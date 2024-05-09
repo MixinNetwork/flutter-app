@@ -23,7 +23,7 @@ Map<String, dynamic> _$GiphyResultDataToJson(GiphyResultData instance) =>
     };
 
 Meta _$MetaFromJson(Map<String, dynamic> json) => Meta(
-      json['status'] as int,
+      (json['status'] as num).toInt(),
       json['msg'] as String,
       json['response_id'] as String,
     );
@@ -35,9 +35,9 @@ Map<String, dynamic> _$MetaToJson(Meta instance) => <String, dynamic>{
     };
 
 Pagination _$PaginationFromJson(Map<String, dynamic> json) => Pagination(
-      json['total_count'] as int,
-      json['count'] as int,
-      json['offset'] as int,
+      (json['total_count'] as num).toInt(),
+      (json['count'] as num).toInt(),
+      (json['offset'] as num).toInt(),
     );
 
 Map<String, dynamic> _$PaginationToJson(Pagination instance) =>

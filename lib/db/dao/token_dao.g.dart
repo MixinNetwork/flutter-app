@@ -41,6 +41,9 @@ mixin _$TokenDaoMixin on DatabaseAccessor<MixinDatabase> {
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<int> countAssets() {
     return customSelect('SELECT COUNT(1) AS _c0 FROM tokens',
         variables: [],

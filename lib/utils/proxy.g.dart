@@ -9,7 +9,7 @@ part of 'proxy.dart';
 ProxyConfig _$ProxyConfigFromJson(Map<String, dynamic> json) => ProxyConfig(
       type: $enumDecode(_$ProxyTypeEnumMap, json['type']),
       host: json['host'] as String,
-      port: json['port'] as int,
+      port: (json['port'] as num).toInt(),
       id: json['id'] as String,
       username: json['username'] as String?,
       password: json['password'] as String?,

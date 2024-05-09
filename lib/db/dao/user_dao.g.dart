@@ -41,6 +41,9 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<User> _fuzzySearchBotGroupUser(String conversationId,
       DateTime createdAt, String id, String username, String identityNumber) {
     return customSelect(

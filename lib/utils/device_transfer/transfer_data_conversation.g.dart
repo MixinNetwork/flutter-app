@@ -12,7 +12,7 @@ TransferDataConversation _$TransferDataConversationFromJson(
       conversationId: json['conversation_id'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       status: const ConversationStatusJsonConverter()
-          .fromJson(json['status'] as int?),
+          .fromJson((json['status'] as num?)?.toInt()),
       ownerId: json['owner_id'] as String?,
       category: const ConversationCategoryJsonConverter()
           .fromJson(json['category'] as String?),
@@ -28,11 +28,11 @@ TransferDataConversation _$TransferDataConversationFromJson(
           ? null
           : DateTime.parse(json['last_message_created_at'] as String),
       lastReadMessageId: json['last_read_message_id'] as String?,
-      unseenMessageCount: json['unseen_message_count'] as int?,
+      unseenMessageCount: (json['unseen_message_count'] as num?)?.toInt(),
       muteUntil: json['mute_until'] == null
           ? null
           : DateTime.parse(json['mute_until'] as String),
-      expireIn: json['expire_in'] as int?,
+      expireIn: (json['expire_in'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TransferDataConversationToJson(

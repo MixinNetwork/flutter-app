@@ -19,7 +19,7 @@ SnapshotMessage _$SnapshotMessageFromJson(Map<String, dynamic> json) =>
       json['sender'] as String?,
       json['receiver'] as String?,
       json['memo'] as String?,
-      json['confirmations'] as int?,
+      (json['confirmations'] as num?)?.toInt(),
       json['snapshot_hash'] as String?,
       json['opening_balance'] as String?,
       json['closing_balance'] as String?,

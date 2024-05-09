@@ -437,7 +437,7 @@ Future<String> _archiveFiles(
   for (final filePath in files) {
     await encoder.addFile(File(filePath), path.basename(filePath));
   }
-  encoder.close();
+  await encoder.close();
   return outPath;
 }
 

@@ -97,7 +97,8 @@ dependencies:
   map: ^2.0.2
   markdown_widget: ^2.3.2+2
   mime: ^1.0.2
-  mixin_bot_sdk_dart: ^1.2.1
+  mixin_bot_sdk_dart:
+    path: ../mixin_bot_sdk_dart
   mixin_logger:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git

@@ -19,7 +19,7 @@ TransferDataSafeSnapshot _$TransferDataSafeSnapshotFromJson(
       transactionHash: json['transaction_hash'] as String,
       createdAt: json['created_at'] as String,
       traceId: json['trace_id'] as String?,
-      confirmations: json['confirmations'] as int?,
+      confirmations: (json['confirmations'] as num?)?.toInt(),
       openingBalance: json['opening_balance'] as String?,
       closingBalance: json['closing_balance'] as String?,
       withdrawal: json['withdrawal'] == null

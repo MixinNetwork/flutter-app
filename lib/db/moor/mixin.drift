@@ -88,10 +88,53 @@ CREATE TABLE safe_snapshots (
     closing_balance TEXT,
     withdrawal TEXT MAPPED BY `const SafeWithdrawalTypeConverter()`,
     deposit TEXT MAPPED BY `const SafeDepositTypeConverter()`,
+    inscription_hash TEXT,
     PRIMARY KEY(snapshot_id)
 );
 
-CREATE TABLE tokens (asset_id TEXT NOT NULL, kernel_asset_id TEXT NOT NULL, symbol TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, price_btc TEXT NOT NULL, price_usd TEXT NOT NULL, chain_id TEXT NOT NULL, change_usd TEXT NOT NULL, change_btc TEXT NOT NULL, confirmations INTEGER NOT NULL, asset_key TEXT NOT NULL, dust TEXT NOT NULL, PRIMARY KEY(asset_id));
+CREATE TABLE tokens (
+    asset_id TEXT NOT NULL,
+    kernel_asset_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    name TEXT NOT NULL,
+    icon_url TEXT NOT NULL,
+    price_btc TEXT NOT NULL,
+    price_usd TEXT NOT NULL,
+    chain_id TEXT NOT NULL,
+    change_usd TEXT NOT NULL,
+    change_btc TEXT NOT NULL,
+    confirmations INTEGER NOT NULL,
+    asset_key TEXT NOT NULL,
+    dust TEXT NOT NULL,
+    collection_hash TEXT,
+    PRIMARY KEY(asset_id)
+);
+
+CREATE TABLE inscription_collections (
+    collection_hash TEXT NOT NULL,
+    supply TEXT NOT NULL,
+    unit TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    name TEXT NOT NULL,
+    icon_url TEXT NOT NULL,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(collection_hash)
+);
+
+CREATE TABLE inscription_items (
+    inscription_hash TEXT NOT NULL,
+    collection_hash TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    content_type TEXT NOT NULL,
+    content_url TEXT NOT NULL,
+    occupied_by TEXT,
+    occupied_at TEXT,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(inscription_hash)
+);
+
 
 CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
 CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
@@ -107,3 +150,4 @@ CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category_created_at ON
 CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messages(conversation_id, status, user_id);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages(conversation_id, quote_message_id);
 CREATE INDEX IF NOT EXISTS index_tokens_kernel_asset_id ON tokens(kernel_asset_id);
+CREATE INDEX IF NOT EXISTS index_tokens_collection_hash ON tokens(collection_hash);

@@ -10,7 +10,7 @@ SignalKey _$SignalKeyFromJson(Map<String, dynamic> json) => SignalKey(
       json['identity_key'] as String,
       SignedPreKey.fromJson(json['signed_pre_key'] as Map<String, dynamic>),
       OneTimePreKey.fromJson(json['one_time_pre_key'] as Map<String, dynamic>),
-      json['registration_id'] as int,
+      (json['registration_id'] as num).toInt(),
       json['user_id'] as String,
       json['session_id'] as String,
     );

@@ -3905,6 +3905,13 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<SafeDeposit?>(SafeSnapshots.$converterdeposit);
+  static const VerificationMeta _inscriptionHashMeta =
+      const VerificationMeta('inscriptionHash');
+  late final GeneratedColumn<String> inscriptionHash = GeneratedColumn<String>(
+      'inscription_hash', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         snapshotId,
@@ -3921,7 +3928,8 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
         openingBalance,
         closingBalance,
         withdrawal,
-        deposit
+        deposit,
+        inscriptionHash
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4017,6 +4025,12 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
     }
     context.handle(_withdrawalMeta, const VerificationResult.success());
     context.handle(_depositMeta, const VerificationResult.success());
+    if (data.containsKey('inscription_hash')) {
+      context.handle(
+          _inscriptionHashMeta,
+          inscriptionHash.isAcceptableOrUnknown(
+              data['inscription_hash']!, _inscriptionHashMeta));
+    }
     return context;
   }
 
@@ -4058,6 +4072,8 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
       deposit: SafeSnapshots.$converterdeposit.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}deposit'])),
+      inscriptionHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}inscription_hash']),
     );
   }
 
@@ -4092,6 +4108,7 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
   final String? closingBalance;
   final SafeWithdrawal? withdrawal;
   final SafeDeposit? deposit;
+  final String? inscriptionHash;
   const SafeSnapshot(
       {required this.snapshotId,
       required this.type,
@@ -4107,7 +4124,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       this.openingBalance,
       this.closingBalance,
       this.withdrawal,
-      this.deposit});
+      this.deposit,
+      this.inscriptionHash});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -4139,6 +4157,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
     if (!nullToAbsent || deposit != null) {
       map['deposit'] =
           Variable<String>(SafeSnapshots.$converterdeposit.toSql(deposit));
+    }
+    if (!nullToAbsent || inscriptionHash != null) {
+      map['inscription_hash'] = Variable<String>(inscriptionHash);
     }
     return map;
   }
@@ -4172,6 +4193,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       deposit: deposit == null && nullToAbsent
           ? const Value.absent()
           : Value(deposit),
+      inscriptionHash: inscriptionHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inscriptionHash),
     );
   }
 
@@ -4194,6 +4218,7 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       closingBalance: serializer.fromJson<String?>(json['closing_balance']),
       withdrawal: serializer.fromJson<SafeWithdrawal?>(json['withdrawal']),
       deposit: serializer.fromJson<SafeDeposit?>(json['deposit']),
+      inscriptionHash: serializer.fromJson<String?>(json['inscription_hash']),
     );
   }
   @override
@@ -4215,6 +4240,7 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       'closing_balance': serializer.toJson<String?>(closingBalance),
       'withdrawal': serializer.toJson<SafeWithdrawal?>(withdrawal),
       'deposit': serializer.toJson<SafeDeposit?>(deposit),
+      'inscription_hash': serializer.toJson<String?>(inscriptionHash),
     };
   }
 
@@ -4233,7 +4259,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
           Value<String?> openingBalance = const Value.absent(),
           Value<String?> closingBalance = const Value.absent(),
           Value<SafeWithdrawal?> withdrawal = const Value.absent(),
-          Value<SafeDeposit?> deposit = const Value.absent()}) =>
+          Value<SafeDeposit?> deposit = const Value.absent(),
+          Value<String?> inscriptionHash = const Value.absent()}) =>
       SafeSnapshot(
         snapshotId: snapshotId ?? this.snapshotId,
         type: type ?? this.type,
@@ -4253,6 +4280,9 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
             closingBalance.present ? closingBalance.value : this.closingBalance,
         withdrawal: withdrawal.present ? withdrawal.value : this.withdrawal,
         deposit: deposit.present ? deposit.value : this.deposit,
+        inscriptionHash: inscriptionHash.present
+            ? inscriptionHash.value
+            : this.inscriptionHash,
       );
   @override
   String toString() {
@@ -4271,7 +4301,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
           ..write('openingBalance: $openingBalance, ')
           ..write('closingBalance: $closingBalance, ')
           ..write('withdrawal: $withdrawal, ')
-          ..write('deposit: $deposit')
+          ..write('deposit: $deposit, ')
+          ..write('inscriptionHash: $inscriptionHash')
           ..write(')'))
         .toString();
   }
@@ -4292,7 +4323,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       openingBalance,
       closingBalance,
       withdrawal,
-      deposit);
+      deposit,
+      inscriptionHash);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4311,7 +4343,8 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
           other.openingBalance == this.openingBalance &&
           other.closingBalance == this.closingBalance &&
           other.withdrawal == this.withdrawal &&
-          other.deposit == this.deposit);
+          other.deposit == this.deposit &&
+          other.inscriptionHash == this.inscriptionHash);
 }
 
 class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
@@ -4330,6 +4363,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
   final Value<String?> closingBalance;
   final Value<SafeWithdrawal?> withdrawal;
   final Value<SafeDeposit?> deposit;
+  final Value<String?> inscriptionHash;
   final Value<int> rowid;
   const SafeSnapshotsCompanion({
     this.snapshotId = const Value.absent(),
@@ -4347,6 +4381,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     this.closingBalance = const Value.absent(),
     this.withdrawal = const Value.absent(),
     this.deposit = const Value.absent(),
+    this.inscriptionHash = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SafeSnapshotsCompanion.insert({
@@ -4365,6 +4400,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     this.closingBalance = const Value.absent(),
     this.withdrawal = const Value.absent(),
     this.deposit = const Value.absent(),
+    this.inscriptionHash = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : snapshotId = Value(snapshotId),
         type = Value(type),
@@ -4391,6 +4427,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
     Expression<String>? closingBalance,
     Expression<String>? withdrawal,
     Expression<String>? deposit,
+    Expression<String>? inscriptionHash,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4409,6 +4446,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       if (closingBalance != null) 'closing_balance': closingBalance,
       if (withdrawal != null) 'withdrawal': withdrawal,
       if (deposit != null) 'deposit': deposit,
+      if (inscriptionHash != null) 'inscription_hash': inscriptionHash,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4429,6 +4467,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       Value<String?>? closingBalance,
       Value<SafeWithdrawal?>? withdrawal,
       Value<SafeDeposit?>? deposit,
+      Value<String?>? inscriptionHash,
       Value<int>? rowid}) {
     return SafeSnapshotsCompanion(
       snapshotId: snapshotId ?? this.snapshotId,
@@ -4446,6 +4485,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       closingBalance: closingBalance ?? this.closingBalance,
       withdrawal: withdrawal ?? this.withdrawal,
       deposit: deposit ?? this.deposit,
+      inscriptionHash: inscriptionHash ?? this.inscriptionHash,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4500,6 +4540,9 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
       map['deposit'] = Variable<String>(
           SafeSnapshots.$converterdeposit.toSql(deposit.value));
     }
+    if (inscriptionHash.present) {
+      map['inscription_hash'] = Variable<String>(inscriptionHash.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4524,6 +4567,7 @@ class SafeSnapshotsCompanion extends UpdateCompanion<SafeSnapshot> {
           ..write('closingBalance: $closingBalance, ')
           ..write('withdrawal: $withdrawal, ')
           ..write('deposit: $deposit, ')
+          ..write('inscriptionHash: $inscriptionHash, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5335,6 +5379,13 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
+  static const VerificationMeta _collectionHashMeta =
+      const VerificationMeta('collectionHash');
+  late final GeneratedColumn<String> collectionHash = GeneratedColumn<String>(
+      'collection_hash', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         assetId,
@@ -5349,7 +5400,8 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
         changeBtc,
         confirmations,
         assetKey,
-        dust
+        dust,
+        collectionHash
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5443,6 +5495,12 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
     } else if (isInserting) {
       context.missing(_dustMeta);
     }
+    if (data.containsKey('collection_hash')) {
+      context.handle(
+          _collectionHashMeta,
+          collectionHash.isAcceptableOrUnknown(
+              data['collection_hash']!, _collectionHashMeta));
+    }
     return context;
   }
 
@@ -5478,6 +5536,8 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
           .read(DriftSqlType.string, data['${effectivePrefix}asset_key'])!,
       dust: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}dust'])!,
+      collectionHash: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}collection_hash']),
     );
   }
 
@@ -5506,6 +5566,7 @@ class Token extends DataClass implements Insertable<Token> {
   final int confirmations;
   final String assetKey;
   final String dust;
+  final String? collectionHash;
   const Token(
       {required this.assetId,
       required this.kernelAssetId,
@@ -5519,7 +5580,8 @@ class Token extends DataClass implements Insertable<Token> {
       required this.changeBtc,
       required this.confirmations,
       required this.assetKey,
-      required this.dust});
+      required this.dust,
+      this.collectionHash});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -5536,6 +5598,9 @@ class Token extends DataClass implements Insertable<Token> {
     map['confirmations'] = Variable<int>(confirmations);
     map['asset_key'] = Variable<String>(assetKey);
     map['dust'] = Variable<String>(dust);
+    if (!nullToAbsent || collectionHash != null) {
+      map['collection_hash'] = Variable<String>(collectionHash);
+    }
     return map;
   }
 
@@ -5554,6 +5619,9 @@ class Token extends DataClass implements Insertable<Token> {
       confirmations: Value(confirmations),
       assetKey: Value(assetKey),
       dust: Value(dust),
+      collectionHash: collectionHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(collectionHash),
     );
   }
 
@@ -5574,6 +5642,7 @@ class Token extends DataClass implements Insertable<Token> {
       confirmations: serializer.fromJson<int>(json['confirmations']),
       assetKey: serializer.fromJson<String>(json['asset_key']),
       dust: serializer.fromJson<String>(json['dust']),
+      collectionHash: serializer.fromJson<String?>(json['collection_hash']),
     );
   }
   @override
@@ -5593,6 +5662,7 @@ class Token extends DataClass implements Insertable<Token> {
       'confirmations': serializer.toJson<int>(confirmations),
       'asset_key': serializer.toJson<String>(assetKey),
       'dust': serializer.toJson<String>(dust),
+      'collection_hash': serializer.toJson<String?>(collectionHash),
     };
   }
 
@@ -5609,7 +5679,8 @@ class Token extends DataClass implements Insertable<Token> {
           String? changeBtc,
           int? confirmations,
           String? assetKey,
-          String? dust}) =>
+          String? dust,
+          Value<String?> collectionHash = const Value.absent()}) =>
       Token(
         assetId: assetId ?? this.assetId,
         kernelAssetId: kernelAssetId ?? this.kernelAssetId,
@@ -5624,6 +5695,8 @@ class Token extends DataClass implements Insertable<Token> {
         confirmations: confirmations ?? this.confirmations,
         assetKey: assetKey ?? this.assetKey,
         dust: dust ?? this.dust,
+        collectionHash:
+            collectionHash.present ? collectionHash.value : this.collectionHash,
       );
   @override
   String toString() {
@@ -5640,7 +5713,8 @@ class Token extends DataClass implements Insertable<Token> {
           ..write('changeBtc: $changeBtc, ')
           ..write('confirmations: $confirmations, ')
           ..write('assetKey: $assetKey, ')
-          ..write('dust: $dust')
+          ..write('dust: $dust, ')
+          ..write('collectionHash: $collectionHash')
           ..write(')'))
         .toString();
   }
@@ -5659,7 +5733,8 @@ class Token extends DataClass implements Insertable<Token> {
       changeBtc,
       confirmations,
       assetKey,
-      dust);
+      dust,
+      collectionHash);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5676,7 +5751,8 @@ class Token extends DataClass implements Insertable<Token> {
           other.changeBtc == this.changeBtc &&
           other.confirmations == this.confirmations &&
           other.assetKey == this.assetKey &&
-          other.dust == this.dust);
+          other.dust == this.dust &&
+          other.collectionHash == this.collectionHash);
 }
 
 class TokensCompanion extends UpdateCompanion<Token> {
@@ -5693,6 +5769,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
   final Value<int> confirmations;
   final Value<String> assetKey;
   final Value<String> dust;
+  final Value<String?> collectionHash;
   final Value<int> rowid;
   const TokensCompanion({
     this.assetId = const Value.absent(),
@@ -5708,6 +5785,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     this.confirmations = const Value.absent(),
     this.assetKey = const Value.absent(),
     this.dust = const Value.absent(),
+    this.collectionHash = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TokensCompanion.insert({
@@ -5724,6 +5802,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     required int confirmations,
     required String assetKey,
     required String dust,
+    this.collectionHash = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : assetId = Value(assetId),
         kernelAssetId = Value(kernelAssetId),
@@ -5752,6 +5831,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     Expression<int>? confirmations,
     Expression<String>? assetKey,
     Expression<String>? dust,
+    Expression<String>? collectionHash,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5768,6 +5848,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
       if (confirmations != null) 'confirmations': confirmations,
       if (assetKey != null) 'asset_key': assetKey,
       if (dust != null) 'dust': dust,
+      if (collectionHash != null) 'collection_hash': collectionHash,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5786,6 +5867,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
       Value<int>? confirmations,
       Value<String>? assetKey,
       Value<String>? dust,
+      Value<String?>? collectionHash,
       Value<int>? rowid}) {
     return TokensCompanion(
       assetId: assetId ?? this.assetId,
@@ -5801,6 +5883,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
       confirmations: confirmations ?? this.confirmations,
       assetKey: assetKey ?? this.assetKey,
       dust: dust ?? this.dust,
+      collectionHash: collectionHash ?? this.collectionHash,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5847,6 +5930,9 @@ class TokensCompanion extends UpdateCompanion<Token> {
     if (dust.present) {
       map['dust'] = Variable<String>(dust.value);
     }
+    if (collectionHash.present) {
+      map['collection_hash'] = Variable<String>(collectionHash.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5869,6 +5955,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
           ..write('confirmations: $confirmations, ')
           ..write('assetKey: $assetKey, ')
           ..write('dust: $dust, ')
+          ..write('collectionHash: $collectionHash, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -14548,8 +14635,936 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   }
 }
 
+class InscriptionCollections extends Table
+    with TableInfo<InscriptionCollections, InscriptionCollection> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  InscriptionCollections(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _collectionHashMeta =
+      const VerificationMeta('collectionHash');
+  late final GeneratedColumn<String> collectionHash = GeneratedColumn<String>(
+      'collection_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _supplyMeta = const VerificationMeta('supply');
+  late final GeneratedColumn<String> supply = GeneratedColumn<String>(
+      'supply', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  late final GeneratedColumn<String> symbol = GeneratedColumn<String>(
+      'symbol', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _iconUrlMeta =
+      const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String> iconUrl = GeneratedColumn<String>(
+      'icon_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(InscriptionCollections.$convertercreatedAt);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> updatedAt =
+      GeneratedColumn<int>('updated_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(InscriptionCollections.$converterupdatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [
+        collectionHash,
+        supply,
+        unit,
+        symbol,
+        name,
+        iconUrl,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inscription_collections';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<InscriptionCollection> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('collection_hash')) {
+      context.handle(
+          _collectionHashMeta,
+          collectionHash.isAcceptableOrUnknown(
+              data['collection_hash']!, _collectionHashMeta));
+    } else if (isInserting) {
+      context.missing(_collectionHashMeta);
+    }
+    if (data.containsKey('supply')) {
+      context.handle(_supplyMeta,
+          supply.isAcceptableOrUnknown(data['supply']!, _supplyMeta));
+    } else if (isInserting) {
+      context.missing(_supplyMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('symbol')) {
+      context.handle(_symbolMeta,
+          symbol.isAcceptableOrUnknown(data['symbol']!, _symbolMeta));
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_updatedAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {collectionHash};
+  @override
+  InscriptionCollection map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InscriptionCollection(
+      collectionHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}collection_hash'])!,
+      supply: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}supply'])!,
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+      symbol: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}symbol'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      iconUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon_url'])!,
+      createdAt: InscriptionCollections.$convertercreatedAt.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      updatedAt: InscriptionCollections.$converterupdatedAt.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!),
+    );
+  }
+
+  @override
+  InscriptionCollections createAlias(String alias) {
+    return InscriptionCollections(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterupdatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(collection_hash)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class InscriptionCollection extends DataClass
+    implements Insertable<InscriptionCollection> {
+  final String collectionHash;
+  final String supply;
+  final String unit;
+  final String symbol;
+  final String name;
+  final String iconUrl;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const InscriptionCollection(
+      {required this.collectionHash,
+      required this.supply,
+      required this.unit,
+      required this.symbol,
+      required this.name,
+      required this.iconUrl,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['collection_hash'] = Variable<String>(collectionHash);
+    map['supply'] = Variable<String>(supply);
+    map['unit'] = Variable<String>(unit);
+    map['symbol'] = Variable<String>(symbol);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    {
+      map['created_at'] = Variable<int>(
+          InscriptionCollections.$convertercreatedAt.toSql(createdAt));
+    }
+    {
+      map['updated_at'] = Variable<int>(
+          InscriptionCollections.$converterupdatedAt.toSql(updatedAt));
+    }
+    return map;
+  }
+
+  InscriptionCollectionsCompanion toCompanion(bool nullToAbsent) {
+    return InscriptionCollectionsCompanion(
+      collectionHash: Value(collectionHash),
+      supply: Value(supply),
+      unit: Value(unit),
+      symbol: Value(symbol),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory InscriptionCollection.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InscriptionCollection(
+      collectionHash: serializer.fromJson<String>(json['collection_hash']),
+      supply: serializer.fromJson<String>(json['supply']),
+      unit: serializer.fromJson<String>(json['unit']),
+      symbol: serializer.fromJson<String>(json['symbol']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'collection_hash': serializer.toJson<String>(collectionHash),
+      'supply': serializer.toJson<String>(supply),
+      'unit': serializer.toJson<String>(unit),
+      'symbol': serializer.toJson<String>(symbol),
+      'name': serializer.toJson<String>(name),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'updated_at': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  InscriptionCollection copyWith(
+          {String? collectionHash,
+          String? supply,
+          String? unit,
+          String? symbol,
+          String? name,
+          String? iconUrl,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      InscriptionCollection(
+        collectionHash: collectionHash ?? this.collectionHash,
+        supply: supply ?? this.supply,
+        unit: unit ?? this.unit,
+        symbol: symbol ?? this.symbol,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('InscriptionCollection(')
+          ..write('collectionHash: $collectionHash, ')
+          ..write('supply: $supply, ')
+          ..write('unit: $unit, ')
+          ..write('symbol: $symbol, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(collectionHash, supply, unit, symbol, name,
+      iconUrl, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InscriptionCollection &&
+          other.collectionHash == this.collectionHash &&
+          other.supply == this.supply &&
+          other.unit == this.unit &&
+          other.symbol == this.symbol &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class InscriptionCollectionsCompanion
+    extends UpdateCompanion<InscriptionCollection> {
+  final Value<String> collectionHash;
+  final Value<String> supply;
+  final Value<String> unit;
+  final Value<String> symbol;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const InscriptionCollectionsCompanion({
+    this.collectionHash = const Value.absent(),
+    this.supply = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.symbol = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InscriptionCollectionsCompanion.insert({
+    required String collectionHash,
+    required String supply,
+    required String unit,
+    required String symbol,
+    required String name,
+    required String iconUrl,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : collectionHash = Value(collectionHash),
+        supply = Value(supply),
+        unit = Value(unit),
+        symbol = Value(symbol),
+        name = Value(name),
+        iconUrl = Value(iconUrl),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<InscriptionCollection> custom({
+    Expression<String>? collectionHash,
+    Expression<String>? supply,
+    Expression<String>? unit,
+    Expression<String>? symbol,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (collectionHash != null) 'collection_hash': collectionHash,
+      if (supply != null) 'supply': supply,
+      if (unit != null) 'unit': unit,
+      if (symbol != null) 'symbol': symbol,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InscriptionCollectionsCompanion copyWith(
+      {Value<String>? collectionHash,
+      Value<String>? supply,
+      Value<String>? unit,
+      Value<String>? symbol,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return InscriptionCollectionsCompanion(
+      collectionHash: collectionHash ?? this.collectionHash,
+      supply: supply ?? this.supply,
+      unit: unit ?? this.unit,
+      symbol: symbol ?? this.symbol,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (collectionHash.present) {
+      map['collection_hash'] = Variable<String>(collectionHash.value);
+    }
+    if (supply.present) {
+      map['supply'] = Variable<String>(supply.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (symbol.present) {
+      map['symbol'] = Variable<String>(symbol.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(
+          InscriptionCollections.$convertercreatedAt.toSql(createdAt.value));
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(
+          InscriptionCollections.$converterupdatedAt.toSql(updatedAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InscriptionCollectionsCompanion(')
+          ..write('collectionHash: $collectionHash, ')
+          ..write('supply: $supply, ')
+          ..write('unit: $unit, ')
+          ..write('symbol: $symbol, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class InscriptionItems extends Table
+    with TableInfo<InscriptionItems, InscriptionItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  InscriptionItems(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _inscriptionHashMeta =
+      const VerificationMeta('inscriptionHash');
+  late final GeneratedColumn<String> inscriptionHash = GeneratedColumn<String>(
+      'inscription_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _collectionHashMeta =
+      const VerificationMeta('collectionHash');
+  late final GeneratedColumn<String> collectionHash = GeneratedColumn<String>(
+      'collection_hash', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _sequenceMeta =
+      const VerificationMeta('sequence');
+  late final GeneratedColumn<int> sequence = GeneratedColumn<int>(
+      'sequence', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _contentTypeMeta =
+      const VerificationMeta('contentType');
+  late final GeneratedColumn<String> contentType = GeneratedColumn<String>(
+      'content_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _contentUrlMeta =
+      const VerificationMeta('contentUrl');
+  late final GeneratedColumn<String> contentUrl = GeneratedColumn<String>(
+      'content_url', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _occupiedByMeta =
+      const VerificationMeta('occupiedBy');
+  late final GeneratedColumn<String> occupiedBy = GeneratedColumn<String>(
+      'occupied_by', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _occupiedAtMeta =
+      const VerificationMeta('occupiedAt');
+  late final GeneratedColumn<String> occupiedAt = GeneratedColumn<String>(
+      'occupied_at', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>('created_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(InscriptionItems.$convertercreatedAt);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int> updatedAt =
+      GeneratedColumn<int>('updated_at', aliasedName, false,
+              type: DriftSqlType.int,
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(InscriptionItems.$converterupdatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [
+        inscriptionHash,
+        collectionHash,
+        sequence,
+        contentType,
+        contentUrl,
+        occupiedBy,
+        occupiedAt,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inscription_items';
+  @override
+  VerificationContext validateIntegrity(Insertable<InscriptionItem> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('inscription_hash')) {
+      context.handle(
+          _inscriptionHashMeta,
+          inscriptionHash.isAcceptableOrUnknown(
+              data['inscription_hash']!, _inscriptionHashMeta));
+    } else if (isInserting) {
+      context.missing(_inscriptionHashMeta);
+    }
+    if (data.containsKey('collection_hash')) {
+      context.handle(
+          _collectionHashMeta,
+          collectionHash.isAcceptableOrUnknown(
+              data['collection_hash']!, _collectionHashMeta));
+    } else if (isInserting) {
+      context.missing(_collectionHashMeta);
+    }
+    if (data.containsKey('sequence')) {
+      context.handle(_sequenceMeta,
+          sequence.isAcceptableOrUnknown(data['sequence']!, _sequenceMeta));
+    } else if (isInserting) {
+      context.missing(_sequenceMeta);
+    }
+    if (data.containsKey('content_type')) {
+      context.handle(
+          _contentTypeMeta,
+          contentType.isAcceptableOrUnknown(
+              data['content_type']!, _contentTypeMeta));
+    } else if (isInserting) {
+      context.missing(_contentTypeMeta);
+    }
+    if (data.containsKey('content_url')) {
+      context.handle(
+          _contentUrlMeta,
+          contentUrl.isAcceptableOrUnknown(
+              data['content_url']!, _contentUrlMeta));
+    } else if (isInserting) {
+      context.missing(_contentUrlMeta);
+    }
+    if (data.containsKey('occupied_by')) {
+      context.handle(
+          _occupiedByMeta,
+          occupiedBy.isAcceptableOrUnknown(
+              data['occupied_by']!, _occupiedByMeta));
+    }
+    if (data.containsKey('occupied_at')) {
+      context.handle(
+          _occupiedAtMeta,
+          occupiedAt.isAcceptableOrUnknown(
+              data['occupied_at']!, _occupiedAtMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_updatedAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {inscriptionHash};
+  @override
+  InscriptionItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InscriptionItem(
+      inscriptionHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}inscription_hash'])!,
+      collectionHash: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}collection_hash'])!,
+      sequence: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sequence'])!,
+      contentType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content_type'])!,
+      contentUrl: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content_url'])!,
+      occupiedBy: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}occupied_by']),
+      occupiedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}occupied_at']),
+      createdAt: InscriptionItems.$convertercreatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!),
+      updatedAt: InscriptionItems.$converterupdatedAt.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!),
+    );
+  }
+
+  @override
+  InscriptionItems createAlias(String alias) {
+    return InscriptionItems(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterupdatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(inscription_hash)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class InscriptionItem extends DataClass implements Insertable<InscriptionItem> {
+  final String inscriptionHash;
+  final String collectionHash;
+  final int sequence;
+  final String contentType;
+  final String contentUrl;
+  final String? occupiedBy;
+  final String? occupiedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const InscriptionItem(
+      {required this.inscriptionHash,
+      required this.collectionHash,
+      required this.sequence,
+      required this.contentType,
+      required this.contentUrl,
+      this.occupiedBy,
+      this.occupiedAt,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['inscription_hash'] = Variable<String>(inscriptionHash);
+    map['collection_hash'] = Variable<String>(collectionHash);
+    map['sequence'] = Variable<int>(sequence);
+    map['content_type'] = Variable<String>(contentType);
+    map['content_url'] = Variable<String>(contentUrl);
+    if (!nullToAbsent || occupiedBy != null) {
+      map['occupied_by'] = Variable<String>(occupiedBy);
+    }
+    if (!nullToAbsent || occupiedAt != null) {
+      map['occupied_at'] = Variable<String>(occupiedAt);
+    }
+    {
+      map['created_at'] =
+          Variable<int>(InscriptionItems.$convertercreatedAt.toSql(createdAt));
+    }
+    {
+      map['updated_at'] =
+          Variable<int>(InscriptionItems.$converterupdatedAt.toSql(updatedAt));
+    }
+    return map;
+  }
+
+  InscriptionItemsCompanion toCompanion(bool nullToAbsent) {
+    return InscriptionItemsCompanion(
+      inscriptionHash: Value(inscriptionHash),
+      collectionHash: Value(collectionHash),
+      sequence: Value(sequence),
+      contentType: Value(contentType),
+      contentUrl: Value(contentUrl),
+      occupiedBy: occupiedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occupiedBy),
+      occupiedAt: occupiedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occupiedAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory InscriptionItem.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InscriptionItem(
+      inscriptionHash: serializer.fromJson<String>(json['inscription_hash']),
+      collectionHash: serializer.fromJson<String>(json['collection_hash']),
+      sequence: serializer.fromJson<int>(json['sequence']),
+      contentType: serializer.fromJson<String>(json['content_type']),
+      contentUrl: serializer.fromJson<String>(json['content_url']),
+      occupiedBy: serializer.fromJson<String?>(json['occupied_by']),
+      occupiedAt: serializer.fromJson<String?>(json['occupied_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'inscription_hash': serializer.toJson<String>(inscriptionHash),
+      'collection_hash': serializer.toJson<String>(collectionHash),
+      'sequence': serializer.toJson<int>(sequence),
+      'content_type': serializer.toJson<String>(contentType),
+      'content_url': serializer.toJson<String>(contentUrl),
+      'occupied_by': serializer.toJson<String?>(occupiedBy),
+      'occupied_at': serializer.toJson<String?>(occupiedAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'updated_at': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  InscriptionItem copyWith(
+          {String? inscriptionHash,
+          String? collectionHash,
+          int? sequence,
+          String? contentType,
+          String? contentUrl,
+          Value<String?> occupiedBy = const Value.absent(),
+          Value<String?> occupiedAt = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      InscriptionItem(
+        inscriptionHash: inscriptionHash ?? this.inscriptionHash,
+        collectionHash: collectionHash ?? this.collectionHash,
+        sequence: sequence ?? this.sequence,
+        contentType: contentType ?? this.contentType,
+        contentUrl: contentUrl ?? this.contentUrl,
+        occupiedBy: occupiedBy.present ? occupiedBy.value : this.occupiedBy,
+        occupiedAt: occupiedAt.present ? occupiedAt.value : this.occupiedAt,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('InscriptionItem(')
+          ..write('inscriptionHash: $inscriptionHash, ')
+          ..write('collectionHash: $collectionHash, ')
+          ..write('sequence: $sequence, ')
+          ..write('contentType: $contentType, ')
+          ..write('contentUrl: $contentUrl, ')
+          ..write('occupiedBy: $occupiedBy, ')
+          ..write('occupiedAt: $occupiedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(inscriptionHash, collectionHash, sequence,
+      contentType, contentUrl, occupiedBy, occupiedAt, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InscriptionItem &&
+          other.inscriptionHash == this.inscriptionHash &&
+          other.collectionHash == this.collectionHash &&
+          other.sequence == this.sequence &&
+          other.contentType == this.contentType &&
+          other.contentUrl == this.contentUrl &&
+          other.occupiedBy == this.occupiedBy &&
+          other.occupiedAt == this.occupiedAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class InscriptionItemsCompanion extends UpdateCompanion<InscriptionItem> {
+  final Value<String> inscriptionHash;
+  final Value<String> collectionHash;
+  final Value<int> sequence;
+  final Value<String> contentType;
+  final Value<String> contentUrl;
+  final Value<String?> occupiedBy;
+  final Value<String?> occupiedAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const InscriptionItemsCompanion({
+    this.inscriptionHash = const Value.absent(),
+    this.collectionHash = const Value.absent(),
+    this.sequence = const Value.absent(),
+    this.contentType = const Value.absent(),
+    this.contentUrl = const Value.absent(),
+    this.occupiedBy = const Value.absent(),
+    this.occupiedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InscriptionItemsCompanion.insert({
+    required String inscriptionHash,
+    required String collectionHash,
+    required int sequence,
+    required String contentType,
+    required String contentUrl,
+    this.occupiedBy = const Value.absent(),
+    this.occupiedAt = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : inscriptionHash = Value(inscriptionHash),
+        collectionHash = Value(collectionHash),
+        sequence = Value(sequence),
+        contentType = Value(contentType),
+        contentUrl = Value(contentUrl),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<InscriptionItem> custom({
+    Expression<String>? inscriptionHash,
+    Expression<String>? collectionHash,
+    Expression<int>? sequence,
+    Expression<String>? contentType,
+    Expression<String>? contentUrl,
+    Expression<String>? occupiedBy,
+    Expression<String>? occupiedAt,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (inscriptionHash != null) 'inscription_hash': inscriptionHash,
+      if (collectionHash != null) 'collection_hash': collectionHash,
+      if (sequence != null) 'sequence': sequence,
+      if (contentType != null) 'content_type': contentType,
+      if (contentUrl != null) 'content_url': contentUrl,
+      if (occupiedBy != null) 'occupied_by': occupiedBy,
+      if (occupiedAt != null) 'occupied_at': occupiedAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InscriptionItemsCompanion copyWith(
+      {Value<String>? inscriptionHash,
+      Value<String>? collectionHash,
+      Value<int>? sequence,
+      Value<String>? contentType,
+      Value<String>? contentUrl,
+      Value<String?>? occupiedBy,
+      Value<String?>? occupiedAt,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return InscriptionItemsCompanion(
+      inscriptionHash: inscriptionHash ?? this.inscriptionHash,
+      collectionHash: collectionHash ?? this.collectionHash,
+      sequence: sequence ?? this.sequence,
+      contentType: contentType ?? this.contentType,
+      contentUrl: contentUrl ?? this.contentUrl,
+      occupiedBy: occupiedBy ?? this.occupiedBy,
+      occupiedAt: occupiedAt ?? this.occupiedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (inscriptionHash.present) {
+      map['inscription_hash'] = Variable<String>(inscriptionHash.value);
+    }
+    if (collectionHash.present) {
+      map['collection_hash'] = Variable<String>(collectionHash.value);
+    }
+    if (sequence.present) {
+      map['sequence'] = Variable<int>(sequence.value);
+    }
+    if (contentType.present) {
+      map['content_type'] = Variable<String>(contentType.value);
+    }
+    if (contentUrl.present) {
+      map['content_url'] = Variable<String>(contentUrl.value);
+    }
+    if (occupiedBy.present) {
+      map['occupied_by'] = Variable<String>(occupiedBy.value);
+    }
+    if (occupiedAt.present) {
+      map['occupied_at'] = Variable<String>(occupiedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(
+          InscriptionItems.$convertercreatedAt.toSql(createdAt.value));
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(
+          InscriptionItems.$converterupdatedAt.toSql(updatedAt.value));
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InscriptionItemsCompanion(')
+          ..write('inscriptionHash: $inscriptionHash, ')
+          ..write('collectionHash: $collectionHash, ')
+          ..write('sequence: $sequence, ')
+          ..write('contentType: $contentType, ')
+          ..write('contentUrl: $contentUrl, ')
+          ..write('occupiedBy: $occupiedBy, ')
+          ..write('occupiedAt: $occupiedAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
+  _$MixinDatabaseManager get managers => _$MixinDatabaseManager(this);
   late final Conversations conversations = Conversations(this);
   late final Messages messages = Messages(this);
   late final Users users = Users(this);
@@ -14585,6 +15600,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Fiats fiats = Fiats(this);
   late final FavoriteApps favoriteApps = FavoriteApps(this);
   late final Properties properties = Properties(this);
+  late final InscriptionCollections inscriptionCollections =
+      InscriptionCollections(this);
+  late final InscriptionItems inscriptionItems = InscriptionItems(this);
   late final Index indexConversationsCategoryStatus = Index(
       'index_conversations_category_status',
       'CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations (category, status)');
@@ -14626,6 +15644,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexTokensKernelAssetId = Index(
       'index_tokens_kernel_asset_id',
       'CREATE INDEX IF NOT EXISTS index_tokens_kernel_asset_id ON tokens (kernel_asset_id)');
+  late final Index indexTokensCollectionHash = Index(
+      'index_tokens_collection_hash',
+      'CREATE INDEX IF NOT EXISTS index_tokens_collection_hash ON tokens (collection_hash)');
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -14672,6 +15693,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final SafeSnapshotDao safeSnapshotDao =
       SafeSnapshotDao(this as MixinDatabase);
   late final TokenDao tokenDao = TokenDao(this as MixinDatabase);
+  late final InscriptionItemDao inscriptionItemDao =
+      InscriptionItemDao(this as MixinDatabase);
+  late final InscriptionCollectionDao inscriptionCollectionDao =
+      InscriptionCollectionDao(this as MixinDatabase);
   Selectable<MessageItem> baseMessageItems(BaseMessageItems$where where,
       BaseMessageItems$order order, BaseMessageItems$limit limit) {
     var $arrayStartIndex = 1;
@@ -14997,6 +16022,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         fiats,
         favoriteApps,
         properties,
+        inscriptionCollections,
+        inscriptionItems,
         indexConversationsCategoryStatus,
         indexConversationsMuteUntil,
         indexFloodMessagesCreatedAt,
@@ -15010,7 +16037,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexMessagesConversationIdCategoryCreatedAt,
         indexMessageConversationIdStatusUserId,
         indexMessagesConversationIdQuoteMessageId,
-        indexTokensKernelAssetId
+        indexTokensKernelAssetId,
+        indexTokensCollectionHash
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -15031,6 +16059,6745 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           ),
         ],
       );
+}
+
+typedef $ConversationsInsertCompanionBuilder = ConversationsCompanion Function({
+  required String conversationId,
+  Value<String?> ownerId,
+  Value<ConversationCategory?> category,
+  Value<String?> name,
+  Value<String?> iconUrl,
+  Value<String?> announcement,
+  Value<String?> codeUrl,
+  Value<String?> payType,
+  required DateTime createdAt,
+  Value<DateTime?> pinTime,
+  Value<String?> lastMessageId,
+  Value<DateTime?> lastMessageCreatedAt,
+  Value<String?> lastReadMessageId,
+  Value<int?> unseenMessageCount,
+  required ConversationStatus status,
+  Value<String?> draft,
+  Value<DateTime?> muteUntil,
+  Value<int?> expireIn,
+  Value<int> rowid,
+});
+typedef $ConversationsUpdateCompanionBuilder = ConversationsCompanion Function({
+  Value<String> conversationId,
+  Value<String?> ownerId,
+  Value<ConversationCategory?> category,
+  Value<String?> name,
+  Value<String?> iconUrl,
+  Value<String?> announcement,
+  Value<String?> codeUrl,
+  Value<String?> payType,
+  Value<DateTime> createdAt,
+  Value<DateTime?> pinTime,
+  Value<String?> lastMessageId,
+  Value<DateTime?> lastMessageCreatedAt,
+  Value<String?> lastReadMessageId,
+  Value<int?> unseenMessageCount,
+  Value<ConversationStatus> status,
+  Value<String?> draft,
+  Value<DateTime?> muteUntil,
+  Value<int?> expireIn,
+  Value<int> rowid,
+});
+
+class $ConversationsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Conversations,
+    Conversation,
+    $ConversationsFilterComposer,
+    $ConversationsOrderingComposer,
+    $ConversationsProcessedTableManager,
+    $ConversationsInsertCompanionBuilder,
+    $ConversationsUpdateCompanionBuilder> {
+  $ConversationsTableManager(_$MixinDatabase db, Conversations table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $ConversationsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $ConversationsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $ConversationsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> conversationId = const Value.absent(),
+            Value<String?> ownerId = const Value.absent(),
+            Value<ConversationCategory?> category = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<String?> iconUrl = const Value.absent(),
+            Value<String?> announcement = const Value.absent(),
+            Value<String?> codeUrl = const Value.absent(),
+            Value<String?> payType = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime?> pinTime = const Value.absent(),
+            Value<String?> lastMessageId = const Value.absent(),
+            Value<DateTime?> lastMessageCreatedAt = const Value.absent(),
+            Value<String?> lastReadMessageId = const Value.absent(),
+            Value<int?> unseenMessageCount = const Value.absent(),
+            Value<ConversationStatus> status = const Value.absent(),
+            Value<String?> draft = const Value.absent(),
+            Value<DateTime?> muteUntil = const Value.absent(),
+            Value<int?> expireIn = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ConversationsCompanion(
+            conversationId: conversationId,
+            ownerId: ownerId,
+            category: category,
+            name: name,
+            iconUrl: iconUrl,
+            announcement: announcement,
+            codeUrl: codeUrl,
+            payType: payType,
+            createdAt: createdAt,
+            pinTime: pinTime,
+            lastMessageId: lastMessageId,
+            lastMessageCreatedAt: lastMessageCreatedAt,
+            lastReadMessageId: lastReadMessageId,
+            unseenMessageCount: unseenMessageCount,
+            status: status,
+            draft: draft,
+            muteUntil: muteUntil,
+            expireIn: expireIn,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String conversationId,
+            Value<String?> ownerId = const Value.absent(),
+            Value<ConversationCategory?> category = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<String?> iconUrl = const Value.absent(),
+            Value<String?> announcement = const Value.absent(),
+            Value<String?> codeUrl = const Value.absent(),
+            Value<String?> payType = const Value.absent(),
+            required DateTime createdAt,
+            Value<DateTime?> pinTime = const Value.absent(),
+            Value<String?> lastMessageId = const Value.absent(),
+            Value<DateTime?> lastMessageCreatedAt = const Value.absent(),
+            Value<String?> lastReadMessageId = const Value.absent(),
+            Value<int?> unseenMessageCount = const Value.absent(),
+            required ConversationStatus status,
+            Value<String?> draft = const Value.absent(),
+            Value<DateTime?> muteUntil = const Value.absent(),
+            Value<int?> expireIn = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ConversationsCompanion.insert(
+            conversationId: conversationId,
+            ownerId: ownerId,
+            category: category,
+            name: name,
+            iconUrl: iconUrl,
+            announcement: announcement,
+            codeUrl: codeUrl,
+            payType: payType,
+            createdAt: createdAt,
+            pinTime: pinTime,
+            lastMessageId: lastMessageId,
+            lastMessageCreatedAt: lastMessageCreatedAt,
+            lastReadMessageId: lastReadMessageId,
+            unseenMessageCount: unseenMessageCount,
+            status: status,
+            draft: draft,
+            muteUntil: muteUntil,
+            expireIn: expireIn,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $ConversationsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Conversations,
+    Conversation,
+    $ConversationsFilterComposer,
+    $ConversationsOrderingComposer,
+    $ConversationsProcessedTableManager,
+    $ConversationsInsertCompanionBuilder,
+    $ConversationsUpdateCompanionBuilder> {
+  $ConversationsProcessedTableManager(super.$state);
+}
+
+class $ConversationsFilterComposer
+    extends FilterComposer<_$MixinDatabase, Conversations> {
+  $ConversationsFilterComposer(super.$state);
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get ownerId => $state.composableBuilder(
+      column: $state.table.ownerId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<ConversationCategory?, ConversationCategory,
+          String>
+      get category => $state.composableBuilder(
+          column: $state.table.category,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get announcement => $state.composableBuilder(
+      column: $state.table.announcement,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get codeUrl => $state.composableBuilder(
+      column: $state.table.codeUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get payType => $state.composableBuilder(
+      column: $state.table.payType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get pinTime =>
+      $state.composableBuilder(
+          column: $state.table.pinTime,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get lastMessageId => $state.composableBuilder(
+      column: $state.table.lastMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int>
+      get lastMessageCreatedAt => $state.composableBuilder(
+          column: $state.table.lastMessageCreatedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get lastReadMessageId => $state.composableBuilder(
+      column: $state.table.lastReadMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get unseenMessageCount => $state.composableBuilder(
+      column: $state.table.unseenMessageCount,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<ConversationStatus, ConversationStatus, int>
+      get status => $state.composableBuilder(
+          column: $state.table.status,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get draft => $state.composableBuilder(
+      column: $state.table.draft,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get muteUntil =>
+      $state.composableBuilder(
+          column: $state.table.muteUntil,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get expireIn => $state.composableBuilder(
+      column: $state.table.expireIn,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $ConversationsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Conversations> {
+  $ConversationsOrderingComposer(super.$state);
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get ownerId => $state.composableBuilder(
+      column: $state.table.ownerId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get announcement => $state.composableBuilder(
+      column: $state.table.announcement,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get codeUrl => $state.composableBuilder(
+      column: $state.table.codeUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get payType => $state.composableBuilder(
+      column: $state.table.payType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get pinTime => $state.composableBuilder(
+      column: $state.table.pinTime,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get lastMessageId => $state.composableBuilder(
+      column: $state.table.lastMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get lastMessageCreatedAt => $state.composableBuilder(
+      column: $state.table.lastMessageCreatedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get lastReadMessageId => $state.composableBuilder(
+      column: $state.table.lastReadMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get unseenMessageCount => $state.composableBuilder(
+      column: $state.table.unseenMessageCount,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get status => $state.composableBuilder(
+      column: $state.table.status,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get draft => $state.composableBuilder(
+      column: $state.table.draft,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get muteUntil => $state.composableBuilder(
+      column: $state.table.muteUntil,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get expireIn => $state.composableBuilder(
+      column: $state.table.expireIn,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $MessagesInsertCompanionBuilder = MessagesCompanion Function({
+  required String messageId,
+  required String conversationId,
+  required String userId,
+  required String category,
+  Value<String?> content,
+  Value<String?> mediaUrl,
+  Value<String?> mediaMimeType,
+  Value<int?> mediaSize,
+  Value<String?> mediaDuration,
+  Value<int?> mediaWidth,
+  Value<int?> mediaHeight,
+  Value<String?> mediaHash,
+  Value<String?> thumbImage,
+  Value<String?> mediaKey,
+  Value<String?> mediaDigest,
+  Value<MediaStatus?> mediaStatus,
+  required MessageStatus status,
+  required DateTime createdAt,
+  Value<String?> action,
+  Value<String?> participantId,
+  Value<String?> snapshotId,
+  Value<String?> hyperlink,
+  Value<String?> name,
+  Value<String?> albumId,
+  Value<String?> stickerId,
+  Value<String?> sharedUserId,
+  Value<String?> mediaWaveform,
+  Value<String?> quoteMessageId,
+  Value<String?> quoteContent,
+  Value<String?> thumbUrl,
+  Value<String?> caption,
+  Value<int> rowid,
+});
+typedef $MessagesUpdateCompanionBuilder = MessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<String> category,
+  Value<String?> content,
+  Value<String?> mediaUrl,
+  Value<String?> mediaMimeType,
+  Value<int?> mediaSize,
+  Value<String?> mediaDuration,
+  Value<int?> mediaWidth,
+  Value<int?> mediaHeight,
+  Value<String?> mediaHash,
+  Value<String?> thumbImage,
+  Value<String?> mediaKey,
+  Value<String?> mediaDigest,
+  Value<MediaStatus?> mediaStatus,
+  Value<MessageStatus> status,
+  Value<DateTime> createdAt,
+  Value<String?> action,
+  Value<String?> participantId,
+  Value<String?> snapshotId,
+  Value<String?> hyperlink,
+  Value<String?> name,
+  Value<String?> albumId,
+  Value<String?> stickerId,
+  Value<String?> sharedUserId,
+  Value<String?> mediaWaveform,
+  Value<String?> quoteMessageId,
+  Value<String?> quoteContent,
+  Value<String?> thumbUrl,
+  Value<String?> caption,
+  Value<int> rowid,
+});
+
+class $MessagesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Messages,
+    Message,
+    $MessagesFilterComposer,
+    $MessagesOrderingComposer,
+    $MessagesProcessedTableManager,
+    $MessagesInsertCompanionBuilder,
+    $MessagesUpdateCompanionBuilder> {
+  $MessagesTableManager(_$MixinDatabase db, Messages table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $MessagesFilterComposer(ComposerState(db, table)),
+          orderingComposer: $MessagesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $MessagesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> category = const Value.absent(),
+            Value<String?> content = const Value.absent(),
+            Value<String?> mediaUrl = const Value.absent(),
+            Value<String?> mediaMimeType = const Value.absent(),
+            Value<int?> mediaSize = const Value.absent(),
+            Value<String?> mediaDuration = const Value.absent(),
+            Value<int?> mediaWidth = const Value.absent(),
+            Value<int?> mediaHeight = const Value.absent(),
+            Value<String?> mediaHash = const Value.absent(),
+            Value<String?> thumbImage = const Value.absent(),
+            Value<String?> mediaKey = const Value.absent(),
+            Value<String?> mediaDigest = const Value.absent(),
+            Value<MediaStatus?> mediaStatus = const Value.absent(),
+            Value<MessageStatus> status = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String?> action = const Value.absent(),
+            Value<String?> participantId = const Value.absent(),
+            Value<String?> snapshotId = const Value.absent(),
+            Value<String?> hyperlink = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<String?> albumId = const Value.absent(),
+            Value<String?> stickerId = const Value.absent(),
+            Value<String?> sharedUserId = const Value.absent(),
+            Value<String?> mediaWaveform = const Value.absent(),
+            Value<String?> quoteMessageId = const Value.absent(),
+            Value<String?> quoteContent = const Value.absent(),
+            Value<String?> thumbUrl = const Value.absent(),
+            Value<String?> caption = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesCompanion(
+            messageId: messageId,
+            conversationId: conversationId,
+            userId: userId,
+            category: category,
+            content: content,
+            mediaUrl: mediaUrl,
+            mediaMimeType: mediaMimeType,
+            mediaSize: mediaSize,
+            mediaDuration: mediaDuration,
+            mediaWidth: mediaWidth,
+            mediaHeight: mediaHeight,
+            mediaHash: mediaHash,
+            thumbImage: thumbImage,
+            mediaKey: mediaKey,
+            mediaDigest: mediaDigest,
+            mediaStatus: mediaStatus,
+            status: status,
+            createdAt: createdAt,
+            action: action,
+            participantId: participantId,
+            snapshotId: snapshotId,
+            hyperlink: hyperlink,
+            name: name,
+            albumId: albumId,
+            stickerId: stickerId,
+            sharedUserId: sharedUserId,
+            mediaWaveform: mediaWaveform,
+            quoteMessageId: quoteMessageId,
+            quoteContent: quoteContent,
+            thumbUrl: thumbUrl,
+            caption: caption,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            required String conversationId,
+            required String userId,
+            required String category,
+            Value<String?> content = const Value.absent(),
+            Value<String?> mediaUrl = const Value.absent(),
+            Value<String?> mediaMimeType = const Value.absent(),
+            Value<int?> mediaSize = const Value.absent(),
+            Value<String?> mediaDuration = const Value.absent(),
+            Value<int?> mediaWidth = const Value.absent(),
+            Value<int?> mediaHeight = const Value.absent(),
+            Value<String?> mediaHash = const Value.absent(),
+            Value<String?> thumbImage = const Value.absent(),
+            Value<String?> mediaKey = const Value.absent(),
+            Value<String?> mediaDigest = const Value.absent(),
+            Value<MediaStatus?> mediaStatus = const Value.absent(),
+            required MessageStatus status,
+            required DateTime createdAt,
+            Value<String?> action = const Value.absent(),
+            Value<String?> participantId = const Value.absent(),
+            Value<String?> snapshotId = const Value.absent(),
+            Value<String?> hyperlink = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<String?> albumId = const Value.absent(),
+            Value<String?> stickerId = const Value.absent(),
+            Value<String?> sharedUserId = const Value.absent(),
+            Value<String?> mediaWaveform = const Value.absent(),
+            Value<String?> quoteMessageId = const Value.absent(),
+            Value<String?> quoteContent = const Value.absent(),
+            Value<String?> thumbUrl = const Value.absent(),
+            Value<String?> caption = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesCompanion.insert(
+            messageId: messageId,
+            conversationId: conversationId,
+            userId: userId,
+            category: category,
+            content: content,
+            mediaUrl: mediaUrl,
+            mediaMimeType: mediaMimeType,
+            mediaSize: mediaSize,
+            mediaDuration: mediaDuration,
+            mediaWidth: mediaWidth,
+            mediaHeight: mediaHeight,
+            mediaHash: mediaHash,
+            thumbImage: thumbImage,
+            mediaKey: mediaKey,
+            mediaDigest: mediaDigest,
+            mediaStatus: mediaStatus,
+            status: status,
+            createdAt: createdAt,
+            action: action,
+            participantId: participantId,
+            snapshotId: snapshotId,
+            hyperlink: hyperlink,
+            name: name,
+            albumId: albumId,
+            stickerId: stickerId,
+            sharedUserId: sharedUserId,
+            mediaWaveform: mediaWaveform,
+            quoteMessageId: quoteMessageId,
+            quoteContent: quoteContent,
+            thumbUrl: thumbUrl,
+            caption: caption,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $MessagesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Messages,
+    Message,
+    $MessagesFilterComposer,
+    $MessagesOrderingComposer,
+    $MessagesProcessedTableManager,
+    $MessagesInsertCompanionBuilder,
+    $MessagesUpdateCompanionBuilder> {
+  $MessagesProcessedTableManager(super.$state);
+}
+
+class $MessagesFilterComposer
+    extends FilterComposer<_$MixinDatabase, Messages> {
+  $MessagesFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaUrl => $state.composableBuilder(
+      column: $state.table.mediaUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaMimeType => $state.composableBuilder(
+      column: $state.table.mediaMimeType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get mediaSize => $state.composableBuilder(
+      column: $state.table.mediaSize,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaDuration => $state.composableBuilder(
+      column: $state.table.mediaDuration,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get mediaWidth => $state.composableBuilder(
+      column: $state.table.mediaWidth,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get mediaHeight => $state.composableBuilder(
+      column: $state.table.mediaHeight,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaHash => $state.composableBuilder(
+      column: $state.table.mediaHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get thumbImage => $state.composableBuilder(
+      column: $state.table.thumbImage,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaKey => $state.composableBuilder(
+      column: $state.table.mediaKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaDigest => $state.composableBuilder(
+      column: $state.table.mediaDigest,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<MediaStatus?, MediaStatus, String>
+      get mediaStatus => $state.composableBuilder(
+          column: $state.table.mediaStatus,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<MessageStatus, MessageStatus, String>
+      get status => $state.composableBuilder(
+          column: $state.table.status,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get action => $state.composableBuilder(
+      column: $state.table.action,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get participantId => $state.composableBuilder(
+      column: $state.table.participantId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get snapshotId => $state.composableBuilder(
+      column: $state.table.snapshotId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get hyperlink => $state.composableBuilder(
+      column: $state.table.hyperlink,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sharedUserId => $state.composableBuilder(
+      column: $state.table.sharedUserId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaWaveform => $state.composableBuilder(
+      column: $state.table.mediaWaveform,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get quoteMessageId => $state.composableBuilder(
+      column: $state.table.quoteMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get quoteContent => $state.composableBuilder(
+      column: $state.table.quoteContent,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get thumbUrl => $state.composableBuilder(
+      column: $state.table.thumbUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get caption => $state.composableBuilder(
+      column: $state.table.caption,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $MessagesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Messages> {
+  $MessagesOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaUrl => $state.composableBuilder(
+      column: $state.table.mediaUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaMimeType => $state.composableBuilder(
+      column: $state.table.mediaMimeType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaSize => $state.composableBuilder(
+      column: $state.table.mediaSize,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaDuration => $state.composableBuilder(
+      column: $state.table.mediaDuration,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaWidth => $state.composableBuilder(
+      column: $state.table.mediaWidth,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaHeight => $state.composableBuilder(
+      column: $state.table.mediaHeight,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaHash => $state.composableBuilder(
+      column: $state.table.mediaHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get thumbImage => $state.composableBuilder(
+      column: $state.table.thumbImage,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaKey => $state.composableBuilder(
+      column: $state.table.mediaKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaDigest => $state.composableBuilder(
+      column: $state.table.mediaDigest,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaStatus => $state.composableBuilder(
+      column: $state.table.mediaStatus,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get status => $state.composableBuilder(
+      column: $state.table.status,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get action => $state.composableBuilder(
+      column: $state.table.action,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get participantId => $state.composableBuilder(
+      column: $state.table.participantId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get snapshotId => $state.composableBuilder(
+      column: $state.table.snapshotId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get hyperlink => $state.composableBuilder(
+      column: $state.table.hyperlink,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sharedUserId => $state.composableBuilder(
+      column: $state.table.sharedUserId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaWaveform => $state.composableBuilder(
+      column: $state.table.mediaWaveform,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get quoteMessageId => $state.composableBuilder(
+      column: $state.table.quoteMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get quoteContent => $state.composableBuilder(
+      column: $state.table.quoteContent,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get thumbUrl => $state.composableBuilder(
+      column: $state.table.thumbUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get caption => $state.composableBuilder(
+      column: $state.table.caption,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $UsersInsertCompanionBuilder = UsersCompanion Function({
+  required String userId,
+  required String identityNumber,
+  Value<UserRelationship?> relationship,
+  Value<String?> fullName,
+  Value<String?> avatarUrl,
+  Value<String?> phone,
+  Value<bool?> isVerified,
+  Value<DateTime?> createdAt,
+  Value<DateTime?> muteUntil,
+  Value<int?> hasPin,
+  Value<String?> appId,
+  Value<String?> biography,
+  Value<int?> isScam,
+  Value<String?> codeUrl,
+  Value<String?> codeId,
+  Value<bool?> isDeactivated,
+  Value<int> rowid,
+});
+typedef $UsersUpdateCompanionBuilder = UsersCompanion Function({
+  Value<String> userId,
+  Value<String> identityNumber,
+  Value<UserRelationship?> relationship,
+  Value<String?> fullName,
+  Value<String?> avatarUrl,
+  Value<String?> phone,
+  Value<bool?> isVerified,
+  Value<DateTime?> createdAt,
+  Value<DateTime?> muteUntil,
+  Value<int?> hasPin,
+  Value<String?> appId,
+  Value<String?> biography,
+  Value<int?> isScam,
+  Value<String?> codeUrl,
+  Value<String?> codeId,
+  Value<bool?> isDeactivated,
+  Value<int> rowid,
+});
+
+class $UsersTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Users,
+    User,
+    $UsersFilterComposer,
+    $UsersOrderingComposer,
+    $UsersProcessedTableManager,
+    $UsersInsertCompanionBuilder,
+    $UsersUpdateCompanionBuilder> {
+  $UsersTableManager(_$MixinDatabase db, Users table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $UsersFilterComposer(ComposerState(db, table)),
+          orderingComposer: $UsersOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $UsersProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> userId = const Value.absent(),
+            Value<String> identityNumber = const Value.absent(),
+            Value<UserRelationship?> relationship = const Value.absent(),
+            Value<String?> fullName = const Value.absent(),
+            Value<String?> avatarUrl = const Value.absent(),
+            Value<String?> phone = const Value.absent(),
+            Value<bool?> isVerified = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+            Value<DateTime?> muteUntil = const Value.absent(),
+            Value<int?> hasPin = const Value.absent(),
+            Value<String?> appId = const Value.absent(),
+            Value<String?> biography = const Value.absent(),
+            Value<int?> isScam = const Value.absent(),
+            Value<String?> codeUrl = const Value.absent(),
+            Value<String?> codeId = const Value.absent(),
+            Value<bool?> isDeactivated = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              UsersCompanion(
+            userId: userId,
+            identityNumber: identityNumber,
+            relationship: relationship,
+            fullName: fullName,
+            avatarUrl: avatarUrl,
+            phone: phone,
+            isVerified: isVerified,
+            createdAt: createdAt,
+            muteUntil: muteUntil,
+            hasPin: hasPin,
+            appId: appId,
+            biography: biography,
+            isScam: isScam,
+            codeUrl: codeUrl,
+            codeId: codeId,
+            isDeactivated: isDeactivated,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String userId,
+            required String identityNumber,
+            Value<UserRelationship?> relationship = const Value.absent(),
+            Value<String?> fullName = const Value.absent(),
+            Value<String?> avatarUrl = const Value.absent(),
+            Value<String?> phone = const Value.absent(),
+            Value<bool?> isVerified = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+            Value<DateTime?> muteUntil = const Value.absent(),
+            Value<int?> hasPin = const Value.absent(),
+            Value<String?> appId = const Value.absent(),
+            Value<String?> biography = const Value.absent(),
+            Value<int?> isScam = const Value.absent(),
+            Value<String?> codeUrl = const Value.absent(),
+            Value<String?> codeId = const Value.absent(),
+            Value<bool?> isDeactivated = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              UsersCompanion.insert(
+            userId: userId,
+            identityNumber: identityNumber,
+            relationship: relationship,
+            fullName: fullName,
+            avatarUrl: avatarUrl,
+            phone: phone,
+            isVerified: isVerified,
+            createdAt: createdAt,
+            muteUntil: muteUntil,
+            hasPin: hasPin,
+            appId: appId,
+            biography: biography,
+            isScam: isScam,
+            codeUrl: codeUrl,
+            codeId: codeId,
+            isDeactivated: isDeactivated,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $UsersProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Users,
+    User,
+    $UsersFilterComposer,
+    $UsersOrderingComposer,
+    $UsersProcessedTableManager,
+    $UsersInsertCompanionBuilder,
+    $UsersUpdateCompanionBuilder> {
+  $UsersProcessedTableManager(super.$state);
+}
+
+class $UsersFilterComposer extends FilterComposer<_$MixinDatabase, Users> {
+  $UsersFilterComposer(super.$state);
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get identityNumber => $state.composableBuilder(
+      column: $state.table.identityNumber,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<UserRelationship?, UserRelationship, String>
+      get relationship => $state.composableBuilder(
+          column: $state.table.relationship,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get fullName => $state.composableBuilder(
+      column: $state.table.fullName,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get avatarUrl => $state.composableBuilder(
+      column: $state.table.avatarUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get phone => $state.composableBuilder(
+      column: $state.table.phone,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get isVerified => $state.composableBuilder(
+      column: $state.table.isVerified,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get muteUntil =>
+      $state.composableBuilder(
+          column: $state.table.muteUntil,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get hasPin => $state.composableBuilder(
+      column: $state.table.hasPin,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get appId => $state.composableBuilder(
+      column: $state.table.appId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get biography => $state.composableBuilder(
+      column: $state.table.biography,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get isScam => $state.composableBuilder(
+      column: $state.table.isScam,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get codeUrl => $state.composableBuilder(
+      column: $state.table.codeUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get codeId => $state.composableBuilder(
+      column: $state.table.codeId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get isDeactivated => $state.composableBuilder(
+      column: $state.table.isDeactivated,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $UsersOrderingComposer extends OrderingComposer<_$MixinDatabase, Users> {
+  $UsersOrderingComposer(super.$state);
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get identityNumber => $state.composableBuilder(
+      column: $state.table.identityNumber,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get relationship => $state.composableBuilder(
+      column: $state.table.relationship,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get fullName => $state.composableBuilder(
+      column: $state.table.fullName,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get avatarUrl => $state.composableBuilder(
+      column: $state.table.avatarUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get phone => $state.composableBuilder(
+      column: $state.table.phone,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get isVerified => $state.composableBuilder(
+      column: $state.table.isVerified,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get muteUntil => $state.composableBuilder(
+      column: $state.table.muteUntil,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get hasPin => $state.composableBuilder(
+      column: $state.table.hasPin,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get appId => $state.composableBuilder(
+      column: $state.table.appId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get biography => $state.composableBuilder(
+      column: $state.table.biography,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get isScam => $state.composableBuilder(
+      column: $state.table.isScam,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get codeUrl => $state.composableBuilder(
+      column: $state.table.codeUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get codeId => $state.composableBuilder(
+      column: $state.table.codeId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get isDeactivated => $state.composableBuilder(
+      column: $state.table.isDeactivated,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $SnapshotsInsertCompanionBuilder = SnapshotsCompanion Function({
+  required String snapshotId,
+  Value<String?> traceId,
+  required String type,
+  required String assetId,
+  required String amount,
+  required DateTime createdAt,
+  Value<String?> opponentId,
+  Value<String?> transactionHash,
+  Value<String?> sender,
+  Value<String?> receiver,
+  Value<String?> memo,
+  Value<int?> confirmations,
+  Value<String?> snapshotHash,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<int> rowid,
+});
+typedef $SnapshotsUpdateCompanionBuilder = SnapshotsCompanion Function({
+  Value<String> snapshotId,
+  Value<String?> traceId,
+  Value<String> type,
+  Value<String> assetId,
+  Value<String> amount,
+  Value<DateTime> createdAt,
+  Value<String?> opponentId,
+  Value<String?> transactionHash,
+  Value<String?> sender,
+  Value<String?> receiver,
+  Value<String?> memo,
+  Value<int?> confirmations,
+  Value<String?> snapshotHash,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<int> rowid,
+});
+
+class $SnapshotsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Snapshots,
+    Snapshot,
+    $SnapshotsFilterComposer,
+    $SnapshotsOrderingComposer,
+    $SnapshotsProcessedTableManager,
+    $SnapshotsInsertCompanionBuilder,
+    $SnapshotsUpdateCompanionBuilder> {
+  $SnapshotsTableManager(_$MixinDatabase db, Snapshots table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $SnapshotsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $SnapshotsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $SnapshotsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> snapshotId = const Value.absent(),
+            Value<String?> traceId = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<String> assetId = const Value.absent(),
+            Value<String> amount = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String?> opponentId = const Value.absent(),
+            Value<String?> transactionHash = const Value.absent(),
+            Value<String?> sender = const Value.absent(),
+            Value<String?> receiver = const Value.absent(),
+            Value<String?> memo = const Value.absent(),
+            Value<int?> confirmations = const Value.absent(),
+            Value<String?> snapshotHash = const Value.absent(),
+            Value<String?> openingBalance = const Value.absent(),
+            Value<String?> closingBalance = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SnapshotsCompanion(
+            snapshotId: snapshotId,
+            traceId: traceId,
+            type: type,
+            assetId: assetId,
+            amount: amount,
+            createdAt: createdAt,
+            opponentId: opponentId,
+            transactionHash: transactionHash,
+            sender: sender,
+            receiver: receiver,
+            memo: memo,
+            confirmations: confirmations,
+            snapshotHash: snapshotHash,
+            openingBalance: openingBalance,
+            closingBalance: closingBalance,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String snapshotId,
+            Value<String?> traceId = const Value.absent(),
+            required String type,
+            required String assetId,
+            required String amount,
+            required DateTime createdAt,
+            Value<String?> opponentId = const Value.absent(),
+            Value<String?> transactionHash = const Value.absent(),
+            Value<String?> sender = const Value.absent(),
+            Value<String?> receiver = const Value.absent(),
+            Value<String?> memo = const Value.absent(),
+            Value<int?> confirmations = const Value.absent(),
+            Value<String?> snapshotHash = const Value.absent(),
+            Value<String?> openingBalance = const Value.absent(),
+            Value<String?> closingBalance = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SnapshotsCompanion.insert(
+            snapshotId: snapshotId,
+            traceId: traceId,
+            type: type,
+            assetId: assetId,
+            amount: amount,
+            createdAt: createdAt,
+            opponentId: opponentId,
+            transactionHash: transactionHash,
+            sender: sender,
+            receiver: receiver,
+            memo: memo,
+            confirmations: confirmations,
+            snapshotHash: snapshotHash,
+            openingBalance: openingBalance,
+            closingBalance: closingBalance,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $SnapshotsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Snapshots,
+    Snapshot,
+    $SnapshotsFilterComposer,
+    $SnapshotsOrderingComposer,
+    $SnapshotsProcessedTableManager,
+    $SnapshotsInsertCompanionBuilder,
+    $SnapshotsUpdateCompanionBuilder> {
+  $SnapshotsProcessedTableManager(super.$state);
+}
+
+class $SnapshotsFilterComposer
+    extends FilterComposer<_$MixinDatabase, Snapshots> {
+  $SnapshotsFilterComposer(super.$state);
+  ColumnFilters<String> get snapshotId => $state.composableBuilder(
+      column: $state.table.snapshotId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get traceId => $state.composableBuilder(
+      column: $state.table.traceId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get type => $state.composableBuilder(
+      column: $state.table.type,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get amount => $state.composableBuilder(
+      column: $state.table.amount,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get opponentId => $state.composableBuilder(
+      column: $state.table.opponentId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get transactionHash => $state.composableBuilder(
+      column: $state.table.transactionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sender => $state.composableBuilder(
+      column: $state.table.sender,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get receiver => $state.composableBuilder(
+      column: $state.table.receiver,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get memo => $state.composableBuilder(
+      column: $state.table.memo,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get snapshotHash => $state.composableBuilder(
+      column: $state.table.snapshotHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get openingBalance => $state.composableBuilder(
+      column: $state.table.openingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get closingBalance => $state.composableBuilder(
+      column: $state.table.closingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $SnapshotsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Snapshots> {
+  $SnapshotsOrderingComposer(super.$state);
+  ColumnOrderings<String> get snapshotId => $state.composableBuilder(
+      column: $state.table.snapshotId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get traceId => $state.composableBuilder(
+      column: $state.table.traceId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get type => $state.composableBuilder(
+      column: $state.table.type,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get amount => $state.composableBuilder(
+      column: $state.table.amount,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get opponentId => $state.composableBuilder(
+      column: $state.table.opponentId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get transactionHash => $state.composableBuilder(
+      column: $state.table.transactionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sender => $state.composableBuilder(
+      column: $state.table.sender,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get receiver => $state.composableBuilder(
+      column: $state.table.receiver,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get memo => $state.composableBuilder(
+      column: $state.table.memo,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get snapshotHash => $state.composableBuilder(
+      column: $state.table.snapshotHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get openingBalance => $state.composableBuilder(
+      column: $state.table.openingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get closingBalance => $state.composableBuilder(
+      column: $state.table.closingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $SafeSnapshotsInsertCompanionBuilder = SafeSnapshotsCompanion Function({
+  required String snapshotId,
+  required String type,
+  required String assetId,
+  required String amount,
+  required String userId,
+  required String opponentId,
+  required String memo,
+  required String transactionHash,
+  required String createdAt,
+  Value<String?> traceId,
+  Value<int?> confirmations,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<SafeWithdrawal?> withdrawal,
+  Value<SafeDeposit?> deposit,
+  Value<String?> inscriptionHash,
+  Value<int> rowid,
+});
+typedef $SafeSnapshotsUpdateCompanionBuilder = SafeSnapshotsCompanion Function({
+  Value<String> snapshotId,
+  Value<String> type,
+  Value<String> assetId,
+  Value<String> amount,
+  Value<String> userId,
+  Value<String> opponentId,
+  Value<String> memo,
+  Value<String> transactionHash,
+  Value<String> createdAt,
+  Value<String?> traceId,
+  Value<int?> confirmations,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<SafeWithdrawal?> withdrawal,
+  Value<SafeDeposit?> deposit,
+  Value<String?> inscriptionHash,
+  Value<int> rowid,
+});
+
+class $SafeSnapshotsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    SafeSnapshots,
+    SafeSnapshot,
+    $SafeSnapshotsFilterComposer,
+    $SafeSnapshotsOrderingComposer,
+    $SafeSnapshotsProcessedTableManager,
+    $SafeSnapshotsInsertCompanionBuilder,
+    $SafeSnapshotsUpdateCompanionBuilder> {
+  $SafeSnapshotsTableManager(_$MixinDatabase db, SafeSnapshots table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $SafeSnapshotsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $SafeSnapshotsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $SafeSnapshotsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> snapshotId = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<String> assetId = const Value.absent(),
+            Value<String> amount = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> opponentId = const Value.absent(),
+            Value<String> memo = const Value.absent(),
+            Value<String> transactionHash = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<String?> traceId = const Value.absent(),
+            Value<int?> confirmations = const Value.absent(),
+            Value<String?> openingBalance = const Value.absent(),
+            Value<String?> closingBalance = const Value.absent(),
+            Value<SafeWithdrawal?> withdrawal = const Value.absent(),
+            Value<SafeDeposit?> deposit = const Value.absent(),
+            Value<String?> inscriptionHash = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SafeSnapshotsCompanion(
+            snapshotId: snapshotId,
+            type: type,
+            assetId: assetId,
+            amount: amount,
+            userId: userId,
+            opponentId: opponentId,
+            memo: memo,
+            transactionHash: transactionHash,
+            createdAt: createdAt,
+            traceId: traceId,
+            confirmations: confirmations,
+            openingBalance: openingBalance,
+            closingBalance: closingBalance,
+            withdrawal: withdrawal,
+            deposit: deposit,
+            inscriptionHash: inscriptionHash,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String snapshotId,
+            required String type,
+            required String assetId,
+            required String amount,
+            required String userId,
+            required String opponentId,
+            required String memo,
+            required String transactionHash,
+            required String createdAt,
+            Value<String?> traceId = const Value.absent(),
+            Value<int?> confirmations = const Value.absent(),
+            Value<String?> openingBalance = const Value.absent(),
+            Value<String?> closingBalance = const Value.absent(),
+            Value<SafeWithdrawal?> withdrawal = const Value.absent(),
+            Value<SafeDeposit?> deposit = const Value.absent(),
+            Value<String?> inscriptionHash = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SafeSnapshotsCompanion.insert(
+            snapshotId: snapshotId,
+            type: type,
+            assetId: assetId,
+            amount: amount,
+            userId: userId,
+            opponentId: opponentId,
+            memo: memo,
+            transactionHash: transactionHash,
+            createdAt: createdAt,
+            traceId: traceId,
+            confirmations: confirmations,
+            openingBalance: openingBalance,
+            closingBalance: closingBalance,
+            withdrawal: withdrawal,
+            deposit: deposit,
+            inscriptionHash: inscriptionHash,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $SafeSnapshotsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    SafeSnapshots,
+    SafeSnapshot,
+    $SafeSnapshotsFilterComposer,
+    $SafeSnapshotsOrderingComposer,
+    $SafeSnapshotsProcessedTableManager,
+    $SafeSnapshotsInsertCompanionBuilder,
+    $SafeSnapshotsUpdateCompanionBuilder> {
+  $SafeSnapshotsProcessedTableManager(super.$state);
+}
+
+class $SafeSnapshotsFilterComposer
+    extends FilterComposer<_$MixinDatabase, SafeSnapshots> {
+  $SafeSnapshotsFilterComposer(super.$state);
+  ColumnFilters<String> get snapshotId => $state.composableBuilder(
+      column: $state.table.snapshotId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get type => $state.composableBuilder(
+      column: $state.table.type,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get amount => $state.composableBuilder(
+      column: $state.table.amount,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get opponentId => $state.composableBuilder(
+      column: $state.table.opponentId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get memo => $state.composableBuilder(
+      column: $state.table.memo,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get transactionHash => $state.composableBuilder(
+      column: $state.table.transactionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get traceId => $state.composableBuilder(
+      column: $state.table.traceId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get openingBalance => $state.composableBuilder(
+      column: $state.table.openingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get closingBalance => $state.composableBuilder(
+      column: $state.table.closingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<SafeWithdrawal?, SafeWithdrawal, String>
+      get withdrawal => $state.composableBuilder(
+          column: $state.table.withdrawal,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<SafeDeposit?, SafeDeposit, String>
+      get deposit => $state.composableBuilder(
+          column: $state.table.deposit,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get inscriptionHash => $state.composableBuilder(
+      column: $state.table.inscriptionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $SafeSnapshotsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, SafeSnapshots> {
+  $SafeSnapshotsOrderingComposer(super.$state);
+  ColumnOrderings<String> get snapshotId => $state.composableBuilder(
+      column: $state.table.snapshotId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get type => $state.composableBuilder(
+      column: $state.table.type,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get amount => $state.composableBuilder(
+      column: $state.table.amount,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get opponentId => $state.composableBuilder(
+      column: $state.table.opponentId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get memo => $state.composableBuilder(
+      column: $state.table.memo,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get transactionHash => $state.composableBuilder(
+      column: $state.table.transactionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get traceId => $state.composableBuilder(
+      column: $state.table.traceId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get openingBalance => $state.composableBuilder(
+      column: $state.table.openingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get closingBalance => $state.composableBuilder(
+      column: $state.table.closingBalance,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get withdrawal => $state.composableBuilder(
+      column: $state.table.withdrawal,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get deposit => $state.composableBuilder(
+      column: $state.table.deposit,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get inscriptionHash => $state.composableBuilder(
+      column: $state.table.inscriptionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $AssetsInsertCompanionBuilder = AssetsCompanion Function({
+  required String assetId,
+  required String symbol,
+  required String name,
+  required String iconUrl,
+  required String balance,
+  required String destination,
+  Value<String?> tag,
+  required String priceBtc,
+  required String priceUsd,
+  required String chainId,
+  required String changeUsd,
+  required String changeBtc,
+  required int confirmations,
+  Value<String?> assetKey,
+  Value<String?> reserve,
+  Value<int> rowid,
+});
+typedef $AssetsUpdateCompanionBuilder = AssetsCompanion Function({
+  Value<String> assetId,
+  Value<String> symbol,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String> balance,
+  Value<String> destination,
+  Value<String?> tag,
+  Value<String> priceBtc,
+  Value<String> priceUsd,
+  Value<String> chainId,
+  Value<String> changeUsd,
+  Value<String> changeBtc,
+  Value<int> confirmations,
+  Value<String?> assetKey,
+  Value<String?> reserve,
+  Value<int> rowid,
+});
+
+class $AssetsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Assets,
+    Asset,
+    $AssetsFilterComposer,
+    $AssetsOrderingComposer,
+    $AssetsProcessedTableManager,
+    $AssetsInsertCompanionBuilder,
+    $AssetsUpdateCompanionBuilder> {
+  $AssetsTableManager(_$MixinDatabase db, Assets table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $AssetsFilterComposer(ComposerState(db, table)),
+          orderingComposer: $AssetsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $AssetsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> assetId = const Value.absent(),
+            Value<String> symbol = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<String> balance = const Value.absent(),
+            Value<String> destination = const Value.absent(),
+            Value<String?> tag = const Value.absent(),
+            Value<String> priceBtc = const Value.absent(),
+            Value<String> priceUsd = const Value.absent(),
+            Value<String> chainId = const Value.absent(),
+            Value<String> changeUsd = const Value.absent(),
+            Value<String> changeBtc = const Value.absent(),
+            Value<int> confirmations = const Value.absent(),
+            Value<String?> assetKey = const Value.absent(),
+            Value<String?> reserve = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AssetsCompanion(
+            assetId: assetId,
+            symbol: symbol,
+            name: name,
+            iconUrl: iconUrl,
+            balance: balance,
+            destination: destination,
+            tag: tag,
+            priceBtc: priceBtc,
+            priceUsd: priceUsd,
+            chainId: chainId,
+            changeUsd: changeUsd,
+            changeBtc: changeBtc,
+            confirmations: confirmations,
+            assetKey: assetKey,
+            reserve: reserve,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String assetId,
+            required String symbol,
+            required String name,
+            required String iconUrl,
+            required String balance,
+            required String destination,
+            Value<String?> tag = const Value.absent(),
+            required String priceBtc,
+            required String priceUsd,
+            required String chainId,
+            required String changeUsd,
+            required String changeBtc,
+            required int confirmations,
+            Value<String?> assetKey = const Value.absent(),
+            Value<String?> reserve = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AssetsCompanion.insert(
+            assetId: assetId,
+            symbol: symbol,
+            name: name,
+            iconUrl: iconUrl,
+            balance: balance,
+            destination: destination,
+            tag: tag,
+            priceBtc: priceBtc,
+            priceUsd: priceUsd,
+            chainId: chainId,
+            changeUsd: changeUsd,
+            changeBtc: changeBtc,
+            confirmations: confirmations,
+            assetKey: assetKey,
+            reserve: reserve,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $AssetsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Assets,
+    Asset,
+    $AssetsFilterComposer,
+    $AssetsOrderingComposer,
+    $AssetsProcessedTableManager,
+    $AssetsInsertCompanionBuilder,
+    $AssetsUpdateCompanionBuilder> {
+  $AssetsProcessedTableManager(super.$state);
+}
+
+class $AssetsFilterComposer extends FilterComposer<_$MixinDatabase, Assets> {
+  $AssetsFilterComposer(super.$state);
+  ColumnFilters<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get balance => $state.composableBuilder(
+      column: $state.table.balance,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get destination => $state.composableBuilder(
+      column: $state.table.destination,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get tag => $state.composableBuilder(
+      column: $state.table.tag,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get priceBtc => $state.composableBuilder(
+      column: $state.table.priceBtc,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get priceUsd => $state.composableBuilder(
+      column: $state.table.priceUsd,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get chainId => $state.composableBuilder(
+      column: $state.table.chainId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get changeUsd => $state.composableBuilder(
+      column: $state.table.changeUsd,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get changeBtc => $state.composableBuilder(
+      column: $state.table.changeBtc,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetKey => $state.composableBuilder(
+      column: $state.table.assetKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get reserve => $state.composableBuilder(
+      column: $state.table.reserve,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $AssetsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Assets> {
+  $AssetsOrderingComposer(super.$state);
+  ColumnOrderings<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get balance => $state.composableBuilder(
+      column: $state.table.balance,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get destination => $state.composableBuilder(
+      column: $state.table.destination,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get tag => $state.composableBuilder(
+      column: $state.table.tag,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get priceBtc => $state.composableBuilder(
+      column: $state.table.priceBtc,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get priceUsd => $state.composableBuilder(
+      column: $state.table.priceUsd,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get chainId => $state.composableBuilder(
+      column: $state.table.chainId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get changeUsd => $state.composableBuilder(
+      column: $state.table.changeUsd,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get changeBtc => $state.composableBuilder(
+      column: $state.table.changeBtc,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetKey => $state.composableBuilder(
+      column: $state.table.assetKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get reserve => $state.composableBuilder(
+      column: $state.table.reserve,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $TokensInsertCompanionBuilder = TokensCompanion Function({
+  required String assetId,
+  required String kernelAssetId,
+  required String symbol,
+  required String name,
+  required String iconUrl,
+  required String priceBtc,
+  required String priceUsd,
+  required String chainId,
+  required String changeUsd,
+  required String changeBtc,
+  required int confirmations,
+  required String assetKey,
+  required String dust,
+  Value<String?> collectionHash,
+  Value<int> rowid,
+});
+typedef $TokensUpdateCompanionBuilder = TokensCompanion Function({
+  Value<String> assetId,
+  Value<String> kernelAssetId,
+  Value<String> symbol,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String> priceBtc,
+  Value<String> priceUsd,
+  Value<String> chainId,
+  Value<String> changeUsd,
+  Value<String> changeBtc,
+  Value<int> confirmations,
+  Value<String> assetKey,
+  Value<String> dust,
+  Value<String?> collectionHash,
+  Value<int> rowid,
+});
+
+class $TokensTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Tokens,
+    Token,
+    $TokensFilterComposer,
+    $TokensOrderingComposer,
+    $TokensProcessedTableManager,
+    $TokensInsertCompanionBuilder,
+    $TokensUpdateCompanionBuilder> {
+  $TokensTableManager(_$MixinDatabase db, Tokens table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $TokensFilterComposer(ComposerState(db, table)),
+          orderingComposer: $TokensOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $TokensProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> assetId = const Value.absent(),
+            Value<String> kernelAssetId = const Value.absent(),
+            Value<String> symbol = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<String> priceBtc = const Value.absent(),
+            Value<String> priceUsd = const Value.absent(),
+            Value<String> chainId = const Value.absent(),
+            Value<String> changeUsd = const Value.absent(),
+            Value<String> changeBtc = const Value.absent(),
+            Value<int> confirmations = const Value.absent(),
+            Value<String> assetKey = const Value.absent(),
+            Value<String> dust = const Value.absent(),
+            Value<String?> collectionHash = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TokensCompanion(
+            assetId: assetId,
+            kernelAssetId: kernelAssetId,
+            symbol: symbol,
+            name: name,
+            iconUrl: iconUrl,
+            priceBtc: priceBtc,
+            priceUsd: priceUsd,
+            chainId: chainId,
+            changeUsd: changeUsd,
+            changeBtc: changeBtc,
+            confirmations: confirmations,
+            assetKey: assetKey,
+            dust: dust,
+            collectionHash: collectionHash,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String assetId,
+            required String kernelAssetId,
+            required String symbol,
+            required String name,
+            required String iconUrl,
+            required String priceBtc,
+            required String priceUsd,
+            required String chainId,
+            required String changeUsd,
+            required String changeBtc,
+            required int confirmations,
+            required String assetKey,
+            required String dust,
+            Value<String?> collectionHash = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TokensCompanion.insert(
+            assetId: assetId,
+            kernelAssetId: kernelAssetId,
+            symbol: symbol,
+            name: name,
+            iconUrl: iconUrl,
+            priceBtc: priceBtc,
+            priceUsd: priceUsd,
+            chainId: chainId,
+            changeUsd: changeUsd,
+            changeBtc: changeBtc,
+            confirmations: confirmations,
+            assetKey: assetKey,
+            dust: dust,
+            collectionHash: collectionHash,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $TokensProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Tokens,
+    Token,
+    $TokensFilterComposer,
+    $TokensOrderingComposer,
+    $TokensProcessedTableManager,
+    $TokensInsertCompanionBuilder,
+    $TokensUpdateCompanionBuilder> {
+  $TokensProcessedTableManager(super.$state);
+}
+
+class $TokensFilterComposer extends FilterComposer<_$MixinDatabase, Tokens> {
+  $TokensFilterComposer(super.$state);
+  ColumnFilters<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get kernelAssetId => $state.composableBuilder(
+      column: $state.table.kernelAssetId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get priceBtc => $state.composableBuilder(
+      column: $state.table.priceBtc,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get priceUsd => $state.composableBuilder(
+      column: $state.table.priceUsd,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get chainId => $state.composableBuilder(
+      column: $state.table.chainId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get changeUsd => $state.composableBuilder(
+      column: $state.table.changeUsd,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get changeBtc => $state.composableBuilder(
+      column: $state.table.changeBtc,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetKey => $state.composableBuilder(
+      column: $state.table.assetKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get dust => $state.composableBuilder(
+      column: $state.table.dust,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get collectionHash => $state.composableBuilder(
+      column: $state.table.collectionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $TokensOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Tokens> {
+  $TokensOrderingComposer(super.$state);
+  ColumnOrderings<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get kernelAssetId => $state.composableBuilder(
+      column: $state.table.kernelAssetId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get priceBtc => $state.composableBuilder(
+      column: $state.table.priceBtc,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get priceUsd => $state.composableBuilder(
+      column: $state.table.priceUsd,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get chainId => $state.composableBuilder(
+      column: $state.table.chainId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get changeUsd => $state.composableBuilder(
+      column: $state.table.changeUsd,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get changeBtc => $state.composableBuilder(
+      column: $state.table.changeBtc,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get confirmations => $state.composableBuilder(
+      column: $state.table.confirmations,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetKey => $state.composableBuilder(
+      column: $state.table.assetKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get dust => $state.composableBuilder(
+      column: $state.table.dust,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get collectionHash => $state.composableBuilder(
+      column: $state.table.collectionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $ChainsInsertCompanionBuilder = ChainsCompanion Function({
+  required String chainId,
+  required String name,
+  required String symbol,
+  required String iconUrl,
+  required int threshold,
+  Value<int> rowid,
+});
+typedef $ChainsUpdateCompanionBuilder = ChainsCompanion Function({
+  Value<String> chainId,
+  Value<String> name,
+  Value<String> symbol,
+  Value<String> iconUrl,
+  Value<int> threshold,
+  Value<int> rowid,
+});
+
+class $ChainsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Chains,
+    Chain,
+    $ChainsFilterComposer,
+    $ChainsOrderingComposer,
+    $ChainsProcessedTableManager,
+    $ChainsInsertCompanionBuilder,
+    $ChainsUpdateCompanionBuilder> {
+  $ChainsTableManager(_$MixinDatabase db, Chains table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $ChainsFilterComposer(ComposerState(db, table)),
+          orderingComposer: $ChainsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $ChainsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> chainId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> symbol = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<int> threshold = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ChainsCompanion(
+            chainId: chainId,
+            name: name,
+            symbol: symbol,
+            iconUrl: iconUrl,
+            threshold: threshold,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String chainId,
+            required String name,
+            required String symbol,
+            required String iconUrl,
+            required int threshold,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ChainsCompanion.insert(
+            chainId: chainId,
+            name: name,
+            symbol: symbol,
+            iconUrl: iconUrl,
+            threshold: threshold,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $ChainsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Chains,
+    Chain,
+    $ChainsFilterComposer,
+    $ChainsOrderingComposer,
+    $ChainsProcessedTableManager,
+    $ChainsInsertCompanionBuilder,
+    $ChainsUpdateCompanionBuilder> {
+  $ChainsProcessedTableManager(super.$state);
+}
+
+class $ChainsFilterComposer extends FilterComposer<_$MixinDatabase, Chains> {
+  $ChainsFilterComposer(super.$state);
+  ColumnFilters<String> get chainId => $state.composableBuilder(
+      column: $state.table.chainId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get threshold => $state.composableBuilder(
+      column: $state.table.threshold,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $ChainsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Chains> {
+  $ChainsOrderingComposer(super.$state);
+  ColumnOrderings<String> get chainId => $state.composableBuilder(
+      column: $state.table.chainId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get threshold => $state.composableBuilder(
+      column: $state.table.threshold,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $StickersInsertCompanionBuilder = StickersCompanion Function({
+  required String stickerId,
+  Value<String?> albumId,
+  required String name,
+  required String assetUrl,
+  required String assetType,
+  required int assetWidth,
+  required int assetHeight,
+  required DateTime createdAt,
+  Value<DateTime?> lastUseAt,
+  Value<int> rowid,
+});
+typedef $StickersUpdateCompanionBuilder = StickersCompanion Function({
+  Value<String> stickerId,
+  Value<String?> albumId,
+  Value<String> name,
+  Value<String> assetUrl,
+  Value<String> assetType,
+  Value<int> assetWidth,
+  Value<int> assetHeight,
+  Value<DateTime> createdAt,
+  Value<DateTime?> lastUseAt,
+  Value<int> rowid,
+});
+
+class $StickersTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Stickers,
+    Sticker,
+    $StickersFilterComposer,
+    $StickersOrderingComposer,
+    $StickersProcessedTableManager,
+    $StickersInsertCompanionBuilder,
+    $StickersUpdateCompanionBuilder> {
+  $StickersTableManager(_$MixinDatabase db, Stickers table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $StickersFilterComposer(ComposerState(db, table)),
+          orderingComposer: $StickersOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $StickersProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> stickerId = const Value.absent(),
+            Value<String?> albumId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> assetUrl = const Value.absent(),
+            Value<String> assetType = const Value.absent(),
+            Value<int> assetWidth = const Value.absent(),
+            Value<int> assetHeight = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime?> lastUseAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StickersCompanion(
+            stickerId: stickerId,
+            albumId: albumId,
+            name: name,
+            assetUrl: assetUrl,
+            assetType: assetType,
+            assetWidth: assetWidth,
+            assetHeight: assetHeight,
+            createdAt: createdAt,
+            lastUseAt: lastUseAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String stickerId,
+            Value<String?> albumId = const Value.absent(),
+            required String name,
+            required String assetUrl,
+            required String assetType,
+            required int assetWidth,
+            required int assetHeight,
+            required DateTime createdAt,
+            Value<DateTime?> lastUseAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StickersCompanion.insert(
+            stickerId: stickerId,
+            albumId: albumId,
+            name: name,
+            assetUrl: assetUrl,
+            assetType: assetType,
+            assetWidth: assetWidth,
+            assetHeight: assetHeight,
+            createdAt: createdAt,
+            lastUseAt: lastUseAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $StickersProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Stickers,
+    Sticker,
+    $StickersFilterComposer,
+    $StickersOrderingComposer,
+    $StickersProcessedTableManager,
+    $StickersInsertCompanionBuilder,
+    $StickersUpdateCompanionBuilder> {
+  $StickersProcessedTableManager(super.$state);
+}
+
+class $StickersFilterComposer
+    extends FilterComposer<_$MixinDatabase, Stickers> {
+  $StickersFilterComposer(super.$state);
+  ColumnFilters<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetUrl => $state.composableBuilder(
+      column: $state.table.assetUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetType => $state.composableBuilder(
+      column: $state.table.assetType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get assetWidth => $state.composableBuilder(
+      column: $state.table.assetWidth,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get assetHeight => $state.composableBuilder(
+      column: $state.table.assetHeight,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get lastUseAt =>
+      $state.composableBuilder(
+          column: $state.table.lastUseAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $StickersOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Stickers> {
+  $StickersOrderingComposer(super.$state);
+  ColumnOrderings<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetUrl => $state.composableBuilder(
+      column: $state.table.assetUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetType => $state.composableBuilder(
+      column: $state.table.assetType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get assetWidth => $state.composableBuilder(
+      column: $state.table.assetWidth,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get assetHeight => $state.composableBuilder(
+      column: $state.table.assetHeight,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get lastUseAt => $state.composableBuilder(
+      column: $state.table.lastUseAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $HyperlinksInsertCompanionBuilder = HyperlinksCompanion Function({
+  required String hyperlink,
+  required String siteName,
+  required String siteTitle,
+  Value<String?> siteDescription,
+  Value<String?> siteImage,
+  Value<int> rowid,
+});
+typedef $HyperlinksUpdateCompanionBuilder = HyperlinksCompanion Function({
+  Value<String> hyperlink,
+  Value<String> siteName,
+  Value<String> siteTitle,
+  Value<String?> siteDescription,
+  Value<String?> siteImage,
+  Value<int> rowid,
+});
+
+class $HyperlinksTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Hyperlinks,
+    Hyperlink,
+    $HyperlinksFilterComposer,
+    $HyperlinksOrderingComposer,
+    $HyperlinksProcessedTableManager,
+    $HyperlinksInsertCompanionBuilder,
+    $HyperlinksUpdateCompanionBuilder> {
+  $HyperlinksTableManager(_$MixinDatabase db, Hyperlinks table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $HyperlinksFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $HyperlinksOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $HyperlinksProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> hyperlink = const Value.absent(),
+            Value<String> siteName = const Value.absent(),
+            Value<String> siteTitle = const Value.absent(),
+            Value<String?> siteDescription = const Value.absent(),
+            Value<String?> siteImage = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HyperlinksCompanion(
+            hyperlink: hyperlink,
+            siteName: siteName,
+            siteTitle: siteTitle,
+            siteDescription: siteDescription,
+            siteImage: siteImage,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String hyperlink,
+            required String siteName,
+            required String siteTitle,
+            Value<String?> siteDescription = const Value.absent(),
+            Value<String?> siteImage = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              HyperlinksCompanion.insert(
+            hyperlink: hyperlink,
+            siteName: siteName,
+            siteTitle: siteTitle,
+            siteDescription: siteDescription,
+            siteImage: siteImage,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $HyperlinksProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Hyperlinks,
+    Hyperlink,
+    $HyperlinksFilterComposer,
+    $HyperlinksOrderingComposer,
+    $HyperlinksProcessedTableManager,
+    $HyperlinksInsertCompanionBuilder,
+    $HyperlinksUpdateCompanionBuilder> {
+  $HyperlinksProcessedTableManager(super.$state);
+}
+
+class $HyperlinksFilterComposer
+    extends FilterComposer<_$MixinDatabase, Hyperlinks> {
+  $HyperlinksFilterComposer(super.$state);
+  ColumnFilters<String> get hyperlink => $state.composableBuilder(
+      column: $state.table.hyperlink,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get siteName => $state.composableBuilder(
+      column: $state.table.siteName,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get siteTitle => $state.composableBuilder(
+      column: $state.table.siteTitle,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get siteDescription => $state.composableBuilder(
+      column: $state.table.siteDescription,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get siteImage => $state.composableBuilder(
+      column: $state.table.siteImage,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $HyperlinksOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Hyperlinks> {
+  $HyperlinksOrderingComposer(super.$state);
+  ColumnOrderings<String> get hyperlink => $state.composableBuilder(
+      column: $state.table.hyperlink,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get siteName => $state.composableBuilder(
+      column: $state.table.siteName,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get siteTitle => $state.composableBuilder(
+      column: $state.table.siteTitle,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get siteDescription => $state.composableBuilder(
+      column: $state.table.siteDescription,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get siteImage => $state.composableBuilder(
+      column: $state.table.siteImage,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $MessageMentionsInsertCompanionBuilder = MessageMentionsCompanion
+    Function({
+  required String messageId,
+  required String conversationId,
+  Value<bool?> hasRead,
+  Value<int> rowid,
+});
+typedef $MessageMentionsUpdateCompanionBuilder = MessageMentionsCompanion
+    Function({
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<bool?> hasRead,
+  Value<int> rowid,
+});
+
+class $MessageMentionsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    MessageMentions,
+    MessageMention,
+    $MessageMentionsFilterComposer,
+    $MessageMentionsOrderingComposer,
+    $MessageMentionsProcessedTableManager,
+    $MessageMentionsInsertCompanionBuilder,
+    $MessageMentionsUpdateCompanionBuilder> {
+  $MessageMentionsTableManager(_$MixinDatabase db, MessageMentions table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $MessageMentionsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $MessageMentionsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $MessageMentionsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<bool?> hasRead = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessageMentionsCompanion(
+            messageId: messageId,
+            conversationId: conversationId,
+            hasRead: hasRead,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            required String conversationId,
+            Value<bool?> hasRead = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessageMentionsCompanion.insert(
+            messageId: messageId,
+            conversationId: conversationId,
+            hasRead: hasRead,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $MessageMentionsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    MessageMentions,
+    MessageMention,
+    $MessageMentionsFilterComposer,
+    $MessageMentionsOrderingComposer,
+    $MessageMentionsProcessedTableManager,
+    $MessageMentionsInsertCompanionBuilder,
+    $MessageMentionsUpdateCompanionBuilder> {
+  $MessageMentionsProcessedTableManager(super.$state);
+}
+
+class $MessageMentionsFilterComposer
+    extends FilterComposer<_$MixinDatabase, MessageMentions> {
+  $MessageMentionsFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get hasRead => $state.composableBuilder(
+      column: $state.table.hasRead,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $MessageMentionsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, MessageMentions> {
+  $MessageMentionsOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get hasRead => $state.composableBuilder(
+      column: $state.table.hasRead,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $PinMessagesInsertCompanionBuilder = PinMessagesCompanion Function({
+  required String messageId,
+  required String conversationId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $PinMessagesUpdateCompanionBuilder = PinMessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $PinMessagesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    PinMessages,
+    PinMessage,
+    $PinMessagesFilterComposer,
+    $PinMessagesOrderingComposer,
+    $PinMessagesProcessedTableManager,
+    $PinMessagesInsertCompanionBuilder,
+    $PinMessagesUpdateCompanionBuilder> {
+  $PinMessagesTableManager(_$MixinDatabase db, PinMessages table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $PinMessagesFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $PinMessagesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $PinMessagesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PinMessagesCompanion(
+            messageId: messageId,
+            conversationId: conversationId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            required String conversationId,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PinMessagesCompanion.insert(
+            messageId: messageId,
+            conversationId: conversationId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $PinMessagesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    PinMessages,
+    PinMessage,
+    $PinMessagesFilterComposer,
+    $PinMessagesOrderingComposer,
+    $PinMessagesProcessedTableManager,
+    $PinMessagesInsertCompanionBuilder,
+    $PinMessagesUpdateCompanionBuilder> {
+  $PinMessagesProcessedTableManager(super.$state);
+}
+
+class $PinMessagesFilterComposer
+    extends FilterComposer<_$MixinDatabase, PinMessages> {
+  $PinMessagesFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $PinMessagesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, PinMessages> {
+  $PinMessagesOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $ExpiredMessagesInsertCompanionBuilder = ExpiredMessagesCompanion
+    Function({
+  required String messageId,
+  required int expireIn,
+  Value<int?> expireAt,
+  Value<int> rowid,
+});
+typedef $ExpiredMessagesUpdateCompanionBuilder = ExpiredMessagesCompanion
+    Function({
+  Value<String> messageId,
+  Value<int> expireIn,
+  Value<int?> expireAt,
+  Value<int> rowid,
+});
+
+class $ExpiredMessagesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    ExpiredMessages,
+    ExpiredMessage,
+    $ExpiredMessagesFilterComposer,
+    $ExpiredMessagesOrderingComposer,
+    $ExpiredMessagesProcessedTableManager,
+    $ExpiredMessagesInsertCompanionBuilder,
+    $ExpiredMessagesUpdateCompanionBuilder> {
+  $ExpiredMessagesTableManager(_$MixinDatabase db, ExpiredMessages table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $ExpiredMessagesFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $ExpiredMessagesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $ExpiredMessagesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<int> expireIn = const Value.absent(),
+            Value<int?> expireAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExpiredMessagesCompanion(
+            messageId: messageId,
+            expireIn: expireIn,
+            expireAt: expireAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            required int expireIn,
+            Value<int?> expireAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ExpiredMessagesCompanion.insert(
+            messageId: messageId,
+            expireIn: expireIn,
+            expireAt: expireAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $ExpiredMessagesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    ExpiredMessages,
+    ExpiredMessage,
+    $ExpiredMessagesFilterComposer,
+    $ExpiredMessagesOrderingComposer,
+    $ExpiredMessagesProcessedTableManager,
+    $ExpiredMessagesInsertCompanionBuilder,
+    $ExpiredMessagesUpdateCompanionBuilder> {
+  $ExpiredMessagesProcessedTableManager(super.$state);
+}
+
+class $ExpiredMessagesFilterComposer
+    extends FilterComposer<_$MixinDatabase, ExpiredMessages> {
+  $ExpiredMessagesFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get expireIn => $state.composableBuilder(
+      column: $state.table.expireIn,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get expireAt => $state.composableBuilder(
+      column: $state.table.expireAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $ExpiredMessagesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, ExpiredMessages> {
+  $ExpiredMessagesOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get expireIn => $state.composableBuilder(
+      column: $state.table.expireIn,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get expireAt => $state.composableBuilder(
+      column: $state.table.expireAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $AddressesTableInsertCompanionBuilder = AddressesCompanion Function({
+  required String addressId,
+  required String type,
+  required String assetId,
+  required String destination,
+  required String label,
+  required DateTime updatedAt,
+  required String reserve,
+  required String fee,
+  Value<String?> tag,
+  Value<String?> dust,
+  Value<int> rowid,
+});
+typedef $AddressesTableUpdateCompanionBuilder = AddressesCompanion Function({
+  Value<String> addressId,
+  Value<String> type,
+  Value<String> assetId,
+  Value<String> destination,
+  Value<String> label,
+  Value<DateTime> updatedAt,
+  Value<String> reserve,
+  Value<String> fee,
+  Value<String?> tag,
+  Value<String?> dust,
+  Value<int> rowid,
+});
+
+class $AddressesTableTableManager extends RootTableManager<
+    _$MixinDatabase,
+    AddressesTable,
+    Addresses,
+    $AddressesTableFilterComposer,
+    $AddressesTableOrderingComposer,
+    $AddressesTableProcessedTableManager,
+    $AddressesTableInsertCompanionBuilder,
+    $AddressesTableUpdateCompanionBuilder> {
+  $AddressesTableTableManager(_$MixinDatabase db, AddressesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $AddressesTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $AddressesTableOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $AddressesTableProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> addressId = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<String> assetId = const Value.absent(),
+            Value<String> destination = const Value.absent(),
+            Value<String> label = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<String> reserve = const Value.absent(),
+            Value<String> fee = const Value.absent(),
+            Value<String?> tag = const Value.absent(),
+            Value<String?> dust = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AddressesCompanion(
+            addressId: addressId,
+            type: type,
+            assetId: assetId,
+            destination: destination,
+            label: label,
+            updatedAt: updatedAt,
+            reserve: reserve,
+            fee: fee,
+            tag: tag,
+            dust: dust,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String addressId,
+            required String type,
+            required String assetId,
+            required String destination,
+            required String label,
+            required DateTime updatedAt,
+            required String reserve,
+            required String fee,
+            Value<String?> tag = const Value.absent(),
+            Value<String?> dust = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AddressesCompanion.insert(
+            addressId: addressId,
+            type: type,
+            assetId: assetId,
+            destination: destination,
+            label: label,
+            updatedAt: updatedAt,
+            reserve: reserve,
+            fee: fee,
+            tag: tag,
+            dust: dust,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $AddressesTableProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    AddressesTable,
+    Addresses,
+    $AddressesTableFilterComposer,
+    $AddressesTableOrderingComposer,
+    $AddressesTableProcessedTableManager,
+    $AddressesTableInsertCompanionBuilder,
+    $AddressesTableUpdateCompanionBuilder> {
+  $AddressesTableProcessedTableManager(super.$state);
+}
+
+class $AddressesTableFilterComposer
+    extends FilterComposer<_$MixinDatabase, AddressesTable> {
+  $AddressesTableFilterComposer(super.$state);
+  ColumnFilters<String> get addressId => $state.composableBuilder(
+      column: $state.table.addressId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get type => $state.composableBuilder(
+      column: $state.table.type,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get destination => $state.composableBuilder(
+      column: $state.table.destination,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get label => $state.composableBuilder(
+      column: $state.table.label,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get updatedAt =>
+      $state.composableBuilder(
+          column: $state.table.updatedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get reserve => $state.composableBuilder(
+      column: $state.table.reserve,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get fee => $state.composableBuilder(
+      column: $state.table.fee,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get tag => $state.composableBuilder(
+      column: $state.table.tag,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get dust => $state.composableBuilder(
+      column: $state.table.dust,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $AddressesTableOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, AddressesTable> {
+  $AddressesTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get addressId => $state.composableBuilder(
+      column: $state.table.addressId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get type => $state.composableBuilder(
+      column: $state.table.type,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get assetId => $state.composableBuilder(
+      column: $state.table.assetId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get destination => $state.composableBuilder(
+      column: $state.table.destination,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get label => $state.composableBuilder(
+      column: $state.table.label,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get updatedAt => $state.composableBuilder(
+      column: $state.table.updatedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get reserve => $state.composableBuilder(
+      column: $state.table.reserve,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get fee => $state.composableBuilder(
+      column: $state.table.fee,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get tag => $state.composableBuilder(
+      column: $state.table.tag,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get dust => $state.composableBuilder(
+      column: $state.table.dust,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $AppsInsertCompanionBuilder = AppsCompanion Function({
+  required String appId,
+  required String appNumber,
+  required String homeUri,
+  required String redirectUri,
+  required String name,
+  required String iconUrl,
+  Value<String?> category,
+  required String description,
+  required String appSecret,
+  Value<String?> capabilities,
+  required String creatorId,
+  Value<String?> resourcePatterns,
+  Value<DateTime?> updatedAt,
+  Value<int> rowid,
+});
+typedef $AppsUpdateCompanionBuilder = AppsCompanion Function({
+  Value<String> appId,
+  Value<String> appNumber,
+  Value<String> homeUri,
+  Value<String> redirectUri,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String?> category,
+  Value<String> description,
+  Value<String> appSecret,
+  Value<String?> capabilities,
+  Value<String> creatorId,
+  Value<String?> resourcePatterns,
+  Value<DateTime?> updatedAt,
+  Value<int> rowid,
+});
+
+class $AppsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Apps,
+    App,
+    $AppsFilterComposer,
+    $AppsOrderingComposer,
+    $AppsProcessedTableManager,
+    $AppsInsertCompanionBuilder,
+    $AppsUpdateCompanionBuilder> {
+  $AppsTableManager(_$MixinDatabase db, Apps table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $AppsFilterComposer(ComposerState(db, table)),
+          orderingComposer: $AppsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $AppsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> appId = const Value.absent(),
+            Value<String> appNumber = const Value.absent(),
+            Value<String> homeUri = const Value.absent(),
+            Value<String> redirectUri = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<String?> category = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<String> appSecret = const Value.absent(),
+            Value<String?> capabilities = const Value.absent(),
+            Value<String> creatorId = const Value.absent(),
+            Value<String?> resourcePatterns = const Value.absent(),
+            Value<DateTime?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AppsCompanion(
+            appId: appId,
+            appNumber: appNumber,
+            homeUri: homeUri,
+            redirectUri: redirectUri,
+            name: name,
+            iconUrl: iconUrl,
+            category: category,
+            description: description,
+            appSecret: appSecret,
+            capabilities: capabilities,
+            creatorId: creatorId,
+            resourcePatterns: resourcePatterns,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String appId,
+            required String appNumber,
+            required String homeUri,
+            required String redirectUri,
+            required String name,
+            required String iconUrl,
+            Value<String?> category = const Value.absent(),
+            required String description,
+            required String appSecret,
+            Value<String?> capabilities = const Value.absent(),
+            required String creatorId,
+            Value<String?> resourcePatterns = const Value.absent(),
+            Value<DateTime?> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AppsCompanion.insert(
+            appId: appId,
+            appNumber: appNumber,
+            homeUri: homeUri,
+            redirectUri: redirectUri,
+            name: name,
+            iconUrl: iconUrl,
+            category: category,
+            description: description,
+            appSecret: appSecret,
+            capabilities: capabilities,
+            creatorId: creatorId,
+            resourcePatterns: resourcePatterns,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $AppsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Apps,
+    App,
+    $AppsFilterComposer,
+    $AppsOrderingComposer,
+    $AppsProcessedTableManager,
+    $AppsInsertCompanionBuilder,
+    $AppsUpdateCompanionBuilder> {
+  $AppsProcessedTableManager(super.$state);
+}
+
+class $AppsFilterComposer extends FilterComposer<_$MixinDatabase, Apps> {
+  $AppsFilterComposer(super.$state);
+  ColumnFilters<String> get appId => $state.composableBuilder(
+      column: $state.table.appId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get appNumber => $state.composableBuilder(
+      column: $state.table.appNumber,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get homeUri => $state.composableBuilder(
+      column: $state.table.homeUri,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get redirectUri => $state.composableBuilder(
+      column: $state.table.redirectUri,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get description => $state.composableBuilder(
+      column: $state.table.description,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get appSecret => $state.composableBuilder(
+      column: $state.table.appSecret,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get capabilities => $state.composableBuilder(
+      column: $state.table.capabilities,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get creatorId => $state.composableBuilder(
+      column: $state.table.creatorId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get resourcePatterns => $state.composableBuilder(
+      column: $state.table.resourcePatterns,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get updatedAt =>
+      $state.composableBuilder(
+          column: $state.table.updatedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $AppsOrderingComposer extends OrderingComposer<_$MixinDatabase, Apps> {
+  $AppsOrderingComposer(super.$state);
+  ColumnOrderings<String> get appId => $state.composableBuilder(
+      column: $state.table.appId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get appNumber => $state.composableBuilder(
+      column: $state.table.appNumber,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get homeUri => $state.composableBuilder(
+      column: $state.table.homeUri,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get redirectUri => $state.composableBuilder(
+      column: $state.table.redirectUri,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get description => $state.composableBuilder(
+      column: $state.table.description,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get appSecret => $state.composableBuilder(
+      column: $state.table.appSecret,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get capabilities => $state.composableBuilder(
+      column: $state.table.capabilities,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get creatorId => $state.composableBuilder(
+      column: $state.table.creatorId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get resourcePatterns => $state.composableBuilder(
+      column: $state.table.resourcePatterns,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get updatedAt => $state.composableBuilder(
+      column: $state.table.updatedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $CircleConversationsInsertCompanionBuilder
+    = CircleConversationsCompanion Function({
+  required String conversationId,
+  required String circleId,
+  Value<String?> userId,
+  required DateTime createdAt,
+  Value<DateTime?> pinTime,
+  Value<int> rowid,
+});
+typedef $CircleConversationsUpdateCompanionBuilder
+    = CircleConversationsCompanion Function({
+  Value<String> conversationId,
+  Value<String> circleId,
+  Value<String?> userId,
+  Value<DateTime> createdAt,
+  Value<DateTime?> pinTime,
+  Value<int> rowid,
+});
+
+class $CircleConversationsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    CircleConversations,
+    CircleConversation,
+    $CircleConversationsFilterComposer,
+    $CircleConversationsOrderingComposer,
+    $CircleConversationsProcessedTableManager,
+    $CircleConversationsInsertCompanionBuilder,
+    $CircleConversationsUpdateCompanionBuilder> {
+  $CircleConversationsTableManager(
+      _$MixinDatabase db, CircleConversations table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $CircleConversationsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $CircleConversationsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $CircleConversationsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> conversationId = const Value.absent(),
+            Value<String> circleId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime?> pinTime = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CircleConversationsCompanion(
+            conversationId: conversationId,
+            circleId: circleId,
+            userId: userId,
+            createdAt: createdAt,
+            pinTime: pinTime,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String conversationId,
+            required String circleId,
+            Value<String?> userId = const Value.absent(),
+            required DateTime createdAt,
+            Value<DateTime?> pinTime = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CircleConversationsCompanion.insert(
+            conversationId: conversationId,
+            circleId: circleId,
+            userId: userId,
+            createdAt: createdAt,
+            pinTime: pinTime,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $CircleConversationsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    CircleConversations,
+    CircleConversation,
+    $CircleConversationsFilterComposer,
+    $CircleConversationsOrderingComposer,
+    $CircleConversationsProcessedTableManager,
+    $CircleConversationsInsertCompanionBuilder,
+    $CircleConversationsUpdateCompanionBuilder> {
+  $CircleConversationsProcessedTableManager(super.$state);
+}
+
+class $CircleConversationsFilterComposer
+    extends FilterComposer<_$MixinDatabase, CircleConversations> {
+  $CircleConversationsFilterComposer(super.$state);
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get circleId => $state.composableBuilder(
+      column: $state.table.circleId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get pinTime =>
+      $state.composableBuilder(
+          column: $state.table.pinTime,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $CircleConversationsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, CircleConversations> {
+  $CircleConversationsOrderingComposer(super.$state);
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get circleId => $state.composableBuilder(
+      column: $state.table.circleId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get pinTime => $state.composableBuilder(
+      column: $state.table.pinTime,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $CirclesInsertCompanionBuilder = CirclesCompanion Function({
+  required String circleId,
+  required String name,
+  required DateTime createdAt,
+  Value<DateTime?> orderedAt,
+  Value<int> rowid,
+});
+typedef $CirclesUpdateCompanionBuilder = CirclesCompanion Function({
+  Value<String> circleId,
+  Value<String> name,
+  Value<DateTime> createdAt,
+  Value<DateTime?> orderedAt,
+  Value<int> rowid,
+});
+
+class $CirclesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Circles,
+    Circle,
+    $CirclesFilterComposer,
+    $CirclesOrderingComposer,
+    $CirclesProcessedTableManager,
+    $CirclesInsertCompanionBuilder,
+    $CirclesUpdateCompanionBuilder> {
+  $CirclesTableManager(_$MixinDatabase db, Circles table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $CirclesFilterComposer(ComposerState(db, table)),
+          orderingComposer: $CirclesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $CirclesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> circleId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime?> orderedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CirclesCompanion(
+            circleId: circleId,
+            name: name,
+            createdAt: createdAt,
+            orderedAt: orderedAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String circleId,
+            required String name,
+            required DateTime createdAt,
+            Value<DateTime?> orderedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CirclesCompanion.insert(
+            circleId: circleId,
+            name: name,
+            createdAt: createdAt,
+            orderedAt: orderedAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $CirclesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Circles,
+    Circle,
+    $CirclesFilterComposer,
+    $CirclesOrderingComposer,
+    $CirclesProcessedTableManager,
+    $CirclesInsertCompanionBuilder,
+    $CirclesUpdateCompanionBuilder> {
+  $CirclesProcessedTableManager(super.$state);
+}
+
+class $CirclesFilterComposer extends FilterComposer<_$MixinDatabase, Circles> {
+  $CirclesFilterComposer(super.$state);
+  ColumnFilters<String> get circleId => $state.composableBuilder(
+      column: $state.table.circleId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get orderedAt =>
+      $state.composableBuilder(
+          column: $state.table.orderedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $CirclesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Circles> {
+  $CirclesOrderingComposer(super.$state);
+  ColumnOrderings<String> get circleId => $state.composableBuilder(
+      column: $state.table.circleId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get orderedAt => $state.composableBuilder(
+      column: $state.table.orderedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $FloodMessagesInsertCompanionBuilder = FloodMessagesCompanion Function({
+  required String messageId,
+  required String data,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $FloodMessagesUpdateCompanionBuilder = FloodMessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> data,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $FloodMessagesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    FloodMessages,
+    FloodMessage,
+    $FloodMessagesFilterComposer,
+    $FloodMessagesOrderingComposer,
+    $FloodMessagesProcessedTableManager,
+    $FloodMessagesInsertCompanionBuilder,
+    $FloodMessagesUpdateCompanionBuilder> {
+  $FloodMessagesTableManager(_$MixinDatabase db, FloodMessages table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $FloodMessagesFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $FloodMessagesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $FloodMessagesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<String> data = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FloodMessagesCompanion(
+            messageId: messageId,
+            data: data,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            required String data,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FloodMessagesCompanion.insert(
+            messageId: messageId,
+            data: data,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $FloodMessagesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    FloodMessages,
+    FloodMessage,
+    $FloodMessagesFilterComposer,
+    $FloodMessagesOrderingComposer,
+    $FloodMessagesProcessedTableManager,
+    $FloodMessagesInsertCompanionBuilder,
+    $FloodMessagesUpdateCompanionBuilder> {
+  $FloodMessagesProcessedTableManager(super.$state);
+}
+
+class $FloodMessagesFilterComposer
+    extends FilterComposer<_$MixinDatabase, FloodMessages> {
+  $FloodMessagesFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get data => $state.composableBuilder(
+      column: $state.table.data,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $FloodMessagesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, FloodMessages> {
+  $FloodMessagesOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get data => $state.composableBuilder(
+      column: $state.table.data,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $JobsInsertCompanionBuilder = JobsCompanion Function({
+  required String jobId,
+  required String action,
+  required DateTime createdAt,
+  Value<int?> orderId,
+  required int priority,
+  Value<String?> userId,
+  Value<String?> blazeMessage,
+  Value<String?> conversationId,
+  Value<String?> resendMessageId,
+  required int runCount,
+  Value<int> rowid,
+});
+typedef $JobsUpdateCompanionBuilder = JobsCompanion Function({
+  Value<String> jobId,
+  Value<String> action,
+  Value<DateTime> createdAt,
+  Value<int?> orderId,
+  Value<int> priority,
+  Value<String?> userId,
+  Value<String?> blazeMessage,
+  Value<String?> conversationId,
+  Value<String?> resendMessageId,
+  Value<int> runCount,
+  Value<int> rowid,
+});
+
+class $JobsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Jobs,
+    Job,
+    $JobsFilterComposer,
+    $JobsOrderingComposer,
+    $JobsProcessedTableManager,
+    $JobsInsertCompanionBuilder,
+    $JobsUpdateCompanionBuilder> {
+  $JobsTableManager(_$MixinDatabase db, Jobs table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $JobsFilterComposer(ComposerState(db, table)),
+          orderingComposer: $JobsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $JobsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> jobId = const Value.absent(),
+            Value<String> action = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int?> orderId = const Value.absent(),
+            Value<int> priority = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> blazeMessage = const Value.absent(),
+            Value<String?> conversationId = const Value.absent(),
+            Value<String?> resendMessageId = const Value.absent(),
+            Value<int> runCount = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              JobsCompanion(
+            jobId: jobId,
+            action: action,
+            createdAt: createdAt,
+            orderId: orderId,
+            priority: priority,
+            userId: userId,
+            blazeMessage: blazeMessage,
+            conversationId: conversationId,
+            resendMessageId: resendMessageId,
+            runCount: runCount,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String jobId,
+            required String action,
+            required DateTime createdAt,
+            Value<int?> orderId = const Value.absent(),
+            required int priority,
+            Value<String?> userId = const Value.absent(),
+            Value<String?> blazeMessage = const Value.absent(),
+            Value<String?> conversationId = const Value.absent(),
+            Value<String?> resendMessageId = const Value.absent(),
+            required int runCount,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              JobsCompanion.insert(
+            jobId: jobId,
+            action: action,
+            createdAt: createdAt,
+            orderId: orderId,
+            priority: priority,
+            userId: userId,
+            blazeMessage: blazeMessage,
+            conversationId: conversationId,
+            resendMessageId: resendMessageId,
+            runCount: runCount,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $JobsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Jobs,
+    Job,
+    $JobsFilterComposer,
+    $JobsOrderingComposer,
+    $JobsProcessedTableManager,
+    $JobsInsertCompanionBuilder,
+    $JobsUpdateCompanionBuilder> {
+  $JobsProcessedTableManager(super.$state);
+}
+
+class $JobsFilterComposer extends FilterComposer<_$MixinDatabase, Jobs> {
+  $JobsFilterComposer(super.$state);
+  ColumnFilters<String> get jobId => $state.composableBuilder(
+      column: $state.table.jobId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get action => $state.composableBuilder(
+      column: $state.table.action,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get orderId => $state.composableBuilder(
+      column: $state.table.orderId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get priority => $state.composableBuilder(
+      column: $state.table.priority,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get blazeMessage => $state.composableBuilder(
+      column: $state.table.blazeMessage,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get resendMessageId => $state.composableBuilder(
+      column: $state.table.resendMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get runCount => $state.composableBuilder(
+      column: $state.table.runCount,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $JobsOrderingComposer extends OrderingComposer<_$MixinDatabase, Jobs> {
+  $JobsOrderingComposer(super.$state);
+  ColumnOrderings<String> get jobId => $state.composableBuilder(
+      column: $state.table.jobId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get action => $state.composableBuilder(
+      column: $state.table.action,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get orderId => $state.composableBuilder(
+      column: $state.table.orderId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get priority => $state.composableBuilder(
+      column: $state.table.priority,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get blazeMessage => $state.composableBuilder(
+      column: $state.table.blazeMessage,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get resendMessageId => $state.composableBuilder(
+      column: $state.table.resendMessageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get runCount => $state.composableBuilder(
+      column: $state.table.runCount,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $MessagesHistoryInsertCompanionBuilder = MessagesHistoryCompanion
+    Function({
+  required String messageId,
+  Value<int> rowid,
+});
+typedef $MessagesHistoryUpdateCompanionBuilder = MessagesHistoryCompanion
+    Function({
+  Value<String> messageId,
+  Value<int> rowid,
+});
+
+class $MessagesHistoryTableManager extends RootTableManager<
+    _$MixinDatabase,
+    MessagesHistory,
+    MessagesHistoryData,
+    $MessagesHistoryFilterComposer,
+    $MessagesHistoryOrderingComposer,
+    $MessagesHistoryProcessedTableManager,
+    $MessagesHistoryInsertCompanionBuilder,
+    $MessagesHistoryUpdateCompanionBuilder> {
+  $MessagesHistoryTableManager(_$MixinDatabase db, MessagesHistory table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $MessagesHistoryFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $MessagesHistoryOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $MessagesHistoryProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesHistoryCompanion(
+            messageId: messageId,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesHistoryCompanion.insert(
+            messageId: messageId,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $MessagesHistoryProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    MessagesHistory,
+    MessagesHistoryData,
+    $MessagesHistoryFilterComposer,
+    $MessagesHistoryOrderingComposer,
+    $MessagesHistoryProcessedTableManager,
+    $MessagesHistoryInsertCompanionBuilder,
+    $MessagesHistoryUpdateCompanionBuilder> {
+  $MessagesHistoryProcessedTableManager(super.$state);
+}
+
+class $MessagesHistoryFilterComposer
+    extends FilterComposer<_$MixinDatabase, MessagesHistory> {
+  $MessagesHistoryFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $MessagesHistoryOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, MessagesHistory> {
+  $MessagesHistoryOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $OffsetsInsertCompanionBuilder = OffsetsCompanion Function({
+  required String key,
+  required String timestamp,
+  Value<int> rowid,
+});
+typedef $OffsetsUpdateCompanionBuilder = OffsetsCompanion Function({
+  Value<String> key,
+  Value<String> timestamp,
+  Value<int> rowid,
+});
+
+class $OffsetsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Offsets,
+    Offset,
+    $OffsetsFilterComposer,
+    $OffsetsOrderingComposer,
+    $OffsetsProcessedTableManager,
+    $OffsetsInsertCompanionBuilder,
+    $OffsetsUpdateCompanionBuilder> {
+  $OffsetsTableManager(_$MixinDatabase db, Offsets table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $OffsetsFilterComposer(ComposerState(db, table)),
+          orderingComposer: $OffsetsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $OffsetsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> key = const Value.absent(),
+            Value<String> timestamp = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              OffsetsCompanion(
+            key: key,
+            timestamp: timestamp,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String key,
+            required String timestamp,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              OffsetsCompanion.insert(
+            key: key,
+            timestamp: timestamp,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $OffsetsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Offsets,
+    Offset,
+    $OffsetsFilterComposer,
+    $OffsetsOrderingComposer,
+    $OffsetsProcessedTableManager,
+    $OffsetsInsertCompanionBuilder,
+    $OffsetsUpdateCompanionBuilder> {
+  $OffsetsProcessedTableManager(super.$state);
+}
+
+class $OffsetsFilterComposer extends FilterComposer<_$MixinDatabase, Offsets> {
+  $OffsetsFilterComposer(super.$state);
+  ColumnFilters<String> get key => $state.composableBuilder(
+      column: $state.table.key,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get timestamp => $state.composableBuilder(
+      column: $state.table.timestamp,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $OffsetsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Offsets> {
+  $OffsetsOrderingComposer(super.$state);
+  ColumnOrderings<String> get key => $state.composableBuilder(
+      column: $state.table.key,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get timestamp => $state.composableBuilder(
+      column: $state.table.timestamp,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $ParticipantSessionInsertCompanionBuilder = ParticipantSessionCompanion
+    Function({
+  required String conversationId,
+  required String userId,
+  required String sessionId,
+  Value<int?> sentToServer,
+  Value<DateTime?> createdAt,
+  Value<String?> publicKey,
+  Value<int> rowid,
+});
+typedef $ParticipantSessionUpdateCompanionBuilder = ParticipantSessionCompanion
+    Function({
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<String> sessionId,
+  Value<int?> sentToServer,
+  Value<DateTime?> createdAt,
+  Value<String?> publicKey,
+  Value<int> rowid,
+});
+
+class $ParticipantSessionTableManager extends RootTableManager<
+    _$MixinDatabase,
+    ParticipantSession,
+    ParticipantSessionData,
+    $ParticipantSessionFilterComposer,
+    $ParticipantSessionOrderingComposer,
+    $ParticipantSessionProcessedTableManager,
+    $ParticipantSessionInsertCompanionBuilder,
+    $ParticipantSessionUpdateCompanionBuilder> {
+  $ParticipantSessionTableManager(_$MixinDatabase db, ParticipantSession table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $ParticipantSessionFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $ParticipantSessionOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $ParticipantSessionProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> conversationId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> sessionId = const Value.absent(),
+            Value<int?> sentToServer = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+            Value<String?> publicKey = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ParticipantSessionCompanion(
+            conversationId: conversationId,
+            userId: userId,
+            sessionId: sessionId,
+            sentToServer: sentToServer,
+            createdAt: createdAt,
+            publicKey: publicKey,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String conversationId,
+            required String userId,
+            required String sessionId,
+            Value<int?> sentToServer = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+            Value<String?> publicKey = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ParticipantSessionCompanion.insert(
+            conversationId: conversationId,
+            userId: userId,
+            sessionId: sessionId,
+            sentToServer: sentToServer,
+            createdAt: createdAt,
+            publicKey: publicKey,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $ParticipantSessionProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    ParticipantSession,
+    ParticipantSessionData,
+    $ParticipantSessionFilterComposer,
+    $ParticipantSessionOrderingComposer,
+    $ParticipantSessionProcessedTableManager,
+    $ParticipantSessionInsertCompanionBuilder,
+    $ParticipantSessionUpdateCompanionBuilder> {
+  $ParticipantSessionProcessedTableManager(super.$state);
+}
+
+class $ParticipantSessionFilterComposer
+    extends FilterComposer<_$MixinDatabase, ParticipantSession> {
+  $ParticipantSessionFilterComposer(super.$state);
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sessionId => $state.composableBuilder(
+      column: $state.table.sessionId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get sentToServer => $state.composableBuilder(
+      column: $state.table.sentToServer,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get publicKey => $state.composableBuilder(
+      column: $state.table.publicKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $ParticipantSessionOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, ParticipantSession> {
+  $ParticipantSessionOrderingComposer(super.$state);
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sessionId => $state.composableBuilder(
+      column: $state.table.sessionId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get sentToServer => $state.composableBuilder(
+      column: $state.table.sentToServer,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get publicKey => $state.composableBuilder(
+      column: $state.table.publicKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $ParticipantsInsertCompanionBuilder = ParticipantsCompanion Function({
+  required String conversationId,
+  required String userId,
+  Value<ParticipantRole?> role,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $ParticipantsUpdateCompanionBuilder = ParticipantsCompanion Function({
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<ParticipantRole?> role,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $ParticipantsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Participants,
+    Participant,
+    $ParticipantsFilterComposer,
+    $ParticipantsOrderingComposer,
+    $ParticipantsProcessedTableManager,
+    $ParticipantsInsertCompanionBuilder,
+    $ParticipantsUpdateCompanionBuilder> {
+  $ParticipantsTableManager(_$MixinDatabase db, Participants table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $ParticipantsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $ParticipantsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $ParticipantsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> conversationId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<ParticipantRole?> role = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ParticipantsCompanion(
+            conversationId: conversationId,
+            userId: userId,
+            role: role,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String conversationId,
+            required String userId,
+            Value<ParticipantRole?> role = const Value.absent(),
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ParticipantsCompanion.insert(
+            conversationId: conversationId,
+            userId: userId,
+            role: role,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $ParticipantsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Participants,
+    Participant,
+    $ParticipantsFilterComposer,
+    $ParticipantsOrderingComposer,
+    $ParticipantsProcessedTableManager,
+    $ParticipantsInsertCompanionBuilder,
+    $ParticipantsUpdateCompanionBuilder> {
+  $ParticipantsProcessedTableManager(super.$state);
+}
+
+class $ParticipantsFilterComposer
+    extends FilterComposer<_$MixinDatabase, Participants> {
+  $ParticipantsFilterComposer(super.$state);
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<ParticipantRole?, ParticipantRole, String>
+      get role => $state.composableBuilder(
+          column: $state.table.role,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $ParticipantsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Participants> {
+  $ParticipantsOrderingComposer(super.$state);
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get role => $state.composableBuilder(
+      column: $state.table.role,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $ResendSessionMessagesInsertCompanionBuilder
+    = ResendSessionMessagesCompanion Function({
+  required String messageId,
+  required String userId,
+  required String sessionId,
+  required int status,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $ResendSessionMessagesUpdateCompanionBuilder
+    = ResendSessionMessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> userId,
+  Value<String> sessionId,
+  Value<int> status,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $ResendSessionMessagesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    ResendSessionMessages,
+    ResendSessionMessage,
+    $ResendSessionMessagesFilterComposer,
+    $ResendSessionMessagesOrderingComposer,
+    $ResendSessionMessagesProcessedTableManager,
+    $ResendSessionMessagesInsertCompanionBuilder,
+    $ResendSessionMessagesUpdateCompanionBuilder> {
+  $ResendSessionMessagesTableManager(
+      _$MixinDatabase db, ResendSessionMessages table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $ResendSessionMessagesFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $ResendSessionMessagesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $ResendSessionMessagesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> messageId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> sessionId = const Value.absent(),
+            Value<int> status = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ResendSessionMessagesCompanion(
+            messageId: messageId,
+            userId: userId,
+            sessionId: sessionId,
+            status: status,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String messageId,
+            required String userId,
+            required String sessionId,
+            required int status,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ResendSessionMessagesCompanion.insert(
+            messageId: messageId,
+            userId: userId,
+            sessionId: sessionId,
+            status: status,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $ResendSessionMessagesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    ResendSessionMessages,
+    ResendSessionMessage,
+    $ResendSessionMessagesFilterComposer,
+    $ResendSessionMessagesOrderingComposer,
+    $ResendSessionMessagesProcessedTableManager,
+    $ResendSessionMessagesInsertCompanionBuilder,
+    $ResendSessionMessagesUpdateCompanionBuilder> {
+  $ResendSessionMessagesProcessedTableManager(super.$state);
+}
+
+class $ResendSessionMessagesFilterComposer
+    extends FilterComposer<_$MixinDatabase, ResendSessionMessages> {
+  $ResendSessionMessagesFilterComposer(super.$state);
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sessionId => $state.composableBuilder(
+      column: $state.table.sessionId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get status => $state.composableBuilder(
+      column: $state.table.status,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $ResendSessionMessagesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, ResendSessionMessages> {
+  $ResendSessionMessagesOrderingComposer(super.$state);
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sessionId => $state.composableBuilder(
+      column: $state.table.sessionId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get status => $state.composableBuilder(
+      column: $state.table.status,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $SentSessionSenderKeysInsertCompanionBuilder
+    = SentSessionSenderKeysCompanion Function({
+  required String conversationId,
+  required String userId,
+  required String sessionId,
+  required int sentToServer,
+  Value<int?> senderKeyId,
+  Value<DateTime?> createdAt,
+  Value<int> rowid,
+});
+typedef $SentSessionSenderKeysUpdateCompanionBuilder
+    = SentSessionSenderKeysCompanion Function({
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<String> sessionId,
+  Value<int> sentToServer,
+  Value<int?> senderKeyId,
+  Value<DateTime?> createdAt,
+  Value<int> rowid,
+});
+
+class $SentSessionSenderKeysTableManager extends RootTableManager<
+    _$MixinDatabase,
+    SentSessionSenderKeys,
+    SentSessionSenderKey,
+    $SentSessionSenderKeysFilterComposer,
+    $SentSessionSenderKeysOrderingComposer,
+    $SentSessionSenderKeysProcessedTableManager,
+    $SentSessionSenderKeysInsertCompanionBuilder,
+    $SentSessionSenderKeysUpdateCompanionBuilder> {
+  $SentSessionSenderKeysTableManager(
+      _$MixinDatabase db, SentSessionSenderKeys table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $SentSessionSenderKeysFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $SentSessionSenderKeysOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $SentSessionSenderKeysProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> conversationId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> sessionId = const Value.absent(),
+            Value<int> sentToServer = const Value.absent(),
+            Value<int?> senderKeyId = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SentSessionSenderKeysCompanion(
+            conversationId: conversationId,
+            userId: userId,
+            sessionId: sessionId,
+            sentToServer: sentToServer,
+            senderKeyId: senderKeyId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String conversationId,
+            required String userId,
+            required String sessionId,
+            required int sentToServer,
+            Value<int?> senderKeyId = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SentSessionSenderKeysCompanion.insert(
+            conversationId: conversationId,
+            userId: userId,
+            sessionId: sessionId,
+            sentToServer: sentToServer,
+            senderKeyId: senderKeyId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $SentSessionSenderKeysProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    SentSessionSenderKeys,
+    SentSessionSenderKey,
+    $SentSessionSenderKeysFilterComposer,
+    $SentSessionSenderKeysOrderingComposer,
+    $SentSessionSenderKeysProcessedTableManager,
+    $SentSessionSenderKeysInsertCompanionBuilder,
+    $SentSessionSenderKeysUpdateCompanionBuilder> {
+  $SentSessionSenderKeysProcessedTableManager(super.$state);
+}
+
+class $SentSessionSenderKeysFilterComposer
+    extends FilterComposer<_$MixinDatabase, SentSessionSenderKeys> {
+  $SentSessionSenderKeysFilterComposer(super.$state);
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sessionId => $state.composableBuilder(
+      column: $state.table.sessionId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get sentToServer => $state.composableBuilder(
+      column: $state.table.sentToServer,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get senderKeyId => $state.composableBuilder(
+      column: $state.table.senderKeyId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $SentSessionSenderKeysOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, SentSessionSenderKeys> {
+  $SentSessionSenderKeysOrderingComposer(super.$state);
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sessionId => $state.composableBuilder(
+      column: $state.table.sessionId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get sentToServer => $state.composableBuilder(
+      column: $state.table.sentToServer,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get senderKeyId => $state.composableBuilder(
+      column: $state.table.senderKeyId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $StickerAlbumsInsertCompanionBuilder = StickerAlbumsCompanion Function({
+  required String albumId,
+  required String name,
+  required String iconUrl,
+  required DateTime createdAt,
+  required DateTime updateAt,
+  Value<int> orderedAt,
+  required String userId,
+  required String category,
+  required String description,
+  Value<String?> banner,
+  Value<bool?> added,
+  Value<bool> isVerified,
+  Value<int> rowid,
+});
+typedef $StickerAlbumsUpdateCompanionBuilder = StickerAlbumsCompanion Function({
+  Value<String> albumId,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<DateTime> createdAt,
+  Value<DateTime> updateAt,
+  Value<int> orderedAt,
+  Value<String> userId,
+  Value<String> category,
+  Value<String> description,
+  Value<String?> banner,
+  Value<bool?> added,
+  Value<bool> isVerified,
+  Value<int> rowid,
+});
+
+class $StickerAlbumsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    StickerAlbums,
+    StickerAlbum,
+    $StickerAlbumsFilterComposer,
+    $StickerAlbumsOrderingComposer,
+    $StickerAlbumsProcessedTableManager,
+    $StickerAlbumsInsertCompanionBuilder,
+    $StickerAlbumsUpdateCompanionBuilder> {
+  $StickerAlbumsTableManager(_$MixinDatabase db, StickerAlbums table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $StickerAlbumsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $StickerAlbumsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $StickerAlbumsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> albumId = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updateAt = const Value.absent(),
+            Value<int> orderedAt = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> category = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<String?> banner = const Value.absent(),
+            Value<bool?> added = const Value.absent(),
+            Value<bool> isVerified = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StickerAlbumsCompanion(
+            albumId: albumId,
+            name: name,
+            iconUrl: iconUrl,
+            createdAt: createdAt,
+            updateAt: updateAt,
+            orderedAt: orderedAt,
+            userId: userId,
+            category: category,
+            description: description,
+            banner: banner,
+            added: added,
+            isVerified: isVerified,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String albumId,
+            required String name,
+            required String iconUrl,
+            required DateTime createdAt,
+            required DateTime updateAt,
+            Value<int> orderedAt = const Value.absent(),
+            required String userId,
+            required String category,
+            required String description,
+            Value<String?> banner = const Value.absent(),
+            Value<bool?> added = const Value.absent(),
+            Value<bool> isVerified = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StickerAlbumsCompanion.insert(
+            albumId: albumId,
+            name: name,
+            iconUrl: iconUrl,
+            createdAt: createdAt,
+            updateAt: updateAt,
+            orderedAt: orderedAt,
+            userId: userId,
+            category: category,
+            description: description,
+            banner: banner,
+            added: added,
+            isVerified: isVerified,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $StickerAlbumsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    StickerAlbums,
+    StickerAlbum,
+    $StickerAlbumsFilterComposer,
+    $StickerAlbumsOrderingComposer,
+    $StickerAlbumsProcessedTableManager,
+    $StickerAlbumsInsertCompanionBuilder,
+    $StickerAlbumsUpdateCompanionBuilder> {
+  $StickerAlbumsProcessedTableManager(super.$state);
+}
+
+class $StickerAlbumsFilterComposer
+    extends FilterComposer<_$MixinDatabase, StickerAlbums> {
+  $StickerAlbumsFilterComposer(super.$state);
+  ColumnFilters<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get updateAt =>
+      $state.composableBuilder(
+          column: $state.table.updateAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get orderedAt => $state.composableBuilder(
+      column: $state.table.orderedAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get description => $state.composableBuilder(
+      column: $state.table.description,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get banner => $state.composableBuilder(
+      column: $state.table.banner,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get added => $state.composableBuilder(
+      column: $state.table.added,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get isVerified => $state.composableBuilder(
+      column: $state.table.isVerified,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $StickerAlbumsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, StickerAlbums> {
+  $StickerAlbumsOrderingComposer(super.$state);
+  ColumnOrderings<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get updateAt => $state.composableBuilder(
+      column: $state.table.updateAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get orderedAt => $state.composableBuilder(
+      column: $state.table.orderedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get description => $state.composableBuilder(
+      column: $state.table.description,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get banner => $state.composableBuilder(
+      column: $state.table.banner,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get added => $state.composableBuilder(
+      column: $state.table.added,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<bool> get isVerified => $state.composableBuilder(
+      column: $state.table.isVerified,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $StickerRelationshipsInsertCompanionBuilder
+    = StickerRelationshipsCompanion Function({
+  required String albumId,
+  required String stickerId,
+  Value<int> rowid,
+});
+typedef $StickerRelationshipsUpdateCompanionBuilder
+    = StickerRelationshipsCompanion Function({
+  Value<String> albumId,
+  Value<String> stickerId,
+  Value<int> rowid,
+});
+
+class $StickerRelationshipsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    StickerRelationships,
+    StickerRelationship,
+    $StickerRelationshipsFilterComposer,
+    $StickerRelationshipsOrderingComposer,
+    $StickerRelationshipsProcessedTableManager,
+    $StickerRelationshipsInsertCompanionBuilder,
+    $StickerRelationshipsUpdateCompanionBuilder> {
+  $StickerRelationshipsTableManager(
+      _$MixinDatabase db, StickerRelationships table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $StickerRelationshipsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $StickerRelationshipsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $StickerRelationshipsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> albumId = const Value.absent(),
+            Value<String> stickerId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StickerRelationshipsCompanion(
+            albumId: albumId,
+            stickerId: stickerId,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String albumId,
+            required String stickerId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              StickerRelationshipsCompanion.insert(
+            albumId: albumId,
+            stickerId: stickerId,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $StickerRelationshipsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    StickerRelationships,
+    StickerRelationship,
+    $StickerRelationshipsFilterComposer,
+    $StickerRelationshipsOrderingComposer,
+    $StickerRelationshipsProcessedTableManager,
+    $StickerRelationshipsInsertCompanionBuilder,
+    $StickerRelationshipsUpdateCompanionBuilder> {
+  $StickerRelationshipsProcessedTableManager(super.$state);
+}
+
+class $StickerRelationshipsFilterComposer
+    extends FilterComposer<_$MixinDatabase, StickerRelationships> {
+  $StickerRelationshipsFilterComposer(super.$state);
+  ColumnFilters<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $StickerRelationshipsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, StickerRelationships> {
+  $StickerRelationshipsOrderingComposer(super.$state);
+  ColumnOrderings<String> get albumId => $state.composableBuilder(
+      column: $state.table.albumId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $TranscriptMessagesInsertCompanionBuilder = TranscriptMessagesCompanion
+    Function({
+  required String transcriptId,
+  required String messageId,
+  Value<String?> userId,
+  Value<String?> userFullName,
+  required String category,
+  required DateTime createdAt,
+  Value<String?> content,
+  Value<String?> mediaUrl,
+  Value<String?> mediaName,
+  Value<int?> mediaSize,
+  Value<int?> mediaWidth,
+  Value<int?> mediaHeight,
+  Value<String?> mediaMimeType,
+  Value<String?> mediaDuration,
+  Value<MediaStatus?> mediaStatus,
+  Value<String?> mediaWaveform,
+  Value<String?> thumbImage,
+  Value<String?> thumbUrl,
+  Value<String?> mediaKey,
+  Value<String?> mediaDigest,
+  Value<DateTime?> mediaCreatedAt,
+  Value<String?> stickerId,
+  Value<String?> sharedUserId,
+  Value<String?> mentions,
+  Value<String?> quoteId,
+  Value<String?> quoteContent,
+  Value<String?> caption,
+  Value<int> rowid,
+});
+typedef $TranscriptMessagesUpdateCompanionBuilder = TranscriptMessagesCompanion
+    Function({
+  Value<String> transcriptId,
+  Value<String> messageId,
+  Value<String?> userId,
+  Value<String?> userFullName,
+  Value<String> category,
+  Value<DateTime> createdAt,
+  Value<String?> content,
+  Value<String?> mediaUrl,
+  Value<String?> mediaName,
+  Value<int?> mediaSize,
+  Value<int?> mediaWidth,
+  Value<int?> mediaHeight,
+  Value<String?> mediaMimeType,
+  Value<String?> mediaDuration,
+  Value<MediaStatus?> mediaStatus,
+  Value<String?> mediaWaveform,
+  Value<String?> thumbImage,
+  Value<String?> thumbUrl,
+  Value<String?> mediaKey,
+  Value<String?> mediaDigest,
+  Value<DateTime?> mediaCreatedAt,
+  Value<String?> stickerId,
+  Value<String?> sharedUserId,
+  Value<String?> mentions,
+  Value<String?> quoteId,
+  Value<String?> quoteContent,
+  Value<String?> caption,
+  Value<int> rowid,
+});
+
+class $TranscriptMessagesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    TranscriptMessages,
+    TranscriptMessage,
+    $TranscriptMessagesFilterComposer,
+    $TranscriptMessagesOrderingComposer,
+    $TranscriptMessagesProcessedTableManager,
+    $TranscriptMessagesInsertCompanionBuilder,
+    $TranscriptMessagesUpdateCompanionBuilder> {
+  $TranscriptMessagesTableManager(_$MixinDatabase db, TranscriptMessages table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $TranscriptMessagesFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $TranscriptMessagesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $TranscriptMessagesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> transcriptId = const Value.absent(),
+            Value<String> messageId = const Value.absent(),
+            Value<String?> userId = const Value.absent(),
+            Value<String?> userFullName = const Value.absent(),
+            Value<String> category = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String?> content = const Value.absent(),
+            Value<String?> mediaUrl = const Value.absent(),
+            Value<String?> mediaName = const Value.absent(),
+            Value<int?> mediaSize = const Value.absent(),
+            Value<int?> mediaWidth = const Value.absent(),
+            Value<int?> mediaHeight = const Value.absent(),
+            Value<String?> mediaMimeType = const Value.absent(),
+            Value<String?> mediaDuration = const Value.absent(),
+            Value<MediaStatus?> mediaStatus = const Value.absent(),
+            Value<String?> mediaWaveform = const Value.absent(),
+            Value<String?> thumbImage = const Value.absent(),
+            Value<String?> thumbUrl = const Value.absent(),
+            Value<String?> mediaKey = const Value.absent(),
+            Value<String?> mediaDigest = const Value.absent(),
+            Value<DateTime?> mediaCreatedAt = const Value.absent(),
+            Value<String?> stickerId = const Value.absent(),
+            Value<String?> sharedUserId = const Value.absent(),
+            Value<String?> mentions = const Value.absent(),
+            Value<String?> quoteId = const Value.absent(),
+            Value<String?> quoteContent = const Value.absent(),
+            Value<String?> caption = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TranscriptMessagesCompanion(
+            transcriptId: transcriptId,
+            messageId: messageId,
+            userId: userId,
+            userFullName: userFullName,
+            category: category,
+            createdAt: createdAt,
+            content: content,
+            mediaUrl: mediaUrl,
+            mediaName: mediaName,
+            mediaSize: mediaSize,
+            mediaWidth: mediaWidth,
+            mediaHeight: mediaHeight,
+            mediaMimeType: mediaMimeType,
+            mediaDuration: mediaDuration,
+            mediaStatus: mediaStatus,
+            mediaWaveform: mediaWaveform,
+            thumbImage: thumbImage,
+            thumbUrl: thumbUrl,
+            mediaKey: mediaKey,
+            mediaDigest: mediaDigest,
+            mediaCreatedAt: mediaCreatedAt,
+            stickerId: stickerId,
+            sharedUserId: sharedUserId,
+            mentions: mentions,
+            quoteId: quoteId,
+            quoteContent: quoteContent,
+            caption: caption,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String transcriptId,
+            required String messageId,
+            Value<String?> userId = const Value.absent(),
+            Value<String?> userFullName = const Value.absent(),
+            required String category,
+            required DateTime createdAt,
+            Value<String?> content = const Value.absent(),
+            Value<String?> mediaUrl = const Value.absent(),
+            Value<String?> mediaName = const Value.absent(),
+            Value<int?> mediaSize = const Value.absent(),
+            Value<int?> mediaWidth = const Value.absent(),
+            Value<int?> mediaHeight = const Value.absent(),
+            Value<String?> mediaMimeType = const Value.absent(),
+            Value<String?> mediaDuration = const Value.absent(),
+            Value<MediaStatus?> mediaStatus = const Value.absent(),
+            Value<String?> mediaWaveform = const Value.absent(),
+            Value<String?> thumbImage = const Value.absent(),
+            Value<String?> thumbUrl = const Value.absent(),
+            Value<String?> mediaKey = const Value.absent(),
+            Value<String?> mediaDigest = const Value.absent(),
+            Value<DateTime?> mediaCreatedAt = const Value.absent(),
+            Value<String?> stickerId = const Value.absent(),
+            Value<String?> sharedUserId = const Value.absent(),
+            Value<String?> mentions = const Value.absent(),
+            Value<String?> quoteId = const Value.absent(),
+            Value<String?> quoteContent = const Value.absent(),
+            Value<String?> caption = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TranscriptMessagesCompanion.insert(
+            transcriptId: transcriptId,
+            messageId: messageId,
+            userId: userId,
+            userFullName: userFullName,
+            category: category,
+            createdAt: createdAt,
+            content: content,
+            mediaUrl: mediaUrl,
+            mediaName: mediaName,
+            mediaSize: mediaSize,
+            mediaWidth: mediaWidth,
+            mediaHeight: mediaHeight,
+            mediaMimeType: mediaMimeType,
+            mediaDuration: mediaDuration,
+            mediaStatus: mediaStatus,
+            mediaWaveform: mediaWaveform,
+            thumbImage: thumbImage,
+            thumbUrl: thumbUrl,
+            mediaKey: mediaKey,
+            mediaDigest: mediaDigest,
+            mediaCreatedAt: mediaCreatedAt,
+            stickerId: stickerId,
+            sharedUserId: sharedUserId,
+            mentions: mentions,
+            quoteId: quoteId,
+            quoteContent: quoteContent,
+            caption: caption,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $TranscriptMessagesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    TranscriptMessages,
+    TranscriptMessage,
+    $TranscriptMessagesFilterComposer,
+    $TranscriptMessagesOrderingComposer,
+    $TranscriptMessagesProcessedTableManager,
+    $TranscriptMessagesInsertCompanionBuilder,
+    $TranscriptMessagesUpdateCompanionBuilder> {
+  $TranscriptMessagesProcessedTableManager(super.$state);
+}
+
+class $TranscriptMessagesFilterComposer
+    extends FilterComposer<_$MixinDatabase, TranscriptMessages> {
+  $TranscriptMessagesFilterComposer(super.$state);
+  ColumnFilters<String> get transcriptId => $state.composableBuilder(
+      column: $state.table.transcriptId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userFullName => $state.composableBuilder(
+      column: $state.table.userFullName,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaUrl => $state.composableBuilder(
+      column: $state.table.mediaUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaName => $state.composableBuilder(
+      column: $state.table.mediaName,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get mediaSize => $state.composableBuilder(
+      column: $state.table.mediaSize,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get mediaWidth => $state.composableBuilder(
+      column: $state.table.mediaWidth,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get mediaHeight => $state.composableBuilder(
+      column: $state.table.mediaHeight,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaMimeType => $state.composableBuilder(
+      column: $state.table.mediaMimeType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaDuration => $state.composableBuilder(
+      column: $state.table.mediaDuration,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<MediaStatus?, MediaStatus, String>
+      get mediaStatus => $state.composableBuilder(
+          column: $state.table.mediaStatus,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaWaveform => $state.composableBuilder(
+      column: $state.table.mediaWaveform,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get thumbImage => $state.composableBuilder(
+      column: $state.table.thumbImage,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get thumbUrl => $state.composableBuilder(
+      column: $state.table.thumbUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaKey => $state.composableBuilder(
+      column: $state.table.mediaKey,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mediaDigest => $state.composableBuilder(
+      column: $state.table.mediaDigest,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get mediaCreatedAt =>
+      $state.composableBuilder(
+          column: $state.table.mediaCreatedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get sharedUserId => $state.composableBuilder(
+      column: $state.table.sharedUserId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get mentions => $state.composableBuilder(
+      column: $state.table.mentions,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get quoteId => $state.composableBuilder(
+      column: $state.table.quoteId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get quoteContent => $state.composableBuilder(
+      column: $state.table.quoteContent,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get caption => $state.composableBuilder(
+      column: $state.table.caption,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $TranscriptMessagesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, TranscriptMessages> {
+  $TranscriptMessagesOrderingComposer(super.$state);
+  ColumnOrderings<String> get transcriptId => $state.composableBuilder(
+      column: $state.table.transcriptId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userFullName => $state.composableBuilder(
+      column: $state.table.userFullName,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaUrl => $state.composableBuilder(
+      column: $state.table.mediaUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaName => $state.composableBuilder(
+      column: $state.table.mediaName,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaSize => $state.composableBuilder(
+      column: $state.table.mediaSize,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaWidth => $state.composableBuilder(
+      column: $state.table.mediaWidth,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaHeight => $state.composableBuilder(
+      column: $state.table.mediaHeight,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaMimeType => $state.composableBuilder(
+      column: $state.table.mediaMimeType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaDuration => $state.composableBuilder(
+      column: $state.table.mediaDuration,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaStatus => $state.composableBuilder(
+      column: $state.table.mediaStatus,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaWaveform => $state.composableBuilder(
+      column: $state.table.mediaWaveform,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get thumbImage => $state.composableBuilder(
+      column: $state.table.thumbImage,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get thumbUrl => $state.composableBuilder(
+      column: $state.table.thumbUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaKey => $state.composableBuilder(
+      column: $state.table.mediaKey,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mediaDigest => $state.composableBuilder(
+      column: $state.table.mediaDigest,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get mediaCreatedAt => $state.composableBuilder(
+      column: $state.table.mediaCreatedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get stickerId => $state.composableBuilder(
+      column: $state.table.stickerId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get sharedUserId => $state.composableBuilder(
+      column: $state.table.sharedUserId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get mentions => $state.composableBuilder(
+      column: $state.table.mentions,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get quoteId => $state.composableBuilder(
+      column: $state.table.quoteId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get quoteContent => $state.composableBuilder(
+      column: $state.table.quoteContent,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get caption => $state.composableBuilder(
+      column: $state.table.caption,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $FiatsInsertCompanionBuilder = FiatsCompanion Function({
+  required String code,
+  required double rate,
+  Value<int> rowid,
+});
+typedef $FiatsUpdateCompanionBuilder = FiatsCompanion Function({
+  Value<String> code,
+  Value<double> rate,
+  Value<int> rowid,
+});
+
+class $FiatsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Fiats,
+    Fiat,
+    $FiatsFilterComposer,
+    $FiatsOrderingComposer,
+    $FiatsProcessedTableManager,
+    $FiatsInsertCompanionBuilder,
+    $FiatsUpdateCompanionBuilder> {
+  $FiatsTableManager(_$MixinDatabase db, Fiats table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $FiatsFilterComposer(ComposerState(db, table)),
+          orderingComposer: $FiatsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $FiatsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> code = const Value.absent(),
+            Value<double> rate = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FiatsCompanion(
+            code: code,
+            rate: rate,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String code,
+            required double rate,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FiatsCompanion.insert(
+            code: code,
+            rate: rate,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $FiatsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Fiats,
+    Fiat,
+    $FiatsFilterComposer,
+    $FiatsOrderingComposer,
+    $FiatsProcessedTableManager,
+    $FiatsInsertCompanionBuilder,
+    $FiatsUpdateCompanionBuilder> {
+  $FiatsProcessedTableManager(super.$state);
+}
+
+class $FiatsFilterComposer extends FilterComposer<_$MixinDatabase, Fiats> {
+  $FiatsFilterComposer(super.$state);
+  ColumnFilters<String> get code => $state.composableBuilder(
+      column: $state.table.code,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get rate => $state.composableBuilder(
+      column: $state.table.rate,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $FiatsOrderingComposer extends OrderingComposer<_$MixinDatabase, Fiats> {
+  $FiatsOrderingComposer(super.$state);
+  ColumnOrderings<String> get code => $state.composableBuilder(
+      column: $state.table.code,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get rate => $state.composableBuilder(
+      column: $state.table.rate,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $FavoriteAppsInsertCompanionBuilder = FavoriteAppsCompanion Function({
+  required String appId,
+  required String userId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $FavoriteAppsUpdateCompanionBuilder = FavoriteAppsCompanion Function({
+  Value<String> appId,
+  Value<String> userId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $FavoriteAppsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    FavoriteApps,
+    FavoriteApp,
+    $FavoriteAppsFilterComposer,
+    $FavoriteAppsOrderingComposer,
+    $FavoriteAppsProcessedTableManager,
+    $FavoriteAppsInsertCompanionBuilder,
+    $FavoriteAppsUpdateCompanionBuilder> {
+  $FavoriteAppsTableManager(_$MixinDatabase db, FavoriteApps table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $FavoriteAppsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $FavoriteAppsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $FavoriteAppsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> appId = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FavoriteAppsCompanion(
+            appId: appId,
+            userId: userId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String appId,
+            required String userId,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              FavoriteAppsCompanion.insert(
+            appId: appId,
+            userId: userId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $FavoriteAppsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    FavoriteApps,
+    FavoriteApp,
+    $FavoriteAppsFilterComposer,
+    $FavoriteAppsOrderingComposer,
+    $FavoriteAppsProcessedTableManager,
+    $FavoriteAppsInsertCompanionBuilder,
+    $FavoriteAppsUpdateCompanionBuilder> {
+  $FavoriteAppsProcessedTableManager(super.$state);
+}
+
+class $FavoriteAppsFilterComposer
+    extends FilterComposer<_$MixinDatabase, FavoriteApps> {
+  $FavoriteAppsFilterComposer(super.$state);
+  ColumnFilters<String> get appId => $state.composableBuilder(
+      column: $state.table.appId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $FavoriteAppsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, FavoriteApps> {
+  $FavoriteAppsOrderingComposer(super.$state);
+  ColumnOrderings<String> get appId => $state.composableBuilder(
+      column: $state.table.appId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $PropertiesInsertCompanionBuilder = PropertiesCompanion Function({
+  required String key,
+  required PropertyGroup group,
+  required String value,
+  Value<int> rowid,
+});
+typedef $PropertiesUpdateCompanionBuilder = PropertiesCompanion Function({
+  Value<String> key,
+  Value<PropertyGroup> group,
+  Value<String> value,
+  Value<int> rowid,
+});
+
+class $PropertiesTableManager extends RootTableManager<
+    _$MixinDatabase,
+    Properties,
+    Property,
+    $PropertiesFilterComposer,
+    $PropertiesOrderingComposer,
+    $PropertiesProcessedTableManager,
+    $PropertiesInsertCompanionBuilder,
+    $PropertiesUpdateCompanionBuilder> {
+  $PropertiesTableManager(_$MixinDatabase db, Properties table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $PropertiesFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $PropertiesOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $PropertiesProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> key = const Value.absent(),
+            Value<PropertyGroup> group = const Value.absent(),
+            Value<String> value = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PropertiesCompanion(
+            key: key,
+            group: group,
+            value: value,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String key,
+            required PropertyGroup group,
+            required String value,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              PropertiesCompanion.insert(
+            key: key,
+            group: group,
+            value: value,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $PropertiesProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    Properties,
+    Property,
+    $PropertiesFilterComposer,
+    $PropertiesOrderingComposer,
+    $PropertiesProcessedTableManager,
+    $PropertiesInsertCompanionBuilder,
+    $PropertiesUpdateCompanionBuilder> {
+  $PropertiesProcessedTableManager(super.$state);
+}
+
+class $PropertiesFilterComposer
+    extends FilterComposer<_$MixinDatabase, Properties> {
+  $PropertiesFilterComposer(super.$state);
+  ColumnFilters<String> get key => $state.composableBuilder(
+      column: $state.table.key,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<PropertyGroup, PropertyGroup, String>
+      get group => $state.composableBuilder(
+          column: $state.table.group,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get value => $state.composableBuilder(
+      column: $state.table.value,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $PropertiesOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, Properties> {
+  $PropertiesOrderingComposer(super.$state);
+  ColumnOrderings<String> get key => $state.composableBuilder(
+      column: $state.table.key,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get group => $state.composableBuilder(
+      column: $state.table.group,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get value => $state.composableBuilder(
+      column: $state.table.value,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $InscriptionCollectionsInsertCompanionBuilder
+    = InscriptionCollectionsCompanion Function({
+  required String collectionHash,
+  required String supply,
+  required String unit,
+  required String symbol,
+  required String name,
+  required String iconUrl,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $InscriptionCollectionsUpdateCompanionBuilder
+    = InscriptionCollectionsCompanion Function({
+  Value<String> collectionHash,
+  Value<String> supply,
+  Value<String> unit,
+  Value<String> symbol,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $InscriptionCollectionsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    InscriptionCollections,
+    InscriptionCollection,
+    $InscriptionCollectionsFilterComposer,
+    $InscriptionCollectionsOrderingComposer,
+    $InscriptionCollectionsProcessedTableManager,
+    $InscriptionCollectionsInsertCompanionBuilder,
+    $InscriptionCollectionsUpdateCompanionBuilder> {
+  $InscriptionCollectionsTableManager(
+      _$MixinDatabase db, InscriptionCollections table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $InscriptionCollectionsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $InscriptionCollectionsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $InscriptionCollectionsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> collectionHash = const Value.absent(),
+            Value<String> supply = const Value.absent(),
+            Value<String> unit = const Value.absent(),
+            Value<String> symbol = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> iconUrl = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InscriptionCollectionsCompanion(
+            collectionHash: collectionHash,
+            supply: supply,
+            unit: unit,
+            symbol: symbol,
+            name: name,
+            iconUrl: iconUrl,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String collectionHash,
+            required String supply,
+            required String unit,
+            required String symbol,
+            required String name,
+            required String iconUrl,
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InscriptionCollectionsCompanion.insert(
+            collectionHash: collectionHash,
+            supply: supply,
+            unit: unit,
+            symbol: symbol,
+            name: name,
+            iconUrl: iconUrl,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $InscriptionCollectionsProcessedTableManager
+    extends ProcessedTableManager<
+        _$MixinDatabase,
+        InscriptionCollections,
+        InscriptionCollection,
+        $InscriptionCollectionsFilterComposer,
+        $InscriptionCollectionsOrderingComposer,
+        $InscriptionCollectionsProcessedTableManager,
+        $InscriptionCollectionsInsertCompanionBuilder,
+        $InscriptionCollectionsUpdateCompanionBuilder> {
+  $InscriptionCollectionsProcessedTableManager(super.$state);
+}
+
+class $InscriptionCollectionsFilterComposer
+    extends FilterComposer<_$MixinDatabase, InscriptionCollections> {
+  $InscriptionCollectionsFilterComposer(super.$state);
+  ColumnFilters<String> get collectionHash => $state.composableBuilder(
+      column: $state.table.collectionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get supply => $state.composableBuilder(
+      column: $state.table.supply,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get unit => $state.composableBuilder(
+      column: $state.table.unit,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get updatedAt =>
+      $state.composableBuilder(
+          column: $state.table.updatedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $InscriptionCollectionsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, InscriptionCollections> {
+  $InscriptionCollectionsOrderingComposer(super.$state);
+  ColumnOrderings<String> get collectionHash => $state.composableBuilder(
+      column: $state.table.collectionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get supply => $state.composableBuilder(
+      column: $state.table.supply,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get unit => $state.composableBuilder(
+      column: $state.table.unit,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get symbol => $state.composableBuilder(
+      column: $state.table.symbol,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get iconUrl => $state.composableBuilder(
+      column: $state.table.iconUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get updatedAt => $state.composableBuilder(
+      column: $state.table.updatedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $InscriptionItemsInsertCompanionBuilder = InscriptionItemsCompanion
+    Function({
+  required String inscriptionHash,
+  required String collectionHash,
+  required int sequence,
+  required String contentType,
+  required String contentUrl,
+  Value<String?> occupiedBy,
+  Value<String?> occupiedAt,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $InscriptionItemsUpdateCompanionBuilder = InscriptionItemsCompanion
+    Function({
+  Value<String> inscriptionHash,
+  Value<String> collectionHash,
+  Value<int> sequence,
+  Value<String> contentType,
+  Value<String> contentUrl,
+  Value<String?> occupiedBy,
+  Value<String?> occupiedAt,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $InscriptionItemsTableManager extends RootTableManager<
+    _$MixinDatabase,
+    InscriptionItems,
+    InscriptionItem,
+    $InscriptionItemsFilterComposer,
+    $InscriptionItemsOrderingComposer,
+    $InscriptionItemsProcessedTableManager,
+    $InscriptionItemsInsertCompanionBuilder,
+    $InscriptionItemsUpdateCompanionBuilder> {
+  $InscriptionItemsTableManager(_$MixinDatabase db, InscriptionItems table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $InscriptionItemsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $InscriptionItemsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $InscriptionItemsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> inscriptionHash = const Value.absent(),
+            Value<String> collectionHash = const Value.absent(),
+            Value<int> sequence = const Value.absent(),
+            Value<String> contentType = const Value.absent(),
+            Value<String> contentUrl = const Value.absent(),
+            Value<String?> occupiedBy = const Value.absent(),
+            Value<String?> occupiedAt = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InscriptionItemsCompanion(
+            inscriptionHash: inscriptionHash,
+            collectionHash: collectionHash,
+            sequence: sequence,
+            contentType: contentType,
+            contentUrl: contentUrl,
+            occupiedBy: occupiedBy,
+            occupiedAt: occupiedAt,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String inscriptionHash,
+            required String collectionHash,
+            required int sequence,
+            required String contentType,
+            required String contentUrl,
+            Value<String?> occupiedBy = const Value.absent(),
+            Value<String?> occupiedAt = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InscriptionItemsCompanion.insert(
+            inscriptionHash: inscriptionHash,
+            collectionHash: collectionHash,
+            sequence: sequence,
+            contentType: contentType,
+            contentUrl: contentUrl,
+            occupiedBy: occupiedBy,
+            occupiedAt: occupiedAt,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $InscriptionItemsProcessedTableManager extends ProcessedTableManager<
+    _$MixinDatabase,
+    InscriptionItems,
+    InscriptionItem,
+    $InscriptionItemsFilterComposer,
+    $InscriptionItemsOrderingComposer,
+    $InscriptionItemsProcessedTableManager,
+    $InscriptionItemsInsertCompanionBuilder,
+    $InscriptionItemsUpdateCompanionBuilder> {
+  $InscriptionItemsProcessedTableManager(super.$state);
+}
+
+class $InscriptionItemsFilterComposer
+    extends FilterComposer<_$MixinDatabase, InscriptionItems> {
+  $InscriptionItemsFilterComposer(super.$state);
+  ColumnFilters<String> get inscriptionHash => $state.composableBuilder(
+      column: $state.table.inscriptionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get collectionHash => $state.composableBuilder(
+      column: $state.table.collectionHash,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get sequence => $state.composableBuilder(
+      column: $state.table.sequence,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get contentType => $state.composableBuilder(
+      column: $state.table.contentType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get contentUrl => $state.composableBuilder(
+      column: $state.table.contentUrl,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get occupiedBy => $state.composableBuilder(
+      column: $state.table.occupiedBy,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get occupiedAt => $state.composableBuilder(
+      column: $state.table.occupiedAt,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get updatedAt =>
+      $state.composableBuilder(
+          column: $state.table.updatedAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $InscriptionItemsOrderingComposer
+    extends OrderingComposer<_$MixinDatabase, InscriptionItems> {
+  $InscriptionItemsOrderingComposer(super.$state);
+  ColumnOrderings<String> get inscriptionHash => $state.composableBuilder(
+      column: $state.table.inscriptionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get collectionHash => $state.composableBuilder(
+      column: $state.table.collectionHash,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get sequence => $state.composableBuilder(
+      column: $state.table.sequence,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get contentType => $state.composableBuilder(
+      column: $state.table.contentType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get contentUrl => $state.composableBuilder(
+      column: $state.table.contentUrl,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get occupiedBy => $state.composableBuilder(
+      column: $state.table.occupiedBy,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get occupiedAt => $state.composableBuilder(
+      column: $state.table.occupiedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get updatedAt => $state.composableBuilder(
+      column: $state.table.updatedAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+class _$MixinDatabaseManager {
+  final _$MixinDatabase _db;
+  _$MixinDatabaseManager(this._db);
+  $ConversationsTableManager get conversations =>
+      $ConversationsTableManager(_db, _db.conversations);
+  $MessagesTableManager get messages =>
+      $MessagesTableManager(_db, _db.messages);
+  $UsersTableManager get users => $UsersTableManager(_db, _db.users);
+  $SnapshotsTableManager get snapshots =>
+      $SnapshotsTableManager(_db, _db.snapshots);
+  $SafeSnapshotsTableManager get safeSnapshots =>
+      $SafeSnapshotsTableManager(_db, _db.safeSnapshots);
+  $AssetsTableManager get assets => $AssetsTableManager(_db, _db.assets);
+  $TokensTableManager get tokens => $TokensTableManager(_db, _db.tokens);
+  $ChainsTableManager get chains => $ChainsTableManager(_db, _db.chains);
+  $StickersTableManager get stickers =>
+      $StickersTableManager(_db, _db.stickers);
+  $HyperlinksTableManager get hyperlinks =>
+      $HyperlinksTableManager(_db, _db.hyperlinks);
+  $MessageMentionsTableManager get messageMentions =>
+      $MessageMentionsTableManager(_db, _db.messageMentions);
+  $PinMessagesTableManager get pinMessages =>
+      $PinMessagesTableManager(_db, _db.pinMessages);
+  $ExpiredMessagesTableManager get expiredMessages =>
+      $ExpiredMessagesTableManager(_db, _db.expiredMessages);
+  $AddressesTableTableManager get addresses =>
+      $AddressesTableTableManager(_db, _db.addresses);
+  $AppsTableManager get apps => $AppsTableManager(_db, _db.apps);
+  $CircleConversationsTableManager get circleConversations =>
+      $CircleConversationsTableManager(_db, _db.circleConversations);
+  $CirclesTableManager get circles => $CirclesTableManager(_db, _db.circles);
+  $FloodMessagesTableManager get floodMessages =>
+      $FloodMessagesTableManager(_db, _db.floodMessages);
+  $JobsTableManager get jobs => $JobsTableManager(_db, _db.jobs);
+  $MessagesHistoryTableManager get messagesHistory =>
+      $MessagesHistoryTableManager(_db, _db.messagesHistory);
+  $OffsetsTableManager get offsets => $OffsetsTableManager(_db, _db.offsets);
+  $ParticipantSessionTableManager get participantSession =>
+      $ParticipantSessionTableManager(_db, _db.participantSession);
+  $ParticipantsTableManager get participants =>
+      $ParticipantsTableManager(_db, _db.participants);
+  $ResendSessionMessagesTableManager get resendSessionMessages =>
+      $ResendSessionMessagesTableManager(_db, _db.resendSessionMessages);
+  $SentSessionSenderKeysTableManager get sentSessionSenderKeys =>
+      $SentSessionSenderKeysTableManager(_db, _db.sentSessionSenderKeys);
+  $StickerAlbumsTableManager get stickerAlbums =>
+      $StickerAlbumsTableManager(_db, _db.stickerAlbums);
+  $StickerRelationshipsTableManager get stickerRelationships =>
+      $StickerRelationshipsTableManager(_db, _db.stickerRelationships);
+  $TranscriptMessagesTableManager get transcriptMessages =>
+      $TranscriptMessagesTableManager(_db, _db.transcriptMessages);
+  $FiatsTableManager get fiats => $FiatsTableManager(_db, _db.fiats);
+  $FavoriteAppsTableManager get favoriteApps =>
+      $FavoriteAppsTableManager(_db, _db.favoriteApps);
+  $PropertiesTableManager get properties =>
+      $PropertiesTableManager(_db, _db.properties);
+  $InscriptionCollectionsTableManager get inscriptionCollections =>
+      $InscriptionCollectionsTableManager(_db, _db.inscriptionCollections);
+  $InscriptionItemsTableManager get inscriptionItems =>
+      $InscriptionItemsTableManager(_db, _db.inscriptionItems);
 }
 
 class MessageItem {

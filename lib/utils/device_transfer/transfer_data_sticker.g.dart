@@ -12,8 +12,8 @@ TransferDataSticker _$TransferDataStickerFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       assetUrl: json['asset_url'] as String,
       assetType: json['asset_type'] as String,
-      assetWidth: json['asset_width'] as int,
-      assetHeight: json['asset_height'] as int,
+      assetWidth: (json['asset_width'] as num).toInt(),
+      assetHeight: (json['asset_height'] as num).toInt(),
       createdAt: DateTime.parse(json['created_at'] as String),
       albumId: json['album_id'] as String?,
       lastUseAt: json['last_use_at'] == null

@@ -33,6 +33,7 @@ class MessageCategory {
   static const systemSession = 'SYSTEM_SESSION';
   static const systemAccountSnapshot = 'SYSTEM_ACCOUNT_SNAPSHOT';
   static const systemSafeSnapshot = 'SYSTEM_SAFE_SNAPSHOT';
+  static const systemSafeInscription = 'SYSTEM_SAFE_INSCRIPTION';
   static const appButtonGroup = 'APP_BUTTON_GROUP';
   static const appCard = 'APP_CARD';
   static const webrtcAudioOffer = 'WEBRTC_AUDIO_OFFER';

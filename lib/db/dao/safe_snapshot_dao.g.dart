@@ -41,6 +41,9 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<SafeSnapshotItem> _snapshotItem(SnapshotItem$where where,
       SnapshotItem$order order, SnapshotItem$limit limit) {
     var $arrayStartIndex = 1;

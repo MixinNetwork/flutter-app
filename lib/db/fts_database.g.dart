@@ -515,6 +515,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
 
 abstract class _$FtsDatabase extends GeneratedDatabase {
   _$FtsDatabase(QueryExecutor e) : super(e);
+  _$FtsDatabaseManager get managers => _$FtsDatabaseManager(this);
   late final MessagesFts messagesFts = MessagesFts(this);
   late final MessagesMetas messagesMetas = MessagesMetas(this);
   late final Index messagesMetasDocIdCreatedAt = Index(
@@ -618,6 +619,249 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
         messagesMetasDocIdCreatedAt,
         messagesMetasConversationIdUserIdCategory
       ];
+}
+
+typedef $MessagesFtsInsertCompanionBuilder = MessagesFtsCompanion Function({
+  required String content,
+  Value<int> rowid,
+});
+typedef $MessagesFtsUpdateCompanionBuilder = MessagesFtsCompanion Function({
+  Value<String> content,
+  Value<int> rowid,
+});
+
+class $MessagesFtsTableManager extends RootTableManager<
+    _$FtsDatabase,
+    MessagesFts,
+    MessagesFt,
+    $MessagesFtsFilterComposer,
+    $MessagesFtsOrderingComposer,
+    $MessagesFtsProcessedTableManager,
+    $MessagesFtsInsertCompanionBuilder,
+    $MessagesFtsUpdateCompanionBuilder> {
+  $MessagesFtsTableManager(_$FtsDatabase db, MessagesFts table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $MessagesFtsFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $MessagesFtsOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $MessagesFtsProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<String> content = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesFtsCompanion(
+            content: content,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required String content,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesFtsCompanion.insert(
+            content: content,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $MessagesFtsProcessedTableManager extends ProcessedTableManager<
+    _$FtsDatabase,
+    MessagesFts,
+    MessagesFt,
+    $MessagesFtsFilterComposer,
+    $MessagesFtsOrderingComposer,
+    $MessagesFtsProcessedTableManager,
+    $MessagesFtsInsertCompanionBuilder,
+    $MessagesFtsUpdateCompanionBuilder> {
+  $MessagesFtsProcessedTableManager(super.$state);
+}
+
+class $MessagesFtsFilterComposer
+    extends FilterComposer<_$FtsDatabase, MessagesFts> {
+  $MessagesFtsFilterComposer(super.$state);
+  ColumnFilters<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $MessagesFtsOrderingComposer
+    extends OrderingComposer<_$FtsDatabase, MessagesFts> {
+  $MessagesFtsOrderingComposer(super.$state);
+  ColumnOrderings<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+typedef $MessagesMetasInsertCompanionBuilder = MessagesMetasCompanion Function({
+  required int docId,
+  required String messageId,
+  required String conversationId,
+  required String category,
+  required String userId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $MessagesMetasUpdateCompanionBuilder = MessagesMetasCompanion Function({
+  Value<int> docId,
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<String> category,
+  Value<String> userId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $MessagesMetasTableManager extends RootTableManager<
+    _$FtsDatabase,
+    MessagesMetas,
+    MessagesMeta,
+    $MessagesMetasFilterComposer,
+    $MessagesMetasOrderingComposer,
+    $MessagesMetasProcessedTableManager,
+    $MessagesMetasInsertCompanionBuilder,
+    $MessagesMetasUpdateCompanionBuilder> {
+  $MessagesMetasTableManager(_$FtsDatabase db, MessagesMetas table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $MessagesMetasFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $MessagesMetasOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $MessagesMetasProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<int> docId = const Value.absent(),
+            Value<String> messageId = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<String> category = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesMetasCompanion(
+            docId: docId,
+            messageId: messageId,
+            conversationId: conversationId,
+            category: category,
+            userId: userId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          getInsertCompanionBuilder: ({
+            required int docId,
+            required String messageId,
+            required String conversationId,
+            required String category,
+            required String userId,
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              MessagesMetasCompanion.insert(
+            docId: docId,
+            messageId: messageId,
+            conversationId: conversationId,
+            category: category,
+            userId: userId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $MessagesMetasProcessedTableManager extends ProcessedTableManager<
+    _$FtsDatabase,
+    MessagesMetas,
+    MessagesMeta,
+    $MessagesMetasFilterComposer,
+    $MessagesMetasOrderingComposer,
+    $MessagesMetasProcessedTableManager,
+    $MessagesMetasInsertCompanionBuilder,
+    $MessagesMetasUpdateCompanionBuilder> {
+  $MessagesMetasProcessedTableManager(super.$state);
+}
+
+class $MessagesMetasFilterComposer
+    extends FilterComposer<_$FtsDatabase, MessagesMetas> {
+  $MessagesMetasFilterComposer(super.$state);
+  ColumnFilters<int> get docId => $state.composableBuilder(
+      column: $state.table.docId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $state.composableBuilder(
+          column: $state.table.createdAt,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+}
+
+class $MessagesMetasOrderingComposer
+    extends OrderingComposer<_$FtsDatabase, MessagesMetas> {
+  $MessagesMetasOrderingComposer(super.$state);
+  ColumnOrderings<int> get docId => $state.composableBuilder(
+      column: $state.table.docId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get messageId => $state.composableBuilder(
+      column: $state.table.messageId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get category => $state.composableBuilder(
+      column: $state.table.category,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get userId => $state.composableBuilder(
+      column: $state.table.userId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get createdAt => $state.composableBuilder(
+      column: $state.table.createdAt,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
+class _$FtsDatabaseManager {
+  final _$FtsDatabase _db;
+  _$FtsDatabaseManager(this._db);
+  $MessagesFtsTableManager get messagesFts =>
+      $MessagesFtsTableManager(_db, _db.messagesFts);
+  $MessagesMetasTableManager get messagesMetas =>
+      $MessagesMetasTableManager(_db, _db.messagesMetas);
 }
 
 typedef FuzzySearchAllMessage$where = Expression<bool> Function(

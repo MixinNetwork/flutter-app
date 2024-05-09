@@ -28,6 +28,8 @@ import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
 import 'dao/hyperlink_dao.dart';
+import 'dao/inscription_collection_dao.dart';
+import 'dao/inscription_item_dao.dart';
 import 'dao/job_dao.dart';
 import 'dao/message_dao.dart';
 import 'dao/message_history_dao.dart';
@@ -91,13 +93,15 @@ part 'mixin_database.g.dart';
     TranscriptMessageDao,
     SafeSnapshotDao,
     TokenDao,
+    InscriptionItemDao,
+    InscriptionCollectionDao,
   ],
 )
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 25;
+  int get schemaVersion => 26;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -238,6 +242,14 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createTable(safeSnapshots);
             await m.createTable(tokens);
             await m.createIndex(indexTokensKernelAssetId);
+          }
+          if (from <= 25) {
+            await _addColumnIfNotExists(
+                m, safeSnapshots, safeSnapshots.inscriptionHash);
+            await _addColumnIfNotExists(m, tokens, tokens.collectionHash);
+            await m.createIndex(indexTokensCollectionHash);
+            await m.createTable(inscriptionCollections);
+            await m.createTable(inscriptionItems);
           }
         },
         beforeOpen: (details) async {
