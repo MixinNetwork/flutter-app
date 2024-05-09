@@ -6,6 +6,7 @@ import '../../constants/constants.dart';
 import '../../db/dao/inscription_collection_dao.dart';
 import '../../db/dao/inscription_item_dao.dart';
 import '../../db/mixin_database.dart';
+import '../../db/vo/inscription.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../job_queue.dart';
 
@@ -58,6 +59,7 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
         continue;
       }
       await syncInscriptionMessageItem(messageId);
+      await database.jobDao.deleteJobById(job.jobId);
     }
   }
 
@@ -70,6 +72,13 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
     final inscriptionHash = message.content;
     if (inscriptionHash == null) {
       w('no inscription hash found for message: $messageId');
+      return;
+    }
+
+    try {
+      inscriptionHash.hexToBytes();
+    } catch (err, stacktrace) {
+      e('inscription hash is not valid: $inscriptionHash', err, stacktrace);
       return;
     }
 

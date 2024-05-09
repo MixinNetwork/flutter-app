@@ -45,6 +45,7 @@ import 'injector.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
 import 'job/sending_job.dart';
+import 'job/sync_inscription_message_job.dart';
 import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
 import 'job/update_token_job.dart';
@@ -68,6 +69,7 @@ class DecryptMessage extends Injector {
     this._updateAssetJob,
     this._deviceTransfer,
     this._updateTokenJob,
+    this._syncInscriptionJob,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -88,6 +90,7 @@ class DecryptMessage extends Injector {
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
   final UpdateTokenJob _updateTokenJob;
+  final SyncInscriptionMessageJob _syncInscriptionJob;
   final DeviceTransferIsolateController? _deviceTransfer;
 
   final refreshKeyMap = <String, int?>{};
@@ -1037,7 +1040,8 @@ class DecryptMessage extends Injector {
     );
     await database.safeSnapshotDao.insert(snapshot);
     await _insertMessage(message, data);
-    createSyncInscriptionMessageJob(data.messageId);
+    await _syncInscriptionJob
+        .add(createSyncInscriptionMessageJob(data.messageId));
   }
 
   Future<void> _updateRemoteMessageStatus(

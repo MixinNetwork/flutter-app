@@ -5,15 +5,10 @@ packages:
     dependency: transitive
     description:
       name: _fe_analyzer_shared
-      sha256: "5aaf60d96c4cd00fe7f21594b5ad6a1b699c80a27420f8a837f4d68473ef09e3"
+      sha256: "0b2f2bd91ba804e53a61d757b986f89f1f9eaed5b11e4b2f5a2468d86d6c9fc7"
       url: "https://pub.dev"
     source: hosted
-    version: "68.0.0"
-  _macros:
-    dependency: transitive
-    description: dart
-    source: sdk
-    version: "0.1.3"
+    version: "67.0.0"
   adaptive_number:
     dependency: transitive
     description:
@@ -26,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: analyzer
-      sha256: "21f1d3720fd1c70316399d5e2bccaebb415c434592d778cce8acb967b8578808"
+      sha256: "37577842a27e4338429a1cbc32679d508836510b056f1eedf0c8d20e39c1383d"
       url: "https://pub.dev"
     source: hosted
-    version: "6.5.0"
+    version: "6.4.1"
   analyzer_plugin:
     dependency: transitive
     description:
@@ -807,6 +802,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.1"
+  hexagon:
+    dependency: "direct main"
+    description:
+      name: hexagon
+      sha256: "058f445a8c293c2a0474546cd6f592693bf8b014f5c682e8174d34d5fd024d87"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   highlight:
     dependency: transitive
     description:
@@ -1177,14 +1180,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
-  macros:
-    dependency: transitive
-    description:
-      name: macros
-      sha256: e4a273c4a7a81fdbea1f3faed45faa6a7c0b78a50076e89d3f02350caefc8939
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0-main.3"
   map:
     dependency: "direct main"
     description:
@@ -2283,5 +2278,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.4.0-256.0.dev <4.0.0"
+  dart: ">=3.3.0 <4.0.0"
   flutter: ">=3.19.0"

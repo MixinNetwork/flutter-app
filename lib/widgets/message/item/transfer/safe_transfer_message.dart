@@ -114,7 +114,8 @@ class SafeTransferMessage extends HookConsumerWidget {
     }
     return MessageBubble(
       forceIsCurrentUserColor: false,
-      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
+      outerTimeAndStatusWidget:
+          const MessageDatetimeAndStatus(hideStatus: true),
       child: InteractiveDecoratedBox(
         onTap: () {
           final snapshotId = context.message.snapshotId;

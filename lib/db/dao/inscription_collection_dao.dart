@@ -1,7 +1,8 @@
 import 'package:drift/drift.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../mixin_database.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
+import '../vo/inscription.dart';
 
 part 'inscription_collection_dao.g.dart';
 

@@ -56,57 +56,11 @@ mixin _$InscriptionCollectionDaoMixin on DatabaseAccessor<MixinDatabase> {
         }).map((QueryRow row) => Inscription(
           collectionHash: row.read<String>('collection_hash'),
           inscriptionHash: row.read<String>('inscription_hash'),
-          name: row.readNullable<String>('name'),
           sequence: row.read<int>('sequence'),
           contentType: row.read<String>('content_type'),
           contentUrl: row.read<String>('content_url'),
+          name: row.readNullable<String>('name'),
           iconUrl: row.readNullable<String>('icon_url'),
         ));
-  }
-}
-
-class Inscription {
-  final String collectionHash;
-  final String inscriptionHash;
-  final String? name;
-  final int sequence;
-  final String contentType;
-  final String contentUrl;
-  final String? iconUrl;
-  Inscription({
-    required this.collectionHash,
-    required this.inscriptionHash,
-    this.name,
-    required this.sequence,
-    required this.contentType,
-    required this.contentUrl,
-    this.iconUrl,
-  });
-  @override
-  int get hashCode => Object.hash(collectionHash, inscriptionHash, name,
-      sequence, contentType, contentUrl, iconUrl);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Inscription &&
-          other.collectionHash == this.collectionHash &&
-          other.inscriptionHash == this.inscriptionHash &&
-          other.name == this.name &&
-          other.sequence == this.sequence &&
-          other.contentType == this.contentType &&
-          other.contentUrl == this.contentUrl &&
-          other.iconUrl == this.iconUrl);
-  @override
-  String toString() {
-    return (StringBuffer('Inscription(')
-          ..write('collectionHash: $collectionHash, ')
-          ..write('inscriptionHash: $inscriptionHash, ')
-          ..write('name: $name, ')
-          ..write('sequence: $sequence, ')
-          ..write('contentType: $contentType, ')
-          ..write('contentUrl: $contentUrl, ')
-          ..write('iconUrl: $iconUrl')
-          ..write(')'))
-        .toString();
   }
 }
