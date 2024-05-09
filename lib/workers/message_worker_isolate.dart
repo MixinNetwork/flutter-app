@@ -225,7 +225,7 @@ class _MessageProcessRunner {
 
     _updateStickerJob = UpdateStickerJob(database: database, client: client);
     _syncInscriptionMessageJob =
-        SyncInscriptionMessageJob(database: database, client: Client());
+        SyncInscriptionMessageJob(database: database, client: client);
 
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
