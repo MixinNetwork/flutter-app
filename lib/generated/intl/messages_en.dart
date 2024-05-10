@@ -249,6 +249,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "closingBalance":
             MessageLookupByLibrary.simpleMessage("Closing Balance"),
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
+        "collectible": MessageLookupByLibrary.simpleMessage("Collectible"),
+        "collection": MessageLookupByLibrary.simpleMessage("Collection"),
         "combineAndForward":
             MessageLookupByLibrary.simpleMessage("Combine and forward"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
@@ -486,6 +488,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
         "groupsInCommon":
             MessageLookupByLibrary.simpleMessage("Groups in Common"),
+        "hash": MessageLookupByLibrary.simpleMessage("HASH"),
         "help": MessageLookupByLibrary.simpleMessage("Help"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
@@ -493,6 +496,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hour": m26,
         "howAreYou": MessageLookupByLibrary.simpleMessage("Hi, how are you?"),
         "iAmGood": MessageLookupByLibrary.simpleMessage("I’m good."),
+        "id": MessageLookupByLibrary.simpleMessage("ID"),
         "ignoreThisVersion":
             MessageLookupByLibrary.simpleMessage("Ignore the new version"),
         "image": MessageLookupByLibrary.simpleMessage("image"),
@@ -567,6 +571,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "nextConversation":
             MessageLookupByLibrary.simpleMessage("Next conversation"),
+        "nftToken": MessageLookupByLibrary.simpleMessage("NFT TOKEN"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noCamera": MessageLookupByLibrary.simpleMessage("No camera"),
         "noData": MessageLookupByLibrary.simpleMessage("No Data"),

@@ -72,6 +72,8 @@ String? messagePreviewOptimize(
         '[${isCurrentUser ? Localization.current.youDeletedThisMessage : Localization.current.thisMessageWasDeleted}]';
   } else if (messageCategory.isTranscript) {
     _content = '[${Localization.current.transcript}]';
+  } else if (messageCategory == MessageCategory.systemSafeInscription) {
+    _content = '[${Localization.current.collectible}]';
   } else {
     _content = Localization.current.messageNotSupport;
   }
@@ -94,7 +96,8 @@ String? messagePreviewIcon(
   if (messageStatus == MessageStatus.failed) {
   } else if (messageCategory.isText) {
   } else if (messageCategory == MessageCategory.systemAccountSnapshot ||
-      messageCategory == MessageCategory.systemSafeSnapshot) {
+      messageCategory == MessageCategory.systemSafeSnapshot ||
+      messageCategory == MessageCategory.systemSafeInscription) {
     icon = Resources.assetsImagesTransferSvg;
   } else if (messageCategory.isSticker) {
     icon = Resources.assetsImagesStickerSvg;

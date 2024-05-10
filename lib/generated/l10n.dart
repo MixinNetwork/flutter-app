@@ -824,6 +824,26 @@ class Localization {
     );
   }
 
+  /// `Collectible`
+  String get collectible {
+    return Intl.message(
+      'Collectible',
+      name: 'collectible',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collection`
+  String get collection {
+    return Intl.message(
+      'Collection',
+      name: 'collection',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Combine and forward`
   String get combineAndForward {
     return Intl.message(
@@ -2318,6 +2338,16 @@ class Localization {
     );
   }
 
+  /// `HASH`
+  String get hash {
+    return Intl.message(
+      'HASH',
+      name: 'hash',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Help`
   String get help {
     return Intl.message(
@@ -2385,6 +2415,16 @@ class Localization {
     return Intl.message(
       'I’m good.',
       name: 'iAmGood',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ID`
+  String get id {
+    return Intl.message(
+      'ID',
+      name: 'id',
       desc: '',
       args: [],
     );
@@ -2917,6 +2957,16 @@ class Localization {
     return Intl.message(
       'Next conversation',
       name: 'nextConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NFT TOKEN`
+  String get nftToken {
+    return Intl.message(
+      'NFT TOKEN',
+      name: 'nftToken',
       desc: '',
       args: [],
     );

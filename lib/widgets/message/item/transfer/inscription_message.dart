@@ -12,6 +12,7 @@ import '../../../../constants/resources.dart';
 import '../../../../db/vo/inscription.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../cache_image.dart';
+import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
@@ -44,10 +45,12 @@ class InscriptionMessage extends HookWidget {
       padding: EdgeInsets.zero,
       clip: true,
       includeNip: true,
-      showBubble: false,
       outerTimeAndStatusWidget:
           const MessageDatetimeAndStatus(hideStatus: true),
-      child: _InscriptionLayout(inscription: inscription),
+      child: InteractiveDecoratedBox(
+        onTap: () {},
+        child: _InscriptionLayout(inscription: inscription),
+      ),
     );
   }
 }
@@ -63,73 +66,71 @@ class _InscriptionLayout extends StatelessWidget {
         SvgPicture.asset(Resources.assetsImagesInscriptionPlaceholderSvg);
     final defaultCollectionImage =
         SvgPicture.asset(Resources.assetsImagesCollectionPlaceholderSvg);
-    return Material(
-      child: SizedBox(
-        width: 260,
-        height: 112,
-        child: Row(
-          children: [
-            SizedBox.square(
-              dimension: 112,
-              child: inscription == null
-                  ? defaultInscriptionImage
-                  : CacheImage(
-                      inscription?.contentUrl ?? '',
-                      errorWidget: () => defaultInscriptionImage,
-                      placeholder: () => defaultInscriptionImage,
+    return SizedBox(
+      width: 260,
+      height: 112,
+      child: Row(
+        children: [
+          SizedBox.square(
+            dimension: 112,
+            child: inscription == null
+                ? defaultInscriptionImage
+                : CacheImage(
+                    inscription?.contentUrl ?? '',
+                    errorWidget: () => defaultInscriptionImage,
+                    placeholder: () => defaultInscriptionImage,
+                  ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    inscription?.name ?? '',
+                    style: TextStyle(color: context.theme.text, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    inscription == null ? '' : '#${inscription!.sequence}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.theme.secondaryText,
                     ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      inscription?.name ?? '',
-                      style: TextStyle(color: context.theme.text, fontSize: 14),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      inscription == null ? '' : '#${inscription!.sequence}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.theme.secondaryText,
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      _ColoredHashWidget(
+                        inscriptionHex: inscription?.inscriptionHash,
                       ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        _ColoredHashWidget(
-                          inscriptionHex: inscription?.inscriptionHash,
-                        ),
-                        const SizedBox(width: 10),
-                        SizedBox.square(
+                      const SizedBox(width: 10),
+                      HexagonWidget(
+                        type: HexagonType.FLAT,
+                        cornerRadius: 2,
+                        height: 20,
+                        width: 22,
+                        child: SizedBox.square(
                           dimension: 22,
-                          child: HexagonWidget(
-                            type: HexagonType.FLAT,
-                            cornerRadius: 2,
-                            height: 20,
-                            width: 22,
-                            child: inscription == null
-                                ? defaultCollectionImage
-                                : CacheImage(
-                                    inscription!.iconUrl ?? '',
-                                    errorWidget: () => defaultCollectionImage,
-                                    placeholder: () => defaultCollectionImage,
-                                  ),
-                          ),
+                          child: inscription == null
+                              ? defaultCollectionImage
+                              : CacheImage(
+                                  inscription!.iconUrl ?? '',
+                                  errorWidget: () => defaultCollectionImage,
+                                  placeholder: () => defaultCollectionImage,
+                                ),
                         ),
-                        const SizedBox(width: 2),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                  ],
-                ),
+                      ),
+                      const SizedBox(width: 2),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -150,11 +151,7 @@ class _ColoredHashWidget extends HookWidget {
       final data = bytes + sha3Hash(bytes).sublist(0, 4);
       final colors = <Color>[];
       for (var i = 0; i < data.length; i += 3) {
-        var color = data[i];
-        color |= data[i + 1] << 8;
-        color |= data[i + 2] << 16;
-        color |= 0xFF << 24;
-        colors.add(Color(color & 0xFFFFFFFF));
+        colors.add(Color.fromARGB(0xFF, data[i], data[i + 1], data[i + 2]));
       }
       return colors;
     }, [inscriptionHex]);
