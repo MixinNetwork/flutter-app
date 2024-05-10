@@ -35,6 +35,7 @@ import 'job/flood_job.dart';
 import 'job/migrate_fts_job.dart';
 import 'job/sending_job.dart';
 import 'job/session_ack_job.dart';
+import 'job/sync_inscription_message_job.dart';
 import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
 import 'job/update_token_job.dart';
@@ -134,6 +135,7 @@ class _MessageProcessRunner {
   late UpdateStickerJob _updateStickerJob;
   late UpdateTokenJob _updateTokenJob;
   late SessionAckJob _sessionAckJob;
+  late SyncInscriptionMessageJob _syncInscriptionMessageJob;
   late FloodJob _floodJob;
   DeviceTransferIsolateController? _deviceTransfer;
 
@@ -222,6 +224,8 @@ class _MessageProcessRunner {
     _updateTokenJob = UpdateTokenJob(database: database, client: client);
 
     _updateStickerJob = UpdateStickerJob(database: database, client: client);
+    _syncInscriptionMessageJob =
+        SyncInscriptionMessageJob(database: database, client: client);
 
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
@@ -264,6 +268,7 @@ class _MessageProcessRunner {
       _updateAssetJob,
       _deviceTransfer,
       _updateTokenJob,
+      _syncInscriptionMessageJob,
     );
     _floodJob.start();
   }
@@ -356,6 +361,8 @@ class _MessageProcessRunner {
         _updateTokenJob.add(event.argument as Job);
       case MainIsolateEventType.addUpdateStickerJob:
         _updateStickerJob.add(event.argument as Job);
+      case MainIsolateEventType.addSyncInscriptionMessageJob:
+        _syncInscriptionMessageJob.add(event.argument as Job);
       case MainIsolateEventType.exit:
         dispose();
         Isolate.exit();

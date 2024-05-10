@@ -13,7 +13,7 @@ SystemConversationMessage _$SystemConversationMessageFromJson(
       json['participant_id'] as String?,
       json['user_id'] as String?,
       const ParticipantRoleJsonConverter().fromJson(json['role'] as String?),
-      json['expire_in'] as int? ?? 0,
+      (json['expire_in'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$SystemConversationMessageToJson(

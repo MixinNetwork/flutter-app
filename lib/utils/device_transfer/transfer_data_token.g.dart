@@ -18,9 +18,10 @@ TransferDataToken _$TransferDataTokenFromJson(Map<String, dynamic> json) =>
       chainId: json['chain_id'] as String,
       changeUsd: json['change_usd'] as String,
       changeBtc: json['change_btc'] as String,
-      confirmations: json['confirmations'] as int,
+      confirmations: (json['confirmations'] as num).toInt(),
       assetKey: json['asset_key'] as String,
       dust: json['dust'] as String,
+      collectionHash: json['collection_hash'] as String?,
     );
 
 Map<String, dynamic> _$TransferDataTokenToJson(TransferDataToken instance) =>
@@ -38,4 +39,5 @@ Map<String, dynamic> _$TransferDataTokenToJson(TransferDataToken instance) =>
       'confirmations': instance.confirmations,
       'asset_key': instance.assetKey,
       'dust': instance.dust,
+      'collection_hash': instance.collectionHash,
     };

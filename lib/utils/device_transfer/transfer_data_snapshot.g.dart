@@ -20,7 +20,7 @@ TransferDataSnapshot _$TransferDataSnapshotFromJson(
       sender: json['sender'] as String?,
       receiver: json['receiver'] as String?,
       memo: json['memo'] as String?,
-      confirmations: json['confirmations'] as int?,
+      confirmations: (json['confirmations'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TransferDataSnapshotToJson(

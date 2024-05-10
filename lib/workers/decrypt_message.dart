@@ -45,6 +45,7 @@ import 'injector.dart';
 import 'isolate_event.dart';
 import 'job/ack_job.dart';
 import 'job/sending_job.dart';
+import 'job/sync_inscription_message_job.dart';
 import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
 import 'job/update_token_job.dart';
@@ -68,6 +69,7 @@ class DecryptMessage extends Injector {
     this._updateAssetJob,
     this._deviceTransfer,
     this._updateTokenJob,
+    this._syncInscriptionJob,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -88,6 +90,7 @@ class DecryptMessage extends Injector {
   final UpdateStickerJob _updateStickerJob;
   final UpdateAssetJob _updateAssetJob;
   final UpdateTokenJob _updateTokenJob;
+  final SyncInscriptionMessageJob _syncInscriptionJob;
   final DeviceTransferIsolateController? _deviceTransfer;
 
   final refreshKeyMap = <String, int?>{};
@@ -392,6 +395,11 @@ class DecryptMessage extends Injector {
       final systemSnapshot =
           db.SafeSnapshot.fromJson(json as Map<String, dynamic>);
       await _processSystemSafeSnapshotMessage(data, systemSnapshot);
+    } else if (data.category == MessageCategory.systemSafeInscription) {
+      final json = _jsonDecode(data.data);
+      final inscription =
+          db.SafeSnapshot.fromJson(json as Map<String, dynamic>);
+      await _processSystemSafeInscriptionMessage(data, inscription);
     }
   }
 
@@ -1002,10 +1010,6 @@ class DecryptMessage extends Injector {
           .deletePendingSnapshotByHash(snapshot.transactionHash);
     }
     await database.safeSnapshotDao.insert(snapshot);
-    var status = data.status;
-    if (_conversationId == data.conversationId && data.userId != accountId) {
-      status = MessageStatus.read;
-    }
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
@@ -1013,13 +1017,31 @@ class DecryptMessage extends Injector {
       category: data.category!,
       content: '',
       snapshotId: snapshot.snapshotId,
-      status: status,
+      status: data.status,
       createdAt: data.createdAt,
       action: snapshot.type,
     );
     await _insertMessage(message, data);
     await _updateTokenJob.add(createUpdateTokenJob(snapshot.assetId));
-    // TODO sync output
+  }
+
+  Future<void> _processSystemSafeInscriptionMessage(
+      BlazeMessageData data, db.SafeSnapshot snapshot) async {
+    final message = Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      category: data.category!,
+      content: snapshot.inscriptionHash,
+      snapshotId: snapshot.snapshotId,
+      status: data.status,
+      createdAt: data.createdAt,
+      action: snapshot.type,
+    );
+    await database.safeSnapshotDao.insert(snapshot);
+    await _insertMessage(message, data);
+    await _syncInscriptionJob
+        .add(createSyncInscriptionMessageJob(data.messageId));
   }
 
   Future<void> _updateRemoteMessageStatus(

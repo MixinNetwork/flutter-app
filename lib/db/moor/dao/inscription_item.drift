@@ -1,0 +1,10 @@
+import '../mixin.drift';
+import '../../vo/inscription.dart';
+
+inscriptionByHash WITH Inscription:
+SELECT i.collection_hash, i.inscription_hash, ic.name, i.sequence, i.content_type,
+  i.content_url, ic.icon_url
+FROM inscription_items i
+LEFT JOIN
+  inscription_collections ic on ic.collection_hash = i.collection_hash
+WHERE inscription_hash = :hash;

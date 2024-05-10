@@ -33,14 +33,16 @@ class MixinCloseButton extends StatelessWidget {
   const MixinCloseButton({
     super.key,
     this.onTap,
+    this.color,
   });
 
   final VoidCallback? onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => ActionButton(
         name: Resources.assetsImagesIcCloseSvg,
-        color: context.theme.icon,
+        color: color ?? context.theme.icon,
         onTap: onTap ?? () => Navigator.pop(context),
       );
 }

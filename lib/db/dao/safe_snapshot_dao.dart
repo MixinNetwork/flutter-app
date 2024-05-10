@@ -25,6 +25,7 @@ extension _SafeSnapshotConverter on sdk.SafeSnapshot {
         closingBalance: Value(closingBalance),
         withdrawal: Value(withdrawal),
         deposit: Value(deposit),
+        inscriptionHash: Value(inscriptionHash),
       );
 }
 

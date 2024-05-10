@@ -41,6 +41,9 @@ mixin _$CircleConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Future<int> _deleteByCircleId(String circleId) {
     return customUpdate(
       'DELETE FROM circle_conversations WHERE circle_id = ?1',

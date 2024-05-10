@@ -34,5 +34,7 @@ const _$JsonTransferDataTypeEnumMap = {
   JsonTransferDataType.pinMessage: 'pin_message',
   JsonTransferDataType.messageMention: 'message_mention',
   JsonTransferDataType.app: 'app',
+  JsonTransferDataType.inscriptionItem: 'inscription_item',
+  JsonTransferDataType.inscriptionCollection: 'inscription_collection',
   JsonTransferDataType.unknown: 'unknown',
 };

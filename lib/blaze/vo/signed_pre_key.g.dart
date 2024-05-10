@@ -7,7 +7,7 @@ part of 'signed_pre_key.dart';
 // **************************************************************************
 
 SignedPreKey _$SignedPreKeyFromJson(Map<String, dynamic> json) => SignedPreKey(
-      json['key_id'] as int,
+      (json['key_id'] as num).toInt(),
       json['pub_key'] as String?,
       json['signature'] as String,
     );

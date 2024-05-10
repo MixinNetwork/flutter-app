@@ -19,7 +19,7 @@ TransferDataAsset _$TransferDataAssetFromJson(Map<String, dynamic> json) =>
       chainId: json['chain_id'] as String,
       changeUsd: json['change_usd'] as String,
       changeBtc: json['change_btc'] as String,
-      confirmations: json['confirmations'] as int,
+      confirmations: (json['confirmations'] as num).toInt(),
       tag: json['tag'] as String?,
       assetKey: json['asset_key'] as String?,
       reserve: json['reserve'] as String?,

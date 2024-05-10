@@ -94,6 +94,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesCollapseSvg.preview}
   static const String assetsImagesCollapseSvg = 'assets/images/collapse.svg';
 
+  /// {@macro assets_generator.assetsImagesCollectionPlaceholderSvg.preview}
+  static const String assetsImagesCollectionPlaceholderSvg =
+      'assets/images/collection_placeholder.svg';
+
   /// {@macro assets_generator.assetsImagesContactSvg.preview}
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
@@ -344,6 +348,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesInformationSvg.preview}
   static const String assetsImagesInformationSvg =
       'assets/images/information.svg';
+
+  /// {@macro assets_generator.assetsImagesInscriptionPlaceholderSvg.preview}
+  static const String assetsImagesInscriptionPlaceholderSvg =
+      'assets/images/inscription_placeholder.svg';
 
   /// {@macro assets_generator.assetsImagesInviteCopySvg.preview}
   static const String assetsImagesInviteCopySvg =

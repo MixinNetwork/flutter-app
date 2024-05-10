@@ -41,6 +41,9 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<int> _baseConversationItemCount(
       BaseConversationItemCount$where where) {
     var $arrayStartIndex = 1;

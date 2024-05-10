@@ -5,7 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/database.dart';
-import '../../db/mixin_database.dart';
+import '../../db/mixin_database.dart' as db;
 import '../attachment/attachment_util.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
@@ -293,7 +293,7 @@ class DeviceTransferReceiver {
             updateIfConflict: false,
           );
         case JsonTransferDataType.messageMention:
-          final messageMention = MessageMention.fromJson(data.data);
+          final messageMention = db.MessageMention.fromJson(data.data);
           d('client: messageMention: $messageMention');
           await database.messageMentionDao.insert(
             messageMention,
@@ -306,6 +306,16 @@ class DeviceTransferReceiver {
             app.toDbApp(),
             updateIfConflict: false,
           );
+        case JsonTransferDataType.inscriptionItem:
+          final inscription = db.InscriptionItem.fromJson(data.data);
+          d('client: inscription: $inscription');
+          await database.inscriptionItemDao
+              .insert(inscription, updateIfConflict: false);
+        case JsonTransferDataType.inscriptionCollection:
+          final collection = db.InscriptionCollection.fromJson(data.data);
+          d('client: InscriptionCollection: $collection');
+          await database.inscriptionCollectionDao
+              .insert(collection, updateIfConflict: false);
         case JsonTransferDataType.unknown:
           i('unknown type: ${data.type}');
       }

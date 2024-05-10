@@ -19,7 +19,7 @@ TransferDataSafeSnapshot _$TransferDataSafeSnapshotFromJson(
       transactionHash: json['transaction_hash'] as String,
       createdAt: json['created_at'] as String,
       traceId: json['trace_id'] as String?,
-      confirmations: json['confirmations'] as int?,
+      confirmations: (json['confirmations'] as num?)?.toInt(),
       openingBalance: json['opening_balance'] as String?,
       closingBalance: json['closing_balance'] as String?,
       withdrawal: json['withdrawal'] == null
@@ -28,6 +28,7 @@ TransferDataSafeSnapshot _$TransferDataSafeSnapshotFromJson(
       deposit: json['deposit'] == null
           ? null
           : SafeDeposit.fromJson(json['deposit'] as Map<String, dynamic>),
+      inscriptionHash: json['inscription_hash'] as String?,
     );
 
 Map<String, dynamic> _$TransferDataSafeSnapshotToJson(
@@ -48,4 +49,5 @@ Map<String, dynamic> _$TransferDataSafeSnapshotToJson(
       'closing_balance': instance.closingBalance,
       'withdrawal': instance.withdrawal?.toJson(),
       'deposit': instance.deposit?.toJson(),
+      'inscription_hash': instance.inscriptionHash,
     };

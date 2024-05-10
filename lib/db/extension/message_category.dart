@@ -144,6 +144,7 @@ extension MessageCategoryExtension on String? {
         MessageCategory.systemSession,
         MessageCategory.systemAccountSnapshot,
         MessageCategory.systemSafeSnapshot,
+        MessageCategory.systemSafeInscription,
         MessageCategory.appButtonGroup,
         MessageCategory.appCard,
         MessageCategory.encryptedText,

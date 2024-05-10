@@ -10,8 +10,8 @@ TransferDataExpiredMessage _$TransferDataExpiredMessageFromJson(
         Map<String, dynamic> json) =>
     TransferDataExpiredMessage(
       messageId: json['message_id'] as String,
-      expireIn: json['expire_in'] as int,
-      expireAt: json['expire_at'] as int?,
+      expireIn: (json['expire_in'] as num).toInt(),
+      expireAt: (json['expire_at'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TransferDataExpiredMessageToJson(

@@ -14,6 +14,8 @@ import 'dao/expired_message_dao.dart';
 import 'dao/favorite_app_dao.dart';
 import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
+import 'dao/inscription_collection_dao.dart';
+import 'dao/inscription_item_dao.dart';
 import 'dao/job_dao.dart';
 import 'dao/message_dao.dart';
 import 'dao/message_history_dao.dart';
@@ -101,6 +103,11 @@ class Database {
   FavoriteAppDao get favoriteAppDao => mixinDatabase.favoriteAppDao;
 
   ExpiredMessageDao get expiredMessageDao => mixinDatabase.expiredMessageDao;
+
+  InscriptionCollectionDao get inscriptionCollectionDao =>
+      mixinDatabase.inscriptionCollectionDao;
+
+  InscriptionItemDao get inscriptionItemDao => mixinDatabase.inscriptionItemDao;
 
   late final SettingPropertyStorage settingProperties;
 

@@ -85,5 +85,5 @@ Future<void> _createZipFile(List<String> paths) async {
   for (final file in files) {
     await encoder.addFile(file);
   }
-  encoder.close();
+  await encoder.close();
 }

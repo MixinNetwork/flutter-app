@@ -222,6 +222,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "closeWindow": MessageLookupByLibrary.simpleMessage("关闭窗口"),
         "closingBalance": MessageLookupByLibrary.simpleMessage("期末余额"),
         "collapse": MessageLookupByLibrary.simpleMessage("折叠"),
+        "collectible": MessageLookupByLibrary.simpleMessage("藏品"),
+        "collection": MessageLookupByLibrary.simpleMessage("合集"),
         "combineAndForward": MessageLookupByLibrary.simpleMessage("合并转发"),
         "confirm": MessageLookupByLibrary.simpleMessage("确认"),
         "confirmPasscodeDesc": MessageLookupByLibrary.simpleMessage("再次确认密码"),
@@ -343,7 +345,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorInvalidPinFormat":
             MessageLookupByLibrary.simpleMessage("错误 20118：PIN 格式不正确"),
         "errorNetworkTaskFailed":
-            MessageLookupByLibrary.simpleMessage("网络连接失败。检查或切换网络，然后重试"),
+            MessageLookupByLibrary.simpleMessage("网络连接失败。检查或切换网络并重试"),
         "errorNoPinToken":
             MessageLookupByLibrary.simpleMessage("缺少凭据，请重新登录之后再尝试使用此功能。"),
         "errorNotFound":
@@ -435,7 +437,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略这次版本更新"),
         "image": MessageLookupByLibrary.simpleMessage("图像"),
-        "includeFiles": MessageLookupByLibrary.simpleMessage("包括文件"),
+        "includeFiles": MessageLookupByLibrary.simpleMessage("包含文件"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("包括视频"),
         "initializing": MessageLookupByLibrary.simpleMessage("初始化…"),
         "invalidStickerFormat": MessageLookupByLibrary.simpleMessage("贴纸格式不支持"),
@@ -497,6 +499,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newVersionDescription": m33,
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
         "nextConversation": MessageLookupByLibrary.simpleMessage("下一个会话"),
+        "nftToken": MessageLookupByLibrary.simpleMessage("NFT 代币"),
         "noAudio": MessageLookupByLibrary.simpleMessage("没有音频"),
         "noCamera": MessageLookupByLibrary.simpleMessage("没有相机"),
         "noData": MessageLookupByLibrary.simpleMessage("没有数据"),

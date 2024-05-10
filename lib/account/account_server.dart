@@ -679,6 +679,13 @@ class AccountServer {
     );
   }
 
+  void addSyncInscriptionMessageJob(String messageId) {
+    _sendEventToWorkerIsolate(
+      MainIsolateEventType.addSyncInscriptionMessageJob,
+      createSyncInscriptionMessageJob(messageId),
+    );
+  }
+
   Future<void> markRead(String conversationId) async {
     final ids =
         await database.messageDao.getUnreadMessageIds(conversationId, userId);

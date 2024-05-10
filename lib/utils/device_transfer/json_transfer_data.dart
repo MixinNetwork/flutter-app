@@ -18,6 +18,8 @@ enum JsonTransferDataType {
   pinMessage,
   messageMention,
   app,
+  inscriptionItem,
+  inscriptionCollection,
   unknown;
 }
 

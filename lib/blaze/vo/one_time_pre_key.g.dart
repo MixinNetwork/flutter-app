@@ -8,7 +8,7 @@ part of 'one_time_pre_key.dart';
 
 OneTimePreKey _$OneTimePreKeyFromJson(Map<String, dynamic> json) =>
     OneTimePreKey(
-      json['key_id'] as int,
+      (json['key_id'] as num).toInt(),
       json['pub_key'] as String?,
     );
 

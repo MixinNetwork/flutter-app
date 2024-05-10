@@ -36,7 +36,7 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) =>
           ?.map((e) => e as String)
           .toList(),
       silent: json['silent'] as bool?,
-      expireIn: json['expire_in'] as int? ?? 0,
+      expireIn: (json['expire_in'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>

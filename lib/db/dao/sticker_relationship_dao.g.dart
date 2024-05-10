@@ -41,6 +41,9 @@ mixin _$StickerRelationshipDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<String> stickerSystemAlbumId(String stickerId) {
     return customSelect(
         'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',

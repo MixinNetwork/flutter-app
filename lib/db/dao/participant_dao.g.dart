@@ -41,6 +41,9 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
         'SELECT user.* FROM participants AS participant INNER JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
