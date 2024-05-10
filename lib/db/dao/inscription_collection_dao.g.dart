@@ -4,9 +4,6 @@ part of 'inscription_collection_dao.dart';
 
 // ignore_for_file: type=lint
 mixin _$InscriptionCollectionDaoMixin on DatabaseAccessor<MixinDatabase> {
-  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
-  InscriptionCollections get inscriptionCollections =>
-      attachedDatabase.inscriptionCollections;
   AddressesTable get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
@@ -44,23 +41,7 @@ mixin _$InscriptionCollectionDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
-  Selectable<Inscription> inscriptionByHash(String hash) {
-    return customSelect(
-        'SELECT i.collection_hash, i.inscription_hash, ic.name, i.sequence, i.content_type, i.content_url, ic.icon_url FROM inscription_items AS i LEFT JOIN inscription_collections AS ic ON ic.collection_hash = i.collection_hash WHERE inscription_hash = ?1',
-        variables: [
-          Variable<String>(hash)
-        ],
-        readsFrom: {
-          inscriptionItems,
-          inscriptionCollections,
-        }).map((QueryRow row) => Inscription(
-          collectionHash: row.read<String>('collection_hash'),
-          inscriptionHash: row.read<String>('inscription_hash'),
-          sequence: row.read<int>('sequence'),
-          contentType: row.read<String>('content_type'),
-          contentUrl: row.read<String>('content_url'),
-          name: row.readNullable<String>('name'),
-          iconUrl: row.readNullable<String>('icon_url'),
-        ));
-  }
+  InscriptionCollections get inscriptionCollections =>
+      attachedDatabase.inscriptionCollections;
+  InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
 }

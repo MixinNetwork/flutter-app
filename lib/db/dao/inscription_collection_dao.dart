@@ -3,11 +3,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../extension/db.dart';
 import '../mixin_database.dart';
-import '../vo/inscription.dart';
 
 part 'inscription_collection_dao.g.dart';
 
-@DriftAccessor(include: {'../moor/dao/inscription_item.drift'})
+@DriftAccessor(include: {'../moor/dao/inscription_collection.drift'})
 class InscriptionCollectionDao extends DatabaseAccessor<MixinDatabase>
     with _$InscriptionCollectionDaoMixin {
   InscriptionCollectionDao(super.attachedDatabase);

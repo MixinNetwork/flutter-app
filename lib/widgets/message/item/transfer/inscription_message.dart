@@ -13,9 +13,11 @@ import '../../../../db/vo/inscription.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../toast.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import 'inscription_dialog.dart';
 
 class InscriptionMessage extends HookWidget {
   const InscriptionMessage({super.key});
@@ -48,7 +50,13 @@ class InscriptionMessage extends HookWidget {
       outerTimeAndStatusWidget:
           const MessageDatetimeAndStatus(hideStatus: true),
       child: InteractiveDecoratedBox(
-        onTap: () {},
+        onTap: () {
+          if (inscription == null) {
+            showToastFailed(context.l10n.dataLoading);
+            return;
+          }
+          showInscriptionDialog(context, inscription.inscriptionHash);
+        },
         child: _InscriptionLayout(inscription: inscription),
       ),
     );
@@ -102,7 +110,7 @@ class _InscriptionLayout extends StatelessWidget {
                   const Spacer(),
                   Row(
                     children: [
-                      _ColoredHashWidget(
+                      ColoredHashWidget(
                         inscriptionHex: inscription?.inscriptionHash,
                       ),
                       const SizedBox(width: 10),
@@ -136,10 +144,16 @@ class _InscriptionLayout extends StatelessWidget {
   }
 }
 
-class _ColoredHashWidget extends HookWidget {
-  const _ColoredHashWidget({required this.inscriptionHex});
+class ColoredHashWidget extends HookWidget {
+  const ColoredHashWidget({
+    required this.inscriptionHex,
+    this.blockSize = const Size(5, 16),
+    super.key,
+  });
 
   final String? inscriptionHex;
+
+  final Size blockSize;
 
   @override
   Widget build(BuildContext context) {
@@ -159,8 +173,8 @@ class _ColoredHashWidget extends HookWidget {
       children: <Widget>[
         for (final color in colors)
           Container(
-            width: 5,
-            height: 16,
+            width: blockSize.width,
+            height: blockSize.height,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(1),
