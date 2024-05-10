@@ -148,12 +148,14 @@ class ColoredHashWidget extends HookWidget {
   const ColoredHashWidget({
     required this.inscriptionHex,
     this.blockSize = const Size(5, 16),
+    this.space = 3,
     super.key,
   });
 
   final String? inscriptionHex;
 
   final Size blockSize;
+  final double space;
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +182,7 @@ class ColoredHashWidget extends HookWidget {
               borderRadius: BorderRadius.circular(1),
             ),
           ),
-      ].joinList(const SizedBox(width: 3)),
+      ].joinList(SizedBox(width: space)),
     );
   }
 }

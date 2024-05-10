@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -113,6 +112,7 @@ class _InscriptionDetailLayout extends StatelessWidget {
                   ColoredHashWidget(
                     inscriptionHex: inscription.inscriptionHash,
                     blockSize: const ui.Size(7, 18),
+                    space: 4,
                   ),
                   const SizedBox(height: 4),
                   CustomSelectableText(
