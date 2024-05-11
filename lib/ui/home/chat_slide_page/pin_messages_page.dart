@@ -116,7 +116,7 @@ class PinMessagesPage extends HookConsumerWidget {
               ),
             ),
             InteractiveDecoratedBox(
-              cursor: WidgetStateMouseCursor.clickable,
+              cursor: SystemMouseCursors.click,
               onTap: () async {
                 await showMixinDialog<bool>(
                   context: context,

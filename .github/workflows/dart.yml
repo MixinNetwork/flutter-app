@@ -20,7 +20,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'master' # 'master', 'beta', 'dev' or 'stable'
+          channel: 'stable' # 'master', 'beta', 'dev' or 'stable'
 
       - uses: actions-rs/toolchain@v1
         with:
