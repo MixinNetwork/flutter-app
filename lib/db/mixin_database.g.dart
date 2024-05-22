@@ -13118,13 +13118,13 @@ class TranscriptMessages extends Table
   @override
   TranscriptMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    var createdAt = DateTime.now()
+    var createdAt = DateTime.now();
     try {
       createdAt = TranscriptMessages.$convertercreatedAt.fromSql(attachedDatabase
           .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!)
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!);
     } catch(err, stacktrace) {
-      e('failed to read created_at: $data', err, stacktrace)
+      e('failed to read created_at: $data', err, stacktrace);
     }
     return TranscriptMessage(
       transcriptId: attachedDatabase.typeMapping
