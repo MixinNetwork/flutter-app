@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../constants/constants.dart';
 import '../enum/media_status.dart';
