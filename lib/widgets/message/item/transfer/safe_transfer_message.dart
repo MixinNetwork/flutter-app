@@ -210,6 +210,8 @@ class _SnapshotLayout extends StatelessWidget {
                       color: context.theme.secondaryText,
                       fontSize: 12,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                 ] else
