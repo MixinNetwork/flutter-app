@@ -5,18 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hexagon/hexagon.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../../../constants/resources.dart';
-import '../../../../db/vo/inscription.dart';
-import '../../../../utils/extension/extension.dart';
-import '../../../cache_image.dart';
-import '../../../interactive_decorated_box.dart';
-import '../../../toast.dart';
-import '../../message.dart';
-import '../../message_bubble.dart';
-import '../../message_datetime_and_status.dart';
+import '../../../../../constants/resources.dart';
+import '../../../../../db/vo/inscription.dart';
+import '../../../../../utils/extension/extension.dart';
+import '../../../../cache_image.dart';
+import '../../../../interactive_decorated_box.dart';
+import '../../../../toast.dart';
+import '../../../message.dart';
+import '../../../message_bubble.dart';
+import '../../../message_datetime_and_status.dart';
+import 'colored_hash_widget.dart';
+import 'inscription_content.dart';
 import 'inscription_dialog.dart';
 
 class InscriptionMessage extends HookWidget {
@@ -42,6 +43,9 @@ class InscriptionMessage extends HookWidget {
         return null;
       }
     }, [content]);
+
+    i('fuck inscription: $inscription');
+
     return MessageBubble(
       forceIsCurrentUserColor: false,
       padding: EdgeInsets.zero,
@@ -70,8 +74,6 @@ class _InscriptionLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultInscriptionImage =
-        SvgPicture.asset(Resources.assetsImagesInscriptionPlaceholderSvg);
     final defaultCollectionImage =
         SvgPicture.asset(Resources.assetsImagesCollectionPlaceholderSvg);
     return SizedBox(
@@ -79,16 +81,8 @@ class _InscriptionLayout extends StatelessWidget {
       height: 112,
       child: Row(
         children: [
-          SizedBox.square(
-            dimension: 112,
-            child: inscription == null
-                ? defaultInscriptionImage
-                : CacheImage(
-                    inscription?.contentUrl ?? '',
-                    errorWidget: () => defaultInscriptionImage,
-                    placeholder: () => defaultInscriptionImage,
-                  ),
-          ),
+          InscriptionContent(
+              inscription: inscription, mode: InscriptionContentMode.small),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(10),
@@ -116,8 +110,8 @@ class _InscriptionLayout extends StatelessWidget {
                       const SizedBox(width: 10),
                       HexagonWidget(
                         type: HexagonType.FLAT,
-                        cornerRadius: 2,
-                        height: 20,
+                        cornerRadius: 4,
+                        height: 22,
                         width: 22,
                         child: SizedBox.square(
                           dimension: 22,
@@ -144,45 +138,12 @@ class _InscriptionLayout extends StatelessWidget {
   }
 }
 
-class ColoredHashWidget extends HookWidget {
-  const ColoredHashWidget({
-    required this.inscriptionHex,
-    this.blockSize = const Size(5, 16),
-    this.space = 3,
-    super.key,
-  });
+enum InscriptionContentMode {
+  small(2),
+  large(5);
 
-  final String? inscriptionHex;
-
-  final Size blockSize;
-  final double space;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = useMemoized(() {
-      if (inscriptionHex == null) {
-        return List.filled(12, Colors.black12);
-      }
-      final bytes = inscriptionHex!.hexToBytes();
-      final data = bytes + sha3Hash(bytes).sublist(0, 4);
-      final colors = <Color>[];
-      for (var i = 0; i < data.length; i += 3) {
-        colors.add(Color.fromARGB(0xFF, data[i], data[i + 1], data[i + 2]));
-      }
-      return colors;
-    }, [inscriptionHex]);
-    return Row(
-      children: <Widget>[
-        for (final color in colors)
-          Container(
-            width: blockSize.width,
-            height: blockSize.height,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(1),
-            ),
-          ),
-      ].joinList(SizedBox(width: space)),
-    );
-  }
+  final int maxLines;
+  const InscriptionContentMode(this.maxLines);
 }
+
+const String cacheInscriptionTextFolderName = 'cache_inscription_text';

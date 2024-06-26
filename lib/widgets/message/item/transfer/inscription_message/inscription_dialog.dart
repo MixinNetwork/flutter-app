@@ -3,14 +3,16 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../constants/brightness_theme_data.dart';
-import '../../../../db/vo/inscription.dart';
-import '../../../../ui/provider/database_provider.dart';
-import '../../../../utils/extension/extension.dart';
-import '../../../buttons.dart';
-import '../../../cache_image.dart';
-import '../../../dialog.dart';
-import '../../../high_light_text.dart';
+import '../../../../../constants/brightness_theme_data.dart';
+import '../../../../../db/vo/inscription.dart';
+import '../../../../../ui/provider/database_provider.dart';
+import '../../../../../utils/extension/extension.dart';
+import '../../../../buttons.dart';
+import '../../../../cache_image.dart';
+import '../../../../dialog.dart';
+import '../../../../high_light_text.dart';
+import 'colored_hash_widget.dart';
+import 'inscription_content.dart';
 import 'inscription_message.dart';
 
 Future<void> showInscriptionDialog(
@@ -101,7 +103,10 @@ class _InscriptionDetailLayout extends StatelessWidget {
             const SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: CacheImage(inscription.contentUrl),
+              child: InscriptionContent(
+                inscription: inscription,
+                mode: InscriptionContentMode.large,
+              ),
             ),
             const SizedBox(height: 20),
             _ItemInfoTile(

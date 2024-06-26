@@ -535,6 +535,9 @@ class Resources {
   static const String assetsImagesSuccessfulSvg =
       'assets/images/successful.svg';
 
+  /// {@macro assets_generator.assetsImagesTextBgPng.preview}
+  static const String assetsImagesTextBgPng = 'assets/images/text_bg.png';
+
   /// {@macro assets_generator.assetsImagesTransferSvg.preview}
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
 

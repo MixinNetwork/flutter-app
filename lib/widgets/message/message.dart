@@ -66,7 +66,7 @@ import 'item/system_message.dart';
 import 'item/text/selectable.dart';
 import 'item/text/text_message.dart';
 import 'item/transcript_message.dart';
-import 'item/transfer/inscription_message.dart';
+import 'item/transfer/inscription_message/inscription_message.dart';
 import 'item/transfer/safe_transfer_message.dart';
 import 'item/transfer/transfer_message.dart';
 import 'item/unknown_message.dart';
