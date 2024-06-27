@@ -115,13 +115,11 @@ class _InscriptionLayout extends StatelessWidget {
                         width: 22,
                         child: SizedBox.square(
                           dimension: 22,
-                          child: inscription == null
-                              ? defaultCollectionImage
-                              : CacheImage(
-                                  inscription!.iconUrl ?? '',
-                                  errorWidget: () => defaultCollectionImage,
-                                  placeholder: () => defaultCollectionImage,
-                                ),
+                          child: CacheImage(
+                            inscription?.iconUrl ?? '',
+                            errorWidget: () => defaultCollectionImage,
+                            placeholder: () => defaultCollectionImage,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 2),
@@ -139,11 +137,13 @@ class _InscriptionLayout extends StatelessWidget {
 }
 
 enum InscriptionContentMode {
-  small(2),
-  large(5);
+  small(2, 14),
+  large(5, 24);
 
   final int maxLines;
-  const InscriptionContentMode(this.maxLines);
+  final double fontSize;
+  // ignore: sort_constructors_first
+  const InscriptionContentMode(this.maxLines, this.fontSize);
 }
 
 const String cacheInscriptionTextFolderName = 'cache_inscription_text';

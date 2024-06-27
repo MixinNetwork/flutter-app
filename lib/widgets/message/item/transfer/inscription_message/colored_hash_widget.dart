@@ -1,7 +1,8 @@
-import '../../../../../utils/extension/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
+import '../../../../../utils/extension/extension.dart';
 
 class ColoredHashWidget extends HookWidget {
   const ColoredHashWidget({
@@ -19,10 +20,10 @@ class ColoredHashWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final colors = useMemoized(() {
-      if (inscriptionHex == null) {
-        return List.filled(12, Colors.black12);
-      }
-      final bytes = inscriptionHex!.hexToBytes();
+      final bytes = inscriptionHex?.hexToBytes();
+
+      if (bytes == null) return List.filled(12, Colors.black12);
+
       final data = bytes + sha3Hash(bytes).sublist(0, 4);
       final colors = <Color>[];
       for (var i = 0; i < data.length; i += 3) {

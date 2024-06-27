@@ -116,7 +116,7 @@ class _InscriptionDetailLayout extends StatelessWidget {
                 children: [
                   ColoredHashWidget(
                     inscriptionHex: inscription.inscriptionHash,
-                    blockSize: const ui.Size(7, 18),
+                    blockSize: const ui.Size(7, 24),
                     space: 4,
                   ),
                   const SizedBox(height: 4),

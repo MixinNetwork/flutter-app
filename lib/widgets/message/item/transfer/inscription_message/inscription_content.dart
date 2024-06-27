@@ -28,30 +28,41 @@ class InscriptionContent extends HookWidget {
         SvgPicture.asset(Resources.assetsImagesInscriptionPlaceholderSvg);
 
     return AspectRatio(
-      aspectRatio: 1,
-      child: inscription == null
-          ? defaultInscriptionImage
-          : inscription?.contentType.startsWith('image') ?? false
-              ? CacheImage(
-                  inscription?.contentUrl ?? '',
-                  errorWidget: () => defaultInscriptionImage,
-                  placeholder: () => defaultInscriptionImage,
-                )
-              : _Text(inscription: inscription, mode: mode),
-    );
+        aspectRatio: 1,
+        child: switch (inscription) {
+          Inscription(contentType: final type, contentUrl: final contentUrl)
+              when type.startsWith('image') =>
+            CacheImage(
+              contentUrl,
+              errorWidget: () => defaultInscriptionImage,
+              placeholder: () => defaultInscriptionImage,
+            ),
+          Inscription(
+            contentType: final type,
+            contentUrl: final contentUrl,
+            iconUrl: final iconUrl?
+          )
+              when type.startsWith('text') =>
+            _TextInscriptionContent(
+              contentUrl: contentUrl,
+              iconUrl: iconUrl,
+              mode: mode,
+            ),
+          _ => defaultInscriptionImage,
+        });
   }
 }
 
-class _Text extends HookWidget {
-  const _Text({required this.inscription, required this.mode});
+class _TextInscriptionContent extends HookWidget {
+  const _TextInscriptionContent(
+      {required this.contentUrl, required this.iconUrl, required this.mode});
 
-  final Inscription? inscription;
+  final String contentUrl;
+  final String iconUrl;
   final InscriptionContentMode mode;
 
   @override
   Widget build(BuildContext context) {
-    final defaultInscriptionImage =
-        SvgPicture.asset(Resources.assetsImagesInscriptionPlaceholderSvg);
     final defaultCollectionImage =
         SvgPicture.asset(Resources.assetsImagesCollectionPlaceholderSvg);
 
@@ -62,61 +73,59 @@ class _Text extends HookWidget {
 
     final text = useMemoizedFuture(
       () async {
-        if (inscription == null) return null;
-        final response = await client.get(Uri.parse(inscription!.contentUrl));
+        final response = await client.get(Uri.parse(contentUrl));
         return response.body;
       },
       null,
-      keys: [inscription?.contentUrl],
-    );
+      keys: [contentUrl],
+    ).data;
 
-    return (inscription?.contentType.startsWith('text') ?? false) &&
-            text.hasData
-        ? Stack(
-            fit: StackFit.expand,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(Resources.assetsImagesTextBgPng),
+        LayoutBuilder(
+          builder: (context, constraints) => Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(Resources.assetsImagesTextBgPng),
-              LayoutBuilder(
-                builder: (context, constraints) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    HexagonWidget(
-                      type: HexagonType.FLAT,
-                      cornerRadius: constraints.maxWidth / 3 / 5,
-                      height: constraints.maxWidth / 3,
-                      width: constraints.maxWidth / 3,
-                      child: SizedBox.square(
-                        dimension: constraints.maxWidth / 3,
-                        child: CacheImage(
-                          inscription!.iconUrl ?? '',
-                          errorWidget: () => defaultCollectionImage,
-                          placeholder: () => defaultCollectionImage,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: constraints.maxWidth / 40),
-                      child: AutoSizeText(
-                        text.requireData!,
-                        maxLines: mode.maxLines,
-                        maxFontSize: 24,
-                        // ignore: avoid_redundant_argument_values
-                        minFontSize: 12,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: const Color.fromRGBO(255, 167, 36, 1),
-                          fontSize:
-                              mode == InscriptionContentMode.small ? 14 : 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+              HexagonWidget(
+                type: HexagonType.FLAT,
+                cornerRadius: constraints.maxWidth / 3 / 5,
+                height: constraints.maxWidth / 3,
+                width: constraints.maxWidth / 3,
+                child: SizedBox.square(
+                  dimension: constraints.maxWidth / 3,
+                  child: CacheImage(
+                    iconUrl,
+                    errorWidget: () => defaultCollectionImage,
+                    placeholder: () => defaultCollectionImage,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: constraints.maxWidth / 40,
+                  right: constraints.maxWidth / 10,
+                  left: constraints.maxWidth / 10,
+                ),
+                child: AutoSizeText(
+                  text ?? '',
+                  maxLines: mode.maxLines,
+                  maxFontSize: 24,
+                  minFontSize: 14,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: const Color.fromRGBO(255, 167, 36, 1),
+                    fontSize: mode.fontSize,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
-          )
-        : defaultInscriptionImage;
+          ),
+        ),
+      ],
+    );
   }
 }
