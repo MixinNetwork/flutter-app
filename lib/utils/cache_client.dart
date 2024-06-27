@@ -22,19 +22,21 @@ class CacheClient extends BaseClient {
   late Client _client;
   final String folderName;
 
+  String get logTag => '[CacheClient][folderName: $folderName]';
+
   @override
   Future<Response> get(Uri url, {Map<String, String>? headers}) async {
     final cacheKey = keyToMd5(url.toString());
 
     final cache = await _loadCache(cacheKey);
     if (cache != null) {
-      i('load response from cache: $url $cacheKey');
+      i('$logTag: load response from cache: $url $cacheKey');
       return Response.bytes(cache, 200);
     }
 
     final response = await super.get(url, headers: headers);
     if (response.statusCode == 200) {
-      i('save response(${response.statusCode}) to cache: $url $cacheKey');
+      i('$logTag: save response(${response.statusCode}) to cache: $url $cacheKey');
       await _saveCache(cacheKey, response.bodyBytes);
     }
     return response;
