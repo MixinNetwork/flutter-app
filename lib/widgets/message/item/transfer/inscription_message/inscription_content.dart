@@ -85,47 +85,90 @@ class _TextInscriptionContent extends HookWidget {
       children: [
         Image.asset(Resources.assetsImagesTextBgPng),
         LayoutBuilder(
-          builder: (context, constraints) => Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              HexagonWidget(
-                type: HexagonType.FLAT,
-                cornerRadius: constraints.maxWidth / 3 / 5,
-                height: constraints.maxWidth / 3,
-                width: constraints.maxWidth / 3,
-                child: SizedBox.square(
-                  dimension: constraints.maxWidth / 3,
-                  child: CacheImage(
-                    iconUrl,
-                    errorWidget: () => defaultCollectionImage,
-                    placeholder: () => defaultCollectionImage,
+          builder: (context, constraints) {
+            final textStyle = TextStyle(
+              color: const Color.fromRGBO(255, 167, 36, 1),
+              fontSize: mode.fontSize,
+              fontWeight: FontWeight.bold,
+            );
+            final autoSizeText = AutoSizeText(
+              text ?? '',
+              maxLines: mode.maxLines,
+              maxFontSize: 24,
+              minFontSize: 14,
+              overflow: TextOverflow.ellipsis,
+              style: textStyle,
+            );
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                HexagonWidget(
+                  type: HexagonType.FLAT,
+                  cornerRadius: constraints.maxWidth / 3 / 5,
+                  height: constraints.maxWidth / 3,
+                  width: constraints.maxWidth / 3,
+                  child: SizedBox.square(
+                    dimension: constraints.maxWidth / 3,
+                    child: CacheImage(
+                      iconUrl,
+                      errorWidget: () => defaultCollectionImage,
+                      placeholder: () => defaultCollectionImage,
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: constraints.maxWidth / 40,
-                  right: constraints.maxWidth / 10,
-                  left: constraints.maxWidth / 10,
-                ),
-                child: AutoSizeText(
-                  text ?? '',
-                  maxLines: mode.maxLines,
-                  maxFontSize: 24,
-                  minFontSize: 14,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: const Color.fromRGBO(255, 167, 36, 1),
-                    fontSize: mode.fontSize,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: constraints.maxWidth / 40,
+                    right: constraints.maxWidth / 10,
+                    left: constraints.maxWidth / 10,
                   ),
+                  child: mode == InscriptionContentMode.large
+                      ? autoSizeText
+                      : _MinLinesWrapper(
+                          text: text,
+                          style: textStyle,
+                          minLines: mode.maxLines,
+                          child: autoSizeText,
+                        ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
         ),
       ],
+    );
+  }
+}
+
+class _MinLinesWrapper extends HookWidget {
+  const _MinLinesWrapper({
+    required this.text,
+    required this.style,
+    required this.child,
+    this.minLines = 1,
+  });
+
+  final String? text;
+  final TextStyle style;
+  final Widget child;
+  final int minLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final minHeight = useMemoized(() {
+      final textPainter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: TextDirection.ltr,
+        maxLines: minLines,
+      )..layout(maxWidth: MediaQuery.of(context).size.width);
+
+      return textPainter.preferredLineHeight * minLines;
+    }, [text, style, minLines]);
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: minHeight),
+      child: child,
     );
   }
 }
