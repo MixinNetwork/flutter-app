@@ -399,7 +399,7 @@ class MixinNetworkImageProvider
   /// print error
   final bool printError;
 
-  /// The max duration to cahce image.
+  /// The max duration to cache image.
   /// After this time the cache is expired and the image is reloaded.
   final Duration? cacheMaxAge;
 
@@ -504,19 +504,19 @@ class MixinNetworkImageProvider
     Uint8List? data;
     // exist, try to find cache image file
     if (_cacheImagesDirectory.existsSync()) {
-      final cacheFlie = File(join(_cacheImagesDirectory.path, md5Key));
-      if (cacheFlie.existsSync()) {
+      final cacheFile = File(join(_cacheImagesDirectory.path, md5Key));
+      if (cacheFile.existsSync()) {
         if (key.cacheMaxAge != null) {
           final now = DateTime.now();
-          final fs = cacheFlie.statSync();
+          final fs = cacheFile.statSync();
           if (now.subtract(key.cacheMaxAge!).isAfter(fs.changed)) {
             i('cache expired, reload. $url');
-            cacheFlie.deleteSync(recursive: true);
+            cacheFile.deleteSync(recursive: true);
           } else {
-            data = await cacheFlie.readAsBytes();
+            data = await cacheFile.readAsBytes();
           }
         } else {
-          data = await cacheFlie.readAsBytes();
+          data = await cacheFile.readAsBytes();
         }
       }
     }
