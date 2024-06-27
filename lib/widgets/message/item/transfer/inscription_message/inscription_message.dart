@@ -44,8 +44,6 @@ class InscriptionMessage extends HookWidget {
       }
     }, [content]);
 
-    i('fuck inscription: $inscription');
-
     return MessageBubble(
       forceIsCurrentUserColor: false,
       padding: EdgeInsets.zero,
