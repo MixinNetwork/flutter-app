@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
+import '../enum/encrypt_category.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -51,8 +52,9 @@ Future<bool> openUri(
   if (uri.scheme.isEmpty) return Future.value(false);
 
   if (uri.isMixin) {
-    if (uri.userId != null && uri.userId!.trim().isNotEmpty) {
-      await showUserDialog(context, uri.userId);
+    final userId = uri.userId;
+    if (userId != null && userId.trim().isNotEmpty) {
+      await showUserDialog(context, userId);
       return true;
     }
 
@@ -67,7 +69,38 @@ Future<bool> openUri(
     }
 
     final conversationId = uri.conversationId;
+    final startText = uri.startTextOfConversation;
     if (conversationId != null && conversationId.trim().isNotEmpty) {
+      if (startText?.trim().isNotEmpty == true) {
+        try {
+          final conversation = await context.database.conversationDao
+              .conversationItem(conversationId)
+              .getSingleOrNull();
+
+          if (conversation == null) {
+            showToastFailed(null);
+            return false;
+          }
+
+          await ConversationStateNotifier.selectConversation(
+            context,
+            conversation.conversationId,
+            conversation: conversation,
+          );
+
+          await context.accountServer.sendTextMessage(
+            startText ?? '',
+            EncryptCategory.plain,
+            conversationId: conversationId,
+          );
+
+          return true;
+        } catch (error) {
+          showToastFailed(error);
+          return false;
+        }
+      }
+
       return _selectConversation(uri, context, conversationId);
     }
 
@@ -301,6 +334,11 @@ extension _MixinUriExtension on Uri {
   bool get isPay => _isTypeHost(MixinSchemeHost.pay);
 
   bool get isMultisigs => _isTypeHost(MixinSchemeHost.multisigs);
+
+  String? get startTextOfConversation {
+    if (!isMixin) return null;
+    return queryParameters['start'];
+  }
 
   String? get categoryOfSend {
     if (!isSend) return null;
