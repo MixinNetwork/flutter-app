@@ -77,7 +77,7 @@ class _TextInscriptionContent extends HookWidget {
         return response.body;
       },
       null,
-      keys: [contentUrl],
+      keys: [client, contentUrl],
     ).data;
 
     return Stack(
