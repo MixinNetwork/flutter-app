@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flex_list/flex_list.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -32,12 +33,6 @@ class ActionMessage extends HookConsumerWidget {
 
     if (actionDataList == null) return const UnknownMessage();
 
-    final bubbleClipper = BubbleClipper(
-      currentUser: false,
-      showNip: false,
-      nipPadding: false,
-    );
-
     return MessageBubble(
       showBubble: false,
       padding: EdgeInsets.zero,
@@ -46,42 +41,60 @@ class ActionMessage extends HookConsumerWidget {
         runSpacing: 6,
         children: actionDataList
             .map(
-              (e) => InteractiveDecoratedBox.color(
-                cursor: SystemMouseCursors.click,
-                onTap: () {
-                  if (context.openAction(e.action)) return;
-                  openUriWithWebView(
-                    context,
-                    e.action,
-                    title: e.label,
-                    conversationId: ref.read(currentConversationIdProvider),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(1),
-                  child: CustomPaint(
-                    painter: BubblePainter(
-                      color: context.theme.primary,
-                      clipper: bubbleClipper,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        // ignore: avoid_dynamic_calls
-                        e.label,
-                        style: TextStyle(
-                          fontSize: context.messageStyle.primaryFontSize,
-                          // ignore: avoid_dynamic_calls
-                          color: colorHex(e.color) ?? Colors.black,
-                          height: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              (e) => ActionMessageButton(action: e),
             )
             .toList(),
+      ),
+    );
+  }
+}
+
+class ActionMessageButton extends ConsumerWidget {
+  const ActionMessageButton({
+    required this.action,
+    super.key,
+  });
+
+  final ActionData action;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bubbleClipper = BubbleClipper(
+      currentUser: false,
+      showNip: false,
+      nipPadding: false,
+    );
+    return InteractiveDecoratedBox.color(
+      cursor: SystemMouseCursors.click,
+      onTap: () {
+        if (context.openAction(action.action)) return;
+        openUriWithWebView(
+          context,
+          action.action,
+          title: action.label,
+          conversationId: ref.read(currentConversationIdProvider),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(1),
+        child: CustomPaint(
+          painter: BubblePainter(
+            color: context.theme.primary,
+            clipper: bubbleClipper,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              action.label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: context.messageStyle.primaryFontSize,
+                color: colorHex(action.color) ?? Colors.black,
+                height: 1,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

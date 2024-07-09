@@ -292,6 +292,8 @@ class _ShareMenuItem extends StatelessWidget {
                 url,
                 app.updatedAt?.toIso8601String() ?? '',
                 true,
+                [],
+                '',
               );
 
               await context.accountServer.sendAppCardMessage(

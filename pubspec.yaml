@@ -173,6 +173,7 @@ dependencies:
       url: https://github.com/boyan01/webcrypto.dart.git
       ref: 210839e1e9311bcddeb733297a565721692033ee
   hexagon: ^0.2.0
+  flex_list: ^1.0.0
 
 dev_dependencies:
   build_runner: ^2.4.8
