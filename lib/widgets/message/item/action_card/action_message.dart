@@ -26,7 +26,6 @@ class ActionCardMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final content = useMessageConverter(converter: (state) => state.content);
-    i('content: $content');
     final appCardData = useMemoized(
       () {
         try {

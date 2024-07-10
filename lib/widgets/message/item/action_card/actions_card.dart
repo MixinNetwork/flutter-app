@@ -1,4 +1,3 @@
-import 'package:flex_list/flex_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -29,20 +28,27 @@ class ActionsCardMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, constraints) {
-        final width = (constraints.maxWidth * 0.41).clamp(240.0, 340.0);
-        return ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: width, minWidth: width),
-          child: Column(
-            children: [
-              MessageBubble(
-                padding: EdgeInsets.zero,
-                clip: true,
+        final width = (constraints.maxWidth * 0.5).clamp(240.0, 400.0);
+        return Column(
+          children: [
+            MessageBubble(
+              padding: EdgeInsets.zero,
+              clip: true,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: width, minWidth: width),
                 child: _ActionsCard(data: data),
               ),
-              const SizedBox(height: 8),
-              _Actions(actions: data.actions)
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            MessageBubble(
+              showBubble: false,
+              padding: EdgeInsets.zero,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: width, minWidth: width),
+                child: _Actions(actions: data.actions),
+              ),
+            )
+          ],
         );
       });
 }
@@ -145,9 +151,7 @@ class _Actions extends StatelessWidget {
   final List<ActionData> actions;
 
   @override
-  Widget build(BuildContext context) => FlexList(
-        verticalSpacing: 8,
-        horizontalSpacing: 8,
+  Widget build(BuildContext context) => ActionButtonLayout(
         children: actions.map((e) => ActionMessageButton(action: e)).toList(),
       );
 }
