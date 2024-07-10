@@ -169,7 +169,7 @@ SPEC CHECKSUMS:
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_keep_screen_on: 855ea723f37225b8fc7895cffa06fe89f4fabd46
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
-  device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
+  device_info_plus: ce1b7762849d3ec103d0e0517299f2db7ad60720
   file_selector_macos: 54fdab7caa3ac3fc43c9fac4d7d8d231277f8cf2
   flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
