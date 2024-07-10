@@ -663,7 +663,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
           if (isDesktop)
             ContextMenu(
               icon: Resources.assetsImagesFilePreviewImagesSvg,
-              title: '${context.l10n.image} & ${context.l10n.video}',
+              title: context.l10n.picturesAndVideos,
               onTap: () async {
                 final files = await selectFiles();
                 if (files.isNotEmpty) {

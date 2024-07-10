@@ -193,7 +193,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "botsTitle": MessageLookupByLibrary.simpleMessage("Боты"),
         "canNotRecognizeQrCode":
             MessageLookupByLibrary.simpleMessage("Не могу распознать QR-код"),
-        "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
+        "cancel": MessageLookupByLibrary.simpleMessage("Отменить"),
         "card": MessageLookupByLibrary.simpleMessage("Карта"),
         "change": MessageLookupByLibrary.simpleMessage("Изменить"),
         "changeNumber": MessageLookupByLibrary.simpleMessage("Изменить номер"),
