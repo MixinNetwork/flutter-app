@@ -14,6 +14,7 @@ import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../../message_layout.dart';
+import '../../message_style.dart';
 import '../action/action_data.dart';
 import '../action/action_message.dart';
 import '../text/text_message.dart';
@@ -102,7 +103,7 @@ class _ActionsCard extends HookConsumerWidget {
             data.title,
             style: TextStyle(
               color: context.theme.text,
-              fontSize: 16,
+              fontSize: context.messageStyle.primaryFontSize,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -118,7 +119,7 @@ class _ActionsCard extends HookConsumerWidget {
                 data.description,
                 style: TextStyle(
                   color: context.theme.secondaryText,
-                  fontSize: 14,
+                  fontSize: context.messageStyle.secondaryFontSize,
                 ),
                 textMatchers: [
                   UrlTextMatcher(context),
