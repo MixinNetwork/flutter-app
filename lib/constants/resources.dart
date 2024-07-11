@@ -246,6 +246,10 @@ class Resources {
   static const String assetsImagesExpiringDarkSvg =
       'assets/images/expiring_dark.svg';
 
+  /// {@macro assets_generator.assetsImagesExternalLinkSvg.preview}
+  static const String assetsImagesExternalLinkSvg =
+      'assets/images/external_link.svg';
+
   /// {@macro assets_generator.assetsImagesFailedSvg.preview}
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 

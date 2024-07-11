@@ -3,8 +3,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../constants/resources.dart';
 import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/extension/extension.dart';
@@ -82,16 +84,33 @@ class ActionMessageButton extends ConsumerWidget {
           color: context.theme.primary,
           clipper: bubbleClipper,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            action.label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: context.messageStyle.secondaryFontSize,
-              color: colorHex(action.color) ?? Colors.black,
-              height: 1,
-            ),
+        child: IntrinsicWidth(
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  action.label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: context.messageStyle.secondaryFontSize,
+                    color: colorHex(action.color) ?? Colors.black,
+                    height: 1,
+                  ),
+                ),
+              ),
+              if (action.isExternalLink)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesExternalLinkSvg,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
