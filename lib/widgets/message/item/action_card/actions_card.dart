@@ -54,6 +54,43 @@ class ActionsCardMessage extends StatelessWidget {
       });
 }
 
+class ActionsCardBody extends StatelessWidget {
+  const ActionsCardBody({
+    required this.description,
+    required this.data,
+    super.key,
+  });
+
+  final AppCardData data;
+  final Widget description;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (data.coverUrl.isNotEmpty) CacheImage(data.coverUrl),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: CustomText(
+              data.title,
+              style: TextStyle(
+                color: context.theme.text,
+                fontSize: context.messageStyle.primaryFontSize,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: description,
+          ),
+          const SizedBox(height: 10),
+        ],
+      );
+}
+
 class _ActionsCard extends HookConsumerWidget {
   const _ActionsCard({required this.data});
 
@@ -92,56 +129,36 @@ class _ActionsCard extends HookConsumerWidget {
 
     final focusNode = useFocusNode(debugLabel: 'text selection focus');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (data.coverUrl.isNotEmpty) CacheImage(data.coverUrl),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: CustomText(
-            data.title,
+    return ActionsCardBody(
+      data: data,
+      description: MessageSelectionArea(
+        focusNode: focusNode,
+        child: MessageLayout(
+          spacing: 6,
+          content: CustomText(
+            data.description,
             style: TextStyle(
-              color: context.theme.text,
-              fontSize: context.messageStyle.primaryFontSize,
-              fontWeight: FontWeight.w500,
+              color: context.theme.secondaryText,
+              fontSize: context.messageStyle.secondaryFontSize,
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: MessageSelectionArea(
-            focusNode: focusNode,
-            child: MessageLayout(
-              spacing: 6,
-              content: CustomText(
-                data.description,
+            textMatchers: [
+              UrlTextMatcher(context),
+              MailTextMatcher(context),
+              MentionTextMatcher(context, mentionMap),
+              BotNumberTextMatcher(context),
+              EmojiTextMatcher(),
+              KeyWordTextMatcher(
+                keyword,
                 style: TextStyle(
-                  color: context.theme.secondaryText,
-                  fontSize: context.messageStyle.secondaryFontSize,
+                  backgroundColor: context.theme.highlight,
+                  color: context.theme.text,
                 ),
-                textMatchers: [
-                  UrlTextMatcher(context),
-                  MailTextMatcher(context),
-                  MentionTextMatcher(context, mentionMap),
-                  BotNumberTextMatcher(context),
-                  EmojiTextMatcher(),
-                  KeyWordTextMatcher(
-                    keyword,
-                    style: TextStyle(
-                      backgroundColor: context.theme.highlight,
-                      color: context.theme.text,
-                    ),
-                  ),
-                ],
               ),
-              dateAndStatus: const MessageDatetimeAndStatus(),
-            ),
+            ],
           ),
+          dateAndStatus: const MessageDatetimeAndStatus(),
         ),
-        const SizedBox(height: 10),
-      ],
+      ),
     );
   }
 }

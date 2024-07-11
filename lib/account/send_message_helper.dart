@@ -625,14 +625,28 @@ class SendMessageHelper {
     String content, {
     bool cleanDraft = true,
   }) async {
-    d('sendAppCardMessage: $content');
+
+    final Map<String, dynamic> data;
+    try {
+      data = jsonDecode(content) as Map<String, dynamic>;
+    } catch (e) {
+      w('AppCardData.fromJson error: $e');
+      return;
+    }
+    if (data['actions'] != null) {
+      data['actions'] = null;
+    }
+    if (data['action'] == '') {
+      data['action'] = null;
+    }
+
     const category = MessageCategory.appCard;
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
       userId: senderId,
       category: category,
-      content: content,
+      content: jsonEncode(data),
       status: MessageStatus.sending,
       createdAt: DateTime.now(),
     );
@@ -854,20 +868,10 @@ class SendMessageHelper {
         cleanDraft: false,
       );
     } else if (message.category == MessageCategory.appCard) {
-      final Map<String, dynamic> data;
-      try {
-        data = jsonDecode(message.content!) as Map<String, dynamic>;
-      } catch (e) {
-        w('AppCardData.fromJson error: $e');
-        return;
-      }
-      if (data['actions'] != null) {
-        data['actions'] = null;
-      }
       await sendAppCardMessage(
         conversationId,
         senderId,
-        jsonEncode(data),
+        message.content!,
         cleanDraft: false,
       );
     } else if (message.category.isTranscript) {

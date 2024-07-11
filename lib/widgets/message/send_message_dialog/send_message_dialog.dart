@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
-
 import '../../../ui/provider/conversation_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -22,10 +22,12 @@ import '../../toast.dart';
 import '../../user_selector/conversation_selector.dart';
 import '../item/action_card/action_card_data.dart';
 import '../item/action_card/action_message.dart';
+import '../item/action_card/actions_card.dart';
 import '../item/contact_message_widget.dart';
 import '../item/post_message.dart';
 import '../message.dart';
 import '../message_bubble.dart';
+import '../message_style.dart';
 import 'send_image_data.dart';
 
 enum _Category {
@@ -60,8 +62,7 @@ Future<bool> showSendDialog(
 
   dynamic result;
   try {
-    final _data =
-        await utf8DecodeWithIsolate(await base64DecodeWithIsolate(data));
+    final _data = await utf8DecodeWithIsolate(decodeBase64(data));
 
     switch (_category) {
       case _Category.image:
@@ -209,7 +210,9 @@ class _SendPage extends HookConsumerWidget {
               borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             alignment: Alignment.center,
-            padding: const EdgeInsets.all(34),
+            padding: category == _Category.app_card
+                ? null
+                : const EdgeInsets.all(34),
             child: child,
           ),
           const SizedBox(height: 54),
@@ -279,25 +282,35 @@ final _bubbleClipper = BubbleClipper(
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.child,
-    // ignore: unused_element
     this.padding = const EdgeInsets.all(8),
+    this.clip = false,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final bool clip;
 
   @override
-  Widget build(BuildContext context) => CustomPaint(
-        painter: BubblePainter(
-          color: context.dynamicColor(lightOtherBubble,
-              darkColor: darkOtherBubble),
-          clipper: _bubbleClipper,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: child,
-        ),
+  Widget build(BuildContext context) {
+    Widget child = Padding(
+      padding: padding,
+      child: this.child,
+    );
+    if (clip) {
+      child = ClipPath(
+        clipper: _bubbleClipper,
+        child: RepaintBoundary(child: child),
       );
+    }
+    return CustomPaint(
+      painter: BubblePainter(
+        color:
+            context.dynamicColor(lightOtherBubble, darkColor: darkOtherBubble),
+        clipper: _bubbleClipper,
+      ),
+      child: child,
+    );
+  }
 }
 
 class _Text extends StatelessWidget {
@@ -419,7 +432,32 @@ class _AppCard extends StatelessWidget {
   final AppCardData data;
 
   @override
-  Widget build(BuildContext context) => _MessageBubble(
-        child: AppCardItem(data: data),
+  Widget build(BuildContext context) {
+    if (!data.isActionsCard) {
+      return _MessageBubble(
+        child: Padding(
+          padding: const EdgeInsets.all(34),
+          child: AppCardItem(data: data),
+        ),
       );
+    } else {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: _MessageBubble(
+          padding: EdgeInsets.zero,
+          clip: true,
+          child: ActionsCardBody(
+            data: data,
+            description: Text(
+              data.description,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: context.messageStyle.secondaryFontSize,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
 }

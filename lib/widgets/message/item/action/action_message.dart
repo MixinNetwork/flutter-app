@@ -238,7 +238,9 @@ class RenderActionButtonLayout extends RenderBox
       height += maxRowHeight + verticalSpacing;
     }
 
-    height -= verticalSpacing;
+    if (child != null) {
+      height -= verticalSpacing;
+    }
     return Size(constraints.maxWidth, height);
   }
 
