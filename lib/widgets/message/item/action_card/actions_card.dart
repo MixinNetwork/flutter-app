@@ -68,7 +68,11 @@ class ActionsCardBody extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (data.coverUrl.isNotEmpty) CacheImage(data.coverUrl),
+          if (data.coverUrl.isNotEmpty)
+            AspectRatio(
+              aspectRatio: 16 / 10,
+              child: CacheImage(data.coverUrl),
+            ),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
