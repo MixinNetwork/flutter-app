@@ -625,7 +625,6 @@ class SendMessageHelper {
     String content, {
     bool cleanDraft = true,
   }) async {
-
     final Map<String, dynamic> data;
     try {
       data = jsonDecode(content) as Map<String, dynamic>;
