@@ -39,14 +39,15 @@ class ActionMessage extends HookConsumerWidget {
     return MessageBubble(
       showBubble: false,
       padding: EdgeInsets.zero,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 6,
-        children: actionDataList
-            .map(
-              (e) => ActionMessageButton(action: e),
-            )
-            .toList(),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 240, maxWidth: 340),
+        child: ActionButtonLayout(
+          children: actionDataList
+              .map(
+                (e) => ActionMessageButton(action: e),
+              )
+              .toList(),
+        ),
       ),
     );
   }
