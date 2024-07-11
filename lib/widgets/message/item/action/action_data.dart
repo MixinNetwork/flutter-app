@@ -17,20 +17,8 @@ class ActionData {
   String color;
   String action;
 
-  bool get isExternalLink {
-    if (action.startsWith('input:')) {
-      return false;
-    }
-    try {
-      final uri = Uri.parse(action);
-      if (uri.scheme == 'mixin') {
-        return false;
-      }
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
+  bool get isExternalLink =>
+      action.startsWith('https://') || action.startsWith('http://');
 
   Map<String, dynamic> toJson() => _$ActionDataToJson(this);
 }
