@@ -41,5 +41,5 @@ class AppCardData {
 
   Map<String, dynamic> toJson() => _$AppCardDataToJson(this);
 
-  bool get isActionsCard => action.isEmpty && actions.isNotEmpty;
+  bool get isActionsCard => action.isEmpty;
 }

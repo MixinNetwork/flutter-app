@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -853,10 +854,20 @@ class SendMessageHelper {
         cleanDraft: false,
       );
     } else if (message.category == MessageCategory.appCard) {
+      final Map<String, dynamic> data;
+      try {
+        data = jsonDecode(message.content!) as Map<String, dynamic>;
+      } catch (e) {
+        w('AppCardData.fromJson error: $e');
+        return;
+      }
+      if (data['actions'] != null) {
+        data['actions'] = null;
+      }
       await sendAppCardMessage(
         conversationId,
         senderId,
-        message.content!,
+        jsonEncode(data),
         cleanDraft: false,
       );
     } else if (message.category.isTranscript) {
