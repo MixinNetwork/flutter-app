@@ -250,6 +250,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Closing Balance"),
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
         "collectible": MessageLookupByLibrary.simpleMessage("Collectible"),
+        "collectibles": MessageLookupByLibrary.simpleMessage("Collectibles"),
         "collection": MessageLookupByLibrary.simpleMessage("Collection"),
         "combineAndForward":
             MessageLookupByLibrary.simpleMessage("Combine and forward"),
@@ -571,7 +572,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "nextConversation":
             MessageLookupByLibrary.simpleMessage("Next conversation"),
-        "nftToken": MessageLookupByLibrary.simpleMessage("NFT TOKEN"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noCamera": MessageLookupByLibrary.simpleMessage("No camera"),
         "noData": MessageLookupByLibrary.simpleMessage("No Data"),
@@ -614,6 +614,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pickAConversation": MessageLookupByLibrary.simpleMessage(
             "Select a conversation and start sending a message"),
+        "picturesAndVideos":
+            MessageLookupByLibrary.simpleMessage("Pictures & Videos"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("Pin"),
         "pinnedMessageTitle": m38,
         "port": MessageLookupByLibrary.simpleMessage("Port"),

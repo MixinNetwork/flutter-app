@@ -46,7 +46,7 @@ dependencies:
       path: packages/desktop_drop
   desktop_keep_screen_on: ^0.0.3
   desktop_webview_window: ^0.2.3
-  device_info_plus: ^9.1.1
+  device_info_plus: ^10.1.0
   dio: ^5.4.1
   dio_smart_retry: ^6.0.0
   drift: ^2.15.0
@@ -138,9 +138,9 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
       ref: 0334bbaa7293c72398eaf4571ba7ba2b5df2302d
-  super_clipboard: ^0.8.2+1
-  super_context_menu: ^0.8.5
-  super_native_extensions: ^0.8.5
+  super_clipboard: ^0.8.17
+  super_context_menu: ^0.8.17
+  super_native_extensions: ^0.8.17
   synchronized: ^3.0.1
   system_tray:
     path: third_party/system_tray

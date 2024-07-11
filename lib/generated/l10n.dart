@@ -834,6 +834,16 @@ class Localization {
     );
   }
 
+  /// `Collectibles`
+  String get collectibles {
+    return Intl.message(
+      'Collectibles',
+      name: 'collectibles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Collection`
   String get collection {
     return Intl.message(
@@ -2962,16 +2972,6 @@ class Localization {
     );
   }
 
-  /// `NFT TOKEN`
-  String get nftToken {
-    return Intl.message(
-      'NFT TOKEN',
-      name: 'nftToken',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `NO AUDIO`
   String get noAudio {
     return Intl.message(
@@ -3299,6 +3299,16 @@ class Localization {
     return Intl.message(
       'Select a conversation and start sending a message',
       name: 'pickAConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pictures & Videos`
+  String get picturesAndVideos {
+    return Intl.message(
+      'Pictures & Videos',
+      name: 'picturesAndVideos',
       desc: '',
       args: [],
     );
