@@ -8,10 +8,23 @@ on:
       flutter_channel:
         description: "run with flutter channel, eg: master, beta, stable"
         required: true
-        default: "master"
+        type: choice
+        options:
+          - 'master'
+          - 'beta'
+          - 'stable'
+        default: "stable"
+      flutter_version:
+        description: "flutter version. eg 3.19.6"
+        required: false
+        default: ""
   push:
     tags:
       - 'v*'
+
+env:
+  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
+  FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel}}
 
 jobs:
   build-linux:
@@ -29,7 +42,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ github.event.inputs.flutter_channel || 'master' }} # 'master', 'beta', 'dev' or 'stable'
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -189,7 +203,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ github.event.inputs.flutter_channel || 'master' }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - uses: actions-rs/toolchain@v1
         with:
