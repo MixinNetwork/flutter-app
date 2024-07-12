@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../crypto/uuid/uuid.dart';
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
@@ -50,15 +51,10 @@ Future<bool> showSendDialog(
   String? conversationId,
   String? data,
   App? app,
+  String? user,
 ) async {
   final _category = category?.category;
   if (_category == null || data == null || data.isEmpty) return false;
-
-  final _conversationId =
-      context.providerContainer.read(currentConversationIdProvider) ==
-              conversationId
-          ? conversationId
-          : null;
 
   dynamic result;
   try {
@@ -104,11 +100,53 @@ Future<bool> showSendDialog(
     return false;
   }
 
+  if (user != null) {
+    return _sendMessageToUserId(context, user, _category, result);
+  }
+  if (conversationId == null) {
+    final currentConversation =
+        context.providerContainer.read(conversationProvider);
+    if (currentConversation != null) {
+      await _sendMessage(context, currentConversation.conversationId,
+          currentConversation.encryptCategory, _category, result);
+      return true;
+    }
+  }
+
   await showMixinDialog(
     context: context,
-    child: _SendPage(_category, _conversationId, result, app),
+    child: _SendPage(_category, conversationId, result, app),
   );
 
+  return true;
+}
+
+Future<bool> _sendMessageToUserId(BuildContext context, String userId,
+    _Category category, dynamic data) async {
+  if (!Uuid.isValidUUID(fromString: userId)) {
+    return false;
+  }
+
+  showToastLoading();
+  try {
+    final users = await context.accountServer.refreshUsers([userId]);
+    if (users == null || users.isEmpty) {
+      return false;
+    }
+  } finally {
+    Toast.dismiss();
+  }
+
+  final conversationId =
+      generateConversationId(context.accountServer.userId, userId);
+  await ConversationStateNotifier.selectUser(context, userId);
+  final conversation = context.providerContainer.read(conversationProvider);
+  if (conversation == null) {
+    return false;
+  }
+  await _sendMessage(
+      context, conversationId, conversation.encryptCategory, category, data,
+      recipientId: userId);
   return true;
 }
 
@@ -232,31 +270,47 @@ class _SendPage extends HookConsumerWidget {
 }
 
 Future<void> _sendMessage(BuildContext context, String conversationId,
-    EncryptCategory encryptCategory, _Category category, dynamic data) async {
+    EncryptCategory encryptCategory, _Category category, dynamic data,
+    {String? recipientId}) async {
   if (category == _Category.text) {
     return context.accountServer.sendTextMessage(
-        data as String, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.post) {
     return context.accountServer.sendPostMessage(
-        data as String, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.sticker) {
     return context.accountServer.sendStickerMessage(
-        data as String, null, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      null,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.contact) {
     return context.accountServer.sendContactMessage(
-        data as String, null, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      null,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.app_card) {
     return context.accountServer.sendAppCardMessage(
       data: data as AppCardData,
       conversationId: conversationId,
+      recipientId: recipientId,
     );
   }
   if (category == _Category.image) {
@@ -268,6 +322,7 @@ Future<void> _sendMessage(BuildContext context, String conversationId,
         sendImageData.url,
         conversationId: conversationId,
         defaultGifMimeType: false,
+        recipientId: recipientId,
       ),
     );
   }
