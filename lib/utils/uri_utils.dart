@@ -333,7 +333,8 @@ extension _MixinUriExtension on Uri {
     }
   }
 
-  bool get isSend => _isTypeScheme(MixinSchemeHost.send);
+  bool get isSend =>
+      _isTypeScheme(MixinSchemeHost.send) || _isTypeHost(MixinSchemeHost.send);
 
   bool get isPay => _isTypeHost(MixinSchemeHost.pay);
 
