@@ -195,9 +195,22 @@ dev_dependencies:
   very_good_analysis: ^5.1.0
 
 dependency_overrides:
-  # pixel_snap 0.1.3 not compat with latest flutter master channel.
-  pixel_snap: 0.1.2
   intl: ^0.19.0
+  super_native_extensions:
+    git:
+      url: https://github.com/boyan01/super_native_extensions.git
+      ref: dc511dcea6291cf2082985939afea8decc03012f
+      path: super_native_extensions
+  super_clipboard:
+    git:
+      url: https://github.com/boyan01/super_native_extensions.git
+      ref: dc511dcea6291cf2082985939afea8decc03012f
+      path: super_clipboard
+  super_context_menu:
+    git:
+      url: https://github.com/boyan01/super_native_extensions.git
+      ref: dc511dcea6291cf2082985939afea8decc03012f
+      path: super_context_menu
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
