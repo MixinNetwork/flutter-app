@@ -107,6 +107,20 @@ class ActionMessageButton extends ConsumerWidget {
                     padding: const EdgeInsets.all(6),
                     child: SvgPicture.asset(
                       Resources.assetsImagesExternalLinkSvg,
+                      width: 6,
+                      height: 6,
+                    ),
+                  ),
+                ),
+              if (action.isSendUserLink)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesLinkSendSvg,
+                      width: 8,
+                      height: 8,
                     ),
                   ),
                 ),

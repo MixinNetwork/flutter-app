@@ -381,6 +381,9 @@ class Resources {
   static const String assetsImagesLightSenderNipBubblePng =
       'assets/images/light_sender_nip_bubble.png';
 
+  /// {@macro assets_generator.assetsImagesLinkSendSvg.preview}
+  static const String assetsImagesLinkSendSvg = 'assets/images/link_send.svg';
+
   /// {@macro assets_generator.assetsImagesLiveSvg.preview}
   static const String assetsImagesLiveSvg = 'assets/images/live.svg';
 

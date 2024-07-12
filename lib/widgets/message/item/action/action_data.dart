@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../utils/uri_utils.dart';
+
 part 'action_data.g.dart';
 
 @JsonSerializable()
@@ -19,6 +21,15 @@ class ActionData {
 
   bool get isExternalLink =>
       action.startsWith('https://') || action.startsWith('http://');
+
+  bool get isSendUserLink {
+    try {
+      final uri = Uri.parse(action);
+      return uri.isSendToUser;
+    } catch (error) {
+      return false;
+    }
+  }
 
   Map<String, dynamic> toJson() => _$ActionDataToJson(this);
 }
