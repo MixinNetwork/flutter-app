@@ -142,7 +142,7 @@ class _ActionsCard extends HookConsumerWidget {
           content: CustomText(
             data.description,
             style: TextStyle(
-              color: context.theme.secondaryText,
+              color: context.theme.text,
               fontSize: context.messageStyle.secondaryFontSize,
             ),
             textMatchers: [
