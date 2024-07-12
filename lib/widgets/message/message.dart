@@ -461,6 +461,18 @@ class MessageItemWidget extends HookConsumerWidget {
                           }
                         },
                       ));
+                    } else if (message.type.isAppCard) {
+                      final selectedContent = _findSelectedContent(context);
+                      if (selectedContent != null) {
+                        copyActions.add(MenuAction(
+                          image: MenuImage.icon(IconFonts.copy),
+                          title: context.l10n.copySelectedText,
+                          callback: () {
+                            Clipboard.setData(
+                                ClipboardData(text: selectedContent.plainText));
+                          },
+                        ));
+                      }
                     }
 
                     final saveActions = [

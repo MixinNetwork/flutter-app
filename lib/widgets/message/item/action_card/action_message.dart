@@ -18,6 +18,7 @@ import '../../message_datetime_and_status.dart';
 import '../../message_style.dart';
 import '../unknown_message.dart';
 import 'action_card_data.dart';
+import 'actions_card.dart';
 
 class ActionCardMessage extends HookConsumerWidget {
   const ActionCardMessage({super.key});
@@ -39,6 +40,10 @@ class ActionCardMessage extends HookConsumerWidget {
     );
 
     if (appCardData == null) return const UnknownMessage();
+
+    if (appCardData.isActionsCard) {
+      return ActionsCardMessage(data: appCardData);
+    }
 
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),

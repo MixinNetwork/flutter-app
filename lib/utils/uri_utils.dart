@@ -106,7 +106,7 @@ Future<bool> openUri(
 
     if (uri.isSend) {
       return showSendDialog(context, uri.categoryOfSend,
-          uri.conversationIdOfSend, uri.dataOfSend, app);
+          uri.conversationIdOfSend, uri.dataOfSend, app, uri.userOfSend);
     }
 
     if (uri.isPay) {
@@ -288,6 +288,10 @@ Future<bool> _selectConversation(
   return true;
 }
 
+extension MixinUriExt on Uri {
+  bool get isSendToUser => userOfSend?.isNotEmpty == true;
+}
+
 extension _MixinUriExtension on Uri {
   bool get isMixinScheme => isScheme(mixinScheme);
 
@@ -338,6 +342,13 @@ extension _MixinUriExtension on Uri {
   String? get startTextOfConversation {
     if (!isMixin) return null;
     return queryParameters['start'];
+  }
+
+  String? get userOfSend {
+    if (!isSend) {
+      return null;
+    }
+    return queryParameters['user'];
   }
 
   String? get categoryOfSend {

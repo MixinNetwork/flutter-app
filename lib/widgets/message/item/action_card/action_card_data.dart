@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../action/action_data.dart';
+
 part 'action_card_data.g.dart';
 
 @JsonSerializable()
@@ -12,6 +14,8 @@ class AppCardData {
     this.action,
     this.updatedAt,
     this.shareable,
+    this.actions,
+    this.coverUrl,
   );
 
   factory AppCardData.fromJson(Map<String, dynamic> json) =>
@@ -21,9 +25,14 @@ class AppCardData {
   final String? appId;
   @JsonKey(name: 'icon_url')
   final String iconUrl;
+  @JsonKey(name: 'cover_url', defaultValue: '')
+  final String coverUrl;
   final String title;
   final String description;
+  @JsonKey(name: 'action', defaultValue: '')
   final String action;
+  @JsonKey(name: 'actions', defaultValue: [])
+  final List<ActionData> actions;
   @JsonKey(name: 'updated_at')
   final String? updatedAt;
 
@@ -31,4 +40,6 @@ class AppCardData {
   final bool shareable;
 
   Map<String, dynamic> toJson() => _$AppCardDataToJson(this);
+
+  bool get isActionsCard => action.isEmpty;
 }

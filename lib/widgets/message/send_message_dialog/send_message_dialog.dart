@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../crypto/uuid/uuid.dart';
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
-
 import '../../../ui/provider/conversation_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -22,10 +23,12 @@ import '../../toast.dart';
 import '../../user_selector/conversation_selector.dart';
 import '../item/action_card/action_card_data.dart';
 import '../item/action_card/action_message.dart';
+import '../item/action_card/actions_card.dart';
 import '../item/contact_message_widget.dart';
 import '../item/post_message.dart';
 import '../message.dart';
 import '../message_bubble.dart';
+import '../message_style.dart';
 import 'send_image_data.dart';
 
 enum _Category {
@@ -48,20 +51,14 @@ Future<bool> showSendDialog(
   String? conversationId,
   String? data,
   App? app,
+  String? user,
 ) async {
   final _category = category?.category;
   if (_category == null || data == null || data.isEmpty) return false;
 
-  final _conversationId =
-      context.providerContainer.read(currentConversationIdProvider) ==
-              conversationId
-          ? conversationId
-          : null;
-
   dynamic result;
   try {
-    final _data =
-        await utf8DecodeWithIsolate(await base64DecodeWithIsolate(data));
+    final _data = await utf8DecodeWithIsolate(decodeBase64(data));
 
     switch (_category) {
       case _Category.image:
@@ -103,11 +100,53 @@ Future<bool> showSendDialog(
     return false;
   }
 
+  if (user != null) {
+    return _sendMessageToUserId(context, user, _category, result);
+  }
+  if (conversationId == null) {
+    final currentConversation =
+        context.providerContainer.read(conversationProvider);
+    if (currentConversation != null) {
+      await _sendMessage(context, currentConversation.conversationId,
+          currentConversation.encryptCategory, _category, result);
+      return true;
+    }
+  }
+
   await showMixinDialog(
     context: context,
-    child: _SendPage(_category, _conversationId, result, app),
+    child: _SendPage(_category, conversationId, result, app),
   );
 
+  return true;
+}
+
+Future<bool> _sendMessageToUserId(BuildContext context, String userId,
+    _Category category, dynamic data) async {
+  if (!Uuid.isValidUUID(fromString: userId)) {
+    return false;
+  }
+
+  showToastLoading();
+  try {
+    final users = await context.accountServer.refreshUsers([userId]);
+    if (users == null || users.isEmpty) {
+      return false;
+    }
+  } finally {
+    Toast.dismiss();
+  }
+
+  final conversationId =
+      generateConversationId(context.accountServer.userId, userId);
+  await ConversationStateNotifier.selectUser(context, userId);
+  final conversation = context.providerContainer.read(conversationProvider);
+  if (conversation == null) {
+    return false;
+  }
+  await _sendMessage(
+      context, conversationId, conversation.encryptCategory, category, data,
+      recipientId: userId);
   return true;
 }
 
@@ -209,7 +248,9 @@ class _SendPage extends HookConsumerWidget {
               borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             alignment: Alignment.center,
-            padding: const EdgeInsets.all(34),
+            padding: category == _Category.app_card
+                ? null
+                : const EdgeInsets.all(34),
             child: child,
           ),
           const SizedBox(height: 54),
@@ -229,31 +270,47 @@ class _SendPage extends HookConsumerWidget {
 }
 
 Future<void> _sendMessage(BuildContext context, String conversationId,
-    EncryptCategory encryptCategory, _Category category, dynamic data) async {
+    EncryptCategory encryptCategory, _Category category, dynamic data,
+    {String? recipientId}) async {
   if (category == _Category.text) {
     return context.accountServer.sendTextMessage(
-        data as String, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.post) {
     return context.accountServer.sendPostMessage(
-        data as String, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.sticker) {
     return context.accountServer.sendStickerMessage(
-        data as String, null, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      null,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.contact) {
     return context.accountServer.sendContactMessage(
-        data as String, null, encryptCategory,
-        conversationId: conversationId);
+      data as String,
+      null,
+      encryptCategory,
+      conversationId: conversationId,
+      recipientId: recipientId,
+    );
   }
   if (category == _Category.app_card) {
     return context.accountServer.sendAppCardMessage(
       data: data as AppCardData,
       conversationId: conversationId,
+      recipientId: recipientId,
     );
   }
   if (category == _Category.image) {
@@ -265,6 +322,7 @@ Future<void> _sendMessage(BuildContext context, String conversationId,
         sendImageData.url,
         conversationId: conversationId,
         defaultGifMimeType: false,
+        recipientId: recipientId,
       ),
     );
   }
@@ -279,25 +337,35 @@ final _bubbleClipper = BubbleClipper(
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.child,
-    // ignore: unused_element
     this.padding = const EdgeInsets.all(8),
+    this.clip = false,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final bool clip;
 
   @override
-  Widget build(BuildContext context) => CustomPaint(
-        painter: BubblePainter(
-          color: context.dynamicColor(lightOtherBubble,
-              darkColor: darkOtherBubble),
-          clipper: _bubbleClipper,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: child,
-        ),
+  Widget build(BuildContext context) {
+    Widget child = Padding(
+      padding: padding,
+      child: this.child,
+    );
+    if (clip) {
+      child = ClipPath(
+        clipper: _bubbleClipper,
+        child: RepaintBoundary(child: child),
       );
+    }
+    return CustomPaint(
+      painter: BubblePainter(
+        color:
+            context.dynamicColor(lightOtherBubble, darkColor: darkOtherBubble),
+        clipper: _bubbleClipper,
+      ),
+      child: child,
+    );
+  }
 }
 
 class _Text extends StatelessWidget {
@@ -419,7 +487,32 @@ class _AppCard extends StatelessWidget {
   final AppCardData data;
 
   @override
-  Widget build(BuildContext context) => _MessageBubble(
-        child: AppCardItem(data: data),
+  Widget build(BuildContext context) {
+    if (!data.isActionsCard) {
+      return _MessageBubble(
+        child: Padding(
+          padding: const EdgeInsets.all(34),
+          child: AppCardItem(data: data),
+        ),
       );
+    } else {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: _MessageBubble(
+          padding: EdgeInsets.zero,
+          clip: true,
+          child: ActionsCardBody(
+            data: data,
+            description: Text(
+              data.description,
+              style: TextStyle(
+                color: context.theme.text,
+                fontSize: context.messageStyle.secondaryFontSize,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
 }

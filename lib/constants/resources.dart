@@ -246,6 +246,10 @@ class Resources {
   static const String assetsImagesExpiringDarkSvg =
       'assets/images/expiring_dark.svg';
 
+  /// {@macro assets_generator.assetsImagesExternalLinkSvg.preview}
+  static const String assetsImagesExternalLinkSvg =
+      'assets/images/external_link.svg';
+
   /// {@macro assets_generator.assetsImagesFailedSvg.preview}
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 
@@ -376,6 +380,9 @@ class Resources {
   /// {@macro assets_generator.assetsImagesLightSenderNipBubblePng.preview}
   static const String assetsImagesLightSenderNipBubblePng =
       'assets/images/light_sender_nip_bubble.png';
+
+  /// {@macro assets_generator.assetsImagesLinkSendSvg.preview}
+  static const String assetsImagesLinkSendSvg = 'assets/images/link_send.svg';
 
   /// {@macro assets_generator.assetsImagesLiveSvg.preview}
   static const String assetsImagesLiveSvg = 'assets/images/live.svg';

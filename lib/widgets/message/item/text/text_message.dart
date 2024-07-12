@@ -17,29 +17,6 @@ import '../../message_layout.dart';
 import '../../message_style.dart';
 import 'selectable.dart';
 
-class _MessageSelectionArea extends StatelessWidget {
-  const _MessageSelectionArea({
-    required this.child,
-    required this.focusNode,
-  });
-
-  final Widget child;
-  final FocusNode focusNode;
-
-  @override
-  Widget build(BuildContext context) {
-    if (kPlatformIsDesktop) {
-      return SelectableRegion(
-        focusNode: focusNode,
-        contextMenuBuilder: (context, state) => const SizedBox(),
-        selectionControls: desktopTextSelectionHandleControls,
-        child: child,
-      );
-    }
-    return child;
-  }
-}
-
 class TextMessage extends HookConsumerWidget {
   const TextMessage({super.key});
 
@@ -79,7 +56,7 @@ class TextMessage extends HookConsumerWidget {
     final focusNode = useFocusNode(debugLabel: 'text selection focus');
 
     return MessageBubble(
-      child: _MessageSelectionArea(
+      child: MessageSelectionArea(
         focusNode: focusNode,
         child: MessageLayout(
           spacing: 6,
@@ -108,5 +85,29 @@ class TextMessage extends HookConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class MessageSelectionArea extends StatelessWidget {
+  const MessageSelectionArea({
+    required this.child,
+    required this.focusNode,
+    super.key,
+  });
+
+  final Widget child;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    if (kPlatformIsDesktop) {
+      return SelectableRegion(
+        focusNode: focusNode,
+        contextMenuBuilder: (context, state) => const SizedBox(),
+        selectionControls: desktopTextSelectionHandleControls,
+        child: child,
+      );
+    }
+    return child;
   }
 }
