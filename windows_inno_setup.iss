@@ -44,11 +44,6 @@ Source: "{#SourcePath}\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Fl
 Source: "{#SourcePath}\windows\libs\vclibs\*"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
-[InstallDelete]
-Type: files; Name: {app}\msvcp140.dll
-Type: files; Name: {app}\vcruntime140.dll
-Type: files; Name: {app}\vcruntime140_1.dll
-
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
