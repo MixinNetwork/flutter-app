@@ -1249,10 +1249,6 @@ class _FileInputOverlay extends HookConsumerWidget {
   }
 }
 
-class _PasteFileOrImageIntent extends Intent {
-  const _PasteFileOrImageIntent();
-}
-
 class _SendFilesIntent extends Intent {
   const _SendFilesIntent();
 }
