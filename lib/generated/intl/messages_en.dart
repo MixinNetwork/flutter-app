@@ -157,6 +157,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "account": MessageLookupByLibrary.simpleMessage("Account"),
         "activity": MessageLookupByLibrary.simpleMessage("Activity"),
         "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "addACaption": MessageLookupByLibrary.simpleMessage("Add a caption"),
         "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
         "addContact": MessageLookupByLibrary.simpleMessage("Add Contact"),
         "addContactWithPlus":

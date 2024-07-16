@@ -42,6 +42,7 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
+import 'image_caption_input.dart';
 import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
@@ -199,6 +200,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       () => files.value.indexWhere((e) => e.isMedia) != -1,
       [identityHashCode(files.value)],
     );
+    final isOneImage = files.value.length == 1 && files.value.first.isImage;
 
     final showZipTab = files.value.length > 1;
 
@@ -237,6 +239,12 @@ class _FilesPreviewDialog extends HookConsumerWidget {
     }, [hasMedia, currentTab.value]);
 
     final zipPasswordController = useTextEditingController();
+    final imageCaptionController = useTextEditingController();
+
+    useEffect(() {
+      imageCaptionController.clear();
+      return null;
+    }, [isOneImage]);
 
     Future<void> send(bool silent) async {
       if (currentTab.value != _TabType.zip) {
@@ -247,6 +255,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             quoteMessageCubit.state?.messageId,
             silent: silent,
             compress: currentTab.value == _TabType.image,
+            imageCaption: isOneImage ? imageCaptionController.text : null,
           ));
         }
         quoteMessageCubit.state = null;
@@ -355,39 +364,11 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-                Align(
-                  child: CustomContextMenuWidget(
-                    desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-                    menuProvider: (_) => Menu(children: [
-                      MenuAction(
-                        image: MenuImage.icon(IconFonts.mute),
-                        title: context.l10n.sendWithoutSound,
-                        callback: () => send(true),
-                      )
-                    ]),
-                    child: ElevatedButton(
-                      onPressed: () => send(false),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.only(
-                            left: 32, top: 18, bottom: 18, right: 32),
-                        backgroundColor: context.theme.accent,
-                      ),
-                      child: Text(
-                        context.l10n.send.toUpperCase(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
+                _BottomActionWidget(
+                  send: send,
+                  imageCaptionController: imageCaptionController,
+                  showImageCaption: isOneImage,
                 ),
-                const SizedBox(height: 24),
-                Align(
-                  child: Text(
-                    context.l10n.enterToSend,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ),
-                const SizedBox(height: 24),
               ],
             ),
             const Align(
@@ -400,6 +381,64 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           ],
         ));
   }
+}
+
+class _BottomActionWidget extends StatelessWidget {
+  const _BottomActionWidget({
+    required this.send,
+    required this.imageCaptionController,
+    required this.showImageCaption,
+  });
+
+  final Future<void> Function(bool silent) send;
+  final TextEditingController imageCaptionController;
+  final bool showImageCaption;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            if (showImageCaption)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: ImageCaptionInputWidget(
+                  textEditingController: imageCaptionController,
+                ),
+              ),
+            const SizedBox(height: 16),
+            CustomContextMenuWidget(
+              desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+              menuProvider: (_) => Menu(children: [
+                MenuAction(
+                  image: MenuImage.icon(IconFonts.mute),
+                  title: context.l10n.sendWithoutSound,
+                  callback: () => send(true),
+                )
+              ]),
+              child: ElevatedButton(
+                onPressed: () => send(false),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.only(
+                      left: 32, top: 18, bottom: 18, right: 32),
+                  backgroundColor: context.theme.accent,
+                ),
+                child: Text(
+                  context.l10n.send.toUpperCase(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              context.l10n.enterToSend,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      );
 }
 
 class _FileListViewportProvider extends StatelessWidget {
@@ -447,6 +486,7 @@ Future<void> _sendFile(
   String? quoteMessageId, {
   required bool silent,
   required bool compress,
+  String? imageCaption,
 }) async {
   final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
@@ -462,6 +502,7 @@ Future<void> _sendFile(
         quoteMessageId: quoteMessageId,
         silent: silent,
         compress: compress,
+        caption: imageCaption,
       );
     case _NormalFile():
       await accountServer.sendDataMessage(

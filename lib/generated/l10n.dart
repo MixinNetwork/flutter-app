@@ -110,6 +110,16 @@ class Localization {
     );
   }
 
+  /// `Add a caption`
+  String get addACaption {
+    return Intl.message(
+      'Add a caption',
+      name: 'addACaption',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `+ Add Bot`
   String get addBotWithPlus {
     return Intl.message(
