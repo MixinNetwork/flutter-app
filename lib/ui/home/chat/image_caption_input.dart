@@ -28,7 +28,7 @@ class ImageCaptionInputWidget extends HookWidget {
         ),
         alignment: Alignment.center,
         child: TextField(
-          maxLines: 7,
+          maxLines: 3,
           minLines: 1,
           controller: textEditingController,
           style: TextStyle(
