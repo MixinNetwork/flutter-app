@@ -45,7 +45,6 @@ class AppCardData {
   bool get isActionsCard => action.isEmpty;
 
   bool get canShareActions => actions.every((e) => e.isValidSharedAction);
-
 }
 
 extension on ActionData {
