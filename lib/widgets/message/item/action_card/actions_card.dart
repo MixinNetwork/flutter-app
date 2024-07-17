@@ -66,7 +66,7 @@ class ActionsCardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (data.coverUrl.isNotEmpty)
             AspectRatio(

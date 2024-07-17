@@ -31,6 +31,7 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/cache_image.dart';
+import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
 import 'show_pin_message_key_value.dart';
 
@@ -628,15 +629,16 @@ class SendMessageHelper {
     final Map<String, dynamic> data;
     try {
       data = jsonDecode(content) as Map<String, dynamic>;
+      final card = AppCardData.fromJson(data);
+      if (data['actions'] != null && !card.canShareActions) {
+        data['actions'] = null;
+      }
+      if (data['action'] == '') {
+        data['action'] = null;
+      }
     } catch (e) {
       w('AppCardData.fromJson error: $e');
       return;
-    }
-    if (data['actions'] != null) {
-      data['actions'] = null;
-    }
-    if (data['action'] == '') {
-      data['action'] = null;
     }
 
     const category = MessageCategory.appCard;

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../../../utils/uri_utils.dart';
 import '../action/action_data.dart';
 
 part 'action_card_data.g.dart';
@@ -42,4 +43,24 @@ class AppCardData {
   Map<String, dynamic> toJson() => _$AppCardDataToJson(this);
 
   bool get isActionsCard => action.isEmpty;
+
+  bool get canShareActions => actions.every((e) => e.isValidSharedAction);
+
+}
+
+extension on ActionData {
+  bool get isValidSharedAction {
+    try {
+      final uri = Uri.parse(action);
+      if (uri.isSendToUser) {
+        return true;
+      }
+      if (isExternalLink && !uri.isHttpsSendUrl) {
+        return true;
+      }
+    } catch (err) {
+      return false;
+    }
+    return false;
+  }
 }
