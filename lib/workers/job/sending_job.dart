@@ -22,6 +22,7 @@ import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../../utils/reg_exp_utils.dart';
+import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../job_queue.dart';
 import '../sender.dart';
@@ -146,11 +147,23 @@ class SendingJob extends JobQueue<Job, List<Job>> {
           .transcriptMessageByTranscriptId(messageId)
           .get();
       final json = list.map((e) {
+        if (e.category.isAppCard) {
+          try {
+            final json = jsonDecode(e.content!) as Map<String, dynamic>;
+            final card = AppCardData.fromJson(json);
+            if (card.isActionsCard && !card.canShareActions) {
+              json.remove('actions');
+              e = e.copyWith(content: Value(jsonEncode(json)));
+            }
+          } catch (error, stacktrace) {
+            w('AppCardData.fromJson error: $error, stack: $stacktrace');
+          }
+        }
+
         final map = e.toJson(serializer: const UtcValueSerializer());
         map['media_duration'] =
             int.tryParse(map['media_duration'] as String? ?? '');
         map.remove('media_status');
-
         return map;
       }).toList();
       message = message.copyWith(content: await jsonEncodeWithIsolate(json));
