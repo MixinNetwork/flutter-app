@@ -19,8 +19,15 @@ class ActionData {
   String color;
   String action;
 
-  bool get isExternalLink =>
-      action.startsWith('https://') || action.startsWith('http://');
+  bool get isExternalLink {
+    try {
+      final uri = Uri.parse(action);
+      return (uri.isScheme('http') || uri.isScheme('https')) &&
+          !uri.isMixinActionUrl;
+    } catch (error) {
+      return false;
+    }
+  }
 
   bool get isSendUserLink {
     try {

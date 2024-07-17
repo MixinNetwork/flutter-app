@@ -289,7 +289,14 @@ Future<bool> _selectConversation(
 }
 
 extension MixinUriExt on Uri {
-  bool get isSendToUser => userOfSend?.isNotEmpty == true;
+  bool get isSendToUser => !userOfSend.isNullOrBlank();
+
+  bool get isHttpsSendUrl => _isTypeHost(MixinSchemeHost.send);
+
+  bool get isMixinActionUrl =>
+      isMixin &&
+      pathSegments.isNotEmpty &&
+      MixinSchemeHost.values.any((e) => e.name == pathSegments.first);
 }
 
 extension _MixinUriExtension on Uri {

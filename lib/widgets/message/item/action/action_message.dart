@@ -100,18 +100,6 @@ class ActionMessageButton extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (action.isExternalLink)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesExternalLinkSvg,
-                      width: 6,
-                      height: 6,
-                    ),
-                  ),
-                ),
               if (action.isSendUserLink)
                 Align(
                   alignment: Alignment.topRight,
@@ -123,7 +111,19 @@ class ActionMessageButton extends ConsumerWidget {
                       height: 8,
                     ),
                   ),
-                ),
+                )
+              else if (action.isExternalLink)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesExternalLinkSvg,
+                      width: 6,
+                      height: 6,
+                    ),
+                  ),
+                )
             ],
           ),
         ),
