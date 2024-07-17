@@ -54,7 +54,8 @@ extension on ActionData {
       if (uri.isSendToUser) {
         return true;
       }
-      if (isExternalLink && !uri.isHttpsSendUrl) {
+      if ((uri.isScheme('http') || uri.isScheme('https')) &&
+          !uri.isHttpsSendUrl) {
         return true;
       }
     } catch (err) {
