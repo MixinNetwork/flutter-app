@@ -275,10 +275,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversation": MessageLookupByLibrary.simpleMessage("Conversation"),
         "conversationDeleteTitle": m11,
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
+        "copyImage": MessageLookupByLibrary.simpleMessage("Copy Image"),
         "copyInvite": MessageLookupByLibrary.simpleMessage("Copy Invite Link"),
         "copyLink": MessageLookupByLibrary.simpleMessage("Copy Link"),
         "copySelectedText":
             MessageLookupByLibrary.simpleMessage("Copy Selected Text"),
+        "copyText": MessageLookupByLibrary.simpleMessage("Copy Text"),
         "create": MessageLookupByLibrary.simpleMessage("Create"),
         "createCircle": MessageLookupByLibrary.simpleMessage("New Circle"),
         "createConversation":

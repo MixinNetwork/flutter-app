@@ -1024,6 +1024,16 @@ class Localization {
     );
   }
 
+  /// `Copy Image`
+  String get copyImage {
+    return Intl.message(
+      'Copy Image',
+      name: 'copyImage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy Invite Link`
   String get copyInvite {
     return Intl.message(
@@ -1049,6 +1059,16 @@ class Localization {
     return Intl.message(
       'Copy Selected Text',
       name: 'copySelectedText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy Text`
+  String get copyText {
+    return Intl.message(
+      'Copy Text',
+      name: 'copyText',
       desc: '',
       args: [],
     );
