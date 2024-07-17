@@ -22,9 +22,33 @@ class TextMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = useMessageConverter(converter: (state) => state.userId);
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
+    return MessageBubble(
+      child: MessageTextWidget(
+        fontSize: context.messageStyle.primaryFontSize,
+        color: context.theme.text,
+        content: content,
+      ),
+    );
+  }
+}
+
+class MessageTextWidget extends HookConsumerWidget {
+  const MessageTextWidget({
+    required this.fontSize,
+    required this.color,
+    required this.content,
+    super.key,
+  });
+
+  final double fontSize;
+  final Color color;
+  final String content;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userId = useMessageConverter(converter: (state) => state.userId);
 
     var keyword = useBlocStateConverter<SearchConversationKeywordCubit,
         (String?, String), String>(
@@ -55,54 +79,56 @@ class TextMessage extends HookConsumerWidget {
 
     final focusNode = useFocusNode(debugLabel: 'text selection focus');
 
-    return MessageBubble(
-      child: MessageSelectionArea(
-        focusNode: focusNode,
-        child: MessageLayout(
-          spacing: 6,
-          content: CustomText(
-            content,
-            style: TextStyle(
-              fontSize: context.messageStyle.primaryFontSize,
-              color: context.theme.text,
-            ),
-            textMatchers: [
-              UrlTextMatcher(context),
-              MailTextMatcher(context),
-              MentionTextMatcher(context, mentionMap),
-              BotNumberTextMatcher(context),
-              EmojiTextMatcher(),
-              KeyWordTextMatcher(
-                keyword,
-                style: TextStyle(
-                  backgroundColor: context.theme.highlight,
-                  color: context.theme.text,
-                ),
-              ),
-            ],
+    return MessageSelectionArea(
+      focusNode: focusNode,
+      child: MessageLayout(
+        spacing: 6,
+        content: CustomText(
+          content,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: color,
           ),
-          dateAndStatus: const MessageDatetimeAndStatus(),
+          textMatchers: [
+            UrlTextMatcher(context),
+            MailTextMatcher(context),
+            MentionTextMatcher(context, mentionMap),
+            BotNumberTextMatcher(context),
+            EmojiTextMatcher(),
+            KeyWordTextMatcher(
+              keyword,
+              style: TextStyle(
+                backgroundColor: context.theme.highlight,
+                color: context.theme.text,
+              ),
+            ),
+          ],
         ),
+        dateAndStatus: const MessageDatetimeAndStatus(),
       ),
     );
   }
 }
 
-class MessageSelectionArea extends StatelessWidget {
+class MessageSelectionArea extends HookWidget {
   const MessageSelectionArea({
     required this.child,
-    required this.focusNode,
+    this.focusNode,
     super.key,
   });
 
   final Widget child;
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
+    final node = useMemoized(
+      () => focusNode ?? FocusNode(debugLabel: 'message_selection_focus'),
+      [focusNode],
+    );
     if (kPlatformIsDesktop) {
       return SelectableRegion(
-        focusNode: focusNode,
+        focusNode: node,
         contextMenuBuilder: (context, state) => const SizedBox(),
         selectionControls: desktopTextSelectionHandleControls,
         child: child,

@@ -623,6 +623,7 @@ class DecryptMessage extends Injector {
               status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
+              caption: attachment.caption,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
       await _insertMessage(message, data);
@@ -1174,6 +1175,7 @@ class DecryptMessage extends Injector {
           mediaDigest: Value(attachment.digest as String?),
           mediaKey: Value(attachment.key as String?),
           mediaWaveform: Value(attachment.waveform as String?),
+          caption: Value(attachment.caption),
           name: Value(attachment.name),
           thumbImage: Value(attachment.thumbnail),
           mediaDuration: Value(attachment.duration.toString()));

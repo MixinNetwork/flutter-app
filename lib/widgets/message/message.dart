@@ -429,21 +429,50 @@ class MessageItemWidget extends HookConsumerWidget {
                     ];
 
                     final copyActions = <MenuAction>[];
-                    if (message.type.isPost || message.type.isImage) {
+                    if (message.type.isPost) {
                       copyActions.add(MenuAction(
                         image: MenuImage.icon(IconFonts.copy),
                         title: context.l10n.copy,
                         callback: () {
-                          if (message.type.isImage) {
-                            copyFile(context.accountServer
-                                .convertMessageAbsolutePath(
-                                    message, isTranscriptPage));
-                            return;
-                          }
                           Clipboard.setData(
                               ClipboardData(text: message.content ?? ''));
                         },
                       ));
+                    } else if (message.type.isImage) {
+                      copyActions.add(MenuAction(
+                        image: MenuImage.icon(IconFonts.copy),
+                        title: context.l10n.copyImage,
+                        callback: () {
+                          copyFile(
+                            context.accountServer.convertMessageAbsolutePath(
+                              message,
+                              isTranscriptPage,
+                            ),
+                          );
+                        },
+                      ));
+                      if (!message.caption.isNullOrBlank()) {
+                        final selectedContent = _findSelectedContent(context);
+                        if (selectedContent != null) {
+                          copyActions.add(MenuAction(
+                            image: MenuImage.icon(IconFonts.copy),
+                            title: context.l10n.copySelectedText,
+                            callback: () {
+                              Clipboard.setData(ClipboardData(
+                                  text: selectedContent.plainText));
+                            },
+                          ));
+                        } else {
+                          copyActions.add(MenuAction(
+                            image: MenuImage.icon(IconFonts.copy),
+                            title: context.l10n.copyText,
+                            callback: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: message.caption ?? ''));
+                            },
+                          ));
+                        }
+                      }
                     } else if (message.type.isText) {
                       final selectedContent = _findSelectedContent(context);
                       copyActions.add(MenuAction(
