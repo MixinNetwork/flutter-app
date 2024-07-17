@@ -134,6 +134,7 @@ class SendMessageHelper {
     bool silent = false,
     bool cleanDraft = true,
     bool compress = false,
+    String? caption,
   }) async {
     final messageId = const Uuid().v4();
 
@@ -203,8 +204,13 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
       thumbImage: thumbImage,
+      caption: caption,
     );
-    await _insertSendMessageToDb(message, cleanDraft: cleanDraft);
+    await _insertSendMessageToDb(
+      message,
+      cleanDraft: cleanDraft,
+      ftsContent: caption,
+    );
 
     if (await _attachmentUtil.isNotPending(messageId)) return;
 
@@ -224,7 +230,7 @@ class SendMessageHelper {
       thumbImage,
       null,
       null,
-      null,
+      caption,
       attachmentResult.createdAt,
     );
 
@@ -730,6 +736,7 @@ class SendMessageHelper {
           conversationId: message.conversationId,
           fileName: message.mediaUrl,
         )),
+        caption: message.caption,
         category: category,
         attachmentResult: attachmentResult,
         cleanDraft: false,

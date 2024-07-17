@@ -16,6 +16,8 @@ import '../../../status.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../../message_style.dart';
+import '../text/text_message.dart';
 import '../transcript_message.dart';
 import '../unknown_message.dart';
 import 'image_preview_page.dart';
@@ -29,22 +31,33 @@ class ImageMessageWidget extends HookConsumerWidget {
         useMessageConverter(converter: (state) => state.mediaWidth);
     final mediaHeight =
         useMessageConverter(converter: (state) => state.mediaHeight);
+    final caption = useMessageConverter(converter: (state) => state.caption);
 
     if (mediaWidth == null || mediaHeight == null) {
       return const UnknownMessage();
     }
 
+    final hasCaption = caption != null && caption.trim().isNotEmpty;
     return ImageMessageLayout(
       imageWidthInPixel: mediaWidth,
       imageHeightInPixel: mediaHeight,
       builder: (context, width, height) => MessageBubble(
-        showBubble: false,
+        showBubble: hasCaption,
         padding: EdgeInsets.zero,
-        includeNip: true,
+        includeNip: !hasCaption,
         clip: true,
-        child: MessageImage(
-          size: Size(width, height),
-          showStatus: true,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: width),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              MessageImage(
+                size: Size(width, height),
+                showStatus: !hasCaption,
+              ),
+              if (hasCaption) ImageCaption(caption: caption),
+            ],
+          ),
         ),
       ),
     );
@@ -244,4 +257,20 @@ class ImageMessageLayout extends StatelessWidget {
         );
         return builder(context, width, height);
       });
+}
+
+class ImageCaption extends StatelessWidget {
+  const ImageCaption({required this.caption, super.key});
+
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: MessageTextWidget(
+          color: context.theme.text,
+          fontSize: context.messageStyle.secondaryFontSize,
+          content: caption,
+        ),
+      );
 }

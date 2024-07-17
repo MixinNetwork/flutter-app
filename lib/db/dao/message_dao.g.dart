@@ -149,7 +149,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
 
   Selectable<SendingMessage> sendingMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
+        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.caption, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
         variables: [
           Variable<String>(messageId)
         ],
@@ -186,6 +186,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           stickerId: row.readNullable<String>('sticker_id'),
           sharedUserId: row.readNullable<String>('shared_user_id'),
           mediaWaveform: row.readNullable<String>('media_waveform'),
+          caption: row.readNullable<String>('caption'),
           quoteMessageId: row.readNullable<String>('quote_message_id'),
           quoteContent: row.readNullable<String>('quote_content'),
           resendStatus: row.readNullable<int>('resend_status'),
@@ -608,6 +609,7 @@ class SendingMessage {
   final String? stickerId;
   final String? sharedUserId;
   final String? mediaWaveform;
+  final String? caption;
   final String? quoteMessageId;
   final String? quoteContent;
   final int? resendStatus;
@@ -641,6 +643,7 @@ class SendingMessage {
     this.stickerId,
     this.sharedUserId,
     this.mediaWaveform,
+    this.caption,
     this.quoteMessageId,
     this.quoteContent,
     this.resendStatus,
@@ -676,6 +679,7 @@ class SendingMessage {
         stickerId,
         sharedUserId,
         mediaWaveform,
+        caption,
         quoteMessageId,
         quoteContent,
         resendStatus,
@@ -713,6 +717,7 @@ class SendingMessage {
           other.stickerId == this.stickerId &&
           other.sharedUserId == this.sharedUserId &&
           other.mediaWaveform == this.mediaWaveform &&
+          other.caption == this.caption &&
           other.quoteMessageId == this.quoteMessageId &&
           other.quoteContent == this.quoteContent &&
           other.resendStatus == this.resendStatus &&
@@ -748,6 +753,7 @@ class SendingMessage {
           ..write('stickerId: $stickerId, ')
           ..write('sharedUserId: $sharedUserId, ')
           ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('caption: $caption, ')
           ..write('quoteMessageId: $quoteMessageId, ')
           ..write('quoteContent: $quoteContent, ')
           ..write('resendStatus: $resendStatus, ')

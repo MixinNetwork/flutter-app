@@ -190,6 +190,7 @@ extension SendingMessageCopy on SendingMessage {
     int? resendStatus,
     String? resendUserId,
     String? resendSessionId,
+    String? caption,
   }) =>
       SendingMessage(
         messageId: messageId ?? this.messageId,
@@ -224,5 +225,6 @@ extension SendingMessageCopy on SendingMessage {
         resendStatus: resendStatus ?? this.resendStatus,
         resendUserId: resendUserId ?? this.resendUserId,
         resendSessionId: resendSessionId ?? this.resendSessionId,
+        caption: caption ?? this.caption,
       );
 }

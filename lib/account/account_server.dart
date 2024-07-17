@@ -392,6 +392,7 @@ class AccountServer {
     String? quoteMessageId,
     bool silent = false,
     bool compress = false,
+    String? caption,
   }) async =>
       _sendMessageHelper.sendImageMessage(
         conversationId: await _initConversation(conversationId, recipientId),
@@ -403,6 +404,7 @@ class AccountServer {
         quoteMessageId: quoteMessageId,
         silent: silent,
         compress: compress,
+        caption: caption,
       );
 
   Future<void> sendVideoMessage(

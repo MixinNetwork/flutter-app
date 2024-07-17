@@ -30,6 +30,7 @@ import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/system/clipboard.dart';
+import '../../../utils/system/text_input.dart';
 import '../../../utils/video.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/buttons.dart';
@@ -42,6 +43,7 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
+import 'image_caption_input.dart';
 import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
@@ -199,6 +201,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       () => files.value.indexWhere((e) => e.isMedia) != -1,
       [identityHashCode(files.value)],
     );
+    final isOneImage = files.value.length == 1 && files.value.first.isImage;
 
     final showZipTab = files.value.length > 1;
 
@@ -237,6 +240,12 @@ class _FilesPreviewDialog extends HookConsumerWidget {
     }, [hasMedia, currentTab.value]);
 
     final zipPasswordController = useTextEditingController();
+    final imageCaptionController = useMemoized(EmojiTextEditingController.new);
+
+    useEffect(() {
+      imageCaptionController.clear();
+      return null;
+    }, [isOneImage]);
 
     Future<void> send(bool silent) async {
       if (currentTab.value != _TabType.zip) {
@@ -247,6 +256,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             quoteMessageCubit.state?.messageId,
             silent: silent,
             compress: currentTab.value == _TabType.image,
+            imageCaption: isOneImage ? imageCaptionController.text : null,
           ));
         }
         quoteMessageCubit.state = null;
@@ -269,137 +279,170 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       }
     }
 
-    return SizedBox(
-        width: 480,
-        height: 600,
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _Tab(
-                        assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                        tooltip: context.l10n.sendQuickly,
-                        onTap: () => currentTab.value = _TabType.image,
-                        selected: currentTab.value == _TabType.image,
-                        show: hasMedia,
-                      ),
-                      _Tab(
-                        assetName: Resources.assetsImagesFilePreviewFilesSvg,
-                        tooltip: context.l10n.sendWithoutCompression,
-                        onTap: () => currentTab.value = _TabType.files,
-                        selected: currentTab.value == _TabType.files,
-                      ),
-                      _Tab(
-                        assetName: Resources.assetsImagesFilePreviewZipSvg,
-                        tooltip: context.l10n.sendArchived,
-                        onTap: () => currentTab.value = _TabType.zip,
-                        selected: currentTab.value == _TabType.zip,
-                        show: showZipTab,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Expanded(
-                  child: _FileListViewportProvider(
-                    child: IndexedStack(
-                      sizing: StackFit.expand,
-                      index: currentTab.value == _TabType.zip ? 1 : 0,
+    void addFile(List<_File> fileAdded) {
+      final currentFiles = files.value.map((e) => e.path).toSet();
+      fileAdded.removeWhere((e) => currentFiles.contains(e.path));
+      files.value = (files.value..addAll(fileAdded)).toList();
+      for (var i = 0; i < fileAdded.length; i++) {
+        onFileAddedStream.add(currentFiles.length + i);
+      }
+    }
+
+    return _Actions(
+      onSend: () => send(false),
+      onFileAdded: addFile,
+      child: SizedBox(
+          width: 480,
+          height: 600,
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _FileInputOverlay(
-                          onSend: () => send(false),
-                          onFileAdded: (fileAdded) {
-                            final currentFiles =
-                                files.value.map((e) => e.path).toSet();
-                            fileAdded.removeWhere(
-                                (e) => currentFiles.contains(e.path));
-                            files.value =
-                                (files.value..addAll(fileAdded)).toList();
-                            for (var i = 0; i < fileAdded.length; i++) {
-                              onFileAddedStream.add(currentFiles.length + i);
-                            }
-                          },
-                          child: _AnimatedListBuilder(
-                              files: files.value,
-                              onFileAdded: onFileAddedStream.stream,
-                              onFileDeleted: onFileRemovedStream.stream,
-                              builder: (context, file, animation) =>
-                                  _AnimatedFileTile(
-                                    key: ValueKey(file),
-                                    file: file,
-                                    animation: animation,
-                                    onDelete: removeFile,
-                                    showBigImage: showAsBigImage,
-                                    onImageEdited: (file, image) async {
-                                      final index = files.value.indexOf(file);
-                                      if (index == -1) {
-                                        e('failed to found file');
-                                        return;
-                                      }
-                                      final list = files.value.toList();
-                                      final newFile = File(image.imagePath);
-                                      list[index] = _File.image(newFile, image);
-                                      files.value = list;
-                                    },
-                                  )),
+                        _Tab(
+                          assetName: Resources.assetsImagesFilePreviewImagesSvg,
+                          tooltip: context.l10n.sendQuickly,
+                          onTap: () => currentTab.value = _TabType.image,
+                          selected: currentTab.value == _TabType.image,
+                          show: hasMedia,
                         ),
-                        _PageZip(zipPasswordController),
+                        _Tab(
+                          assetName: Resources.assetsImagesFilePreviewFilesSvg,
+                          tooltip: context.l10n.sendWithoutCompression,
+                          onTap: () => currentTab.value = _TabType.files,
+                          selected: currentTab.value == _TabType.files,
+                        ),
+                        _Tab(
+                          assetName: Resources.assetsImagesFilePreviewZipSvg,
+                          tooltip: context.l10n.sendArchived,
+                          onTap: () => currentTab.value = _TabType.zip,
+                          selected: currentTab.value == _TabType.zip,
+                          show: showZipTab,
+                        ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                Align(
-                  child: CustomContextMenuWidget(
-                    desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-                    menuProvider: (_) => Menu(children: [
-                      MenuAction(
-                        image: MenuImage.icon(IconFonts.mute),
-                        title: context.l10n.sendWithoutSound,
-                        callback: () => send(true),
-                      )
-                    ]),
-                    child: ElevatedButton(
-                      onPressed: () => send(false),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.only(
-                            left: 32, top: 18, bottom: 18, right: 32),
-                        backgroundColor: context.theme.accent,
-                      ),
-                      child: Text(
-                        context.l10n.send.toUpperCase(),
-                        style: const TextStyle(color: Colors.white),
+                  const SizedBox(height: 4),
+                  Expanded(
+                    child: _FileListViewportProvider(
+                      child: IndexedStack(
+                        sizing: StackFit.expand,
+                        index: currentTab.value == _TabType.zip ? 1 : 0,
+                        children: [
+                          _FileInputOverlay(
+                            onFileAdded: addFile,
+                            child: _AnimatedListBuilder(
+                                files: files.value,
+                                onFileAdded: onFileAddedStream.stream,
+                                onFileDeleted: onFileRemovedStream.stream,
+                                builder: (context, file, animation) =>
+                                    _AnimatedFileTile(
+                                      key: ValueKey(file),
+                                      file: file,
+                                      animation: animation,
+                                      onDelete: removeFile,
+                                      showBigImage: showAsBigImage,
+                                      onImageEdited: (file, image) async {
+                                        final index = files.value.indexOf(file);
+                                        if (index == -1) {
+                                          e('failed to found file');
+                                          return;
+                                        }
+                                        final list = files.value.toList();
+                                        final newFile = File(image.imagePath);
+                                        list[index] =
+                                            _File.image(newFile, image);
+                                        files.value = list;
+                                      },
+                                    )),
+                          ),
+                          _PageZip(zipPasswordController),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  child: Text(
-                    context.l10n.enterToSend,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  _BottomActionWidget(
+                    send: send,
+                    imageCaptionController: imageCaptionController,
+                    showImageCaption: isOneImage,
                   ),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
-            const Align(
-              alignment: AlignmentDirectional.topEnd,
-              child: Padding(
-                padding: EdgeInsets.all(22),
-                child: MixinCloseButton(),
+                ],
               ),
-            )
-          ],
-        ));
+              const Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Padding(
+                  padding: EdgeInsets.all(22),
+                  child: MixinCloseButton(),
+                ),
+              )
+            ],
+          )),
+    );
   }
+}
+
+class _BottomActionWidget extends StatelessWidget {
+  const _BottomActionWidget({
+    required this.send,
+    required this.imageCaptionController,
+    required this.showImageCaption,
+  });
+
+  final Future<void> Function(bool silent) send;
+  final TextEditingController imageCaptionController;
+  final bool showImageCaption;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            if (showImageCaption)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: ImageCaptionInputWidget(
+                  textEditingController: imageCaptionController,
+                ),
+              ),
+            const SizedBox(height: 16),
+            CustomContextMenuWidget(
+              desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+              menuProvider: (_) => Menu(children: [
+                MenuAction(
+                  image: MenuImage.icon(IconFonts.mute),
+                  title: context.l10n.sendWithoutSound,
+                  callback: () => send(true),
+                )
+              ]),
+              child: ElevatedButton(
+                onPressed: () => send(false),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.only(
+                      left: 32, top: 18, bottom: 18, right: 32),
+                  backgroundColor: context.theme.accent,
+                ),
+                child: Text(
+                  context.l10n.send.toUpperCase(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              context.l10n.enterToSend,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      );
 }
 
 class _FileListViewportProvider extends StatelessWidget {
@@ -447,6 +490,7 @@ Future<void> _sendFile(
   String? quoteMessageId, {
   required bool silent,
   required bool compress,
+  String? imageCaption,
 }) async {
   final conversationItem = context.providerContainer.read(conversationProvider);
   if (conversationItem == null) return;
@@ -462,6 +506,7 @@ Future<void> _sendFile(
         quoteMessageId: quoteMessageId,
         silent: silent,
         compress: compress,
+        caption: imageCaption,
       );
     case _NormalFile():
       await accountServer.sendDataMessage(
@@ -1129,42 +1174,57 @@ class _TileNormalFile extends HookConsumerWidget {
       );
 }
 
+class _Actions extends StatelessWidget {
+  const _Actions({
+    required this.child,
+    required this.onSend,
+    required this.onFileAdded,
+  });
+
+  final Widget child;
+  final VoidCallback onSend;
+  final void Function(List<_File>) onFileAdded;
+
+  @override
+  Widget build(BuildContext context) => FocusableActionDetector(
+        autofocus: true,
+        shortcuts: {
+          const SingleActivator(LogicalKeyboardKey.enter):
+              const _SendFilesIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyV,
+            meta: kPlatformIsDarwin,
+            control: !kPlatformIsDarwin,
+          ): const PasteTextIntent(SelectionChangedCause.keyboard),
+        },
+        actions: {
+          PasteTextIntent: _PasteContextAction(
+            context,
+            (files) => onFileAdded(
+                files.map((file) => _File.auto(file.xFile)).toList()),
+          ),
+          _SendFilesIntent: CallbackAction<_SendFilesIntent>(onInvoke: (_) {
+            onSend();
+          }),
+        },
+        child: child,
+      );
+}
+
 class _FileInputOverlay extends HookConsumerWidget {
   const _FileInputOverlay({
     required this.child,
     required this.onFileAdded,
-    required this.onSend,
   });
 
   final Widget child;
 
   final void Function(List<_File>) onFileAdded;
-  final void Function() onSend;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dragging = useState(false);
     return FocusableActionDetector(
-      autofocus: true,
-      shortcuts: {
-        SingleActivator(
-          LogicalKeyboardKey.keyV,
-          meta: kPlatformIsDarwin,
-          control: !kPlatformIsDarwin,
-        ): const _PasteFileOrImageIntent(),
-        const SingleActivator(
-          LogicalKeyboardKey.enter,
-        ): const _SendFilesIntent(),
-      },
-      actions: {
-        _PasteFileOrImageIntent: CallbackAction<Intent>(onInvoke: (_) async {
-          final files = await getClipboardFiles();
-          onFileAdded(files.map((file) => _File.auto(file.xFile)).toList());
-        }),
-        _SendFilesIntent: CallbackAction<Intent>(onInvoke: (_) {
-          onSend();
-        }),
-      },
       child: DropTarget(
         onDragEntered: (_) => dragging.value = true,
         onDragExited: (_) => dragging.value = false,
@@ -1187,10 +1247,6 @@ class _FileInputOverlay extends HookConsumerWidget {
       ),
     );
   }
-}
-
-class _PasteFileOrImageIntent extends Intent {
-  const _PasteFileOrImageIntent();
 }
 
 class _SendFilesIntent extends Intent {
@@ -1225,4 +1281,24 @@ class _ChatDragIndicator extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _PasteContextAction extends Action<PasteTextIntent> {
+  _PasteContextAction(this.context, this.onPasteFiles);
+
+  final BuildContext context;
+  final void Function(Iterable<File> files) onPasteFiles;
+
+  @override
+  Object? invoke(PasteTextIntent intent) {
+    final callingAction = this.callingAction;
+    scheduleMicrotask(() async {
+      final files = await getClipboardFiles();
+      if (files.isNotEmpty) {
+        onPasteFiles(files);
+      } else if (callingAction != null) {
+        callingAction.invoke(intent);
+      }
+    });
+  }
 }
