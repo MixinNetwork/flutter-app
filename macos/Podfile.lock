@@ -177,7 +177,7 @@ SPEC CHECKSUMS:
   irondash_engine_context: da62996ee25616d2f01bbeb85dc115d813359478
   local_auth_foundation: 7d1835ccc3ff0cfcf081d7bae330db0911218412
   mixin_logger: 011219cd258a9229c11e97e1b637e1c223330462
-  network_info_plus: f4fbc7877ab7b3294500d9441dfa53cd54972d05
+  network_info_plus: aeb9c4ed699cae128bc94b9d0f04f2389a414cbb
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: fa739dd842b393193c5ca93c26798dff6e3d0e0c
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
