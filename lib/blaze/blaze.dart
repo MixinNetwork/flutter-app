@@ -99,9 +99,9 @@ class Blaze {
       i('ws _userAgent: $userAgent');
       _connect(_token!);
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
-        i('ws webSocket state: ${channel?.innerWebSocket?.readyState}');
+        i('ws webSocket state: ${channel?.ready}');
 
-        if (channel?.innerWebSocket?.readyState == WebSocket.open) return;
+        // if (channel?.innerWebSocket?.readyState == WebSocket.open) return;
         if (_connectedState == ConnectedState.connected) return;
         _connectedState = ConnectedState.disconnected;
 
