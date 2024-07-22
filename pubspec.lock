@@ -1264,10 +1264,11 @@ packages:
   msix:
     dependency: "direct dev"
     description:
-      name: msix
-      sha256: "519b183d15dc9f9c594f247e2d2339d855cf0eaacc30e19b128e14f3ecc62047"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "75190427070d1a57873cfd895fb9251d0713ebd8"
+      resolved-ref: "75190427070d1a57873cfd895fb9251d0713ebd8"
+      url: "https://github.com/riccardo-lomazzi/msix.git"
+    source: git
     version: "3.16.7"
   native_dio_adapter:
     dependency: "direct main"
