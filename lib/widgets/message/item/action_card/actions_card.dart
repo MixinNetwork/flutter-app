@@ -102,7 +102,7 @@ class ActionsCardBody extends StatelessWidget {
         children: [
           if (data.coverUrl.isNotEmpty)
             AspectRatio(
-              aspectRatio: 16 / 10,
+              aspectRatio: 1,
               child: CacheImage(data.coverUrl),
             ),
           const SizedBox(height: 10),
