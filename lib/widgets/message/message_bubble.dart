@@ -69,7 +69,7 @@ class MessageBubble extends HookConsumerWidget {
     var _child = child;
 
     if (!includeNip) {
-      _child = _MessageBubbleNipPadding(
+      _child = MessageBubbleNipPadding(
         currentUser: isCurrentUser,
         child: child,
       );
@@ -92,7 +92,7 @@ class MessageBubble extends HookConsumerWidget {
               // constraint width to 0, the ancestor IntrinsicWidth will relayout
               // and get the correct width.
               width: constraintQuoteWidthToMessage ? 0 : null,
-              child: _MessageBubbleNipPadding(
+              child: MessageBubbleNipPadding(
                 currentUser: isCurrentUser,
                 child: HookBuilder(builder: (context) {
                   final quoteContent = useMessageConverter(
@@ -228,10 +228,11 @@ class MessageBubble extends HookConsumerWidget {
   }
 }
 
-class _MessageBubbleNipPadding extends StatelessWidget {
-  const _MessageBubbleNipPadding({
+class MessageBubbleNipPadding extends StatelessWidget {
+  const MessageBubbleNipPadding({
     required this.currentUser,
     required this.child,
+    super.key,
   });
 
   final bool currentUser;

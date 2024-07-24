@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../utils/extension/extension.dart';
 import '../../../cache_image.dart';
 import '../../../high_light_text.dart';
+import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_style.dart';
 import '../action/action_data.dart';
@@ -20,35 +22,68 @@ class ActionsCardMessage extends StatelessWidget {
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, constraints) {
         final width = (constraints.maxWidth * 0.41).clamp(240.0, 340.0);
-        return Column(
-          children: [
-            MessageBubble(
-              padding: EdgeInsets.zero,
-              clip: true,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: width, minWidth: width),
-                child: ActionsCardBody(
-                  data: data,
-                  description: MessageTextWidget(
-                    color: context.theme.text,
-                    fontSize: context.messageStyle.secondaryFontSize,
-                    content: data.description,
+        return MessageBubble(
+          showBubble: false,
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _Bubble(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: width, minWidth: width),
+                  child: ActionsCardBody(
+                    data: data,
+                    description: MessageTextWidget(
+                      color: context.theme.text,
+                      fontSize: context.messageStyle.primaryFontSize,
+                      content: data.description,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            MessageBubble(
-              showBubble: false,
-              padding: EdgeInsets.zero,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: width, minWidth: width),
-                child: _Actions(actions: data.actions),
-              ),
-            )
-          ],
+              const SizedBox(height: 8),
+              HookBuilder(
+                builder: (context) => MessageBubbleNipPadding(
+                  currentUser: useIsCurrentUser(),
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxWidth: width, minWidth: width),
+                    child: _Actions(actions: data.actions),
+                  ),
+                ),
+              )
+            ],
+          ),
         );
       });
+}
+
+class _Bubble extends HookWidget {
+  const _Bubble({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCurrentUser = useIsCurrentUser();
+    final clipper = BubbleClipper(
+      currentUser: isCurrentUser,
+      showNip: true,
+    );
+    final bubbleColor = context.messageBubbleColor(isCurrentUser);
+    return CustomPaint(
+      painter: BubblePainter(
+        color: bubbleColor,
+        clipper: clipper,
+      ),
+      child: ClipPath(
+        clipper: clipper,
+        child: MessageBubbleNipPadding(
+          currentUser: isCurrentUser,
+          child: child,
+        ),
+      ),
+    );
+  }
 }
 
 class ActionsCardBody extends StatelessWidget {
