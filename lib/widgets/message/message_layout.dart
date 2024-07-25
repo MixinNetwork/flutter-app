@@ -237,7 +237,8 @@ class _RenderMessageLayout extends RenderBox
 
     final boxesForSelection =
         renderParagraph.getBoxesForSelection(TextSelection(
-      baseOffset: positionForOffset.offset - 1,
+      baseOffset:
+          positionForOffset.offset == 0 ? 0 : positionForOffset.offset - 1,
       extentOffset: positionForOffset.offset,
     ));
 

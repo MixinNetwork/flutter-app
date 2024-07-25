@@ -507,7 +507,7 @@ class _AppCard extends StatelessWidget {
               data.description,
               style: TextStyle(
                 color: context.theme.text,
-                fontSize: context.messageStyle.secondaryFontSize,
+                fontSize: context.messageStyle.primaryFontSize,
               ),
             ),
           ),

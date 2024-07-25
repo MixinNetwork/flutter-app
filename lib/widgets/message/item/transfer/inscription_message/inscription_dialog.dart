@@ -47,44 +47,65 @@ class _InscriptionDialog extends ConsumerWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (inscription == null)
-            const Material(color: Colors.black87)
-          else
-            CacheImage(inscription.contentUrl),
-          BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12, top: 12),
-                      child: MixinCloseButton(color: theme.icon),
-                    ),
-                  ],
-                ),
-                if (inscription == null)
-                  SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: context.theme.secondaryText,
-                      ),
-                    ),
-                  )
-                else
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: _InscriptionDetailLayout(inscription: inscription),
+          const Material(color: Colors.black87),
+          Opacity(
+            opacity: 0.3,
+            child: _BlurBackground(inscription),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12, top: 12),
+                    child: MixinCloseButton(color: theme.icon),
+                  ),
+                ],
+              ),
+              if (inscription == null)
+                SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: context.theme.secondaryText,
                     ),
                   ),
-              ],
-            ),
+                )
+              else
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: _InscriptionDetailLayout(inscription: inscription),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BlurBackground extends StatelessWidget {
+  const _BlurBackground(this.inscription);
+
+  final Inscription? inscription;
+
+  @override
+  Widget build(BuildContext context) {
+    if (inscription == null) {
+      return const SizedBox.expand();
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CacheImage(inscription!.contentUrl),
+        BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+          child: const SizedBox.expand(),
+        ),
+      ],
     );
   }
 }
