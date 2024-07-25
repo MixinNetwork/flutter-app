@@ -87,13 +87,13 @@ jobs:
         run: flutter build linux
 
       - name: Compress Flutter build
-        run: tar -C build/linux/x64/release/bundle -cvf mixin-desktop-linux-portable.tar.gz .
+        run: tar -C build/linux/x64/release/bundle -cvf mixin_desktop_linux_amd64_portable.tar.gz .
 
       - name: Upload app archive for next steps
         uses: actions/upload-artifact@v3
         with:
-          name: mixin-desktop-linux-portable-archive
-          path: mixin-desktop-linux-portable.tar.gz
+          name: mixin_desktop_linux_amd64_portable
+          path: mixin_desktop_linux_amd64_portable.tar.gz
 
       - name: Package APP
         run: ./dist/linux_deb.sh
@@ -109,7 +109,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin-desktop-linux-portable.tar.gz
+          file: mixin_desktop_linux_amd64_portable.tar.gz
           asset_name: mixin_desktop_linux_amd64_portable.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
@@ -134,12 +134,12 @@ jobs:
       - name: Download app archive
         uses: actions/download-artifact@v3
         with:
-          name: mixin-desktop-linux-portable-archive
+          name: mixin_desktop_linux_amd64_portable
 
       - name: uncompress app archive
         run: |
           mkdir -p build/linux/x64/release/bundle
-          tar -C build/linux/x64/release/bundle -xvf mixin-desktop-linux-portable.tar.gz
+          tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
 
       - name: Prepare snap build
         run: ./dist/linux_snap_prepare.sh
@@ -151,11 +151,14 @@ jobs:
           snapcraft-args: '--enable-experimental-extensions'
           path: dist/snap
 
+      - name: copy snap
+        run: |
+          cp ${{ steps.build-snap.outputs.snap }} mixin_desktop_linux_amd64.snap
       - name: Upload snap
         uses: actions/upload-artifact@v3
         with:
           name: mixin-desktop-snap
-          path: ${{ steps.build-snap.outputs.snap }}
+          path: mixin_desktop_linux_amd64.snap
 
       - name: Upload linux snap
         uses: svenstaro/upload-release-action@v2
@@ -177,12 +180,12 @@ jobs:
       - name: Download app archive
         uses: actions/download-artifact@v3
         with:
-          name: mixin-desktop-linux-portable-archive
+          name: mixin_desktop_linux_amd64_portable
 
       - name: uncompress app archive
         run: |
           mkdir -p build/linux/x64/release/bundle
-          tar -C build/linux/x64/release/bundle -xvf mixin-desktop-linux-portable.tar.gz
+          tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
 
       - name: Build AppImage unsing appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1
@@ -190,18 +193,19 @@ jobs:
           entrypoint: appimage-builder
           args: --recipe ./AppImageBuilder.yml --skip-test
 
+      - run: mv "Mixin Messenger-latest-x86_64.AppImage" mixin_desktop_linux_amd64.AppImage
       - name: Upload AppImage Artifact
         uses: actions/upload-artifact@v3
         with:
           name: AppImage
-          path: './*.AppImage*'
+          path: mixin_desktop_linux_amd64.AppImage
 
       - name: Upload linux AppImage
         uses: svenstaro/upload-release-action@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Mixin Messenger-latest-x86_64.AppImage
+          file: mixin_desktop_linux_amd64.AppImage
           asset_name: mixin_desktop_linux_amd64.AppImage
           tag: ${{ github.ref }}
           overwrite: true
@@ -251,8 +255,8 @@ jobs:
       - name: Upload Installer
         uses: actions/upload-artifact@v3
         with:
-          name: mixin_setup.exe.zip
-          path: build\mixin_setup.exe
+          name: mixin_desktop_windows_setup_amd64.exe.zip
+          path: build\mixin_desktop_windows_setup_amd64.exe
 
       - name: Build msix
         run: |
@@ -279,7 +283,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/mixin_setup.exe
+          file: build/mixin_desktop_windows_setup_amd64.exe
           asset_name: mixin_desktop_windows_setup_amd64.exe
           tag: ${{ github.ref }}
           overwrite: true
