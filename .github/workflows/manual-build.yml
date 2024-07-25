@@ -34,12 +34,11 @@ on:
 env:
   FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
   FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
-  PLATFORMS: ${{ github.event.inputs.platforms || 'linux,windows' }}
 
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-    if: ${{ contains(env.PLATFORMS, 'linux') }}
+    if: contains(github.event.inputs.platforms, 'linux') || github.event.inputs.platforms == ''
     steps:
       # Work around https://github.com/actions/runner-images/issues/8659
       - uses: mjp41/workaround8649@c8550b715ccdc17f89c8d5c28d7a48eeff9c94a8
@@ -209,7 +208,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    if: ${{ contains(env.PLATFORMS, 'windows') }}
+    if: contains(github.event.inputs.platforms, 'windows') || github.event.inputs.platforms == ''
     steps:
       - uses: actions/checkout@v4
 
