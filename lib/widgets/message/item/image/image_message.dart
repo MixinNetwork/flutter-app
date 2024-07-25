@@ -269,7 +269,7 @@ class ImageCaption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: MessageTextWidget(
           color: context.theme.text,
-          fontSize: context.messageStyle.secondaryFontSize,
+          fontSize: context.messageStyle.primaryFontSize,
           content: caption,
         ),
       );
