@@ -58,6 +58,7 @@ const statusOffset = 'messages_status_offset';
 
 const kMarkLimit = 999;
 const kDbDeleteLimit = 500;
+const kMaxGroupParticipants = 1024;
 
 const kMaxTextLength = 64 * 1024;
 const kDefaultTextInputLimit = 200;

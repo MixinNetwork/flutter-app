@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/participant_dao.dart';
@@ -352,7 +353,7 @@ class _ActionAddParticipants extends HookConsumerWidget {
                   singleSelect: false,
                   title: context.l10n.addParticipants,
                   onlyContact: true,
-                  maxSelect: 1024 - participants.length,
+                  maxSelect: kMaxGroupParticipants - participants.length,
                 );
                 if (result == null || result.isEmpty) return;
 
