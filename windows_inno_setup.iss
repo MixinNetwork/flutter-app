@@ -24,7 +24,7 @@ DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 OutputDir={#SourcePath}\build\
-OutputBaseFilename=mixin_setup
+OutputBaseFilename=mixin_desktop_windows_setup_amd64
 SetupIconFile={#SourcePath}\windows\runner\resources\app_icon.ico
 Compression=lzma
 SolidCompression=yes

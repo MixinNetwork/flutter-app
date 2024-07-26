@@ -8,14 +8,37 @@ on:
       flutter_channel:
         description: "run with flutter channel, eg: master, beta, stable"
         required: true
-        default: "master"
+        type: choice
+        options:
+          - 'master'
+          - 'beta'
+          - 'stable'
+        default: "stable"
+      flutter_version:
+        description: "flutter version. eg 3.19.6"
+        required: false
+        default: ""
+      platforms:
+        description: "platforms to build, eg: linux, windows"
+        required: false
+        type: choice
+        options:
+          - 'linux,windows'
+          - 'linux'
+          - 'windows'
+        default: "linux,windows"
   push:
     tags:
       - 'v*'
 
+env:
+  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
+  FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    if: contains(github.event.inputs.platforms, 'linux') || github.event.inputs.platforms == ''
     steps:
       # Work around https://github.com/actions/runner-images/issues/8659
       - uses: mjp41/workaround8649@c8550b715ccdc17f89c8d5c28d7a48eeff9c94a8
@@ -29,7 +52,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ github.event.inputs.flutter_channel || 'master' }} # 'master', 'beta', 'dev' or 'stable'
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -63,13 +87,13 @@ jobs:
         run: flutter build linux
 
       - name: Compress Flutter build
-        run: tar -C build/linux/x64/release/bundle -cvf mixin-desktop-linux-portable.tar.gz .
+        run: tar -C build/linux/x64/release/bundle -cvf mixin_desktop_linux_amd64_portable.tar.gz .
 
       - name: Upload app archive for next steps
         uses: actions/upload-artifact@v3
         with:
-          name: mixin-desktop-linux-portable-archive
-          path: mixin-desktop-linux-portable.tar.gz
+          name: mixin_desktop_linux_amd64_portable
+          path: mixin_desktop_linux_amd64_portable.tar.gz
 
       - name: Package APP
         run: ./dist/linux_deb.sh
@@ -85,7 +109,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin-desktop-linux-portable.tar.gz
+          file: mixin_desktop_linux_amd64_portable.tar.gz
           asset_name: mixin_desktop_linux_amd64_portable.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
@@ -110,12 +134,12 @@ jobs:
       - name: Download app archive
         uses: actions/download-artifact@v3
         with:
-          name: mixin-desktop-linux-portable-archive
+          name: mixin_desktop_linux_amd64_portable
 
       - name: uncompress app archive
         run: |
           mkdir -p build/linux/x64/release/bundle
-          tar -C build/linux/x64/release/bundle -xvf mixin-desktop-linux-portable.tar.gz
+          tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
 
       - name: Prepare snap build
         run: ./dist/linux_snap_prepare.sh
@@ -127,11 +151,14 @@ jobs:
           snapcraft-args: '--enable-experimental-extensions'
           path: dist/snap
 
+      - name: copy snap
+        run: |
+          cp ${{ steps.build-snap.outputs.snap }} mixin_desktop_linux_amd64.snap
       - name: Upload snap
         uses: actions/upload-artifact@v3
         with:
           name: mixin-desktop-snap
-          path: ${{ steps.build-snap.outputs.snap }}
+          path: mixin_desktop_linux_amd64.snap
 
       - name: Upload linux snap
         uses: svenstaro/upload-release-action@v2
@@ -153,12 +180,12 @@ jobs:
       - name: Download app archive
         uses: actions/download-artifact@v3
         with:
-          name: mixin-desktop-linux-portable-archive
+          name: mixin_desktop_linux_amd64_portable
 
       - name: uncompress app archive
         run: |
           mkdir -p build/linux/x64/release/bundle
-          tar -C build/linux/x64/release/bundle -xvf mixin-desktop-linux-portable.tar.gz
+          tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
 
       - name: Build AppImage unsing appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1
@@ -166,30 +193,33 @@ jobs:
           entrypoint: appimage-builder
           args: --recipe ./AppImageBuilder.yml --skip-test
 
+      - run: mv "Mixin Messenger-latest-x86_64.AppImage" mixin_desktop_linux_amd64.AppImage
       - name: Upload AppImage Artifact
         uses: actions/upload-artifact@v3
         with:
           name: AppImage
-          path: './*.AppImage*'
+          path: mixin_desktop_linux_amd64.AppImage
 
       - name: Upload linux AppImage
         uses: svenstaro/upload-release-action@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Mixin Messenger-latest-x86_64.AppImage
+          file: mixin_desktop_linux_amd64.AppImage
           asset_name: mixin_desktop_linux_amd64.AppImage
           tag: ${{ github.ref }}
           overwrite: true
 
   build-windows:
     runs-on: windows-latest
+    if: contains(github.event.inputs.platforms, 'windows') || github.event.inputs.platforms == ''
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ github.event.inputs.flutter_channel || 'master' }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -208,19 +238,13 @@ jobs:
 
       - uses: ilammy/setup-nasm@v1
 
-      # setup webcrypto for unit test
-      #      - run: flutter pub run webcrypto:setup
-      #
-      #      - name: Run tests
-      #        run: flutter test
-
       - name: Build APP
         id: build-app
         run: |
           $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
           $build_number=$version_str.Split("+")[1]
-          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number" -vv
+          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
           echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
 
       - name: Build Installer
@@ -231,8 +255,8 @@ jobs:
       - name: Upload Installer
         uses: actions/upload-artifact@v3
         with:
-          name: mixin_setup.exe.zip
-          path: build\mixin_setup.exe
+          name: mixin_desktop_windows_setup_amd64.exe.zip
+          path: build\mixin_desktop_windows_setup_amd64.exe
 
       - name: Build msix
         run: |
@@ -259,8 +283,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/mixin_setup.exe
+          file: build/mixin_desktop_windows_setup_amd64.exe
           asset_name: mixin_desktop_windows_setup_amd64.exe
           tag: ${{ github.ref }}
           overwrite: true
-
