@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../bloc/simple_cubit.dart';
@@ -102,6 +103,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
   List<ConversationSelector> initSelected = const [],
   String? confirmedText,
   Widget? action,
+  int? maxSelect,
 }) =>
     showMixinDialog<List<ConversationSelector>?>(
       context: context,
@@ -114,6 +116,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
         allowEmpty: allowEmpty,
         confirmedText: confirmedText,
         action: action,
+        maxSelect: maxSelect,
       ),
     );
 
@@ -154,6 +157,7 @@ class _ConversationSelector extends HookConsumerWidget {
     this.allowEmpty = false,
     this.confirmedText,
     this.action,
+    this.maxSelect,
   });
 
   final String title;
@@ -164,6 +168,7 @@ class _ConversationSelector extends HookConsumerWidget {
   final bool allowEmpty;
   final String? confirmedText;
   final Widget? action;
+  final int? maxSelect;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -173,6 +178,10 @@ class _ConversationSelector extends HookConsumerWidget {
       if (list.contains(item)) {
         list.remove(item);
       } else {
+        if (maxSelect != null && list.length >= maxSelect!) {
+          w('max select reached: $maxSelect');
+          return;
+        }
         list.add(item);
       }
       selector.emit(list);
@@ -275,7 +284,7 @@ class _ConversationSelector extends HookConsumerWidget {
                           ),
                           if (!singleSelect)
                             Text(
-                              '${selected.length} / ${conversationFilterState.recentConversations.length + conversationFilterState.friends.length + conversationFilterState.bots.length}',
+                              '${selected.length} / ${maxSelect ?? conversationFilterState.recentConversations.length + conversationFilterState.friends.length + conversationFilterState.bots.length}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: context.theme.secondaryText,
