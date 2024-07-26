@@ -352,6 +352,7 @@ class _ActionAddParticipants extends HookConsumerWidget {
                   singleSelect: false,
                   title: context.l10n.addParticipants,
                   onlyContact: true,
+                  maxSelect: 1024 - participants.length,
                 );
                 if (result == null || result.isEmpty) return;
 
