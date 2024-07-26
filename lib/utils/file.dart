@@ -46,7 +46,7 @@ Future<bool> saveFileToSystem(
   final mineType = lookupMimeType(file);
   final extension = p.extension(targetName);
 
-  final path = (await file_selector.getSaveLocation(
+  var path = (await file_selector.getSaveLocation(
     confirmButtonText: context.l10n.save,
     suggestedName: targetName,
     acceptedTypeGroups: [
@@ -61,6 +61,9 @@ Future<bool> saveFileToSystem(
       ?.path;
   if (path == null || path.isEmpty) {
     return false;
+  }
+  if (Platform.isWindows && !path.endsWith(extension)) {
+    path = path + extension;
   }
   d('copy file to $path');
   await File(file).copy(path);
