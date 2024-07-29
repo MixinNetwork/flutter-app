@@ -25,6 +25,7 @@ class ActionsCardMessage extends StatelessWidget {
         return MessageBubble(
           showBubble: false,
           padding: EdgeInsets.zero,
+          includeNip: true,
           child: Column(
             children: [
               _Bubble(
