@@ -89,7 +89,8 @@ class ActionMessageButton extends ConsumerWidget {
             fit: StackFit.passthrough,
             children: [
               Padding(
-                padding: const EdgeInsets.all(8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 child: Text(
                   action.label,
                   textAlign: TextAlign.center,
@@ -231,14 +232,40 @@ class RenderActionButtonLayout extends RenderBox
         .._row = row
         ..height = maxRowHeight;
 
-      if (size.width < childWidths[0] && rowItems < 3) {
-        rowItems += 1;
-      } else if (size.width < childWidths[1] && rowItems < 2) {
-        rowItems += 2;
+      if (size.width <= childWidths[0]) {
+        if (rowItems == 0 || rowItems == 2 || rowItems == 4) {
+          rowItems += 2;
+        } else {
+          rowItems = 6;
+        }
+      } else if (size.width <= childWidths[1]) {
+        if (rowItems == 0) {
+          rowItems += 3;
+        } else if (rowItems == 2 || rowItems == 3) {
+          rowItems = 6;
+        } else {
+          rowItems = 2;
+          height += maxRowHeight + verticalSpacing;
+          maxRowHeight = size.height;
+          row += 1;
+          parentData
+            .._row = row
+            ..height = maxRowHeight;
+        }
       } else {
-        rowItems += 3;
+        if (rowItems == 0) {
+          rowItems += 6;
+        } else {
+          rowItems = 0;
+          height += maxRowHeight + verticalSpacing;
+          maxRowHeight = 0;
+          parentData
+            .._row = row + 1
+            ..height = size.height;
+          row += 2;
+        }
       }
-      if (rowItems >= 3) {
+      if (rowItems >= 6) {
         rowItems = 0;
         height += maxRowHeight + verticalSpacing;
         maxRowHeight = 0;
