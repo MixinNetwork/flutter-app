@@ -55,6 +55,8 @@ apply_standard_settings(${BINARY_NAME})
 target_link_libraries(${BINARY_NAME} PRIVATE flutter)
 target_link_libraries(${BINARY_NAME} PRIVATE PkgConfig::GTK)
 target_link_libraries(${BINARY_NAME} PRIVATE dbus-1)
+target_link_libraries(${BINARY_NAME} PRIVATE mixin_logger)
+target_link_libraries(${BINARY_NAME} PRIVATE breakpad_client)
 add_dependencies(${BINARY_NAME} flutter_assemble)
 # Only the install-generated bundle's copy of the executable will launch
 # correctly, since the resources must in the right relative locations. To avoid
