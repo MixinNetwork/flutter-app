@@ -45,9 +45,7 @@ Future<bool> showStickerStorePageDialog(
       constraints: BoxConstraints.loose(const Size(480, 600)),
       child: Navigator(
         key: navigatorKey,
-        onDidRemovePage: (page) {
-
-        },
+        onDidRemovePage: (page) {},
         pages: const [
           MaterialPage(child: _StickerStorePage()),
         ],
