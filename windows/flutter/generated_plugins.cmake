@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   flutter_app_icon_badge
   irondash_engine_context
+  local_auth_windows
   platform_device_id_windows
   protocol_handler_windows
   quick_breakpad

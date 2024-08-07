@@ -20,7 +20,7 @@ PODS:
   - FlutterMacOS (1.0.0)
   - irondash_engine_context (0.0.1):
     - FlutterMacOS
-  - local_auth_foundation (0.0.1):
+  - local_auth_darwin (0.0.1):
     - Flutter
     - FlutterMacOS
   - mixin_logger (0.0.1):
@@ -42,18 +42,21 @@ PODS:
     - FlutterMacOS
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - "sqlite3 (3.45.3+1)":
-    - "sqlite3/common (= 3.45.3+1)"
-  - "sqlite3/common (3.45.3+1)"
-  - "sqlite3/fts5 (3.45.3+1)":
+  - "sqlite3 (3.46.0+1)":
+    - "sqlite3/common (= 3.46.0+1)"
+  - "sqlite3/common (3.46.0+1)"
+  - "sqlite3/dbstatvtab (3.46.0+1)":
     - sqlite3/common
-  - "sqlite3/perf-threadsafe (3.45.3+1)":
+  - "sqlite3/fts5 (3.46.0+1)":
     - sqlite3/common
-  - "sqlite3/rtree (3.45.3+1)":
+  - "sqlite3/perf-threadsafe (3.46.0+1)":
+    - sqlite3/common
+  - "sqlite3/rtree (3.46.0+1)":
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - FlutterMacOS
-    - "sqlite3 (~> 3.45.3+1)"
+    - "sqlite3 (~> 3.46.0+1)"
+    - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -83,7 +86,7 @@ DEPENDENCIES:
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
-  - local_auth_foundation (from `Flutter/ephemeral/.symlinks/plugins/local_auth_foundation/darwin`)
+  - local_auth_darwin (from `Flutter/ephemeral/.symlinks/plugins/local_auth_darwin/darwin`)
   - mixin_logger (from `Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos`)
   - network_info_plus (from `Flutter/ephemeral/.symlinks/plugins/network_info_plus/macos`)
   - ogg_opus_player (from `Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/macos`)
@@ -128,8 +131,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   irondash_engine_context:
     :path: Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos
-  local_auth_foundation:
-    :path: Flutter/ephemeral/.symlinks/plugins/local_auth_foundation/darwin
+  local_auth_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/local_auth_darwin/darwin
   mixin_logger:
     :path: Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos
   network_info_plus:
@@ -165,7 +168,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
-  cupertino_http: afa11b9e2786b62da2671e4ddd32caf792503748
+  cupertino_http: 1d506209e339211efa0764caa7b2de4bc55b6818
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_keep_screen_on: 855ea723f37225b8fc7895cffa06fe89f4fabd46
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
@@ -175,7 +178,7 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   irondash_engine_context: da62996ee25616d2f01bbeb85dc115d813359478
-  local_auth_foundation: 7d1835ccc3ff0cfcf081d7bae330db0911218412
+  local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
   mixin_logger: 011219cd258a9229c11e97e1b637e1c223330462
   network_info_plus: aeb9c4ed699cae128bc94b9d0f04f2389a414cbb
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
@@ -185,12 +188,12 @@ SPEC CHECKSUMS:
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   protocol_handler_macos: d10a6c01d6373389ffd2278013ab4c47ed6d6daa
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
-  sqlite3_flutter_libs: 8d204ef443cf0d5c1c8b058044eab53f3943a9c5
+  sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
+  sqlite3_flutter_libs: 5ca46c1a04eddfbeeb5b16566164aa7ad1616e7b
   super_native_extensions: 85efee3a7495b46b04befcfc86ed12069264ebf3
-  url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
+  url_launcher_macos: 5f437abeda8c85500ceb03f5c1938a8c5a705399
   video_compress: c896234f100791b5fef7f049afa38f6d2ef7b42f
-  video_player_avfoundation: 2b4384f3b157206b5e150a0083cdc0c905d260d3
+  video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 

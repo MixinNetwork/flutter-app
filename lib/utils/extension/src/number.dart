@@ -23,7 +23,7 @@ extension StringCurrencyExtension on String {
   String numberFormat() {
     if (isEmpty) return this;
     try {
-      return NumberFormat('#,###.########').format(DecimalIntl(asDecimal));
+      return DecimalFormatter(NumberFormat('#,###.########')).format(asDecimal);
     } catch (error) {
       return this;
     }
