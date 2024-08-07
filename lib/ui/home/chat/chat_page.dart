@@ -290,9 +290,8 @@ class ChatPage extends HookConsumerWidget {
                     child: _SideRouter(
                       chatSideCubit: chatSideCubit,
                       constraints: boxConstraints,
-                      onPopPage: (Route<dynamic> route, dynamic result) {
+                      onDidRemovePage: (page) {
                         chatSideCubit.onPopPage();
-                        return route.didPop(result);
                       },
                       pages: [
                         if (routeMode) chatContainerPage,
@@ -315,14 +314,14 @@ class _SideRouter extends StatelessWidget {
     required this.chatSideCubit,
     required this.pages,
     required this.constraints,
-    this.onPopPage,
+    this.onDidRemovePage,
   });
 
   final ChatSideCubit chatSideCubit;
 
   final List<Page<dynamic>> pages;
 
-  final PopPageCallback? onPopPage;
+  final DidRemovePageCallback? onDidRemovePage;
 
   final BoxConstraints constraints;
 
@@ -332,9 +331,15 @@ class _SideRouter extends StatelessWidget {
     return routeMode
         ? SizedBox(
             width: constraints.maxWidth,
-            child: Navigator(pages: pages, onPopPage: onPopPage))
+            child: Navigator(
+              pages: pages,
+              onDidRemovePage: onDidRemovePage,
+            ))
         : _AnimatedChatSlide(
-            constraints: constraints, pages: pages, onPopPage: onPopPage);
+            constraints: constraints,
+            pages: pages,
+            onDidRemovePage: onDidRemovePage,
+          );
   }
 }
 
@@ -342,12 +347,12 @@ class _AnimatedChatSlide extends HookConsumerWidget {
   const _AnimatedChatSlide({
     required this.pages,
     required this.constraints,
-    required this.onPopPage,
+    required this.onDidRemovePage,
   });
 
   final List<Page<dynamic>> pages;
 
-  final PopPageCallback? onPopPage;
+  final DidRemovePageCallback? onDidRemovePage;
 
   final BoxConstraints constraints;
 
@@ -389,7 +394,7 @@ class _AnimatedChatSlide extends HookConsumerWidget {
           minWidth: kChatSidePageWidth,
           child: Navigator(
             pages: _pages.value,
-            onPopPage: onPopPage,
+            onDidRemovePage: onDidRemovePage,
           ),
         ),
       ),
@@ -453,8 +458,7 @@ class ChatContainer extends HookConsumerWidget {
                   ),
                 ),
                 child: Navigator(
-                  onPopPage: (Route<dynamic> route, dynamic result) =>
-                      route.didPop(result),
+                  onDidRemovePage: (page) {},
                   pages: [
                     MaterialPage(
                       child: _ChatDropOverlay(

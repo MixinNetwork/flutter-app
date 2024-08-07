@@ -574,6 +574,41 @@ class Conversation extends DataClass implements Insertable<Conversation> {
         muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
         expireIn: expireIn.present ? expireIn.value : this.expireIn,
       );
+  Conversation copyWithCompanion(ConversationsCompanion data) {
+    return Conversation(
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      category: data.category.present ? data.category.value : this.category,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      announcement: data.announcement.present
+          ? data.announcement.value
+          : this.announcement,
+      codeUrl: data.codeUrl.present ? data.codeUrl.value : this.codeUrl,
+      payType: data.payType.present ? data.payType.value : this.payType,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      pinTime: data.pinTime.present ? data.pinTime.value : this.pinTime,
+      lastMessageId: data.lastMessageId.present
+          ? data.lastMessageId.value
+          : this.lastMessageId,
+      lastMessageCreatedAt: data.lastMessageCreatedAt.present
+          ? data.lastMessageCreatedAt.value
+          : this.lastMessageCreatedAt,
+      lastReadMessageId: data.lastReadMessageId.present
+          ? data.lastReadMessageId.value
+          : this.lastReadMessageId,
+      unseenMessageCount: data.unseenMessageCount.present
+          ? data.unseenMessageCount.value
+          : this.unseenMessageCount,
+      status: data.status.present ? data.status.value : this.status,
+      draft: data.draft.present ? data.draft.value : this.draft,
+      muteUntil: data.muteUntil.present ? data.muteUntil.value : this.muteUntil,
+      expireIn: data.expireIn.present ? data.expireIn.value : this.expireIn,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Conversation(')
@@ -1790,6 +1825,64 @@ class Message extends DataClass implements Insertable<Message> {
         thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
         caption: caption.present ? caption.value : this.caption,
       );
+  Message copyWithCompanion(MessagesCompanion data) {
+    return Message(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      category: data.category.present ? data.category.value : this.category,
+      content: data.content.present ? data.content.value : this.content,
+      mediaUrl: data.mediaUrl.present ? data.mediaUrl.value : this.mediaUrl,
+      mediaMimeType: data.mediaMimeType.present
+          ? data.mediaMimeType.value
+          : this.mediaMimeType,
+      mediaSize: data.mediaSize.present ? data.mediaSize.value : this.mediaSize,
+      mediaDuration: data.mediaDuration.present
+          ? data.mediaDuration.value
+          : this.mediaDuration,
+      mediaWidth:
+          data.mediaWidth.present ? data.mediaWidth.value : this.mediaWidth,
+      mediaHeight:
+          data.mediaHeight.present ? data.mediaHeight.value : this.mediaHeight,
+      mediaHash: data.mediaHash.present ? data.mediaHash.value : this.mediaHash,
+      thumbImage:
+          data.thumbImage.present ? data.thumbImage.value : this.thumbImage,
+      mediaKey: data.mediaKey.present ? data.mediaKey.value : this.mediaKey,
+      mediaDigest:
+          data.mediaDigest.present ? data.mediaDigest.value : this.mediaDigest,
+      mediaStatus:
+          data.mediaStatus.present ? data.mediaStatus.value : this.mediaStatus,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      action: data.action.present ? data.action.value : this.action,
+      participantId: data.participantId.present
+          ? data.participantId.value
+          : this.participantId,
+      snapshotId:
+          data.snapshotId.present ? data.snapshotId.value : this.snapshotId,
+      hyperlink: data.hyperlink.present ? data.hyperlink.value : this.hyperlink,
+      name: data.name.present ? data.name.value : this.name,
+      albumId: data.albumId.present ? data.albumId.value : this.albumId,
+      stickerId: data.stickerId.present ? data.stickerId.value : this.stickerId,
+      sharedUserId: data.sharedUserId.present
+          ? data.sharedUserId.value
+          : this.sharedUserId,
+      mediaWaveform: data.mediaWaveform.present
+          ? data.mediaWaveform.value
+          : this.mediaWaveform,
+      quoteMessageId: data.quoteMessageId.present
+          ? data.quoteMessageId.value
+          : this.quoteMessageId,
+      quoteContent: data.quoteContent.present
+          ? data.quoteContent.value
+          : this.quoteContent,
+      thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
+      caption: data.caption.present ? data.caption.value : this.caption,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Message(')
@@ -2777,6 +2870,34 @@ class User extends DataClass implements Insertable<User> {
         isDeactivated:
             isDeactivated.present ? isDeactivated.value : this.isDeactivated,
       );
+  User copyWithCompanion(UsersCompanion data) {
+    return User(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      identityNumber: data.identityNumber.present
+          ? data.identityNumber.value
+          : this.identityNumber,
+      relationship: data.relationship.present
+          ? data.relationship.value
+          : this.relationship,
+      fullName: data.fullName.present ? data.fullName.value : this.fullName,
+      avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      isVerified:
+          data.isVerified.present ? data.isVerified.value : this.isVerified,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      muteUntil: data.muteUntil.present ? data.muteUntil.value : this.muteUntil,
+      hasPin: data.hasPin.present ? data.hasPin.value : this.hasPin,
+      appId: data.appId.present ? data.appId.value : this.appId,
+      biography: data.biography.present ? data.biography.value : this.biography,
+      isScam: data.isScam.present ? data.isScam.value : this.isScam,
+      codeUrl: data.codeUrl.present ? data.codeUrl.value : this.codeUrl,
+      codeId: data.codeId.present ? data.codeId.value : this.codeId,
+      isDeactivated: data.isDeactivated.present
+          ? data.isDeactivated.value
+          : this.isDeactivated,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('User(')
@@ -3526,6 +3647,38 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
         closingBalance:
             closingBalance.present ? closingBalance.value : this.closingBalance,
       );
+  Snapshot copyWithCompanion(SnapshotsCompanion data) {
+    return Snapshot(
+      snapshotId:
+          data.snapshotId.present ? data.snapshotId.value : this.snapshotId,
+      traceId: data.traceId.present ? data.traceId.value : this.traceId,
+      type: data.type.present ? data.type.value : this.type,
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      opponentId:
+          data.opponentId.present ? data.opponentId.value : this.opponentId,
+      transactionHash: data.transactionHash.present
+          ? data.transactionHash.value
+          : this.transactionHash,
+      sender: data.sender.present ? data.sender.value : this.sender,
+      receiver: data.receiver.present ? data.receiver.value : this.receiver,
+      memo: data.memo.present ? data.memo.value : this.memo,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
+      snapshotHash: data.snapshotHash.present
+          ? data.snapshotHash.value
+          : this.snapshotHash,
+      openingBalance: data.openingBalance.present
+          ? data.openingBalance.value
+          : this.openingBalance,
+      closingBalance: data.closingBalance.present
+          ? data.closingBalance.value
+          : this.closingBalance,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Snapshot(')
@@ -4284,6 +4437,40 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
             ? inscriptionHash.value
             : this.inscriptionHash,
       );
+  SafeSnapshot copyWithCompanion(SafeSnapshotsCompanion data) {
+    return SafeSnapshot(
+      snapshotId:
+          data.snapshotId.present ? data.snapshotId.value : this.snapshotId,
+      type: data.type.present ? data.type.value : this.type,
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      opponentId:
+          data.opponentId.present ? data.opponentId.value : this.opponentId,
+      memo: data.memo.present ? data.memo.value : this.memo,
+      transactionHash: data.transactionHash.present
+          ? data.transactionHash.value
+          : this.transactionHash,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      traceId: data.traceId.present ? data.traceId.value : this.traceId,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
+      openingBalance: data.openingBalance.present
+          ? data.openingBalance.value
+          : this.openingBalance,
+      closingBalance: data.closingBalance.present
+          ? data.closingBalance.value
+          : this.closingBalance,
+      withdrawal:
+          data.withdrawal.present ? data.withdrawal.value : this.withdrawal,
+      deposit: data.deposit.present ? data.deposit.value : this.deposit,
+      inscriptionHash: data.inscriptionHash.present
+          ? data.inscriptionHash.value
+          : this.inscriptionHash,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SafeSnapshot(')
@@ -5009,6 +5196,29 @@ class Asset extends DataClass implements Insertable<Asset> {
         assetKey: assetKey.present ? assetKey.value : this.assetKey,
         reserve: reserve.present ? reserve.value : this.reserve,
       );
+  Asset copyWithCompanion(AssetsCompanion data) {
+    return Asset(
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      balance: data.balance.present ? data.balance.value : this.balance,
+      destination:
+          data.destination.present ? data.destination.value : this.destination,
+      tag: data.tag.present ? data.tag.value : this.tag,
+      priceBtc: data.priceBtc.present ? data.priceBtc.value : this.priceBtc,
+      priceUsd: data.priceUsd.present ? data.priceUsd.value : this.priceUsd,
+      chainId: data.chainId.present ? data.chainId.value : this.chainId,
+      changeUsd: data.changeUsd.present ? data.changeUsd.value : this.changeUsd,
+      changeBtc: data.changeBtc.present ? data.changeBtc.value : this.changeBtc,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
+      assetKey: data.assetKey.present ? data.assetKey.value : this.assetKey,
+      reserve: data.reserve.present ? data.reserve.value : this.reserve,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Asset(')
@@ -5698,6 +5908,31 @@ class Token extends DataClass implements Insertable<Token> {
         collectionHash:
             collectionHash.present ? collectionHash.value : this.collectionHash,
       );
+  Token copyWithCompanion(TokensCompanion data) {
+    return Token(
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      kernelAssetId: data.kernelAssetId.present
+          ? data.kernelAssetId.value
+          : this.kernelAssetId,
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      priceBtc: data.priceBtc.present ? data.priceBtc.value : this.priceBtc,
+      priceUsd: data.priceUsd.present ? data.priceUsd.value : this.priceUsd,
+      chainId: data.chainId.present ? data.chainId.value : this.chainId,
+      changeUsd: data.changeUsd.present ? data.changeUsd.value : this.changeUsd,
+      changeBtc: data.changeBtc.present ? data.changeBtc.value : this.changeBtc,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
+      assetKey: data.assetKey.present ? data.assetKey.value : this.assetKey,
+      dust: data.dust.present ? data.dust.value : this.dust,
+      collectionHash: data.collectionHash.present
+          ? data.collectionHash.value
+          : this.collectionHash,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Token(')
@@ -6145,6 +6380,16 @@ class Chain extends DataClass implements Insertable<Chain> {
         iconUrl: iconUrl ?? this.iconUrl,
         threshold: threshold ?? this.threshold,
       );
+  Chain copyWithCompanion(ChainsCompanion data) {
+    return Chain(
+      chainId: data.chainId.present ? data.chainId.value : this.chainId,
+      name: data.name.present ? data.name.value : this.name,
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      threshold: data.threshold.present ? data.threshold.value : this.threshold,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Chain(')
@@ -6569,6 +6814,22 @@ class Sticker extends DataClass implements Insertable<Sticker> {
         createdAt: createdAt ?? this.createdAt,
         lastUseAt: lastUseAt.present ? lastUseAt.value : this.lastUseAt,
       );
+  Sticker copyWithCompanion(StickersCompanion data) {
+    return Sticker(
+      stickerId: data.stickerId.present ? data.stickerId.value : this.stickerId,
+      albumId: data.albumId.present ? data.albumId.value : this.albumId,
+      name: data.name.present ? data.name.value : this.name,
+      assetUrl: data.assetUrl.present ? data.assetUrl.value : this.assetUrl,
+      assetType: data.assetType.present ? data.assetType.value : this.assetType,
+      assetWidth:
+          data.assetWidth.present ? data.assetWidth.value : this.assetWidth,
+      assetHeight:
+          data.assetHeight.present ? data.assetHeight.value : this.assetHeight,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastUseAt: data.lastUseAt.present ? data.lastUseAt.value : this.lastUseAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Sticker(')
@@ -6944,6 +7205,18 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
             : this.siteDescription,
         siteImage: siteImage.present ? siteImage.value : this.siteImage,
       );
+  Hyperlink copyWithCompanion(HyperlinksCompanion data) {
+    return Hyperlink(
+      hyperlink: data.hyperlink.present ? data.hyperlink.value : this.hyperlink,
+      siteName: data.siteName.present ? data.siteName.value : this.siteName,
+      siteTitle: data.siteTitle.present ? data.siteTitle.value : this.siteTitle,
+      siteDescription: data.siteDescription.present
+          ? data.siteDescription.value
+          : this.siteDescription,
+      siteImage: data.siteImage.present ? data.siteImage.value : this.siteImage,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Hyperlink(')
@@ -7209,6 +7482,16 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
         conversationId: conversationId ?? this.conversationId,
         hasRead: hasRead.present ? hasRead.value : this.hasRead,
       );
+  MessageMention copyWithCompanion(MessageMentionsCompanion data) {
+    return MessageMention(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      hasRead: data.hasRead.present ? data.hasRead.value : this.hasRead,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('MessageMention(')
@@ -7445,6 +7728,16 @@ class PinMessage extends DataClass implements Insertable<PinMessage> {
         conversationId: conversationId ?? this.conversationId,
         createdAt: createdAt ?? this.createdAt,
       );
+  PinMessage copyWithCompanion(PinMessagesCompanion data) {
+    return PinMessage(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('PinMessage(')
@@ -7682,6 +7975,14 @@ class ExpiredMessage extends DataClass implements Insertable<ExpiredMessage> {
         expireIn: expireIn ?? this.expireIn,
         expireAt: expireAt.present ? expireAt.value : this.expireAt,
       );
+  ExpiredMessage copyWithCompanion(ExpiredMessagesCompanion data) {
+    return ExpiredMessage(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      expireIn: data.expireIn.present ? data.expireIn.value : this.expireIn,
+      expireAt: data.expireAt.present ? data.expireAt.value : this.expireAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('ExpiredMessage(')
@@ -8087,6 +8388,22 @@ class Addresses extends DataClass implements Insertable<Addresses> {
         tag: tag.present ? tag.value : this.tag,
         dust: dust.present ? dust.value : this.dust,
       );
+  Addresses copyWithCompanion(AddressesCompanion data) {
+    return Addresses(
+      addressId: data.addressId.present ? data.addressId.value : this.addressId,
+      type: data.type.present ? data.type.value : this.type,
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      destination:
+          data.destination.present ? data.destination.value : this.destination,
+      label: data.label.present ? data.label.value : this.label,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      reserve: data.reserve.present ? data.reserve.value : this.reserve,
+      fee: data.fee.present ? data.fee.value : this.fee,
+      tag: data.tag.present ? data.tag.value : this.tag,
+      dust: data.dust.present ? data.dust.value : this.dust,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Addresses(')
@@ -8684,6 +9001,30 @@ class App extends DataClass implements Insertable<App> {
             : this.resourcePatterns,
         updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
       );
+  App copyWithCompanion(AppsCompanion data) {
+    return App(
+      appId: data.appId.present ? data.appId.value : this.appId,
+      appNumber: data.appNumber.present ? data.appNumber.value : this.appNumber,
+      homeUri: data.homeUri.present ? data.homeUri.value : this.homeUri,
+      redirectUri:
+          data.redirectUri.present ? data.redirectUri.value : this.redirectUri,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      category: data.category.present ? data.category.value : this.category,
+      description:
+          data.description.present ? data.description.value : this.description,
+      appSecret: data.appSecret.present ? data.appSecret.value : this.appSecret,
+      capabilities: data.capabilities.present
+          ? data.capabilities.value
+          : this.capabilities,
+      creatorId: data.creatorId.present ? data.creatorId.value : this.creatorId,
+      resourcePatterns: data.resourcePatterns.present
+          ? data.resourcePatterns.value
+          : this.resourcePatterns,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('App(')
@@ -9129,6 +9470,18 @@ class CircleConversation extends DataClass
         createdAt: createdAt ?? this.createdAt,
         pinTime: pinTime.present ? pinTime.value : this.pinTime,
       );
+  CircleConversation copyWithCompanion(CircleConversationsCompanion data) {
+    return CircleConversation(
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      circleId: data.circleId.present ? data.circleId.value : this.circleId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      pinTime: data.pinTime.present ? data.pinTime.value : this.pinTime,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('CircleConversation(')
@@ -9423,6 +9776,15 @@ class Circle extends DataClass implements Insertable<Circle> {
         createdAt: createdAt ?? this.createdAt,
         orderedAt: orderedAt.present ? orderedAt.value : this.orderedAt,
       );
+  Circle copyWithCompanion(CirclesCompanion data) {
+    return Circle(
+      circleId: data.circleId.present ? data.circleId.value : this.circleId,
+      name: data.name.present ? data.name.value : this.name,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      orderedAt: data.orderedAt.present ? data.orderedAt.value : this.orderedAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Circle(')
@@ -9670,6 +10032,14 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
         data: data ?? this.data,
         createdAt: createdAt ?? this.createdAt,
       );
+  FloodMessage copyWithCompanion(FloodMessagesCompanion data) {
+    return FloodMessage(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      data: data.data.present ? data.data.value : this.data,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('FloodMessage(')
@@ -10095,6 +10465,27 @@ class Job extends DataClass implements Insertable<Job> {
             : this.resendMessageId,
         runCount: runCount ?? this.runCount,
       );
+  Job copyWithCompanion(JobsCompanion data) {
+    return Job(
+      jobId: data.jobId.present ? data.jobId.value : this.jobId,
+      action: data.action.present ? data.action.value : this.action,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      blazeMessage: data.blazeMessage.present
+          ? data.blazeMessage.value
+          : this.blazeMessage,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      resendMessageId: data.resendMessageId.present
+          ? data.resendMessageId.value
+          : this.resendMessageId,
+      runCount: data.runCount.present ? data.runCount.value : this.runCount,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Job(')
@@ -10379,6 +10770,12 @@ class MessagesHistoryData extends DataClass
   MessagesHistoryData copyWith({String? messageId}) => MessagesHistoryData(
         messageId: messageId ?? this.messageId,
       );
+  MessagesHistoryData copyWithCompanion(MessagesHistoryCompanion data) {
+    return MessagesHistoryData(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('MessagesHistoryData(')
@@ -10555,6 +10952,13 @@ class Offset extends DataClass implements Insertable<Offset> {
         key: key ?? this.key,
         timestamp: timestamp ?? this.timestamp,
       );
+  Offset copyWithCompanion(OffsetsCompanion data) {
+    return Offset(
+      key: data.key.present ? data.key.value : this.key,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Offset(')
@@ -10862,6 +11266,21 @@ class ParticipantSessionData extends DataClass
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
         publicKey: publicKey.present ? publicKey.value : this.publicKey,
       );
+  ParticipantSessionData copyWithCompanion(ParticipantSessionCompanion data) {
+    return ParticipantSessionData(
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      sentToServer: data.sentToServer.present
+          ? data.sentToServer.value
+          : this.sentToServer,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      publicKey: data.publicKey.present ? data.publicKey.value : this.publicKey,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('ParticipantSessionData(')
@@ -11168,6 +11587,17 @@ class Participant extends DataClass implements Insertable<Participant> {
         role: role.present ? role.value : this.role,
         createdAt: createdAt ?? this.createdAt,
       );
+  Participant copyWithCompanion(ParticipantsCompanion data) {
+    return Participant(
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      role: data.role.present ? data.role.value : this.role,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Participant(')
@@ -11469,6 +11899,16 @@ class ResendSessionMessage extends DataClass
         status: status ?? this.status,
         createdAt: createdAt ?? this.createdAt,
       );
+  ResendSessionMessage copyWithCompanion(ResendSessionMessagesCompanion data) {
+    return ResendSessionMessage(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('ResendSessionMessage(')
@@ -11822,6 +12262,22 @@ class SentSessionSenderKey extends DataClass
         senderKeyId: senderKeyId.present ? senderKeyId.value : this.senderKeyId,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
+  SentSessionSenderKey copyWithCompanion(SentSessionSenderKeysCompanion data) {
+    return SentSessionSenderKey(
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      sentToServer: data.sentToServer.present
+          ? data.sentToServer.value
+          : this.sentToServer,
+      senderKeyId:
+          data.senderKeyId.present ? data.senderKeyId.value : this.senderKeyId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SentSessionSenderKey(')
@@ -12325,6 +12781,25 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
         added: added.present ? added.value : this.added,
         isVerified: isVerified ?? this.isVerified,
       );
+  StickerAlbum copyWithCompanion(StickerAlbumsCompanion data) {
+    return StickerAlbum(
+      albumId: data.albumId.present ? data.albumId.value : this.albumId,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updateAt: data.updateAt.present ? data.updateAt.value : this.updateAt,
+      orderedAt: data.orderedAt.present ? data.orderedAt.value : this.orderedAt,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      category: data.category.present ? data.category.value : this.category,
+      description:
+          data.description.present ? data.description.value : this.description,
+      banner: data.banner.present ? data.banner.value : this.banner,
+      added: data.added.present ? data.added.value : this.added,
+      isVerified:
+          data.isVerified.present ? data.isVerified.value : this.isVerified,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('StickerAlbum(')
@@ -12662,6 +13137,13 @@ class StickerRelationship extends DataClass
         albumId: albumId ?? this.albumId,
         stickerId: stickerId ?? this.stickerId,
       );
+  StickerRelationship copyWithCompanion(StickerRelationshipsCompanion data) {
+    return StickerRelationship(
+      albumId: data.albumId.present ? data.albumId.value : this.albumId,
+      stickerId: data.stickerId.present ? data.stickerId.value : this.stickerId,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('StickerRelationship(')
@@ -13548,6 +14030,59 @@ class TranscriptMessage extends DataClass
             quoteContent.present ? quoteContent.value : this.quoteContent,
         caption: caption.present ? caption.value : this.caption,
       );
+  TranscriptMessage copyWithCompanion(TranscriptMessagesCompanion data) {
+    return TranscriptMessage(
+      transcriptId: data.transcriptId.present
+          ? data.transcriptId.value
+          : this.transcriptId,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      userFullName: data.userFullName.present
+          ? data.userFullName.value
+          : this.userFullName,
+      category: data.category.present ? data.category.value : this.category,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      content: data.content.present ? data.content.value : this.content,
+      mediaUrl: data.mediaUrl.present ? data.mediaUrl.value : this.mediaUrl,
+      mediaName: data.mediaName.present ? data.mediaName.value : this.mediaName,
+      mediaSize: data.mediaSize.present ? data.mediaSize.value : this.mediaSize,
+      mediaWidth:
+          data.mediaWidth.present ? data.mediaWidth.value : this.mediaWidth,
+      mediaHeight:
+          data.mediaHeight.present ? data.mediaHeight.value : this.mediaHeight,
+      mediaMimeType: data.mediaMimeType.present
+          ? data.mediaMimeType.value
+          : this.mediaMimeType,
+      mediaDuration: data.mediaDuration.present
+          ? data.mediaDuration.value
+          : this.mediaDuration,
+      mediaStatus:
+          data.mediaStatus.present ? data.mediaStatus.value : this.mediaStatus,
+      mediaWaveform: data.mediaWaveform.present
+          ? data.mediaWaveform.value
+          : this.mediaWaveform,
+      thumbImage:
+          data.thumbImage.present ? data.thumbImage.value : this.thumbImage,
+      thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
+      mediaKey: data.mediaKey.present ? data.mediaKey.value : this.mediaKey,
+      mediaDigest:
+          data.mediaDigest.present ? data.mediaDigest.value : this.mediaDigest,
+      mediaCreatedAt: data.mediaCreatedAt.present
+          ? data.mediaCreatedAt.value
+          : this.mediaCreatedAt,
+      stickerId: data.stickerId.present ? data.stickerId.value : this.stickerId,
+      sharedUserId: data.sharedUserId.present
+          ? data.sharedUserId.value
+          : this.sharedUserId,
+      mentions: data.mentions.present ? data.mentions.value : this.mentions,
+      quoteId: data.quoteId.present ? data.quoteId.value : this.quoteId,
+      quoteContent: data.quoteContent.present
+          ? data.quoteContent.value
+          : this.quoteContent,
+      caption: data.caption.present ? data.caption.value : this.caption,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('TranscriptMessage(')
@@ -14098,6 +14633,13 @@ class Fiat extends DataClass implements Insertable<Fiat> {
         code: code ?? this.code,
         rate: rate ?? this.rate,
       );
+  Fiat copyWithCompanion(FiatsCompanion data) {
+    return Fiat(
+      code: data.code.present ? data.code.value : this.code,
+      rate: data.rate.present ? data.rate.value : this.rate,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Fiat(')
@@ -14310,6 +14852,14 @@ class FavoriteApp extends DataClass implements Insertable<FavoriteApp> {
         userId: userId ?? this.userId,
         createdAt: createdAt ?? this.createdAt,
       );
+  FavoriteApp copyWithCompanion(FavoriteAppsCompanion data) {
+    return FavoriteApp(
+      appId: data.appId.present ? data.appId.value : this.appId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('FavoriteApp(')
@@ -14537,6 +15087,14 @@ class Property extends DataClass implements Insertable<Property> {
         group: group ?? this.group,
         value: value ?? this.value,
       );
+  Property copyWithCompanion(PropertiesCompanion data) {
+    return Property(
+      key: data.key.present ? data.key.value : this.key,
+      group: data.group.present ? data.group.value : this.group,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Property(')
@@ -14902,6 +15460,22 @@ class InscriptionCollection extends DataClass
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
+  InscriptionCollection copyWithCompanion(
+      InscriptionCollectionsCompanion data) {
+    return InscriptionCollection(
+      collectionHash: data.collectionHash.present
+          ? data.collectionHash.value
+          : this.collectionHash,
+      supply: data.supply.present ? data.supply.value : this.supply,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      symbol: data.symbol.present ? data.symbol.value : this.symbol,
+      name: data.name.present ? data.name.value : this.name,
+      iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('InscriptionCollection(')
@@ -15380,6 +15954,28 @@ class InscriptionItem extends DataClass implements Insertable<InscriptionItem> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
       );
+  InscriptionItem copyWithCompanion(InscriptionItemsCompanion data) {
+    return InscriptionItem(
+      inscriptionHash: data.inscriptionHash.present
+          ? data.inscriptionHash.value
+          : this.inscriptionHash,
+      collectionHash: data.collectionHash.present
+          ? data.collectionHash.value
+          : this.collectionHash,
+      sequence: data.sequence.present ? data.sequence.value : this.sequence,
+      contentType:
+          data.contentType.present ? data.contentType.value : this.contentType,
+      contentUrl:
+          data.contentUrl.present ? data.contentUrl.value : this.contentUrl,
+      occupiedBy:
+          data.occupiedBy.present ? data.occupiedBy.value : this.occupiedBy,
+      occupiedAt:
+          data.occupiedAt.present ? data.occupiedAt.value : this.occupiedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('InscriptionItem(')
@@ -15564,7 +16160,7 @@ class InscriptionItemsCompanion extends UpdateCompanion<InscriptionItem> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
-  _$MixinDatabaseManager get managers => _$MixinDatabaseManager(this);
+  $MixinDatabaseManager get managers => $MixinDatabaseManager(this);
   late final Conversations conversations = Conversations(this);
   late final Messages messages = Messages(this);
   late final Users users = Users(this);
@@ -16063,7 +16659,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       );
 }
 
-typedef $ConversationsInsertCompanionBuilder = ConversationsCompanion Function({
+typedef $ConversationsCreateCompanionBuilder = ConversationsCompanion Function({
   required String conversationId,
   Value<String?> ownerId,
   Value<ConversationCategory?> category,
@@ -16112,8 +16708,7 @@ class $ConversationsTableManager extends RootTableManager<
     Conversation,
     $ConversationsFilterComposer,
     $ConversationsOrderingComposer,
-    $ConversationsProcessedTableManager,
-    $ConversationsInsertCompanionBuilder,
+    $ConversationsCreateCompanionBuilder,
     $ConversationsUpdateCompanionBuilder> {
   $ConversationsTableManager(_$MixinDatabase db, Conversations table)
       : super(TableManagerState(
@@ -16123,8 +16718,7 @@ class $ConversationsTableManager extends RootTableManager<
               $ConversationsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $ConversationsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $ConversationsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> conversationId = const Value.absent(),
             Value<String?> ownerId = const Value.absent(),
             Value<ConversationCategory?> category = const Value.absent(),
@@ -16166,7 +16760,7 @@ class $ConversationsTableManager extends RootTableManager<
             expireIn: expireIn,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String conversationId,
             Value<String?> ownerId = const Value.absent(),
             Value<ConversationCategory?> category = const Value.absent(),
@@ -16209,18 +16803,6 @@ class $ConversationsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $ConversationsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Conversations,
-    Conversation,
-    $ConversationsFilterComposer,
-    $ConversationsOrderingComposer,
-    $ConversationsProcessedTableManager,
-    $ConversationsInsertCompanionBuilder,
-    $ConversationsUpdateCompanionBuilder> {
-  $ConversationsProcessedTableManager(super.$state);
 }
 
 class $ConversationsFilterComposer
@@ -16424,7 +17006,7 @@ class $ConversationsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $MessagesInsertCompanionBuilder = MessagesCompanion Function({
+typedef $MessagesCreateCompanionBuilder = MessagesCompanion Function({
   required String messageId,
   required String conversationId,
   required String userId,
@@ -16499,8 +17081,7 @@ class $MessagesTableManager extends RootTableManager<
     Message,
     $MessagesFilterComposer,
     $MessagesOrderingComposer,
-    $MessagesProcessedTableManager,
-    $MessagesInsertCompanionBuilder,
+    $MessagesCreateCompanionBuilder,
     $MessagesUpdateCompanionBuilder> {
   $MessagesTableManager(_$MixinDatabase db, Messages table)
       : super(TableManagerState(
@@ -16508,8 +17089,7 @@ class $MessagesTableManager extends RootTableManager<
           table: table,
           filteringComposer: $MessagesFilterComposer(ComposerState(db, table)),
           orderingComposer: $MessagesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $MessagesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<String> conversationId = const Value.absent(),
             Value<String> userId = const Value.absent(),
@@ -16577,7 +17157,7 @@ class $MessagesTableManager extends RootTableManager<
             caption: caption,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             required String conversationId,
             required String userId,
@@ -16646,18 +17226,6 @@ class $MessagesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $MessagesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Messages,
-    Message,
-    $MessagesFilterComposer,
-    $MessagesOrderingComposer,
-    $MessagesProcessedTableManager,
-    $MessagesInsertCompanionBuilder,
-    $MessagesUpdateCompanionBuilder> {
-  $MessagesProcessedTableManager(super.$state);
 }
 
 class $MessagesFilterComposer
@@ -16984,7 +17552,7 @@ class $MessagesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $UsersInsertCompanionBuilder = UsersCompanion Function({
+typedef $UsersCreateCompanionBuilder = UsersCompanion Function({
   required String userId,
   required String identityNumber,
   Value<UserRelationship?> relationship,
@@ -17029,8 +17597,7 @@ class $UsersTableManager extends RootTableManager<
     User,
     $UsersFilterComposer,
     $UsersOrderingComposer,
-    $UsersProcessedTableManager,
-    $UsersInsertCompanionBuilder,
+    $UsersCreateCompanionBuilder,
     $UsersUpdateCompanionBuilder> {
   $UsersTableManager(_$MixinDatabase db, Users table)
       : super(TableManagerState(
@@ -17038,8 +17605,7 @@ class $UsersTableManager extends RootTableManager<
           table: table,
           filteringComposer: $UsersFilterComposer(ComposerState(db, table)),
           orderingComposer: $UsersOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $UsersProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> userId = const Value.absent(),
             Value<String> identityNumber = const Value.absent(),
             Value<UserRelationship?> relationship = const Value.absent(),
@@ -17077,7 +17643,7 @@ class $UsersTableManager extends RootTableManager<
             isDeactivated: isDeactivated,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String userId,
             required String identityNumber,
             Value<UserRelationship?> relationship = const Value.absent(),
@@ -17116,18 +17682,6 @@ class $UsersTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $UsersProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Users,
-    User,
-    $UsersFilterComposer,
-    $UsersOrderingComposer,
-    $UsersProcessedTableManager,
-    $UsersInsertCompanionBuilder,
-    $UsersUpdateCompanionBuilder> {
-  $UsersProcessedTableManager(super.$state);
 }
 
 class $UsersFilterComposer extends FilterComposer<_$MixinDatabase, Users> {
@@ -17302,7 +17856,7 @@ class $UsersOrderingComposer extends OrderingComposer<_$MixinDatabase, Users> {
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $SnapshotsInsertCompanionBuilder = SnapshotsCompanion Function({
+typedef $SnapshotsCreateCompanionBuilder = SnapshotsCompanion Function({
   required String snapshotId,
   Value<String?> traceId,
   required String type,
@@ -17345,8 +17899,7 @@ class $SnapshotsTableManager extends RootTableManager<
     Snapshot,
     $SnapshotsFilterComposer,
     $SnapshotsOrderingComposer,
-    $SnapshotsProcessedTableManager,
-    $SnapshotsInsertCompanionBuilder,
+    $SnapshotsCreateCompanionBuilder,
     $SnapshotsUpdateCompanionBuilder> {
   $SnapshotsTableManager(_$MixinDatabase db, Snapshots table)
       : super(TableManagerState(
@@ -17355,8 +17908,7 @@ class $SnapshotsTableManager extends RootTableManager<
           filteringComposer: $SnapshotsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $SnapshotsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $SnapshotsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> snapshotId = const Value.absent(),
             Value<String?> traceId = const Value.absent(),
             Value<String> type = const Value.absent(),
@@ -17392,7 +17944,7 @@ class $SnapshotsTableManager extends RootTableManager<
             closingBalance: closingBalance,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String snapshotId,
             Value<String?> traceId = const Value.absent(),
             required String type,
@@ -17429,18 +17981,6 @@ class $SnapshotsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $SnapshotsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Snapshots,
-    Snapshot,
-    $SnapshotsFilterComposer,
-    $SnapshotsOrderingComposer,
-    $SnapshotsProcessedTableManager,
-    $SnapshotsInsertCompanionBuilder,
-    $SnapshotsUpdateCompanionBuilder> {
-  $SnapshotsProcessedTableManager(super.$state);
 }
 
 class $SnapshotsFilterComposer
@@ -17603,7 +18143,7 @@ class $SnapshotsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $SafeSnapshotsInsertCompanionBuilder = SafeSnapshotsCompanion Function({
+typedef $SafeSnapshotsCreateCompanionBuilder = SafeSnapshotsCompanion Function({
   required String snapshotId,
   required String type,
   required String assetId,
@@ -17648,8 +18188,7 @@ class $SafeSnapshotsTableManager extends RootTableManager<
     SafeSnapshot,
     $SafeSnapshotsFilterComposer,
     $SafeSnapshotsOrderingComposer,
-    $SafeSnapshotsProcessedTableManager,
-    $SafeSnapshotsInsertCompanionBuilder,
+    $SafeSnapshotsCreateCompanionBuilder,
     $SafeSnapshotsUpdateCompanionBuilder> {
   $SafeSnapshotsTableManager(_$MixinDatabase db, SafeSnapshots table)
       : super(TableManagerState(
@@ -17659,8 +18198,7 @@ class $SafeSnapshotsTableManager extends RootTableManager<
               $SafeSnapshotsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $SafeSnapshotsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $SafeSnapshotsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> snapshotId = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<String> assetId = const Value.absent(),
@@ -17698,7 +18236,7 @@ class $SafeSnapshotsTableManager extends RootTableManager<
             inscriptionHash: inscriptionHash,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String snapshotId,
             required String type,
             required String assetId,
@@ -17737,18 +18275,6 @@ class $SafeSnapshotsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $SafeSnapshotsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    SafeSnapshots,
-    SafeSnapshot,
-    $SafeSnapshotsFilterComposer,
-    $SafeSnapshotsOrderingComposer,
-    $SafeSnapshotsProcessedTableManager,
-    $SafeSnapshotsInsertCompanionBuilder,
-    $SafeSnapshotsUpdateCompanionBuilder> {
-  $SafeSnapshotsProcessedTableManager(super.$state);
 }
 
 class $SafeSnapshotsFilterComposer
@@ -17923,7 +18449,7 @@ class $SafeSnapshotsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $AssetsInsertCompanionBuilder = AssetsCompanion Function({
+typedef $AssetsCreateCompanionBuilder = AssetsCompanion Function({
   required String assetId,
   required String symbol,
   required String name,
@@ -17966,8 +18492,7 @@ class $AssetsTableManager extends RootTableManager<
     Asset,
     $AssetsFilterComposer,
     $AssetsOrderingComposer,
-    $AssetsProcessedTableManager,
-    $AssetsInsertCompanionBuilder,
+    $AssetsCreateCompanionBuilder,
     $AssetsUpdateCompanionBuilder> {
   $AssetsTableManager(_$MixinDatabase db, Assets table)
       : super(TableManagerState(
@@ -17975,8 +18500,7 @@ class $AssetsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $AssetsFilterComposer(ComposerState(db, table)),
           orderingComposer: $AssetsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $AssetsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> assetId = const Value.absent(),
             Value<String> symbol = const Value.absent(),
             Value<String> name = const Value.absent(),
@@ -18012,7 +18536,7 @@ class $AssetsTableManager extends RootTableManager<
             reserve: reserve,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String assetId,
             required String symbol,
             required String name,
@@ -18049,18 +18573,6 @@ class $AssetsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $AssetsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Assets,
-    Asset,
-    $AssetsFilterComposer,
-    $AssetsOrderingComposer,
-    $AssetsProcessedTableManager,
-    $AssetsInsertCompanionBuilder,
-    $AssetsUpdateCompanionBuilder> {
-  $AssetsProcessedTableManager(super.$state);
 }
 
 class $AssetsFilterComposer extends FilterComposer<_$MixinDatabase, Assets> {
@@ -18220,7 +18732,7 @@ class $AssetsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $TokensInsertCompanionBuilder = TokensCompanion Function({
+typedef $TokensCreateCompanionBuilder = TokensCompanion Function({
   required String assetId,
   required String kernelAssetId,
   required String symbol,
@@ -18261,8 +18773,7 @@ class $TokensTableManager extends RootTableManager<
     Token,
     $TokensFilterComposer,
     $TokensOrderingComposer,
-    $TokensProcessedTableManager,
-    $TokensInsertCompanionBuilder,
+    $TokensCreateCompanionBuilder,
     $TokensUpdateCompanionBuilder> {
   $TokensTableManager(_$MixinDatabase db, Tokens table)
       : super(TableManagerState(
@@ -18270,8 +18781,7 @@ class $TokensTableManager extends RootTableManager<
           table: table,
           filteringComposer: $TokensFilterComposer(ComposerState(db, table)),
           orderingComposer: $TokensOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $TokensProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> assetId = const Value.absent(),
             Value<String> kernelAssetId = const Value.absent(),
             Value<String> symbol = const Value.absent(),
@@ -18305,7 +18815,7 @@ class $TokensTableManager extends RootTableManager<
             collectionHash: collectionHash,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String assetId,
             required String kernelAssetId,
             required String symbol,
@@ -18340,18 +18850,6 @@ class $TokensTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $TokensProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Tokens,
-    Token,
-    $TokensFilterComposer,
-    $TokensOrderingComposer,
-    $TokensProcessedTableManager,
-    $TokensInsertCompanionBuilder,
-    $TokensUpdateCompanionBuilder> {
-  $TokensProcessedTableManager(super.$state);
 }
 
 class $TokensFilterComposer extends FilterComposer<_$MixinDatabase, Tokens> {
@@ -18501,7 +18999,7 @@ class $TokensOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $ChainsInsertCompanionBuilder = ChainsCompanion Function({
+typedef $ChainsCreateCompanionBuilder = ChainsCompanion Function({
   required String chainId,
   required String name,
   required String symbol,
@@ -18524,8 +19022,7 @@ class $ChainsTableManager extends RootTableManager<
     Chain,
     $ChainsFilterComposer,
     $ChainsOrderingComposer,
-    $ChainsProcessedTableManager,
-    $ChainsInsertCompanionBuilder,
+    $ChainsCreateCompanionBuilder,
     $ChainsUpdateCompanionBuilder> {
   $ChainsTableManager(_$MixinDatabase db, Chains table)
       : super(TableManagerState(
@@ -18533,8 +19030,7 @@ class $ChainsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $ChainsFilterComposer(ComposerState(db, table)),
           orderingComposer: $ChainsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $ChainsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> chainId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> symbol = const Value.absent(),
@@ -18550,7 +19046,7 @@ class $ChainsTableManager extends RootTableManager<
             threshold: threshold,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String chainId,
             required String name,
             required String symbol,
@@ -18567,18 +19063,6 @@ class $ChainsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $ChainsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Chains,
-    Chain,
-    $ChainsFilterComposer,
-    $ChainsOrderingComposer,
-    $ChainsProcessedTableManager,
-    $ChainsInsertCompanionBuilder,
-    $ChainsUpdateCompanionBuilder> {
-  $ChainsProcessedTableManager(super.$state);
 }
 
 class $ChainsFilterComposer extends FilterComposer<_$MixinDatabase, Chains> {
@@ -18638,7 +19122,7 @@ class $ChainsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $StickersInsertCompanionBuilder = StickersCompanion Function({
+typedef $StickersCreateCompanionBuilder = StickersCompanion Function({
   required String stickerId,
   Value<String?> albumId,
   required String name,
@@ -18669,8 +19153,7 @@ class $StickersTableManager extends RootTableManager<
     Sticker,
     $StickersFilterComposer,
     $StickersOrderingComposer,
-    $StickersProcessedTableManager,
-    $StickersInsertCompanionBuilder,
+    $StickersCreateCompanionBuilder,
     $StickersUpdateCompanionBuilder> {
   $StickersTableManager(_$MixinDatabase db, Stickers table)
       : super(TableManagerState(
@@ -18678,8 +19161,7 @@ class $StickersTableManager extends RootTableManager<
           table: table,
           filteringComposer: $StickersFilterComposer(ComposerState(db, table)),
           orderingComposer: $StickersOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $StickersProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> stickerId = const Value.absent(),
             Value<String?> albumId = const Value.absent(),
             Value<String> name = const Value.absent(),
@@ -18703,7 +19185,7 @@ class $StickersTableManager extends RootTableManager<
             lastUseAt: lastUseAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String stickerId,
             Value<String?> albumId = const Value.absent(),
             required String name,
@@ -18728,18 +19210,6 @@ class $StickersTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $StickersProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Stickers,
-    Sticker,
-    $StickersFilterComposer,
-    $StickersOrderingComposer,
-    $StickersProcessedTableManager,
-    $StickersInsertCompanionBuilder,
-    $StickersUpdateCompanionBuilder> {
-  $StickersProcessedTableManager(super.$state);
 }
 
 class $StickersFilterComposer
@@ -18844,7 +19314,7 @@ class $StickersOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $HyperlinksInsertCompanionBuilder = HyperlinksCompanion Function({
+typedef $HyperlinksCreateCompanionBuilder = HyperlinksCompanion Function({
   required String hyperlink,
   required String siteName,
   required String siteTitle,
@@ -18867,8 +19337,7 @@ class $HyperlinksTableManager extends RootTableManager<
     Hyperlink,
     $HyperlinksFilterComposer,
     $HyperlinksOrderingComposer,
-    $HyperlinksProcessedTableManager,
-    $HyperlinksInsertCompanionBuilder,
+    $HyperlinksCreateCompanionBuilder,
     $HyperlinksUpdateCompanionBuilder> {
   $HyperlinksTableManager(_$MixinDatabase db, Hyperlinks table)
       : super(TableManagerState(
@@ -18878,8 +19347,7 @@ class $HyperlinksTableManager extends RootTableManager<
               $HyperlinksFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $HyperlinksOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $HyperlinksProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> hyperlink = const Value.absent(),
             Value<String> siteName = const Value.absent(),
             Value<String> siteTitle = const Value.absent(),
@@ -18895,7 +19363,7 @@ class $HyperlinksTableManager extends RootTableManager<
             siteImage: siteImage,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String hyperlink,
             required String siteName,
             required String siteTitle,
@@ -18912,18 +19380,6 @@ class $HyperlinksTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $HyperlinksProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Hyperlinks,
-    Hyperlink,
-    $HyperlinksFilterComposer,
-    $HyperlinksOrderingComposer,
-    $HyperlinksProcessedTableManager,
-    $HyperlinksInsertCompanionBuilder,
-    $HyperlinksUpdateCompanionBuilder> {
-  $HyperlinksProcessedTableManager(super.$state);
 }
 
 class $HyperlinksFilterComposer
@@ -18984,7 +19440,7 @@ class $HyperlinksOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $MessageMentionsInsertCompanionBuilder = MessageMentionsCompanion
+typedef $MessageMentionsCreateCompanionBuilder = MessageMentionsCompanion
     Function({
   required String messageId,
   required String conversationId,
@@ -19005,8 +19461,7 @@ class $MessageMentionsTableManager extends RootTableManager<
     MessageMention,
     $MessageMentionsFilterComposer,
     $MessageMentionsOrderingComposer,
-    $MessageMentionsProcessedTableManager,
-    $MessageMentionsInsertCompanionBuilder,
+    $MessageMentionsCreateCompanionBuilder,
     $MessageMentionsUpdateCompanionBuilder> {
   $MessageMentionsTableManager(_$MixinDatabase db, MessageMentions table)
       : super(TableManagerState(
@@ -19016,9 +19471,7 @@ class $MessageMentionsTableManager extends RootTableManager<
               $MessageMentionsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $MessageMentionsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $MessageMentionsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<String> conversationId = const Value.absent(),
             Value<bool?> hasRead = const Value.absent(),
@@ -19030,7 +19483,7 @@ class $MessageMentionsTableManager extends RootTableManager<
             hasRead: hasRead,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             required String conversationId,
             Value<bool?> hasRead = const Value.absent(),
@@ -19043,18 +19496,6 @@ class $MessageMentionsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $MessageMentionsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    MessageMentions,
-    MessageMention,
-    $MessageMentionsFilterComposer,
-    $MessageMentionsOrderingComposer,
-    $MessageMentionsProcessedTableManager,
-    $MessageMentionsInsertCompanionBuilder,
-    $MessageMentionsUpdateCompanionBuilder> {
-  $MessageMentionsProcessedTableManager(super.$state);
 }
 
 class $MessageMentionsFilterComposer
@@ -19095,7 +19536,7 @@ class $MessageMentionsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $PinMessagesInsertCompanionBuilder = PinMessagesCompanion Function({
+typedef $PinMessagesCreateCompanionBuilder = PinMessagesCompanion Function({
   required String messageId,
   required String conversationId,
   required DateTime createdAt,
@@ -19114,8 +19555,7 @@ class $PinMessagesTableManager extends RootTableManager<
     PinMessage,
     $PinMessagesFilterComposer,
     $PinMessagesOrderingComposer,
-    $PinMessagesProcessedTableManager,
-    $PinMessagesInsertCompanionBuilder,
+    $PinMessagesCreateCompanionBuilder,
     $PinMessagesUpdateCompanionBuilder> {
   $PinMessagesTableManager(_$MixinDatabase db, PinMessages table)
       : super(TableManagerState(
@@ -19125,8 +19565,7 @@ class $PinMessagesTableManager extends RootTableManager<
               $PinMessagesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $PinMessagesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $PinMessagesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<String> conversationId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -19138,7 +19577,7 @@ class $PinMessagesTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             required String conversationId,
             required DateTime createdAt,
@@ -19151,18 +19590,6 @@ class $PinMessagesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $PinMessagesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    PinMessages,
-    PinMessage,
-    $PinMessagesFilterComposer,
-    $PinMessagesOrderingComposer,
-    $PinMessagesProcessedTableManager,
-    $PinMessagesInsertCompanionBuilder,
-    $PinMessagesUpdateCompanionBuilder> {
-  $PinMessagesProcessedTableManager(super.$state);
 }
 
 class $PinMessagesFilterComposer
@@ -19205,7 +19632,7 @@ class $PinMessagesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $ExpiredMessagesInsertCompanionBuilder = ExpiredMessagesCompanion
+typedef $ExpiredMessagesCreateCompanionBuilder = ExpiredMessagesCompanion
     Function({
   required String messageId,
   required int expireIn,
@@ -19226,8 +19653,7 @@ class $ExpiredMessagesTableManager extends RootTableManager<
     ExpiredMessage,
     $ExpiredMessagesFilterComposer,
     $ExpiredMessagesOrderingComposer,
-    $ExpiredMessagesProcessedTableManager,
-    $ExpiredMessagesInsertCompanionBuilder,
+    $ExpiredMessagesCreateCompanionBuilder,
     $ExpiredMessagesUpdateCompanionBuilder> {
   $ExpiredMessagesTableManager(_$MixinDatabase db, ExpiredMessages table)
       : super(TableManagerState(
@@ -19237,9 +19663,7 @@ class $ExpiredMessagesTableManager extends RootTableManager<
               $ExpiredMessagesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $ExpiredMessagesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $ExpiredMessagesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<int> expireIn = const Value.absent(),
             Value<int?> expireAt = const Value.absent(),
@@ -19251,7 +19675,7 @@ class $ExpiredMessagesTableManager extends RootTableManager<
             expireAt: expireAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             required int expireIn,
             Value<int?> expireAt = const Value.absent(),
@@ -19264,18 +19688,6 @@ class $ExpiredMessagesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $ExpiredMessagesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    ExpiredMessages,
-    ExpiredMessage,
-    $ExpiredMessagesFilterComposer,
-    $ExpiredMessagesOrderingComposer,
-    $ExpiredMessagesProcessedTableManager,
-    $ExpiredMessagesInsertCompanionBuilder,
-    $ExpiredMessagesUpdateCompanionBuilder> {
-  $ExpiredMessagesProcessedTableManager(super.$state);
 }
 
 class $ExpiredMessagesFilterComposer
@@ -19316,7 +19728,7 @@ class $ExpiredMessagesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $AddressesTableInsertCompanionBuilder = AddressesCompanion Function({
+typedef $AddressesTableCreateCompanionBuilder = AddressesCompanion Function({
   required String addressId,
   required String type,
   required String assetId,
@@ -19349,8 +19761,7 @@ class $AddressesTableTableManager extends RootTableManager<
     Addresses,
     $AddressesTableFilterComposer,
     $AddressesTableOrderingComposer,
-    $AddressesTableProcessedTableManager,
-    $AddressesTableInsertCompanionBuilder,
+    $AddressesTableCreateCompanionBuilder,
     $AddressesTableUpdateCompanionBuilder> {
   $AddressesTableTableManager(_$MixinDatabase db, AddressesTable table)
       : super(TableManagerState(
@@ -19360,9 +19771,7 @@ class $AddressesTableTableManager extends RootTableManager<
               $AddressesTableFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $AddressesTableOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $AddressesTableProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> addressId = const Value.absent(),
             Value<String> type = const Value.absent(),
             Value<String> assetId = const Value.absent(),
@@ -19388,7 +19797,7 @@ class $AddressesTableTableManager extends RootTableManager<
             dust: dust,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String addressId,
             required String type,
             required String assetId,
@@ -19415,18 +19824,6 @@ class $AddressesTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $AddressesTableProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    AddressesTable,
-    Addresses,
-    $AddressesTableFilterComposer,
-    $AddressesTableOrderingComposer,
-    $AddressesTableProcessedTableManager,
-    $AddressesTableInsertCompanionBuilder,
-    $AddressesTableUpdateCompanionBuilder> {
-  $AddressesTableProcessedTableManager(super.$state);
 }
 
 class $AddressesTableFilterComposer
@@ -19539,7 +19936,7 @@ class $AddressesTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $AppsInsertCompanionBuilder = AppsCompanion Function({
+typedef $AppsCreateCompanionBuilder = AppsCompanion Function({
   required String appId,
   required String appNumber,
   required String homeUri,
@@ -19578,8 +19975,7 @@ class $AppsTableManager extends RootTableManager<
     App,
     $AppsFilterComposer,
     $AppsOrderingComposer,
-    $AppsProcessedTableManager,
-    $AppsInsertCompanionBuilder,
+    $AppsCreateCompanionBuilder,
     $AppsUpdateCompanionBuilder> {
   $AppsTableManager(_$MixinDatabase db, Apps table)
       : super(TableManagerState(
@@ -19587,8 +19983,7 @@ class $AppsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $AppsFilterComposer(ComposerState(db, table)),
           orderingComposer: $AppsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $AppsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> appId = const Value.absent(),
             Value<String> appNumber = const Value.absent(),
             Value<String> homeUri = const Value.absent(),
@@ -19620,7 +20015,7 @@ class $AppsTableManager extends RootTableManager<
             updatedAt: updatedAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String appId,
             required String appNumber,
             required String homeUri,
@@ -19653,18 +20048,6 @@ class $AppsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $AppsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Apps,
-    App,
-    $AppsFilterComposer,
-    $AppsOrderingComposer,
-    $AppsProcessedTableManager,
-    $AppsInsertCompanionBuilder,
-    $AppsUpdateCompanionBuilder> {
-  $AppsProcessedTableManager(super.$state);
 }
 
 class $AppsFilterComposer extends FilterComposer<_$MixinDatabase, Apps> {
@@ -19805,7 +20188,7 @@ class $AppsOrderingComposer extends OrderingComposer<_$MixinDatabase, Apps> {
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $CircleConversationsInsertCompanionBuilder
+typedef $CircleConversationsCreateCompanionBuilder
     = CircleConversationsCompanion Function({
   required String conversationId,
   required String circleId,
@@ -19830,8 +20213,7 @@ class $CircleConversationsTableManager extends RootTableManager<
     CircleConversation,
     $CircleConversationsFilterComposer,
     $CircleConversationsOrderingComposer,
-    $CircleConversationsProcessedTableManager,
-    $CircleConversationsInsertCompanionBuilder,
+    $CircleConversationsCreateCompanionBuilder,
     $CircleConversationsUpdateCompanionBuilder> {
   $CircleConversationsTableManager(
       _$MixinDatabase db, CircleConversations table)
@@ -19842,9 +20224,7 @@ class $CircleConversationsTableManager extends RootTableManager<
               $CircleConversationsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $CircleConversationsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $CircleConversationsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> conversationId = const Value.absent(),
             Value<String> circleId = const Value.absent(),
             Value<String?> userId = const Value.absent(),
@@ -19860,7 +20240,7 @@ class $CircleConversationsTableManager extends RootTableManager<
             pinTime: pinTime,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String conversationId,
             required String circleId,
             Value<String?> userId = const Value.absent(),
@@ -19877,18 +20257,6 @@ class $CircleConversationsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $CircleConversationsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    CircleConversations,
-    CircleConversation,
-    $CircleConversationsFilterComposer,
-    $CircleConversationsOrderingComposer,
-    $CircleConversationsProcessedTableManager,
-    $CircleConversationsInsertCompanionBuilder,
-    $CircleConversationsUpdateCompanionBuilder> {
-  $CircleConversationsProcessedTableManager(super.$state);
 }
 
 class $CircleConversationsFilterComposer
@@ -19953,7 +20321,7 @@ class $CircleConversationsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $CirclesInsertCompanionBuilder = CirclesCompanion Function({
+typedef $CirclesCreateCompanionBuilder = CirclesCompanion Function({
   required String circleId,
   required String name,
   required DateTime createdAt,
@@ -19974,8 +20342,7 @@ class $CirclesTableManager extends RootTableManager<
     Circle,
     $CirclesFilterComposer,
     $CirclesOrderingComposer,
-    $CirclesProcessedTableManager,
-    $CirclesInsertCompanionBuilder,
+    $CirclesCreateCompanionBuilder,
     $CirclesUpdateCompanionBuilder> {
   $CirclesTableManager(_$MixinDatabase db, Circles table)
       : super(TableManagerState(
@@ -19983,8 +20350,7 @@ class $CirclesTableManager extends RootTableManager<
           table: table,
           filteringComposer: $CirclesFilterComposer(ComposerState(db, table)),
           orderingComposer: $CirclesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $CirclesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> circleId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -19998,7 +20364,7 @@ class $CirclesTableManager extends RootTableManager<
             orderedAt: orderedAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String circleId,
             required String name,
             required DateTime createdAt,
@@ -20013,18 +20379,6 @@ class $CirclesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $CirclesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Circles,
-    Circle,
-    $CirclesFilterComposer,
-    $CirclesOrderingComposer,
-    $CirclesProcessedTableManager,
-    $CirclesInsertCompanionBuilder,
-    $CirclesUpdateCompanionBuilder> {
-  $CirclesProcessedTableManager(super.$state);
 }
 
 class $CirclesFilterComposer extends FilterComposer<_$MixinDatabase, Circles> {
@@ -20078,7 +20432,7 @@ class $CirclesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $FloodMessagesInsertCompanionBuilder = FloodMessagesCompanion Function({
+typedef $FloodMessagesCreateCompanionBuilder = FloodMessagesCompanion Function({
   required String messageId,
   required String data,
   required DateTime createdAt,
@@ -20097,8 +20451,7 @@ class $FloodMessagesTableManager extends RootTableManager<
     FloodMessage,
     $FloodMessagesFilterComposer,
     $FloodMessagesOrderingComposer,
-    $FloodMessagesProcessedTableManager,
-    $FloodMessagesInsertCompanionBuilder,
+    $FloodMessagesCreateCompanionBuilder,
     $FloodMessagesUpdateCompanionBuilder> {
   $FloodMessagesTableManager(_$MixinDatabase db, FloodMessages table)
       : super(TableManagerState(
@@ -20108,8 +20461,7 @@ class $FloodMessagesTableManager extends RootTableManager<
               $FloodMessagesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $FloodMessagesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $FloodMessagesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<String> data = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -20121,7 +20473,7 @@ class $FloodMessagesTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             required String data,
             required DateTime createdAt,
@@ -20134,18 +20486,6 @@ class $FloodMessagesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $FloodMessagesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    FloodMessages,
-    FloodMessage,
-    $FloodMessagesFilterComposer,
-    $FloodMessagesOrderingComposer,
-    $FloodMessagesProcessedTableManager,
-    $FloodMessagesInsertCompanionBuilder,
-    $FloodMessagesUpdateCompanionBuilder> {
-  $FloodMessagesProcessedTableManager(super.$state);
 }
 
 class $FloodMessagesFilterComposer
@@ -20188,7 +20528,7 @@ class $FloodMessagesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $JobsInsertCompanionBuilder = JobsCompanion Function({
+typedef $JobsCreateCompanionBuilder = JobsCompanion Function({
   required String jobId,
   required String action,
   required DateTime createdAt,
@@ -20221,8 +20561,7 @@ class $JobsTableManager extends RootTableManager<
     Job,
     $JobsFilterComposer,
     $JobsOrderingComposer,
-    $JobsProcessedTableManager,
-    $JobsInsertCompanionBuilder,
+    $JobsCreateCompanionBuilder,
     $JobsUpdateCompanionBuilder> {
   $JobsTableManager(_$MixinDatabase db, Jobs table)
       : super(TableManagerState(
@@ -20230,8 +20569,7 @@ class $JobsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $JobsFilterComposer(ComposerState(db, table)),
           orderingComposer: $JobsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $JobsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> jobId = const Value.absent(),
             Value<String> action = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -20257,7 +20595,7 @@ class $JobsTableManager extends RootTableManager<
             runCount: runCount,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String jobId,
             required String action,
             required DateTime createdAt,
@@ -20284,18 +20622,6 @@ class $JobsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $JobsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Jobs,
-    Job,
-    $JobsFilterComposer,
-    $JobsOrderingComposer,
-    $JobsProcessedTableManager,
-    $JobsInsertCompanionBuilder,
-    $JobsUpdateCompanionBuilder> {
-  $JobsProcessedTableManager(super.$state);
 }
 
 class $JobsFilterComposer extends FilterComposer<_$MixinDatabase, Jobs> {
@@ -20406,7 +20732,7 @@ class $JobsOrderingComposer extends OrderingComposer<_$MixinDatabase, Jobs> {
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $MessagesHistoryInsertCompanionBuilder = MessagesHistoryCompanion
+typedef $MessagesHistoryCreateCompanionBuilder = MessagesHistoryCompanion
     Function({
   required String messageId,
   Value<int> rowid,
@@ -20423,8 +20749,7 @@ class $MessagesHistoryTableManager extends RootTableManager<
     MessagesHistoryData,
     $MessagesHistoryFilterComposer,
     $MessagesHistoryOrderingComposer,
-    $MessagesHistoryProcessedTableManager,
-    $MessagesHistoryInsertCompanionBuilder,
+    $MessagesHistoryCreateCompanionBuilder,
     $MessagesHistoryUpdateCompanionBuilder> {
   $MessagesHistoryTableManager(_$MixinDatabase db, MessagesHistory table)
       : super(TableManagerState(
@@ -20434,9 +20759,7 @@ class $MessagesHistoryTableManager extends RootTableManager<
               $MessagesHistoryFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $MessagesHistoryOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $MessagesHistoryProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -20444,7 +20767,7 @@ class $MessagesHistoryTableManager extends RootTableManager<
             messageId: messageId,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -20453,18 +20776,6 @@ class $MessagesHistoryTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $MessagesHistoryProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    MessagesHistory,
-    MessagesHistoryData,
-    $MessagesHistoryFilterComposer,
-    $MessagesHistoryOrderingComposer,
-    $MessagesHistoryProcessedTableManager,
-    $MessagesHistoryInsertCompanionBuilder,
-    $MessagesHistoryUpdateCompanionBuilder> {
-  $MessagesHistoryProcessedTableManager(super.$state);
 }
 
 class $MessagesHistoryFilterComposer
@@ -20485,7 +20796,7 @@ class $MessagesHistoryOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $OffsetsInsertCompanionBuilder = OffsetsCompanion Function({
+typedef $OffsetsCreateCompanionBuilder = OffsetsCompanion Function({
   required String key,
   required String timestamp,
   Value<int> rowid,
@@ -20502,8 +20813,7 @@ class $OffsetsTableManager extends RootTableManager<
     Offset,
     $OffsetsFilterComposer,
     $OffsetsOrderingComposer,
-    $OffsetsProcessedTableManager,
-    $OffsetsInsertCompanionBuilder,
+    $OffsetsCreateCompanionBuilder,
     $OffsetsUpdateCompanionBuilder> {
   $OffsetsTableManager(_$MixinDatabase db, Offsets table)
       : super(TableManagerState(
@@ -20511,8 +20821,7 @@ class $OffsetsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $OffsetsFilterComposer(ComposerState(db, table)),
           orderingComposer: $OffsetsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $OffsetsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
             Value<String> timestamp = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -20522,7 +20831,7 @@ class $OffsetsTableManager extends RootTableManager<
             timestamp: timestamp,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String key,
             required String timestamp,
             Value<int> rowid = const Value.absent(),
@@ -20533,18 +20842,6 @@ class $OffsetsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $OffsetsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Offsets,
-    Offset,
-    $OffsetsFilterComposer,
-    $OffsetsOrderingComposer,
-    $OffsetsProcessedTableManager,
-    $OffsetsInsertCompanionBuilder,
-    $OffsetsUpdateCompanionBuilder> {
-  $OffsetsProcessedTableManager(super.$state);
 }
 
 class $OffsetsFilterComposer extends FilterComposer<_$MixinDatabase, Offsets> {
@@ -20574,7 +20871,7 @@ class $OffsetsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $ParticipantSessionInsertCompanionBuilder = ParticipantSessionCompanion
+typedef $ParticipantSessionCreateCompanionBuilder = ParticipantSessionCompanion
     Function({
   required String conversationId,
   required String userId,
@@ -20601,8 +20898,7 @@ class $ParticipantSessionTableManager extends RootTableManager<
     ParticipantSessionData,
     $ParticipantSessionFilterComposer,
     $ParticipantSessionOrderingComposer,
-    $ParticipantSessionProcessedTableManager,
-    $ParticipantSessionInsertCompanionBuilder,
+    $ParticipantSessionCreateCompanionBuilder,
     $ParticipantSessionUpdateCompanionBuilder> {
   $ParticipantSessionTableManager(_$MixinDatabase db, ParticipantSession table)
       : super(TableManagerState(
@@ -20612,9 +20908,7 @@ class $ParticipantSessionTableManager extends RootTableManager<
               $ParticipantSessionFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $ParticipantSessionOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $ParticipantSessionProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> conversationId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<String> sessionId = const Value.absent(),
@@ -20632,7 +20926,7 @@ class $ParticipantSessionTableManager extends RootTableManager<
             publicKey: publicKey,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String conversationId,
             required String userId,
             required String sessionId,
@@ -20651,18 +20945,6 @@ class $ParticipantSessionTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $ParticipantSessionProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    ParticipantSession,
-    ParticipantSessionData,
-    $ParticipantSessionFilterComposer,
-    $ParticipantSessionOrderingComposer,
-    $ParticipantSessionProcessedTableManager,
-    $ParticipantSessionInsertCompanionBuilder,
-    $ParticipantSessionUpdateCompanionBuilder> {
-  $ParticipantSessionProcessedTableManager(super.$state);
 }
 
 class $ParticipantSessionFilterComposer
@@ -20735,7 +21017,7 @@ class $ParticipantSessionOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $ParticipantsInsertCompanionBuilder = ParticipantsCompanion Function({
+typedef $ParticipantsCreateCompanionBuilder = ParticipantsCompanion Function({
   required String conversationId,
   required String userId,
   Value<ParticipantRole?> role,
@@ -20756,8 +21038,7 @@ class $ParticipantsTableManager extends RootTableManager<
     Participant,
     $ParticipantsFilterComposer,
     $ParticipantsOrderingComposer,
-    $ParticipantsProcessedTableManager,
-    $ParticipantsInsertCompanionBuilder,
+    $ParticipantsCreateCompanionBuilder,
     $ParticipantsUpdateCompanionBuilder> {
   $ParticipantsTableManager(_$MixinDatabase db, Participants table)
       : super(TableManagerState(
@@ -20767,8 +21048,7 @@ class $ParticipantsTableManager extends RootTableManager<
               $ParticipantsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $ParticipantsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $ParticipantsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> conversationId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<ParticipantRole?> role = const Value.absent(),
@@ -20782,7 +21062,7 @@ class $ParticipantsTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String conversationId,
             required String userId,
             Value<ParticipantRole?> role = const Value.absent(),
@@ -20797,18 +21077,6 @@ class $ParticipantsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $ParticipantsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Participants,
-    Participant,
-    $ParticipantsFilterComposer,
-    $ParticipantsOrderingComposer,
-    $ParticipantsProcessedTableManager,
-    $ParticipantsInsertCompanionBuilder,
-    $ParticipantsUpdateCompanionBuilder> {
-  $ParticipantsProcessedTableManager(super.$state);
 }
 
 class $ParticipantsFilterComposer
@@ -20863,7 +21131,7 @@ class $ParticipantsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $ResendSessionMessagesInsertCompanionBuilder
+typedef $ResendSessionMessagesCreateCompanionBuilder
     = ResendSessionMessagesCompanion Function({
   required String messageId,
   required String userId,
@@ -20888,8 +21156,7 @@ class $ResendSessionMessagesTableManager extends RootTableManager<
     ResendSessionMessage,
     $ResendSessionMessagesFilterComposer,
     $ResendSessionMessagesOrderingComposer,
-    $ResendSessionMessagesProcessedTableManager,
-    $ResendSessionMessagesInsertCompanionBuilder,
+    $ResendSessionMessagesCreateCompanionBuilder,
     $ResendSessionMessagesUpdateCompanionBuilder> {
   $ResendSessionMessagesTableManager(
       _$MixinDatabase db, ResendSessionMessages table)
@@ -20900,9 +21167,7 @@ class $ResendSessionMessagesTableManager extends RootTableManager<
               $ResendSessionMessagesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $ResendSessionMessagesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $ResendSessionMessagesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> messageId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<String> sessionId = const Value.absent(),
@@ -20918,7 +21183,7 @@ class $ResendSessionMessagesTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String messageId,
             required String userId,
             required String sessionId,
@@ -20935,18 +21200,6 @@ class $ResendSessionMessagesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $ResendSessionMessagesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    ResendSessionMessages,
-    ResendSessionMessage,
-    $ResendSessionMessagesFilterComposer,
-    $ResendSessionMessagesOrderingComposer,
-    $ResendSessionMessagesProcessedTableManager,
-    $ResendSessionMessagesInsertCompanionBuilder,
-    $ResendSessionMessagesUpdateCompanionBuilder> {
-  $ResendSessionMessagesProcessedTableManager(super.$state);
 }
 
 class $ResendSessionMessagesFilterComposer
@@ -21009,7 +21262,7 @@ class $ResendSessionMessagesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $SentSessionSenderKeysInsertCompanionBuilder
+typedef $SentSessionSenderKeysCreateCompanionBuilder
     = SentSessionSenderKeysCompanion Function({
   required String conversationId,
   required String userId,
@@ -21036,8 +21289,7 @@ class $SentSessionSenderKeysTableManager extends RootTableManager<
     SentSessionSenderKey,
     $SentSessionSenderKeysFilterComposer,
     $SentSessionSenderKeysOrderingComposer,
-    $SentSessionSenderKeysProcessedTableManager,
-    $SentSessionSenderKeysInsertCompanionBuilder,
+    $SentSessionSenderKeysCreateCompanionBuilder,
     $SentSessionSenderKeysUpdateCompanionBuilder> {
   $SentSessionSenderKeysTableManager(
       _$MixinDatabase db, SentSessionSenderKeys table)
@@ -21048,9 +21300,7 @@ class $SentSessionSenderKeysTableManager extends RootTableManager<
               $SentSessionSenderKeysFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $SentSessionSenderKeysOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $SentSessionSenderKeysProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> conversationId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<String> sessionId = const Value.absent(),
@@ -21068,7 +21318,7 @@ class $SentSessionSenderKeysTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String conversationId,
             required String userId,
             required String sessionId,
@@ -21087,18 +21337,6 @@ class $SentSessionSenderKeysTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $SentSessionSenderKeysProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    SentSessionSenderKeys,
-    SentSessionSenderKey,
-    $SentSessionSenderKeysFilterComposer,
-    $SentSessionSenderKeysOrderingComposer,
-    $SentSessionSenderKeysProcessedTableManager,
-    $SentSessionSenderKeysInsertCompanionBuilder,
-    $SentSessionSenderKeysUpdateCompanionBuilder> {
-  $SentSessionSenderKeysProcessedTableManager(super.$state);
 }
 
 class $SentSessionSenderKeysFilterComposer
@@ -21171,7 +21409,7 @@ class $SentSessionSenderKeysOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $StickerAlbumsInsertCompanionBuilder = StickerAlbumsCompanion Function({
+typedef $StickerAlbumsCreateCompanionBuilder = StickerAlbumsCompanion Function({
   required String albumId,
   required String name,
   required String iconUrl,
@@ -21208,8 +21446,7 @@ class $StickerAlbumsTableManager extends RootTableManager<
     StickerAlbum,
     $StickerAlbumsFilterComposer,
     $StickerAlbumsOrderingComposer,
-    $StickerAlbumsProcessedTableManager,
-    $StickerAlbumsInsertCompanionBuilder,
+    $StickerAlbumsCreateCompanionBuilder,
     $StickerAlbumsUpdateCompanionBuilder> {
   $StickerAlbumsTableManager(_$MixinDatabase db, StickerAlbums table)
       : super(TableManagerState(
@@ -21219,8 +21456,7 @@ class $StickerAlbumsTableManager extends RootTableManager<
               $StickerAlbumsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $StickerAlbumsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $StickerAlbumsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> albumId = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<String> iconUrl = const Value.absent(),
@@ -21250,7 +21486,7 @@ class $StickerAlbumsTableManager extends RootTableManager<
             isVerified: isVerified,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String albumId,
             required String name,
             required String iconUrl,
@@ -21281,18 +21517,6 @@ class $StickerAlbumsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $StickerAlbumsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    StickerAlbums,
-    StickerAlbum,
-    $StickerAlbumsFilterComposer,
-    $StickerAlbumsOrderingComposer,
-    $StickerAlbumsProcessedTableManager,
-    $StickerAlbumsInsertCompanionBuilder,
-    $StickerAlbumsUpdateCompanionBuilder> {
-  $StickerAlbumsProcessedTableManager(super.$state);
 }
 
 class $StickerAlbumsFilterComposer
@@ -21427,7 +21651,7 @@ class $StickerAlbumsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $StickerRelationshipsInsertCompanionBuilder
+typedef $StickerRelationshipsCreateCompanionBuilder
     = StickerRelationshipsCompanion Function({
   required String albumId,
   required String stickerId,
@@ -21446,8 +21670,7 @@ class $StickerRelationshipsTableManager extends RootTableManager<
     StickerRelationship,
     $StickerRelationshipsFilterComposer,
     $StickerRelationshipsOrderingComposer,
-    $StickerRelationshipsProcessedTableManager,
-    $StickerRelationshipsInsertCompanionBuilder,
+    $StickerRelationshipsCreateCompanionBuilder,
     $StickerRelationshipsUpdateCompanionBuilder> {
   $StickerRelationshipsTableManager(
       _$MixinDatabase db, StickerRelationships table)
@@ -21458,9 +21681,7 @@ class $StickerRelationshipsTableManager extends RootTableManager<
               $StickerRelationshipsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $StickerRelationshipsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $StickerRelationshipsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> albumId = const Value.absent(),
             Value<String> stickerId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -21470,7 +21691,7 @@ class $StickerRelationshipsTableManager extends RootTableManager<
             stickerId: stickerId,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String albumId,
             required String stickerId,
             Value<int> rowid = const Value.absent(),
@@ -21481,18 +21702,6 @@ class $StickerRelationshipsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $StickerRelationshipsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    StickerRelationships,
-    StickerRelationship,
-    $StickerRelationshipsFilterComposer,
-    $StickerRelationshipsOrderingComposer,
-    $StickerRelationshipsProcessedTableManager,
-    $StickerRelationshipsInsertCompanionBuilder,
-    $StickerRelationshipsUpdateCompanionBuilder> {
-  $StickerRelationshipsProcessedTableManager(super.$state);
 }
 
 class $StickerRelationshipsFilterComposer
@@ -21523,7 +21732,7 @@ class $StickerRelationshipsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $TranscriptMessagesInsertCompanionBuilder = TranscriptMessagesCompanion
+typedef $TranscriptMessagesCreateCompanionBuilder = TranscriptMessagesCompanion
     Function({
   required String transcriptId,
   required String messageId,
@@ -21592,8 +21801,7 @@ class $TranscriptMessagesTableManager extends RootTableManager<
     TranscriptMessage,
     $TranscriptMessagesFilterComposer,
     $TranscriptMessagesOrderingComposer,
-    $TranscriptMessagesProcessedTableManager,
-    $TranscriptMessagesInsertCompanionBuilder,
+    $TranscriptMessagesCreateCompanionBuilder,
     $TranscriptMessagesUpdateCompanionBuilder> {
   $TranscriptMessagesTableManager(_$MixinDatabase db, TranscriptMessages table)
       : super(TableManagerState(
@@ -21603,9 +21811,7 @@ class $TranscriptMessagesTableManager extends RootTableManager<
               $TranscriptMessagesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $TranscriptMessagesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $TranscriptMessagesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> transcriptId = const Value.absent(),
             Value<String> messageId = const Value.absent(),
             Value<String?> userId = const Value.absent(),
@@ -21665,7 +21871,7 @@ class $TranscriptMessagesTableManager extends RootTableManager<
             caption: caption,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String transcriptId,
             required String messageId,
             Value<String?> userId = const Value.absent(),
@@ -21726,18 +21932,6 @@ class $TranscriptMessagesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $TranscriptMessagesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    TranscriptMessages,
-    TranscriptMessage,
-    $TranscriptMessagesFilterComposer,
-    $TranscriptMessagesOrderingComposer,
-    $TranscriptMessagesProcessedTableManager,
-    $TranscriptMessagesInsertCompanionBuilder,
-    $TranscriptMessagesUpdateCompanionBuilder> {
-  $TranscriptMessagesProcessedTableManager(super.$state);
 }
 
 class $TranscriptMessagesFilterComposer
@@ -22024,7 +22218,7 @@ class $TranscriptMessagesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $FiatsInsertCompanionBuilder = FiatsCompanion Function({
+typedef $FiatsCreateCompanionBuilder = FiatsCompanion Function({
   required String code,
   required double rate,
   Value<int> rowid,
@@ -22041,8 +22235,7 @@ class $FiatsTableManager extends RootTableManager<
     Fiat,
     $FiatsFilterComposer,
     $FiatsOrderingComposer,
-    $FiatsProcessedTableManager,
-    $FiatsInsertCompanionBuilder,
+    $FiatsCreateCompanionBuilder,
     $FiatsUpdateCompanionBuilder> {
   $FiatsTableManager(_$MixinDatabase db, Fiats table)
       : super(TableManagerState(
@@ -22050,8 +22243,7 @@ class $FiatsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $FiatsFilterComposer(ComposerState(db, table)),
           orderingComposer: $FiatsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $FiatsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> code = const Value.absent(),
             Value<double> rate = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -22061,7 +22253,7 @@ class $FiatsTableManager extends RootTableManager<
             rate: rate,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String code,
             required double rate,
             Value<int> rowid = const Value.absent(),
@@ -22072,18 +22264,6 @@ class $FiatsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $FiatsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Fiats,
-    Fiat,
-    $FiatsFilterComposer,
-    $FiatsOrderingComposer,
-    $FiatsProcessedTableManager,
-    $FiatsInsertCompanionBuilder,
-    $FiatsUpdateCompanionBuilder> {
-  $FiatsProcessedTableManager(super.$state);
 }
 
 class $FiatsFilterComposer extends FilterComposer<_$MixinDatabase, Fiats> {
@@ -22112,7 +22292,7 @@ class $FiatsOrderingComposer extends OrderingComposer<_$MixinDatabase, Fiats> {
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $FavoriteAppsInsertCompanionBuilder = FavoriteAppsCompanion Function({
+typedef $FavoriteAppsCreateCompanionBuilder = FavoriteAppsCompanion Function({
   required String appId,
   required String userId,
   required DateTime createdAt,
@@ -22131,8 +22311,7 @@ class $FavoriteAppsTableManager extends RootTableManager<
     FavoriteApp,
     $FavoriteAppsFilterComposer,
     $FavoriteAppsOrderingComposer,
-    $FavoriteAppsProcessedTableManager,
-    $FavoriteAppsInsertCompanionBuilder,
+    $FavoriteAppsCreateCompanionBuilder,
     $FavoriteAppsUpdateCompanionBuilder> {
   $FavoriteAppsTableManager(_$MixinDatabase db, FavoriteApps table)
       : super(TableManagerState(
@@ -22142,8 +22321,7 @@ class $FavoriteAppsTableManager extends RootTableManager<
               $FavoriteAppsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $FavoriteAppsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $FavoriteAppsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> appId = const Value.absent(),
             Value<String> userId = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -22155,7 +22333,7 @@ class $FavoriteAppsTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String appId,
             required String userId,
             required DateTime createdAt,
@@ -22168,18 +22346,6 @@ class $FavoriteAppsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $FavoriteAppsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    FavoriteApps,
-    FavoriteApp,
-    $FavoriteAppsFilterComposer,
-    $FavoriteAppsOrderingComposer,
-    $FavoriteAppsProcessedTableManager,
-    $FavoriteAppsInsertCompanionBuilder,
-    $FavoriteAppsUpdateCompanionBuilder> {
-  $FavoriteAppsProcessedTableManager(super.$state);
 }
 
 class $FavoriteAppsFilterComposer
@@ -22222,7 +22388,7 @@ class $FavoriteAppsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $PropertiesInsertCompanionBuilder = PropertiesCompanion Function({
+typedef $PropertiesCreateCompanionBuilder = PropertiesCompanion Function({
   required String key,
   required PropertyGroup group,
   required String value,
@@ -22241,8 +22407,7 @@ class $PropertiesTableManager extends RootTableManager<
     Property,
     $PropertiesFilterComposer,
     $PropertiesOrderingComposer,
-    $PropertiesProcessedTableManager,
-    $PropertiesInsertCompanionBuilder,
+    $PropertiesCreateCompanionBuilder,
     $PropertiesUpdateCompanionBuilder> {
   $PropertiesTableManager(_$MixinDatabase db, Properties table)
       : super(TableManagerState(
@@ -22252,8 +22417,7 @@ class $PropertiesTableManager extends RootTableManager<
               $PropertiesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $PropertiesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $PropertiesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> key = const Value.absent(),
             Value<PropertyGroup> group = const Value.absent(),
             Value<String> value = const Value.absent(),
@@ -22265,7 +22429,7 @@ class $PropertiesTableManager extends RootTableManager<
             value: value,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String key,
             required PropertyGroup group,
             required String value,
@@ -22278,18 +22442,6 @@ class $PropertiesTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $PropertiesProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    Properties,
-    Property,
-    $PropertiesFilterComposer,
-    $PropertiesOrderingComposer,
-    $PropertiesProcessedTableManager,
-    $PropertiesInsertCompanionBuilder,
-    $PropertiesUpdateCompanionBuilder> {
-  $PropertiesProcessedTableManager(super.$state);
 }
 
 class $PropertiesFilterComposer
@@ -22332,7 +22484,7 @@ class $PropertiesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $InscriptionCollectionsInsertCompanionBuilder
+typedef $InscriptionCollectionsCreateCompanionBuilder
     = InscriptionCollectionsCompanion Function({
   required String collectionHash,
   required String supply,
@@ -22363,8 +22515,7 @@ class $InscriptionCollectionsTableManager extends RootTableManager<
     InscriptionCollection,
     $InscriptionCollectionsFilterComposer,
     $InscriptionCollectionsOrderingComposer,
-    $InscriptionCollectionsProcessedTableManager,
-    $InscriptionCollectionsInsertCompanionBuilder,
+    $InscriptionCollectionsCreateCompanionBuilder,
     $InscriptionCollectionsUpdateCompanionBuilder> {
   $InscriptionCollectionsTableManager(
       _$MixinDatabase db, InscriptionCollections table)
@@ -22375,9 +22526,7 @@ class $InscriptionCollectionsTableManager extends RootTableManager<
               $InscriptionCollectionsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $InscriptionCollectionsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $InscriptionCollectionsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> collectionHash = const Value.absent(),
             Value<String> supply = const Value.absent(),
             Value<String> unit = const Value.absent(),
@@ -22399,7 +22548,7 @@ class $InscriptionCollectionsTableManager extends RootTableManager<
             updatedAt: updatedAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String collectionHash,
             required String supply,
             required String unit,
@@ -22422,19 +22571,6 @@ class $InscriptionCollectionsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $InscriptionCollectionsProcessedTableManager
-    extends ProcessedTableManager<
-        _$MixinDatabase,
-        InscriptionCollections,
-        InscriptionCollection,
-        $InscriptionCollectionsFilterComposer,
-        $InscriptionCollectionsOrderingComposer,
-        $InscriptionCollectionsProcessedTableManager,
-        $InscriptionCollectionsInsertCompanionBuilder,
-        $InscriptionCollectionsUpdateCompanionBuilder> {
-  $InscriptionCollectionsProcessedTableManager(super.$state);
 }
 
 class $InscriptionCollectionsFilterComposer
@@ -22529,7 +22665,7 @@ class $InscriptionCollectionsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $InscriptionItemsInsertCompanionBuilder = InscriptionItemsCompanion
+typedef $InscriptionItemsCreateCompanionBuilder = InscriptionItemsCompanion
     Function({
   required String inscriptionHash,
   required String collectionHash,
@@ -22562,8 +22698,7 @@ class $InscriptionItemsTableManager extends RootTableManager<
     InscriptionItem,
     $InscriptionItemsFilterComposer,
     $InscriptionItemsOrderingComposer,
-    $InscriptionItemsProcessedTableManager,
-    $InscriptionItemsInsertCompanionBuilder,
+    $InscriptionItemsCreateCompanionBuilder,
     $InscriptionItemsUpdateCompanionBuilder> {
   $InscriptionItemsTableManager(_$MixinDatabase db, InscriptionItems table)
       : super(TableManagerState(
@@ -22573,9 +22708,7 @@ class $InscriptionItemsTableManager extends RootTableManager<
               $InscriptionItemsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $InscriptionItemsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $InscriptionItemsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> inscriptionHash = const Value.absent(),
             Value<String> collectionHash = const Value.absent(),
             Value<int> sequence = const Value.absent(),
@@ -22599,7 +22732,7 @@ class $InscriptionItemsTableManager extends RootTableManager<
             updatedAt: updatedAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String inscriptionHash,
             required String collectionHash,
             required int sequence,
@@ -22624,18 +22757,6 @@ class $InscriptionItemsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $InscriptionItemsProcessedTableManager extends ProcessedTableManager<
-    _$MixinDatabase,
-    InscriptionItems,
-    InscriptionItem,
-    $InscriptionItemsFilterComposer,
-    $InscriptionItemsOrderingComposer,
-    $InscriptionItemsProcessedTableManager,
-    $InscriptionItemsInsertCompanionBuilder,
-    $InscriptionItemsUpdateCompanionBuilder> {
-  $InscriptionItemsProcessedTableManager(super.$state);
 }
 
 class $InscriptionItemsFilterComposer
@@ -22740,9 +22861,9 @@ class $InscriptionItemsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-class _$MixinDatabaseManager {
+class $MixinDatabaseManager {
   final _$MixinDatabase _db;
-  _$MixinDatabaseManager(this._db);
+  $MixinDatabaseManager(this._db);
   $ConversationsTableManager get conversations =>
       $ConversationsTableManager(_db, _db.conversations);
   $MessagesTableManager get messages =>
