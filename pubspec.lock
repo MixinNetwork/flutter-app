@@ -137,11 +137,10 @@ packages:
   breakpad_client:
     dependency: "direct main"
     description:
-      path: "packages/breakpad_client"
-      ref: "02179369742d8361223fa0ba16c780e9e7b66885"
-      resolved-ref: "02179369742d8361223fa0ba16c780e9e7b66885"
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
+      name: breakpad_client
+      sha256: "6b17c71c206bbeaa06870180d419892ce9cc108bf94dea86b47c326fcb1485e6"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.0.1"
   bring_window_to_front:
     dependency: "direct main"
@@ -1291,12 +1290,11 @@ packages:
   mixin_logger:
     dependency: "direct main"
     description:
-      path: "packages/mixin_logger"
-      ref: "5ae61ad5561cf62ca5ef0112e8d3b58f1a47bdb4"
-      resolved-ref: "5ae61ad5561cf62ca5ef0112e8d3b58f1a47bdb4"
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
-    version: "0.1.1"
+      name: mixin_logger
+      sha256: a92fb0cfc09fa132cb7aea34f1a736d1a36718fc0f956e8c89d9c51c97c7cdba
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   msix:
     dependency: "direct dev"
     description:
