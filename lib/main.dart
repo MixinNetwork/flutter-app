@@ -92,7 +92,7 @@ Future<void> main(List<String> args) async {
 
   if (kPlatformIsDesktop) {
     Size? windowSize;
-    if (!Platform.isMacOS) {
+    if (Platform.isWindows) {
       final screen = await getCurrentScreen();
       i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
       const defaultWindowSize = Size(1280, 750);
@@ -116,7 +116,7 @@ Future<void> main(List<String> args) async {
       minimumSize:
           const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480),
       size: windowSize,
-      center: Platform.isMacOS ? null : true,
+      center: Platform.isWindows ? true : null,
     );
 
     await windowManager.ensureInitialized();

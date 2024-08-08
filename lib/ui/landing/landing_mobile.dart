@@ -48,7 +48,7 @@ class LoginWithMobileWidget extends HookConsumerWidget {
       create: (_) => LandingMobileCubit(context.multiAuthChangeNotifier, locale,
           userAgent: userAgent, deviceId: deviceId),
       child: Navigator(
-        onPopPage: (_, __) => true,
+        onDidRemovePage: (page) {},
         pages: const [
           MaterialPage(
             child: _PhoneNumberInputScene(),

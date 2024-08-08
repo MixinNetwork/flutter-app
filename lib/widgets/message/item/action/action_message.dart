@@ -226,6 +226,7 @@ class RenderActionButtonLayout extends RenderBox
       final parentData = child.parentData! as _ParentData;
 
       final size = child.getDryLayout(childConstraints);
+      final lastMaxRowHeight = maxRowHeight;
       maxRowHeight = math.max(size.height, maxRowHeight);
 
       parentData
@@ -245,7 +246,7 @@ class RenderActionButtonLayout extends RenderBox
           rowItems = 6;
         } else {
           rowItems = 2;
-          height += maxRowHeight + verticalSpacing;
+          height += lastMaxRowHeight + verticalSpacing;
           maxRowHeight = size.height;
           row += 1;
           parentData
@@ -257,7 +258,8 @@ class RenderActionButtonLayout extends RenderBox
           rowItems += 6;
         } else {
           rowItems = 0;
-          height += maxRowHeight + verticalSpacing;
+          height += lastMaxRowHeight + verticalSpacing;
+          height += size.height + verticalSpacing;
           maxRowHeight = 0;
           parentData
             .._row = row + 1

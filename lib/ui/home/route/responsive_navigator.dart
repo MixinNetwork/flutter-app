@@ -101,10 +101,7 @@ class ResponsiveNavigator extends HookConsumerWidget {
                     rightEmptyPage.name,
                   },
                 ),
-                onPopPage: (Route<dynamic> route, dynamic result) {
-                  responsiveNavigatorNotifier.onPopPage();
-                  return route.didPop(result);
-                },
+                onDidRemovePage: (Page<dynamic> page) {},
                 pages: [
                   if (routeMode) leftPage,
                   if (!routeMode && responsiveNavigatorState.pages.isEmpty)

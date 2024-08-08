@@ -1375,6 +1375,7 @@ class _SelectableRegionContainerDelegate
         _hasReceivedEndEvent.remove(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
         break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:

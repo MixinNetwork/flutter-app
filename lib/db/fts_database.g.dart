@@ -96,6 +96,12 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
   MessagesFt copyWith({String? content}) => MessagesFt(
         content: content ?? this.content,
       );
+  MessagesFt copyWithCompanion(MessagesFtsCompanion data) {
+    return MessagesFt(
+      content: data.content.present ? data.content.value : this.content,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('MessagesFt(')
@@ -372,6 +378,19 @@ class MessagesMeta extends DataClass implements Insertable<MessagesMeta> {
         userId: userId ?? this.userId,
         createdAt: createdAt ?? this.createdAt,
       );
+  MessagesMeta copyWithCompanion(MessagesMetasCompanion data) {
+    return MessagesMeta(
+      docId: data.docId.present ? data.docId.value : this.docId,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      category: data.category.present ? data.category.value : this.category,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('MessagesMeta(')
@@ -515,7 +534,7 @@ class MessagesMetasCompanion extends UpdateCompanion<MessagesMeta> {
 
 abstract class _$FtsDatabase extends GeneratedDatabase {
   _$FtsDatabase(QueryExecutor e) : super(e);
-  _$FtsDatabaseManager get managers => _$FtsDatabaseManager(this);
+  $FtsDatabaseManager get managers => $FtsDatabaseManager(this);
   late final MessagesFts messagesFts = MessagesFts(this);
   late final MessagesMetas messagesMetas = MessagesMetas(this);
   late final Index messagesMetasDocIdCreatedAt = Index(
@@ -621,7 +640,7 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
       ];
 }
 
-typedef $MessagesFtsInsertCompanionBuilder = MessagesFtsCompanion Function({
+typedef $MessagesFtsCreateCompanionBuilder = MessagesFtsCompanion Function({
   required String content,
   Value<int> rowid,
 });
@@ -636,8 +655,7 @@ class $MessagesFtsTableManager extends RootTableManager<
     MessagesFt,
     $MessagesFtsFilterComposer,
     $MessagesFtsOrderingComposer,
-    $MessagesFtsProcessedTableManager,
-    $MessagesFtsInsertCompanionBuilder,
+    $MessagesFtsCreateCompanionBuilder,
     $MessagesFtsUpdateCompanionBuilder> {
   $MessagesFtsTableManager(_$FtsDatabase db, MessagesFts table)
       : super(TableManagerState(
@@ -647,8 +665,7 @@ class $MessagesFtsTableManager extends RootTableManager<
               $MessagesFtsFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $MessagesFtsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $MessagesFtsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> content = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -656,7 +673,7 @@ class $MessagesFtsTableManager extends RootTableManager<
             content: content,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String content,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -665,18 +682,6 @@ class $MessagesFtsTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $MessagesFtsProcessedTableManager extends ProcessedTableManager<
-    _$FtsDatabase,
-    MessagesFts,
-    MessagesFt,
-    $MessagesFtsFilterComposer,
-    $MessagesFtsOrderingComposer,
-    $MessagesFtsProcessedTableManager,
-    $MessagesFtsInsertCompanionBuilder,
-    $MessagesFtsUpdateCompanionBuilder> {
-  $MessagesFtsProcessedTableManager(super.$state);
 }
 
 class $MessagesFtsFilterComposer
@@ -697,7 +702,7 @@ class $MessagesFtsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $MessagesMetasInsertCompanionBuilder = MessagesMetasCompanion Function({
+typedef $MessagesMetasCreateCompanionBuilder = MessagesMetasCompanion Function({
   required int docId,
   required String messageId,
   required String conversationId,
@@ -722,8 +727,7 @@ class $MessagesMetasTableManager extends RootTableManager<
     MessagesMeta,
     $MessagesMetasFilterComposer,
     $MessagesMetasOrderingComposer,
-    $MessagesMetasProcessedTableManager,
-    $MessagesMetasInsertCompanionBuilder,
+    $MessagesMetasCreateCompanionBuilder,
     $MessagesMetasUpdateCompanionBuilder> {
   $MessagesMetasTableManager(_$FtsDatabase db, MessagesMetas table)
       : super(TableManagerState(
@@ -733,8 +737,7 @@ class $MessagesMetasTableManager extends RootTableManager<
               $MessagesMetasFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $MessagesMetasOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $MessagesMetasProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<int> docId = const Value.absent(),
             Value<String> messageId = const Value.absent(),
             Value<String> conversationId = const Value.absent(),
@@ -752,7 +755,7 @@ class $MessagesMetasTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required int docId,
             required String messageId,
             required String conversationId,
@@ -771,18 +774,6 @@ class $MessagesMetasTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $MessagesMetasProcessedTableManager extends ProcessedTableManager<
-    _$FtsDatabase,
-    MessagesMetas,
-    MessagesMeta,
-    $MessagesMetasFilterComposer,
-    $MessagesMetasOrderingComposer,
-    $MessagesMetasProcessedTableManager,
-    $MessagesMetasInsertCompanionBuilder,
-    $MessagesMetasUpdateCompanionBuilder> {
-  $MessagesMetasProcessedTableManager(super.$state);
 }
 
 class $MessagesMetasFilterComposer
@@ -855,9 +846,9 @@ class $MessagesMetasOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-class _$FtsDatabaseManager {
+class $FtsDatabaseManager {
   final _$FtsDatabase _db;
-  _$FtsDatabaseManager(this._db);
+  $FtsDatabaseManager(this._db);
   $MessagesFtsTableManager get messagesFts =>
       $MessagesFtsTableManager(_db, _db.messagesFts);
   $MessagesMetasTableManager get messagesMetas =>

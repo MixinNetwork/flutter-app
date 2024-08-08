@@ -136,6 +136,14 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
         senderId: senderId ?? this.senderId,
         record: record ?? this.record,
       );
+  SenderKey copyWithCompanion(SenderKeysCompanion data) {
+    return SenderKey(
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      senderId: data.senderId.present ? data.senderId.value : this.senderId,
+      record: data.record.present ? data.record.value : this.record,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SenderKey(')
@@ -481,6 +489,23 @@ class Identity extends DataClass implements Insertable<Identity> {
             nextPrekeyId.present ? nextPrekeyId.value : this.nextPrekeyId,
         timestamp: timestamp ?? this.timestamp,
       );
+  Identity copyWithCompanion(IdentitiesCompanion data) {
+    return Identity(
+      id: data.id.present ? data.id.value : this.id,
+      address: data.address.present ? data.address.value : this.address,
+      registrationId: data.registrationId.present
+          ? data.registrationId.value
+          : this.registrationId,
+      publicKey: data.publicKey.present ? data.publicKey.value : this.publicKey,
+      privateKey:
+          data.privateKey.present ? data.privateKey.value : this.privateKey,
+      nextPrekeyId: data.nextPrekeyId.present
+          ? data.nextPrekeyId.value
+          : this.nextPrekeyId,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Identity(')
@@ -752,6 +777,14 @@ class Prekey extends DataClass implements Insertable<Prekey> {
         prekeyId: prekeyId ?? this.prekeyId,
         record: record ?? this.record,
       );
+  Prekey copyWithCompanion(PrekeysCompanion data) {
+    return Prekey(
+      id: data.id.present ? data.id.value : this.id,
+      prekeyId: data.prekeyId.present ? data.prekeyId.value : this.prekeyId,
+      record: data.record.present ? data.record.value : this.record,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Prekey(')
@@ -988,6 +1021,15 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
         record: record ?? this.record,
         timestamp: timestamp ?? this.timestamp,
       );
+  SignedPrekey copyWithCompanion(SignedPrekeysCompanion data) {
+    return SignedPrekey(
+      id: data.id.present ? data.id.value : this.id,
+      prekeyId: data.prekeyId.present ? data.prekeyId.value : this.prekeyId,
+      record: data.record.present ? data.record.value : this.record,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('SignedPrekey(')
@@ -1266,6 +1308,16 @@ class Session extends DataClass implements Insertable<Session> {
         record: record ?? this.record,
         timestamp: timestamp ?? this.timestamp,
       );
+  Session copyWithCompanion(SessionsCompanion data) {
+    return Session(
+      id: data.id.present ? data.id.value : this.id,
+      address: data.address.present ? data.address.value : this.address,
+      device: data.device.present ? data.device.value : this.device,
+      record: data.record.present ? data.record.value : this.record,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('Session(')
@@ -1569,6 +1621,16 @@ class RatchetSenderKey extends DataClass
         messageId: messageId.present ? messageId.value : this.messageId,
         createdAt: createdAt ?? this.createdAt,
       );
+  RatchetSenderKey copyWithCompanion(RatchetSenderKeysCompanion data) {
+    return RatchetSenderKey(
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+      senderId: data.senderId.present ? data.senderId.value : this.senderId,
+      status: data.status.present ? data.status.value : this.status,
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
   @override
   String toString() {
     return (StringBuffer('RatchetSenderKey(')
@@ -1696,7 +1758,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
 
 abstract class _$SignalDatabase extends GeneratedDatabase {
   _$SignalDatabase(QueryExecutor e) : super(e);
-  _$SignalDatabaseManager get managers => _$SignalDatabaseManager(this);
+  $SignalDatabaseManager get managers => $SignalDatabaseManager(this);
   late final SenderKeys senderKeys = SenderKeys(this);
   late final Identities identities = Identities(this);
   late final Index indexIdentitiesAddress = Index('index_identities_address',
@@ -1739,7 +1801,7 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
       ];
 }
 
-typedef $SenderKeysInsertCompanionBuilder = SenderKeysCompanion Function({
+typedef $SenderKeysCreateCompanionBuilder = SenderKeysCompanion Function({
   required String groupId,
   required String senderId,
   required Uint8List record,
@@ -1758,8 +1820,7 @@ class $SenderKeysTableManager extends RootTableManager<
     SenderKey,
     $SenderKeysFilterComposer,
     $SenderKeysOrderingComposer,
-    $SenderKeysProcessedTableManager,
-    $SenderKeysInsertCompanionBuilder,
+    $SenderKeysCreateCompanionBuilder,
     $SenderKeysUpdateCompanionBuilder> {
   $SenderKeysTableManager(_$SignalDatabase db, SenderKeys table)
       : super(TableManagerState(
@@ -1769,8 +1830,7 @@ class $SenderKeysTableManager extends RootTableManager<
               $SenderKeysFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $SenderKeysOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $SenderKeysProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> groupId = const Value.absent(),
             Value<String> senderId = const Value.absent(),
             Value<Uint8List> record = const Value.absent(),
@@ -1782,7 +1842,7 @@ class $SenderKeysTableManager extends RootTableManager<
             record: record,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String groupId,
             required String senderId,
             required Uint8List record,
@@ -1795,18 +1855,6 @@ class $SenderKeysTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $SenderKeysProcessedTableManager extends ProcessedTableManager<
-    _$SignalDatabase,
-    SenderKeys,
-    SenderKey,
-    $SenderKeysFilterComposer,
-    $SenderKeysOrderingComposer,
-    $SenderKeysProcessedTableManager,
-    $SenderKeysInsertCompanionBuilder,
-    $SenderKeysUpdateCompanionBuilder> {
-  $SenderKeysProcessedTableManager(super.$state);
 }
 
 class $SenderKeysFilterComposer
@@ -1847,7 +1895,7 @@ class $SenderKeysOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $IdentitiesInsertCompanionBuilder = IdentitiesCompanion Function({
+typedef $IdentitiesCreateCompanionBuilder = IdentitiesCompanion Function({
   Value<int> id,
   required String address,
   Value<int?> registrationId,
@@ -1872,8 +1920,7 @@ class $IdentitiesTableManager extends RootTableManager<
     Identity,
     $IdentitiesFilterComposer,
     $IdentitiesOrderingComposer,
-    $IdentitiesProcessedTableManager,
-    $IdentitiesInsertCompanionBuilder,
+    $IdentitiesCreateCompanionBuilder,
     $IdentitiesUpdateCompanionBuilder> {
   $IdentitiesTableManager(_$SignalDatabase db, Identities table)
       : super(TableManagerState(
@@ -1883,8 +1930,7 @@ class $IdentitiesTableManager extends RootTableManager<
               $IdentitiesFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $IdentitiesOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $IdentitiesProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> address = const Value.absent(),
             Value<int?> registrationId = const Value.absent(),
@@ -1902,7 +1948,7 @@ class $IdentitiesTableManager extends RootTableManager<
             nextPrekeyId: nextPrekeyId,
             timestamp: timestamp,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String address,
             Value<int?> registrationId = const Value.absent(),
@@ -1921,18 +1967,6 @@ class $IdentitiesTableManager extends RootTableManager<
             timestamp: timestamp,
           ),
         ));
-}
-
-class $IdentitiesProcessedTableManager extends ProcessedTableManager<
-    _$SignalDatabase,
-    Identities,
-    Identity,
-    $IdentitiesFilterComposer,
-    $IdentitiesOrderingComposer,
-    $IdentitiesProcessedTableManager,
-    $IdentitiesInsertCompanionBuilder,
-    $IdentitiesUpdateCompanionBuilder> {
-  $IdentitiesProcessedTableManager(super.$state);
 }
 
 class $IdentitiesFilterComposer
@@ -2013,7 +2047,7 @@ class $IdentitiesOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $PrekeysInsertCompanionBuilder = PrekeysCompanion Function({
+typedef $PrekeysCreateCompanionBuilder = PrekeysCompanion Function({
   Value<int> id,
   required int prekeyId,
   required Uint8List record,
@@ -2030,8 +2064,7 @@ class $PrekeysTableManager extends RootTableManager<
     Prekey,
     $PrekeysFilterComposer,
     $PrekeysOrderingComposer,
-    $PrekeysProcessedTableManager,
-    $PrekeysInsertCompanionBuilder,
+    $PrekeysCreateCompanionBuilder,
     $PrekeysUpdateCompanionBuilder> {
   $PrekeysTableManager(_$SignalDatabase db, Prekeys table)
       : super(TableManagerState(
@@ -2039,8 +2072,7 @@ class $PrekeysTableManager extends RootTableManager<
           table: table,
           filteringComposer: $PrekeysFilterComposer(ComposerState(db, table)),
           orderingComposer: $PrekeysOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $PrekeysProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int> prekeyId = const Value.absent(),
             Value<Uint8List> record = const Value.absent(),
@@ -2050,7 +2082,7 @@ class $PrekeysTableManager extends RootTableManager<
             prekeyId: prekeyId,
             record: record,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required int prekeyId,
             required Uint8List record,
@@ -2061,18 +2093,6 @@ class $PrekeysTableManager extends RootTableManager<
             record: record,
           ),
         ));
-}
-
-class $PrekeysProcessedTableManager extends ProcessedTableManager<
-    _$SignalDatabase,
-    Prekeys,
-    Prekey,
-    $PrekeysFilterComposer,
-    $PrekeysOrderingComposer,
-    $PrekeysProcessedTableManager,
-    $PrekeysInsertCompanionBuilder,
-    $PrekeysUpdateCompanionBuilder> {
-  $PrekeysProcessedTableManager(super.$state);
 }
 
 class $PrekeysFilterComposer extends FilterComposer<_$SignalDatabase, Prekeys> {
@@ -2112,7 +2132,7 @@ class $PrekeysOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $SignedPrekeysInsertCompanionBuilder = SignedPrekeysCompanion Function({
+typedef $SignedPrekeysCreateCompanionBuilder = SignedPrekeysCompanion Function({
   Value<int> id,
   required int prekeyId,
   required Uint8List record,
@@ -2131,8 +2151,7 @@ class $SignedPrekeysTableManager extends RootTableManager<
     SignedPrekey,
     $SignedPrekeysFilterComposer,
     $SignedPrekeysOrderingComposer,
-    $SignedPrekeysProcessedTableManager,
-    $SignedPrekeysInsertCompanionBuilder,
+    $SignedPrekeysCreateCompanionBuilder,
     $SignedPrekeysUpdateCompanionBuilder> {
   $SignedPrekeysTableManager(_$SignalDatabase db, SignedPrekeys table)
       : super(TableManagerState(
@@ -2142,8 +2161,7 @@ class $SignedPrekeysTableManager extends RootTableManager<
               $SignedPrekeysFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $SignedPrekeysOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $SignedPrekeysProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int> prekeyId = const Value.absent(),
             Value<Uint8List> record = const Value.absent(),
@@ -2155,7 +2173,7 @@ class $SignedPrekeysTableManager extends RootTableManager<
             record: record,
             timestamp: timestamp,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required int prekeyId,
             required Uint8List record,
@@ -2168,18 +2186,6 @@ class $SignedPrekeysTableManager extends RootTableManager<
             timestamp: timestamp,
           ),
         ));
-}
-
-class $SignedPrekeysProcessedTableManager extends ProcessedTableManager<
-    _$SignalDatabase,
-    SignedPrekeys,
-    SignedPrekey,
-    $SignedPrekeysFilterComposer,
-    $SignedPrekeysOrderingComposer,
-    $SignedPrekeysProcessedTableManager,
-    $SignedPrekeysInsertCompanionBuilder,
-    $SignedPrekeysUpdateCompanionBuilder> {
-  $SignedPrekeysProcessedTableManager(super.$state);
 }
 
 class $SignedPrekeysFilterComposer
@@ -2230,7 +2236,7 @@ class $SignedPrekeysOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $SessionsInsertCompanionBuilder = SessionsCompanion Function({
+typedef $SessionsCreateCompanionBuilder = SessionsCompanion Function({
   Value<int> id,
   required String address,
   required int device,
@@ -2251,8 +2257,7 @@ class $SessionsTableManager extends RootTableManager<
     Session,
     $SessionsFilterComposer,
     $SessionsOrderingComposer,
-    $SessionsProcessedTableManager,
-    $SessionsInsertCompanionBuilder,
+    $SessionsCreateCompanionBuilder,
     $SessionsUpdateCompanionBuilder> {
   $SessionsTableManager(_$SignalDatabase db, Sessions table)
       : super(TableManagerState(
@@ -2260,8 +2265,7 @@ class $SessionsTableManager extends RootTableManager<
           table: table,
           filteringComposer: $SessionsFilterComposer(ComposerState(db, table)),
           orderingComposer: $SessionsOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) => $SessionsProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> address = const Value.absent(),
             Value<int> device = const Value.absent(),
@@ -2275,7 +2279,7 @@ class $SessionsTableManager extends RootTableManager<
             record: record,
             timestamp: timestamp,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String address,
             required int device,
@@ -2290,18 +2294,6 @@ class $SessionsTableManager extends RootTableManager<
             timestamp: timestamp,
           ),
         ));
-}
-
-class $SessionsProcessedTableManager extends ProcessedTableManager<
-    _$SignalDatabase,
-    Sessions,
-    Session,
-    $SessionsFilterComposer,
-    $SessionsOrderingComposer,
-    $SessionsProcessedTableManager,
-    $SessionsInsertCompanionBuilder,
-    $SessionsUpdateCompanionBuilder> {
-  $SessionsProcessedTableManager(super.$state);
 }
 
 class $SessionsFilterComposer
@@ -2362,7 +2354,7 @@ class $SessionsOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-typedef $RatchetSenderKeysInsertCompanionBuilder = RatchetSenderKeysCompanion
+typedef $RatchetSenderKeysCreateCompanionBuilder = RatchetSenderKeysCompanion
     Function({
   required String groupId,
   required String senderId,
@@ -2387,8 +2379,7 @@ class $RatchetSenderKeysTableManager extends RootTableManager<
     RatchetSenderKey,
     $RatchetSenderKeysFilterComposer,
     $RatchetSenderKeysOrderingComposer,
-    $RatchetSenderKeysProcessedTableManager,
-    $RatchetSenderKeysInsertCompanionBuilder,
+    $RatchetSenderKeysCreateCompanionBuilder,
     $RatchetSenderKeysUpdateCompanionBuilder> {
   $RatchetSenderKeysTableManager(_$SignalDatabase db, RatchetSenderKeys table)
       : super(TableManagerState(
@@ -2398,9 +2389,7 @@ class $RatchetSenderKeysTableManager extends RootTableManager<
               $RatchetSenderKeysFilterComposer(ComposerState(db, table)),
           orderingComposer:
               $RatchetSenderKeysOrderingComposer(ComposerState(db, table)),
-          getChildManagerBuilder: (p) =>
-              $RatchetSenderKeysProcessedTableManager(p),
-          getUpdateCompanionBuilder: ({
+          updateCompanionCallback: ({
             Value<String> groupId = const Value.absent(),
             Value<String> senderId = const Value.absent(),
             Value<String> status = const Value.absent(),
@@ -2416,7 +2405,7 @@ class $RatchetSenderKeysTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
-          getInsertCompanionBuilder: ({
+          createCompanionCallback: ({
             required String groupId,
             required String senderId,
             required String status,
@@ -2433,18 +2422,6 @@ class $RatchetSenderKeysTableManager extends RootTableManager<
             rowid: rowid,
           ),
         ));
-}
-
-class $RatchetSenderKeysProcessedTableManager extends ProcessedTableManager<
-    _$SignalDatabase,
-    RatchetSenderKeys,
-    RatchetSenderKey,
-    $RatchetSenderKeysFilterComposer,
-    $RatchetSenderKeysOrderingComposer,
-    $RatchetSenderKeysProcessedTableManager,
-    $RatchetSenderKeysInsertCompanionBuilder,
-    $RatchetSenderKeysUpdateCompanionBuilder> {
-  $RatchetSenderKeysProcessedTableManager(super.$state);
 }
 
 class $RatchetSenderKeysFilterComposer
@@ -2505,9 +2482,9 @@ class $RatchetSenderKeysOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-class _$SignalDatabaseManager {
+class $SignalDatabaseManager {
   final _$SignalDatabase _db;
-  _$SignalDatabaseManager(this._db);
+  $SignalDatabaseManager(this._db);
   $SenderKeysTableManager get senderKeys =>
       $SenderKeysTableManager(_db, _db.senderKeys);
   $IdentitiesTableManager get identities =>
