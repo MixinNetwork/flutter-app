@@ -164,7 +164,7 @@ dependencies:
   breakpad_client:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
-      ref: 153b1bcda1ce75d07f163f3c6703757f0093c91a
+      ref: 02179369742d8361223fa0ba16c780e9e7b66885
       path: packages/breakpad_client
 dev_dependencies:
   build_runner: ^2.4.8
