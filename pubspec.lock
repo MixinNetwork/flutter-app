@@ -1882,26 +1882,26 @@ packages:
     dependency: "direct main"
     description:
       name: super_clipboard
-      sha256: c72d2ae8c3a66b20a104523add86b7c2813b1d4cced893a9764b84fb97ac8e2a
+      sha256: "74098001413e075cc53dee72b68c32eaffc10709df41806800393abaa6dac9d5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.18"
+    version: "0.8.19"
   super_context_menu:
     dependency: "direct main"
     description:
       name: super_context_menu
-      sha256: f261f4bbc191dc37548d0b9520203290504a9b1c08982aef5f4b12ac647f1188
+      sha256: c21e8a2d5a2f304c5acf56b78c8fd21a36f83ea9aded513529de022dc0a077f3
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.18"
+    version: "0.8.19"
   super_native_extensions:
     dependency: "direct main"
     description:
       name: super_native_extensions
-      sha256: b03f19e54744b65940a7c2cb4f93abd4819b5355aa3464d7b3c9a013b6b76db1
+      sha256: c24676825c9f3ae844676a843d45ad186f2270539ffe72be4277753e46d14e29
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.18"
+    version: "0.8.19"
   synchronized:
     dependency: "direct main"
     description:

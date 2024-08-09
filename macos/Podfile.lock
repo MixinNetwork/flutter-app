@@ -182,7 +182,7 @@ SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   irondash_engine_context: da62996ee25616d2f01bbeb85dc115d813359478
   local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
-  mixin_logger: 011219cd258a9229c11e97e1b637e1c223330462
+  mixin_logger: 5e5bd35ba38da1ff4939ee5ec83260d7fc5258fc
   network_info_plus: aeb9c4ed699cae128bc94b9d0f04f2389a414cbb
   ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
   package_info_plus: fa739dd842b393193c5ca93c26798dff6e3d0e0c
