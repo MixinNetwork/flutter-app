@@ -12,7 +12,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   local_auth_windows
   platform_device_id_windows
   protocol_handler_windows
-  quick_breakpad
   screen_retriever
   sqlite3_flutter_libs
   super_native_extensions
@@ -24,6 +23,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  breakpad_client
   jni
   mixin_logger
   ogg_opus_player

@@ -1,11 +1,17 @@
 #include <flutter/dart_project.h>
-#include <flutter/flutter_view_controller.h>
 #include <windows.h>
+#include <breakpad_client/breakpad_client.h>
+#include <mixin_logger/mixin_logger.h>
+
+#include <filesystem>
 
 #include "flutter_window.h"
 #include "utils.h"
 
 #include <protocol_handler_windows/protocol_handler_windows_plugin_c_api.h>
+#include <shlobj.h>
+
+#pragma comment(lib, "shell32.lib")
 
 class CSingleInstance {
  public:
@@ -30,6 +36,19 @@ class CSingleInstance {
   HANDLE h_mutex_;
 };
 
+std::filesystem::path GetDocumentDir() {
+  CHAR my_documents[MAX_PATH];
+  HRESULT hr = SHGetFolderPathA(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, my_documents);
+  if FAILED(hr) {
+    return "/tmp";
+  }
+  return my_documents;
+}
+
+void custom_logger(const char *log) {
+  mixin_logger_write_log(log);
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
   HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"Mixin");
@@ -40,6 +59,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     ::SetForegroundWindow(hwnd);
     return EXIT_FAILURE;
   }
+
+  auto app_dir = GetDocumentDir() / "Mixin";
+
+  auto log_dir = (app_dir / "log").string();
+  auto crash_dir = (app_dir / "crash").string();
+
+  mixin_logger_init(log_dir.c_str(), 10 * 1024 * 1024, 10, "");
+  breakpad_client_set_logger(custom_logger);
+  breakpad_client_init_exception_handler(crash_dir.c_str());
+
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {

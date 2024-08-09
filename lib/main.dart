@@ -12,9 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:overlay_support/overlay_support.dart';
-import 'package:path/path.dart' as p;
 import 'package:protocol_handler/protocol_handler.dart';
-import 'package:quick_breakpad/quick_breakpad.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
@@ -55,14 +53,6 @@ Future<void> main(List<String> args) async {
     initMixinDocumentsDirectory(),
   ]);
   loadBalancer = result.first as LoadBalancer?;
-
-  // init crash report dump path.
-  // default to executable directory, but we might haven't write permission to
-  // executable directory, so use documents directory instead.
-  unawaited(QuickBreakpad.setDumpPath(p.join(
-    mixinDocumentsDirectory.path,
-    'crash',
-  )));
 
   scheduleMicrotask(() async {
     initLogger(mixinLogDirectory.path);

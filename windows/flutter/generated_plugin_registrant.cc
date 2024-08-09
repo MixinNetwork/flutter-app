@@ -15,7 +15,6 @@
 #include <local_auth_windows/local_auth_plugin.h>
 #include <platform_device_id_windows/platform_device_id_windows_plugin.h>
 #include <protocol_handler_windows/protocol_handler_windows_plugin_c_api.h>
-#include <quick_breakpad/quick_breakpad_plugin.h>
 #include <screen_retriever/screen_retriever_plugin.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <super_native_extensions/super_native_extensions_plugin_c_api.h>
@@ -44,8 +43,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("PlatformDeviceIdWindowsPlugin"));
   ProtocolHandlerWindowsPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("ProtocolHandlerWindowsPluginCApi"));
-  QuickBreakpadPluginRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("QuickBreakpadPlugin"));
   ScreenRetrieverPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("ScreenRetrieverPlugin"));
   Sqlite3FlutterLibsPluginRegisterWithRegistrar(
