@@ -138,10 +138,10 @@ packages:
     dependency: "direct main"
     description:
       name: breakpad_client
-      sha256: "6b17c71c206bbeaa06870180d419892ce9cc108bf94dea86b47c326fcb1485e6"
+      sha256: "579a84aa1903f698fc3c6671eb9a902925fb46b2a6c9c6c2fdbfb8f800b551b0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   bring_window_to_front:
     dependency: "direct main"
     description:
