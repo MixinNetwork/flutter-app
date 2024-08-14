@@ -15,7 +15,7 @@ publish_to: none
 version: 1.10.1+285
 
 environment:
-  sdk: '^3.2.0'
+  sdk: '^3.5.0'
 
 dependencies:
   android_id: ^0.4.0
@@ -121,7 +121,7 @@ dependencies:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
-      ref: 0334bbaa7293c72398eaf4571ba7ba2b5df2302d
+      ref: 66a8ed5f955fa35c9aaac76842b9dab83c51db92
   super_clipboard: ^0.8.19
   super_context_menu: ^0.8.19
   super_native_extensions: ^0.8.19
@@ -158,6 +158,12 @@ dependencies:
       ref: 210839e1e9311bcddeb733297a565721692033ee
   hexagon: ^0.2.0
   breakpad_client: ^0.0.2
+  data_detector:
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 66a8ed5f955fa35c9aaac76842b9dab83c51db92
+      path: packages/data_detector
+
 dev_dependencies:
   build_runner: ^2.4.8
   debug_info_collector:

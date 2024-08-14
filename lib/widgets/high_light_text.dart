@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:data_detector/data_detector.dart';
 import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -507,8 +508,16 @@ class _MatchedSpans {
 
 class UrlTextMatcher extends TextMatcher implements EquatableMixin {
   UrlTextMatcher(BuildContext context)
-      : super.regExp(
-          regExp: uriRegExp,
+      : super.textRangesFromText(
+          textRangesFromText: (text) {
+            if (kPlatformIsDarwin) {
+              final dataDetector =
+                  DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
+              return dataDetector.matchesInString(text).map((e) => e.range);
+            } else {
+              return TextMatcher._textRangesFromText(text, uriRegExp);
+            }
+          },
           matchBuilder: (
             span,
             displayString,
