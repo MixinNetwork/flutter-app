@@ -360,6 +360,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.6"
+  data_detector:
+    dependency: "direct main"
+    description:
+      path: "packages/data_detector"
+      ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
+      resolved-ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   dbus:
     dependency: "direct main"
     description:
@@ -1344,6 +1353,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
+  objective_c:
+    dependency: transitive
+    description:
+      name: objective_c
+      sha256: "77c341fce45bb3865a7bc3ddee4201605799e3de2f7af200e8dae26369d210ea"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   octo_image:
     dependency: "direct main"
     description:
@@ -1873,8 +1890,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/string_tokenizer"
-      ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
-      resolved-ref: "0334bbaa7293c72398eaf4571ba7ba2b5df2302d"
+      ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
+      resolved-ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
@@ -2313,5 +2330,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.5.0-259.0.dev <4.0.0"
+  dart: ">=3.5.0 <4.0.0"
   flutter: ">=3.22.0"
