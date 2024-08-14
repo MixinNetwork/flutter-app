@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -105,7 +107,9 @@ class ActionsCardBody extends StatelessWidget {
             AspectRatio(
               aspectRatio: 1,
               child: CacheImage(data.coverUrl),
-            ),
+            )
+          else if (data.cover != null)
+            _CoverWidget(cover: data.cover!),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -126,6 +130,26 @@ class ActionsCardBody extends StatelessWidget {
           const SizedBox(height: 10),
         ],
       );
+}
+
+class _CoverWidget extends StatelessWidget {
+  const _CoverWidget({required this.cover});
+
+  final Cover cover;
+
+  @override
+  Widget build(BuildContext context) {
+    var aspect = 1.0;
+    try {
+      aspect = math.max(cover.width / cover.height, 1.5);
+    } catch (err) {
+      aspect = 1;
+    }
+    return AspectRatio(
+      aspectRatio: aspect,
+      child: CacheImage(cover.url),
+    );
+  }
 }
 
 class _Actions extends StatelessWidget {

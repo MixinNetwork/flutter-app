@@ -17,6 +17,7 @@ class AppCardData {
     this.shareable,
     this.actions,
     this.coverUrl,
+    this.cover,
   );
 
   factory AppCardData.fromJson(Map<String, dynamic> json) =>
@@ -28,6 +29,9 @@ class AppCardData {
   final String iconUrl;
   @JsonKey(name: 'cover_url', defaultValue: '')
   final String coverUrl;
+
+  final Cover? cover;
+
   final String title;
   final String description;
   @JsonKey(name: 'action', defaultValue: '')
@@ -45,6 +49,28 @@ class AppCardData {
   bool get isActionsCard => action.isEmpty;
 
   bool get canShareActions => actions.every((e) => e.isValidSharedAction);
+}
+
+@JsonSerializable()
+class Cover {
+  const Cover({
+    required this.url,
+    required this.thumbnail,
+    required this.mimeType,
+    required this.width,
+    required this.height,
+  });
+
+  factory Cover.fromJson(Map<String, dynamic> json) => _$CoverFromJson(json);
+
+  final String url;
+  final String? thumbnail;
+  @JsonKey(name: 'mime_type')
+  final String mimeType;
+  final int width;
+  final int height;
+
+  Map<String, dynamic> toJson() => _$CoverToJson(this);
 }
 
 extension on ActionData {
