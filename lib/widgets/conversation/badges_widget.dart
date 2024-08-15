@@ -49,8 +49,8 @@ class BadgesWidget extends StatelessWidget {
               Plan.standard: Resources.assetsImagesPlanStandardSvg,
               Plan.premium: Resources.assetsImagesPlanPremiumSvg,
             }[plan]!,
-            width: 12,
-            height: 12,
+            width: 16,
+            height: 16,
           ),
         );
       default:

@@ -5,6 +5,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 class MembershipConverter extends TypeConverter<Membership?, String?> {
+  const MembershipConverter();
+
   @override
   Membership? fromSql(String? fromDb) {
     if (fromDb == null) {
