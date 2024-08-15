@@ -24,6 +24,7 @@ class TransferDataUser {
     this.isScam,
     this.codeUrl,
     this.codeId,
+    this.membership,
   });
 
   factory TransferDataUser.fromJson(Map<String, dynamic> json) =>
@@ -45,6 +46,7 @@ class TransferDataUser {
         isScam: user.isScam == 1,
         codeUrl: user.codeUrl,
         codeId: user.codeId,
+        membership: user.membership,
       );
 
   @JsonKey(name: 'user_id')
@@ -90,6 +92,9 @@ class TransferDataUser {
   @JsonKey(name: 'code_id')
   final String? codeId;
 
+  @JsonKey(name: 'membership')
+  final Membership? membership;
+
   Map<String, dynamic> toJson() => _$TransferDataUserToJson(this);
 
   db.User toDbUser() => db.User(
@@ -108,6 +113,7 @@ class TransferDataUser {
         isScam: isScam == true ? 1 : 0,
         codeUrl: codeUrl,
         codeId: codeId,
+        membership: membership,
       );
 
   @override

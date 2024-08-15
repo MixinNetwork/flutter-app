@@ -2408,6 +2408,14 @@ class Users extends Table with TableInfo<Users, User> {
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<UserRelationship?>(Users.$converterrelationship);
+  static const VerificationMeta _membershipMeta =
+      const VerificationMeta('membership');
+  late final GeneratedColumnWithTypeConverter<Membership?, String> membership =
+      GeneratedColumn<String>('membership', aliasedName, true,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<Membership?>(Users.$convertermembership);
   static const VerificationMeta _fullNameMeta =
       const VerificationMeta('fullName');
   late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
@@ -2501,6 +2509,7 @@ class Users extends Table with TableInfo<Users, User> {
         userId,
         identityNumber,
         relationship,
+        membership,
         fullName,
         avatarUrl,
         phone,
@@ -2540,6 +2549,7 @@ class Users extends Table with TableInfo<Users, User> {
       context.missing(_identityNumberMeta);
     }
     context.handle(_relationshipMeta, const VerificationResult.success());
+    context.handle(_membershipMeta, const VerificationResult.success());
     if (data.containsKey('full_name')) {
       context.handle(_fullNameMeta,
           fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
@@ -2606,6 +2616,9 @@ class Users extends Table with TableInfo<Users, User> {
       relationship: Users.$converterrelationship.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}relationship'])),
+      membership: Users.$convertermembership.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}membership'])),
       fullName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}full_name']),
       avatarUrl: attachedDatabase.typeMapping
@@ -2642,6 +2655,8 @@ class Users extends Table with TableInfo<Users, User> {
 
   static TypeConverter<UserRelationship?, String?> $converterrelationship =
       const UserRelationshipConverter();
+  static TypeConverter<Membership?, String?> $convertermembership =
+      const MembershipConverter();
   static TypeConverter<DateTime, int> $convertercreatedAt =
       const MillisDateConverter();
   static TypeConverter<DateTime?, int?> $convertercreatedAtn =
@@ -2660,6 +2675,7 @@ class User extends DataClass implements Insertable<User> {
   final String userId;
   final String identityNumber;
   final UserRelationship? relationship;
+  final Membership? membership;
   final String? fullName;
   final String? avatarUrl;
   final String? phone;
@@ -2677,6 +2693,7 @@ class User extends DataClass implements Insertable<User> {
       {required this.userId,
       required this.identityNumber,
       this.relationship,
+      this.membership,
       this.fullName,
       this.avatarUrl,
       this.phone,
@@ -2698,6 +2715,10 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || relationship != null) {
       map['relationship'] =
           Variable<String>(Users.$converterrelationship.toSql(relationship));
+    }
+    if (!nullToAbsent || membership != null) {
+      map['membership'] =
+          Variable<String>(Users.$convertermembership.toSql(membership));
     }
     if (!nullToAbsent || fullName != null) {
       map['full_name'] = Variable<String>(fullName);
@@ -2750,6 +2771,9 @@ class User extends DataClass implements Insertable<User> {
       relationship: relationship == null && nullToAbsent
           ? const Value.absent()
           : Value(relationship),
+      membership: membership == null && nullToAbsent
+          ? const Value.absent()
+          : Value(membership),
       fullName: fullName == null && nullToAbsent
           ? const Value.absent()
           : Value(fullName),
@@ -2795,6 +2819,7 @@ class User extends DataClass implements Insertable<User> {
       identityNumber: serializer.fromJson<String>(json['identity_number']),
       relationship:
           serializer.fromJson<UserRelationship?>(json['relationship']),
+      membership: serializer.fromJson<Membership?>(json['membership']),
       fullName: serializer.fromJson<String?>(json['full_name']),
       avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
       phone: serializer.fromJson<String?>(json['phone']),
@@ -2817,6 +2842,7 @@ class User extends DataClass implements Insertable<User> {
       'user_id': serializer.toJson<String>(userId),
       'identity_number': serializer.toJson<String>(identityNumber),
       'relationship': serializer.toJson<UserRelationship?>(relationship),
+      'membership': serializer.toJson<Membership?>(membership),
       'full_name': serializer.toJson<String?>(fullName),
       'avatar_url': serializer.toJson<String?>(avatarUrl),
       'phone': serializer.toJson<String?>(phone),
@@ -2837,6 +2863,7 @@ class User extends DataClass implements Insertable<User> {
           {String? userId,
           String? identityNumber,
           Value<UserRelationship?> relationship = const Value.absent(),
+          Value<Membership?> membership = const Value.absent(),
           Value<String?> fullName = const Value.absent(),
           Value<String?> avatarUrl = const Value.absent(),
           Value<String?> phone = const Value.absent(),
@@ -2855,6 +2882,7 @@ class User extends DataClass implements Insertable<User> {
         identityNumber: identityNumber ?? this.identityNumber,
         relationship:
             relationship.present ? relationship.value : this.relationship,
+        membership: membership.present ? membership.value : this.membership,
         fullName: fullName.present ? fullName.value : this.fullName,
         avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
         phone: phone.present ? phone.value : this.phone,
@@ -2879,6 +2907,8 @@ class User extends DataClass implements Insertable<User> {
       relationship: data.relationship.present
           ? data.relationship.value
           : this.relationship,
+      membership:
+          data.membership.present ? data.membership.value : this.membership,
       fullName: data.fullName.present ? data.fullName.value : this.fullName,
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       phone: data.phone.present ? data.phone.value : this.phone,
@@ -2904,6 +2934,7 @@ class User extends DataClass implements Insertable<User> {
           ..write('userId: $userId, ')
           ..write('identityNumber: $identityNumber, ')
           ..write('relationship: $relationship, ')
+          ..write('membership: $membership, ')
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('phone: $phone, ')
@@ -2926,6 +2957,7 @@ class User extends DataClass implements Insertable<User> {
       userId,
       identityNumber,
       relationship,
+      membership,
       fullName,
       avatarUrl,
       phone,
@@ -2946,6 +2978,7 @@ class User extends DataClass implements Insertable<User> {
           other.userId == this.userId &&
           other.identityNumber == this.identityNumber &&
           other.relationship == this.relationship &&
+          other.membership == this.membership &&
           other.fullName == this.fullName &&
           other.avatarUrl == this.avatarUrl &&
           other.phone == this.phone &&
@@ -2965,6 +2998,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> userId;
   final Value<String> identityNumber;
   final Value<UserRelationship?> relationship;
+  final Value<Membership?> membership;
   final Value<String?> fullName;
   final Value<String?> avatarUrl;
   final Value<String?> phone;
@@ -2983,6 +3017,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.userId = const Value.absent(),
     this.identityNumber = const Value.absent(),
     this.relationship = const Value.absent(),
+    this.membership = const Value.absent(),
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -3002,6 +3037,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String userId,
     required String identityNumber,
     this.relationship = const Value.absent(),
+    this.membership = const Value.absent(),
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -3022,6 +3058,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? userId,
     Expression<String>? identityNumber,
     Expression<String>? relationship,
+    Expression<String>? membership,
     Expression<String>? fullName,
     Expression<String>? avatarUrl,
     Expression<String>? phone,
@@ -3041,6 +3078,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (userId != null) 'user_id': userId,
       if (identityNumber != null) 'identity_number': identityNumber,
       if (relationship != null) 'relationship': relationship,
+      if (membership != null) 'membership': membership,
       if (fullName != null) 'full_name': fullName,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (phone != null) 'phone': phone,
@@ -3062,6 +3100,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       {Value<String>? userId,
       Value<String>? identityNumber,
       Value<UserRelationship?>? relationship,
+      Value<Membership?>? membership,
       Value<String?>? fullName,
       Value<String?>? avatarUrl,
       Value<String?>? phone,
@@ -3080,6 +3119,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       userId: userId ?? this.userId,
       identityNumber: identityNumber ?? this.identityNumber,
       relationship: relationship ?? this.relationship,
+      membership: membership ?? this.membership,
       fullName: fullName ?? this.fullName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       phone: phone ?? this.phone,
@@ -3109,6 +3149,10 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (relationship.present) {
       map['relationship'] = Variable<String>(
           Users.$converterrelationship.toSql(relationship.value));
+    }
+    if (membership.present) {
+      map['membership'] =
+          Variable<String>(Users.$convertermembership.toSql(membership.value));
     }
     if (fullName.present) {
       map['full_name'] = Variable<String>(fullName.value);
@@ -3163,6 +3207,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('userId: $userId, ')
           ..write('identityNumber: $identityNumber, ')
           ..write('relationship: $relationship, ')
+          ..write('membership: $membership, ')
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('phone: $phone, ')
@@ -17556,6 +17601,7 @@ typedef $UsersCreateCompanionBuilder = UsersCompanion Function({
   required String userId,
   required String identityNumber,
   Value<UserRelationship?> relationship,
+  Value<Membership?> membership,
   Value<String?> fullName,
   Value<String?> avatarUrl,
   Value<String?> phone,
@@ -17575,6 +17621,7 @@ typedef $UsersUpdateCompanionBuilder = UsersCompanion Function({
   Value<String> userId,
   Value<String> identityNumber,
   Value<UserRelationship?> relationship,
+  Value<Membership?> membership,
   Value<String?> fullName,
   Value<String?> avatarUrl,
   Value<String?> phone,
@@ -17609,6 +17656,7 @@ class $UsersTableManager extends RootTableManager<
             Value<String> userId = const Value.absent(),
             Value<String> identityNumber = const Value.absent(),
             Value<UserRelationship?> relationship = const Value.absent(),
+            Value<Membership?> membership = const Value.absent(),
             Value<String?> fullName = const Value.absent(),
             Value<String?> avatarUrl = const Value.absent(),
             Value<String?> phone = const Value.absent(),
@@ -17628,6 +17676,7 @@ class $UsersTableManager extends RootTableManager<
             userId: userId,
             identityNumber: identityNumber,
             relationship: relationship,
+            membership: membership,
             fullName: fullName,
             avatarUrl: avatarUrl,
             phone: phone,
@@ -17647,6 +17696,7 @@ class $UsersTableManager extends RootTableManager<
             required String userId,
             required String identityNumber,
             Value<UserRelationship?> relationship = const Value.absent(),
+            Value<Membership?> membership = const Value.absent(),
             Value<String?> fullName = const Value.absent(),
             Value<String?> avatarUrl = const Value.absent(),
             Value<String?> phone = const Value.absent(),
@@ -17666,6 +17716,7 @@ class $UsersTableManager extends RootTableManager<
             userId: userId,
             identityNumber: identityNumber,
             relationship: relationship,
+            membership: membership,
             fullName: fullName,
             avatarUrl: avatarUrl,
             phone: phone,
@@ -17699,6 +17750,13 @@ class $UsersFilterComposer extends FilterComposer<_$MixinDatabase, Users> {
   ColumnWithTypeConverterFilters<UserRelationship?, UserRelationship, String>
       get relationship => $state.composableBuilder(
           column: $state.table.relationship,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<Membership?, Membership, String>
+      get membership => $state.composableBuilder(
+          column: $state.table.membership,
           builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
               column,
               joinBuilders: joinBuilders));
@@ -17787,6 +17845,11 @@ class $UsersOrderingComposer extends OrderingComposer<_$MixinDatabase, Users> {
 
   ColumnOrderings<String> get relationship => $state.composableBuilder(
       column: $state.table.relationship,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get membership => $state.composableBuilder(
+      column: $state.table.membership,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 

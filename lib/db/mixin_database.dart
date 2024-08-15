@@ -9,6 +9,7 @@ import '../enum/property_group.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
+import 'converter/membership_converter.dart';
 import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
@@ -101,7 +102,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 26;
+  int get schemaVersion => 27;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -250,6 +251,9 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createIndex(indexTokensCollectionHash);
             await m.createTable(inscriptionCollections);
             await m.createTable(inscriptionItems);
+          }
+          if (from <= 26) {
+            await _addColumnIfNotExists(m, users, users.membership);
           }
         },
         beforeOpen: (details) async {

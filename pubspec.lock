@@ -264,7 +264,7 @@ packages:
     source: hosted
     version: "4.10.0"
   collection:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: collection
       sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
@@ -1291,10 +1291,9 @@ packages:
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
-      name: mixin_bot_sdk_dart
-      sha256: f8620f631e5af819eeb8fc3fa3f2053c67b7e8ed89923d8da13b569ec03b0799
-      url: "https://pub.dev"
-    source: hosted
+      path: "../mixin_bot_sdk_dart"
+      relative: true
+    source: path
     version: "1.2.4"
   mixin_logger:
     dependency: "direct main"
