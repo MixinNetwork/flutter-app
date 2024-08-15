@@ -326,14 +326,13 @@ class SearchList extends HookConsumerWidget {
                     child: SearchItem(
                       avatar: ConversationAvatarWidget(
                         conversationId: conversation.conversationId,
-                        fullName: conversation.validName,
-                        groupIconUrl: conversation.groupIconUrl,
+                        fullName: conversation.name,
                         avatarUrl: conversation.avatarUrl,
                         category: conversation.category,
                         size: ConversationPage.conversationItemAvatarSize,
                         userId: conversation.ownerId,
                       ),
-                      name: conversation.validName,
+                      name: conversation.name ?? '',
                       description: description,
                       trailing: BadgesWidget(
                         verified: conversation.isVerified,
@@ -743,24 +742,15 @@ class SearchMessageItem extends HookConsumerWidget {
           )
         : ConversationAvatarWidget(
             conversationId: message.conversationId,
-            fullName: conversationValidName(
-              message.groupName,
-              message.ownerFullName,
-            ),
-            groupIconUrl: message.groupIconUrl,
-            avatarUrl: message.ownerAvatarUrl,
+            fullName: message.name,
+            avatarUrl: message.avatarUrl,
             category: message.category,
             size: ConversationPage.conversationItemAvatarSize,
             userId: message.ownerId,
           );
     return SearchItem(
       avatar: avatar,
-      name: showSender
-          ? message.senderFullName ?? ''
-          : conversationValidName(
-              message.groupName,
-              message.ownerFullName,
-            ),
+      name: showSender ? message.senderFullName ?? '' : message.name ?? '',
       trailing: BadgesWidget(
         verified: message.verified,
         isBot: message.appId != null,

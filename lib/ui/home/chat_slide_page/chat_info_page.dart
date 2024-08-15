@@ -305,8 +305,7 @@ class ChatInfoPage extends HookConsumerWidget {
                       description: muting
                           ? Text(
                               DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                  conversationState
-                                      .conversation!.validMuteUntil!
+                                  conversationState.conversation!.muteUntil!
                                       .toLocal()),
                               style: TextStyle(
                                 color: context.theme.secondaryText,
@@ -639,7 +638,7 @@ class _AddToContactsButton extends StatelessWidget {
                   ),
                   onPressed: () {
                     final username = conversation.user?.fullName ??
-                        conversation.conversation?.validName;
+                        conversation.conversation?.name;
                     assert(username != null,
                         'ContactsAdd: username should not be null.');
                     assert(conversation.isGroup != true,

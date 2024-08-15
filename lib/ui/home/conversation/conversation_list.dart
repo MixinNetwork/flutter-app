@@ -190,7 +190,7 @@ class ConversationItemWidget extends StatelessWidget {
                                   children: [
                                     Flexible(
                                       child: CustomText(
-                                        conversation.validName,
+                                        conversation.name ?? '',
                                         style: TextStyle(
                                           color: context.theme.text,
                                           fontSize: 16,
@@ -378,7 +378,7 @@ class _MessageContent extends HookConsumerWidget {
         conversation.relationship,
         conversation.participantFullName,
         conversation.senderFullName,
-        conversation.groupName,
+        conversation.name,
         conversation.draft,
         hasDraft,
       ],

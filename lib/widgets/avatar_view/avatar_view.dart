@@ -20,7 +20,6 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     this.conversationId,
     this.userId,
     this.fullName,
-    this.groupIconUrl,
     this.avatarUrl,
     this.category,
   });
@@ -29,7 +28,6 @@ class ConversationAvatarWidget extends HookConsumerWidget {
   final String? userId;
   final String? conversationId;
   final String? fullName;
-  final String? groupIconUrl;
   final String? avatarUrl;
   final ConversationCategory? category;
   final double size;
@@ -39,7 +37,6 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     final _conversationId = conversation?.conversationId ?? conversationId;
     assert(_conversationId != null);
     final _name = conversation?.name ?? fullName;
-    final _groupIconUrl = conversation?.groupIconUrl ?? groupIconUrl;
     final _avatarUrl = conversation?.avatarUrl ?? avatarUrl;
     final _category = conversation?.category ?? category;
     assert(_category != null);
@@ -73,7 +70,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
             ? AvatarWidget(
                 userId: _userId,
                 name: _name,
-                avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
+                avatarUrl: _avatarUrl ?? '',
                 size: size)
             : AvatarPuzzlesWidget(list, size),
       ),

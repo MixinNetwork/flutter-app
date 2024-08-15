@@ -70,7 +70,7 @@ class ConversationState extends Equatable {
   bool? get isGroup =>
       conversation?.isGroupConversation ?? (user != null ? false : null);
 
-  String? get name => conversation?.validName ?? user?.fullName;
+  String? get name => conversation?.name ?? user?.fullName;
 
   String? get identityNumber =>
       conversation?.ownerIdentityNumber ?? user?.identityNumber;
