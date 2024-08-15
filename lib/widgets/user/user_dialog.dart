@@ -14,7 +14,7 @@ import '../../utils/logger.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
-import '../conversation/verified_or_bot_widget.dart';
+import '../conversation/badges_widget.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import '../menu.dart';
@@ -195,9 +195,10 @@ class _UserProfileBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                VerifiedOrBotWidget(
+                BadgesWidget(
                   verified: user.isVerified,
                   isBot: !anonymous && user.appId != null,
+                  membership: user.membership,
                 )
               ],
             ),

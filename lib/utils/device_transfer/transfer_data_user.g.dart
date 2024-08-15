@@ -28,6 +28,9 @@ TransferDataUser _$TransferDataUserFromJson(Map<String, dynamic> json) =>
       isScam: json['is_scam'] as bool?,
       codeUrl: json['code_url'] as String?,
       codeId: json['code_id'] as String?,
+      membership: json['membership'] == null
+          ? null
+          : Membership.fromJson(json['membership'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TransferDataUserToJson(TransferDataUser instance) =>
@@ -48,4 +51,5 @@ Map<String, dynamic> _$TransferDataUserToJson(TransferDataUser instance) =>
       'is_scam': instance.isScam,
       'code_url': instance.codeUrl,
       'code_id': instance.codeId,
+      'membership': instance.membership?.toJson(),
     };

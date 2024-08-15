@@ -9,13 +9,27 @@ ORDER BY participant.created_at ASC
 LIMIT 4;
 
 groupParticipantsByConversationId AS ParticipantUser:
-SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt,
-u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName,
-u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil,
-u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam
-FROM participants p, users u
+SELECT p.conversation_id AS conversationId,
+    p.role AS role,
+    p.created_at AS createdAt,
+    u.user_id AS userId,
+    u.identity_number AS identityNumber,
+    u.relationship AS relationship,
+    u.biography AS biography,
+    u.full_name AS fullName,
+    u.avatar_url AS avatarUrl,
+    u.phone AS phone,
+    u.is_verified AS isVerified,
+    u.created_at AS userCreatedAt,
+    u.mute_until AS muteUntil,
+    u.has_pin AS hasPin,
+    u.app_id AS appId,
+    u.is_scam AS isScam,
+    u.membership AS membership
+FROM participants p,
+    users u
 WHERE p.conversation_id = :conversationId
-AND p.user_id = u.user_id
+    AND p.user_id = u.user_id
 ORDER BY p.created_at DESC;
 
 userIdByIdentityNumber:

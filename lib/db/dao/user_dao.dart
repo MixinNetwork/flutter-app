@@ -27,6 +27,7 @@ extension UserExtension on sdk.User {
         codeId: codeId,
         codeUrl: codeUrl,
         isDeactivated: isDeactivated,
+        membership: membership,
       );
 }
 

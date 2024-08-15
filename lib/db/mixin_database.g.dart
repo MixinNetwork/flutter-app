@@ -2408,6 +2408,14 @@ class Users extends Table with TableInfo<Users, User> {
               requiredDuringInsert: false,
               $customConstraints: '')
           .withConverter<UserRelationship?>(Users.$converterrelationship);
+  static const VerificationMeta _membershipMeta =
+      const VerificationMeta('membership');
+  late final GeneratedColumnWithTypeConverter<Membership?, String> membership =
+      GeneratedColumn<String>('membership', aliasedName, true,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<Membership?>(Users.$convertermembership);
   static const VerificationMeta _fullNameMeta =
       const VerificationMeta('fullName');
   late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
@@ -2501,6 +2509,7 @@ class Users extends Table with TableInfo<Users, User> {
         userId,
         identityNumber,
         relationship,
+        membership,
         fullName,
         avatarUrl,
         phone,
@@ -2540,6 +2549,7 @@ class Users extends Table with TableInfo<Users, User> {
       context.missing(_identityNumberMeta);
     }
     context.handle(_relationshipMeta, const VerificationResult.success());
+    context.handle(_membershipMeta, const VerificationResult.success());
     if (data.containsKey('full_name')) {
       context.handle(_fullNameMeta,
           fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
@@ -2606,6 +2616,9 @@ class Users extends Table with TableInfo<Users, User> {
       relationship: Users.$converterrelationship.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}relationship'])),
+      membership: Users.$convertermembership.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}membership'])),
       fullName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}full_name']),
       avatarUrl: attachedDatabase.typeMapping
@@ -2642,6 +2655,8 @@ class Users extends Table with TableInfo<Users, User> {
 
   static TypeConverter<UserRelationship?, String?> $converterrelationship =
       const UserRelationshipConverter();
+  static TypeConverter<Membership?, String?> $convertermembership =
+      const MembershipConverter();
   static TypeConverter<DateTime, int> $convertercreatedAt =
       const MillisDateConverter();
   static TypeConverter<DateTime?, int?> $convertercreatedAtn =
@@ -2660,6 +2675,7 @@ class User extends DataClass implements Insertable<User> {
   final String userId;
   final String identityNumber;
   final UserRelationship? relationship;
+  final Membership? membership;
   final String? fullName;
   final String? avatarUrl;
   final String? phone;
@@ -2677,6 +2693,7 @@ class User extends DataClass implements Insertable<User> {
       {required this.userId,
       required this.identityNumber,
       this.relationship,
+      this.membership,
       this.fullName,
       this.avatarUrl,
       this.phone,
@@ -2698,6 +2715,10 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || relationship != null) {
       map['relationship'] =
           Variable<String>(Users.$converterrelationship.toSql(relationship));
+    }
+    if (!nullToAbsent || membership != null) {
+      map['membership'] =
+          Variable<String>(Users.$convertermembership.toSql(membership));
     }
     if (!nullToAbsent || fullName != null) {
       map['full_name'] = Variable<String>(fullName);
@@ -2750,6 +2771,9 @@ class User extends DataClass implements Insertable<User> {
       relationship: relationship == null && nullToAbsent
           ? const Value.absent()
           : Value(relationship),
+      membership: membership == null && nullToAbsent
+          ? const Value.absent()
+          : Value(membership),
       fullName: fullName == null && nullToAbsent
           ? const Value.absent()
           : Value(fullName),
@@ -2795,6 +2819,7 @@ class User extends DataClass implements Insertable<User> {
       identityNumber: serializer.fromJson<String>(json['identity_number']),
       relationship:
           serializer.fromJson<UserRelationship?>(json['relationship']),
+      membership: serializer.fromJson<Membership?>(json['membership']),
       fullName: serializer.fromJson<String?>(json['full_name']),
       avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
       phone: serializer.fromJson<String?>(json['phone']),
@@ -2817,6 +2842,7 @@ class User extends DataClass implements Insertable<User> {
       'user_id': serializer.toJson<String>(userId),
       'identity_number': serializer.toJson<String>(identityNumber),
       'relationship': serializer.toJson<UserRelationship?>(relationship),
+      'membership': serializer.toJson<Membership?>(membership),
       'full_name': serializer.toJson<String?>(fullName),
       'avatar_url': serializer.toJson<String?>(avatarUrl),
       'phone': serializer.toJson<String?>(phone),
@@ -2837,6 +2863,7 @@ class User extends DataClass implements Insertable<User> {
           {String? userId,
           String? identityNumber,
           Value<UserRelationship?> relationship = const Value.absent(),
+          Value<Membership?> membership = const Value.absent(),
           Value<String?> fullName = const Value.absent(),
           Value<String?> avatarUrl = const Value.absent(),
           Value<String?> phone = const Value.absent(),
@@ -2855,6 +2882,7 @@ class User extends DataClass implements Insertable<User> {
         identityNumber: identityNumber ?? this.identityNumber,
         relationship:
             relationship.present ? relationship.value : this.relationship,
+        membership: membership.present ? membership.value : this.membership,
         fullName: fullName.present ? fullName.value : this.fullName,
         avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
         phone: phone.present ? phone.value : this.phone,
@@ -2879,6 +2907,8 @@ class User extends DataClass implements Insertable<User> {
       relationship: data.relationship.present
           ? data.relationship.value
           : this.relationship,
+      membership:
+          data.membership.present ? data.membership.value : this.membership,
       fullName: data.fullName.present ? data.fullName.value : this.fullName,
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       phone: data.phone.present ? data.phone.value : this.phone,
@@ -2904,6 +2934,7 @@ class User extends DataClass implements Insertable<User> {
           ..write('userId: $userId, ')
           ..write('identityNumber: $identityNumber, ')
           ..write('relationship: $relationship, ')
+          ..write('membership: $membership, ')
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('phone: $phone, ')
@@ -2926,6 +2957,7 @@ class User extends DataClass implements Insertable<User> {
       userId,
       identityNumber,
       relationship,
+      membership,
       fullName,
       avatarUrl,
       phone,
@@ -2946,6 +2978,7 @@ class User extends DataClass implements Insertable<User> {
           other.userId == this.userId &&
           other.identityNumber == this.identityNumber &&
           other.relationship == this.relationship &&
+          other.membership == this.membership &&
           other.fullName == this.fullName &&
           other.avatarUrl == this.avatarUrl &&
           other.phone == this.phone &&
@@ -2965,6 +2998,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> userId;
   final Value<String> identityNumber;
   final Value<UserRelationship?> relationship;
+  final Value<Membership?> membership;
   final Value<String?> fullName;
   final Value<String?> avatarUrl;
   final Value<String?> phone;
@@ -2983,6 +3017,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.userId = const Value.absent(),
     this.identityNumber = const Value.absent(),
     this.relationship = const Value.absent(),
+    this.membership = const Value.absent(),
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -3002,6 +3037,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String userId,
     required String identityNumber,
     this.relationship = const Value.absent(),
+    this.membership = const Value.absent(),
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -3022,6 +3058,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? userId,
     Expression<String>? identityNumber,
     Expression<String>? relationship,
+    Expression<String>? membership,
     Expression<String>? fullName,
     Expression<String>? avatarUrl,
     Expression<String>? phone,
@@ -3041,6 +3078,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (userId != null) 'user_id': userId,
       if (identityNumber != null) 'identity_number': identityNumber,
       if (relationship != null) 'relationship': relationship,
+      if (membership != null) 'membership': membership,
       if (fullName != null) 'full_name': fullName,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (phone != null) 'phone': phone,
@@ -3062,6 +3100,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       {Value<String>? userId,
       Value<String>? identityNumber,
       Value<UserRelationship?>? relationship,
+      Value<Membership?>? membership,
       Value<String?>? fullName,
       Value<String?>? avatarUrl,
       Value<String?>? phone,
@@ -3080,6 +3119,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       userId: userId ?? this.userId,
       identityNumber: identityNumber ?? this.identityNumber,
       relationship: relationship ?? this.relationship,
+      membership: membership ?? this.membership,
       fullName: fullName ?? this.fullName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       phone: phone ?? this.phone,
@@ -3109,6 +3149,10 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (relationship.present) {
       map['relationship'] = Variable<String>(
           Users.$converterrelationship.toSql(relationship.value));
+    }
+    if (membership.present) {
+      map['membership'] =
+          Variable<String>(Users.$convertermembership.toSql(membership.value));
     }
     if (fullName.present) {
       map['full_name'] = Variable<String>(fullName.value);
@@ -3163,6 +3207,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('userId: $userId, ')
           ..write('identityNumber: $identityNumber, ')
           ..write('relationship: $relationship, ')
+          ..write('membership: $membership, ')
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('phone: $phone, ')
@@ -16358,7 +16403,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -16414,12 +16459,16 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           relationship: Users.$converterrelationship
               .fromSql(row.readNullable<String>('relationship')),
           avatarUrl: row.readNullable<String>('avatarUrl'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
           sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
           sharedUserIdentityNumber:
               row.readNullable<String>('sharedUserIdentityNumber'),
           sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
           sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
           sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+          sharedUserMembership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('sharedUserMembership')),
           conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
           conversionCategory: Conversations.$convertercategory
               .fromSql(row.readNullable<String>('conversionCategory')),
@@ -16494,7 +16543,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           ...generatedorder.introducedVariables,
@@ -16549,12 +16598,16 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           relationship: Users.$converterrelationship
               .fromSql(row.readNullable<String>('relationship')),
           avatarUrl: row.readNullable<String>('avatarUrl'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
           sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
           sharedUserIdentityNumber:
               row.readNullable<String>('sharedUserIdentityNumber'),
           sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
           sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
           sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+          sharedUserMembership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('sharedUserMembership')),
           conversationOwnerId: row.readNullable<String>('conversationOwnerId'),
           conversionCategory: Conversations.$convertercategory
               .fromSql(row.readNullable<String>('conversionCategory')),
@@ -17556,6 +17609,7 @@ typedef $UsersCreateCompanionBuilder = UsersCompanion Function({
   required String userId,
   required String identityNumber,
   Value<UserRelationship?> relationship,
+  Value<Membership?> membership,
   Value<String?> fullName,
   Value<String?> avatarUrl,
   Value<String?> phone,
@@ -17575,6 +17629,7 @@ typedef $UsersUpdateCompanionBuilder = UsersCompanion Function({
   Value<String> userId,
   Value<String> identityNumber,
   Value<UserRelationship?> relationship,
+  Value<Membership?> membership,
   Value<String?> fullName,
   Value<String?> avatarUrl,
   Value<String?> phone,
@@ -17609,6 +17664,7 @@ class $UsersTableManager extends RootTableManager<
             Value<String> userId = const Value.absent(),
             Value<String> identityNumber = const Value.absent(),
             Value<UserRelationship?> relationship = const Value.absent(),
+            Value<Membership?> membership = const Value.absent(),
             Value<String?> fullName = const Value.absent(),
             Value<String?> avatarUrl = const Value.absent(),
             Value<String?> phone = const Value.absent(),
@@ -17628,6 +17684,7 @@ class $UsersTableManager extends RootTableManager<
             userId: userId,
             identityNumber: identityNumber,
             relationship: relationship,
+            membership: membership,
             fullName: fullName,
             avatarUrl: avatarUrl,
             phone: phone,
@@ -17647,6 +17704,7 @@ class $UsersTableManager extends RootTableManager<
             required String userId,
             required String identityNumber,
             Value<UserRelationship?> relationship = const Value.absent(),
+            Value<Membership?> membership = const Value.absent(),
             Value<String?> fullName = const Value.absent(),
             Value<String?> avatarUrl = const Value.absent(),
             Value<String?> phone = const Value.absent(),
@@ -17666,6 +17724,7 @@ class $UsersTableManager extends RootTableManager<
             userId: userId,
             identityNumber: identityNumber,
             relationship: relationship,
+            membership: membership,
             fullName: fullName,
             avatarUrl: avatarUrl,
             phone: phone,
@@ -17699,6 +17758,13 @@ class $UsersFilterComposer extends FilterComposer<_$MixinDatabase, Users> {
   ColumnWithTypeConverterFilters<UserRelationship?, UserRelationship, String>
       get relationship => $state.composableBuilder(
           column: $state.table.relationship,
+          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
+              column,
+              joinBuilders: joinBuilders));
+
+  ColumnWithTypeConverterFilters<Membership?, Membership, String>
+      get membership => $state.composableBuilder(
+          column: $state.table.membership,
           builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
               column,
               joinBuilders: joinBuilders));
@@ -17787,6 +17853,11 @@ class $UsersOrderingComposer extends OrderingComposer<_$MixinDatabase, Users> {
 
   ColumnOrderings<String> get relationship => $state.composableBuilder(
       column: $state.table.relationship,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get membership => $state.composableBuilder(
+      column: $state.table.membership,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
@@ -22953,11 +23024,13 @@ class MessageItem {
   final String? appId;
   final UserRelationship? relationship;
   final String? avatarUrl;
+  final Membership? membership;
   final String? sharedUserFullName;
   final String? sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
   final bool? sharedUserIsVerified;
   final String? sharedUserAppId;
+  final Membership? sharedUserMembership;
   final String? conversationOwnerId;
   final ConversationCategory? conversionCategory;
   final String? groupName;
@@ -23013,11 +23086,13 @@ class MessageItem {
     this.appId,
     this.relationship,
     this.avatarUrl,
+    this.membership,
     this.sharedUserFullName,
     this.sharedUserIdentityNumber,
     this.sharedUserAvatarUrl,
     this.sharedUserIsVerified,
     this.sharedUserAppId,
+    this.sharedUserMembership,
     this.conversationOwnerId,
     this.conversionCategory,
     this.groupName,
@@ -23075,11 +23150,13 @@ class MessageItem {
         appId,
         relationship,
         avatarUrl,
+        membership,
         sharedUserFullName,
         sharedUserIdentityNumber,
         sharedUserAvatarUrl,
         sharedUserIsVerified,
         sharedUserAppId,
+        sharedUserMembership,
         conversationOwnerId,
         conversionCategory,
         groupName,
@@ -23139,11 +23216,13 @@ class MessageItem {
           other.appId == this.appId &&
           other.relationship == this.relationship &&
           other.avatarUrl == this.avatarUrl &&
+          other.membership == this.membership &&
           other.sharedUserFullName == this.sharedUserFullName &&
           other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
           other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
           other.sharedUserIsVerified == this.sharedUserIsVerified &&
           other.sharedUserAppId == this.sharedUserAppId &&
+          other.sharedUserMembership == this.sharedUserMembership &&
           other.conversationOwnerId == this.conversationOwnerId &&
           other.conversionCategory == this.conversionCategory &&
           other.groupName == this.groupName &&
@@ -23201,11 +23280,13 @@ class MessageItem {
           ..write('appId: $appId, ')
           ..write('relationship: $relationship, ')
           ..write('avatarUrl: $avatarUrl, ')
+          ..write('membership: $membership, ')
           ..write('sharedUserFullName: $sharedUserFullName, ')
           ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
           ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
           ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
           ..write('sharedUserAppId: $sharedUserAppId, ')
+          ..write('sharedUserMembership: $sharedUserMembership, ')
           ..write('conversationOwnerId: $conversationOwnerId, ')
           ..write('conversionCategory: $conversionCategory, ')
           ..write('groupName: $groupName, ')

@@ -11,7 +11,7 @@ import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/buttons.dart';
-import '../../../widgets/conversation/verified_or_bot_widget.dart';
+import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
@@ -268,9 +268,10 @@ class ConversationName extends StatelessWidget {
               ),
             ),
           ),
-          VerifiedOrBotWidget(
+          BadgesWidget(
             verified: conversationState.isVerified,
             isBot: conversationState.isBot ?? false,
+            membership: conversationState.membership,
           ),
         ],
       );

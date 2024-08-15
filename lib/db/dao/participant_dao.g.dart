@@ -59,7 +59,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
   Selectable<ParticipantUser> groupParticipantsByConversationId(
       String conversationId) {
     return customSelect(
-        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
+        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam, u.membership AS membership FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
         variables: [
           Variable<String>(conversationId)
         ],
@@ -89,6 +89,8 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
           hasPin: row.readNullable<int>('hasPin'),
           appId: row.readNullable<String>('appId'),
           isScam: row.readNullable<int>('isScam'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
         ));
   }
 
@@ -155,6 +157,7 @@ class ParticipantUser {
   final int? hasPin;
   final String? appId;
   final int? isScam;
+  final Membership? membership;
   ParticipantUser({
     required this.conversationId,
     this.role,
@@ -172,6 +175,7 @@ class ParticipantUser {
     this.hasPin,
     this.appId,
     this.isScam,
+    this.membership,
   });
   @override
   int get hashCode => Object.hash(
@@ -190,7 +194,8 @@ class ParticipantUser {
       muteUntil,
       hasPin,
       appId,
-      isScam);
+      isScam,
+      membership);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -210,7 +215,8 @@ class ParticipantUser {
           other.muteUntil == this.muteUntil &&
           other.hasPin == this.hasPin &&
           other.appId == this.appId &&
-          other.isScam == this.isScam);
+          other.isScam == this.isScam &&
+          other.membership == this.membership);
   @override
   String toString() {
     return (StringBuffer('ParticipantUser(')
@@ -229,7 +235,8 @@ class ParticipantUser {
           ..write('muteUntil: $muteUntil, ')
           ..write('hasPin: $hasPin, ')
           ..write('appId: $appId, ')
-          ..write('isScam: $isScam')
+          ..write('isScam: $isScam, ')
+          ..write('membership: $membership')
           ..write(')'))
         .toString();
   }

@@ -745,8 +745,7 @@ class AccountServer {
     await database.userDao.insert(db.User(
       userId: me.userId,
       identityNumber: me.identityNumber,
-      relationship:
-          const UserRelationshipJsonConverter().fromJson(me.relationship),
+      relationship: me.relationship,
       fullName: me.fullName,
       avatarUrl: me.avatarUrl,
       phone: me.phone,
@@ -757,6 +756,7 @@ class AccountServer {
       isScam: me.isScam ? 1 : 0,
       codeId: me.codeId,
       codeUrl: me.codeUrl,
+      membership: me.membership,
     ));
     multiAuthNotifier.updateAccount(me);
   }

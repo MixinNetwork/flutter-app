@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
-import '../../conversation/verified_or_bot_widget.dart';
+import '../../conversation/badges_widget.dart';
 import '../../interactive_decorated_box.dart';
 import '../../user/user_dialog.dart';
 import '../message.dart';
@@ -29,6 +30,8 @@ class ContactMessageWidget extends HookConsumerWidget {
         useMessageConverter(converter: (state) => state.sharedUserAppId);
     final sharedUserIdentityNumber = useMessageConverter(
         converter: (state) => state.sharedUserIdentityNumber ?? '');
+    final shareUserMembership =
+        useMessageConverter(converter: (state) => state.sharedUserMembership);
 
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
@@ -38,12 +41,14 @@ class ContactMessageWidget extends HookConsumerWidget {
           sharedUserId,
         ),
         child: ContactItem(
-            avatarUrl: sharedUserAvatarUrl,
-            userId: sharedUserId,
-            fullName: sharedUserFullName,
-            isVerified: sharedUserIsVerified,
-            appId: sharedUserAppId,
-            identityNumber: sharedUserIdentityNumber),
+          avatarUrl: sharedUserAvatarUrl,
+          userId: sharedUserId,
+          fullName: sharedUserFullName,
+          isVerified: sharedUserIsVerified,
+          appId: sharedUserAppId,
+          identityNumber: sharedUserIdentityNumber,
+          membership: shareUserMembership,
+        ),
       ),
     );
   }
@@ -57,6 +62,7 @@ class ContactItem extends StatelessWidget {
     required this.isVerified,
     required this.appId,
     required this.identityNumber,
+    required this.membership,
     super.key,
   });
 
@@ -66,6 +72,7 @@ class ContactItem extends StatelessWidget {
   final bool? isVerified;
   final String? appId;
   final String identityNumber;
+  final Membership? membership;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -97,9 +104,10 @@ class ContactItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    VerifiedOrBotWidget(
+                    BadgesWidget(
                       verified: isVerified,
                       isBot: appId != null,
+                      membership: membership,
                     ),
                   ],
                 ),

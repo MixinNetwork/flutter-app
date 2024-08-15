@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -19,7 +20,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
-import '../conversation/verified_or_bot_widget.dart';
+import '../conversation/badges_widget.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import '../interactive_decorated_box.dart';
@@ -392,6 +393,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               title: item.validName,
                               verified: item.ownerVerified,
                               isBot: item.isBotConversation,
+                              membership: item.membership,
                               selected: selected.any((element) =>
                                   _getConversationId(element, context) ==
                                   _getConversationId(item, context)),
@@ -416,6 +418,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               title: item.fullName ?? '',
                               verified: item.isVerified,
                               isBot: item.appId != null,
+                              membership: item.membership,
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
                                   _getConversationId(element, context) ==
@@ -440,6 +443,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               title: item.fullName!,
                               verified: item.isVerified,
                               isBot: item.appId != null,
+                              membership: item.membership,
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
                                   _getConversationId(element, context) ==
@@ -636,6 +640,7 @@ class _BaseItem extends StatelessWidget {
     required this.avatar,
     required this.verified,
     required this.isBot,
+    required this.membership,
     this.showSelector = false,
     this.selected = false,
   });
@@ -648,6 +653,7 @@ class _BaseItem extends StatelessWidget {
 
   final bool? verified;
   final bool isBot;
+  final sdk.Membership? membership;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -699,9 +705,10 @@ class _BaseItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  VerifiedOrBotWidget(
+                  BadgesWidget(
                     verified: verified,
                     isBot: isBot,
+                    membership: membership,
                   ),
                 ],
               ),

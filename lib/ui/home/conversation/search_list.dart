@@ -22,7 +22,7 @@ import '../../../utils/message_optimize.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/uri_utils.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
-import '../../../widgets/conversation/verified_or_bot_widget.dart';
+import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
@@ -222,9 +222,10 @@ class SearchList extends HookConsumerWidget {
                   ),
                   name: user.fullName ?? '?',
                   description: context.l10n.contactMixinId(user.identityNumber),
-                  trailing: VerifiedOrBotWidget(
+                  trailing: BadgesWidget(
                     verified: user.isVerified,
                     isBot: user.appId != null,
+                    membership: user.membership,
                   ),
                   keyword: keyword,
                   onTap: () async {
@@ -334,9 +335,10 @@ class SearchList extends HookConsumerWidget {
                       ),
                       name: conversation.validName,
                       description: description,
-                      trailing: VerifiedOrBotWidget(
+                      trailing: BadgesWidget(
                         verified: conversation.isVerified,
                         isBot: conversation.appId != null,
+                        membership: conversation.membership,
                       ),
                       keyword: keyword,
                       onTap: () async {
@@ -759,9 +761,10 @@ class SearchMessageItem extends HookConsumerWidget {
               message.groupName,
               message.ownerFullName,
             ),
-      trailing: VerifiedOrBotWidget(
+      trailing: BadgesWidget(
         verified: message.verified,
         isBot: message.appId != null,
+        membership: message.membership,
       ),
       nameHighlight: false,
       keyword: keyword,

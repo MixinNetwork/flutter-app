@@ -245,7 +245,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
         variables: [
           for (var $ in messageIds) Variable<String>($)
         ],
@@ -266,6 +266,8 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           mediaName: row.readNullable<String>('mediaName'),
           appId: row.readNullable<String>('appId'),
           verified: row.readNullable<bool>('verified'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
           ownerId: row.readNullable<String>('ownerId'),
           groupIconUrl: row.readNullable<String>('groupIconUrl'),
           category: Conversations.$convertercategory
@@ -310,7 +312,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedlimit.introducedVariables
@@ -334,6 +336,8 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           mediaName: row.readNullable<String>('mediaName'),
           appId: row.readNullable<String>('appId'),
           verified: row.readNullable<bool>('verified'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
           ownerId: row.readNullable<String>('ownerId'),
           groupIconUrl: row.readNullable<String>('groupIconUrl'),
           category: Conversations.$convertercategory
@@ -888,6 +892,7 @@ class SearchMessageDetailItem {
   final String? mediaName;
   final String? appId;
   final bool? verified;
+  final Membership? membership;
   final String? ownerId;
   final String? groupIconUrl;
   final ConversationCategory? category;
@@ -907,6 +912,7 @@ class SearchMessageDetailItem {
     this.mediaName,
     this.appId,
     this.verified,
+    this.membership,
     this.ownerId,
     this.groupIconUrl,
     this.category,
@@ -928,6 +934,7 @@ class SearchMessageDetailItem {
       mediaName,
       appId,
       verified,
+      membership,
       ownerId,
       groupIconUrl,
       category,
@@ -950,6 +957,7 @@ class SearchMessageDetailItem {
           other.mediaName == this.mediaName &&
           other.appId == this.appId &&
           other.verified == this.verified &&
+          other.membership == this.membership &&
           other.ownerId == this.ownerId &&
           other.groupIconUrl == this.groupIconUrl &&
           other.category == this.category &&
@@ -971,6 +979,7 @@ class SearchMessageDetailItem {
           ..write('mediaName: $mediaName, ')
           ..write('appId: $appId, ')
           ..write('verified: $verified, ')
+          ..write('membership: $membership, ')
           ..write('ownerId: $ownerId, ')
           ..write('groupIconUrl: $groupIconUrl, ')
           ..write('category: $category, ')

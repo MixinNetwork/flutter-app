@@ -4,6 +4,7 @@ import '../converter/conversation_status_type_converter.dart';
 import '../converter/media_status_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
 import '../converter/user_relationship_converter.dart';
+import '../converter/membership_converter.dart';
 import '../converter/participant_role_converter.dart';
 import '../converter/millis_date_converter.dart';
 import '../converter/property_group_converter.dart';
@@ -56,7 +57,7 @@ CREATE TABLE sticker_relationships ( album_id TEXT NOT NULL, sticker_id TEXT NOT
 
 CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT NULL, asset_url TEXT NOT NULL, asset_type TEXT NOT NULL, asset_width INTEGER NOT NULL, asset_height INTEGER NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, last_use_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(sticker_id) );
 
-CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT MAPPED BY `const UserRelationshipConverter()`, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified BOOLEAN, created_at INTEGER MAPPED BY `const MillisDateConverter()`, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, code_url TEXT, code_id TEXT, is_deactivated BOOLEAN, PRIMARY KEY(user_id) );
+CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT MAPPED BY `const UserRelationshipConverter()`, membership TEXT MAPPED BY `const MembershipConverter()`, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified BOOLEAN, created_at INTEGER MAPPED BY `const MillisDateConverter()`, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, code_url TEXT, code_id TEXT, is_deactivated BOOLEAN, PRIMARY KEY(user_id) );
 
 CREATE TABLE transcript_messages (transcript_id TEXT NOT NULL, message_id TEXT NOT NULL, user_id TEXT, user_full_name TEXT, category TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, content TEXT, media_url TEXT, media_name TEXT, media_size INTEGER, media_width INTEGER, media_height INTEGER, media_mime_type TEXT, media_duration TEXT, media_status TEXT MAPPED BY `const MediaStatusTypeConverter()`, media_waveform TEXT, thumb_image TEXT, thumb_url TEXT, media_key TEXT, media_digest TEXT, media_created_at INTEGER MAPPED BY `const MillisDateConverter()`, sticker_id TEXT, shared_user_id TEXT, mentions TEXT, quote_id TEXT, quote_content TEXT, caption TEXT, PRIMARY KEY(transcript_id, message_id));
 
