@@ -1,32 +1,44 @@
 import '../mixin.drift';
 
 _baseQuoteMessageItem AS QuoteMessageItem:
-SELECT message.message_id AS messageId, message.conversation_id AS conversationId,
+SELECT message.message_id AS messageId,
+    message.conversation_id AS conversationId,
     sender.user_id AS userId,
-    sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber,
+    sender.full_name AS userFullName,
+    sender.identity_number AS userIdentityNumber,
     sender.app_id AS appId,
     message.category AS type,
-    message.content AS content, message.created_at AS createdAt, message.status AS status,
-    message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform,
-    message.name AS mediaName, message.media_mime_type AS mediaMimeType,
+    message.content AS content,
+    message.created_at AS createdAt,
+    message.status AS status,
+    message.media_status AS mediaStatus,
+    message.media_waveform AS mediaWaveform,
+    message.name AS mediaName,
+    message.media_mime_type AS mediaMimeType,
     message.media_size AS mediaSize,
-    message.media_width AS mediaWidth, message.media_height AS mediaHeight,
-    message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
+    message.media_width AS mediaWidth,
+    message.media_height AS mediaHeight,
+    message.thumb_image AS thumbImage,
+    message.thumb_url AS thumbUrl,
+    message.media_url AS mediaUrl,
     message.media_duration AS mediaDuration,
     message.sticker_id AS stickerId,
-    sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth,
+    sticker.asset_url AS assetUrl,
+    sticker.asset_width AS assetWidth,
     sticker.asset_height AS assetHeight,
-    sticker.name AS assetName, sticker.asset_type AS assetType,
+    sticker.name AS assetName,
+    sticker.asset_type AS assetType,
     message.shared_user_id AS sharedUserId,
     shareUser.full_name AS sharedUserFullName,
     shareUser.identity_number AS sharedUserIdentityNumber,
-    shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified,
+    shareUser.avatar_url AS sharedUserAvatarUrl,
+    shareUser.is_verified AS sharedUserIsVerified,
     shareUser.app_id AS sharedUserAppId
 FROM messages message
-         INNER JOIN users sender ON message.user_id = sender.user_id
-         LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
-         LEFT JOIN users shareUser ON message.shared_user_id = shareUser.user_id
-         LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
+    INNER JOIN users sender ON message.user_id = sender.user_id
+    LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
+    LEFT JOIN users shareUser ON message.shared_user_id = shareUser.user_id
+    LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;

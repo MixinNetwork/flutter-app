@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/dao/message_dao.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -16,12 +17,14 @@ import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/provider/conversation_provider.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../ui/provider/pending_jump_message_provider.dart';
+import '../../../ui/provider/user_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../cache_image.dart';
+import '../../conversation/badges_widget.dart';
 import '../../high_light_text.dart';
 import '../../image.dart';
 import '../../sticker_page/sticker_item.dart';
@@ -34,14 +37,14 @@ import 'action_card/action_card_data.dart';
 class QuoteMessage extends HookConsumerWidget {
   const QuoteMessage({
     super.key,
-    this.content,
+    this.quoteContent,
     this.quoteMessageId,
     this.messageId,
     this.message,
     this.isTranscriptPage = false,
   });
 
-  final String? content;
+  final String? quoteContent;
   final String? quoteMessageId;
   final String? messageId;
   final MessageItem? message;
@@ -50,9 +53,9 @@ class QuoteMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final decodeMap = useMemoized(() {
-      if (content == null) return null;
-      return jsonDecode(content!);
-    }, [content]);
+      if (quoteContent == null) return null;
+      return jsonDecode(quoteContent!);
+    }, [quoteContent]);
 
     if (quoteMessageId?.isEmpty ?? true) return const SizedBox();
     var inputMode = false;
@@ -67,8 +70,50 @@ class QuoteMessage extends HookConsumerWidget {
       } else if (decodeMap != null) {
         quote = mapToQuoteMessage(decodeMap as Map<String, dynamic>);
       }
-      final type = quote?.type as String?;
-      if (content != null && (type == null || type.isIllegalMessageCategory)) {
+
+      String? type;
+      String? userId;
+      String? userFullName;
+      String? content;
+      String? thumbUrl;
+      String? mediaName;
+      String? assetUrl;
+      String? assetType;
+      String? sharedUserId;
+      String? sharedUserFullName;
+      String? sharedUserAvatarUrl;
+      String? sharedUserIdentityNumber;
+      switch (quote) {
+        case final quote when quote is QuoteMessageItem:
+          type = quote.type;
+          userId = quote.userId;
+          userFullName = quote.userFullName;
+          content = quote.content;
+          thumbUrl = quote.thumbUrl;
+          mediaName = quote.mediaName;
+          assetUrl = quote.assetUrl;
+          assetType = quote.assetType;
+          sharedUserId = quote.sharedUserId;
+          sharedUserFullName = quote.sharedUserFullName;
+          sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
+          sharedUserIdentityNumber = quote.sharedUserIdentityNumber;
+        case final quote when quote is MessageItem:
+          type = quote.type;
+          userId = quote.userId;
+          userFullName = quote.userFullName;
+          content = quote.content;
+          thumbUrl = quote.thumbUrl;
+          mediaName = quote.mediaName;
+          assetUrl = quote.assetUrl;
+          assetType = quote.assetType;
+          sharedUserId = quote.sharedUserId;
+          sharedUserFullName = quote.sharedUserFullName;
+          sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
+          sharedUserIdentityNumber = quote.sharedUserIdentityNumber;
+      }
+
+      if (quoteContent != null &&
+          (type == null || type.isIllegalMessageCategory)) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -82,15 +127,13 @@ class QuoteMessage extends HookConsumerWidget {
           onTap: () {},
         );
       }
-      final userId = quote?.userId as String?;
-      final userFullName = quote?.userFullName as String?;
       if (type.isText) {
         return HookConsumer(
           builder: (context, ref, _) {
-            final rawContent = quote.content as String;
+            final rawContent = content ?? '';
             final mentionCache = ref.read(mentionCacheProvider);
 
-            final content = useMemoizedFuture(
+            final description = useMemoizedFuture(
               () async => mentionCache.replaceMention(
                 rawContent,
                 await mentionCache.checkMentionCache({rawContent}),
@@ -104,7 +147,7 @@ class QuoteMessage extends HookConsumerWidget {
               quoteMessageId: quoteMessageId!,
               userId: userId,
               name: userFullName,
-              description: content!,
+              description: description!,
               inputMode: inputMode,
             );
           },
@@ -158,7 +201,7 @@ class QuoteMessage extends HookConsumerWidget {
           userId: userId,
           name: userFullName,
           image: CacheImage(
-            quote.thumbUrl as String,
+            thumbUrl ?? '',
             placeholder: () => placeholder,
             errorWidget: () => placeholder,
           ),
@@ -180,7 +223,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesFileSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: quote.mediaName as String? ?? context.l10n.file,
+          description: mediaName ?? context.l10n.file,
           inputMode: inputMode,
         );
       }
@@ -208,7 +251,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesFileSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: (quote.content! as String).postOptimizeMarkdown,
+          description: (content ?? '').postOptimizeMarkdown,
           inputMode: inputMode,
         );
       }
@@ -247,8 +290,8 @@ class QuoteMessage extends HookConsumerWidget {
           userId: userId,
           name: userFullName,
           image: StickerItem(
-            assetUrl: quote.assetUrl as String,
-            assetType: quote.assetType as String?,
+            assetUrl: assetUrl ?? '',
+            assetType: assetType,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
@@ -267,24 +310,24 @@ class QuoteMessage extends HookConsumerWidget {
           image: Padding(
             padding: const EdgeInsets.all(6),
             child: AvatarWidget(
-              name: quote.sharedUserFullName as String?,
-              userId: quote.sharedUserId as String?,
+              name: sharedUserFullName,
+              userId: sharedUserId,
               size: 48,
-              avatarUrl: quote.sharedUserAvatarUrl as String?,
+              avatarUrl: sharedUserAvatarUrl,
             ),
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesContactSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: quote.sharedUserIdentityNumber as String,
+          description: sharedUserIdentityNumber ?? '',
           inputMode: inputMode,
         );
       }
       if (type == MessageCategory.appCard ||
           type == MessageCategory.appButtonGroup) {
         String? description;
-        final json = jsonDecode(quote.content as String);
+        final json = jsonDecode(content ?? '');
         switch (type) {
           case MessageCategory.appButtonGroup:
             description = (json as List?)
@@ -388,7 +431,7 @@ class _QuoteImage extends HookWidget {
   }
 }
 
-class _QuoteMessageBase extends StatelessWidget {
+class _QuoteMessageBase extends HookConsumerWidget {
   const _QuoteMessageBase({
     required this.messageId,
     required this.quoteMessageId,
@@ -412,13 +455,16 @@ class _QuoteMessageBase extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
     final color = userId?.isNotEmpty == true
         ? getNameColorById(userId!)
         : context.theme.accent;
+
+    final user = userId != null ? ref.watch(userCacheProvider(userId!)) : null;
+
     return ClipRRect(
       borderRadius: inputMode
           ? BorderRadius.zero
@@ -478,15 +524,25 @@ class _QuoteMessageBase extends StatelessWidget {
                             if (name != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
-                                child: CustomText(
-                                  name!,
-                                  style: TextStyle(
-                                    fontSize:
-                                        context.messageStyle.secondaryFontSize,
-                                    color: color,
-                                    height: 1,
-                                  ),
-                                  maxLines: 1,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CustomText(
+                                      name!,
+                                      style: TextStyle(
+                                        fontSize: context
+                                            .messageStyle.secondaryFontSize,
+                                        color: color,
+                                        height: 1,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                    BadgesWidget(
+                                      verified: false,
+                                      isBot: false,
+                                      membership: user?.membership,
+                                    )
+                                  ],
                                 ),
                               ),
                             Row(

@@ -852,16 +852,27 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userIdentityNumber =
         useMessageConverter(converter: (m) => m.userIdentityNumber);
+    final membership = useMessageConverter(converter: (m) => m.membership);
 
     final messageColumn = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (userName != null && userId != null)
-          MessageName(
-            userName: userName!,
-            userId: userId!,
-            userIdentityNumber: userIdentityNumber,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: MessageName(
+                  userName: userName!,
+                  userId: userId!,
+                  userIdentityNumber: userIdentityNumber,
+                  membership: membership,
+                  isBot: false,
+                  verified: false,
+                ),
+              ),
+            ],
           ),
         CustomContextMenuWidget(
           hitTestBehavior: HitTestBehavior.translucent,
