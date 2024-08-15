@@ -1,0 +1,34 @@
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g clip-path="url(#clip0_29197_11174)">
+        <rect width="18" height="18" rx="9" fill="url(#paint0_radial_29197_11174)" />
+        <mask id="mask0_29197_11174" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="14"
+            height="14">
+            <path
+                d="M2 9C2 5.13401 5.13401 2 9 2C12.866 2 16 5.13401 16 9C16 12.866 12.866 16 9 16C5.13401 16 2 12.866 2 9Z"
+                fill="#6C85C8" />
+        </mask>
+        <g mask="url(#mask0_29197_11174)">
+            <path
+                d="M8.6454 14C11.5393 14 13.8853 11.7189 13.8853 8.90492C13.8853 6.58852 12.2956 4.63315 10.1191 4.01412C9.79818 3.92284 9.56946 4.29299 9.71774 4.58439C9.98967 5.11881 10.1425 5.72074 10.1425 6.35738C10.1425 8.56833 8.29924 10.3607 6.02545 10.3607C5.37072 10.3607 4.75169 10.212 4.20207 9.94763C3.9024 9.80345 3.52172 10.0258 3.61559 10.3379C4.25222 12.4542 6.26316 14 8.6454 14Z"
+                fill="url(#paint1_linear_29197_11174)" />
+        </g>
+    </g>
+    <defs>
+        <radialGradient id="paint0_radial_29197_11174" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+            gradientTransform="translate(9 9) rotate(90) scale(9)">
+            <stop stop-color="#7783A3" />
+            <stop offset="0.479233" stop-color="#7783A3" stop-opacity="0.628815" />
+            <stop offset="0.625781" stop-color="#7783A3" stop-opacity="0.515669" />
+            <stop offset="0.735946" stop-color="#7783A3" stop-opacity="0.416522" />
+            <stop offset="1" stop-color="#7783A3" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="paint1_linear_29197_11174" x1="8.01623" y1="13.8909" x2="8.74318" y2="4"
+            gradientUnits="userSpaceOnUse">
+            <stop stop-color="#CAD4EB" />
+            <stop offset="1" stop-color="white" />
+        </linearGradient>
+        <clipPath id="clip0_29197_11174">
+            <rect width="18" height="18" fill="white" />
+        </clipPath>
+    </defs>
+</svg>

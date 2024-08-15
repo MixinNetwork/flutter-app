@@ -81,30 +81,64 @@ ORDER  BY m.created_at DESC;
 
 
 searchMessageByIds AS SearchMessageDetailItem:
-SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName,
-    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl
-    FROM messages m
+SELECT m.message_id messageId,
+    u.user_id AS senderId,
+    u.avatar_url AS senderAvatarUrl,
+    u.full_name AS senderFullName,
+    m.status AS status,
+    m.category AS type,
+    m.content AS content,
+    m.created_at AS createdAt,
+    m.name AS mediaName,
+    u.app_id AS appId,
+    u.is_verified AS verified,
+    u.membership AS membership,
+    c.owner_id AS ownerId,
+    c.icon_url AS groupIconUrl,
+    c.category AS category,
+    c.name AS groupName,
+    c.conversation_id AS conversationId,
+    owner.full_name AS ownerFullName,
+    owner.avatar_url AS ownerAvatarUrl
+FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
     INNER JOIN users owner ON c.owner_id = owner.user_id
-    WHERE m.message_id IN :messageIds
-    ORDER BY m.created_at DESC, m.rowid DESC;
+WHERE m.message_id IN :messageIds
+ORDER BY m.created_at DESC,
+    m.rowid DESC;
 
 miniMessageByIds AS MiniMessageItem:
 SELECT conversation_id as conversationId, message_id as messageId FROM messages WHERE message_id IN :messageIds;
 
 _searchMessage AS SearchMessageDetailItem:
-SELECT m.message_id messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName,
-    m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified,
-    c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl
-    FROM messages m
+SELECT m.message_id messageId,
+    u.user_id AS senderId,
+    u.avatar_url AS senderAvatarUrl,
+    u.full_name AS senderFullName,
+    m.status AS status,
+    m.category AS type,
+    m.content AS content,
+    m.created_at AS createdAt,
+    m.name AS mediaName,
+    u.app_id AS appId,
+    u.is_verified AS verified,
+    u.membership AS membership,
+    c.owner_id AS ownerId,
+    c.icon_url AS groupIconUrl,
+    c.category AS category,
+    c.name AS groupName,
+    c.conversation_id AS conversationId,
+    owner.full_name AS ownerFullName,
+    owner.avatar_url AS ownerAvatarUrl
+FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
     INNER JOIN users owner ON c.owner_id = owner.user_id
-    WHERE $where
-    ORDER BY m.created_at DESC, m.rowid DESC
-    LIMIT $limit;
+WHERE $where
+ORDER BY m.created_at DESC,
+    m.rowid DESC
+LIMIT $limit;
 
 countMessages:
 SELECT count(1) FROM messages;

@@ -443,6 +443,17 @@ class Resources {
   /// {@macro assets_generator.assetsImagesPinArrowSvg.preview}
   static const String assetsImagesPinArrowSvg = 'assets/images/pin_arrow.svg';
 
+  /// {@macro assets_generator.assetsImagesPlanBasicSvg.preview}
+  static const String assetsImagesPlanBasicSvg = 'assets/images/plan_basic.svg';
+
+  /// {@macro assets_generator.assetsImagesPlanPremiumSvg.preview}
+  static const String assetsImagesPlanPremiumSvg =
+      'assets/images/plan_premium.svg';
+
+  /// {@macro assets_generator.assetsImagesPlanStandardSvg.preview}
+  static const String assetsImagesPlanStandardSvg =
+      'assets/images/plan_standard.svg';
+
   /// {@macro assets_generator.assetsImagesPlaySvg.preview}
   static const String assetsImagesPlaySvg = 'assets/images/play.svg';
 

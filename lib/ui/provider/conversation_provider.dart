@@ -60,6 +60,8 @@ class ConversationState extends Equatable {
   bool get isVerified =>
       conversation?.ownerVerified ?? user?.isVerified ?? false;
 
+  Membership? get membership => user?.membership ?? conversation?.membership;
+
   // note: check user information first.
   // because in bot stranger conversation. it might be conversation.isStrangerConversation == false
   bool? get isStranger =>

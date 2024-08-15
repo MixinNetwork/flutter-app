@@ -14,7 +14,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
-import '../../../widgets/conversation/verified_or_bot_widget.dart';
+import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
@@ -180,9 +180,10 @@ class _ParticipantTile extends HookWidget {
                     ],
                   ),
                 ),
-                VerifiedOrBotWidget(
+                BadgesWidget(
                   isBot: participant.appId != null,
                   verified: participant.isVerified,
+                  membership: participant.membership,
                 ),
               ],
             ),

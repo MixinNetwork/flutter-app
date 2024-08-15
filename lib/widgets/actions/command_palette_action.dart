@@ -21,7 +21,7 @@ import '../../utils/hook.dart';
 import '../../utils/platform.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
-import '../conversation/verified_or_bot_widget.dart';
+import '../conversation/badges_widget.dart';
 import '../dialog.dart';
 import '../search_text_field.dart';
 import 'actions.dart';
@@ -293,9 +293,10 @@ class CommandPalettePage extends HookConsumerWidget {
                                     avatarUrl: user.avatarUrl,
                                   ),
                                   name: user.fullName ?? '?',
-                                  trailing: VerifiedOrBotWidget(
+                                  trailing: BadgesWidget(
                                     verified: user.isVerified,
                                     isBot: user.appId != null,
+                                    membership: user.membership,
                                   ),
                                   keyword: keyword,
                                   onTap: () => select(index),
@@ -328,9 +329,10 @@ class CommandPalettePage extends HookConsumerWidget {
                                     userId: conversation.ownerId,
                                   ),
                                   name: conversation.validName,
-                                  trailing: VerifiedOrBotWidget(
+                                  trailing: BadgesWidget(
                                     verified: conversation.isVerified,
                                     isBot: conversation.appId != null,
+                                    membership: conversation.membership,
                                   ),
                                   keyword: keyword,
                                   onTap: () => select(users.length + index),

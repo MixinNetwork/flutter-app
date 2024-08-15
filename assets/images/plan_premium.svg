@@ -1,0 +1,55 @@
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g clip-path="url(#clip0_29197_11163)">
+        <rect width="18" height="18" rx="9" fill="url(#paint0_radial_29197_11163)" />
+        <mask id="mask0_29197_11163" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="14"
+            height="14">
+            <path
+                d="M2 9C2 5.13401 5.13401 2 9 2C12.866 2 16 5.13401 16 9C16 12.866 12.866 16 9 16C5.13401 16 2 12.866 2 9Z"
+                fill="#524E3F" />
+        </mask>
+        <g mask="url(#mask0_29197_11163)">
+            <path
+                d="M13.86 8.012C13.5806 7.82318 13.3627 7.55656 13.2333 7.24515C13.1039 6.93374 13.0687 6.59123 13.132 6.26C13.316 5.308 13.476 4.996 13.24 4.756C13.004 4.516 12.692 4.68 11.736 4.864C11.4048 4.9273 11.0623 4.89207 10.7509 4.76268C10.4394 4.63328 10.1728 4.4154 9.984 4.136C9.444 3.336 9.336 3 9 3C8.664 3 8.556 3.336 8.012 4.14C7.82266 4.41867 7.55581 4.63575 7.24444 4.76442C6.93307 4.89309 6.59083 4.92771 6.26 4.864C5.308 4.68 5 4.52 4.756 4.756C4.512 4.992 4.68 5.304 4.864 6.26C4.9273 6.59123 4.89207 6.93374 4.76268 7.24515C4.63328 7.55656 4.4154 7.82318 4.136 8.012C3.336 8.556 3 8.664 3 9C3 9.336 3.336 9.444 4.14 9.988C4.41867 10.1773 4.63575 10.4442 4.76442 10.7556C4.89309 11.0669 4.92771 11.4092 4.864 11.74C4.68 12.692 4.52 13 4.756 13.244C4.992 13.488 5.304 13.32 6.26 13.136C6.59122 13.0727 6.93374 13.1079 7.24515 13.2373C7.55655 13.3667 7.82317 13.5846 8.012 13.864C8.556 14.664 8.664 15 9 15C9.336 15 9.444 14.664 9.988 13.864C10.1768 13.5846 10.4434 13.3667 10.7549 13.2373C11.0663 13.1079 11.4088 13.0727 11.74 13.136C12.692 13.32 13.004 13.48 13.244 13.244C13.484 13.008 13.32 12.696 13.136 11.74C13.0723 11.4092 13.1069 11.0669 13.2356 10.7556C13.3642 10.4442 13.5813 10.1773 13.86 9.988C14.664 9.444 15 9.336 15 9C15 8.664 14.664 8.556 13.86 8.012Z"
+                fill="url(#paint1_linear_29197_11163)" />
+            <circle cx="9" cy="9" r="3.75" fill="url(#paint2_radial_29197_11163)" />
+            <g filter="url(#filter0_f_29197_11163)">
+                <path
+                    d="M10.2898 6.76769C9.0562 6.05548 7.47882 6.47814 6.76662 7.71172C6.05441 8.9453 6.47707 10.5227 7.71065 11.2349"
+                    stroke="url(#paint3_linear_29197_11163)" />
+            </g>
+        </g>
+    </g>
+    <defs>
+        <filter id="filter0_f_29197_11163" x="4.92041" y="4.92188" width="6.61914" height="7.74609"
+            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+            <feGaussianBlur stdDeviation="0.5" result="effect1_foregroundBlur_29197_11163" />
+        </filter>
+        <radialGradient id="paint0_radial_29197_11163" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+            gradientTransform="translate(9 9) rotate(90) scale(9)">
+            <stop offset="0.293697" stop-color="#733E00" />
+            <stop offset="0.74047" stop-color="#CF9020" stop-opacity="0.28" />
+            <stop offset="1" stop-color="#CF9020" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="paint1_linear_29197_11163" x1="9" y1="15" x2="9" y2="3" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FFE175" />
+            <stop offset="1" stop-color="#FFFCE5" />
+        </linearGradient>
+        <radialGradient id="paint2_radial_29197_11163" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+            gradientTransform="translate(9 9) rotate(-90) scale(3.5)">
+            <stop offset="0.31702" stop-color="#FFF5B3" />
+            <stop offset="0.785" stop-color="#FAE891" />
+            <stop offset="1" stop-color="#F5C850" />
+        </radialGradient>
+        <linearGradient id="paint3_linear_29197_11163" x1="13.7724" y1="14.2319" x2="15.8193" y2="9.67458"
+            gradientUnits="userSpaceOnUse">
+            <stop stop-color="#FBE638" stop-opacity="0" />
+            <stop offset="0.636846" stop-color="#FFFBEB" />
+            <stop offset="0.951571" stop-color="#FDF194" stop-opacity="0" />
+        </linearGradient>
+        <clipPath id="clip0_29197_11163">
+            <rect width="18" height="18" fill="white" />
+        </clipPath>
+    </defs>
+</svg>
