@@ -43,14 +43,14 @@ class BadgesWidget extends StatelessWidget {
     switch ((membership?.isValid, membership?.plan)) {
       case (true, final plan) when plan != Plan.none:
         children.add(
-          Image.asset(
+          SvgPicture.asset(
             {
-              Plan.basic: Resources.assetsImagesPlanBasicPng,
-              Plan.standard: Resources.assetsImagesPlanStandardPng,
-              Plan.premium: Resources.assetsImagesPlanPremiumPng,
+              Plan.basic: Resources.assetsImagesPlanBasicSvg,
+              Plan.standard: Resources.assetsImagesPlanStandardSvg,
+              Plan.premium: Resources.assetsImagesPlanPremiumSvg,
             }[plan]!,
-            width: 16,
-            height: 16,
+            width: 14,
+            height: 14,
           ),
         );
       default:
