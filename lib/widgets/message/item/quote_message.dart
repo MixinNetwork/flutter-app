@@ -15,9 +15,9 @@ import '../../../enum/message_category.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/provider/conversation_provider.dart';
-import '../../../ui/provider/database_provider.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../ui/provider/pending_jump_message_provider.dart';
+import '../../../ui/provider/user_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -431,7 +431,7 @@ class _QuoteImage extends HookWidget {
   }
 }
 
-class _QuoteMessageBase extends HookWidget {
+class _QuoteMessageBase extends HookConsumerWidget {
   const _QuoteMessageBase({
     required this.messageId,
     required this.quoteMessageId,
@@ -455,7 +455,7 @@ class _QuoteMessageBase extends HookWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
@@ -463,16 +463,7 @@ class _QuoteMessageBase extends HookWidget {
         ? getNameColorById(userId!)
         : context.theme.accent;
 
-    final user = useMemoizedFuture(() async {
-      if (userId == null) return null;
-      return context.providerContainer
-          .read(databaseProvider)
-          .value
-          ?.userDao
-          .userById(userId!)
-          .getSingleOrNull();
-    }, null)
-        .data;
+    final user = userId != null ? ref.watch(userCacheProvider(userId!)) : null;
 
     return ClipRRect(
       borderRadius: inputMode
