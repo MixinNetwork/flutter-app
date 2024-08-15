@@ -182,12 +182,12 @@ WHERE (
         (
             conversation.category = 'GROUP'
             AND conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
-         (conversation.category = ' CONTACT ' AND
-           (owner.full_name LIKE ' %' || :query || ' %' ESCAPE ' \ ' OR
-            owner.identity_number LIKE ' %' || :query || ' %' ESCAPE ' \ '))
+         (conversation.category = 'CONTACT' AND
+           (owner.full_name LIKE '%' || :query || '%' ESCAPE '\' OR
+            owner.identity_number LIKE '%' || :query || '%' ESCAPE '\'))
       ) AND $where
-ORDER BY (conversation.category = ' GROUP ' AND conversation.name = :query COLLATE NOCASE)
-    OR (conversation.category = ' CONTACT '
+ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE NOCASE)
+    OR (conversation.category = 'CONTACT'
         AND (owner.full_name = :query COLLATE NOCASE
             OR owner.identity_number = :query COLLATE NOCASE)) DESC,
     conversation.pin_time DESC,

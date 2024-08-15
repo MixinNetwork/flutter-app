@@ -103,7 +103,7 @@ class MessageBubble extends HookConsumerWidget {
                   return QuoteMessage(
                     messageId: messageId,
                     quoteMessageId: quoteId,
-                    content: quoteContent,
+                    quoteContent: quoteContent,
                     isTranscriptPage: isTranscriptPage,
                   );
                 }),
