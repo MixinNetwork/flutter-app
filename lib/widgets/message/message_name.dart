@@ -59,11 +59,16 @@ class MessageName extends ConsumerWidget {
         ));
     }
 
-    children.add(BadgesWidget(
-      verified: verified,
-      isBot: isBot,
-      membership: membership,
-    ));
+    children.add(
+      Padding(
+        padding: const EdgeInsets.only(bottom: 3),
+        child: BadgesWidget(
+          verified: verified,
+          isBot: isBot,
+          membership: membership,
+        ),
+      ),
+    );
 
     return Align(
       alignment: Alignment.centerLeft,
