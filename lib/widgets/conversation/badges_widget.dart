@@ -21,11 +21,11 @@ class BadgesWidget extends StatelessWidget {
 
     switch ((verified, isBot, membership?.isValid, membership?.plan)) {
       case (_, _, true, final plan) when plan != Plan.none:
-        child = SvgPicture.asset(
+        child = Image.asset(
           {
-            Plan.basic: Resources.assetsImagesPlanBasicSvg,
-            Plan.standard: Resources.assetsImagesPlanStandardSvg,
-            Plan.premium: Resources.assetsImagesPlanPremiumSvg,
+            Plan.basic: Resources.assetsImagesPlanBasicPng,
+            Plan.standard: Resources.assetsImagesPlanStandardPng,
+            Plan.premium: Resources.assetsImagesPlanPremiumPng,
           }[plan]!,
           width: 14,
           height: 14,
