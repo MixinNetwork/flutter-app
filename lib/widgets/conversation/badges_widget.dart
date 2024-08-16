@@ -29,6 +29,7 @@ class BadgesWidget extends StatelessWidget {
           }[plan]!,
           width: 14,
           height: 14,
+          isAntiAlias: true,
         );
       case (true, _, _, _):
         child = SvgPicture.asset(
