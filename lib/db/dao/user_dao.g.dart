@@ -148,7 +148,7 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlastFilter.amountOfVariables;
     return customSelect(
-        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = user_id WHERE ${generatedfirstFilter.sql} AND user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \' %\' || ?3 || \' %\' ESCAPE \'\\\')AND ${generatedlastFilter.sql} GROUP BY user_id ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
+        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = user_id WHERE ${generatedfirstFilter.sql} AND user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')AND ${generatedlastFilter.sql} GROUP BY user_id ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
@@ -178,7 +178,7 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedfilter.amountOfVariables;
     return customSelect(
-        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = users.user_id LEFT JOIN circle_conversations AS circleConversation ON circleConversation.user_id = users.user_id WHERE ${generatedfilter.sql} AND users.user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \' %\' || ?3 || \' %\' ESCAPE \'\\\')AND circleConversation.circle_id = ?4 GROUP BY users.user_id ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
+        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = users.user_id LEFT JOIN circle_conversations AS circleConversation ON circleConversation.user_id = users.user_id WHERE ${generatedfilter.sql} AND users.user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')AND circleConversation.circle_id = ?4 GROUP BY users.user_id ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
