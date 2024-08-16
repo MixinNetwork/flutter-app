@@ -161,7 +161,7 @@ dependencies:
   data_detector:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
-      ref: 66a8ed5f955fa35c9aaac76842b9dab83c51db92
+      ref: 08c1ce40eb6abfad6049fb6aad8bd30312ec5319
       path: packages/data_detector
 
 dev_dependencies:
