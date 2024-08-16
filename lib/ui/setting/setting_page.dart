@@ -16,6 +16,7 @@ import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/conversation/badges_widget.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
 import '../home/home.dart';
@@ -233,8 +234,13 @@ class _UserProfile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (fullName, identityNumber) = ref.watch(authAccountProvider
-        .select((value) => (value?.fullName, value?.identityNumber)));
+    final (fullName, identityNumber, membership, isVerified) = ref.watch(
+        authAccountProvider.select((value) => (
+              value?.fullName,
+              value?.identityNumber,
+              value?.membership,
+              value?.isVerified
+            )));
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -251,15 +257,25 @@ class _UserProfile extends HookConsumerWidget {
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: CustomText(
-            fullName ?? '',
-            maxLines: 2,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-              color: context.theme.text,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomText(
+                fullName ?? '',
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: context.theme.text,
+                ),
+              ),
+              BadgesWidget(
+                verified: isVerified,
+                isBot: false,
+                membership: membership,
+              )
+            ],
           ),
         ),
         const SizedBox(height: 4),
