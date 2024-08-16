@@ -38,7 +38,7 @@ WHERE $firstFilter
     AND relationship = 'FRIEND'
     AND (
         full_name LIKE '%' || :username || '%' ESCAPE '\'
-        OR identity_number LIKE '%' || :identityNumber || '%' ESCAPE '\') AND $lastFilter
+        OR identity_number LIKE ' %' || :identityNumber || ' %' ESCAPE '\') AND $lastFilter
         GROUP BY user_id
 ORDER BY full_name = :username COLLATE nocase
     OR identity_number = :identityNumber COLLATE nocase DESC;
@@ -53,7 +53,7 @@ WHERE $filter
     AND relationship = 'FRIEND'
     AND (
         full_name LIKE '%' || :username || '%' ESCAPE '\'
-        OR identity_number LIKE '%' || :identityNumber || '%' ESCAPE '\') AND circleConversation.circle_id = :circleId
+        OR identity_number LIKE ' %' || :identityNumber || ' %' ESCAPE '\') AND circleConversation.circle_id = :circleId
         GROUP BY users.user_id
 ORDER BY full_name = :username COLLATE nocase
     OR identity_number = :identityNumber COLLATE nocase DESC;
