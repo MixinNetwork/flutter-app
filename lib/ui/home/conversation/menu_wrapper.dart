@@ -138,11 +138,10 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 image: MenuImage.icon(IconFonts.delete),
                 title: context.l10n.deleteChat,
                 callback: () async {
-                  final name =
-                      conversation?.validName ?? searchConversation!.validName;
+                  final name = conversation?.name ?? searchConversation!.name;
                   final ret = await showConfirmMixinDialog(
                     context,
-                    context.l10n.conversationDeleteTitle(name),
+                    context.l10n.conversationDeleteTitle(name ?? ''),
                     description: context.l10n.deleteChatDescription,
                   );
                   if (ret == null) return;

@@ -200,7 +200,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageId = $expandVar($arrayStartIndex, messageId.length);
     $arrayStartIndex += messageId.length;
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, COALESCE(conversationOwner.full_name, c.name) AS name, COALESCE(conversationOwner.mute_until, c.mute_until) AS muteUntil, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId, c.owner_id AS ownerUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.category = \'CONTACT\' AND c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
         variables: [
           for (var $ in messageId) Variable<String>($)
         ],
@@ -218,15 +218,9 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           content: row.readNullable<String>('content'),
           quoteContent: row.readNullable<String>('quoteContent'),
           status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-          groupName: row.readNullable<String>('groupName'),
+          name: row.readNullable<String>('name'),
           muteUntil: NullAwareTypeConverter.wrapFromSql(
-              Conversations.$convertermuteUntil,
-              row.readNullable<int>('muteUntil')),
-          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-              Users.$convertermuteUntil,
-              row.readNullable<int>('ownerMuteUntil')),
-          ownerUserId: row.readNullable<String>('ownerUserId'),
-          ownerFullName: row.readNullable<String>('ownerFullName'),
+              Users.$convertermuteUntil, row.readNullable<int>('muteUntil')),
           createdAt:
               Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
           category: Conversations.$convertercategory
@@ -236,6 +230,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
               .fromSql(row.readNullable<String>('relationship')),
           participantFullName: row.readNullable<String>('participantFullName'),
           participantUserId: row.readNullable<String>('participantUserId'),
+          ownerUserId: row.readNullable<String>('ownerUserId'),
         ));
   }
 
@@ -245,7 +240,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.category AS category, c.conversation_id AS conversationId, COALESCE(owner.avatar_url, c.icon_url) AS avatarUrl, COALESCE(owner.full_name, c.name) AS name FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.category = \'CONTACT\' AND c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
         variables: [
           for (var $ in messageIds) Variable<String>($)
         ],
@@ -269,13 +264,11 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
           ownerId: row.readNullable<String>('ownerId'),
-          groupIconUrl: row.readNullable<String>('groupIconUrl'),
           category: Conversations.$convertercategory
               .fromSql(row.readNullable<String>('category')),
-          groupName: row.readNullable<String>('groupName'),
           conversationId: row.read<String>('conversationId'),
-          ownerFullName: row.readNullable<String>('ownerFullName'),
-          ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          name: row.readNullable<String>('name'),
         ));
   }
 
@@ -312,7 +305,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.category AS category, c.conversation_id AS conversationId, COALESCE(owner.avatar_url, c.icon_url) AS avatarUrl, COALESCE(owner.full_name, c.name) AS name FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.category = \'CONTACT\' AND c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedlimit.introducedVariables
@@ -339,13 +332,11 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
           ownerId: row.readNullable<String>('ownerId'),
-          groupIconUrl: row.readNullable<String>('groupIconUrl'),
           category: Conversations.$convertercategory
               .fromSql(row.readNullable<String>('category')),
-          groupName: row.readNullable<String>('groupName'),
           conversationId: row.read<String>('conversationId'),
-          ownerFullName: row.readNullable<String>('ownerFullName'),
-          ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+          avatarUrl: row.readNullable<String>('avatarUrl'),
+          name: row.readNullable<String>('name'),
         ));
   }
 
@@ -777,17 +768,15 @@ class NotificationMessage {
   final String? content;
   final String? quoteContent;
   final MessageStatus status;
-  final String? groupName;
+  final String? name;
   final DateTime? muteUntil;
-  final DateTime? ownerMuteUntil;
-  final String? ownerUserId;
-  final String? ownerFullName;
   final DateTime createdAt;
   final ConversationCategory? category;
   final String? actionName;
   final UserRelationship? relationship;
   final String? participantFullName;
   final String? participantUserId;
+  final String? ownerUserId;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
@@ -797,17 +786,15 @@ class NotificationMessage {
     this.content,
     this.quoteContent,
     required this.status,
-    this.groupName,
+    this.name,
     this.muteUntil,
-    this.ownerMuteUntil,
-    this.ownerUserId,
-    this.ownerFullName,
     required this.createdAt,
     this.category,
     this.actionName,
     this.relationship,
     this.participantFullName,
     this.participantUserId,
+    this.ownerUserId,
   });
   @override
   int get hashCode => Object.hash(
@@ -819,17 +806,15 @@ class NotificationMessage {
       content,
       quoteContent,
       status,
-      groupName,
+      name,
       muteUntil,
-      ownerMuteUntil,
-      ownerUserId,
-      ownerFullName,
       createdAt,
       category,
       actionName,
       relationship,
       participantFullName,
-      participantUserId);
+      participantUserId,
+      ownerUserId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -842,17 +827,15 @@ class NotificationMessage {
           other.content == this.content &&
           other.quoteContent == this.quoteContent &&
           other.status == this.status &&
-          other.groupName == this.groupName &&
+          other.name == this.name &&
           other.muteUntil == this.muteUntil &&
-          other.ownerMuteUntil == this.ownerMuteUntil &&
-          other.ownerUserId == this.ownerUserId &&
-          other.ownerFullName == this.ownerFullName &&
           other.createdAt == this.createdAt &&
           other.category == this.category &&
           other.actionName == this.actionName &&
           other.relationship == this.relationship &&
           other.participantFullName == this.participantFullName &&
-          other.participantUserId == this.participantUserId);
+          other.participantUserId == this.participantUserId &&
+          other.ownerUserId == this.ownerUserId);
   @override
   String toString() {
     return (StringBuffer('NotificationMessage(')
@@ -864,17 +847,15 @@ class NotificationMessage {
           ..write('content: $content, ')
           ..write('quoteContent: $quoteContent, ')
           ..write('status: $status, ')
-          ..write('groupName: $groupName, ')
+          ..write('name: $name, ')
           ..write('muteUntil: $muteUntil, ')
-          ..write('ownerMuteUntil: $ownerMuteUntil, ')
-          ..write('ownerUserId: $ownerUserId, ')
-          ..write('ownerFullName: $ownerFullName, ')
           ..write('createdAt: $createdAt, ')
           ..write('category: $category, ')
           ..write('actionName: $actionName, ')
           ..write('relationship: $relationship, ')
           ..write('participantFullName: $participantFullName, ')
-          ..write('participantUserId: $participantUserId')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('ownerUserId: $ownerUserId')
           ..write(')'))
         .toString();
   }
@@ -894,12 +875,10 @@ class SearchMessageDetailItem {
   final bool? verified;
   final Membership? membership;
   final String? ownerId;
-  final String? groupIconUrl;
   final ConversationCategory? category;
-  final String? groupName;
   final String conversationId;
-  final String? ownerFullName;
-  final String? ownerAvatarUrl;
+  final String? avatarUrl;
+  final String? name;
   SearchMessageDetailItem({
     required this.messageId,
     required this.senderId,
@@ -914,12 +893,10 @@ class SearchMessageDetailItem {
     this.verified,
     this.membership,
     this.ownerId,
-    this.groupIconUrl,
     this.category,
-    this.groupName,
     required this.conversationId,
-    this.ownerFullName,
-    this.ownerAvatarUrl,
+    this.avatarUrl,
+    this.name,
   });
   @override
   int get hashCode => Object.hash(
@@ -936,12 +913,10 @@ class SearchMessageDetailItem {
       verified,
       membership,
       ownerId,
-      groupIconUrl,
       category,
-      groupName,
       conversationId,
-      ownerFullName,
-      ownerAvatarUrl);
+      avatarUrl,
+      name);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -959,12 +934,10 @@ class SearchMessageDetailItem {
           other.verified == this.verified &&
           other.membership == this.membership &&
           other.ownerId == this.ownerId &&
-          other.groupIconUrl == this.groupIconUrl &&
           other.category == this.category &&
-          other.groupName == this.groupName &&
           other.conversationId == this.conversationId &&
-          other.ownerFullName == this.ownerFullName &&
-          other.ownerAvatarUrl == this.ownerAvatarUrl);
+          other.avatarUrl == this.avatarUrl &&
+          other.name == this.name);
   @override
   String toString() {
     return (StringBuffer('SearchMessageDetailItem(')
@@ -981,12 +954,10 @@ class SearchMessageDetailItem {
           ..write('verified: $verified, ')
           ..write('membership: $membership, ')
           ..write('ownerId: $ownerId, ')
-          ..write('groupIconUrl: $groupIconUrl, ')
           ..write('category: $category, ')
-          ..write('groupName: $groupName, ')
           ..write('conversationId: $conversationId, ')
-          ..write('ownerFullName: $ownerFullName, ')
-          ..write('ownerAvatarUrl: $ownerAvatarUrl')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('name: $name')
           ..write(')'))
         .toString();
   }

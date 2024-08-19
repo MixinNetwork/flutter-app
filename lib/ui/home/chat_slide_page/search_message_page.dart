@@ -17,6 +17,7 @@ import '../../../utils/system/text_input.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
+import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
@@ -420,17 +421,20 @@ class _SearchParticipantList extends HookConsumerWidget {
                   size: 38,
                 ),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: CustomText(
-                    user.fullName ?? '',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: context.theme.text,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                CustomText(
+                  user.fullName ?? '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: context.theme.text,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                BadgesWidget(
+                  verified: user.isVerified,
+                  isBot: user.isBot,
+                  membership: user.membership,
+                )
               ],
             ),
           ),

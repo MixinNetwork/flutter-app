@@ -117,7 +117,6 @@ class _GroupConversationItemWidget extends StatelessWidget {
                     size: ConversationPage.conversationItemAvatarSize,
                     conversationId: group.conversationId,
                     category: ConversationCategory.group,
-                    groupIconUrl: group.groupIconUrl,
                   ),
                   const SizedBox(width: 12),
                   Expanded(

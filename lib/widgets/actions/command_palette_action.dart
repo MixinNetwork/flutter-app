@@ -9,7 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
-import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
@@ -321,14 +320,13 @@ class CommandPalettePage extends HookConsumerWidget {
                                   padding: const EdgeInsets.all(14),
                                   avatar: ConversationAvatarWidget(
                                     conversationId: conversation.conversationId,
-                                    fullName: conversation.validName,
-                                    groupIconUrl: conversation.groupIconUrl,
+                                    fullName: conversation.name,
                                     avatarUrl: conversation.avatarUrl,
                                     category: conversation.category,
                                     size: 40,
                                     userId: conversation.ownerId,
                                   ),
-                                  name: conversation.validName,
+                                  name: conversation.name ?? '',
                                   trailing: BadgesWidget(
                                     verified: conversation.isVerified,
                                     isBot: conversation.appId != null,

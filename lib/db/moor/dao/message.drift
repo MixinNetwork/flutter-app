@@ -58,38 +58,32 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
 
 
 notificationMessage AS NotificationMessage:
-SELECT m.message_id                   AS messageId,
-       m.conversation_id              AS conversationId,
-       sender.user_id                 AS senderId,
-       sender.full_name               AS senderFullName,
-       m.category                     AS type,
-       m.content                      AS content,
-       m.quote_content                AS quoteContent,
-       m.status                       AS status,
-       c.name                         AS groupName,
-       c.mute_until                   AS muteUntil,
-       conversationOwner.mute_until   AS ownerMuteUntil,
-       conversationOwner.user_id      AS ownerUserId,
-       conversationOwner.full_name    AS ownerFullName,
-       m.created_at                   AS createdAt,
-       c.category                     AS category,
-       m.action                       AS actionName,
-       conversationOwner.relationship AS relationship,
-       pu.full_name                   AS participantFullName,
-       pu.user_id                     AS participantUserId
-FROM   messages m
-       INNER JOIN users sender
-               ON m.user_id = sender.user_id
-       LEFT JOIN conversations c
-              ON m.conversation_id = c.conversation_id
-       LEFT JOIN users conversationOwner
-              ON c.owner_id = conversationOwner.user_id
-       LEFT JOIN message_mentions mm
-              ON m.message_id = mm.message_id
-       LEFT JOIN users pu
-              ON pu.user_id = m.participant_id
-WHERE  m.message_id in :messageId
-ORDER  BY m.created_at DESC;
+SELECT m.message_id AS messageId,
+    m.conversation_id AS conversationId,
+    sender.user_id AS senderId,
+    sender.full_name AS senderFullName,
+    m.category AS type,
+    m.content AS content,
+    m.quote_content AS quoteContent,
+    m.status AS status,
+    COALESCE(conversationOwner.full_name, c.name) AS name,
+    COALESCE(conversationOwner.mute_until, c.mute_until) AS muteUntil,
+    m.created_at AS createdAt,
+    c.category AS category,
+    m.action AS actionName,
+    conversationOwner.relationship AS relationship,
+    pu.full_name AS participantFullName,
+    pu.user_id AS participantUserId,
+    c.owner_id AS ownerUserId
+FROM messages m
+    INNER JOIN users sender ON m.user_id = sender.user_id
+    LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
+    LEFT JOIN users conversationOwner ON c.category = 'CONTACT'
+    AND c.owner_id = conversationOwner.user_id
+    LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
+    LEFT JOIN users pu ON pu.user_id = m.participant_id
+WHERE m.message_id in :messageId
+ORDER BY m.created_at DESC;
 
 
 searchMessageByIds AS SearchMessageDetailItem:
@@ -106,16 +100,14 @@ SELECT m.message_id messageId,
     u.is_verified AS verified,
     u.membership AS membership,
     c.owner_id AS ownerId,
-    c.icon_url AS groupIconUrl,
     c.category AS category,
-    c.name AS groupName,
     c.conversation_id AS conversationId,
-    owner.full_name AS ownerFullName,
-    owner.avatar_url AS ownerAvatarUrl
+    COALESCE(owner.avatar_url, c.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, c.name) AS name
 FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    INNER JOIN users owner ON c.owner_id = owner.user_id
+    INNER JOIN users owner ON c.category = 'CONTACT' AND c.owner_id = owner.user_id
 WHERE m.message_id IN :messageIds
 ORDER BY m.created_at DESC,
     m.rowid DESC;
@@ -137,16 +129,14 @@ SELECT m.message_id messageId,
     u.is_verified AS verified,
     u.membership AS membership,
     c.owner_id AS ownerId,
-    c.icon_url AS groupIconUrl,
     c.category AS category,
-    c.name AS groupName,
     c.conversation_id AS conversationId,
-    owner.full_name AS ownerFullName,
-    owner.avatar_url AS ownerAvatarUrl
+    COALESCE(owner.avatar_url, c.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, c.name) AS name
 FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    INNER JOIN users owner ON c.owner_id = owner.user_id
+    INNER JOIN users owner ON c.category = 'CONTACT' AND c.owner_id = owner.user_id
 WHERE $where
 ORDER BY m.created_at DESC,
     m.rowid DESC

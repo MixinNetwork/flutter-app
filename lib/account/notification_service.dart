@@ -6,7 +6,6 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../blaze/vo/pin_message_minimal.dart';
 import '../db/database_event_bus.dart';
-import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
 import '../generated/l10n.dart';
 
@@ -85,17 +84,9 @@ class NotificationService {
             // quote current user
             if (await quotedCurrentUser()) return true;
 
-            final muteUntil = event.category == ConversationCategory.group
-                ? event.muteUntil
-                : event.ownerMuteUntil;
-            return muteUntil?.isAfter(DateTime.now()) != true;
+            return event.muteUntil?.isAfter(DateTime.now()) != true;
           })
           .asyncMap((event) async {
-            final name = conversationValidName(
-              event.groupName,
-              event.ownerFullName,
-            );
-
             String? body;
             if (context.settingChangeNotifier.messagePreview) {
               final mentionCache =
@@ -153,7 +144,7 @@ class NotificationService {
             }
 
             await showNotification(
-              title: name,
+              title: event.name ?? '',
               body: body,
               uri: Uri(
                 scheme: enumConvertToString(NotificationScheme.conversation),

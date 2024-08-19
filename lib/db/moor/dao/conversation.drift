@@ -9,27 +9,21 @@ WHERE $where;
 
 _baseConversationItems AS ConversationItem:
 SELECT conversation.conversation_id AS conversationId,
-    conversation.icon_url AS groupIconUrl,
+    COALESCE(owner.avatar_url, conversation.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, conversation.name) AS name,
+    COALESCE(owner.mute_until, conversation.mute_until) AS muteUntil,
     conversation.category AS category,
     conversation.draft AS draft,
-    conversation.name AS groupName,
     conversation.status AS status,
     conversation.last_read_message_id AS lastReadMessageId,
     conversation.unseen_message_count AS unseenMessageCount,
     conversation.owner_id AS ownerId,
     conversation.pin_time AS pinTime,
-    conversation.mute_until AS muteUntil,
     conversation.expire_in as expireIn,
-    owner.avatar_url AS avatarUrl,
-    owner.full_name AS name,
     owner.is_verified AS ownerVerified,
     owner.identity_number AS ownerIdentityNumber,
-    owner.mute_until AS ownerMuteUntil,
     owner.app_id AS appId,
-    CASE
-        WHEN conversation.category = 'CONTACT' THEN owner.membership
-        ELSE NULL
-    END AS membership,
+    owner.membership AS membership,
     lastMessage.content AS content,
     lastMessage.category AS contentType,
     conversation.created_at AS createdAt,
@@ -43,47 +37,43 @@ SELECT conversation.conversation_id AS conversationId,
     participant.full_name AS participantFullName,
     participant.user_id AS participantUserId,
     em.expire_in AS messageExpireIn,
-    (
-        SELECT COUNT(1)
-        FROM message_mentions messageMention
-        WHERE messageMention.conversation_id = conversation.conversation_id
-            AND messageMention.has_read = 0
-    ) AS mentionCount,
+    COALESCE(mentionCounts.count, 0) AS mentionCount,
     owner.relationship AS relationship
 FROM conversations conversation
-    INNER JOIN users owner ON owner.user_id = conversation.owner_id
+    LEFT JOIN users owner ON conversation.category = 'CONTACT' AND owner.user_id = conversation.owner_id
     LEFT JOIN messages lastMessage ON conversation.last_message_id = lastMessage.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
     LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
     LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
     LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
+    LEFT JOIN (
+        SELECT conversation_id,
+            COUNT(1) AS count
+        FROM message_mentions
+        WHERE has_read = 0
+        GROUP BY conversation_id
+    ) AS mentionCounts ON conversation.conversation_id = mentionCounts.conversation_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
 
 _baseConversationItemsByCircleId AS ConversationItem:
 SELECT conversation.conversation_id AS conversationId,
-    conversation.icon_url AS groupIconUrl,
+    COALESCE(owner.avatar_url, conversation.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, conversation.name) AS name,
+    COALESCE(owner.mute_until, conversation.mute_until) AS muteUntil,
     conversation.category AS category,
     conversation.draft AS draft,
-    conversation.name AS groupName,
     conversation.status AS status,
     conversation.last_read_message_id AS lastReadMessageId,
     conversation.unseen_message_count AS unseenMessageCount,
     conversation.owner_id AS ownerId,
     conversation.pin_time AS pinTime,
-    conversation.mute_until AS muteUntil,
     conversation.expire_in as expireIn,
-    owner.avatar_url AS avatarUrl,
-    owner.full_name AS name,
     owner.is_verified AS ownerVerified,
     owner.identity_number AS ownerIdentityNumber,
-    owner.mute_until AS ownerMuteUntil,
     owner.app_id AS appId,
-    CASE
-        WHEN conversation.category = 'CONTACT' THEN owner.membership
-        ELSE NULL
-    END AS membership,
+    owner.membership AS membership,
     lastMessage.content AS content,
     lastMessage.category AS contentType,
     conversation.created_at AS createdAt,
@@ -97,21 +87,24 @@ SELECT conversation.conversation_id AS conversationId,
     participant.full_name AS participantFullName,
     participant.user_id AS participantUserId,
     em.expire_in AS messageExpireIn,
-    (
-        SELECT COUNT(1)
-        FROM message_mentions messageMention
-        WHERE messageMention.conversation_id = conversation.conversation_id
-            AND messageMention.has_read = 0
-    ) AS mentionCount,
+    COALESCE(mentionCounts.count, 0) AS mentionCount,
     owner.relationship AS relationship
 FROM conversations conversation
-    INNER JOIN users owner ON owner.user_id = conversation.owner_id
+    LEFT JOIN users owner ON conversation.category = 'CONTACT'
+    AND owner.user_id = conversation.owner_id
     LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
     LEFT JOIN messages lastMessage ON conversation.last_message_id = lastMessage.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
     LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
     LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
     LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
+    LEFT JOIN (
+        SELECT conversation_id,
+            COUNT(1) AS count
+        FROM message_mentions
+        WHERE has_read = 0
+        GROUP BY conversation_id
+    ) AS mentionCounts ON conversation.conversation_id = mentionCounts.conversation_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;
@@ -149,22 +142,16 @@ LIMIT 1;
 
 _fuzzySearchConversation AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,
-    conversation.icon_url AS groupIconUrl,
+    COALESCE(owner.avatar_url, conversation.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, conversation.name) AS name,
+    COALESCE(owner.mute_until, conversation.mute_until) AS muteUntil,
     conversation.category AS category,
-    conversation.name AS groupName,
     conversation.pin_time AS pinTime,
-    conversation.mute_until AS muteUntil,
     conversation.owner_id AS ownerId,
-    owner.mute_until AS ownerMuteUntil,
     owner.identity_number AS ownerIdentityNumber,
-    owner.full_name AS fullName,
-    owner.avatar_url AS avatarUrl,
     owner.is_verified AS isVerified,
     owner.app_id AS appId,
-    CASE
-        WHEN conversation.category = 'CONTACT' THEN owner.membership
-        ELSE NULL
-    END AS membership,
+    owner.membership AS membership,
     message.status AS messageStatus,
     message.content AS content,
     message.category AS contentType,
@@ -174,7 +161,7 @@ SELECT conversation.conversation_id AS conversationId,
     participant.user_id AS participantUserId,
     participant.full_name AS participantFullName
 FROM conversations conversation
-    INNER JOIN users owner ON owner.user_id = conversation.owner_id
+    LEFT JOIN users owner ON conversation.category = 'CONTACT' AND owner.user_id = conversation.owner_id
     LEFT JOIN messages message ON conversation.last_message_id = message.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
     LEFT JOIN users participant ON participant.user_id = message.participant_id
@@ -196,22 +183,16 @@ ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE
 
 _searchConversationItemByIn AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,
-    conversation.icon_url AS groupIconUrl,
+    COALESCE(owner.avatar_url, conversation.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, conversation.name) AS name,
+    COALESCE(owner.mute_until, conversation.mute_until) AS muteUntil,
     conversation.category AS category,
-    conversation.name AS groupName,
     conversation.pin_time AS pinTime,
-    conversation.mute_until AS muteUntil,
     conversation.owner_id AS ownerId,
-    owner.mute_until AS ownerMuteUntil,
     owner.identity_number AS ownerIdentityNumber,
-    owner.full_name AS fullName,
-    owner.avatar_url AS avatarUrl,
     owner.is_verified AS isVerified,
     owner.app_id AS appId,
-    CASE
-        WHEN conversation.category = 'CONTACT' THEN owner.membership
-        ELSE NULL
-    END AS membership,
+    owner.membership AS membership,
     message.status AS messageStatus,
     message.content AS content,
     message.category AS contentType,
@@ -221,7 +202,7 @@ SELECT conversation.conversation_id AS conversationId,
     participant.user_id AS participantUserId,
     participant.full_name AS participantFullName
 FROM conversations conversation
-    INNER JOIN users owner ON owner.user_id = conversation.owner_id
+    LEFT JOIN users owner ON conversation.category = 'CONTACT' AND owner.user_id = conversation.owner_id
     LEFT JOIN messages message ON conversation.last_message_id = message.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
     LEFT JOIN users participant ON participant.user_id = message.participant_id
@@ -230,22 +211,16 @@ ORDER BY $order;
 
 _fuzzySearchConversationInCircle AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,
-    conversation.icon_url AS groupIconUrl,
+    COALESCE(owner.avatar_url, conversation.icon_url) AS avatarUrl,
+    COALESCE(owner.full_name, conversation.name) AS name,
+    COALESCE(owner.mute_until, conversation.mute_until) AS muteUntil,
     conversation.category AS category,
-    conversation.name AS groupName,
     conversation.pin_time AS pinTime,
-    conversation.mute_until AS muteUntil,
     conversation.owner_id AS ownerId,
-    owner.mute_until AS ownerMuteUntil,
     owner.identity_number AS ownerIdentityNumber,
-    owner.full_name AS fullName,
-    owner.avatar_url AS avatarUrl,
     owner.is_verified AS isVerified,
     owner.app_id AS appId,
-    CASE
-        WHEN conversation.category = 'CONTACT' THEN owner.membership
-        ELSE NULL
-    END AS membership,
+    owner.membership AS membership,
     message.status AS messageStatus,
     message.content AS content,
     message.category AS contentType,
@@ -255,7 +230,7 @@ SELECT conversation.conversation_id AS conversationId,
     participant.user_id AS participantUserId,
     participant.full_name AS participantFullName
 FROM conversations conversation
-         INNER JOIN users owner ON owner.user_id = conversation.owner_id
+         LEFT JOIN users owner ON conversation.category = 'CONTACT' AND owner.user_id = conversation.owner_id
          LEFT JOIN messages message ON conversation.last_message_id = message.message_id
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
          LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
@@ -274,10 +249,15 @@ ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE
     limit $limit;
 
 conversationStorageUsage AS ConversationStorageUsage:
-SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,
-    u.full_name, u.avatar_url, u.is_verified
+SELECT c.conversation_id,
+    c.owner_id,
+    c.category,
+    u.identity_number,
+    u.is_verified,
+    COALESCE(u.full_name, c.name) AS name,
+    COALESCE(u.avatar_url, c.icon_url) AS avatarUrl
 FROM conversations c
-         INNER JOIN users u ON u.user_id = c.owner_id
+    LEFT JOIN users u ON c.category = 'CONTACT' AND u.user_id = c.owner_id
 WHERE c.category IS NOT NULL;
 
 

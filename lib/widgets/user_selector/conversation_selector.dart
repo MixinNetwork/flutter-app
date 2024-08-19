@@ -27,7 +27,7 @@ import '../interactive_decorated_box.dart';
 import 'bloc/conversation_filter_cubit.dart';
 
 String _getConversationName(dynamic item) {
-  if (item is ConversationItem) return item.validName;
+  if (item is ConversationItem) return item.name ?? '?';
   if (item is User) return item.fullName ?? '?';
   throw ArgumentError('must be ConversationItem or User');
 }
@@ -390,7 +390,7 @@ class _ConversationSelector extends HookConsumerWidget {
                             child: _BaseItem(
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
-                              title: item.validName,
+                              title: item.name ?? '',
                               verified: item.ownerVerified,
                               isBot: item.isBotConversation,
                               membership: item.membership,

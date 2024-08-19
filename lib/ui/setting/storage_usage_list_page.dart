@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watcher/watcher.dart';
 
 import '../../db/dao/conversation_dao.dart';
-import '../../db/extension/conversation.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
@@ -98,8 +97,7 @@ class _Item extends HookConsumerWidget {
         child: CellItem(
           leading: ConversationAvatarWidget(
             conversationId: item.conversationId,
-            fullName: item.fullName,
-            groupIconUrl: item.iconUrl,
+            fullName: item.name,
             avatarUrl: item.avatarUrl,
             category: item.category,
             size: 50,
@@ -109,7 +107,7 @@ class _Item extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(conversationValidName(item.name, item.fullName)),
+              Text(item.name ?? ''),
               Text(
                 sizeString,
                 style: TextStyle(
@@ -122,7 +120,7 @@ class _Item extends HookConsumerWidget {
           onTap: () => ref.read(responsiveNavigatorProvider.notifier).pushPage(
             ResponsiveNavigatorStateNotifier.storageUsageDetail,
             arguments: (
-              conversationValidName(item.name, item.fullName),
+              item.name,
               item.conversationId,
             ),
           ),
