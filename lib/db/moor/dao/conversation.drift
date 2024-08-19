@@ -44,7 +44,7 @@ FROM conversations conversation
     LEFT JOIN messages lastMessage ON conversation.last_message_id = lastMessage.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
     LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
-    LEFT JOIN users participant ON conversation.category = 'CONTACT' AND participant.user_id = lastMessage.participant_id
+    LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
     LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
     LEFT JOIN (
         SELECT conversation_id,
@@ -96,8 +96,7 @@ FROM conversations conversation
     LEFT JOIN messages lastMessage ON conversation.last_message_id = lastMessage.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
     LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
-    LEFT JOIN users participant ON conversation.category = 'CONTACT'
-    AND participant.user_id = lastMessage.participant_id
+    LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
     LEFT JOIN expired_messages em ON lastMessage.message_id = em.message_id
     LEFT JOIN (
         SELECT conversation_id,
@@ -165,7 +164,7 @@ FROM conversations conversation
     LEFT JOIN users owner ON conversation.category = 'CONTACT' AND owner.user_id = conversation.owner_id
     LEFT JOIN messages message ON conversation.last_message_id = message.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
-    LEFT JOIN users participant ON conversation.category = 'CONTACT' AND participant.user_id = message.participant_id
+    LEFT JOIN users participant ON participant.user_id = message.participant_id
 WHERE (
         (
             conversation.category = 'GROUP'
@@ -206,7 +205,7 @@ FROM conversations conversation
     LEFT JOIN users owner ON conversation.category = 'CONTACT' AND owner.user_id = conversation.owner_id
     LEFT JOIN messages message ON conversation.last_message_id = message.message_id
     LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
-    LEFT JOIN users participant ON conversation.category = 'CONTACT' AND participant.user_id = message.participant_id
+    LEFT JOIN users participant ON participant.user_id = message.participant_id
 WHERE conversation.conversation_id IN :ids
 ORDER BY $order;
 
@@ -235,7 +234,7 @@ FROM conversations conversation
          LEFT JOIN messages message ON conversation.last_message_id = message.message_id
          LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = message.user_id
          LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
-         LEFT JOIN users participant ON conversation.category = 'CONTACT' AND participant.user_id = message.participant_id
+         LEFT JOIN users participant ON participant.user_id = message.participant_id
 WHERE ((conversation.category = 'GROUP' AND conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
             (conversation.category = 'CONTACT' AND
             (owner.full_name LIKE '%' || :query || '%' ESCAPE '\' OR
