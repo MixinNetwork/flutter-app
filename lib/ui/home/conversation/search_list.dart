@@ -761,11 +761,13 @@ class SearchMessageItem extends HookConsumerWidget {
               message.groupName,
               message.ownerFullName,
             ),
-      trailing: BadgesWidget(
-        verified: message.verified,
-        isBot: message.appId != null,
-        membership: message.membership,
-      ),
+      trailing: showSender || message.category == ConversationCategory.contact
+          ? BadgesWidget(
+              verified: message.verified,
+              isBot: message.appId != null,
+              membership: message.membership,
+            )
+          : null,
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,
