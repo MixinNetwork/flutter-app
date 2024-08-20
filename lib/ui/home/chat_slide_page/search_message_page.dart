@@ -105,9 +105,7 @@ class SearchMessagePage extends HookConsumerWidget {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-            ),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
             child: Row(
               children: [
                 Expanded(
@@ -421,20 +419,28 @@ class _SearchParticipantList extends HookConsumerWidget {
                   size: 38,
                 ),
                 const SizedBox(width: 16),
-                CustomText(
-                  user.fullName ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.theme.text,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: CustomText(
+                          user.fullName ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: context.theme.text,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      BadgesWidget(
+                        verified: user.isVerified,
+                        isBot: user.isBot,
+                        membership: user.membership,
+                      )
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                BadgesWidget(
-                  verified: user.isVerified,
-                  isBot: user.isBot,
-                  membership: user.membership,
-                )
               ],
             ),
           ),

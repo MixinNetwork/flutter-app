@@ -49,7 +49,7 @@ class BadgesWidget extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: child,
     );
   }

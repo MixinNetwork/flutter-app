@@ -160,32 +160,36 @@ class _ParticipantTile extends HookWidget {
               userId: participant.userId,
               name: participant.fullName,
             ),
-            title: Row(
-              children: [
-                Flexible(
-                  child: CustomText(
-                    participant.fullName ?? '?',
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 16,
-                    ),
-                    textMatchers: [
-                      EmojiTextMatcher(),
-                      KeyWordTextMatcher(
-                        keyword,
-                        style: TextStyle(
-                          color: context.theme.accent,
-                        ),
+            title: Expanded(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: CustomText(
+                      participant.fullName ?? '?',
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: 16,
                       ),
-                    ],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textMatchers: [
+                        EmojiTextMatcher(),
+                        KeyWordTextMatcher(
+                          keyword,
+                          style: TextStyle(
+                            color: context.theme.accent,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                BadgesWidget(
-                  isBot: participant.appId != null,
-                  verified: participant.isVerified,
-                  membership: participant.membership,
-                ),
-              ],
+                  BadgesWidget(
+                    isBot: participant.appId != null,
+                    verified: participant.isVerified,
+                    membership: participant.membership,
+                  ),
+                ],
+              ),
             ),
             onTap: () {
               showUserDialog(context, participant.userId);

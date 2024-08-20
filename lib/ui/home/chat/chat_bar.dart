@@ -239,12 +239,10 @@ class ConversationName extends StatelessWidget {
     required this.conversationState,
     super.key,
     this.fontSize = 16,
-    this.overflow = true,
   });
 
   final double fontSize;
   final ConversationState conversationState;
-  final bool overflow;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -253,18 +251,15 @@ class ConversationName extends StatelessWidget {
           Flexible(
             child: CustomSelectableArea(
               child: CustomText(
-                (overflow
-                        ? conversationState.name?.overflow
-                        : conversationState.name) ??
-                    '',
+                conversationState.name?.overflow ?? '',
                 style: TextStyle(
                   color: context.theme.text,
                   fontSize: fontSize,
                   height: 1,
-                  overflow: overflow ? TextOverflow.ellipsis : null,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 textAlign: TextAlign.center,
-                maxLines: overflow ? 1 : null,
+                maxLines: 1,
               ),
             ),
           ),
