@@ -121,9 +121,12 @@ class ChatInfoPage extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 10),
-            ConversationName(
-              conversationState: conversationState,
-              fontSize: 18,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ConversationName(
+                conversationState: conversationState,
+                fontSize: 18,
+              ),
             ),
             const SizedBox(height: 4),
             ConversationIDOrCount(
