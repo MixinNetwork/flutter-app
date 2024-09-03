@@ -12,7 +12,7 @@ ORDER BY $order
 LIMIT $limit;
 
 deletePendingSnapshotByHash:
-DELETE FROM safe_snapshots WHERE type = 'pending' AND transaction_hash = :transactionHash;
+DELETE FROM safe_snapshots WHERE type = 'pending' AND deposit LIKE '%' || :transactionHash || '%' ESCAPE '\';
 
 countSnapshots:
 SELECT COUNT(1) FROM safe_snapshots;

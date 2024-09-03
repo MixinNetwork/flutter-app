@@ -391,10 +391,18 @@ class DecryptMessage extends Injector {
           _jsonDecode(data.data) as Map<String, dynamic>);
       await _processSystemSnapshotMessage(data, systemSnapshot);
     } else if (data.category == MessageCategory.systemSafeSnapshot) {
-      final json = _jsonDecode(data.data);
-      final systemSnapshot =
-          db.SafeSnapshot.fromJson(json as Map<String, dynamic>);
-      await _processSystemSafeSnapshotMessage(data, systemSnapshot);
+      final json = _jsonDecode(data.data) as Map<String, dynamic>;
+
+      final systemSnapshot = db.SafeSnapshot.fromJson(json);
+      String? depositHash;
+      if (json
+          case {
+            'deposit_hash': final String hash,
+          }) {
+        depositHash = hash;
+      }
+      await _processSystemSafeSnapshotMessage(
+          data, systemSnapshot, depositHash);
     } else if (data.category == MessageCategory.systemSafeInscription) {
       final json = _jsonDecode(data.data);
       final inscription =
@@ -1004,13 +1012,20 @@ class DecryptMessage extends Injector {
     await _insertMessage(message, data);
   }
 
-  Future<void> _processSystemSafeSnapshotMessage(
-      BlazeMessageData data, db.SafeSnapshot snapshot) async {
-    if (snapshot.transactionHash.isNotEmpty) {
-      await database.safeSnapshotDao
-          .deletePendingSnapshotByHash(snapshot.transactionHash);
+  Future<void> _processSystemSafeSnapshotMessage(BlazeMessageData data,
+      db.SafeSnapshot snapshot, String? depositHash) async {
+    if (depositHash != null && depositHash.isNotEmpty) {
+      await database.safeSnapshotDao.deletePendingSnapshotByHash(depositHash);
+      await database.safeSnapshotDao.insert(snapshot.copyWith(
+        deposit: Value(SafeDeposit(
+          depositHash: depositHash,
+          sender: '',
+        )),
+      ));
+    } else {
+      await database.safeSnapshotDao.insert(snapshot);
     }
-    await database.safeSnapshotDao.insert(snapshot);
+
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
