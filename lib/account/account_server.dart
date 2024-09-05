@@ -33,7 +33,6 @@ import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
-import '../utils/authentication.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';

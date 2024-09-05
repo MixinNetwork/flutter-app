@@ -6,7 +6,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../account/account_key_value.dart';
 import '../../crypto/signal/signal_database.dart';
