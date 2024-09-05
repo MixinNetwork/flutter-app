@@ -132,9 +132,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m50(count) => "${Intl.plural(count, one: '周', other: '周')}";
 
-  static String m51(arg0) => "价值 ${arg0}";
+  static String m51(arg0) => "当前版本（${arg0}）不再可用!\n请点击下面的“更新”按钮从应用商店更新到最新版本。";
 
-  static String m52(arg0) => "当时价值 ${arg0}";
+  static String m52(arg0) => "价值 ${arg0}";
+
+  static String m53(arg0) => "当时价值 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -687,13 +689,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("确定取消置顶所有消息么？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未读消息"),
+        "updateMixin": MessageLookupByLibrary.simpleMessage("升级 Mixin"),
+        "updateMixinDescription": m51,
+        "upgrade": MessageLookupByLibrary.simpleMessage("升级"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升级中..."),
         "useBiometric": MessageLookupByLibrary.simpleMessage("使用生物识别"),
         "userDeleteHint": MessageLookupByLibrary.simpleMessage("该用户已经删除了账号。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "username": MessageLookupByLibrary.simpleMessage("用户名"),
-        "valueNow": m51,
-        "valueThen": m52,
+        "valueNow": m52,
+        "valueThen": m53,
         "verifyPin": MessageLookupByLibrary.simpleMessage("验证 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),

@@ -4678,6 +4678,36 @@ class Localization {
     );
   }
 
+  /// `Update Mixin`
+  String get updateMixin {
+    return Intl.message(
+      'Update Mixin',
+      name: 'updateMixin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The current version ({arg0}) is no longer available!\nPlease click "Update" below to update to the latest version from the Google Play.`
+  String updateMixinDescription(Object arg0) {
+    return Intl.message(
+      'The current version ($arg0) is no longer available!\nPlease click "Update" below to update to the latest version from the Google Play.',
+      name: 'updateMixinDescription',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
+  /// `Upgrade`
+  String get upgrade {
+    return Intl.message(
+      'Upgrade',
+      name: 'upgrade',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Upgrading`
   String get upgrading {
     return Intl.message(

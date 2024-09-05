@@ -140,9 +140,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m50(count) =>
       "${Intl.plural(count, one: 'неделя', other: 'недели')}";
 
-  static String m51(arg0) => "значение сейчас ${arg0}";
+  static String m51(arg0) =>
+      "Текущая версия (${arg0}) больше не доступна!\nНажмите «Обновить» ниже, чтобы выполнить обновление до последней версии из Google Play.";
 
-  static String m52(arg0) => "значение затем ${arg0}";
+  static String m52(arg0) => "значение сейчас ${arg0}";
+
+  static String m53(arg0) => "значение затем ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -694,11 +697,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Вы уверены, что хотите открепить все сообщения?"),
         "unreadMessages":
             MessageLookupByLibrary.simpleMessage("Непрочитанные сообщения"),
+        "updateMixin": MessageLookupByLibrary.simpleMessage("Обновить Mixin"),
+        "updateMixinDescription": m51,
         "upgrading": MessageLookupByLibrary.simpleMessage("Обновление"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Пользователь не найден"),
-        "valueNow": m51,
-        "valueThen": m52,
+        "valueNow": m52,
+        "valueThen": m53,
         "verifyPin":
             MessageLookupByLibrary.simpleMessage("Подтвердить PIN-код"),
         "video": MessageLookupByLibrary.simpleMessage("Видео"),

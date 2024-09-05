@@ -132,9 +132,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m50(count) => "${Intl.plural(count, one: '週', other: '週')}";
 
-  static String m51(arg0) => "價值 ${arg0}";
+  static String m51(arg0) => "當前版本（${arg0}）不再可用!\n請點選下面的“更新”按鈕從應用商店更新到最新版本。";
 
-  static String m52(arg0) => "當時價值 ${arg0}";
+  static String m52(arg0) => "價值 ${arg0}";
+
+  static String m53(arg0) => "當時價值 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -442,7 +444,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iAmGood": MessageLookupByLibrary.simpleMessage("我很好。"),
         "id": MessageLookupByLibrary.simpleMessage("ID"),
         "ignoreThisVersion": MessageLookupByLibrary.simpleMessage("忽略這次版本更新"),
-        "image": MessageLookupByLibrary.simpleMessage("影象"),
+        "image": MessageLookupByLibrary.simpleMessage("影像"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包含檔案"),
         "includeVideos": MessageLookupByLibrary.simpleMessage("包括影片"),
         "initializing": MessageLookupByLibrary.simpleMessage("初始化…"),
@@ -542,7 +544,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pickAConversation":
             MessageLookupByLibrary.simpleMessage("選擇一個對話，開始傳送資訊"),
-        "picturesAndVideos": MessageLookupByLibrary.simpleMessage("影象 & 影片"),
+        "picturesAndVideos": MessageLookupByLibrary.simpleMessage("影像 & 影片"),
         "pinTitle": MessageLookupByLibrary.simpleMessage("置頂"),
         "pinnedMessageTitle": m38,
         "port": MessageLookupByLibrary.simpleMessage("埠號"),
@@ -687,13 +689,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("確定取消置頂所有訊息麼？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("未讀訊息"),
+        "updateMixin": MessageLookupByLibrary.simpleMessage("升級 Mixin"),
+        "updateMixinDescription": m51,
+        "upgrade": MessageLookupByLibrary.simpleMessage("升級"),
         "upgrading": MessageLookupByLibrary.simpleMessage("升級中..."),
         "useBiometric": MessageLookupByLibrary.simpleMessage("使用生物識別"),
         "userDeleteHint": MessageLookupByLibrary.simpleMessage("該使用者已經刪除了賬號。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到這個使用者"),
         "username": MessageLookupByLibrary.simpleMessage("使用者名稱"),
-        "valueNow": m51,
-        "valueThen": m52,
+        "valueNow": m52,
+        "valueThen": m53,
         "verifyPin": MessageLookupByLibrary.simpleMessage("驗證 PIN"),
         "video": MessageLookupByLibrary.simpleMessage("影片"),
         "videos": MessageLookupByLibrary.simpleMessage("影片"),

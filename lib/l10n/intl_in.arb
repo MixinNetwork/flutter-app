@@ -212,6 +212,8 @@
 "turnOnNotifications" : "Aktifkan Notifikasi",
 "unblock" : "Batal Blokir",
 "unmute" : "Suarakan",
+"updateMixin" : "Perbarui Mixin",
+"updateMixinDescription" : "Versi saat ini ({arg0}) tidak lagi tersedia!\nHarap klik Perbarui berikut untuk memperbarui ke versi terbaru dari App Store.",
 "upgrading" : "Meningkatkan",
 "userNotFound" : "Pengguna tidak ditemukan",
 "verifyPin" : "Verifikasikan PIN",

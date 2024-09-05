@@ -128,9 +128,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m50(count) => "${Intl.plural(count, one: '週', other: '週間')}";
 
-  static String m51(arg0) => "現在価格 ${arg0}";
+  static String m51(arg0) =>
+      "現在のバージョン(${arg0})は使用できなくなりました。\n「アップデート」をクリックして、Google Playから最新バージョンにアップデートしてください。";
 
-  static String m52(arg0) => "当時の価格 ${arg0}";
+  static String m52(arg0) => "現在価格 ${arg0}";
+
+  static String m53(arg0) => "当時の価格 ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -619,10 +622,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesConfirmation":
             MessageLookupByLibrary.simpleMessage("全てのメッセージのピン留めを解除しますか？"),
         "unreadMessages": MessageLookupByLibrary.simpleMessage("新しいメッセージ"),
+        "updateMixin": MessageLookupByLibrary.simpleMessage("Mixinのアップデート"),
+        "updateMixinDescription": m51,
         "upgrading": MessageLookupByLibrary.simpleMessage("アップデート中"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("ユーザーが見つかりませんでした"),
-        "valueNow": m51,
-        "valueThen": m52,
+        "valueNow": m52,
+        "valueThen": m53,
         "verifyPin": MessageLookupByLibrary.simpleMessage("PINコードを認証"),
         "video": MessageLookupByLibrary.simpleMessage("動画"),
         "videos": MessageLookupByLibrary.simpleMessage("動画"),

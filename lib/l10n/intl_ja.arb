@@ -379,6 +379,8 @@
 "unpinAllMessages" : "全てのメッセージのピン留めを解除する",
 "unpinAllMessagesConfirmation" : "全てのメッセージのピン留めを解除しますか？",
 "unreadMessages" : "新しいメッセージ",
+"updateMixin" : "Mixinのアップデート",
+"updateMixinDescription" : "現在のバージョン({arg0})は使用できなくなりました。\n「アップデート」をクリックして、Google Playから最新バージョンにアップデートしてください。",
 "upgrading" : "アップデート中",
 "userNotFound" : "ユーザーが見つかりませんでした",
 "valueNow" : "現在価格 {arg0}",

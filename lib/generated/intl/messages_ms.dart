@@ -81,9 +81,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m44(arg0) => "Adakah anda pasti mahu menghantar ${arg0}?";
 
-  static String m51(arg0) => "nilai sekarang ${arg0}";
+  static String m51(arg0) =>
+      "Versi semasa (${arg0}) tidak lagi tersedia!\nSila klik Kemas kini di bawah untuk mengemas kini ke versi terbaharu dari Google Play.";
 
-  static String m52(arg0) => "nilai maka ${arg0}";
+  static String m52(arg0) => "nilai sekarang ${arg0}";
+
+  static String m53(arg0) => "nilai maka ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -392,11 +395,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "typeMessage": MessageLookupByLibrary.simpleMessage("Taipkan mesej"),
         "unblock": MessageLookupByLibrary.simpleMessage("Buka sekatan"),
         "unmute": MessageLookupByLibrary.simpleMessage("Nyahsenyap"),
+        "updateMixin": MessageLookupByLibrary.simpleMessage("Kemas kini Mixin"),
+        "updateMixinDescription": m51,
         "upgrading": MessageLookupByLibrary.simpleMessage("Menaik taraf"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemui"),
-        "valueNow": m51,
-        "valueThen": m52,
+        "valueNow": m52,
+        "valueThen": m53,
         "verifyPin": MessageLookupByLibrary.simpleMessage("Sahkan PIN"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videos": MessageLookupByLibrary.simpleMessage("Video"),
