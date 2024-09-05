@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../blaze/blaze.dart';
 import '../../utils/audio_message_player/audio_message_service.dart';
@@ -11,12 +12,14 @@ import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
+import '../../utils/system/package_info.dart';
 import '../../utils/system/text_input.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
+import '../landing/landing.dart';
 import '../provider/conversation_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/responsive_navigator_provider.dart';
@@ -58,6 +61,11 @@ class HomePage extends HookConsumerWidget {
     final isEmptyUserName = ref.watch(authAccountProvider
         .select((value) => value?.fullName?.isEmpty ?? true));
 
+    final updateRequired = useMemoizedStream(
+            () => context.accountServer.isUpdateRequired,
+            keys: [context.accountServer]).data ??
+        false;
+
     return DeviceTransferHandlerWidget(
       child: CommandPaletteWrapper(
         child: ConversationHotKey(
@@ -66,55 +74,111 @@ class HomePage extends HookConsumerWidget {
             children: [
               LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) =>
-                    _HomePage(
-                  constraints: constraints,
-                ),
+                    _HomePage(constraints: constraints),
               ),
               if (isEmptyUserName) const _SetupNameWidget(),
-              if (localTimeError)
-                HookBuilder(builder: (context) {
-                  final loading = useState(false);
-                  return Material(
-                    color: context.theme.background,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            context.l10n.loadingTime,
-                            style: TextStyle(
-                              color: context.theme.text,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          if (loading.value)
-                            CircularProgressIndicator(
-                              color: context.theme.accent,
-                            ),
-                          if (!loading.value)
-                            MixinButton(
-                              onTap: () async {
-                                loading.value = true;
-                                try {
-                                  await context.accountServer.reconnectBlaze();
-                                } catch (_) {}
-
-                                loading.value = false;
-                              },
-                              child: Text(context.l10n.continueText),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+              if (localTimeError) const _LocalTimeError(),
+              if (updateRequired) const _RequiredUpdateWidget(),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _RequiredUpdateWidget extends HookWidget {
+  const _RequiredUpdateWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    final info = useMemoizedFuture(getPackageInfo, null).data;
+    return Material(
+      color: context.theme.background,
+      child: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.updateMixin,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  context.l10n.updateMixinDescription(info?.version ?? ''),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                MixinButton(
+                  onTap: () async {
+                    await launchUrlString('https://mixin.one/messenger');
+                  },
+                  child: Text(context.l10n.upgrade),
+                ),
+              ],
+            ),
+          ),
+          const Positioned(
+            bottom: 16,
+            right: 16,
+            child: VersionInfoWidget(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocalTimeError extends StatelessWidget {
+  const _LocalTimeError();
+
+  @override
+  Widget build(BuildContext context) => HookBuilder(builder: (context) {
+        final loading = useState(false);
+        return Material(
+          color: context.theme.background,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.loadingTime,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                if (loading.value)
+                  CircularProgressIndicator(
+                    color: context.theme.accent,
+                  ),
+                if (!loading.value)
+                  MixinButton(
+                    onTap: () async {
+                      loading.value = true;
+                      try {
+                        await context.accountServer.reconnectBlaze();
+                      } catch (_) {}
+
+                      loading.value = false;
+                    },
+                    child: Text(context.l10n.continueText),
+                  ),
+              ],
+            ),
+          ),
+        );
+      });
 }
 
 class _SetupNameWidget extends HookConsumerWidget {

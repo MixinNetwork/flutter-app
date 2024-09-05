@@ -33,6 +33,7 @@ import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
+import '../utils/authentication.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -114,22 +115,31 @@ class AccountServer {
     appActiveListener.addListener(onActive);
   }
 
+  final BehaviorSubject<bool> _isUpdateRequired = BehaviorSubject<bool>();
+
+  ValueStream<bool> get isUpdateRequired => _isUpdateRequired;
+
   Future<void> _onClientRequestError(DioException e) async {
-    if (e is MixinApiError && (e.error! as MixinError).code == authentication) {
-      final serverTime =
-          int.tryParse(e.response?.headers.value('x-server-time') ?? '');
-      if (serverTime != null) {
-        final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
-        final deviceTime =
-            e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
-        final difference = time.difference(deviceTime ?? DateTime.now());
-        if (difference.abs() >= const Duration(minutes: 5)) {
-          _notifyBlazeWaitSyncTime();
-          return;
+    if (e is MixinApiError) {
+      final mixinError = e.error! as MixinError;
+      if (mixinError.code == authentication) {
+        final serverTime =
+            int.tryParse(e.response?.headers.value('x-server-time') ?? '');
+        if (serverTime != null) {
+          final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
+          final deviceTime =
+              e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
+          final difference = time.difference(deviceTime ?? DateTime.now());
+          if (difference.abs() >= const Duration(minutes: 5)) {
+            _notifyBlazeWaitSyncTime();
+            return;
+          }
         }
+        await signOutAndClear();
+        multiAuthNotifier.signOut();
+      } else if (mixinError.code == oldVersion) {
+        _isUpdateRequired.value = true;
       }
-      await signOutAndClear();
-      multiAuthNotifier.signOut();
     }
   }
 

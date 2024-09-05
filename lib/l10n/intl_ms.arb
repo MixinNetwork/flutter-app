@@ -215,6 +215,8 @@
 "typeMessage" : "Taipkan mesej",
 "unblock" : "Buka sekatan",
 "unmute" : "Nyahsenyap",
+"updateMixin" : "Kemas kini Mixin",
+"updateMixinDescription" : "Versi semasa ({arg0}) tidak lagi tersedia!\nSila klik Kemas kini di bawah untuk mengemas kini ke versi terbaharu dari Google Play.",
 "upgrading" : "Menaik taraf",
 "userNotFound" : "Pengguna tidak ditemui",
 "valueNow" : "nilai sekarang {arg0}",

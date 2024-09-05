@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../account/account_key_value.dart';
 import '../../crypto/signal/signal_database.dart';
@@ -178,48 +180,55 @@ class LandingScaffold extends HookConsumerWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final info = useMemoizedFuture(getPackageInfo, null).data;
-    return Portal(
-      child: Scaffold(
-        backgroundColor: context.dynamicColor(
-          const Color(0xFFE5E5E5),
-          darkColor: const Color.fromRGBO(35, 39, 43, 1),
-        ),
-        resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: [
-            Center(
-              child: SizedBox(
-                width: 520,
-                height: 418,
-                child: Material(
-                  color: context.theme.popUp,
-                  borderRadius: const BorderRadius.all(Radius.circular(13)),
-                  elevation: 10,
-                  child: ClipRRect(
+  Widget build(BuildContext context, WidgetRef ref) => Portal(
+        child: Scaffold(
+          backgroundColor: context.dynamicColor(
+            const Color(0xFFE5E5E5),
+            darkColor: const Color.fromRGBO(35, 39, 43, 1),
+          ),
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: [
+              Center(
+                child: SizedBox(
+                  width: 520,
+                  height: 418,
+                  child: Material(
+                    color: context.theme.popUp,
                     borderRadius: const BorderRadius.all(Radius.circular(13)),
-                    child: child,
+                    elevation: 10,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(13)),
+                      child: child,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: NTapGestureDetector(
-                n: 5,
-                onTap: () => showLogPage(context),
-                child: Text(
-                  info?.versionAndBuildNumber ?? '',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: context.theme.secondaryText,
-                  ),
-                ),
+              const Positioned(
+                bottom: 16,
+                right: 16,
+                child: VersionInfoWidget(),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+      );
+}
+
+class VersionInfoWidget extends HookWidget {
+  const VersionInfoWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final info = useMemoizedFuture(getPackageInfo, null).data;
+    return NTapGestureDetector(
+      n: 5,
+      onTap: () => showLogPage(context),
+      child: Text(
+        info?.versionAndBuildNumber ?? '',
+        style: TextStyle(
+          fontSize: 14,
+          color: context.theme.secondaryText,
         ),
       ),
     );

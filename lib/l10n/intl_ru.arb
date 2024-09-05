@@ -379,6 +379,8 @@
 "unpinAllMessages" : "Открепить все сообщения",
 "unpinAllMessagesConfirmation" : "Вы уверены, что хотите открепить все сообщения?",
 "unreadMessages" : "Непрочитанные сообщения",
+"updateMixin" : "Обновить Mixin",
+"updateMixinDescription" : "Текущая версия ({arg0}) больше не доступна!\nНажмите «Обновить» ниже, чтобы выполнить обновление до последней версии из Google Play.",
 "upgrading" : "Обновление",
 "userNotFound" : "Пользователь не найден",
 "valueNow" : "значение сейчас {arg0}",

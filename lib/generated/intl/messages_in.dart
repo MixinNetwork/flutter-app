@@ -80,6 +80,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m44(arg0) => "Yakin ingin mengirim ${arg0}?";
 
+  static String m51(arg0) =>
+      "Versi saat ini (${arg0}) tidak lagi tersedia!\nHarap klik Perbarui berikut untuk memperbarui ke versi terbaru dari App Store.";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Tentang"),
@@ -385,6 +388,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aktifkan Notifikasi"),
         "unblock": MessageLookupByLibrary.simpleMessage("Batal Blokir"),
         "unmute": MessageLookupByLibrary.simpleMessage("Suarakan"),
+        "updateMixin": MessageLookupByLibrary.simpleMessage("Perbarui Mixin"),
+        "updateMixinDescription": m51,
         "upgrading": MessageLookupByLibrary.simpleMessage("Meningkatkan"),
         "userNotFound":
             MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemukan"),
