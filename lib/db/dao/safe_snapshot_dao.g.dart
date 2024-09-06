@@ -102,7 +102,7 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
 
   Future<int> deletePendingSnapshotByHash(String transactionHash) {
     return customUpdate(
-      'DELETE FROM safe_snapshots WHERE type = \'pending\' AND transaction_hash = ?1',
+      'DELETE FROM safe_snapshots WHERE type = \'pending\' AND deposit LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'',
       variables: [Variable<String>(transactionHash)],
       updates: {safeSnapshots},
       updateKind: UpdateKind.delete,
