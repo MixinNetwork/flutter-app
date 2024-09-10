@@ -90,7 +90,7 @@ jobs:
         run: tar -C build/linux/x64/release/bundle -cvf mixin_desktop_linux_amd64_portable.tar.gz .
 
       - name: Upload app archive for next steps
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mixin_desktop_linux_amd64_portable
           path: mixin_desktop_linux_amd64_portable.tar.gz
@@ -99,7 +99,7 @@ jobs:
         run: ./dist/linux_deb.sh
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mixin_desktop_amd64.deb.zip
           path: build/mixin_desktop_amd64.deb
@@ -155,7 +155,7 @@ jobs:
         run: |
           cp ${{ steps.build-snap.outputs.snap }} mixin_desktop_linux_amd64.snap
       - name: Upload snap
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mixin-desktop-snap
           path: mixin_desktop_linux_amd64.snap
@@ -195,7 +195,7 @@ jobs:
 
       - run: mv "Mixin Messenger-latest-x86_64.AppImage" mixin_desktop_linux_amd64.AppImage
       - name: Upload AppImage Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AppImage
           path: mixin_desktop_linux_amd64.AppImage
@@ -253,7 +253,7 @@ jobs:
         shell: cmd
 
       - name: Upload Installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mixin_desktop_windows_setup_amd64.exe.zip
           path: build\mixin_desktop_windows_setup_amd64.exe
@@ -264,7 +264,7 @@ jobs:
           flutter pub run msix:create --build-windows false --version ${{ steps.build-app.outputs.MSIX_PACKAGE_VERSION }} -v
 
       - name: Upload msix
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: flutter_app.msix.zip
           path: build\windows\x64\runner\Release\flutter_app.msix
@@ -273,7 +273,7 @@ jobs:
         run: flutter pub run debug_info_collector
 
       - name: Upload debug info
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows_debug_info
           path: build\syms
