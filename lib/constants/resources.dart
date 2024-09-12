@@ -438,9 +438,9 @@ class Resources {
   /// {@macro assets_generator.assetsImagesPlanBasicPng.preview}
   static const String assetsImagesPlanBasicPng = 'assets/images/plan_basic.png';
 
-  /// {@macro assets_generator.assetsImagesPlanPremiumPng.preview}
-  static const String assetsImagesPlanPremiumPng =
-      'assets/images/plan_premium.png';
+  /// {@macro assets_generator.assetsImagesPlanPremiumGif.preview}
+  static const String assetsImagesPlanPremiumGif =
+      'assets/images/plan_premium.gif';
 
   /// {@macro assets_generator.assetsImagesPlanStandardPng.preview}
   static const String assetsImagesPlanStandardPng =
