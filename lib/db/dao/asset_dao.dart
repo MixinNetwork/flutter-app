@@ -14,8 +14,8 @@ extension AssetConverter on sdk.Asset {
     }
     return AssetsCompanion.insert(
       assetId: assetId,
-      symbol: symbol,
-      name: name,
+      symbol: displaySymbol,
+      name: displayName,
       iconUrl: iconUrl,
       balance: balance,
       destination: destination,
