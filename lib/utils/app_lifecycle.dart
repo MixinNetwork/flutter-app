@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 final _appObserver = _AppLifecycleObserver();
@@ -11,7 +10,7 @@ void initAppLifecycleObserver() {
 /// Check if app is on foreground.
 bool get isAppActive => _appObserver._isActive.value;
 
-ValueListenable<bool> get appActiveListener => _appObserver._isActive;
+ValueNotifier<bool> get appActiveListener => _appObserver._isActive;
 
 class _AppLifecycleObserver extends WidgetsBindingObserver {
   final _isActive = ValueNotifier<bool>(true);
