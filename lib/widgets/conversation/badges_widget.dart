@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -7,7 +6,7 @@ import '../../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
 import '../cache_image.dart';
 
-class BadgesWidget extends HookWidget {
+class BadgesWidget extends StatelessWidget {
   const BadgesWidget({
     required this.verified,
     required this.isBot,
