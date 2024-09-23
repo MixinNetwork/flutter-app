@@ -295,6 +295,7 @@ class MixinFileImage extends FileImage {
         informationCollector: () => <DiagnosticsNode>[
           ErrorDescription('Path: ${file.path}'),
         ],
+        controller: controller,
       );
 
   Future<ui.Codec> _loadAsync(
@@ -712,3 +713,52 @@ Future<Uint8List?> downloadImage(String url) async {
 
 /// get md5 from key
 String keyToMd5(String key) => md5.convert(utf8.encode(key)).toString();
+
+class MixinAssetImage extends AssetImage {
+  const MixinAssetImage(
+    super.assetName, {
+    super.bundle,
+    super.package,
+    this.controller,
+  });
+
+  final ValueNotifier<bool>? controller;
+
+  @protected
+  Future<ui.Codec> _loadAsync(
+    AssetBundleImageKey key, {
+    required Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
+  }) async {
+    final ui.ImmutableBuffer buffer;
+    // Hot reload/restart could change whether an asset bundle or key in a
+    // bundle are available, or if it is a network backed bundle.
+    try {
+      buffer = await key.bundle.loadBuffer(key.name);
+      // ignore: avoid_catching_errors
+    } on FlutterError {
+      PaintingBinding.instance.imageCache.evict(key);
+      rethrow;
+    }
+    return decode(buffer);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(
+      AssetBundleImageKey key, ImageDecoderCallback decode) {
+    InformationCollector? collector;
+    assert(() {
+      collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<ImageProvider>('Image provider', this),
+            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
+          ];
+      return true;
+    }());
+    return _MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key, decode: decode),
+      scale: key.scale,
+      debugLabel: key.name,
+      informationCollector: collector,
+      controller: controller,
+    );
+  }
+}
