@@ -50,6 +50,7 @@ enum MixinSchemeHost {
   conversations,
   multisigs,
   swap,
+  markets,
 }
 
 const int hour1 = 1000 * 60 * 60;

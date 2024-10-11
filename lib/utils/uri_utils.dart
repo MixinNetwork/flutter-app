@@ -119,7 +119,7 @@ Future<bool> openUri(
       return false;
     }
 
-    if (uri.isSwap) {
+    if (uri.isSwap || uri.isMarkets) {
       await showUnknownMixinUrlDialog(context, uri);
       return false;
     }
@@ -354,6 +354,9 @@ extension _MixinUriExtension on Uri {
 
   bool get isSwap =>
       _isTypeHost(MixinSchemeHost.swap) || _isTypeScheme(MixinSchemeHost.swap);
+
+  bool get isMarkets =>
+      _isTypeHost(MixinSchemeHost.markets) || _isTypeScheme(MixinSchemeHost.markets);
 
   String? get startTextOfConversation {
     if (!isMixin) return null;
