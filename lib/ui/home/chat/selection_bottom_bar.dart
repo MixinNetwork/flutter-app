@@ -104,7 +104,7 @@ class SelectionBottomBar extends HookConsumerWidget {
                         content =
                             messagePreviewOptimize(e.status, e.type, e.content);
                       }
-                      return '${e.userFullName}, (${dateFormat.format(e.createdAt)}):\n$content';
+                      return '${e.userFullName}, (${dateFormat.format(e.createdAt.toLocal())}):\n$content';
                     }).join('\n\n');
 
                     await Clipboard.setData(ClipboardData(text: text));
