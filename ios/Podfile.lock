@@ -86,6 +86,8 @@ PODS:
     - Flutter
   - protocol_handler_ios (0.0.1):
     - Flutter
+  - rhttp (0.0.1):
+    - Flutter
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
@@ -144,6 +146,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
   - protocol_handler_ios (from `.symlinks/plugins/protocol_handler_ios/ios`)
+  - rhttp (from `.symlinks/plugins/rhttp/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -207,6 +210,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/platform_device_id/ios"
   protocol_handler_ios:
     :path: ".symlinks/plugins/protocol_handler_ios/ios"
+  rhttp:
+    :path: ".symlinks/plugins/rhttp/ios"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   super_native_extensions:
@@ -247,6 +252,7 @@ SPEC CHECKSUMS:
   PhoneNumberKit: 3d9a20cfe8ee68f35c2a3ae9474093133f72a8a1
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   protocol_handler_ios: a5db8abc38526ee326988b808be621e5fd568990
+  rhttp: 367a8162e63311c6dde543169b591cc04454dcd6
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
   sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
   sqlite3_flutter_libs: c00457ebd31e59fa6bb830380ddba24d44fbcd3b

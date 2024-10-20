@@ -23,6 +23,7 @@ list(APPEND FLUTTER_FFI_PLUGIN_LIST
   jni
   mixin_logger
   ogg_opus_player
+  rhttp
   webcrypto
 )
 

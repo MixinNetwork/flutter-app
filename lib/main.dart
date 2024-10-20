@@ -13,6 +13,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:protocol_handler/protocol_handler.dart';
+import 'package:rhttp/rhttp.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
@@ -35,6 +36,8 @@ Future<void> main(List<String> args) async {
   EquatableConfig.stringify = true;
 
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+
+  await Rhttp.init();
 
   WidgetsFlutterBinding.ensureInitialized();
 

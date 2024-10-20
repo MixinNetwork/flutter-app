@@ -43,6 +43,8 @@ PODS:
   - PLCrashReporter (1.11.2)
   - protocol_handler_macos (0.0.1):
     - FlutterMacOS
+  - rhttp (0.0.1):
+    - FlutterMacOS
   - screen_retriever (0.0.1):
     - FlutterMacOS
   - "sqlite3 (3.46.0+1)":
@@ -100,6 +102,7 @@ DEPENDENCIES:
   - platform_device_id_macos (from `Flutter/ephemeral/.symlinks/plugins/platform_device_id_macos/macos`)
   - PLCrashReporter
   - protocol_handler_macos (from `Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos`)
+  - rhttp (from `Flutter/ephemeral/.symlinks/plugins/rhttp/macos`)
   - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
   - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
@@ -157,6 +160,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/platform_device_id_macos/macos
   protocol_handler_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos
+  rhttp:
+    :path: Flutter/ephemeral/.symlinks/plugins/rhttp/macos
   screen_retriever:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
   sqlite3_flutter_libs:
@@ -197,6 +202,7 @@ SPEC CHECKSUMS:
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
   protocol_handler_macos: d10a6c01d6373389ffd2278013ab4c47ed6d6daa
+  rhttp: 337afda4c3e4df31087160719ffca6452c225cc2
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
   sqlite3_flutter_libs: 5ca46c1a04eddfbeeb5b16566164aa7ad1616e7b
