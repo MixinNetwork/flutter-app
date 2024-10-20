@@ -356,7 +356,8 @@ extension _MixinUriExtension on Uri {
       _isTypeHost(MixinSchemeHost.swap) || _isTypeScheme(MixinSchemeHost.swap);
 
   bool get isMarkets =>
-      _isTypeHost(MixinSchemeHost.markets) || _isTypeScheme(MixinSchemeHost.markets);
+      _isTypeHost(MixinSchemeHost.markets) ||
+      _isTypeScheme(MixinSchemeHost.markets);
 
   String? get startTextOfConversation {
     if (!isMixin) return null;
