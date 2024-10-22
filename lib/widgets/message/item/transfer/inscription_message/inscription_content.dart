@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -74,7 +76,7 @@ class _TextInscriptionContent extends HookWidget {
     final text = useMemoizedFuture(
       () async {
         final response = await client.get(Uri.parse(contentUrl));
-        return response.body;
+        return utf8.decode(response.bodyBytes, allowMalformed: true);
       },
       null,
       keys: [client, contentUrl],
@@ -98,6 +100,7 @@ class _TextInscriptionContent extends HookWidget {
               minFontSize: 14,
               overflow: TextOverflow.ellipsis,
               style: textStyle,
+              textAlign: TextAlign.center,
             );
             return Column(
               mainAxisSize: MainAxisSize.min,
