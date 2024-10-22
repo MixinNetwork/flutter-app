@@ -9,6 +9,7 @@ import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
+import 'package:rhttp/rhttp.dart' as rhttp;
 
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
@@ -23,6 +24,7 @@ import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
+import '../mixin_api_client.dart';
 import '../property/setting_property.dart';
 import '../proxy.dart';
 import 'download_key_value.dart';

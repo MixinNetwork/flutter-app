@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:dio/dio.dart';
+import 'package:dio_compatibility_layer/dio_compatibility_layer.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:native_dio_adapter/native_dio_adapter.dart';
+import 'package:rhttp/rhttp.dart' as rhttp;
 
 import '../constants/constants.dart';
 import 'logger.dart';
@@ -79,7 +80,11 @@ Client createClient({
 
 extension DioNativeAdapter on Dio {
   void userCustomAdapter() {
-    httpClientAdapter = NativeAdapter();
+    final client = rhttp.RhttpCompatibleClient.createSync(
+        settings: const rhttp.ClientSettings(
+      dnsSettings: rhttp.DnsSettings.static(fallback: '8.8.8.8'),
+    ));
+    httpClientAdapter = ConversionLayerAdapter(client);
   }
 }
 

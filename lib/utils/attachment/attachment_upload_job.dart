@@ -90,6 +90,8 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
 }
 
 Future<void> _upload(_AttachmentUploadJobOption options) async {
+  await rhttp.Rhttp.init();
+
   List<int>? digest;
   final cancelToken = CancelToken();
 

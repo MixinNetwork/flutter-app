@@ -80,6 +80,8 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
 }
 
 Future<void> _download(_AttachmentDownloadJobOption options) async {
+  await rhttp.Rhttp.init();
+
   final cancelToken = CancelToken();
 
   final receivePort = ReceivePort();
