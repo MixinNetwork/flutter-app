@@ -24,7 +24,6 @@ import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
-import '../mixin_api_client.dart';
 import '../property/setting_property.dart';
 import '../proxy.dart';
 import 'download_key_value.dart';
