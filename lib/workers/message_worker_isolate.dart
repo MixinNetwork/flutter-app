@@ -10,6 +10,7 @@ import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:rhttp/rhttp.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/isolate_channel.dart';
 
@@ -70,6 +71,7 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   EquatableConfig.stringify = true;
   ansiColorDisabled = Platform.isIOS;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
+  await Rhttp.init();
   BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
   final isolateChannel =
       IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
