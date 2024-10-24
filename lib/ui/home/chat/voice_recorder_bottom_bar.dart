@@ -217,8 +217,8 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
                 child: CompositedTransformFollower(
                   link: link,
                   showWhenUnlinked: false,
-                  targetAnchor: Alignment.center,
-                  followerAnchor: Alignment.center,
+                  targetAnchor: Alignment.bottomCenter,
+                  followerAnchor: Alignment.bottomCenter,
                   child: SizedBox(
                     width: layoutWidth,
                     child: const Material(child: VoiceRecorderBottomBar()),
@@ -451,7 +451,6 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
             onTap: () async {
               final conversationItem = ref.read(conversationProvider);
               final accountServer = context.accountServer;
-              final quietMessageId = ref.read(quoteMessageIdProvider);
 
               final recorderCubit = context.read<VoiceRecorderCubit>();
 
@@ -478,6 +477,8 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
               }
               if (conversationItem == null) return;
 
+              final quoteMessageId = ref.read(quoteMessageIdProvider);
+              ref.read(quoteMessageProvider.notifier).state = null;
               await accountServer.sendAudioMessage(
                 audioFile.xFile,
                 result.duration,
@@ -485,7 +486,7 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
                 conversationItem.encryptCategory,
                 conversationId: conversationItem.conversationId,
                 recipientId: conversationItem.userId,
-                quoteMessageId: quietMessageId,
+                quoteMessageId: quoteMessageId,
               );
             },
           ),

@@ -119,8 +119,9 @@ class AudioMessage extends HookConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _AnimatedWave(
-                    duration: duration,
+                  SizedBox(
+                    width: 238,
+                    child: _AnimatedWave(duration: duration),
                   ),
                   const SizedBox(height: 8),
                   Text(
