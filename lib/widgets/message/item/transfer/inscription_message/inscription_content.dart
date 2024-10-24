@@ -55,6 +55,11 @@ class InscriptionContent extends HookWidget {
   }
 }
 
+// Replace all invisible characters with a placeholder ■
+@visibleForTesting
+String inscriptionDisplayContent(String content) => content.replaceAll(
+    RegExp(r'[\s\p{Other}\p{Cf}\p{Cc}\p{Cn}]', unicode: true), '■');
+
 class _TextInscriptionContent extends HookWidget {
   const _TextInscriptionContent(
       {required this.contentUrl, required this.iconUrl, required this.mode});
@@ -76,7 +81,8 @@ class _TextInscriptionContent extends HookWidget {
     final text = useMemoizedFuture(
       () async {
         final response = await client.get(Uri.parse(contentUrl));
-        return utf8.decode(response.bodyBytes, allowMalformed: true);
+        final text = utf8.decode(response.bodyBytes, allowMalformed: true);
+        return inscriptionDisplayContent(text);
       },
       null,
       keys: [client, contentUrl],
