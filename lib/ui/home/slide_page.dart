@@ -18,7 +18,9 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/animated_visibility.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
+import '../../widgets/conversation/badges_widget.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/high_light_text.dart';
 import '../../widgets/menu.dart';
 import '../../widgets/select_item.dart';
 import '../../widgets/toast.dart';
@@ -156,9 +158,21 @@ class _CurrentUser extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              account?.fullName ?? '',
-              style: const TextStyle(fontSize: 14),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: CustomText(
+                    account?.fullName ?? '',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+                BadgesWidget(
+                  verified: account?.isVerified,
+                  isBot: false,
+                  membership: account?.membership,
+                )
+              ],
             ),
             const SizedBox(height: 2),
             Text(
