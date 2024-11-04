@@ -23,7 +23,7 @@ class ActionsCardMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, constraints) {
-        final width = (constraints.maxWidth * 0.41).clamp(240.0, 340.0);
+        final width = (constraints.maxWidth * 0.5).clamp(320.0, 375.0);
         return MessageBubble(
           showBubble: false,
           padding: EdgeInsets.zero,
