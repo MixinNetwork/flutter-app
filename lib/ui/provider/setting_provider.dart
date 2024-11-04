@@ -55,7 +55,7 @@ class _SettingState extends Equatable {
 
   int get brightness => _brightness ?? 0;
 
-  bool get messageShowAvatar => _messageShowAvatar ?? false;
+  bool get messageShowAvatar => _messageShowAvatar ?? true;
 
   bool get messagePreview => _messagePreview ?? true;
 
@@ -208,7 +208,7 @@ class SettingChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get messageShowAvatar => _messageShowAvatar ?? false;
+  bool get messageShowAvatar => _messageShowAvatar ?? true;
 
   set messageShowIdentityNumber(bool value) {
     if (_messageShowIdentityNumber == value) return;
