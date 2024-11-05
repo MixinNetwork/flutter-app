@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rhttp/rhttp.dart';
 
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
@@ -548,22 +549,42 @@ class MixinNetworkImageProvider
   ) async {
     try {
       final resolved = Uri.base.resolve(key.url);
-      final response = await _tryGetResponse(resolved, key.proxyConfig);
-      if (response == null || response.statusCode != HttpStatus.ok) {
-        return null;
+      final Uint8List bytes;
+
+      if (key.proxyConfig != null) {
+        final response = await _tryGetResponse(resolved, key.proxyConfig);
+        if (response == null || response.statusCode != HttpStatus.ok) {
+          return null;
+        }
+
+        bytes = await consolidateHttpClientResponseBytes(
+          response,
+          onBytesReceived: chunkEvents != null
+              ? (int cumulative, int? total) {
+                  chunkEvents.add(ImageChunkEvent(
+                    cumulativeBytesLoaded: cumulative,
+                    expectedTotalBytes: total,
+                  ));
+                }
+              : null,
+        );
+      } else {
+        d('no proxy: load image from network: $resolved');
+        final response = await Rhttp.getBytes(resolved.toString(),
+            onReceiveProgress: chunkEvents != null
+                ? (int cumulative, int total) {
+                    chunkEvents.add(ImageChunkEvent(
+                      cumulativeBytesLoaded: cumulative,
+                      expectedTotalBytes: total,
+                    ));
+                  }
+                : null);
+        if (response.statusCode != HttpStatus.ok) {
+          return null;
+        }
+        bytes = response.body;
       }
 
-      final bytes = await consolidateHttpClientResponseBytes(
-        response,
-        onBytesReceived: chunkEvents != null
-            ? (int cumulative, int? total) {
-                chunkEvents.add(ImageChunkEvent(
-                  cumulativeBytesLoaded: cumulative,
-                  expectedTotalBytes: total,
-                ));
-              }
-            : null,
-      );
       if (bytes.lengthInBytes == 0) {
         return Future<Uint8List>.error(
             StateError('NetworkImage is an empty file: $resolved'));
