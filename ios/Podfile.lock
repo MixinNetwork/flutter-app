@@ -1,8 +1,6 @@
 PODS:
   - audio_session (0.0.1):
     - Flutter
-  - cupertino_http (0.0.1):
-    - Flutter
   - device_info (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -124,7 +122,6 @@ PODS:
 
 DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
-  - cupertino_http (from `.symlinks/plugins/cupertino_http/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -166,8 +163,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
-  cupertino_http:
-    :path: ".symlinks/plugins/cupertino_http/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
   device_info_plus:
@@ -227,7 +222,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audio_session: 088d2483ebd1dc43f51d253d4a1c517d9a2e7207
-  cupertino_http: 1a3a0f163c1b26e7f1a293b33d476e0fde7a64ec
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   DKImagePickerController: a7836546cfdfe014171694f643a7d575bc8ace7f
