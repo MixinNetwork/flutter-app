@@ -80,14 +80,12 @@ Client createClient({
   return client;
 }
 
+final globalRHttpClient = rhttp.RhttpCompatibleClient.createSync();
+
 extension DioNativeAdapter on Dio {
   void userCustomAdapter() {
-    final client = rhttp.RhttpCompatibleClient.createSync(
-        settings: const rhttp.ClientSettings(
-            // dnsSettings: rhttp.DnsSettings.static(fallback: '8.8.8.8'),
-            ));
-    httpClientAdapter =
-        _CustomHttpClientAdapterWrapper(ConversionLayerAdapter(client));
+    httpClientAdapter = _CustomHttpClientAdapterWrapper(
+        ConversionLayerAdapter(globalRHttpClient));
   }
 }
 
