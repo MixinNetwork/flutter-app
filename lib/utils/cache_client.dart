@@ -6,9 +6,9 @@ import 'package:http/io_client.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:rhttp/rhttp.dart';
 
 import '../widgets/cache_image.dart';
+import 'mixin_api_client.dart';
 import 'proxy.dart';
 
 class CacheClient extends BaseClient {
@@ -16,7 +16,7 @@ class CacheClient extends BaseClient {
     if (proxyConfig != null) {
       _client = IOClient(HttpClient()..setProxy(proxyConfig));
     } else {
-      _client = RhttpCompatibleClient.createSync();
+      _client = globalRHttpClient;
     }
   }
 
