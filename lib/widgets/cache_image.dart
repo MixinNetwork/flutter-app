@@ -207,10 +207,8 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
 
-    if (_nextFrame != null) {
-      _nextFrame?.image.dispose();
-      _nextFrame = null;
-    }
+    _nextFrame?.image.dispose();
+    _nextFrame = null;
 
     try {
       _nextFrame = await _codec!.getNextFrame();
