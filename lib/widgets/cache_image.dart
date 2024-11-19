@@ -60,7 +60,6 @@ Future<ui.ImmutableBuffer?> _loadCacheBuffer(
       data = await ui.ImmutableBuffer.fromFilePath(
         join(_cacheImagesDirectory.path, md5Key),
       );
-      i('fuck s loadCacheBuffer url: $key, status: ${data.length}');
     } catch (_) {
       // Throws an Exception if the asset does not exist.
     }
@@ -142,7 +141,6 @@ Future<Uint8List?> loadCacheBytes(
   if (_cacheImagesDirectory.existsSync() && md5Key != null) {
     try {
       data = await File(join(_cacheImagesDirectory.path, md5Key)).readAsBytes();
-      i('fuck s loadCacheBytes url: $key, status: ${data.length}');
     } catch (_) {
       // Throws an Exception if the asset does not exist.
     }
