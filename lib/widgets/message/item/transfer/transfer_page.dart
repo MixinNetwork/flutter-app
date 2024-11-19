@@ -476,14 +476,14 @@ class SymbolIconWithBorder extends StatelessWidget {
                   chainPlaceholderSize: chainSize + chainBorder,
                 ),
                 clipBehavior: Clip.antiAliasWithSaveLayer,
-                child: CacheImage(symbolUrl),
+                child: MixinImage.network(symbolUrl),
               ),
             ),
             if (chainUrl != null)
               Positioned(
                 right: chainBorder / 2,
                 bottom: chainBorder / 2,
-                child: CacheImage(
+                child: MixinImage.network(
                   chainUrl!,
                   width: chainSize,
                   height: chainSize,

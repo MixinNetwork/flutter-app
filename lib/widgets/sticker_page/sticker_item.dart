@@ -83,13 +83,14 @@ class StickerItem extends HookConsumerWidget {
             errorBuilder:
                 errorWidget != null ? (_, __, ___) => errorWidget! : null,
           )
-        : CacheImage(
+        : MixinImage.network(
             assetUrl,
             height: height,
             width: width,
-            controller: playing,
+            // controller: playing,
             fit: BoxFit.contain,
-            errorWidget: errorWidget != null ? () => errorWidget! : null,
+            errorBuilder:
+                errorWidget != null ? (_, __, ___) => errorWidget! : null,
           );
 
     if (width == null || height == null) {

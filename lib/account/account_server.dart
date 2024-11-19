@@ -1416,23 +1416,23 @@ class AccountServer {
 
   Future<void> pinMessage({
     required String conversationId,
-    required List<PinMessageMinimal> pinMessageMinimals,
+    required List<PinMessageMinimal> pinMessageMinimalist,
   }) =>
       _sendMessageHelper.sendPinMessage(
         conversationId: conversationId,
         senderId: userId,
-        pinMessageMinimals: pinMessageMinimals,
+        pinMessageMinimalist: pinMessageMinimalist,
         pin: true,
       );
 
   Future<void> unpinMessage({
     required String conversationId,
-    required List<PinMessageMinimal> pinMessageMinimals,
+    required List<PinMessageMinimal> pinMessageMinimalist,
   }) =>
       _sendMessageHelper.sendPinMessage(
         conversationId: conversationId,
         senderId: userId,
-        pinMessageMinimals: pinMessageMinimals,
+        pinMessageMinimalist: pinMessageMinimalist,
         pin: false,
       );
 

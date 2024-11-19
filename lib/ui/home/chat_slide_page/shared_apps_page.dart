@@ -120,7 +120,7 @@ class _AppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipOval(
-        child: CacheImage(
+        child: MixinImage.network(
           app.iconUrl,
           width: size,
           height: size,

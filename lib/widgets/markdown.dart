@@ -110,7 +110,7 @@ MarkdownConfig _createMarkdownConfig({
         final imageUrl = url;
         return ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
-          child: CacheImage(
+          child: MixinImage.network(
             imageUrl,
             width: width,
             height: height,

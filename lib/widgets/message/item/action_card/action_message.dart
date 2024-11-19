@@ -7,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../../utils/hook.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../cache_image.dart';
@@ -71,7 +70,6 @@ class AppCardItem extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playing = useImagePlaying(context);
     final description = useMemoized(
       () => const LineSplitter().convert(data.description).firstOrNull ?? '',
       [data.description],
@@ -81,11 +79,10 @@ class AppCardItem extends HookConsumerWidget {
       children: [
         ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          child: CacheImage(
+          child: MixinImage.network(
             data.iconUrl,
             height: 40,
             width: 40,
-            controller: playing,
           ),
         ),
         const SizedBox(width: 8),

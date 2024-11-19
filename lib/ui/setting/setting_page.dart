@@ -180,12 +180,9 @@ class _Item extends HookConsumerWidget {
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
-    // ignore: unused_element
-    this.leading,
   });
 
   final String? leadingAssetName;
-  final Widget? leading;
   final String title;
   final String? pageName;
   final Color? color;
@@ -199,16 +196,15 @@ class _Item extends HookConsumerWidget {
         value.pages.any((element) => pageName == element.name)));
 
     return CellItem(
-      leading: leading ??
-          (leadingAssetName != null
-              ? SvgPicture.asset(
-                  leadingAssetName!,
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                      color ?? context.theme.text, BlendMode.srcIn),
-                )
-              : null),
+      leading: (leadingAssetName != null
+          ? SvgPicture.asset(
+              leadingAssetName!,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                  color ?? context.theme.text, BlendMode.srcIn),
+            )
+          : null),
       title: AutoSizeText(title, maxLines: 1),
       color: color ?? context.theme.text,
       selected: selected,

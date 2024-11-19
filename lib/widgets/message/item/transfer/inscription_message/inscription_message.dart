@@ -113,9 +113,10 @@ class _InscriptionLayout extends StatelessWidget {
                         width: 22,
                         child: SizedBox.square(
                           dimension: 22,
-                          child: CacheImage(
+                          child: MixinImage.network(
                             inscription?.iconUrl ?? '',
-                            errorWidget: () => defaultCollectionImage,
+                            errorBuilder: (_, __, ___) =>
+                                defaultCollectionImage,
                             placeholder: () => defaultCollectionImage,
                           ),
                         ),

@@ -34,9 +34,9 @@ class InscriptionContent extends HookWidget {
         child: switch (inscription) {
           Inscription(contentType: final type, contentUrl: final contentUrl)
               when type.startsWith('image') =>
-            CacheImage(
+            MixinImage.network(
               contentUrl,
-              errorWidget: () => defaultInscriptionImage,
+              errorBuilder: (_, __, ___) => defaultInscriptionImage,
               placeholder: () => defaultInscriptionImage,
             ),
           Inscription(
@@ -119,9 +119,9 @@ class _TextInscriptionContent extends HookWidget {
                   width: constraints.maxWidth / 3,
                   child: SizedBox.square(
                     dimension: constraints.maxWidth / 3,
-                    child: CacheImage(
+                    child: MixinImage.network(
                       iconUrl,
-                      errorWidget: () => defaultCollectionImage,
+                      errorBuilder: (_, __, ___) => defaultCollectionImage,
                       placeholder: () => defaultCollectionImage,
                     ),
                   ),

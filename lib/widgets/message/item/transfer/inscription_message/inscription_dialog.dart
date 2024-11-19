@@ -100,7 +100,7 @@ class _BlurBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        CacheImage(inscription!.contentUrl),
+        MixinImage.network(inscription!.contentUrl),
         BackdropFilter(
           filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
           child: const SizedBox.expand(),

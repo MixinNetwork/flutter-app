@@ -200,10 +200,10 @@ class QuoteMessage extends HookConsumerWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: CacheImage(
+          image: MixinImage.network(
             thumbUrl ?? '',
             placeholder: () => placeholder,
-            errorWidget: () => placeholder,
+            errorBuilder: (_, __, ___) => placeholder,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
@@ -417,13 +417,13 @@ class _QuoteImage extends HookWidget {
       [mediaUrl, messageId],
     );
 
-    return Image(
-      image: MixinFileImage(File(context.accountServer.convertAbsolutePath(
+    return MixinImage.file(
+      File(context.accountServer.convertAbsolutePath(
         type,
         quote.conversationId as String,
         mediaUrl,
         isTranscriptPage,
-      ))),
+      )),
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) =>
           ImageByBlurHashOrBase64(imageData: thumbImage!),

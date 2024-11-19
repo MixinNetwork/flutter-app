@@ -190,12 +190,12 @@ class AvatarWidget extends StatelessWidget {
     );
 
     final child = avatarUrl?.isNotEmpty == true
-        ? CacheImage(
+        ? MixinImage.network(
             avatarUrl!,
             width: size,
             height: size,
             placeholder: () => placeholder,
-            errorWidget: () => placeholder,
+            errorBuilder: (_, __, ___) => placeholder,
           )
         : placeholder;
 

@@ -172,7 +172,7 @@ class _SnapshotLayout extends StatelessWidget {
                       const SizedBox.square(dimension: 16)
                     else
                       ClipOval(
-                        child: CacheImage(
+                        child: MixinImage.network(
                           assetIcon!,
                           width: 16,
                           height: 16,

@@ -169,7 +169,6 @@ class _GifItem extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final previewImage = gif.images.fixedWidthDownsampled;
     final sendImage = gif.images.fixedWidth;
-    final playing = useImagePlaying(context);
 
     return InteractiveDecoratedBox(
       onTap: () async {
@@ -187,9 +186,8 @@ class _GifItem extends HookConsumerWidget {
           height: int.tryParse(sendImage.height),
         );
       },
-      child: CacheImage(
+      child: MixinImage.network(
         previewImage.url,
-        controller: playing,
         placeholder: () => ColoredBox(color: context.theme.secondaryText),
       ),
     );

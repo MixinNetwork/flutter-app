@@ -129,7 +129,7 @@ class MessageVideo extends HookConsumerWidget {
           children: [
             if (thumbImage != null)
               ImageByBlurHashOrBase64(imageData: thumbImage),
-            if (thumbUrl != null) CacheImage(thumbUrl),
+            if (thumbUrl != null) MixinImage.network(thumbUrl),
             overlay ?? _VideoMessageOverlayInfo(isCurrentUser: isCurrentUser),
           ],
         ),

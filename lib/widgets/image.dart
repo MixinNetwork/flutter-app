@@ -41,15 +41,12 @@ class _ImageByBlurHash extends HookConsumerWidget {
     required this.blurHash,
     this.width = _kDefaultBlurHashSize,
     this.height = _kDefaultBlurHashSize,
-    // ignore: unused_element
-    this.fit = BoxFit.cover,
   })  : assert(width > 0),
         assert(height > 0);
 
   final BlurHash blurHash;
   final int width;
   final int height;
-  final BoxFit? fit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,7 +69,6 @@ class _ImageByBlurHash extends HookConsumerWidget {
       image: image.value,
       width: width.toDouble(),
       height: height.toDouble(),
-      fit: fit,
     );
   }
 }

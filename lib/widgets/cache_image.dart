@@ -7,63 +7,18 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http_client_helper/http_client_helper.dart';
+import 'package:lottie/lottie.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:rhttp/rhttp.dart';
 
 import '../utils/extension/extension.dart';
+import '../utils/hook.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
-
-typedef LoadingErrorWidgetBuilder = Widget Function();
-
-class CacheImage extends StatelessWidget {
-  const CacheImage(
-    this.src, {
-    this.width,
-    this.height,
-    this.placeholder,
-    this.errorWidget,
-    this.fit = BoxFit.cover,
-    this.controller,
-    super.key,
-  });
-
-  final String src;
-  final double? width;
-  final double? height;
-  final PlaceholderWidgetBuilder? placeholder;
-  final LoadingErrorWidgetBuilder? errorWidget;
-  final ValueNotifier<bool>? controller;
-
-  final BoxFit fit;
-
-  @override
-  Widget build(BuildContext context) {
-    final proxyUrl = context.database.settingProperties.activatedProxy;
-    return Image(
-      image: MixinNetworkImageProvider(
-        src,
-        controller: controller,
-        proxyConfig: proxyUrl,
-      ),
-      width: width,
-      height: height,
-      fit: fit,
-      errorBuilder: (context, error, stackTrace) =>
-          errorWidget?.call() ?? SizedBox(width: width, height: height),
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) {
-          return child;
-        }
-        return placeholder?.call() ?? SizedBox(width: width, height: height);
-      },
-    );
-  }
-}
 
 // min frameDuration
 // see also:
@@ -72,761 +27,349 @@ class CacheImage extends StatelessWidget {
 const _defaultFrameDuration = Duration(milliseconds: 100);
 const _minFrameDuration = Duration(milliseconds: 20);
 
-class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
-  /// Creates a image stream completer.
-  ///
-  /// Immediately starts decoding the first image frame when the codec is ready.
-  ///
-  /// The `codec` parameter is a future for an initialized [ui.Codec] that will
-  /// be used to decode the image.
-  ///
-  /// The `scale` parameter is the linear scale factor for drawing this frames
-  /// of this image at their intended size.
-  ///
-  /// The `tag` parameter is passed on to created [ImageInfo] objects to
-  /// help identify the source of the image.
-  ///
-  /// The `chunkEvents` parameter is an optional stream of notifications about
-  /// the loading progress of the image. If this stream is provided, the events
-  /// produced by the stream will be delivered to registered [ImageChunkListener]s
-  /// (see [addListener]).
-  _MultiFrameImageStreamCompleter({
-    required Future<ui.Codec> codec,
-    required double scale,
-    String? debugLabel,
-    Stream<ImageChunkEvent>? chunkEvents,
-    InformationCollector? informationCollector,
-    this.controller,
-  })  : _informationCollector = informationCollector,
-        _scale = scale {
-    this.debugLabel = debugLabel;
-    codec.then<void>(_handleCodecReady,
-        onError: (Object error, StackTrace stack) {
-      reportError(
-        context: ErrorDescription('resolving an image codec'),
-        exception: error,
-        stack: stack,
-        informationCollector: informationCollector,
-        silent: true,
-      );
-    });
-    if (chunkEvents != null) {
-      chunkEvents.listen(
-        reportImageChunkEvent,
-        onError: (Object error, StackTrace stack) {
-          reportError(
-            context: ErrorDescription('loading an image'),
-            exception: error,
-            stack: stack,
-            informationCollector: informationCollector,
-            silent: true,
-          );
-        },
-      );
-    }
-  }
-
-  final ValueNotifier<bool>? controller;
-
-  ImageInfo? _currentImage;
-  ui.Codec? _codec;
-  final double _scale;
-  final InformationCollector? _informationCollector;
-  ui.FrameInfo? _nextFrame;
-
-  // When the current was first shown.
-  late Duration _shownTimestamp;
-
-  // The requested duration for the current frame;
-  Duration? _frameDuration;
-
-  // How many frames have been emitted so far.
-  // int _framesEmitted = 0;
-  Timer? _timer;
-
-  // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
-  bool _frameCallbackScheduled = false;
-
-  bool _isDisposed = false;
-
-  void _controllerListener() {
-    if (_isDisposed || controller?.value == false) {
-      return;
-    }
-    _decodeNextFrameAndSchedule();
-  }
-
-  void _handleCodecReady(ui.Codec codec) {
-    _codec = codec;
-    assert(_codec != null);
-
-    if (hasListeners) {
-      try {
-        controller?.addListener(_controllerListener);
-      } catch (_) {}
-      _decodeNextFrameAndSchedule();
-    }
-  }
-
-  void _handleAppFrame(Duration timestamp) {
-    if (_isDisposed) {
-      return;
-    }
-    _frameCallbackScheduled = false;
-    if (!hasListeners) return;
-    assert(_nextFrame != null);
-    if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(ImageInfo(
-        image: _nextFrame!.image.clone(),
-        scale: _scale,
-        debugLabel: debugLabel,
-      ));
-      _shownTimestamp = timestamp;
-      _frameDuration = _nextFrame!.duration;
-      if (_frameDuration! < _minFrameDuration) {
-        _frameDuration = _defaultFrameDuration;
-      }
-      _nextFrame!.image.dispose();
-      _nextFrame = null;
-      if (controller?.value == false) return;
-      // ignore gif's repetition count
-      _decodeNextFrameAndSchedule();
-      return;
-    }
-    final delay = _frameDuration! - (timestamp - _shownTimestamp);
-    _timer = Timer(delay, _scheduleAppFrame);
-  }
-
-  bool _isFirstFrame() => _frameDuration == null;
-
-  bool _hasFrameDurationPassed(Duration timestamp) =>
-      timestamp - _shownTimestamp >= _frameDuration!;
-
-  Future<void> _decodeNextFrameAndSchedule() async {
-    if (_isDisposed || _codec == null || !hasListeners) {
-      return;
-    }
-
-    _nextFrame?.image.dispose();
-    _nextFrame = null;
-
-    try {
-      _nextFrame = await _codec!.getNextFrame();
-    } catch (exception, stack) {
-      if (!_isDisposed) {
-        reportError(
-          context: ErrorDescription('resolving an image frame'),
-          exception: exception,
-          stack: stack,
-          informationCollector: _informationCollector,
-          silent: true,
-        );
-      }
-      return;
-    }
-
-    if (_isDisposed || !hasListeners || controller?.value == false) {
-      _nextFrame?.image.dispose();
-      _nextFrame = null;
-      return;
-    }
-
-    if (_codec!.frameCount == 1) {
-      // ImageStreamCompleter listeners removed while waiting for next frame to
-      // be decoded.
-      // There's no reason to emit the frame without active listeners.
-      if (!hasListeners) {
-        return;
-      }
-      // This is not an animated image, just return it and don't schedule more
-      // frames.
-      _emitFrame(ImageInfo(
-        image: _nextFrame!.image.clone(),
-        scale: _scale,
-        debugLabel: debugLabel,
-      ));
-      _nextFrame!.image.dispose();
-      _nextFrame = null;
-      return;
-    }
-    _scheduleAppFrame();
-  }
-
-  void _scheduleAppFrame() {
-    if (_frameCallbackScheduled) {
-      return;
-    }
-    _frameCallbackScheduled = true;
-    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
-  }
-
-  void _emitFrame(ImageInfo imageInfo) {
-    if (_isDisposed) {
-      imageInfo.dispose();
-      return;
-    }
-    setImage(imageInfo);
-    // _framesEmitted += 1;
-  }
-
-  @override
-  void addListener(ImageStreamListener listener) {
-    if (!hasListeners &&
-        _codec != null &&
-        (_currentImage == null || _codec!.frameCount > 1)) {
-      _decodeNextFrameAndSchedule();
-    }
-    super.addListener(listener);
-  }
-
-  @override
-  void removeListener(ImageStreamListener listener) {
-    super.removeListener(listener);
-    if (!hasListeners) {
-      _timer?.cancel();
-      _timer = null;
-      _disposeResources();
-    }
-  }
-
-  void _disposeResources() {
-    if (_isDisposed) {
-      return;
-    }
-    _isDisposed = true;
-
-    _timer?.cancel();
-    _timer = null;
-
-    try {
-      controller?.removeListener(_controllerListener);
-    } catch (_) {}
-
-    _nextFrame?.image.dispose();
-    _nextFrame = null;
-
-    _codec?.dispose();
-    _codec = null;
-
-    _currentImage?.dispose();
-    _currentImage = null;
-  }
-}
-
-class MixinFileImage extends FileImage {
-  MixinFileImage(
-    super.file, {
-    super.scale,
-    this.controller,
-  }) : _lastModified = _fileLastModified(file);
-
-  final ValueNotifier<bool>? controller;
-
-  // used to check if the file has been modified.
-  final int _lastModified;
-
-  static int _fileLastModified(File file) {
-    try {
-      return file.lastModifiedSync().millisecondsSinceEpoch;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  @override
-  @protected
-  ImageStreamCompleter loadImage(FileImage key, ImageDecoderCallback decode) =>
-      _MultiFrameImageStreamCompleter(
-        codec: _loadAsync(key, decode: decode),
-        scale: key.scale,
-        debugLabel: key.file.path,
-        informationCollector: () => <DiagnosticsNode>[
-          ErrorDescription('Path: ${file.path}'),
-        ],
-        controller: controller,
-      );
-
-  Future<ui.Codec> _loadAsync(
-    FileImage key, {
-    ImageDecoderCallback? decode,
-    // ignore: deprecated_member_use
-    DecoderBufferCallback? decodeBufferDeprecated,
-  }) async {
-    assert(key == this);
-
-    if (file.path.isEmpty) {
-      throw StateError('file path is empty');
-    }
-
-    if (!file.existsSync()) {
-      throw StateError('file is not exists. ${file.path}');
-    }
-
-    final bytes = await file.readAsBytes();
-
-    if (bytes.lengthInBytes == 0) {
-      // The file may become available later.
-      PaintingBinding.instance.imageCache.evict(key);
-      throw StateError('$file is empty and cannot be loaded as an image.');
-    }
-
-    if (decodeBufferDeprecated != null) {
-      return decodeBufferDeprecated(
-          await ui.ImmutableBuffer.fromUint8List(bytes));
-    } else {
-      final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-      return decode!(buffer);
-    }
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      other is MixinFileImage &&
-      super == other &&
-      _lastModified == other._lastModified;
-
-  @override
-  int get hashCode => Object.hash(super.hashCode, _lastModified);
-}
-
 const String cacheImageFolderName = 'cacheimage';
 
-@immutable
-class MixinNetworkImageProvider
-    extends ImageProvider<MixinNetworkImageProvider> {
-  const MixinNetworkImageProvider(
-    this.url, {
-    this.scale = 1.0,
-    this.headers,
-    this.cache = true,
-    this.retries = 3,
-    this.timeLimit,
-    this.timeRetry = const Duration(milliseconds: 100),
-    this.cacheKey,
-    this.printError = true,
-    this.cancelToken,
-    this.imageCacheName,
-    this.cacheMaxAge,
-    this.controller,
-    this.proxyConfig,
-  });
+final _sharedHttpClient = HttpClient()..autoUncompress = false;
 
-  final ValueNotifier<bool>? controller;
-
-  /// The name of [ImageCache], you can define custom [ImageCache] to store this provider.
-  final String? imageCacheName;
-
-  /// The time limit to request image
-  final Duration? timeLimit;
-
-  /// The time to retry to request
-  final int retries;
-
-  /// The time duration to retry to request
-  final Duration timeRetry;
-
-  /// Whether cache image to local
-  final bool cache;
-
-  /// The URL from which the image will be fetched.
-  final String url;
-
-  final ProxyConfig? proxyConfig;
-
-  /// The scale to place in the [ImageInfo] object of the image.
-  final double scale;
-
-  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
-  final Map<String, String>? headers;
-
-  /// The token to cancel network request
-  final CancellationToken? cancelToken;
-
-  /// Custom cache key
-  final String? cacheKey;
-
-  /// print error
-  final bool printError;
-
-  /// The max duration to cache image.
-  /// After this time the cache is expired and the image is reloaded.
-  final Duration? cacheMaxAge;
-
-  @override
-  ImageStreamCompleter loadImage(
-      MixinNetworkImageProvider key, ImageDecoderCallback decode) {
-    final chunkEvents = StreamController<ImageChunkEvent>();
-
-    return _MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents, decode: decode),
-      scale: key.scale,
-      chunkEvents: chunkEvents.stream,
-      informationCollector: () => <DiagnosticsNode>[
-        DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<MixinNetworkImageProvider>('Image key', key),
-      ],
-      controller: controller,
-    );
-  }
-
-  /// Override this method, so that you can handle raw image data,
-  /// for example, compress
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List data, {
-    ImageDecoderCallback? decode,
-    // ignore: deprecated_member_use
-    DecoderBufferCallback? decodeBufferDeprecated,
-  }) async {
-    if (decodeBufferDeprecated != null) {
-      return decodeBufferDeprecated(
-          await ui.ImmutableBuffer.fromUint8List(data));
-    } else {
-      return decode!(await ui.ImmutableBuffer.fromUint8List(data));
+HttpClient get _httpClient {
+  var client = _sharedHttpClient;
+  assert(() {
+    if (debugNetworkImageHttpClientProvider != null) {
+      client = debugNetworkImageHttpClientProvider!();
     }
-  }
+    return true;
+  }());
+  return client;
+}
 
-  @override
-  Future<MixinNetworkImageProvider> obtainKey(
-          ImageConfiguration configuration) =>
-      SynchronousFuture<MixinNetworkImageProvider>(this);
+ProxyConfig? _imageClientProxyConfig;
 
-  Future<ui.Codec> _loadAsync(
-    MixinNetworkImageProvider key,
-    StreamController<ImageChunkEvent> chunkEvents, {
-    ImageDecoderCallback? decode,
-    // ignore: deprecated_member_use
-    DecoderBufferCallback? decodeBufferDeprecated,
-  }) async {
-    assert(key == this);
-    final md5Key = cacheKey ?? keyToMd5(key.url);
-    ui.Codec? result;
-    if (cache) {
-      try {
-        final data = await _loadCache(key, chunkEvents, md5Key);
-        if (data != null) {
-          result = await instantiateImageCodec(
-            data,
-            decode: decode,
-            decodeBufferDeprecated: decodeBufferDeprecated,
-          );
-        }
-      } catch (e) {
-        if (printError) {
-          i('load cache error $e');
-        }
-      }
-    }
+Future<ui.ImmutableBuffer?> _loadCacheBuffer(
+  ImageProvider<Object> provider,
+  ProxyConfig? proxyConfig,
+) async {
+  final md5Key = _getKeyImage(provider);
 
-    if (result == null) {
-      try {
-        final data = await _loadNetwork(key, chunkEvents);
-        if (data != null) {
-          result = await instantiateImageCodec(
-            data,
-            decode: decode,
-            decodeBufferDeprecated: decodeBufferDeprecated,
-          );
-        }
-      } catch (e) {
-        i('load network error $e');
-      }
-    }
+  final _cacheImagesDirectory = Directory(
+      join((await getTemporaryDirectory()).path, cacheImageFolderName));
+  ui.ImmutableBuffer? data;
 
-    if (result == null) {
-      // The image failed to load, so we should evict it from the cache.
-      scheduleMicrotask(() {
-        PaintingBinding.instance.imageCache.evict(key);
-      });
-      return Future<ui.Codec>.error(StateError('Failed to load $url.'));
-    }
-    return result;
-  }
-
-  /// Get the image from cache folder.
-  Future<Uint8List?> _loadCache(
-    MixinNetworkImageProvider key,
-    StreamController<ImageChunkEvent>? chunkEvents,
-    String md5Key,
-  ) async {
-    final _cacheImagesDirectory = Directory(
-        join((await getTemporaryDirectory()).path, cacheImageFolderName));
-    Uint8List? data;
-    // exist, try to find cache image file
-    if (_cacheImagesDirectory.existsSync()) {
-      final cacheFile = File(join(_cacheImagesDirectory.path, md5Key));
-      if (cacheFile.existsSync()) {
-        if (key.cacheMaxAge != null) {
-          final now = DateTime.now();
-          final fs = cacheFile.statSync();
-          if (now.subtract(key.cacheMaxAge!).isAfter(fs.changed)) {
-            i('cache expired, reload. $url');
-            cacheFile.deleteSync(recursive: true);
-          } else {
-            data = await cacheFile.readAsBytes();
-          }
-        } else {
-          data = await cacheFile.readAsBytes();
-        }
-      }
-    }
-    // create folder
-    else {
-      await _cacheImagesDirectory.create();
-    }
-
-    // load from network
-    if (data == null) {
-      data = await _loadNetwork(
-        key,
-        chunkEvents,
-      );
-      if (data != null) {
-        // cache image file
-        await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(data);
-      }
-    }
-
-    return data;
-  }
-
-  /// Get the image from network.
-  Future<Uint8List?> _loadNetwork(
-    MixinNetworkImageProvider key,
-    StreamController<ImageChunkEvent>? chunkEvents,
-  ) async {
+  if (_cacheImagesDirectory.existsSync() && md5Key != null) {
     try {
-      final resolved = Uri.base.resolve(key.url);
-      final Uint8List bytes;
-
-      if (key.proxyConfig != null) {
-        final response = await _tryGetResponse(resolved, key.proxyConfig);
-        if (response == null || response.statusCode != HttpStatus.ok) {
-          return null;
-        }
-
-        bytes = await consolidateHttpClientResponseBytes(
-          response,
-          onBytesReceived: chunkEvents != null
-              ? (int cumulative, int? total) {
-                  chunkEvents.add(ImageChunkEvent(
-                    cumulativeBytesLoaded: cumulative,
-                    expectedTotalBytes: total,
-                  ));
-                }
-              : null,
-        );
-      } else {
-        d('no proxy: load image from network: $resolved');
-        final response = await Rhttp.getBytes(resolved.toString(),
-            onReceiveProgress: chunkEvents != null
-                ? (int cumulative, int total) {
-                    chunkEvents.add(ImageChunkEvent(
-                      cumulativeBytesLoaded: cumulative,
-                      expectedTotalBytes: total,
-                    ));
-                  }
-                : null);
-        if (response.statusCode != HttpStatus.ok) {
-          return null;
-        }
-        bytes = response.body;
-      }
-
-      if (bytes.lengthInBytes == 0) {
-        return Future<Uint8List>.error(
-            StateError('NetworkImage is an empty file: $resolved'));
-      }
-
-      return bytes;
-      // ignore: avoid_catching_errors
-    } on OperationCanceledError catch (_) {
-      if (printError) {
-        i('User cancel request.');
-      }
-      return Future<Uint8List>.error(StateError('User cancel request $url.'));
-    } catch (e) {
-      if (printError) {
-        i('Failed to load image. $e');
-      }
-    } finally {
-      await chunkEvents?.close();
-    }
-    return null;
-  }
-
-  Future<HttpClientResponse> _getResponse(
-      Uri resolved, ProxyConfig? proxy) async {
-    if (proxy != _imageClientProxyConfig) {
-      _httpClient.setProxy(proxy);
-      _imageClientProxyConfig = proxy;
-    }
-    final request = await _httpClient.getUrl(resolved);
-    headers?.forEach((String name, String value) {
-      request.headers.add(name, value);
-    });
-    final response = await request.close();
-    if (timeLimit != null) {
-      response.timeout(
-        timeLimit!,
+      data = await ui.ImmutableBuffer.fromFilePath(
+        join(_cacheImagesDirectory.path, md5Key),
       );
+    } catch (_) {
+      // Throws an Exception if the asset does not exist.
     }
-    return response;
+  } else {
+    await _cacheImagesDirectory.create();
   }
 
-  // Http get with cancel, delay try again
-  Future<HttpClientResponse?> _tryGetResponse(
-    Uri resolved,
-    ProxyConfig? proxy,
-  ) async {
-    cancelToken?.throwIfCancellationRequested();
-    return RetryHelper.tryRun<HttpClientResponse>(
-      () => CancellationTokenSource.register(
-        cancelToken,
-        _getResponse(resolved, proxy),
-      ),
-      cancelToken: cancelToken,
-      timeRetry: timeRetry,
-      retries: retries,
+  if (data == null) {
+    final (buffer, bytes) = await _loadBuffer(provider, proxyConfig);
+    data = buffer;
+    if (bytes != null) {
+      await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(bytes);
+    }
+  }
+
+  return data;
+}
+
+String? _getKeyImage(Object provider) =>
+    provider is NetworkImage ? provider.url : null;
+
+Future<(ui.ImmutableBuffer?, Uint8List?)> _loadBuffer(
+  ImageProvider<Object> provider,
+  ProxyConfig? proxyConfig,
+) async {
+  if (provider is NetworkImage) {
+    final resolved = Uri.base.resolve(provider.url);
+    final Uint8List bytes;
+
+    final response = await _tryGetResponse(resolved, proxyConfig);
+    if (response == null || response.statusCode != HttpStatus.ok) {
+      return (null, null);
+    }
+
+    bytes = await consolidateHttpClientResponseBytes(response);
+
+    if (bytes.lengthInBytes == 0) {
+      throw StateError('NetworkImage is an empty file: $resolved');
+    }
+    return (await ui.ImmutableBuffer.fromUint8List(bytes), bytes);
+  } else if (provider is AssetImage) {
+    return (await ui.ImmutableBuffer.fromAsset(provider.assetName), null);
+  } else if (provider is FileImage) {
+    return (await ui.ImmutableBuffer.fromFilePath(provider.file.path), null);
+  } else if (provider is MemoryImage) {
+    return (
+      await ui.ImmutableBuffer.fromUint8List(provider.bytes),
+      provider.bytes
     );
   }
+  return (null, null);
+}
 
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
+Future<HttpClientResponse?> _tryGetResponse(
+  Uri resolved,
+  ProxyConfig? proxy,
+) async {
+  if (proxy != _imageClientProxyConfig) {
+    _httpClient.setProxy(proxy);
+    _imageClientProxyConfig = proxy;
+  }
+  final request = await _httpClient.getUrl(resolved);
+  final response = await request.close();
+
+  return response;
+}
+
+Future<Uint8List?> loadCacheBytes(
+  Object provider,
+  ProxyConfig? proxyConfig,
+) async {
+  final md5Key = _getKeyImage(provider);
+
+  final _cacheImagesDirectory = Directory(
+      join((await getTemporaryDirectory()).path, cacheImageFolderName));
+  Uint8List? data;
+
+  if (_cacheImagesDirectory.existsSync() && md5Key != null) {
+    try {
+      data = await File(join(_cacheImagesDirectory.path, md5Key)).readAsBytes();
+    } catch (_) {
+      // Throws an Exception if the asset does not exist.
     }
-    return other is MixinNetworkImageProvider &&
-        url == other.url &&
-        scale == other.scale &&
-        timeLimit == other.timeLimit &&
-        cancelToken == other.cancelToken &&
-        timeRetry == other.timeRetry &&
-        cache == other.cache &&
-        cacheKey == other.cacheKey &&
-        headers == other.headers &&
-        retries == other.retries &&
-        imageCacheName == other.imageCacheName &&
-        cacheMaxAge == other.cacheMaxAge &&
-        controller == other.controller;
+  } else {
+    await _cacheImagesDirectory.create();
   }
 
-  @override
-  int get hashCode => Object.hash(
-        controller,
-        url,
-        scale,
-        timeLimit,
-        cancelToken,
-        timeRetry,
-        cache,
-        cacheKey,
-        headers,
-        retries,
-        imageCacheName,
-        cacheMaxAge,
-      );
+  if (data == null) {
+    data = await _loadBytes(provider, proxyConfig);
+    if (data != null) {
+      await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(data);
+    }
+  }
 
-  @override
-  String toString() =>
-      'MixinExtendedNetworkImageProvider("$url", scale: $scale)';
+  return data;
+}
 
-  /// Get network image data from cached
-  Future<Uint8List?> getNetworkImageData({
-    StreamController<ImageChunkEvent>? chunkEvents,
-  }) {
-    final uId = cacheKey ?? keyToMd5(url);
-
-    if (cache) {
-      return _loadCache(
-        this,
-        chunkEvents,
-        uId,
-      );
+Future<Uint8List?> _loadBytes(
+  Object provider,
+  ProxyConfig? proxyConfig,
+) async {
+  if (provider is NetworkLottie) {
+    final resolved = Uri.base.resolve(provider.url);
+    final response = await _tryGetResponse(resolved, proxyConfig);
+    if (response == null || response.statusCode != HttpStatus.ok) {
+      return null;
+    }
+    final bytes = await consolidateHttpClientResponseBytes(response);
+    if (bytes.lengthInBytes == 0) {
+      throw StateError('NetworkImage is an empty file: $resolved');
+    }
+    return bytes;
+  } else if (provider is NetworkImage) {
+    final resolved = Uri.base.resolve(provider.url);
+    final response = await _tryGetResponse(resolved, proxyConfig);
+    if (response == null || response.statusCode != HttpStatus.ok) {
+      return null;
     }
 
-    return _loadNetwork(
-      this,
-      chunkEvents,
-    );
+    final bytes = await consolidateHttpClientResponseBytes(response);
+    if (bytes.lengthInBytes == 0) {
+      throw StateError('NetworkImage is an empty file: $resolved');
+    }
+    return bytes;
+  } else if (provider is AssetImage) {
+    final data = await provider.bundle?.load(provider.assetName);
+    return data?.buffer.asUint8List();
+  } else if (provider is FileImage) {
+    return provider.file.readAsBytes();
+  } else if (provider is MemoryImage) {
+    return provider.bytes;
   }
-
-  // Do not access this field directly; use [_httpClient] instead.
-  // We set `autoUncompress` to false to ensure that we can trust the value of
-  // the `Content-Length` HTTP header. We automatically uncompress the content
-  // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()
-    ..autoUncompress = false;
-
-  static HttpClient get _httpClient {
-    var client = _sharedHttpClient;
-    assert(() {
-      if (debugNetworkImageHttpClientProvider != null) {
-        client = debugNetworkImageHttpClientProvider!();
-      }
-      return true;
-    }());
-    return client;
-  }
-
-  /// proxy config for [_httpClient]
-  static ProxyConfig? _imageClientProxyConfig;
+  return null;
 }
 
 /// download image from network to cache. return the cache image file.
 /// [url] is the image url.
-Future<Uint8List?> downloadImage(String url) async {
-  final imageProvider = MixinNetworkImageProvider(url);
-  return imageProvider._loadCache(imageProvider, null, keyToMd5(url));
-}
+Future<Uint8List?> downloadImage(String url) async =>
+    loadCacheBytes(NetworkImage(url), null);
 
 /// get md5 from key
 String keyToMd5(String key) => md5.convert(utf8.encode(key)).toString();
 
-class MixinAssetImage extends AssetImage {
-  const MixinAssetImage(
-    super.assetName, {
-    super.bundle,
-    super.package,
+class MixinImage extends HookWidget {
+  const MixinImage({
+    required this.image,
+    super.key,
+    this.placeholder,
+    this.errorBuilder,
+    this.width,
+    this.height,
+    this.cancelToken,
+    this.fit,
+    this.isAntiAlias = false,
     this.controller,
   });
 
+  MixinImage.network(
+    String url, {
+    super.key,
+    this.placeholder,
+    this.errorBuilder,
+    this.width,
+    this.height,
+    this.cancelToken,
+    this.fit,
+    this.isAntiAlias = false,
+    this.controller,
+  }) : image = NetworkImage(url);
+
+  MixinImage.file(
+    File file, {
+    super.key,
+    this.placeholder,
+    this.errorBuilder,
+    this.width,
+    this.height,
+    this.cancelToken,
+    this.fit,
+    this.isAntiAlias = false,
+    this.controller,
+  }) : image = FileImage(file);
+
+  MixinImage.asset(
+    String assetName, {
+    super.key,
+    this.placeholder,
+    this.errorBuilder,
+    this.width,
+    this.height,
+    this.cancelToken,
+    this.fit,
+    this.isAntiAlias = false,
+    this.controller,
+  }) : image = AssetImage(assetName);
+
+  MixinImage.memory(
+    Uint8List bytes, {
+    super.key,
+    this.placeholder,
+    this.errorBuilder,
+    this.width,
+    this.height,
+    this.cancelToken,
+    this.fit,
+    this.isAntiAlias = false,
+    this.controller,
+  }) : image = MemoryImage(bytes);
+
+  final ImageProvider image;
+  final PlaceholderWidgetBuilder? placeholder;
+  final ImageErrorWidgetBuilder? errorBuilder;
+  final double? width;
+  final double? height;
+  final CancellationToken? cancelToken;
+  final BoxFit? fit;
+  final bool isAntiAlias;
   final ValueNotifier<bool>? controller;
 
-  @protected
-  Future<ui.Codec> _loadAsync(
-    AssetBundleImageKey key, {
-    required Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
-  }) async {
-    final ui.ImmutableBuffer buffer;
-    // Hot reload/restart could change whether an asset bundle or key in a
-    // bundle are available, or if it is a network backed bundle.
-    try {
-      buffer = await key.bundle.loadBuffer(key.name);
-      // ignore: avoid_catching_errors
-    } on FlutterError {
-      PaintingBinding.instance.imageCache.evict(key);
-      rethrow;
-    }
-    return decode(buffer);
-  }
-
   @override
-  ImageStreamCompleter loadImage(
-      AssetBundleImageKey key, ImageDecoderCallback decode) {
-    InformationCollector? collector;
-    assert(() {
-      collector = () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<AssetBundleImageKey>('Image key', key),
-          ];
-      return true;
-    }());
-    return _MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode: decode),
-      scale: key.scale,
-      debugLabel: key.name,
-      informationCollector: collector,
-      controller: controller,
+  Widget build(BuildContext context) {
+    final proxyUrl = context.database.settingProperties.activatedProxy;
+
+    final frameInfo = useState<ui.FrameInfo?>(null);
+    final timer = useState<Timer?>(null);
+    final frameCallbackScheduled = useState(false);
+    final error = useState<(Object, StackTrace?)?>(null);
+
+    final codec = useMemoizedFuture(
+      () async {
+        try {
+          error.value = null;
+          final buffer = await _loadCacheBuffer(image, proxyUrl);
+          return buffer != null
+              ? PaintingBinding.instance.instantiateImageCodecWithSize(buffer)
+              : null;
+        } catch (e, stack) {
+          error.value = (e, stack);
+          return null;
+        }
+      },
+      null,
+      keys: [image, proxyUrl],
+    ).data;
+
+    useEffect(
+        () => () {
+              timer.value?.cancel();
+              frameInfo.value?.image.dispose();
+            },
+        []);
+
+    useEffect(() {
+      void dispose() {
+        timer.value?.cancel();
+        frameInfo.value?.image.dispose();
+      }
+
+      if (codec == null) return dispose;
+
+      Future<void> getNextFrame() async {
+        try {
+          final frame = await codec.getNextFrame();
+          frameInfo.value = frame;
+
+          if (codec.frameCount > 1) {
+            var duration = frame.duration;
+            if (duration < _minFrameDuration) {
+              duration = _defaultFrameDuration;
+            }
+
+            timer.value?.cancel();
+            timer.value = Timer(duration, () {
+              if (!frameCallbackScheduled.value) {
+                frameCallbackScheduled.value = true;
+                SchedulerBinding.instance.scheduleFrameCallback((_) {
+                  frameCallbackScheduled.value = false;
+                  getNextFrame();
+                });
+              }
+            });
+          }
+        } catch (e) {
+          v('Error getting next frame: $e');
+        }
+      }
+
+      getNextFrame();
+
+      return dispose;
+    }, [codec]);
+
+    switch (error.value) {
+      case (final Object e, final StackTrace? stack):
+        final widget = errorBuilder?.call(context, e, stack);
+        if (widget != null) {
+          return widget;
+        }
+      default:
+        break;
+    }
+
+    if (frameInfo.value == null) {
+      return placeholder?.call() ?? SizedBox(width: width, height: height);
+    }
+
+    return RawImage(
+      image: frameInfo.value!.image,
+      width: width,
+      height: height,
+      fit: fit,
     );
   }
 }
