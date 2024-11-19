@@ -48,7 +48,8 @@ Future<ui.ImmutableBuffer?> _loadCacheBuffer(
   ImageProvider<Object> provider,
   ProxyConfig? proxyConfig,
 ) async {
-  final md5Key = _getKeyImage(provider);
+  final key = _getKeyImage(provider);
+  final md5Key = key != null ? keyToMd5(key) : null;
 
   final _cacheImagesDirectory = Directory(
       join((await getTemporaryDirectory()).path, cacheImageFolderName));
@@ -59,6 +60,7 @@ Future<ui.ImmutableBuffer?> _loadCacheBuffer(
       data = await ui.ImmutableBuffer.fromFilePath(
         join(_cacheImagesDirectory.path, md5Key),
       );
+      i('fuck s loadCacheBuffer url: $key, status: ${data.length}');
     } catch (_) {
       // Throws an Exception if the asset does not exist.
     }
@@ -130,7 +132,8 @@ Future<Uint8List?> loadCacheBytes(
   Object provider,
   ProxyConfig? proxyConfig,
 ) async {
-  final md5Key = _getKeyImage(provider);
+  final key = _getKeyImage(provider);
+  final md5Key = key != null ? keyToMd5(key) : null;
 
   final _cacheImagesDirectory = Directory(
       join((await getTemporaryDirectory()).path, cacheImageFolderName));
@@ -139,6 +142,7 @@ Future<Uint8List?> loadCacheBytes(
   if (_cacheImagesDirectory.existsSync() && md5Key != null) {
     try {
       data = await File(join(_cacheImagesDirectory.path, md5Key)).readAsBytes();
+      i('fuck s loadCacheBytes url: $key, status: ${data.length}');
     } catch (_) {
       // Throws an Exception if the asset does not exist.
     }
@@ -304,17 +308,9 @@ class MixinImage extends HookWidget {
       keys: [image, proxyUrl],
     ).data;
 
-    useEffect(
-        () => () {
-              timer.value?.cancel();
-              frameInfo.value?.image.dispose();
-            },
-        []);
-
     useEffect(() {
       void dispose() {
         timer.value?.cancel();
-        frameInfo.value?.image.dispose();
       }
 
       if (codec == null) return dispose;
@@ -322,6 +318,12 @@ class MixinImage extends HookWidget {
       Future<void> getNextFrame() async {
         try {
           final frame = await codec.getNextFrame();
+
+          final oldFrame = frameInfo.value;
+          if (oldFrame?.image != null && !oldFrame!.image.debugDisposed) {
+            oldFrame.image.dispose();
+          }
+
           frameInfo.value = frame;
 
           if (codec.frameCount > 1) {
@@ -365,11 +367,17 @@ class MixinImage extends HookWidget {
       return placeholder?.call() ?? SizedBox(width: width, height: height);
     }
 
+    final currentFrame = frameInfo.value;
+    if (currentFrame == null) {
+      return placeholder?.call() ?? SizedBox(width: width, height: height);
+    }
+
     return RawImage(
-      image: frameInfo.value!.image,
+      image: currentFrame.image,
       width: width,
       height: height,
       fit: fit,
+      isAntiAlias: isAntiAlias,
     );
   }
 }
