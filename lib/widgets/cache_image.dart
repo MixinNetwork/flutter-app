@@ -127,7 +127,7 @@ Future<HttpClientResponse?> _tryGetResponse(
   return response;
 }
 
-Future<Uint8List?> loadCacheBytes(
+Future<Uint8List?> _loadCacheBytes(
   Object provider,
   ProxyConfig? proxyConfig,
 ) async {
@@ -199,7 +199,7 @@ Future<Uint8List?> _loadBytes(
 /// download image from network to cache. return the cache image file.
 /// [url] is the image url.
 Future<Uint8List?> downloadImage(String url) async =>
-    loadCacheBytes(NetworkImage(url), null);
+    _loadCacheBytes(NetworkImage(url), null);
 
 /// get md5 from key
 String keyToMd5(String key) => md5.convert(utf8.encode(key)).toString();
