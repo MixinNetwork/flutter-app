@@ -416,13 +416,13 @@ class MessageItemWidget extends HookConsumerWidget {
                             if (message.pinned) {
                               await context.accountServer.unpinMessage(
                                 conversationId: message.conversationId,
-                                pinMessageMinimalist: [pinMessageMinimal],
+                                pinMessageMinimals: [pinMessageMinimal],
                               );
                               return;
                             }
                             await context.accountServer.pinMessage(
                               conversationId: message.conversationId,
-                              pinMessageMinimalist: [pinMessageMinimal],
+                              pinMessageMinimals: [pinMessageMinimal],
                             );
                           },
                         ),

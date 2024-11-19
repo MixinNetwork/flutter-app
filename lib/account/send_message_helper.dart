@@ -929,7 +929,7 @@ class SendMessageHelper {
       );
     }).toList();
 
-    final transcriptMinimalist = transcriptMessages
+    final transcriptMinimals = transcriptMessages
         .map((e) => TranscriptMinimal(
               name: e.userFullName ?? '',
               category: encryptCategory.asCategory(e.category),
@@ -942,7 +942,7 @@ class SendMessageHelper {
       conversationId: conversationId,
       userId: senderId,
       category: category,
-      content: await jsonEncodeWithIsolate(transcriptMinimalist),
+      content: await jsonEncodeWithIsolate(transcriptMinimals),
       createdAt: DateTime.now(),
       status: MessageStatus.sending,
       mediaStatus: hasAttachments ? MediaStatus.canceled : MediaStatus.done,
@@ -1199,18 +1199,18 @@ class SendMessageHelper {
   Future<void> sendPinMessage({
     required String conversationId,
     required String senderId,
-    required List<PinMessageMinimal> pinMessageMinimalist,
+    required List<PinMessageMinimal> pinMessageMinimals,
     required bool pin,
   }) async {
-    if (pinMessageMinimalist.isEmpty) return;
+    if (pinMessageMinimals.isEmpty) return;
 
     final pinMessagePayload = PinMessagePayload(
       action: pin ? PinMessagePayloadAction.pin : PinMessagePayloadAction.unpin,
-      messageIds: pinMessageMinimalist.map((e) => e.messageId).toList(),
+      messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
     );
     final encoded = await jsonEncodeWithIsolate(pinMessagePayload);
     if (pin) {
-      await Future.forEach<PinMessageMinimal>(pinMessageMinimalist,
+      await Future.forEach<PinMessageMinimal>(pinMessageMinimals,
           (pinMessageMinimal) async {
         await _pinMessageDao.insert(
           PinMessage(
@@ -1238,7 +1238,7 @@ class SendMessageHelper {
       unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
     } else {
       await _pinMessageDao
-          .deleteByIds(pinMessageMinimalist.map((e) => e.messageId).toList());
+          .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
 
     _addSendingJob(createSendPinJob(conversationId, encoded));

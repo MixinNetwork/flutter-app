@@ -43,7 +43,7 @@ class TranscriptMessageWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final content =
         useMessageConverter(converter: (state) => state.content ?? '');
-    final transcriptMinimalist = useMemoized<List<TranscriptMinimal>?>(() {
+    final transcriptMinimals = useMemoized<List<TranscriptMinimal>?>(() {
       try {
         final json = jsonDecode(content);
         return (json as List<dynamic>)
@@ -59,14 +59,14 @@ class TranscriptMessageWidget extends HookConsumerWidget {
 
     final isCurrentUser = useIsCurrentUser();
 
-    if (transcriptMinimalist == null) {
-      e('TranscriptMessageWidget: transcriptMinimalist is null');
+    if (transcriptMinimals == null) {
+      e('TranscriptMessageWidget: transcriptMinimals is null');
       return const UnknownMessage();
     }
 
     return HookBuilder(builder: (context) {
       final previews = useMemoized(
-          () => transcriptMinimalist
+          () => transcriptMinimals
               .map((transcriptMinimal) =>
                   messagePreviewOptimize(
                     null,
@@ -75,20 +75,19 @@ class TranscriptMessageWidget extends HookConsumerWidget {
                   ) ??
                   '')
               .toList(),
-          [transcriptMinimalist]);
+          [transcriptMinimals]);
 
-      assert(
-          previews.isEmpty || previews.length == transcriptMinimalist.length);
+      assert(previews.isEmpty || previews.length == transcriptMinimals.length);
 
       final transcriptTexts = useMemoized(
           () => List.generate(
-              math.min(transcriptMinimalist.length, 4),
+              math.min(transcriptMinimals.length, 4),
               (index) =>
                   index).map((i) =>
-              '${transcriptMinimalist[i].name}: ${previews.isEmpty ? '' : previews[i]}'
+              '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
                   .overflow),
           [
-            transcriptMinimalist,
+            transcriptMinimals,
             previews,
           ]);
 

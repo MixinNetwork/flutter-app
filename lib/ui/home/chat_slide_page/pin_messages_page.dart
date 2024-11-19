@@ -135,7 +135,7 @@ class PinMessagesPage extends HookConsumerWidget {
                                   Navigator.pop(context);
                                   context.accountServer.unpinMessage(
                                     conversationId: conversationId,
-                                    pinMessageMinimalist: list
+                                    pinMessageMinimals: list
                                         .map((e) => PinMessageMinimal(
                                               type: e.type,
                                               messageId: e.messageId,
