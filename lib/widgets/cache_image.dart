@@ -147,8 +147,12 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
   bool _frameCallbackScheduled = false;
 
+  bool _isDisposed = false;
+
   void _controllerListener() {
-    if (controller?.value == false) return;
+    if (_isDisposed || controller?.value == false) {
+      return;
+    }
     _decodeNextFrameAndSchedule();
   }
 
@@ -165,6 +169,9 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void _handleAppFrame(Duration timestamp) {
+    if (_isDisposed) {
+      return;
+    }
     _frameCallbackScheduled = false;
     if (!hasListeners) return;
     assert(_nextFrame != null);
@@ -196,22 +203,36 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       timestamp - _shownTimestamp >= _frameDuration!;
 
   Future<void> _decodeNextFrameAndSchedule() async {
-    // This will be null if we gave it away. If not, it's still ours and it
-    // must be disposed of.
-    _nextFrame?.image.dispose();
-    _nextFrame = null;
+    if (_isDisposed || _codec == null || !hasListeners) {
+      return;
+    }
+
+    if (_nextFrame != null) {
+      _nextFrame?.image.dispose();
+      _nextFrame = null;
+    }
+
     try {
       _nextFrame = await _codec!.getNextFrame();
     } catch (exception, stack) {
-      reportError(
-        context: ErrorDescription('resolving an image frame'),
-        exception: exception,
-        stack: stack,
-        informationCollector: _informationCollector,
-        silent: true,
-      );
+      if (!_isDisposed) {
+        reportError(
+          context: ErrorDescription('resolving an image frame'),
+          exception: exception,
+          stack: stack,
+          informationCollector: _informationCollector,
+          silent: true,
+        );
+      }
       return;
     }
+
+    if (_isDisposed || !hasListeners || controller?.value == false) {
+      _nextFrame?.image.dispose();
+      _nextFrame = null;
+      return;
+    }
+
     if (_codec!.frameCount == 1) {
       // ImageStreamCompleter listeners removed while waiting for next frame to
       // be decoded.
@@ -242,6 +263,10 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void _emitFrame(ImageInfo imageInfo) {
+    if (_isDisposed) {
+      imageInfo.dispose();
+      return;
+    }
     setImage(imageInfo);
     // _framesEmitted += 1;
   }
@@ -262,7 +287,31 @@ class _MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners) {
       _timer?.cancel();
       _timer = null;
+      _disposeResources();
     }
+  }
+
+  void _disposeResources() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
+
+    _timer?.cancel();
+    _timer = null;
+
+    try {
+      controller?.removeListener(_controllerListener);
+    } catch (_) {}
+
+    _nextFrame?.image.dispose();
+    _nextFrame = null;
+
+    _codec?.dispose();
+    _codec = null;
+
+    _currentImage?.dispose();
+    _currentImage = null;
   }
 }
 
