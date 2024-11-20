@@ -213,7 +213,7 @@ class MixinImage extends HookWidget {
     this.width,
     this.height,
     this.cancelToken,
-    this.fit,
+    this.fit = BoxFit.cover,
     this.isAntiAlias = false,
     this.controller,
   });
@@ -226,7 +226,7 @@ class MixinImage extends HookWidget {
     this.width,
     this.height,
     this.cancelToken,
-    this.fit,
+    this.fit = BoxFit.cover,
     this.isAntiAlias = false,
     this.controller,
   }) : image = NetworkImage(url);
@@ -238,8 +238,8 @@ class MixinImage extends HookWidget {
     this.errorBuilder,
     this.width,
     this.height,
+    this.fit = BoxFit.cover,
     this.cancelToken,
-    this.fit,
     this.isAntiAlias = false,
     this.controller,
   }) : image = FileImage(file);
@@ -252,7 +252,7 @@ class MixinImage extends HookWidget {
     this.width,
     this.height,
     this.cancelToken,
-    this.fit,
+    this.fit = BoxFit.cover,
     this.isAntiAlias = false,
     this.controller,
   }) : image = AssetImage(assetName);
@@ -265,7 +265,7 @@ class MixinImage extends HookWidget {
     this.width,
     this.height,
     this.cancelToken,
-    this.fit,
+    this.fit = BoxFit.cover,
     this.isAntiAlias = false,
     this.controller,
   }) : image = MemoryImage(bytes);
@@ -284,27 +284,89 @@ class MixinImage extends HookWidget {
   Widget build(BuildContext context) {
     final proxyUrl = context.database.settingProperties.activatedProxy;
 
-    final frameInfo = useState<ui.FrameInfo?>(null);
-    final timer = useState<Timer?>(null);
-    final error = useState<(Object, StackTrace?)?>(null);
-    final isImageLoading = useState(false);
-
-    final codec = useMemoizedFuture(
+    final codecAsync = useMemoizedFuture(
       () async {
-        try {
-          error.value = null;
-          final buffer = await _loadCacheBuffer(image, proxyUrl);
-          return buffer != null
-              ? PaintingBinding.instance.instantiateImageCodecWithSize(buffer)
-              : null;
-        } catch (e, stack) {
-          error.value = (e, stack);
-          return null;
+        final buffer = await _loadCacheBuffer(image, proxyUrl);
+        if (buffer == null) {
+          throw Exception('Failed to load image buffer');
         }
+        return PaintingBinding.instance.instantiateImageCodecWithSize(buffer);
       },
       null,
       keys: [image, proxyUrl],
-    ).data;
+    );
+
+    if (codecAsync.error != null) {
+      return errorBuilder?.call(
+            context,
+            codecAsync.error!,
+            codecAsync.stackTrace,
+          ) ??
+          SizedBox(width: width, height: height);
+    }
+
+    if (codecAsync.data == null) {
+      return placeholder?.call() ?? SizedBox(width: width, height: height);
+    }
+
+    if (controller == null) {
+      return HookBuilder(builder: (context) {
+        final controller = useImagePlaying(context);
+
+        return _AnimatedImageWidget(
+          codec: codecAsync.data!,
+          controller: controller,
+          placeholder:
+              placeholder ?? () => SizedBox(width: width, height: height),
+          errorBuilder: errorBuilder,
+          width: width,
+          height: height,
+          fit: fit,
+          isAntiAlias: isAntiAlias,
+        );
+      });
+    }
+
+    return _AnimatedImageWidget(
+      codec: codecAsync.data!,
+      controller: controller!,
+      placeholder: placeholder ?? () => SizedBox(width: width, height: height),
+      errorBuilder: errorBuilder,
+      width: width,
+      height: height,
+      fit: fit,
+      isAntiAlias: isAntiAlias,
+    );
+  }
+}
+
+class _AnimatedImageWidget extends HookWidget {
+  const _AnimatedImageWidget({
+    required this.codec,
+    required this.controller,
+    required this.placeholder,
+    required this.errorBuilder,
+    this.width,
+    this.height,
+    this.fit,
+    this.isAntiAlias = false,
+  });
+
+  final ui.Codec codec;
+  final ValueNotifier<bool> controller;
+  final PlaceholderWidgetBuilder? placeholder;
+  final ImageErrorWidgetBuilder? errorBuilder;
+  final double? width;
+  final double? height;
+  final BoxFit? fit;
+  final bool isAntiAlias;
+
+  @override
+  Widget build(BuildContext context) {
+    final frameInfo = useState<ui.FrameInfo?>(null);
+    final timer = useRef<Timer?>(null);
+    final error = useState<(Object, StackTrace?)?>(null);
+    final isImageLoading = useState(false);
 
     useEffect(() {
       timer.value?.cancel();
@@ -316,14 +378,11 @@ class MixinImage extends HookWidget {
     }, [codec]);
 
     useEffect(() {
-      if (codec == null) return null;
-
       Future<void> getNextFrame() async {
         if (isImageLoading.value || !context.mounted) return;
 
         try {
           error.value = null;
-
           isImageLoading.value = true;
 
           final frame = await codec.getNextFrame();
@@ -335,7 +394,7 @@ class MixinImage extends HookWidget {
           frameInfo.value = frame;
 
           final shouldContinueAnimation =
-              codec.frameCount > 1 && (controller?.value ?? true);
+              codec.frameCount > 1 && controller.value;
 
           if (shouldContinueAnimation) {
             var duration = frame.duration;
@@ -353,14 +412,16 @@ class MixinImage extends HookWidget {
         } catch (e, s) {
           error.value = (e, s);
         } finally {
-          isImageLoading.value = false;
+          if (context.mounted) {
+            isImageLoading.value = false;
+          }
         }
       }
 
       getNextFrame();
 
       void onControllerChanged() {
-        if (controller!.value) {
+        if (controller.value) {
           if (codec.frameCount > 1) {
             getNextFrame();
           }
@@ -370,17 +431,16 @@ class MixinImage extends HookWidget {
         }
       }
 
-      controller?.addListener(onControllerChanged);
+      controller.addListener(onControllerChanged);
 
       return () {
         timer.value?.cancel();
-
+        timer.value = null;
         frameInfo.value?.image.dispose();
         if (context.mounted) {
-          timer.value = null;
           frameInfo.value = null;
         }
-        controller?.removeListener(onControllerChanged);
+        controller.removeListener(onControllerChanged);
       };
     }, [codec, controller]);
 
