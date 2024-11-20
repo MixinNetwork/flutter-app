@@ -60,8 +60,8 @@ Future<ui.ImmutableBuffer?> _loadCacheBuffer(
       data = await ui.ImmutableBuffer.fromFilePath(
         join(_cacheImagesDirectory.path, md5Key),
       );
-    } catch (_) {
-      // Throws an Exception if the asset does not exist.
+    } catch (error, stackTrace) {
+      e('Failed to load cache image', error, stackTrace);
     }
   } else {
     await _cacheImagesDirectory.create();
