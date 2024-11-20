@@ -156,7 +156,6 @@ class MessageImage extends HookConsumerWidget {
             MixinImage.file(
               File(context.accountServer.convertAbsolutePath(
                   type, conversationId, mediaUrl, isTranscriptPage)),
-              fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => thumbWidget,
             ),
             Center(

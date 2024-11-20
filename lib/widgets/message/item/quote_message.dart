@@ -424,7 +424,6 @@ class _QuoteImage extends HookWidget {
         mediaUrl,
         isTranscriptPage,
       )),
-      fit: BoxFit.cover,
       errorBuilder: (_, __, ___) =>
           ImageByBlurHashOrBase64(imageData: thumbImage!),
     );
