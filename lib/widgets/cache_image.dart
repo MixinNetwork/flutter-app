@@ -286,8 +286,8 @@ class MixinImage extends HookWidget {
 
     final frameInfo = useState<ui.FrameInfo?>(null);
     final timer = useState<Timer?>(null);
-    final frameCallbackScheduled = useState(false);
     final error = useState<(Object, StackTrace?)?>(null);
+    final isImageLoading = useState(false);
 
     final codec = useMemoizedFuture(
       () async {
@@ -307,24 +307,37 @@ class MixinImage extends HookWidget {
     ).data;
 
     useEffect(() {
-      void dispose() {
-        timer.value?.cancel();
-      }
+      timer.value?.cancel();
+      timer.value = null;
+      frameInfo.value?.image.dispose();
+      frameInfo.value = null;
+      error.value = null;
+      isImageLoading.value = false;
+    }, [codec]);
 
-      if (codec == null) return dispose;
+    useEffect(() {
+      if (codec == null) return null;
 
       Future<void> getNextFrame() async {
+        if (isImageLoading.value || !context.mounted) return;
+
         try {
+          error.value = null;
+
+          isImageLoading.value = true;
+
           final frame = await codec.getNextFrame();
+          if (!context.mounted) return;
 
           final oldFrame = frameInfo.value;
-          if (oldFrame?.image != null && !oldFrame!.image.debugDisposed) {
-            oldFrame.image.dispose();
-          }
+          oldFrame?.image.dispose();
 
           frameInfo.value = frame;
 
-          if (codec.frameCount > 1) {
+          final shouldContinueAnimation =
+              codec.frameCount > 1 && (controller?.value ?? true);
+
+          if (shouldContinueAnimation) {
             var duration = frame.duration;
             if (duration < _minFrameDuration) {
               duration = _defaultFrameDuration;
@@ -332,24 +345,44 @@ class MixinImage extends HookWidget {
 
             timer.value?.cancel();
             timer.value = Timer(duration, () {
-              if (!frameCallbackScheduled.value) {
-                frameCallbackScheduled.value = true;
-                SchedulerBinding.instance.scheduleFrameCallback((_) {
-                  frameCallbackScheduled.value = false;
-                  getNextFrame();
-                });
-              }
+              SchedulerBinding.instance.scheduleFrameCallback((_) {
+                getNextFrame();
+              });
             });
           }
-        } catch (e) {
-          v('Error getting next frame: $e');
+        } catch (e, s) {
+          error.value = (e, s);
+        } finally {
+          isImageLoading.value = false;
         }
       }
 
       getNextFrame();
 
-      return dispose;
-    }, [codec]);
+      void onControllerChanged() {
+        if (controller!.value) {
+          if (codec.frameCount > 1) {
+            getNextFrame();
+          }
+        } else {
+          timer.value?.cancel();
+          timer.value = null;
+        }
+      }
+
+      controller?.addListener(onControllerChanged);
+
+      return () {
+        timer.value?.cancel();
+
+        frameInfo.value?.image.dispose();
+        if (context.mounted) {
+          timer.value = null;
+          frameInfo.value = null;
+        }
+        controller?.removeListener(onControllerChanged);
+      };
+    }, [codec, controller]);
 
     switch (error.value) {
       case (final Object e, final StackTrace? stack):

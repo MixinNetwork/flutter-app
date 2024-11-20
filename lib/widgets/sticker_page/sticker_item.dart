@@ -87,7 +87,6 @@ class StickerItem extends HookConsumerWidget {
             assetUrl,
             height: height,
             width: width,
-            // controller: playing,
             fit: BoxFit.contain,
             errorBuilder:
                 errorWidget != null ? (_, __, ___) => errorWidget! : null,
