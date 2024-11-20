@@ -9,7 +9,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http_client_helper/http_client_helper.dart';
-import 'package:lottie/lottie.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -70,7 +69,7 @@ Future<ui.ImmutableBuffer?> _loadCacheBuffer(
   if (data == null) {
     final (buffer, bytes) = await _loadBuffer(provider, proxyConfig);
     data = buffer;
-    if (bytes != null) {
+    if (bytes != null && md5Key != null) {
       await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(bytes);
     }
   }
@@ -150,7 +149,7 @@ Future<Uint8List?> _loadCacheBytes(
 
   if (data == null) {
     data = await _loadBytes(provider, proxyConfig);
-    if (data != null) {
+    if (data != null && md5Key != null) {
       await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(data);
     }
   }
@@ -162,18 +161,7 @@ Future<Uint8List?> _loadBytes(
   Object provider,
   ProxyConfig? proxyConfig,
 ) async {
-  if (provider is NetworkLottie) {
-    final resolved = Uri.base.resolve(provider.url);
-    final response = await _tryGetResponse(resolved, proxyConfig);
-    if (response == null || response.statusCode != HttpStatus.ok) {
-      return null;
-    }
-    final bytes = await consolidateHttpClientResponseBytes(response);
-    if (bytes.lengthInBytes == 0) {
-      throw StateError('NetworkImage is an empty file: $resolved');
-    }
-    return bytes;
-  } else if (provider is NetworkImage) {
+  if (provider is NetworkImage) {
     final resolved = Uri.base.resolve(provider.url);
     final response = await _tryGetResponse(resolved, proxyConfig);
     if (response == null || response.statusCode != HttpStatus.ok) {
