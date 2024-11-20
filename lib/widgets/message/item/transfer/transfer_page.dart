@@ -12,9 +12,9 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
-import '../../../cache_image.dart';
 import '../../../dialog.dart';
 import '../../../high_light_text.dart';
+import '../../../mixin_image.dart';
 
 Future<void> showTransferDialog(
   BuildContext context,
@@ -476,14 +476,14 @@ class SymbolIconWithBorder extends StatelessWidget {
                   chainPlaceholderSize: chainSize + chainBorder,
                 ),
                 clipBehavior: Clip.antiAliasWithSaveLayer,
-                child: CacheImage(symbolUrl),
+                child: MixinImage.network(symbolUrl),
               ),
             ),
             if (chainUrl != null)
               Positioned(
                 right: chainBorder / 2,
                 bottom: chainBorder / 2,
-                child: CacheImage(
+                child: MixinImage.network(
                   chainUrl!,
                   width: chainSize,
                   height: chainSize,

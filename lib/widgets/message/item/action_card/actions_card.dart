@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../utils/extension/extension.dart';
-import '../../../cache_image.dart';
 import '../../../high_light_text.dart';
+import '../../../mixin_image.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_style.dart';
@@ -106,7 +106,7 @@ class ActionsCardBody extends StatelessWidget {
           if (data.coverUrl.isNotEmpty)
             AspectRatio(
               aspectRatio: 1,
-              child: CacheImage(data.coverUrl),
+              child: MixinImage.network(data.coverUrl),
             )
           else if (data.cover != null)
             _CoverWidget(cover: data.cover!),
@@ -147,7 +147,7 @@ class _CoverWidget extends StatelessWidget {
     }
     return AspectRatio(
       aspectRatio: aspect,
-      child: CacheImage(cover.url),
+      child: MixinImage.network(cover.url),
     );
   }
 }

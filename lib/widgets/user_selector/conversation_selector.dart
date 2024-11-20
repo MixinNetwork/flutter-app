@@ -197,7 +197,9 @@ class _ConversationSelector extends HookConsumerWidget {
           state.recentConversations.forEach((element) {
             if (!initSelected
                 .map((e) => e.conversationId)
-                .contains(element.conversationId)) return;
+                .contains(element.conversationId)) {
+              return;
+            }
             selectItem(element);
           });
 

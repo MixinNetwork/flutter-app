@@ -10,8 +10,8 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../../../../constants/resources.dart';
 import '../../../../../db/vo/inscription.dart';
 import '../../../../../utils/extension/extension.dart';
-import '../../../../cache_image.dart';
 import '../../../../interactive_decorated_box.dart';
+import '../../../../mixin_image.dart';
 import '../../../../toast.dart';
 import '../../../message.dart';
 import '../../../message_bubble.dart';
@@ -113,9 +113,10 @@ class _InscriptionLayout extends StatelessWidget {
                         width: 22,
                         child: SizedBox.square(
                           dimension: 22,
-                          child: CacheImage(
+                          child: MixinImage.network(
                             inscription?.iconUrl ?? '',
-                            errorWidget: () => defaultCollectionImage,
+                            errorBuilder: (_, __, ___) =>
+                                defaultCollectionImage,
                             placeholder: () => defaultCollectionImage,
                           ),
                         ),

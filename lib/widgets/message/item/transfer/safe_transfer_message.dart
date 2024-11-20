@@ -14,9 +14,9 @@ import '../../../../db/extension/job.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../ui/provider/transfer_provider.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../cache_image.dart';
 import '../../../high_light_text.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../mixin_image.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
@@ -172,7 +172,7 @@ class _SnapshotLayout extends StatelessWidget {
                       const SizedBox.square(dimension: 16)
                     else
                       ClipOval(
-                        child: CacheImage(
+                        child: MixinImage.network(
                           assetIcon!,
                           width: 16,
                           height: 16,

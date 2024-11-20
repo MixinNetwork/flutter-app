@@ -3,8 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
-import '../../utils/app_lifecycle.dart';
-import '../cache_image.dart';
+import '../mixin_image.dart';
 
 class BadgesWidget extends StatelessWidget {
   const BadgesWidget({
@@ -23,15 +22,12 @@ class BadgesWidget extends StatelessWidget {
 
     switch ((verified, isBot, membership?.isValid, membership?.plan)) {
       case (_, _, true, final plan?) when plan != Plan.none:
-        child = Image(
-          image: MixinAssetImage(
-            {
-              Plan.basic: Resources.assetsImagesPlanBasicPng,
-              Plan.standard: Resources.assetsImagesPlanStandardPng,
-              Plan.premium: Resources.assetsImagesPlanPremiumGif,
-            }[plan]!,
-            controller: appActiveListener,
-          ),
+        child = MixinImage.asset(
+          {
+            Plan.basic: Resources.assetsImagesPlanBasicPng,
+            Plan.standard: Resources.assetsImagesPlanStandardPng,
+            Plan.premium: Resources.assetsImagesPlanPremiumGif,
+          }[plan]!,
           width: 14,
           height: 14,
           isAntiAlias: true,

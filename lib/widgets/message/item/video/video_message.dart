@@ -14,9 +14,9 @@ import '../../../../enum/media_status.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../cache_image.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../mixin_image.dart';
 import '../../../status.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -129,7 +129,7 @@ class MessageVideo extends HookConsumerWidget {
           children: [
             if (thumbImage != null)
               ImageByBlurHashOrBase64(imageData: thumbImage),
-            if (thumbUrl != null) CacheImage(thumbUrl),
+            if (thumbUrl != null) MixinImage.network(thumbUrl),
             overlay ?? _VideoMessageOverlayInfo(isCurrentUser: isCurrentUser),
           ],
         ),

@@ -7,8 +7,8 @@ import '../../app.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../cache_image.dart';
 import '../cache_lottie.dart';
+import '../mixin_image.dart';
 
 class StickerItem extends HookConsumerWidget {
   const StickerItem({
@@ -83,13 +83,13 @@ class StickerItem extends HookConsumerWidget {
             errorBuilder:
                 errorWidget != null ? (_, __, ___) => errorWidget! : null,
           )
-        : CacheImage(
+        : MixinImage.network(
             assetUrl,
             height: height,
             width: width,
-            controller: playing,
             fit: BoxFit.contain,
-            errorWidget: errorWidget != null ? () => errorWidget! : null,
+            errorBuilder:
+                errorWidget != null ? (_, __, ___) => errorWidget! : null,
           );
 
     if (width == null || height == null) {

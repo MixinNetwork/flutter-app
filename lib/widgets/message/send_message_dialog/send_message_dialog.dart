@@ -16,8 +16,8 @@ import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
-import '../../cache_image.dart';
 import '../../dialog.dart';
+import '../../mixin_image.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../../toast.dart';
 import '../../user_selector/conversation_selector.dart';
@@ -93,7 +93,6 @@ Future<bool> showSendDialog(
       // ignore: no_default_cases
       default:
         result = _data;
-        break;
     }
   } catch (e, s) {
     w('showSendDialog error: $e, $s');
@@ -391,15 +390,10 @@ class _Image extends HookConsumerWidget {
   final SendImageData image;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final playing = useImagePlaying(context);
-
-    return CacheImage(
-      image.url,
-      controller: playing,
-      placeholder: () => ColoredBox(color: context.theme.secondaryText),
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => MixinImage.network(
+        image.url,
+        placeholder: () => ColoredBox(color: context.theme.secondaryText),
+      );
 }
 
 class _Sticker extends HookConsumerWidget {

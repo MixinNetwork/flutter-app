@@ -30,9 +30,9 @@ import '../utils/image.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
-import '../widgets/cache_image.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
+import '../widgets/mixin_image.dart';
 import 'show_pin_message_key_value.dart';
 
 const jpegMimeType = 'image/jpeg';

@@ -11,8 +11,8 @@ import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
-import '../cache_image.dart';
 import '../interactive_decorated_box.dart';
+import '../mixin_image.dart';
 import '../search_text_field.dart';
 
 class GiphyPage extends HookConsumerWidget {
@@ -169,7 +169,6 @@ class _GifItem extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final previewImage = gif.images.fixedWidthDownsampled;
     final sendImage = gif.images.fixedWidth;
-    final playing = useImagePlaying(context);
 
     return InteractiveDecoratedBox(
       onTap: () async {
@@ -187,9 +186,8 @@ class _GifItem extends HookConsumerWidget {
           height: int.tryParse(sendImage.height),
         );
       },
-      child: CacheImage(
+      child: MixinImage.network(
         previewImage.url,
-        controller: playing,
         placeholder: () => ColoredBox(color: context.theme.secondaryText),
       ),
     );

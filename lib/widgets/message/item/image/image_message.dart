@@ -8,10 +8,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../../enum/media_status.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../../utils/hook.dart';
-import '../../../cache_image.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../mixin_image.dart';
 import '../../../status.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -85,8 +84,6 @@ class MessageImage extends HookConsumerWidget {
         useMessageConverter(converter: (state) => state.thumbImage ?? '');
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
-    final playing = useImagePlaying(context);
-
     final isUnDownloadGiphyGif = useMessageConverter(
       converter: (message) =>
           message.mediaMimeType == 'image/gif' &&
@@ -96,9 +93,8 @@ class MessageImage extends HookConsumerWidget {
     final Widget thumbWidget;
     if (isUnDownloadGiphyGif) {
       // un-downloaded giphy gif image.
-      thumbWidget = CacheImage(
+      thumbWidget = MixinImage.network(
         thumbImage,
-        controller: playing,
         placeholder: () => ColoredBox(color: context.theme.secondaryText),
       );
     } else {
@@ -157,13 +153,9 @@ class MessageImage extends HookConsumerWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image(
-              image: MixinFileImage(
-                File(context.accountServer.convertAbsolutePath(
-                    type, conversationId, mediaUrl, isTranscriptPage)),
-                controller: playing,
-              ),
-              fit: BoxFit.cover,
+            MixinImage.file(
+              File(context.accountServer.convertAbsolutePath(
+                  type, conversationId, mediaUrl, isTranscriptPage)),
               errorBuilder: (_, __, ___) => thumbWidget,
             ),
             Center(

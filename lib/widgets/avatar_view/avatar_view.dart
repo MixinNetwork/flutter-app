@@ -10,7 +10,7 @@ import '../../db/mixin_database.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../cache_image.dart';
+import '../mixin_image.dart';
 
 class ConversationAvatarWidget extends HookConsumerWidget {
   const ConversationAvatarWidget({
@@ -190,12 +190,12 @@ class AvatarWidget extends StatelessWidget {
     );
 
     final child = avatarUrl?.isNotEmpty == true
-        ? CacheImage(
+        ? MixinImage.network(
             avatarUrl!,
             width: size,
             height: size,
             placeholder: () => placeholder,
-            errorWidget: () => placeholder,
+            errorBuilder: (_, __, ___) => placeholder,
           )
         : placeholder;
 

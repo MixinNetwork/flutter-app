@@ -8,9 +8,9 @@ import '../../../../../db/vo/inscription.dart';
 import '../../../../../ui/provider/database_provider.dart';
 import '../../../../../utils/extension/extension.dart';
 import '../../../../buttons.dart';
-import '../../../../cache_image.dart';
 import '../../../../dialog.dart';
 import '../../../../high_light_text.dart';
+import '../../../../mixin_image.dart';
 import 'colored_hash_widget.dart';
 import 'inscription_content.dart';
 import 'inscription_message.dart';
@@ -100,7 +100,7 @@ class _BlurBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        CacheImage(inscription!.contentUrl),
+        MixinImage.network(inscription!.contentUrl),
         BackdropFilter(
           filter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
           child: const SizedBox.expand(),

@@ -34,13 +34,13 @@ import '../../../utils/system/text_input.dart';
 import '../../../utils/video.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/buttons.dart';
-import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/image.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
+import '../../../widgets/mixin_image.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import 'image_caption_input.dart';
@@ -1027,8 +1027,8 @@ class _TileBigImage extends HookConsumerWidget {
                 minWidth: 420,
                 maxWidth: 420,
               ),
-              child: Image(
-                image: MixinFileImage(File(file.path)),
+              child: MixinImage.file(
+                File(file.path),
                 fit: BoxFit.fitWidth,
                 errorBuilder: (_, __, ___) => const SizedBox(),
               ),

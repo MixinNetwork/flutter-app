@@ -23,10 +23,10 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
-import '../../cache_image.dart';
 import '../../conversation/badges_widget.dart';
 import '../../high_light_text.dart';
 import '../../image.dart';
+import '../../mixin_image.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../message.dart';
 import '../message_style.dart';
@@ -200,10 +200,10 @@ class QuoteMessage extends HookConsumerWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: CacheImage(
+          image: MixinImage.network(
             thumbUrl ?? '',
             placeholder: () => placeholder,
-            errorWidget: () => placeholder,
+            errorBuilder: (_, __, ___) => placeholder,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
@@ -417,14 +417,13 @@ class _QuoteImage extends HookWidget {
       [mediaUrl, messageId],
     );
 
-    return Image(
-      image: MixinFileImage(File(context.accountServer.convertAbsolutePath(
+    return MixinImage.file(
+      File(context.accountServer.convertAbsolutePath(
         type,
         quote.conversationId as String,
         mediaUrl,
         isTranscriptPage,
-      ))),
-      fit: BoxFit.cover,
+      )),
       errorBuilder: (_, __, ___) =>
           ImageByBlurHashOrBase64(imageData: thumbImage!),
     );

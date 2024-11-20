@@ -99,7 +99,9 @@ class HoverOverlay extends HookConsumerWidget {
     Future<void> onChildHovering(_) async {
       if (cancelableRef.value != null &&
           !cancelableRef.value!.isCanceled &&
-          !cancelableRef.value!.isCompleted) return;
+          !cancelableRef.value!.isCompleted) {
+        return;
+      }
 
       if (delayDuration != null) {
         cancelableRef.value = CancelableOperation.fromFuture(
