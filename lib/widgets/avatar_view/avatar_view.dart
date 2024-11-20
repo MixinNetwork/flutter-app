@@ -10,7 +10,7 @@ import '../../db/mixin_database.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../cache_image.dart';
+import '../mixin_image.dart';
 
 class ConversationAvatarWidget extends HookConsumerWidget {
   const ConversationAvatarWidget({

@@ -6,7 +6,7 @@ import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/cache_image.dart';
+import '../../../widgets/mixin_image.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../provider/conversation_provider.dart';
 

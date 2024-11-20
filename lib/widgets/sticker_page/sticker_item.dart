@@ -7,8 +7,8 @@ import '../../app.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../cache_image.dart';
 import '../cache_lottie.dart';
+import '../mixin_image.dart';
 
 class StickerItem extends HookConsumerWidget {
   const StickerItem({

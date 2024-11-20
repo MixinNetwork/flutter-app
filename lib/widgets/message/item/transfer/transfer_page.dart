@@ -12,9 +12,9 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
-import '../../../cache_image.dart';
 import '../../../dialog.dart';
 import '../../../high_light_text.dart';
+import '../../../mixin_image.dart';
 
 Future<void> showTransferDialog(
   BuildContext context,

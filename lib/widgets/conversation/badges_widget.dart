@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
-import '../cache_image.dart';
+import '../mixin_image.dart';
 
 class BadgesWidget extends StatelessWidget {
   const BadgesWidget({

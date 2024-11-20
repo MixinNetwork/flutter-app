@@ -10,8 +10,8 @@ import 'package:map/map.dart' as map;
 
 import '../../../../constants/resources.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../mixin_image.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';

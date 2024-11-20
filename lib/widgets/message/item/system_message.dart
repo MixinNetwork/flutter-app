@@ -136,7 +136,6 @@ String generateSystemText({
     case MessageAction.update:
     default:
       text = Localization.current.messageNotSupport;
-      break;
   }
   return text;
 }

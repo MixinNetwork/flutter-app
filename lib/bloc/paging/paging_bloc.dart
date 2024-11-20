@@ -177,7 +177,9 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
       if (!state.initialized ||
           state.map.isEmpty ||
           expectMinListRange(event.itemPositions.first - prefetchDistance,
-              event.itemPositions.last + prefetchDistance)) return;
+              event.itemPositions.last + prefetchDistance)) {
+        return;
+      }
 
       final expectStart = event.itemPositions.first - limit;
       final expectEnd = event.itemPositions.last + limit;

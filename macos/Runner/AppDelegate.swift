@@ -67,7 +67,7 @@ class AppDelegate: FlutterAppDelegate {
                 // We could send the report from here, but we'll just print out some debugging info instead.
                 if let text = PLCrashReportTextFormatter.stringValue(for: report, with: PLCrashReportTextFormatiOS) {
                     print(text)
-                    mixin_logger_write_log("native crash occured: \(Date())")
+                    mixin_logger_write_log("native crash occurred: \(Date())")
                     mixin_logger_write_log(text)
                 } else {
                     print("CrashReporter: can't convert report to text")

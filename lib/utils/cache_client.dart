@@ -7,7 +7,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../widgets/cache_image.dart';
+import '../widgets/mixin_image.dart';
 import 'mixin_api_client.dart';
 import 'proxy.dart';
 

@@ -11,7 +11,7 @@ import '../../../../../db/vo/inscription.dart';
 import '../../../../../utils/cache_client.dart';
 import '../../../../../utils/extension/extension.dart';
 import '../../../../../utils/hook.dart';
-import '../../../../cache_image.dart';
+import '../../../../mixin_image.dart';
 import 'inscription_message.dart';
 
 class InscriptionContent extends HookWidget {

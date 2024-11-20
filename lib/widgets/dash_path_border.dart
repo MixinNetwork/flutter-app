@@ -2,7 +2,7 @@ import 'package:flutter/painting.dart';
 
 /// Creates a new path that is drawn from the segments of `source`.
 ///
-/// Dash intervals are controled by the `dashArray` - see [CircularIntervalList]
+/// Dash intervals are controlled by the `dashArray` - see [CircularIntervalList]
 /// for examples.
 ///
 /// `dashOffset` specifies an initial starting point for the dashing.

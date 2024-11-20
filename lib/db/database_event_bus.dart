@@ -152,7 +152,9 @@ class DataBaseEventBus {
   void updateParticipant(Iterable<MiniParticipantItem> participants) {
     final newParticipants = participants.where((participant) {
       if (participant.conversationId.trim().isNotEmpty &&
-          participant.userId.trim().isNotEmpty) return true;
+          participant.userId.trim().isNotEmpty) {
+        return true;
+      }
       i('DatabaseEvent: updateParticipant participantId is empty');
       return false;
     });
@@ -187,7 +189,9 @@ class DataBaseEventBus {
   void insertOrReplaceMessages(Iterable<MiniMessageItem> messageEvents) {
     final newMessageEvents = messageEvents.where((event) {
       if (event.messageId.trim().isNotEmpty &&
-          event.conversationId.trim().isNotEmpty) return true;
+          event.conversationId.trim().isNotEmpty) {
+        return true;
+      }
       i('DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event');
       return false;
     });
@@ -244,7 +248,9 @@ class DataBaseEventBus {
   void updateMessageMention(Iterable<MiniMessageItem> messageEvents) {
     final newMessageEvents = messageEvents.where((event) {
       if (event.messageId.trim().isNotEmpty &&
-          event.conversationId.trim().isNotEmpty) return true;
+          event.conversationId.trim().isNotEmpty) {
+        return true;
+      }
       i('DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event');
       return false;
     });
@@ -279,7 +285,9 @@ class DataBaseEventBus {
   void updatePinMessage(Iterable<MiniMessageItem> messageEvent) {
     final newMessageEvents = messageEvent.where((event) {
       if (event.messageId.trim().isNotEmpty &&
-          event.conversationId.trim().isNotEmpty) return true;
+          event.conversationId.trim().isNotEmpty) {
+        return true;
+      }
       i('DatabaseEvent: updatePinMessage messageId or conversationId is empty: $event');
       return false;
     });

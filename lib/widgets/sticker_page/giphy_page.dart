@@ -11,8 +11,8 @@ import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
-import '../cache_image.dart';
 import '../interactive_decorated_box.dart';
+import '../mixin_image.dart';
 import '../search_text_field.dart';
 
 class GiphyPage extends HookConsumerWidget {

@@ -8,8 +8,8 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../utils/extension/extension.dart';
 import '../utils/uri_utils.dart';
-import 'cache_image.dart';
 import 'high_light_text.dart';
+import 'mixin_image.dart';
 
 class MarkdownColumn extends StatelessWidget {
   const MarkdownColumn({required this.data, super.key});
