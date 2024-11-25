@@ -99,6 +99,12 @@ class AccountServer {
 
     try {
       await checkSignalKeys();
+    } on MixinApiError catch (e) {
+      final err = e.error;
+      if (err is MixinError && err.code == oldVersion) {
+        _isUpdateRequired.value = true;
+      }
+      return;
     } catch (e, s) {
       w('$e, $s');
       await signOutAndClear();
