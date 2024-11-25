@@ -33,12 +33,15 @@ class ActionsCardMessage extends StatelessWidget {
               _Bubble(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: width, minWidth: width),
-                  child: ActionsCardBody(
-                    data: data,
-                    description: MessageTextWidget(
-                      color: context.theme.text,
-                      fontSize: context.messageStyle.primaryFontSize,
-                      content: data.description,
+                  child: MessageSelectionArea(
+                    child: ActionsCardBody(
+                      data: data,
+                      description: MessageTextWidget(
+                        enableSelection: false,
+                        color: context.theme.text,
+                        fontSize: context.messageStyle.primaryFontSize,
+                        content: data.description,
+                      ),
                     ),
                   ),
                 ),

@@ -39,12 +39,14 @@ class MessageTextWidget extends HookConsumerWidget {
     required this.fontSize,
     required this.color,
     required this.content,
+    this.enableSelection = true,
     super.key,
   });
 
   final double fontSize;
   final Color color;
   final String content;
+  final bool enableSelection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,34 +81,39 @@ class MessageTextWidget extends HookConsumerWidget {
 
     final focusNode = useFocusNode(debugLabel: 'text selection focus');
 
-    return MessageSelectionArea(
-      focusNode: focusNode,
-      child: MessageLayout(
-        spacing: 6,
-        content: CustomText(
-          content,
-          style: TextStyle(
-            fontSize: fontSize,
-            color: color,
-          ),
-          textMatchers: [
-            UrlTextMatcher(context),
-            MailTextMatcher(context),
-            MentionTextMatcher(context, mentionMap),
-            BotNumberTextMatcher(context),
-            EmojiTextMatcher(),
-            KeyWordTextMatcher(
-              keyword,
-              style: TextStyle(
-                backgroundColor: context.theme.highlight,
-                color: context.theme.text,
-              ),
-            ),
-          ],
+    Widget child = MessageLayout(
+      spacing: 6,
+      content: CustomText(
+        content,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: color,
         ),
-        dateAndStatus: const MessageDatetimeAndStatus(),
+        textMatchers: [
+          UrlTextMatcher(context),
+          MailTextMatcher(context),
+          MentionTextMatcher(context, mentionMap),
+          BotNumberTextMatcher(context),
+          EmojiTextMatcher(),
+          KeyWordTextMatcher(
+            keyword,
+            style: TextStyle(
+              backgroundColor: context.theme.highlight,
+              color: context.theme.text,
+            ),
+          ),
+        ],
       ),
+      dateAndStatus: const MessageDatetimeAndStatus(),
     );
+
+    if (enableSelection) {
+      child = MessageSelectionArea(
+        focusNode: focusNode,
+        child: child,
+      );
+    }
+    return child;
   }
 }
 

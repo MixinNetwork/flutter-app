@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
@@ -50,6 +51,7 @@ import '../toast.dart';
 import '../user/user_dialog.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
+import 'item/action_card/action_card_data.dart';
 import 'item/action_card/action_message.dart';
 import 'item/audio_message.dart';
 import 'item/contact_message_widget.dart';
@@ -497,8 +499,18 @@ class MessageItemWidget extends HookConsumerWidget {
                           image: MenuImage.icon(IconFonts.copy),
                           title: context.l10n.copySelectedText,
                           callback: () {
-                            Clipboard.setData(
-                                ClipboardData(text: selectedContent.plainText));
+                            String text;
+                            try {
+                              final data = AppCardData.fromJson(
+                                  jsonDecode(message.content!)
+                                      as Map<String, dynamic>);
+                              text = data.generateCopyTextWithBreakLine(
+                                  selectedContent.plainText);
+                            } catch (error) {
+                              e('ActionCard decode error: $error');
+                              text = selectedContent.plainText;
+                            }
+                            Clipboard.setData(ClipboardData(text: text));
                           },
                         ));
                       }

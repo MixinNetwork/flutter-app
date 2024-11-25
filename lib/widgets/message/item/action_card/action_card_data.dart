@@ -49,6 +49,23 @@ class AppCardData {
   bool get isActionsCard => action.isEmpty;
 
   bool get canShareActions => actions.every((e) => e.isValidSharedAction);
+
+  // title and description is not in one Text Widget. when use SelectionArea,
+  // if user select title and description, it will concat them together without break line.
+  // so we need a method to generate copy text with break line.
+  String generateCopyTextWithBreakLine(String selection) {
+    if (!isActionsCard || title.isEmpty || description.isEmpty) {
+      return selection;
+    }
+
+    final allStr = '$title$description';
+    final index = allStr.indexOf(selection);
+    if (index + selection.length <= title.length || index >= title.length) {
+      return selection;
+    }
+    final breakIndex = title.length - index;
+    return '${selection.substring(0, breakIndex)}\n${selection.substring(breakIndex)}';
+  }
 }
 
 @JsonSerializable()
