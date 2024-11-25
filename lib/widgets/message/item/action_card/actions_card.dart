@@ -118,7 +118,7 @@ class ActionsCardBody extends StatelessWidget {
               style: TextStyle(
                 color: context.theme.text,
                 fontSize: context.messageStyle.primaryFontSize,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
