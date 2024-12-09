@@ -238,7 +238,7 @@ analyzer:
     - moor
 
 msix_config:
-  display_name: Mixin Desktop
+  display_name: Mixin Messenger
   publisher_display_name: Mixin Ltd
   identity_name: 14801MixinLtd.MixinDesktop
   publisher: CN=272248D5-9A62-44D7-A299-5E1F8B46A9B0
