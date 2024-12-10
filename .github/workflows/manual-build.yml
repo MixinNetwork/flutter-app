@@ -84,7 +84,9 @@ jobs:
         run: flutter test
 
       - name: Build APP
-        run: flutter build linux
+        run: flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Compress Flutter build
         run: tar -C build/linux/x64/release/bundle -cvf mixin_desktop_linux_amd64_portable.tar.gz .
@@ -244,8 +246,10 @@ jobs:
           $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
           $build_number=$version_str.Split("+")[1]
-          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
+          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number" --dart-define SENTRY_DSN=$env:SENTRY_DSN
           echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Build Installer
         run: |
