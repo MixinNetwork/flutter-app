@@ -185,6 +185,7 @@ dev_dependencies:
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
   flutter_lints: ^5.0.0
   very_good_analysis: ^6.0.0
+  sentry_flutter: ^8.10.1
 
 dependency_overrides:
   very_good_analysis: ^6.0.0

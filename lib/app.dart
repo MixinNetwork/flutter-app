@@ -9,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
@@ -52,6 +53,16 @@ class App extends HookConsumerWidget {
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
 
     final authState = ref.watch(authProvider);
+
+    useMemoized(() {
+      Sentry.configureScope((scope) {
+        if (authState != null) {
+          scope.setUser(SentryUser(id: authState.userId));
+        } else {
+          scope.setUser(null);
+        }
+      });
+    }, [authState]);
 
     Widget child;
     if (authState == null) {

@@ -13,6 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   platform_device_id_windows
   protocol_handler_windows
   screen_retriever_windows
+  sentry_flutter
   sqlite3_flutter_libs
   super_native_extensions
   system_tray

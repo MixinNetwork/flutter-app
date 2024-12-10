@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   open_file_linux
   platform_device_id_linux
   screen_retriever_linux
+  sentry_flutter
   sqlite3_flutter_libs
   super_native_extensions
   url_launcher_linux
