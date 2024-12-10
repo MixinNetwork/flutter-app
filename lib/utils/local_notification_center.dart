@@ -26,7 +26,7 @@ class Notification {
 }
 
 abstract class _NotificationManager {
-  final _payloadStreamController = BehaviorSubject<Uri>();
+  final _payloadStreamController = BehaviorSubject<Uri?>();
   final List<Notification> notifications = [];
 
   Future<void> initialize();
@@ -51,6 +51,7 @@ abstract class _NotificationManager {
 
   Stream<Uri> notificationActionEvent(NotificationScheme notificationScheme) =>
       _payloadStreamController.stream
+          .whereNotNull()
           .where((e) => e.scheme == enumConvertToString(notificationScheme));
 }
 
@@ -271,6 +272,10 @@ Future<void> initListener() async {
 Stream<Uri> notificationSelectEvent(NotificationScheme notificationScheme) =>
     _notificationManager?.notificationActionEvent(notificationScheme) ??
     const Stream.empty();
+
+void clearNotificationEvent() {
+  _notificationManager?._payloadStreamController.add(null);
+}
 
 int _incrementAndGetId() {
   _id++;

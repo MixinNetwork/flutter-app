@@ -193,6 +193,7 @@ class NotificationService {
   List<StreamSubscription> streamSubscriptions = [];
 
   Future<void> close() async {
+    clearNotificationEvent();
     await Future.wait(streamSubscriptions.map((e) => e.cancel()));
   }
 }
