@@ -33,7 +33,7 @@ class MentionCache {
     final map = <String, MentionUser>{};
     final noCacheContents = <String>{};
 
-    final contents = _contents.whereNotNull().toSet();
+    final contents = _contents.nonNulls.toSet();
 
     for (final element in contents) {
       final cache = _contentMentionLruCache.get(element.hashCode);
@@ -125,7 +125,7 @@ class MentionCache {
         .where((element) => _userLruCache.get(element) == null)
         .toSet();
 
-    final mentionUsers = identityNumbers.map(_userLruCache.get).whereNotNull();
+    final mentionUsers = identityNumbers.map(_userLruCache.get).nonNulls;
     final map = Map.fromIterables(
         mentionUsers.map((e) => e.identityNumber), mentionUsers);
 

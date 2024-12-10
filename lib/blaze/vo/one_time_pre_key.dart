@@ -11,9 +11,9 @@ class OneTimePreKey with EquatableMixin {
       _$OneTimePreKeyFromJson(json);
 
   @JsonKey(name: 'key_id')
-  int keyId;
+  final int keyId;
   @JsonKey(name: 'pub_key')
-  String? pubKey;
+  final String? pubKey;
 
   Map<String, dynamic> toJson() => _$OneTimePreKeyToJson(this);
 

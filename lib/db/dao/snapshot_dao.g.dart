@@ -9,7 +9,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   Assets get assets => attachedDatabase.assets;
   Chains get chains => attachedDatabase.chains;
   Fiats get fiats => attachedDatabase.fiats;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   CircleConversations get circleConversations =>
       attachedDatabase.circleConversations;

@@ -360,8 +360,7 @@ class _ActionAddParticipants extends HookConsumerWidget {
                 );
                 if (result == null || result.isEmpty) return;
 
-                final userIds =
-                    result.map((e) => e.userId).whereNotNull().toList();
+                final userIds = result.map((e) => e.userId).nonNulls.toList();
                 final conversationId = ref.read(currentConversationIdProvider);
                 if (conversationId == null) return;
 

@@ -6,7 +6,7 @@ part of 'favorite_app_dao.dart';
 mixin _$FavoriteAppDaoMixin on DatabaseAccessor<MixinDatabase> {
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   Apps get apps => attachedDatabase.apps;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>
       attachedDatabase.circleConversations;

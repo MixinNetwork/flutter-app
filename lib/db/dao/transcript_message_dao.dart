@@ -115,7 +115,7 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
       return transcript.content;
     }));
 
-    return contents.whereNotNull().join(' ');
+    return contents.nonNulls.join(' ');
   }
 
   Future<List<TranscriptMessage>> getTranscriptMessages({

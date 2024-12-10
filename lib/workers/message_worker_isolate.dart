@@ -24,7 +24,6 @@ import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
-import '../utils/proxy.dart';
 import '../utils/system/package_info.dart';
 import 'decrypt_message.dart';
 import 'device_transfer.dart';

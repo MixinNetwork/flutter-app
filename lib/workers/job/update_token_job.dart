@@ -7,7 +7,6 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/constants.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
-import '../../utils/extension/extension.dart';
 import '../job_queue.dart';
 
 class UpdateTokenJob extends JobQueue<Job, List<Job>> {
@@ -68,6 +67,6 @@ class UpdateTokenJob extends JobQueue<Job, List<Job>> {
         await Future.delayed(Duration(seconds: retryDelay));
       }
     }));
-    DataBaseEventBus.instance.updateToken(tokenIds.whereNotNull());
+    DataBaseEventBus.instance.updateToken(tokenIds.nonNulls);
   }
 }

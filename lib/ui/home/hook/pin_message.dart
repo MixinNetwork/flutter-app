@@ -50,7 +50,7 @@ PinMessageState usePinMessageState(String? conversationId) {
           )
         ],
         duration: kSlowThrottleDuration,
-      ).map((event) => event.whereNotNull().toList());
+      ).map((event) => event.nonNulls.toList());
     },
     initialData: [],
     keys: [conversationId],

@@ -1814,22 +1814,84 @@ typedef $SenderKeysUpdateCompanionBuilder = SenderKeysCompanion Function({
   Value<int> rowid,
 });
 
+class $SenderKeysFilterComposer extends Composer<_$SignalDatabase, SenderKeys> {
+  $SenderKeysFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get groupId => $composableBuilder(
+      column: $table.groupId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderId => $composableBuilder(
+      column: $table.senderId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnFilters(column));
+}
+
+class $SenderKeysOrderingComposer
+    extends Composer<_$SignalDatabase, SenderKeys> {
+  $SenderKeysOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get groupId => $composableBuilder(
+      column: $table.groupId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderId => $composableBuilder(
+      column: $table.senderId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnOrderings(column));
+}
+
+class $SenderKeysAnnotationComposer
+    extends Composer<_$SignalDatabase, SenderKeys> {
+  $SenderKeysAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get senderId =>
+      $composableBuilder(column: $table.senderId, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get record =>
+      $composableBuilder(column: $table.record, builder: (column) => column);
+}
+
 class $SenderKeysTableManager extends RootTableManager<
     _$SignalDatabase,
     SenderKeys,
     SenderKey,
     $SenderKeysFilterComposer,
     $SenderKeysOrderingComposer,
+    $SenderKeysAnnotationComposer,
     $SenderKeysCreateCompanionBuilder,
-    $SenderKeysUpdateCompanionBuilder> {
+    $SenderKeysUpdateCompanionBuilder,
+    (SenderKey, BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>),
+    SenderKey,
+    PrefetchHooks Function()> {
   $SenderKeysTableManager(_$SignalDatabase db, SenderKeys table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $SenderKeysFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $SenderKeysOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $SenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SenderKeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> groupId = const Value.absent(),
             Value<String> senderId = const Value.absent(),
@@ -1854,47 +1916,25 @@ class $SenderKeysTableManager extends RootTableManager<
             record: record,
             rowid: rowid,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $SenderKeysFilterComposer
-    extends FilterComposer<_$SignalDatabase, SenderKeys> {
-  $SenderKeysFilterComposer(super.$state);
-  ColumnFilters<String> get groupId => $state.composableBuilder(
-      column: $state.table.groupId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get senderId => $state.composableBuilder(
-      column: $state.table.senderId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $SenderKeysOrderingComposer
-    extends OrderingComposer<_$SignalDatabase, SenderKeys> {
-  $SenderKeysOrderingComposer(super.$state);
-  ColumnOrderings<String> get groupId => $state.composableBuilder(
-      column: $state.table.groupId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get senderId => $state.composableBuilder(
-      column: $state.table.senderId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $SenderKeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    SenderKeys,
+    SenderKey,
+    $SenderKeysFilterComposer,
+    $SenderKeysOrderingComposer,
+    $SenderKeysAnnotationComposer,
+    $SenderKeysCreateCompanionBuilder,
+    $SenderKeysUpdateCompanionBuilder,
+    (SenderKey, BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>),
+    SenderKey,
+    PrefetchHooks Function()>;
 typedef $IdentitiesCreateCompanionBuilder = IdentitiesCompanion Function({
   Value<int> id,
   required String address,
@@ -1914,22 +1954,123 @@ typedef $IdentitiesUpdateCompanionBuilder = IdentitiesCompanion Function({
   Value<int> timestamp,
 });
 
+class $IdentitiesFilterComposer extends Composer<_$SignalDatabase, Identities> {
+  $IdentitiesFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get address => $composableBuilder(
+      column: $table.address, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get registrationId => $composableBuilder(
+      column: $table.registrationId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get publicKey => $composableBuilder(
+      column: $table.publicKey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get privateKey => $composableBuilder(
+      column: $table.privateKey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get nextPrekeyId => $composableBuilder(
+      column: $table.nextPrekeyId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+}
+
+class $IdentitiesOrderingComposer
+    extends Composer<_$SignalDatabase, Identities> {
+  $IdentitiesOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get address => $composableBuilder(
+      column: $table.address, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get registrationId => $composableBuilder(
+      column: $table.registrationId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get publicKey => $composableBuilder(
+      column: $table.publicKey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get privateKey => $composableBuilder(
+      column: $table.privateKey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get nextPrekeyId => $composableBuilder(
+      column: $table.nextPrekeyId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+}
+
+class $IdentitiesAnnotationComposer
+    extends Composer<_$SignalDatabase, Identities> {
+  $IdentitiesAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<int> get registrationId => $composableBuilder(
+      column: $table.registrationId, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get publicKey =>
+      $composableBuilder(column: $table.publicKey, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get privateKey => $composableBuilder(
+      column: $table.privateKey, builder: (column) => column);
+
+  GeneratedColumn<int> get nextPrekeyId => $composableBuilder(
+      column: $table.nextPrekeyId, builder: (column) => column);
+
+  GeneratedColumn<int> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
 class $IdentitiesTableManager extends RootTableManager<
     _$SignalDatabase,
     Identities,
     Identity,
     $IdentitiesFilterComposer,
     $IdentitiesOrderingComposer,
+    $IdentitiesAnnotationComposer,
     $IdentitiesCreateCompanionBuilder,
-    $IdentitiesUpdateCompanionBuilder> {
+    $IdentitiesUpdateCompanionBuilder,
+    (Identity, BaseReferences<_$SignalDatabase, Identities, Identity>),
+    Identity,
+    PrefetchHooks Function()> {
   $IdentitiesTableManager(_$SignalDatabase db, Identities table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $IdentitiesFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $IdentitiesOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $IdentitiesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $IdentitiesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $IdentitiesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> address = const Value.absent(),
@@ -1966,87 +2107,25 @@ class $IdentitiesTableManager extends RootTableManager<
             nextPrekeyId: nextPrekeyId,
             timestamp: timestamp,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $IdentitiesFilterComposer
-    extends FilterComposer<_$SignalDatabase, Identities> {
-  $IdentitiesFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get address => $state.composableBuilder(
-      column: $state.table.address,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get registrationId => $state.composableBuilder(
-      column: $state.table.registrationId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<Uint8List> get publicKey => $state.composableBuilder(
-      column: $state.table.publicKey,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<Uint8List> get privateKey => $state.composableBuilder(
-      column: $state.table.privateKey,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get nextPrekeyId => $state.composableBuilder(
-      column: $state.table.nextPrekeyId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get timestamp => $state.composableBuilder(
-      column: $state.table.timestamp,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $IdentitiesOrderingComposer
-    extends OrderingComposer<_$SignalDatabase, Identities> {
-  $IdentitiesOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get address => $state.composableBuilder(
-      column: $state.table.address,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get registrationId => $state.composableBuilder(
-      column: $state.table.registrationId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<Uint8List> get publicKey => $state.composableBuilder(
-      column: $state.table.publicKey,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<Uint8List> get privateKey => $state.composableBuilder(
-      column: $state.table.privateKey,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get nextPrekeyId => $state.composableBuilder(
-      column: $state.table.nextPrekeyId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get timestamp => $state.composableBuilder(
-      column: $state.table.timestamp,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $IdentitiesProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    Identities,
+    Identity,
+    $IdentitiesFilterComposer,
+    $IdentitiesOrderingComposer,
+    $IdentitiesAnnotationComposer,
+    $IdentitiesCreateCompanionBuilder,
+    $IdentitiesUpdateCompanionBuilder,
+    (Identity, BaseReferences<_$SignalDatabase, Identities, Identity>),
+    Identity,
+    PrefetchHooks Function()>;
 typedef $PrekeysCreateCompanionBuilder = PrekeysCompanion Function({
   Value<int> id,
   required int prekeyId,
@@ -2058,20 +2137,82 @@ typedef $PrekeysUpdateCompanionBuilder = PrekeysCompanion Function({
   Value<Uint8List> record,
 });
 
+class $PrekeysFilterComposer extends Composer<_$SignalDatabase, Prekeys> {
+  $PrekeysFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get prekeyId => $composableBuilder(
+      column: $table.prekeyId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnFilters(column));
+}
+
+class $PrekeysOrderingComposer extends Composer<_$SignalDatabase, Prekeys> {
+  $PrekeysOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get prekeyId => $composableBuilder(
+      column: $table.prekeyId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnOrderings(column));
+}
+
+class $PrekeysAnnotationComposer extends Composer<_$SignalDatabase, Prekeys> {
+  $PrekeysAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get prekeyId =>
+      $composableBuilder(column: $table.prekeyId, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get record =>
+      $composableBuilder(column: $table.record, builder: (column) => column);
+}
+
 class $PrekeysTableManager extends RootTableManager<
     _$SignalDatabase,
     Prekeys,
     Prekey,
     $PrekeysFilterComposer,
     $PrekeysOrderingComposer,
+    $PrekeysAnnotationComposer,
     $PrekeysCreateCompanionBuilder,
-    $PrekeysUpdateCompanionBuilder> {
+    $PrekeysUpdateCompanionBuilder,
+    (Prekey, BaseReferences<_$SignalDatabase, Prekeys, Prekey>),
+    Prekey,
+    PrefetchHooks Function()> {
   $PrekeysTableManager(_$SignalDatabase db, Prekeys table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer: $PrekeysFilterComposer(ComposerState(db, table)),
-          orderingComposer: $PrekeysOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $PrekeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $PrekeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $PrekeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int> prekeyId = const Value.absent(),
@@ -2092,46 +2233,25 @@ class $PrekeysTableManager extends RootTableManager<
             prekeyId: prekeyId,
             record: record,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $PrekeysFilterComposer extends FilterComposer<_$SignalDatabase, Prekeys> {
-  $PrekeysFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get prekeyId => $state.composableBuilder(
-      column: $state.table.prekeyId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $PrekeysOrderingComposer
-    extends OrderingComposer<_$SignalDatabase, Prekeys> {
-  $PrekeysOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get prekeyId => $state.composableBuilder(
-      column: $state.table.prekeyId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $PrekeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    Prekeys,
+    Prekey,
+    $PrekeysFilterComposer,
+    $PrekeysOrderingComposer,
+    $PrekeysAnnotationComposer,
+    $PrekeysCreateCompanionBuilder,
+    $PrekeysUpdateCompanionBuilder,
+    (Prekey, BaseReferences<_$SignalDatabase, Prekeys, Prekey>),
+    Prekey,
+    PrefetchHooks Function()>;
 typedef $SignedPrekeysCreateCompanionBuilder = SignedPrekeysCompanion Function({
   Value<int> id,
   required int prekeyId,
@@ -2145,22 +2265,97 @@ typedef $SignedPrekeysUpdateCompanionBuilder = SignedPrekeysCompanion Function({
   Value<int> timestamp,
 });
 
+class $SignedPrekeysFilterComposer
+    extends Composer<_$SignalDatabase, SignedPrekeys> {
+  $SignedPrekeysFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get prekeyId => $composableBuilder(
+      column: $table.prekeyId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+}
+
+class $SignedPrekeysOrderingComposer
+    extends Composer<_$SignalDatabase, SignedPrekeys> {
+  $SignedPrekeysOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get prekeyId => $composableBuilder(
+      column: $table.prekeyId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+}
+
+class $SignedPrekeysAnnotationComposer
+    extends Composer<_$SignalDatabase, SignedPrekeys> {
+  $SignedPrekeysAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get prekeyId =>
+      $composableBuilder(column: $table.prekeyId, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get record =>
+      $composableBuilder(column: $table.record, builder: (column) => column);
+
+  GeneratedColumn<int> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
 class $SignedPrekeysTableManager extends RootTableManager<
     _$SignalDatabase,
     SignedPrekeys,
     SignedPrekey,
     $SignedPrekeysFilterComposer,
     $SignedPrekeysOrderingComposer,
+    $SignedPrekeysAnnotationComposer,
     $SignedPrekeysCreateCompanionBuilder,
-    $SignedPrekeysUpdateCompanionBuilder> {
+    $SignedPrekeysUpdateCompanionBuilder,
+    (
+      SignedPrekey,
+      BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>
+    ),
+    SignedPrekey,
+    PrefetchHooks Function()> {
   $SignedPrekeysTableManager(_$SignalDatabase db, SignedPrekeys table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $SignedPrekeysFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $SignedPrekeysOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $SignedPrekeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SignedPrekeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SignedPrekeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int> prekeyId = const Value.absent(),
@@ -2185,57 +2380,28 @@ class $SignedPrekeysTableManager extends RootTableManager<
             record: record,
             timestamp: timestamp,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $SignedPrekeysFilterComposer
-    extends FilterComposer<_$SignalDatabase, SignedPrekeys> {
-  $SignedPrekeysFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get prekeyId => $state.composableBuilder(
-      column: $state.table.prekeyId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get timestamp => $state.composableBuilder(
-      column: $state.table.timestamp,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $SignedPrekeysOrderingComposer
-    extends OrderingComposer<_$SignalDatabase, SignedPrekeys> {
-  $SignedPrekeysOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get prekeyId => $state.composableBuilder(
-      column: $state.table.prekeyId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get timestamp => $state.composableBuilder(
-      column: $state.table.timestamp,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $SignedPrekeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    SignedPrekeys,
+    SignedPrekey,
+    $SignedPrekeysFilterComposer,
+    $SignedPrekeysOrderingComposer,
+    $SignedPrekeysAnnotationComposer,
+    $SignedPrekeysCreateCompanionBuilder,
+    $SignedPrekeysUpdateCompanionBuilder,
+    (
+      SignedPrekey,
+      BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>
+    ),
+    SignedPrekey,
+    PrefetchHooks Function()>;
 typedef $SessionsCreateCompanionBuilder = SessionsCompanion Function({
   Value<int> id,
   required String address,
@@ -2251,20 +2417,100 @@ typedef $SessionsUpdateCompanionBuilder = SessionsCompanion Function({
   Value<int> timestamp,
 });
 
+class $SessionsFilterComposer extends Composer<_$SignalDatabase, Sessions> {
+  $SessionsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get address => $composableBuilder(
+      column: $table.address, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get device => $composableBuilder(
+      column: $table.device, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+}
+
+class $SessionsOrderingComposer extends Composer<_$SignalDatabase, Sessions> {
+  $SessionsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get address => $composableBuilder(
+      column: $table.address, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get device => $composableBuilder(
+      column: $table.device, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<Uint8List> get record => $composableBuilder(
+      column: $table.record, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+}
+
+class $SessionsAnnotationComposer extends Composer<_$SignalDatabase, Sessions> {
+  $SessionsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<int> get device =>
+      $composableBuilder(column: $table.device, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get record =>
+      $composableBuilder(column: $table.record, builder: (column) => column);
+
+  GeneratedColumn<int> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+}
+
 class $SessionsTableManager extends RootTableManager<
     _$SignalDatabase,
     Sessions,
     Session,
     $SessionsFilterComposer,
     $SessionsOrderingComposer,
+    $SessionsAnnotationComposer,
     $SessionsCreateCompanionBuilder,
-    $SessionsUpdateCompanionBuilder> {
+    $SessionsUpdateCompanionBuilder,
+    (Session, BaseReferences<_$SignalDatabase, Sessions, Session>),
+    Session,
+    PrefetchHooks Function()> {
   $SessionsTableManager(_$SignalDatabase db, Sessions table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer: $SessionsFilterComposer(ComposerState(db, table)),
-          orderingComposer: $SessionsOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $SessionsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SessionsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SessionsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> address = const Value.absent(),
@@ -2293,67 +2539,25 @@ class $SessionsTableManager extends RootTableManager<
             record: record,
             timestamp: timestamp,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $SessionsFilterComposer
-    extends FilterComposer<_$SignalDatabase, Sessions> {
-  $SessionsFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get address => $state.composableBuilder(
-      column: $state.table.address,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get device => $state.composableBuilder(
-      column: $state.table.device,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<int> get timestamp => $state.composableBuilder(
-      column: $state.table.timestamp,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $SessionsOrderingComposer
-    extends OrderingComposer<_$SignalDatabase, Sessions> {
-  $SessionsOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get address => $state.composableBuilder(
-      column: $state.table.address,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get device => $state.composableBuilder(
-      column: $state.table.device,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<Uint8List> get record => $state.composableBuilder(
-      column: $state.table.record,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get timestamp => $state.composableBuilder(
-      column: $state.table.timestamp,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $SessionsProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    Sessions,
+    Session,
+    $SessionsFilterComposer,
+    $SessionsOrderingComposer,
+    $SessionsAnnotationComposer,
+    $SessionsCreateCompanionBuilder,
+    $SessionsUpdateCompanionBuilder,
+    (Session, BaseReferences<_$SignalDatabase, Sessions, Session>),
+    Session,
+    PrefetchHooks Function()>;
 typedef $RatchetSenderKeysCreateCompanionBuilder = RatchetSenderKeysCompanion
     Function({
   required String groupId,
@@ -2373,22 +2577,106 @@ typedef $RatchetSenderKeysUpdateCompanionBuilder = RatchetSenderKeysCompanion
   Value<int> rowid,
 });
 
+class $RatchetSenderKeysFilterComposer
+    extends Composer<_$SignalDatabase, RatchetSenderKeys> {
+  $RatchetSenderKeysFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get groupId => $composableBuilder(
+      column: $table.groupId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get senderId => $composableBuilder(
+      column: $table.senderId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get messageId => $composableBuilder(
+      column: $table.messageId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $RatchetSenderKeysOrderingComposer
+    extends Composer<_$SignalDatabase, RatchetSenderKeys> {
+  $RatchetSenderKeysOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get groupId => $composableBuilder(
+      column: $table.groupId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get senderId => $composableBuilder(
+      column: $table.senderId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get messageId => $composableBuilder(
+      column: $table.messageId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $RatchetSenderKeysAnnotationComposer
+    extends Composer<_$SignalDatabase, RatchetSenderKeys> {
+  $RatchetSenderKeysAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get groupId =>
+      $composableBuilder(column: $table.groupId, builder: (column) => column);
+
+  GeneratedColumn<String> get senderId =>
+      $composableBuilder(column: $table.senderId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get messageId =>
+      $composableBuilder(column: $table.messageId, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
 class $RatchetSenderKeysTableManager extends RootTableManager<
     _$SignalDatabase,
     RatchetSenderKeys,
     RatchetSenderKey,
     $RatchetSenderKeysFilterComposer,
     $RatchetSenderKeysOrderingComposer,
+    $RatchetSenderKeysAnnotationComposer,
     $RatchetSenderKeysCreateCompanionBuilder,
-    $RatchetSenderKeysUpdateCompanionBuilder> {
+    $RatchetSenderKeysUpdateCompanionBuilder,
+    (
+      RatchetSenderKey,
+      BaseReferences<_$SignalDatabase, RatchetSenderKeys, RatchetSenderKey>
+    ),
+    RatchetSenderKey,
+    PrefetchHooks Function()> {
   $RatchetSenderKeysTableManager(_$SignalDatabase db, RatchetSenderKeys table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $RatchetSenderKeysFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $RatchetSenderKeysOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $RatchetSenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $RatchetSenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $RatchetSenderKeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> groupId = const Value.absent(),
             Value<String> senderId = const Value.absent(),
@@ -2421,66 +2709,28 @@ class $RatchetSenderKeysTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $RatchetSenderKeysFilterComposer
-    extends FilterComposer<_$SignalDatabase, RatchetSenderKeys> {
-  $RatchetSenderKeysFilterComposer(super.$state);
-  ColumnFilters<String> get groupId => $state.composableBuilder(
-      column: $state.table.groupId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get senderId => $state.composableBuilder(
-      column: $state.table.senderId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get status => $state.composableBuilder(
-      column: $state.table.status,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get messageId => $state.composableBuilder(
-      column: $state.table.messageId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get createdAt => $state.composableBuilder(
-      column: $state.table.createdAt,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $RatchetSenderKeysOrderingComposer
-    extends OrderingComposer<_$SignalDatabase, RatchetSenderKeys> {
-  $RatchetSenderKeysOrderingComposer(super.$state);
-  ColumnOrderings<String> get groupId => $state.composableBuilder(
-      column: $state.table.groupId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get senderId => $state.composableBuilder(
-      column: $state.table.senderId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get status => $state.composableBuilder(
-      column: $state.table.status,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get messageId => $state.composableBuilder(
-      column: $state.table.messageId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get createdAt => $state.composableBuilder(
-      column: $state.table.createdAt,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
+typedef $RatchetSenderKeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    RatchetSenderKeys,
+    RatchetSenderKey,
+    $RatchetSenderKeysFilterComposer,
+    $RatchetSenderKeysOrderingComposer,
+    $RatchetSenderKeysAnnotationComposer,
+    $RatchetSenderKeysCreateCompanionBuilder,
+    $RatchetSenderKeysUpdateCompanionBuilder,
+    (
+      RatchetSenderKey,
+      BaseReferences<_$SignalDatabase, RatchetSenderKeys, RatchetSenderKey>
+    ),
+    RatchetSenderKey,
+    PrefetchHooks Function()>;
 
 class $SignalDatabaseManager {
   final _$SignalDatabase _db;

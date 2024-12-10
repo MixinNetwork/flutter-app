@@ -19,7 +19,7 @@ environment:
 
 dependencies:
   android_id: ^0.4.0
-  ansicolor: ^2.0.2
+  ansicolor: ^2.0.3
   archive: ^3.4.10
   async: ^2.8.1
   audio_session: ^0.1.18
@@ -47,16 +47,16 @@ dependencies:
   desktop_keep_screen_on: ^0.0.3
   desktop_webview_window: ^0.2.3
   device_info_plus: ^10.1.0
-  dio: ^5.5.0
-  dio_smart_retry: ^6.0.0
+  dio: ^5.7.0
+  dio_smart_retry: ^7.0.1
   dio_compatibility_layer: ^0.1.0
-  rhttp: ^0.8.0
-  flutter_rust_bridge: 2.4.0
-  drift: ^2.19.1+1
+  rhttp: ^0.9.6
+  flutter_rust_bridge: ^2.6.0
+  drift: ^2.22.1
   ecache: ^2.0.3
   emojis: ^0.9.9
-  equatable: ^2.0.5
-  file_picker: ^8.0.7
+  equatable: ^2.0.7
+  file_picker: ^8.1.4
   file_selector: ^1.0.3
   file_selector_linux: ^0.9.0
   file_selector_macos: ^0.9.3
@@ -68,7 +68,7 @@ dependencies:
   flutter_app_icon_badge: ^2.0.0
   flutter_bloc: ^8.1.5
   flutter_hooks: ^0.20.5
-  flutter_local_notifications: ^17.2.1
+  flutter_local_notifications: ^18.0.1
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
@@ -95,7 +95,7 @@ dependencies:
   lottie: ^3.1.2
   map: ^2.0.2
   markdown_widget: ^2.3.2+2
-  mime: ^1.0.2
+  mime: ^2.0.0
   mixin_bot_sdk_dart: ^1.2.8
   mixin_logger: ^0.1.2
   network_info_plus: ^6.0.0
@@ -124,9 +124,9 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
       ref: 66a8ed5f955fa35c9aaac76842b9dab83c51db92
-  super_clipboard: ^0.8.19
-  super_context_menu: ^0.8.19
-  super_native_extensions: ^0.8.19
+  super_clipboard: ^0.8.24
+  super_context_menu: ^0.8.24
+  super_native_extensions: ^0.8.24
   synchronized: ^3.0.1
   system_tray:
     path: third_party/system_tray
@@ -144,7 +144,7 @@ dependencies:
   webview_flutter: ^4.8.0
   win32: ^5.7.1
   win_toast: ^0.3.1
-  window_manager: ^0.3.8
+  window_manager: ^0.4.3
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
@@ -183,8 +183,9 @@ dev_dependencies:
     git:
       url: https://github.com/riccardo-lomazzi/msix.git
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
   very_good_analysis: ^6.0.0
+  sentry_flutter: ^8.10.1
 
 dependency_overrides:
   very_good_analysis: ^6.0.0

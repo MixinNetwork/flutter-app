@@ -9,7 +9,7 @@ mixin _$CircleDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.circleConversations;
   Conversations get conversations => attachedDatabase.conversations;
   Users get users => attachedDatabase.users;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   FloodMessages get floodMessages => attachedDatabase.floodMessages;

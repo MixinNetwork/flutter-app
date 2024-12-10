@@ -28,21 +28,6 @@ const _minFrameDuration = Duration(milliseconds: 20);
 
 const String cacheImageFolderName = 'cacheimage';
 
-final _sharedHttpClient = HttpClient()..autoUncompress = false;
-
-HttpClient get _httpClient {
-  var client = _sharedHttpClient;
-  assert(() {
-    if (debugNetworkImageHttpClientProvider != null) {
-      client = debugNetworkImageHttpClientProvider!();
-    }
-    return true;
-  }());
-  return client;
-}
-
-ProxyConfig? _imageClientProxyConfig;
-
 Future<ui.ImmutableBuffer?> _loadCacheBuffer(
   ImageProvider<Object> provider,
   ProxyConfig? proxyConfig,
@@ -89,11 +74,11 @@ Future<(ui.ImmutableBuffer?, Uint8List?)> _loadBuffer(
     final Uint8List bytes;
 
     final response = await _tryGetResponse(resolved, proxyConfig);
-    if (response == null || response.statusCode != HttpStatus.ok) {
+    if (response.statusCode != HttpStatus.ok) {
       return (null, null);
     }
 
-    bytes = await consolidateHttpClientResponseBytes(response);
+    bytes = response.bodyBytes;
 
     if (bytes.lengthInBytes == 0) {
       throw StateError('NetworkImage is an empty file: $resolved');
@@ -112,17 +97,12 @@ Future<(ui.ImmutableBuffer?, Uint8List?)> _loadBuffer(
   return (null, null);
 }
 
-Future<HttpClientResponse?> _tryGetResponse(
+Future<Response> _tryGetResponse(
   Uri resolved,
   ProxyConfig? proxy,
 ) async {
-  if (proxy != _imageClientProxyConfig) {
-    _httpClient.setProxy(proxy);
-    _imageClientProxyConfig = proxy;
-  }
-  final request = await _httpClient.getUrl(resolved);
-  final response = await request.close();
-
+  final client = await createRHttpClient(proxyConfig: proxy);
+  final response = await client.get(resolved);
   return response;
 }
 
@@ -164,11 +144,11 @@ Future<Uint8List?> _loadBytes(
   if (provider is NetworkImage) {
     final resolved = Uri.base.resolve(provider.url);
     final response = await _tryGetResponse(resolved, proxyConfig);
-    if (response == null || response.statusCode != HttpStatus.ok) {
+    if (response.statusCode != HttpStatus.ok) {
       return null;
     }
 
-    final bytes = await consolidateHttpClientResponseBytes(response);
+    final bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0) {
       throw StateError('NetworkImage is an empty file: $resolved');
     }

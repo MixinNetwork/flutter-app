@@ -649,22 +649,66 @@ typedef $MessagesFtsUpdateCompanionBuilder = MessagesFtsCompanion Function({
   Value<int> rowid,
 });
 
+class $MessagesFtsFilterComposer extends Composer<_$FtsDatabase, MessagesFts> {
+  $MessagesFtsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+}
+
+class $MessagesFtsOrderingComposer
+    extends Composer<_$FtsDatabase, MessagesFts> {
+  $MessagesFtsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+}
+
+class $MessagesFtsAnnotationComposer
+    extends Composer<_$FtsDatabase, MessagesFts> {
+  $MessagesFtsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+}
+
 class $MessagesFtsTableManager extends RootTableManager<
     _$FtsDatabase,
     MessagesFts,
     MessagesFt,
     $MessagesFtsFilterComposer,
     $MessagesFtsOrderingComposer,
+    $MessagesFtsAnnotationComposer,
     $MessagesFtsCreateCompanionBuilder,
-    $MessagesFtsUpdateCompanionBuilder> {
+    $MessagesFtsUpdateCompanionBuilder,
+    (MessagesFt, BaseReferences<_$FtsDatabase, MessagesFts, MessagesFt>),
+    MessagesFt,
+    PrefetchHooks Function()> {
   $MessagesFtsTableManager(_$FtsDatabase db, MessagesFts table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $MessagesFtsFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $MessagesFtsOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $MessagesFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessagesFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessagesFtsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> content = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -681,27 +725,25 @@ class $MessagesFtsTableManager extends RootTableManager<
             content: content,
             rowid: rowid,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $MessagesFtsFilterComposer
-    extends FilterComposer<_$FtsDatabase, MessagesFts> {
-  $MessagesFtsFilterComposer(super.$state);
-  ColumnFilters<String> get content => $state.composableBuilder(
-      column: $state.table.content,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $MessagesFtsOrderingComposer
-    extends OrderingComposer<_$FtsDatabase, MessagesFts> {
-  $MessagesFtsOrderingComposer(super.$state);
-  ColumnOrderings<String> get content => $state.composableBuilder(
-      column: $state.table.content,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $MessagesFtsProcessedTableManager = ProcessedTableManager<
+    _$FtsDatabase,
+    MessagesFts,
+    MessagesFt,
+    $MessagesFtsFilterComposer,
+    $MessagesFtsOrderingComposer,
+    $MessagesFtsAnnotationComposer,
+    $MessagesFtsCreateCompanionBuilder,
+    $MessagesFtsUpdateCompanionBuilder,
+    (MessagesFt, BaseReferences<_$FtsDatabase, MessagesFts, MessagesFt>),
+    MessagesFt,
+    PrefetchHooks Function()>;
 typedef $MessagesMetasCreateCompanionBuilder = MessagesMetasCompanion Function({
   required int docId,
   required String messageId,
@@ -721,22 +763,116 @@ typedef $MessagesMetasUpdateCompanionBuilder = MessagesMetasCompanion Function({
   Value<int> rowid,
 });
 
+class $MessagesMetasFilterComposer
+    extends Composer<_$FtsDatabase, MessagesMetas> {
+  $MessagesMetasFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get docId => $composableBuilder(
+      column: $table.docId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get messageId => $composableBuilder(
+      column: $table.messageId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get conversationId => $composableBuilder(
+      column: $table.conversationId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $composableBuilder(
+          column: $table.createdAt,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+}
+
+class $MessagesMetasOrderingComposer
+    extends Composer<_$FtsDatabase, MessagesMetas> {
+  $MessagesMetasOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get docId => $composableBuilder(
+      column: $table.docId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get messageId => $composableBuilder(
+      column: $table.messageId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get conversationId => $composableBuilder(
+      column: $table.conversationId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $MessagesMetasAnnotationComposer
+    extends Composer<_$FtsDatabase, MessagesMetas> {
+  $MessagesMetasAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get docId =>
+      $composableBuilder(column: $table.docId, builder: (column) => column);
+
+  GeneratedColumn<String> get messageId =>
+      $composableBuilder(column: $table.messageId, builder: (column) => column);
+
+  GeneratedColumn<String> get conversationId => $composableBuilder(
+      column: $table.conversationId, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
 class $MessagesMetasTableManager extends RootTableManager<
     _$FtsDatabase,
     MessagesMetas,
     MessagesMeta,
     $MessagesMetasFilterComposer,
     $MessagesMetasOrderingComposer,
+    $MessagesMetasAnnotationComposer,
     $MessagesMetasCreateCompanionBuilder,
-    $MessagesMetasUpdateCompanionBuilder> {
+    $MessagesMetasUpdateCompanionBuilder,
+    (MessagesMeta, BaseReferences<_$FtsDatabase, MessagesMetas, MessagesMeta>),
+    MessagesMeta,
+    PrefetchHooks Function()> {
   $MessagesMetasTableManager(_$FtsDatabase db, MessagesMetas table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $MessagesMetasFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $MessagesMetasOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $MessagesMetasFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessagesMetasOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessagesMetasAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> docId = const Value.absent(),
             Value<String> messageId = const Value.absent(),
@@ -773,78 +909,25 @@ class $MessagesMetasTableManager extends RootTableManager<
             createdAt: createdAt,
             rowid: rowid,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $MessagesMetasFilterComposer
-    extends FilterComposer<_$FtsDatabase, MessagesMetas> {
-  $MessagesMetasFilterComposer(super.$state);
-  ColumnFilters<int> get docId => $state.composableBuilder(
-      column: $state.table.docId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get messageId => $state.composableBuilder(
-      column: $state.table.messageId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get conversationId => $state.composableBuilder(
-      column: $state.table.conversationId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get category => $state.composableBuilder(
-      column: $state.table.category,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get userId => $state.composableBuilder(
-      column: $state.table.userId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
-      $state.composableBuilder(
-          column: $state.table.createdAt,
-          builder: (column, joinBuilders) => ColumnWithTypeConverterFilters(
-              column,
-              joinBuilders: joinBuilders));
-}
-
-class $MessagesMetasOrderingComposer
-    extends OrderingComposer<_$FtsDatabase, MessagesMetas> {
-  $MessagesMetasOrderingComposer(super.$state);
-  ColumnOrderings<int> get docId => $state.composableBuilder(
-      column: $state.table.docId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get messageId => $state.composableBuilder(
-      column: $state.table.messageId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get conversationId => $state.composableBuilder(
-      column: $state.table.conversationId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get category => $state.composableBuilder(
-      column: $state.table.category,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get userId => $state.composableBuilder(
-      column: $state.table.userId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<int> get createdAt => $state.composableBuilder(
-      column: $state.table.createdAt,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
+typedef $MessagesMetasProcessedTableManager = ProcessedTableManager<
+    _$FtsDatabase,
+    MessagesMetas,
+    MessagesMeta,
+    $MessagesMetasFilterComposer,
+    $MessagesMetasOrderingComposer,
+    $MessagesMetasAnnotationComposer,
+    $MessagesMetasCreateCompanionBuilder,
+    $MessagesMetasUpdateCompanionBuilder,
+    (MessagesMeta, BaseReferences<_$FtsDatabase, MessagesMetas, MessagesMeta>),
+    MessagesMeta,
+    PrefetchHooks Function()>;
 
 class $FtsDatabaseManager {
   final _$FtsDatabase _db;

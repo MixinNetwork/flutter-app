@@ -1,15 +1,15 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
+import 'package:dio_compatibility_layer/dio_compatibility_layer.dart';
 import 'package:equatable/equatable.dart';
+import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:rhttp/rhttp.dart' as rhttp;
 
 import 'extension/extension.dart';
-import 'mixin_api_client.dart';
-import 'property/setting_property.dart';
 
 part 'proxy.g.dart';
 
@@ -55,33 +55,13 @@ class ProxyConfig with EquatableMixin {
 
 extension DioProxyExt on Dio {
   void applyProxy(ProxyConfig? config) {
-    if (config != null) {
-      i('apply client proxy $config');
-      httpClientAdapter = IOHttpClientAdapter();
-      (httpClientAdapter as IOHttpClientAdapter).createHttpClient =
-          () => HttpClient()..setProxy(config);
-    } else {
-      i('remove client proxy');
-      userCustomAdapter();
-    }
-  }
-}
-
-extension ClientExt on Client {
-  void configProxySetting(SettingPropertyStorage settingProperties) {
-    var proxyConfig = settingProperties.activatedProxy;
-    settingProperties.addListener(() {
-      final config = settingProperties.activatedProxy;
-      if (config != proxyConfig) {
-        proxyConfig = config;
-        dio.applyProxy(config);
-      }
-    });
-    dio.applyProxy(proxyConfig);
+    i('apply client proxy ${config?.toUri()}');
+    httpClientAdapter = _CustomHttpClientAdapterWrapper(config);
   }
 }
 
 extension HttpClientProxy on HttpClient {
+  // for websocket proxy
   void setProxy(ProxyConfig? config) {
     switch (config) {
       case ProxyConfig(type: ProxyType.http):
@@ -97,6 +77,56 @@ extension HttpClientProxy on HttpClient {
       // not supported yet.
       case null:
         findProxy = null;
+    }
+  }
+}
+
+rhttp.RhttpCompatibleClient? _cachedClient;
+ProxyConfig? _cachedProxyConfig;
+
+Future<rhttp.RhttpCompatibleClient> createRHttpClient({
+  ProxyConfig? proxyConfig,
+}) async {
+  if (_cachedProxyConfig == proxyConfig && _cachedClient != null) {
+    return _cachedClient!;
+  }
+
+  final settings = rhttp.ClientSettings(
+    proxySettings: proxyConfig != null
+        ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
+        : const rhttp.ProxySettings.noProxy(),
+  );
+  final client = await rhttp.RhttpCompatibleClient.create(settings: settings);
+  _cachedClient = client;
+  _cachedProxyConfig = proxyConfig;
+  return client;
+}
+
+class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
+  _CustomHttpClientAdapterWrapper(ProxyConfig? proxyConfig)
+      : client = createRHttpClient(proxyConfig: proxyConfig);
+
+  final Future<rhttp.RhttpCompatibleClient> client;
+
+  @override
+  void close({bool force = false}) {
+    Future.sync(() async {
+      final client = await this.client;
+      client.close();
+    });
+  }
+
+  @override
+  Future<ResponseBody> fetch(RequestOptions options,
+      Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+    try {
+      final adapter = ConversionLayerAdapter(await client);
+      final resp = await adapter.fetch(options, requestStream, cancelFuture);
+      return resp;
+    } on rhttp.RhttpWrappedClientException catch (error, stackTrace) {
+      // RhttpException.request can not send to other isolate by SendPort
+      Error.throwWithStackTrace(
+          http.ClientException(error.message, error.uri), stackTrace);
     }
   }
 }
