@@ -38,7 +38,6 @@ import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
-import '../utils/proxy.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../workers/injector.dart';

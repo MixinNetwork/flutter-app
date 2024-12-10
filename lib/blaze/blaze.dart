@@ -21,8 +21,8 @@ import '../workers/message_worker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
 
-const String _wsHost1 = 'wss://blaze.mixin.one';
-const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
+const String _wsHost1 = 'wss://blaze.mixin.one:443';
+const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net:443';
 
 enum ConnectedState {
   connecting,

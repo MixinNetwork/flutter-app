@@ -1,17 +1,15 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:dio/dio.dart';
-import 'package:dio_compatibility_layer/dio_compatibility_layer.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:rhttp/rhttp.dart' as rhttp;
 
 import '../constants/constants.dart';
 import 'logger.dart';
 import 'platform.dart';
+import 'property/setting_property.dart';
+import 'proxy.dart';
 import 'system/package_info.dart';
 
 const tenSecond = Duration(seconds: 10);
@@ -76,45 +74,25 @@ Client createClient({
       }),
     ],
   );
-  client.dio.userCustomAdapter();
   return client;
-}
-
-final globalRHttpClient = rhttp.RhttpCompatibleClient.createSync();
-
-extension DioNativeAdapter on Dio {
-  void userCustomAdapter() {
-    httpClientAdapter = _CustomHttpClientAdapterWrapper(
-        ConversionLayerAdapter(globalRHttpClient));
-  }
-}
-
-class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
-  _CustomHttpClientAdapterWrapper(this.client);
-
-  final HttpClientAdapter client;
-
-  @override
-  void close({bool force = false}) {
-    client.close(force: force);
-  }
-
-  @override
-  Future<ResponseBody> fetch(RequestOptions options,
-      Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
-    try {
-      final resp = await client.fetch(options, requestStream, cancelFuture);
-      return resp;
-    } on rhttp.RhttpWrappedClientException catch (error, stackTrace) {
-      // RhttpException.request can not send to other isolate by SendPort
-      Error.throwWithStackTrace(
-          http.ClientException(error.message, error.uri), stackTrace);
-    }
-  }
 }
 
 final _formatter = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
 
 extension _DateTimeFormatter on DateTime {
   String outputFormat() => _formatter.format(this);
+}
+
+extension ClientExt on Client {
+  void configProxySetting(SettingPropertyStorage settingProperties) {
+    var proxyConfig = settingProperties.activatedProxy;
+    settingProperties.addListener(() {
+      final config = settingProperties.activatedProxy;
+      if (config != proxyConfig) {
+        proxyConfig = config;
+        dio.applyProxy(config);
+      }
+    });
+    dio.applyProxy(proxyConfig);
+  }
 }
