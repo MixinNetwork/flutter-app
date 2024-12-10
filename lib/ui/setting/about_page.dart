@@ -125,9 +125,8 @@ class AboutPage extends HookConsumerWidget {
                     ),
                     CellItem(
                       title: Text(context.l10n.privacyPolicy),
-                      onTap: () {
-                        throw Exception('This is test exception');
-                      },
+                      onTap: () =>
+                          openUri(context, 'https://mixin.one/pages/privacy'),
                     ),
                     if (!Platform.isMacOS)
                       CellItem(
