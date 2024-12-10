@@ -81,15 +81,25 @@ extension HttpClientProxy on HttpClient {
   }
 }
 
+rhttp.RhttpCompatibleClient? _cachedClient;
+ProxyConfig? _cachedProxyConfig;
+
 Future<rhttp.RhttpCompatibleClient> createRHttpClient({
   ProxyConfig? proxyConfig,
 }) async {
+  if (_cachedProxyConfig == proxyConfig && _cachedClient != null) {
+    return _cachedClient!;
+  }
+
   final settings = rhttp.ClientSettings(
     proxySettings: proxyConfig != null
         ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
         : const rhttp.ProxySettings.noProxy(),
   );
-  return rhttp.RhttpCompatibleClient.create(settings: settings);
+  final client = await rhttp.RhttpCompatibleClient.create(settings: settings);
+  _cachedClient = client;
+  _cachedProxyConfig = proxyConfig;
+  return client;
 }
 
 class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
