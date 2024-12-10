@@ -25,8 +25,7 @@ Future<Iterable<File>> getClipboardFiles() async {
     final uris = await Future.wait(
         fileReaders.map((item) => item.readValue(Formats.fileUri)));
 
-    final files = uris
-        .nonNulls
+    final files = uris.nonNulls
         .map((e) => e.toFilePath(windows: Platform.isWindows))
         .map(File.new)
         .where((element) => element.existsSync());

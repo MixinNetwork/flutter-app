@@ -25,8 +25,7 @@ Future<List<XFile>> selectFiles() async {
     if (result == null) {
       return const [];
     }
-    return result.paths
-        .nonNulls
+    return result.paths.nonNulls
         .map((e) => XFile(e, mimeType: lookupMimeType(e)))
         .toList();
   }

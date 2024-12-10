@@ -14,6 +14,5 @@ class AddressDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(Address address) =>
       into(db.addresses).insertOnConflictUpdate(address);
 
-  Future deleteAddress(Address address) =>
-      delete(db.addresses).delete(address);
+  Future deleteAddress(Address address) => delete(db.addresses).delete(address);
 }
