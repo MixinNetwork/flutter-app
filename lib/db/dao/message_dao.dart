@@ -317,7 +317,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                 ..limit(kDbDeleteLimit))
               .map((row) => row.read(db.messages.messageId))
               .get())
-          .whereNotNull();
+          .nonNulls;
 
       d('${ids.length} ids to be deleted');
 
@@ -590,7 +590,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where(db.messages.messageId.isIn(messageIds)))
         .map((row) => row.read(db.messages.conversationId))
         .get();
-    return future.whereNotNull().toList();
+    return future.nonNulls.toList();
   }
 
   Selectable<MessageItem> messagesByConversationId(
@@ -624,7 +624,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               db.messages.status.isIn(['SENT', 'DELIVERED'])))
         .map((row) => row.read(db.messages.messageId))
         .get();
-    final ids = list.whereNotNull().toList();
+    final ids = list.nonNulls.toList();
     if (ids.isNotEmpty) {
       await markMessageRead(ids.map((e) =>
           MiniMessageItem(conversationId: conversationId, messageId: e)));
@@ -734,7 +734,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   db.messages.quoteMessageId.equals(quoteMessageId)))
             .map((row) => row.read(db.messages.messageId))
             .get())
-        .whereNotNull()
+        .nonNulls
         .toList();
 
     if (messageIds.isEmpty) return;
@@ -1388,7 +1388,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   messages.content.isNotNull()))
             .map((row) => row.read(messages.messageId))
             .get())
-        .whereNotNull();
+        .nonNulls;
 
     if (messageIds.isEmpty) return;
 

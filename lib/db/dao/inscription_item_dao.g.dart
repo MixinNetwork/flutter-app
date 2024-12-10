@@ -7,7 +7,7 @@ mixin _$InscriptionItemDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

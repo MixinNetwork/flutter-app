@@ -65,11 +65,7 @@ class _LocalNotificationManager extends _NotificationManager {
 
   @override
   Future<void> initialize() async {
-    final darwinInitializationSettings = DarwinInitializationSettings(
-        onDidReceiveLocalNotification:
-            (int id, String? title, String? body, String? payload) {
-      i('onDidReceiveLocalNotification: $id');
-    });
+    const darwinInitializationSettings = DarwinInitializationSettings();
 
     final initializationSettings = InitializationSettings(
       iOS: darwinInitializationSettings,

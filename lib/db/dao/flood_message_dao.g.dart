@@ -5,7 +5,7 @@ part of 'flood_message_dao.dart';
 // ignore_for_file: type=lint
 mixin _$FloodMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   FloodMessages get floodMessages => attachedDatabase.floodMessages;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

@@ -91,7 +91,7 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
               .getSingle();
           return exist ? null : e.$2;
         })))
-            .whereNotNull();
+            .nonNulls;
 
         final transcriptMessageFtsContent = <String, String>{};
         for (final message in messagesToMigrate) {

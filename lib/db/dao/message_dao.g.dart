@@ -11,7 +11,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   MessageMentions get messageMentions => attachedDatabase.messageMentions;
   ResendSessionMessages get resendSessionMessages =>
       attachedDatabase.resendSessionMessages;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   CircleConversations get circleConversations =>

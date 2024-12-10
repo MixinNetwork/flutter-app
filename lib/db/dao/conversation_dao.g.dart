@@ -13,7 +13,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   MessageMentions get messageMentions => attachedDatabase.messageMentions;
   Participants get participants => attachedDatabase.participants;
-  AddressesTable get addresses => attachedDatabase.addresses;
+  Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
   Circles get circles => attachedDatabase.circles;

@@ -12,7 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   local_auth_windows
   platform_device_id_windows
   protocol_handler_windows
-  screen_retriever
+  screen_retriever_windows
   sqlite3_flutter_libs
   super_native_extensions
   system_tray

@@ -41,12 +41,12 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
           .where((element) =>
               element.isContactConversation && element.ownerId != null)
           .map((e) => e.ownerId)
-          .whereNotNull()
+          .nonNulls
           .toSet();
       botConversationIds = conversations
           .where((element) => element.isBotConversation)
           .map((e) => e.appId)
-          .whereNotNull()
+          .nonNulls
           .toSet();
     }
 

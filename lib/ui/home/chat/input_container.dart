@@ -623,7 +623,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                 singleSelect: true,
                 onlyContact: true,
                 title: context.l10n.select,
-                filteredIds: [conversationState.userId].whereNotNull(),
+                filteredIds: [conversationState.userId].nonNulls,
               );
 
               if (result == null || result.isEmpty) return;

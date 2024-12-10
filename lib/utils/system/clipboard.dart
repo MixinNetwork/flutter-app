@@ -8,7 +8,6 @@ import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 import '../../widgets/toast.dart';
-import '../extension/extension.dart';
 import '../file.dart';
 
 Future<Iterable<File>> getClipboardFiles() async {
@@ -27,7 +26,7 @@ Future<Iterable<File>> getClipboardFiles() async {
         fileReaders.map((item) => item.readValue(Formats.fileUri)));
 
     final files = uris
-        .whereNotNull()
+        .nonNulls
         .map((e) => e.toFilePath(windows: Platform.isWindows))
         .map(File.new)
         .where((element) => element.existsSync());
@@ -62,7 +61,7 @@ Future<Iterable<File>> getClipboardFiles() async {
     return saveBytesToTempFile(imageBytes, TempFileType.pasteboardImage);
   }));
 
-  return list.whereNotNull();
+  return list.nonNulls;
 }
 
 Future<void> copyFile(String? filePath) async {

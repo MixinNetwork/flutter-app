@@ -5,7 +5,6 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/constants.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
-import '../../utils/extension/extension.dart';
 import '../job_queue.dart';
 
 class UpdateAssetJob extends JobQueue<Job, List<Job>> {
@@ -63,6 +62,6 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
       }
     }));
 
-    DataBaseEventBus.instance.updateAsset(assetIds.whereNotNull());
+    DataBaseEventBus.instance.updateAsset(assetIds.nonNulls);
   }
 }

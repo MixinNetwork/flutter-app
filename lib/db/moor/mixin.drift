@@ -15,7 +15,7 @@ import '../../enum/message_category.dart';
 import '../../enum/message_action.dart';
 import '../../enum/property_group.dart';
 
-CREATE TABLE addresses (address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, destination TEXT NOT NULL, label TEXT NOT NULL, updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, reserve TEXT NOT NULL, fee TEXT NOT NULL, tag TEXT, dust TEXT, PRIMARY KEY(address_id));
+CREATE TABLE addresses (address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, destination TEXT NOT NULL, label TEXT NOT NULL, updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, reserve TEXT NOT NULL, fee TEXT NOT NULL, tag TEXT, dust TEXT, PRIMARY KEY(address_id)) AS Address;
 
 CREATE TABLE apps (app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, category TEXT, description TEXT NOT NULL, app_secret TEXT NOT NULL, capabilities TEXT, creator_id TEXT NOT NULL, resource_patterns TEXT, updated_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(app_id));
 

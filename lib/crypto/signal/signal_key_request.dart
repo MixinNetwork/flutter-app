@@ -13,28 +13,29 @@ part 'signal_key_request.g.dart';
 class SignalKeyRequest with EquatableMixin {
   SignalKeyRequest(this.identityKey, this.signedPreKey, this.oneTimePreKeys);
 
-  SignalKeyRequest.from(IdentityKey ik, SignedPreKeyRecord spk,
+  factory SignalKeyRequest.from(IdentityKey ik, SignedPreKeyRecord spk,
       {List<PreKeyRecord>? preKeyRecords}) {
-    identityKey = base64.encode(ik.serialize());
+    final identityKey = base64.encode(ik.serialize());
     final publicBase64 = base64.encode(spk.getKeyPair().publicKey.serialize());
     final signatureBase64 = base64.encode(spk.signature);
-    signedPreKey = SignedPreKey(spk.id, publicBase64, signatureBase64);
+    final signedPreKey = SignedPreKey(spk.id, publicBase64, signatureBase64);
+    final oneTimePreKeys = <OneTimePreKey>[];
     if (preKeyRecords != null) {
-      oneTimePreKeys = <OneTimePreKey>[];
       preKeyRecords.forEach((e) => oneTimePreKeys.add(OneTimePreKey(
           e.id, base64.encode(e.getKeyPair().publicKey.serialize()))));
     }
+    return SignalKeyRequest(identityKey, signedPreKey, oneTimePreKeys);
   }
 
   factory SignalKeyRequest.fromJson(Map<String, dynamic> json) =>
       _$SignalKeyRequestFromJson(json);
 
   @JsonKey(name: 'identity_key')
-  late String identityKey;
+  final String identityKey;
   @JsonKey(name: 'signed_pre_key')
-  late SignedPreKey signedPreKey;
+  final SignedPreKey signedPreKey;
   @JsonKey(name: 'one_time_pre_keys')
-  late List<OneTimePreKey> oneTimePreKeys;
+  final List<OneTimePreKey> oneTimePreKeys;
 
   Map<String, dynamic> toJson() => _$SignalKeyRequestToJson(this);
 

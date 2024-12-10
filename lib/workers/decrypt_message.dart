@@ -1344,7 +1344,7 @@ class DecryptMessage extends Injector {
           return TranscriptMessage.fromJson(json);
         })
         .where((transcript) => transcript.transcriptId == data.messageId)
-        .whereNotNull()
+        .nonNulls
         .toList();
 
     if (transcripts.isEmpty) {
@@ -1365,7 +1365,7 @@ class DecryptMessage extends Injector {
         }));
 
     Future _refreshUser() => refreshUsers([
-          ...transcripts.map((e) => e.userId).whereNotNull(),
+          ...transcripts.map((e) => e.userId).nonNulls,
           ...transcripts
               .where((transcript) =>
                   transcript.category.isContact &&

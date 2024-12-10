@@ -12,9 +12,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart';
-import 'package:super_context_menu/src/default_builder/desktop_menu_widget_builder.dart';
 import 'package:super_context_menu/src/default_builder/group_intrinsic_width.dart';
-import 'package:super_context_menu/src/default_builder/mobile_menu_widget_builder.dart';
 import 'package:super_context_menu/src/desktop.dart';
 import 'package:super_context_menu/src/mobile.dart';
 import 'package:super_context_menu/src/scaffold/desktop/menu_widget_builder.dart';
@@ -731,6 +729,7 @@ class CustomContextMenuWidget extends StatelessWidget {
         contextMenuIsAllowed: contextMenuIsAllowed,
         iconTheme: iconTheme,
         menuWidgetBuilder: desktopMenuWidgetBuilder,
+        tapRegionGroupIds: {child},
         child: child,
       );
     } else {

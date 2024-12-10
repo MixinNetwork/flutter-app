@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 
 import '../signal_database.dart';
@@ -24,7 +23,7 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
               db.sessions.device.equals(1).not()))
         .map((row) => row.read(db.sessions.device))
         .get();
-    return list.whereNotNull().toList();
+    return list.nonNulls.toList();
   }
 
   Future<List<Session>> getSessions(String address) async =>
