@@ -313,7 +313,7 @@ class _DoneLayout extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: context.theme.green.withOpacity(0.2),
+              color: context.theme.green.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Center(

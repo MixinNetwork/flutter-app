@@ -76,7 +76,7 @@ class _NetworkNotConnect extends StatelessWidget {
     child = visible
         ? Container(
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
-            color: context.theme.warning.withOpacity(0.2),
+            color: context.theme.warning.withValues(alpha: 0.2),
             child: Row(children: [
               ClipOval(
                 child: Container(

@@ -19,7 +19,7 @@ class WebViewNavigationBar extends StatelessWidget {
           name: Resources.assetsImagesIcBackSvg,
           color: state.canGoBack
               ? context.theme.icon
-              : context.theme.icon.withOpacity(0.5),
+              : context.theme.icon.withValues(alpha: 0.5),
           onTap: controller.back,
           size: 16,
           padding: EdgeInsets.zero,
@@ -29,7 +29,7 @@ class WebViewNavigationBar extends StatelessWidget {
           name: Resources.assetsImagesIcForwardSvg,
           color: state.canGoForward
               ? context.theme.icon
-              : context.theme.icon.withOpacity(0.5),
+              : context.theme.icon.withValues(alpha: 0.5),
           onTap: controller.forward,
           size: 16,
           padding: EdgeInsets.zero,

@@ -95,7 +95,7 @@ class MediaPage extends HookConsumerWidget {
             SvgPicture.asset(
               Resources.assetsImagesEmptyImageSvg,
               colorFilter: ColorFilter.mode(
-                context.theme.secondaryText.withOpacity(0.4),
+                context.theme.secondaryText.withValues(alpha: 0.4),
                 BlendMode.srcIn,
               ),
             ),
@@ -228,7 +228,7 @@ class _ItemVideo extends HookConsumerWidget {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Colors.black.withOpacity(0.5),
+                    Colors.black.withValues(alpha: 0.5),
                     Colors.transparent,
                   ],
                 ),

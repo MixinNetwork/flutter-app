@@ -234,7 +234,7 @@ class ChatPage extends HookConsumerWidget {
     final blinkCubit = useBloc(
       () => BlinkCubit(
         tickerProvider,
-        context.theme.accent.withOpacity(0.5),
+        context.theme.accent.withValues(alpha: 0.5),
       ),
     );
     final pinMessageState = usePinMessageState(conversationId);
@@ -451,8 +451,8 @@ class ChatContainer extends HookConsumerWidget {
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       context.brightnessValue == 1.0
-                          ? Colors.white.withOpacity(0.02)
-                          : Colors.black.withOpacity(0.03),
+                          ? Colors.white.withValues(alpha: 0.02)
+                          : Colors.black.withValues(alpha: 0.03),
                       BlendMode.srcIn,
                     ),
                   ),

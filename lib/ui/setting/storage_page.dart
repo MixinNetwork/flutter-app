@@ -42,7 +42,7 @@ class StoragePage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: context.theme.accent,
+                            activeTrackColor: context.theme.accent,
                             value: photoAutoDownload,
                             onChanged: (bool value) => context
                                 .settingChangeNotifier
@@ -54,7 +54,7 @@ class StoragePage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: context.theme.accent,
+                            inactiveTrackColor: context.theme.accent,
                             value: videoAutoDownload,
                             onChanged: (bool value) => context
                                 .settingChangeNotifier
@@ -66,7 +66,7 @@ class StoragePage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: context.theme.accent,
+                            activeTrackColor: context.theme.accent,
                             value: fileAutoDownload,
                             onChanged: (bool value) => context
                                 .settingChangeNotifier.fileAutoDownload = value,

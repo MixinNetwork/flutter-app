@@ -571,7 +571,8 @@ class _PlayerVolumeBar extends HookConsumerWidget {
               value: volume,
               allowedInteraction: SliderInteraction.tapAndSlide,
               activeColor: context.theme.accent,
-              inactiveColor: context.playerStyle.foreground.withOpacity(0.6),
+              inactiveColor:
+                  context.playerStyle.foreground.withValues(alpha: 0.6),
               thumbColor: context.playerStyle.foreground,
               onChanged: (value) {
                 ref.read(videoPlayerProvider).setVolume(value);

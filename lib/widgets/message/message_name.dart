@@ -53,7 +53,7 @@ class MessageName extends ConsumerWidget {
             '@$userIdentityNumber',
             style: TextStyle(
               fontSize: context.messageStyle.statusFontSize,
-              color: context.theme.text.withOpacity(0.5),
+              color: context.theme.text.withValues(alpha: 0.5),
             ),
           ),
         ));

@@ -123,9 +123,9 @@ class _StickerAlbumDetail extends HookConsumerWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  context.theme.popUp.withOpacity(0),
-                  context.theme.popUp.withOpacity(0.36),
-                  context.theme.popUp.withOpacity(1),
+                  context.theme.popUp.withValues(alpha: 0),
+                  context.theme.popUp.withValues(alpha: 0.36),
+                  context.theme.popUp.withValues(alpha: 1),
                 ],
               ),
             ),

@@ -89,7 +89,7 @@ class PostPage extends HookConsumerWidget {
             SvgPicture.asset(
               Resources.assetsImagesEmptyFileSvg,
               colorFilter: ColorFilter.mode(
-                context.theme.secondaryText.withOpacity(0.4),
+                context.theme.secondaryText.withValues(alpha: 0.4),
                 BlendMode.srcIn,
               ),
             ),
