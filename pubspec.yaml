@@ -108,7 +108,6 @@ dependencies:
   path_provider: ^2.1.2
   photo_view: ^0.15.0
   pin_code_fields: ^8.0.1
-  platform_device_id: ^1.0.1
   pretty_qr_code: ^3.3.0
   protocol_handler: ^0.2.0
   provider: ^6.1.2

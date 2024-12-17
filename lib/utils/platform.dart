@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:platform_device_id/platform_device_id.dart';
 import 'package:ui_device/ui_device.dart' as ui_device;
 import 'package:uuid/uuid.dart';
 
@@ -46,15 +46,19 @@ Future<String> getPlatformVersion() async {
 
 Future<String> getDeviceId() async {
   try {
-    final String? id;
+    String? id;
     if (Platform.isWindows) {
       id = (await _getWindowsDeviceId())?.trim();
     } else if (Platform.isMacOS) {
       id = (await _getMacOSDeviceId())?.trim();
     } else if (Platform.isLinux) {
       id = (await _getLinuxDeviceId())?.trim();
-    } else {
-      id = (await PlatformDeviceId.getDeviceId)?.trim();
+    } else if (Platform.isAndroid) {
+      final androidId = await const AndroidId().getId();
+      id = androidId?.trim();
+    } else if (Platform.isIOS) {
+      final deviceInfo = await DeviceInfoPlugin().iosInfo;
+      id = deviceInfo.identifierForVendor?.trim();
     }
     if (id == null || id.isEmpty) {
       throw Exception("${Platform.operatingSystem}'s device id is empty");

@@ -10,7 +10,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_app_icon_badge
   irondash_engine_context
   local_auth_windows
-  platform_device_id_windows
   protocol_handler_windows
   screen_retriever_windows
   sentry_flutter

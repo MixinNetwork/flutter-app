@@ -10,7 +10,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_app_icon_badge
   irondash_engine_context
   open_file_linux
-  platform_device_id_linux
   screen_retriever_linux
   sentry_flutter
   sqlite3_flutter_libs
