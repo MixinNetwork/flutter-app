@@ -47,7 +47,7 @@ class NotificationPage extends HookConsumerWidget {
                 trailing: Transform.scale(
                   scale: 0.7,
                   child: CupertinoSwitch(
-                    activeColor: context.theme.accent,
+                    activeTrackColor: context.theme.accent,
                     value: currentMessagePreview,
                     onChanged: (bool value) =>
                         context.settingChangeNotifier.messagePreview = value,

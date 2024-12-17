@@ -43,7 +43,7 @@ class SelectItem extends HookConsumerWidget {
           ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
           : boxDecoration,
       hoveringColor: context.theme.sidebarSelected
-          .withOpacity(context.theme.sidebarSelected.opacity / 2),
+          .withValues(alpha: context.theme.sidebarSelected.a / 2),
       child: LayoutBuilder(builder: (context, boxConstraints) {
         final hideTitle = boxConstraints.maxWidth < 75;
         final hideUnreadText = boxConstraints.maxWidth < 100;

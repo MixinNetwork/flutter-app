@@ -42,8 +42,8 @@ class SlidePage extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: context.brightnessValue == 1.0
-                  ? Colors.black.withOpacity(0.03)
-                  : Colors.white.withOpacity(0.01),
+                  ? Colors.black.withValues(alpha: 0.03)
+                  : Colors.white.withValues(alpha: 0.01),
               border: Border(
                 right: BorderSide(
                   color: context.theme.divider,

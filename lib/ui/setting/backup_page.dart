@@ -27,7 +27,7 @@ class BackupPage extends HookConsumerWidget {
                 width: 88,
                 height: 58,
                 colorFilter: ColorFilter.mode(
-                  context.theme.secondaryText.withOpacity(0.4),
+                  context.theme.secondaryText.withValues(alpha: 0.4),
                   BlendMode.srcIn,
                 ),
               ),
@@ -59,7 +59,7 @@ class BackupPage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: context.theme.accent,
+                            activeTrackColor: context.theme.accent,
                             value: true,
                             onChanged: (bool value) {},
                           )),
@@ -69,7 +69,7 @@ class BackupPage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: context.theme.accent,
+                            activeTrackColor: context.theme.accent,
                             value: true,
                             onChanged: (bool value) {},
                           )),
@@ -79,7 +79,7 @@ class BackupPage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: context.theme.accent,
+                            activeTrackColor: context.theme.accent,
                             value: true,
                             onChanged: (bool value) {},
                           )),

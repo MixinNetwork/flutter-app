@@ -938,7 +938,7 @@ class _TileBigVideo extends HookConsumerWidget {
                       gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.28),
+                      Colors.black.withValues(alpha: 0.28),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -1039,7 +1039,7 @@ class _TileBigImage extends HookConsumerWidget {
                   gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.28),
+                  Colors.black.withValues(alpha: 0.28),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

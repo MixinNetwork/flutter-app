@@ -250,7 +250,7 @@ class TranscriptPage extends HookConsumerWidget {
     final blinkCubit = useBloc(
       () => BlinkCubit(
         tickerProvider,
-        context.theme.accent.withOpacity(0.5),
+        context.theme.accent.withValues(alpha: 0.5),
       ),
     );
 

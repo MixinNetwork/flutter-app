@@ -136,7 +136,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                 trailing: Transform.scale(
                   scale: 0.7,
                   child: CupertinoSwitch(
-                    activeColor: context.theme.accent,
+                    activeTrackColor: context.theme.accent,
                     value: showAvatar,
                     onChanged: (bool value) =>
                         context.settingChangeNotifier.messageShowAvatar = value,
@@ -148,7 +148,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                 trailing: Transform.scale(
                   scale: 0.7,
                   child: CupertinoSwitch(
-                    activeColor: context.theme.accent,
+                    activeTrackColor: context.theme.accent,
                     value: showIdentityNumber,
                     onChanged: (bool value) => context.settingChangeNotifier
                         .messageShowIdentityNumber = value,
@@ -262,7 +262,7 @@ class _ChatTextSizePreview extends HookConsumerWidget {
     final tickerProvider = useSingleTickerProvider();
     final blinkCubit = useMemoized(() => BlinkCubit(
           tickerProvider,
-          context.theme.accent.withOpacity(0.5),
+          context.theme.accent.withValues(alpha: 0.5),
         ));
     final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
@@ -295,8 +295,8 @@ class _ChatTextSizePreview extends HookConsumerWidget {
               fit: BoxFit.none,
               colorFilter: ColorFilter.mode(
                 context.brightnessValue == 1.0
-                    ? Colors.white.withOpacity(0.02)
-                    : Colors.black.withOpacity(0.03),
+                    ? Colors.white.withValues(alpha: 0.02)
+                    : Colors.black.withValues(alpha: 0.03),
                 BlendMode.srcIn,
               ),
             ),

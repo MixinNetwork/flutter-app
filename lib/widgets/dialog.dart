@@ -326,7 +326,7 @@ class DialogTextField extends HookConsumerWidget {
               child: Text(
                 hintText,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   height: 1,
                 ),
                 maxLines: 1,

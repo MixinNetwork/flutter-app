@@ -69,7 +69,7 @@ class _ImageEditorDialog extends HookConsumerWidget {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: ColoredBox(
-          color: context.theme.background.withOpacity(0.8),
+          color: context.theme.background.withValues(alpha: 0.8),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -783,7 +783,7 @@ class _CropRectWidget extends HookConsumerWidget {
           child: CustomPaint(
             painter: _CropShadowOverlayPainter(
               cropRect: cacheTransformedRect.value,
-              overlayColor: Colors.black.withOpacity(0.4),
+              overlayColor: Colors.black.withValues(alpha: 0.4),
               lineColor: Colors.white,
             ),
             child: const SizedBox.expand(),
@@ -1323,7 +1323,7 @@ class _CustomColorBar extends HookConsumerWidget {
               },
               child: Material(
                 color: Colors.white,
-                shadowColor: Colors.black.withOpacity(0.2),
+                shadowColor: Colors.black.withValues(alpha: 0.2),
                 borderRadius: const BorderRadius.all(Radius.circular(58)),
                 elevation: 4,
                 child: const SizedBox(width: 9, height: 30),
@@ -1538,7 +1538,7 @@ class _DrawOperationBar extends HookConsumerWidget {
             ActionButton(
               color: canUndo
                   ? context.theme.icon
-                  : context.theme.icon.withOpacity(0.2),
+                  : context.theme.icon.withValues(alpha: 0.2),
               name: Resources.assetsImagesEditImageUndoSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().undoDraw();
@@ -1548,7 +1548,7 @@ class _DrawOperationBar extends HookConsumerWidget {
             ActionButton(
               color: canRedo
                   ? context.theme.icon
-                  : context.theme.icon.withOpacity(0.2),
+                  : context.theme.icon.withValues(alpha: 0.2),
               name: Resources.assetsImagesEditImageRedoSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().redoDraw();
