@@ -20,6 +20,7 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
+import 'constants/env.dart';
 import 'ui/home/home.dart';
 import 'ui/setting/log_page.dart';
 import 'utils/app_lifecycle.dart';
@@ -34,11 +35,12 @@ import 'utils/web_view/web_view_desktop.dart';
 import 'widgets/protocol_handler.dart';
 
 Future<void> main(List<String> args) async {
-  if (const String.fromEnvironment('SENTRY_DSN').isEmpty) {
+  if (Env.sentryDsn.isEmpty) {
     await _runApp(args);
   } else {
     await SentryFlutter.init((options) {
       options
+        ..dsn = Env.sentryDsn
         ..tracesSampleRate = 1.0
         ..profilesSampleRate = 1.0;
     }, appRunner: () => _runApp(args));
@@ -97,7 +99,7 @@ Future<void> _runApp(List<String> args) async {
     return true;
   };
 
-  if (const String.fromEnvironment('SENTRY_DSN').isNotEmpty) {
+  if (Env.sentryDsn.isNotEmpty) {
     i('app running with sentry');
   } else {
     e('app running without sentry');

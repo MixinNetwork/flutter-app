@@ -46,3 +46,6 @@ dist/flatpak/build-dir*
 dist/flatpak/.flatpak-builder
 dist/flatpak/mixin-desktop-linux-portable.tar.gz
 /lib/constants/resources.preview.dart
+
+*.env
+env.g.dart

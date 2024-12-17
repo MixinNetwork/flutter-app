@@ -77,6 +77,15 @@ jobs:
 
       - run: flutter config --enable-linux-desktop
 
+      - name: Generator ENV
+        run: |
+          tee .env &>/dev/null << EOF
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          EOF
+
+      - name: Run Build Runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
       # setup webcrypto for unit test
       - run: dart run webcrypto:setup
 
@@ -231,6 +240,13 @@ jobs:
 
       - run: flutter --version
 
+      - name: Generator ENV
+        run: |
+          echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+
+      - name: Run Build Runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
       # https://stackoverflow.com/questions/22575662/filename-too-long-in-git-for-windows/22575737#22575737
       - run: git config --system core.longpaths true
 
@@ -246,10 +262,8 @@ jobs:
           $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
           $build_number=$version_str.Split("+")[1]
-          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number" --dart-define SENTRY_DSN=$env:SENTRY_DSN
+          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
           echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Build Installer
         run: |
