@@ -142,9 +142,9 @@ class _VideoFile extends _File {
     ).hash;
   }
 
-  final _metadataCompleter = Completer<_VideoMetadata>();
+  final _metadataCompleter = Completer<_VideoMetadata?>();
 
-  final _blurHashCompleter = Completer<String>();
+  final _blurHashCompleter = Completer<String?>();
 
   Future<void> _loadMetadata() async {
     try {
@@ -159,7 +159,7 @@ class _VideoFile extends _File {
       );
     } catch (error, stackTrace) {
       e('failed to load video metadata', error, stackTrace);
-      _metadataCompleter.completeError(error, stackTrace);
+      _metadataCompleter.complete(null);
     }
 
     final stopwatch = Stopwatch()..start();
@@ -169,7 +169,7 @@ class _VideoFile extends _File {
       _blurHashCompleter.complete(hash);
     } catch (error, stackTrace) {
       e('failed to load video thumbnail', error, stackTrace);
-      _blurHashCompleter.completeError(error, stackTrace);
+      _blurHashCompleter.complete(null);
     }
 
     d('thumbnail cost: ${stopwatch.elapsedMilliseconds}ms');
@@ -520,18 +520,30 @@ Future<void> _sendFile(
     case _VideoFile():
       final metadata = await file._metadataCompleter.future;
       final blurHash = await file._blurHashCompleter.future;
-      await accountServer.sendVideoMessage(
-        xFile,
-        conversationItem.encryptCategory,
-        conversationId: conversationItem.conversationId,
-        recipientId: conversationItem.userId,
-        quoteMessageId: quoteMessageId,
-        silent: silent,
-        mediaHeight: metadata.height,
-        mediaWidth: metadata.width,
-        mediaDuration: metadata.duration.toString(),
-        thumbImage: blurHash,
-      );
+      if (metadata != null) {
+        await accountServer.sendVideoMessage(
+          xFile,
+          conversationItem.encryptCategory,
+          conversationId: conversationItem.conversationId,
+          recipientId: conversationItem.userId,
+          quoteMessageId: quoteMessageId,
+          silent: silent,
+          mediaHeight: metadata.height,
+          mediaWidth: metadata.width,
+          mediaDuration: metadata.duration.toString(),
+          // use a default blur hash if it's not available
+          thumbImage: blurHash ?? 'L1GIo.]day]K-;jsfQjsRjfQj[fQ',
+        );
+      } else {
+        await accountServer.sendDataMessage(
+          xFile,
+          conversationItem.encryptCategory,
+          conversationId: conversationItem.conversationId,
+          recipientId: conversationItem.userId,
+          quoteMessageId: quoteMessageId,
+          silent: silent,
+        );
+      }
   }
 }
 
@@ -871,7 +883,7 @@ final _videoControllerProvider = ChangeNotifierProvider.autoDispose
 );
 
 final _videoBlurHashProvider =
-    FutureProvider.autoDispose.family<String, _VideoFile>(
+    FutureProvider.autoDispose.family<String?, _VideoFile>(
   (ref, file) => file._blurHashCompleter.future,
 );
 

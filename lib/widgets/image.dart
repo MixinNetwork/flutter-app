@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -66,9 +67,8 @@ class _ImageByBlurHash extends HookConsumerWidget {
       );
     }, [blurHash, width, height]);
     return RawImage(
+      fit: BoxFit.cover,
       image: image.value,
-      width: width.toDouble(),
-      height: height.toDouble(),
     );
   }
 }
