@@ -54,7 +54,7 @@ class StoragePage extends HookConsumerWidget {
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            inactiveTrackColor: context.theme.accent,
+                            activeTrackColor: context.theme.accent,
                             value: videoAutoDownload,
                             onChanged: (bool value) => context
                                 .settingChangeNotifier
