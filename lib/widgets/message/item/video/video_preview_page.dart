@@ -100,6 +100,12 @@ class _VideoControlShowHideNotifier extends StateNotifier<bool> {
     _timer = null;
     _autoHide();
   }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 }
 
 class _VideoPreviewPage extends HookConsumerWidget {
