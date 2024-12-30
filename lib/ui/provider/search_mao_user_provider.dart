@@ -26,12 +26,10 @@ final searchMaoUserProvider =
   if (keyword.isEmpty || !keyword.isValidMao()) {
     return null;
   }
-  final mao = keyword.completeMao();
-
   try {
-    final user = (await client.userApi.search(mao)).data.asDbUser;
+    final user = (await client.userApi.search(keyword)).data.asDbUser;
     await ref.read(databaseProvider).valueOrNull?.userDao.insert(user);
-    return MaoUser(user: user, mao: mao);
+    return MaoUser(user: user, mao: keyword.completeMao());
   } catch (error, stackTrace) {
     e('searchMaoUserProvider error: $error, $stackTrace');
     return null;
