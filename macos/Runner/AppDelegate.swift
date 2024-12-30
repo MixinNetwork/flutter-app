@@ -84,6 +84,10 @@ class AppDelegate: FlutterAppDelegate {
         endActivity()
     }
     
+    override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+      return true
+    }
+
     private func beginActivity() {
         endActivity()
         activity = ProcessInfo.processInfo.beginActivity(options: .background, reason: "Receive new messages")
