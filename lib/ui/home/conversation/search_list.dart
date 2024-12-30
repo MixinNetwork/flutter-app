@@ -10,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
+import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/dao/message_dao.dart';
 import '../../../db/database_event_bus.dart';
@@ -18,6 +19,7 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/message_optimize.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/uri_utils.dart';
@@ -27,6 +29,7 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
+import '../../../widgets/mixin_image.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../provider/conversation_provider.dart';
@@ -34,6 +37,7 @@ import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/keyword_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
+import '../../provider/search_mao_user_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
@@ -71,6 +75,8 @@ class SearchList extends HookConsumerWidget {
     final accountServer = context.accountServer;
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
+
+    final maoUser = ref.watch(searchMaoUserProvider(keyword)).valueOrNull;
 
     final users = useMemoizedStream(() {
           if (keyword.trim().isEmpty || filterUnseen) {
@@ -137,8 +143,10 @@ class SearchList extends HookConsumerWidget {
 
     final type = useState<_ShowMoreType?>(null);
 
-    final resultIsEmpty =
-        users.isEmpty && conversations.isEmpty && messages.isEmpty;
+    final resultIsEmpty = maoUser == null &&
+        users.isEmpty &&
+        conversations.isEmpty &&
+        messages.isEmpty;
 
     if (keyword.isEmpty && filterUnseen) {
       return const UnseenConversationList();
@@ -158,6 +166,13 @@ class SearchList extends HookConsumerWidget {
     }
     return CustomScrollView(
       slivers: [
+        if (maoUser != null)
+          SliverToBoxAdapter(
+            child: _SearchMaoUserWidget(
+              maoUser: maoUser,
+              keyword: keyword,
+            ),
+          ),
         if (users.isEmpty && isUrl)
           SliverToBoxAdapter(
             child: SearchItem(
@@ -396,26 +411,81 @@ class SearchList extends HookConsumerWidget {
   }
 }
 
-class SearchItem extends StatelessWidget {
-  const SearchItem(
-      {required this.name,
-      required this.keyword,
-      required this.onTap,
-      super.key,
-      this.avatar,
-      this.nameHighlight = true,
-      this.description,
-      this.descriptionIcon,
-      this.date,
-      this.trailing,
-      this.selected,
-      this.maxLines = false,
-      this.margin = const EdgeInsets.symmetric(horizontal: 6),
-      this.padding = const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 12,
+const _maoIcon =
+    'https://kernel.mixin.dev/objects/fe75a8e48aeffb486df622c91bebfe4056ada7009f3151fb49e2a18340bbd615/icon';
+
+class _SearchMaoUserWidget extends StatelessWidget {
+  const _SearchMaoUserWidget({
+    required this.maoUser,
+    required this.keyword,
+  });
+
+  final MaoUser maoUser;
+  final String keyword;
+
+  @override
+  Widget build(BuildContext context) {
+    final defaultInscriptionImage = SvgPicture.asset(
+      Resources.assetsImagesInscriptionPlaceholderSvg,
+      width: 14,
+      height: 14,
+    );
+    return SearchItem(
+      avatar: AvatarWidget(
+        name: maoUser.user.fullName,
+        userId: maoUser.user.userId,
+        size: ConversationPage.conversationItemAvatarSize,
+        avatarUrl: maoUser.user.avatarUrl,
       ),
-      this.nameFontSize = 16});
+      name: maoUser.user.fullName ?? '?',
+      description: maoUser.mao,
+      descriptionIconWidget: ClipOval(
+        child: MixinImage.network(
+          _maoIcon,
+          width: 14,
+          height: 14,
+          errorBuilder: (context, error, stackTrace) {
+            e('load mao icon error: $error, $stackTrace');
+            return defaultInscriptionImage;
+          },
+          placeholder: () => defaultInscriptionImage,
+        ),
+      ),
+      keyword: keyword,
+      onTap: () async {
+        await ConversationStateNotifier.selectUser(
+          context,
+          maoUser.user.userId,
+          user: maoUser.user,
+        );
+        _clear(context);
+      },
+    );
+  }
+}
+
+class SearchItem extends StatelessWidget {
+  const SearchItem({
+    required this.name,
+    required this.keyword,
+    required this.onTap,
+    super.key,
+    this.avatar,
+    this.nameHighlight = true,
+    this.description,
+    this.descriptionIcon,
+    this.date,
+    this.trailing,
+    this.selected,
+    this.maxLines = false,
+    this.margin = const EdgeInsets.symmetric(horizontal: 6),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: 6,
+      vertical: 12,
+    ),
+    this.nameFontSize = 16,
+    this.descriptionIconWidget,
+  });
 
   final Widget? avatar;
   final Widget? trailing;
@@ -425,6 +495,7 @@ class SearchItem extends StatelessWidget {
   final VoidCallback onTap;
   final String? description;
   final String? descriptionIcon;
+  final Widget? descriptionIconWidget;
   final DateTime? date;
   final bool? selected;
   final bool maxLines;
@@ -507,6 +578,11 @@ class SearchItem extends StatelessWidget {
                     if (description != null)
                       Row(
                         children: [
+                          if (descriptionIconWidget != null)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 2),
+                              child: descriptionIconWidget,
+                            ),
                           if (descriptionIcon != null)
                             Padding(
                               padding: const EdgeInsets.only(right: 2),
