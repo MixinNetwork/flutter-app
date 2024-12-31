@@ -77,7 +77,7 @@ class NotificationPage extends HookConsumerWidget {
                       cellBackgroundColor:
                           context.theme.settingCellBackgroundColor,
                       child: CellItem(
-                        title: Text(context.l10n.turnOnNotifications),
+                        title: Text(context.l10n.enablePushNotification),
                         onTap: () => openUri(context,
                             'x-apple.systempreferences:com.apple.preference.notifications'),
                       ),

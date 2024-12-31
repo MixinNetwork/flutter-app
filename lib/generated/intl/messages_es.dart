@@ -84,9 +84,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(arg0) => "Se ha unido en ${arg0}";
 
-  static String m28(arg0) =>
-      "Tu cuenta se eliminará el ${arg0}; si continúas iniciando sesión, se cancelará la solicitud para eliminar tu cuenta.";
-
   static String m29(arg0) =>
       "Te enviaremos un código de 4 dígitos a tu número de teléfono ${arg0}. Introduce el código en la siguiente pantalla.";
 
@@ -335,6 +332,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Todos los cambios se perderán. ¿Estás seguro de que quieres salir?"),
         "editName": MessageLookupByLibrary.simpleMessage("Editar nombre"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Editar perfil"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("Activar las notificaciones"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "Introduce tu PIN para eliminar tu cuenta"),
         "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage(
@@ -365,8 +364,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "ERROR 30102: formato de dirección no válido."),
         "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
             "ERROR 20129: enviar el código de verificación con demasiada frecuencia, inténtalo de nuevo más tarde."),
-        "errorInvalidEmergencyContact": MessageLookupByLibrary.simpleMessage(
-            "ERROR 20130: Contacto de emergencia no válido"),
         "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
             "ERROR 20118: Formato de PIN no válido."),
         "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
@@ -440,8 +437,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("Seguir sistema"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Síguenos en Facebook"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("Síguenos en Twitter"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("Síguenos en X"),
         "foodAndDrink": MessageLookupByLibrary.simpleMessage("Comida y bebida"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Formato no compatible"),
@@ -482,7 +478,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "joinGroupWithPlus":
             MessageLookupByLibrary.simpleMessage("+ Únete al grupo"),
         "joinedIn": m27,
-        "landingDeleteContent": m28,
         "landingInvitationDialogContent": m29,
         "landingValidationTitle": m30,
         "learnMore":
@@ -553,8 +548,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("SIN PUBLICACIONES"),
         "noResults": MessageLookupByLibrary.simpleMessage("SIN RESULTADOS"),
         "notFound": MessageLookupByLibrary.simpleMessage("Extraviado"),
-        "notificationContent": MessageLookupByLibrary.simpleMessage(
-            "No te pierdas los mensajes de tus amigos."),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "Las notificaciones no están permitidas, ve a Configuración de notificaciones para activarlas."),
         "notifications": MessageLookupByLibrary.simpleMessage("Notificaciones"),
@@ -677,7 +670,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "showMixin": MessageLookupByLibrary.simpleMessage("Mostrar Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("Iniciar sesión"),
         "signOut": MessageLookupByLibrary.simpleMessage("Cerrar sesión"),
-        "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage(
+        "signWithMobileNumber": MessageLookupByLibrary.simpleMessage(
             "Iniciar sesión con número de teléfono"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage(
             "Iniciar sesión con código QR"),
@@ -725,8 +718,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "transfer": MessageLookupByLibrary.simpleMessage("Transferir"),
         "travelAndPlaces":
             MessageLookupByLibrary.simpleMessage("Viajes y lugares"),
-        "turnOnNotifications":
-            MessageLookupByLibrary.simpleMessage("Activar las notificaciones"),
         "typeMessage":
             MessageLookupByLibrary.simpleMessage("Escribe el mensaje"),
         "unableToOpenFile": m45,

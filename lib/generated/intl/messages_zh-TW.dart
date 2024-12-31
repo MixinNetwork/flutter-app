@@ -81,7 +81,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(arg0) => "${arg0} 加入";
 
-  static String m28(arg0) => "您的賬戶將於 ${arg0} 被刪除，如果您繼續登入，刪除您賬戶的請求將被取消。";
+  static String m28(arg0, arg1) =>
+      "您在 ${arg0} 申請了刪除賬號，賬號將於 ${arg1} 被刪除，如果您繼續登入，刪除您賬戶的請求將被取消。";
 
   static String m29(arg0) => "我們將傳送4位驗證碼到手機 ${arg0}, 請在下一個頁面輸入";
 
@@ -315,6 +316,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("退出將會清除此次所有的改動。"),
         "editName": MessageLookupByLibrary.simpleMessage("修改暱稱"),
         "editProfile": MessageLookupByLibrary.simpleMessage("編輯資料"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("啟用推送通知"),
         "encryptZipFileWithPassword":
             MessageLookupByLibrary.simpleMessage("使用密碼來加密 zip 檔案"),
         "enterPinToDeleteAccount":
@@ -347,9 +350,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorInvalidCodeTooFrequent":
             MessageLookupByLibrary.simpleMessage("錯誤 20129：傳送驗證碼太頻繁，請稍後再試"),
         "errorInvalidEmergencyContact":
-            MessageLookupByLibrary.simpleMessage("錯誤 20130：緊急聯絡人不正確"),
+            MessageLookupByLibrary.simpleMessage("錯誤 20130：恢復聯絡人不正確"),
         "errorInvalidPinFormat":
             MessageLookupByLibrary.simpleMessage("錯誤 20118：PIN 格式不正確"),
+        "errorLegacyPin": MessageLookupByLibrary.simpleMessage(
+            "錯誤 20118：為了加強 Mixin 網路的安全，Mixin API 現已暫停 D3M-PIN 升級到 TIP，詳情請檢視檔案並登記等待處理。"),
         "errorNetworkTaskFailed":
             MessageLookupByLibrary.simpleMessage("網路連線失敗。檢查或切換網路並重試"),
         "errorNoPinToken":
@@ -418,8 +423,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("跟隨系統"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("關注我們的 Facebook"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("關注我們的 Twitter"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("關注我們的 X"),
         "foodAndDrink": MessageLookupByLibrary.simpleMessage("食物與飲料"),
         "formatNotSupported": MessageLookupByLibrary.simpleMessage("不支援該格式"),
         "forward": MessageLookupByLibrary.simpleMessage("轉發"),
@@ -520,7 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notSupportBiometric":
             MessageLookupByLibrary.simpleMessage("此裝置不支援生物驗證"),
         "notificationContent":
-            MessageLookupByLibrary.simpleMessage("不再遺漏好友的訊息。"),
+            MessageLookupByLibrary.simpleMessage("啟用推送通知以即時更新價格警報和訊息。"),
         "notificationPermissionManually":
             MessageLookupByLibrary.simpleMessage("未允許通知，請到通知設定開啟。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
@@ -530,6 +534,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneHour": MessageLookupByLibrary.simpleMessage("1 小時"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 年"),
+        "open": MessageLookupByLibrary.simpleMessage("開啟"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("開啟主頁"),
         "openLink": m35,
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("開啟日誌資料夾"),
@@ -628,8 +633,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "showIdentityNumber": MessageLookupByLibrary.simpleMessage("顯示 ID"),
         "showMixin": MessageLookupByLibrary.simpleMessage("顯示 Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("登入"),
-        "signOut": MessageLookupByLibrary.simpleMessage("登出"),
-        "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage("透過手機號登入"),
+        "signOut": MessageLookupByLibrary.simpleMessage("退出登入"),
+        "signWithMobileNumber": MessageLookupByLibrary.simpleMessage("透過手機號登入"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("透過二維碼登入"),
         "smileysAndPeople": MessageLookupByLibrary.simpleMessage("表情符號與人物"),
         "snapshotHash": MessageLookupByLibrary.simpleMessage("快照雜湊"),
@@ -669,7 +674,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "transferringChatsTips":
             MessageLookupByLibrary.simpleMessage("同步時請不要關閉螢幕並保持 Mixin 在前臺執行。"),
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行與地點"),
-        "turnOnNotifications": MessageLookupByLibrary.simpleMessage("開啟通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("輸入訊息"),
         "unableToOpenFile": m45,
         "unblock": MessageLookupByLibrary.simpleMessage("解除封鎖"),

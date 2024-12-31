@@ -81,9 +81,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(arg0) => "Присоединился к ${arg0}";
 
-  static String m28(arg0) =>
-      "Ваш аккаунт будет удален ${arg0}. Если вы продолжите входить в систему, запрос на удаление вашего аккаунта будет отменен.";
-
   static String m29(arg0) =>
       "Мы отправим 4-значный код на ваш номер телефона ${arg0}. Введите код на следующем экране.";
 
@@ -317,6 +314,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Редактировать название"),
         "editProfile":
             MessageLookupByLibrary.simpleMessage("Редактировать профиль"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("Включить уведомления"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "Введите свой PIN-код, чтобы удалить свою учетную запись"),
         "enterYourPhoneNumber":
@@ -347,8 +346,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "ОШИБКА 30102: Недопустимый формат адреса."),
         "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
             "ОШИБКА 20129: Код подтверждения отправляется слишком часто. Повторите попытку позже."),
-        "errorInvalidEmergencyContact": MessageLookupByLibrary.simpleMessage(
-            "ОШИБКА 20130: Недопустимый экстренный контакт"),
         "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
             "ОШИБКА 20118: Неверный формат PIN-кода."),
         "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
@@ -418,8 +415,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Следуйте системе"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Следите за нами на Фейсбуке"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("Следите за нами на Twitter"),
+        "followUsOnX":
+            MessageLookupByLibrary.simpleMessage("Следите за нами на X"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Формат не поддерживается"),
         "forward": MessageLookupByLibrary.simpleMessage("Перенаправить"),
@@ -456,7 +453,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "joinGroupWithPlus":
             MessageLookupByLibrary.simpleMessage("+ Присоединиться к группе"),
         "joinedIn": m27,
-        "landingDeleteContent": m28,
         "landingInvitationDialogContent": m29,
         "landingValidationTitle": m30,
         "learnMore": MessageLookupByLibrary.simpleMessage("Узнать больше"),
@@ -518,8 +514,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("НЕТ СООБЩЕНИЙ"),
         "noResults": MessageLookupByLibrary.simpleMessage("НЕТ РЕЗУЛЬТАТОВ"),
         "notFound": MessageLookupByLibrary.simpleMessage("Не найден"),
-        "notificationContent": MessageLookupByLibrary.simpleMessage(
-            "Не пропустите сообщения от друзей."),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "Уведомления запрещены. Чтобы включить их, перейдите в настройки уведомлений."),
         "notifications": MessageLookupByLibrary.simpleMessage("Уведомления"),
@@ -638,7 +632,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "showMixin": MessageLookupByLibrary.simpleMessage("Показать Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("Войти"),
         "signOut": MessageLookupByLibrary.simpleMessage("Выход"),
-        "signWithPhoneNumber":
+        "signWithMobileNumber":
             MessageLookupByLibrary.simpleMessage("Войти через номер телефона"),
         "signWithQrcode":
             MessageLookupByLibrary.simpleMessage("Войти с QrCode"),
@@ -678,8 +672,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Транзакции НЕ МОГУТ быть удалены"),
         "transcript": MessageLookupByLibrary.simpleMessage("Стенограмма"),
         "transfer": MessageLookupByLibrary.simpleMessage("Передача"),
-        "turnOnNotifications":
-            MessageLookupByLibrary.simpleMessage("Включить уведомления"),
         "typeMessage":
             MessageLookupByLibrary.simpleMessage("Введите сообщение"),
         "unableToOpenFile": m45,

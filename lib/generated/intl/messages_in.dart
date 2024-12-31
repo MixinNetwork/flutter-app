@@ -161,6 +161,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Edit deskripsi grup"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("Aktifkan Notifikasi"),
         "enterYourPhoneNumber":
             MessageLookupByLibrary.simpleMessage("Masukkan nomor ponsel Anda"),
         "errorAuthentication": MessageLookupByLibrary.simpleMessage(
@@ -179,8 +181,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "KESALAHAN 30102: Format alamat tidak valid."),
         "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
             "KESALAHAN 20129: Terlalu sering mengirim kode verifikasi, coba lagi nanti."),
-        "errorInvalidEmergencyContact": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20130: Kontak darurat tidak valid"),
         "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
             "KESALAHAN 20118: Format PIN tidak valid"),
         "errorNotFound": MessageLookupByLibrary.simpleMessage(
@@ -244,8 +244,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("Otomatis"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Ikuti kami di Facebook"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("Ikuti kami di Twitter"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("Ikuti kami di X"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Format tidak didukung"),
         "forward": MessageLookupByLibrary.simpleMessage("Teruskan"),
@@ -306,8 +305,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("TIDAK ADA POSTINGAN"),
         "noResults": MessageLookupByLibrary.simpleMessage("Tidak ada hasil"),
         "notFound": MessageLookupByLibrary.simpleMessage("Tidak ditemukan"),
-        "notificationContent": MessageLookupByLibrary.simpleMessage(
-            "Jangan lewatkan pesan dari teman Anda."),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifikasi"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1 Jam"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 Minggu"),
@@ -361,7 +358,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
         "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
         "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),
-        "signWithPhoneNumber":
+        "signWithMobileNumber":
             MessageLookupByLibrary.simpleMessage("Masuk dengan nomor telepon"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Stiker"),
@@ -384,8 +381,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transaksi"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
-        "turnOnNotifications":
-            MessageLookupByLibrary.simpleMessage("Aktifkan Notifikasi"),
         "unblock": MessageLookupByLibrary.simpleMessage("Batal Blokir"),
         "unmute": MessageLookupByLibrary.simpleMessage("Suarakan"),
         "updateMixin": MessageLookupByLibrary.simpleMessage("Perbarui Mixin"),

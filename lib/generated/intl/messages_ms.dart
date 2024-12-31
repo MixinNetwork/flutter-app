@@ -168,6 +168,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Edit keterangan kumpulan"),
         "editGroupName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("Hidupkan Pemberitahuan"),
         "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage(
             "Masukkan nombor telefon bimbit anda"),
         "errorAuthentication": MessageLookupByLibrary.simpleMessage(
@@ -186,8 +188,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "RALAT 30102: Format alamat tidak sah."),
         "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
             "RALAT 20129: Hantar kod pengesahan terlalu kerap, sila cuba sebentar lagi."),
-        "errorInvalidEmergencyContact": MessageLookupByLibrary.simpleMessage(
-            "RALAT 20130: Kenalan kecemasan tidak sah"),
         "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
             "RALAT 20118: Format PIN tidak sah"),
         "errorNotFound":
@@ -251,8 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("Ikut Sistem"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Ikuti kami di Facebook"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("Ikuti kami di Twitter"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("Ikuti kami di X"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Format tidak disokong"),
         "forward": MessageLookupByLibrary.simpleMessage("Ke hadapan"),
@@ -312,8 +311,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("TIADA POST"),
         "noResults": MessageLookupByLibrary.simpleMessage("Tiada keputusan"),
         "notFound": MessageLookupByLibrary.simpleMessage("Tidak ditemui"),
-        "notificationContent": MessageLookupByLibrary.simpleMessage(
-            "Jangan terlepas mesej daripada rakan anda."),
         "notifications": MessageLookupByLibrary.simpleMessage("Pemberitahuan"),
         "oneHour": MessageLookupByLibrary.simpleMessage("1 jam"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 minggu"),
@@ -366,7 +363,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Berkongsi"),
         "show": MessageLookupByLibrary.simpleMessage("Tunjuk"),
         "signIn": MessageLookupByLibrary.simpleMessage("Log masuk"),
-        "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage(
+        "signWithMobileNumber": MessageLookupByLibrary.simpleMessage(
             "Log masuk dengan nombor telefon"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "sticker": MessageLookupByLibrary.simpleMessage("Pelekat"),
@@ -390,8 +387,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
         "transactions": MessageLookupByLibrary.simpleMessage("Urus Niaga"),
         "transfer": MessageLookupByLibrary.simpleMessage("Pindah"),
-        "turnOnNotifications":
-            MessageLookupByLibrary.simpleMessage("Hidupkan Pemberitahuan"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Taipkan mesej"),
         "unblock": MessageLookupByLibrary.simpleMessage("Buka sekatan"),
         "unmute": MessageLookupByLibrary.simpleMessage("Nyahsenyap"),

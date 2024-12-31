@@ -104,9 +104,9 @@ class AboutPage extends HookConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Text(context.l10n.followUsOnTwitter),
-                      onTap: () => openUri(
-                          context, 'https://twitter.com/MixinMessenger'),
+                      title: Text(context.l10n.followUsOnX),
+                      onTap: () =>
+                          openUri(context, 'https://x.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(context.l10n.followUsOnFacebook),
