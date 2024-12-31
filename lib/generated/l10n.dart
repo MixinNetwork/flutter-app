@@ -1604,6 +1604,16 @@ class Localization {
     );
   }
 
+  /// `Enable push notification`
+  String get enablePushNotification {
+    return Intl.message(
+      'Enable push notification',
+      name: 'enablePushNotification',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Encrypt zip file with password`
   String get encryptZipFileWithPassword {
     return Intl.message(
@@ -1784,10 +1794,10 @@ class Localization {
     );
   }
 
-  /// `ERROR 20130: Invalid emergency contact`
+  /// `ERROR 20130: Invalid recovery contact`
   String get errorInvalidEmergencyContact {
     return Intl.message(
-      'ERROR 20130: Invalid emergency contact',
+      'ERROR 20130: Invalid recovery contact',
       name: 'errorInvalidEmergencyContact',
       desc: '',
       args: [],
@@ -1799,6 +1809,16 @@ class Localization {
     return Intl.message(
       'ERROR 20118: Invalid PIN format.',
       name: 'errorInvalidPinFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR 20118: To enhance the security of the Mixin network, Mixin API has temporarily suspended the upgrading from D3M-PIN to TIP. Please refer to the documentation for details and register for processing.`
+  String get errorLegacyPin {
+    return Intl.message(
+      'ERROR 20118: To enhance the security of the Mixin network, Mixin API has temporarily suspended the upgrading from D3M-PIN to TIP. Please refer to the documentation for details and register for processing.',
+      name: 'errorLegacyPin',
       desc: '',
       args: [],
     );
@@ -2238,11 +2258,11 @@ class Localization {
     );
   }
 
-  /// `Follow us on Twitter`
-  String get followUsOnTwitter {
+  /// `Follow us on X`
+  String get followUsOnX {
     return Intl.message(
-      'Follow us on Twitter',
-      name: 'followUsOnTwitter',
+      'Follow us on X',
+      name: 'followUsOnX',
       desc: '',
       args: [],
     );
@@ -2570,13 +2590,13 @@ class Localization {
     );
   }
 
-  /// `Your account will be deleted on {arg0}, if you continue to log in, the request to delete your account will be cancelled.`
-  String landingDeleteContent(Object arg0) {
+  /// `You requested to delete your account on {arg0}. The account will be deleted on {arg1}. If you continue to login, your account deletion will be cancelled.`
+  String landingDeleteContent(Object arg0, Object arg1) {
     return Intl.message(
-      'Your account will be deleted on $arg0, if you continue to log in, the request to delete your account will be cancelled.',
+      'You requested to delete your account on $arg0. The account will be deleted on $arg1. If you continue to login, your account deletion will be cancelled.',
       name: 'landingDeleteContent',
       desc: '',
-      args: [arg0],
+      args: [arg0, arg1],
     );
   }
 
@@ -3112,10 +3132,10 @@ class Localization {
     );
   }
 
-  /// `Don't miss messages from your friends.`
+  /// `Enable push notifications to stay updated on price alerts and messages in real time.`
   String get notificationContent {
     return Intl.message(
-      'Don\'t miss messages from your friends.',
+      'Enable push notifications to stay updated on price alerts and messages in real time.',
       name: 'notificationContent',
       desc: '',
       args: [],
@@ -3197,6 +3217,16 @@ class Localization {
     return Intl.message(
       '1 Year',
       name: 'oneYear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open`
+  String get open {
+    return Intl.message(
+      'Open',
+      name: 'open',
       desc: '',
       args: [],
     );
@@ -4138,11 +4168,11 @@ class Localization {
     );
   }
 
-  /// `Sign in with phone number`
-  String get signWithPhoneNumber {
+  /// `Sign in with mobile number`
+  String get signWithMobileNumber {
     return Intl.message(
-      'Sign in with phone number',
-      name: 'signWithPhoneNumber',
+      'Sign in with mobile number',
+      name: 'signWithMobileNumber',
       desc: '',
       args: [],
     );
@@ -4493,16 +4523,6 @@ class Localization {
     return Intl.message(
       'Travel & Places',
       name: 'travelAndPlaces',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Turn On Notifications`
-  String get turnOnNotifications {
-    return Intl.message(
-      'Turn On Notifications',
-      name: 'turnOnNotifications',
       desc: '',
       args: [],
     );

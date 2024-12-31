@@ -79,9 +79,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(arg0) => "${arg0}からMixinを利用しています";
 
-  static String m28(arg0) =>
-      "あなたのアカウントは(${arg0}) 後に消去されます。ログインを継続する場合、あなたのアカウント消去はキャンセルされます。";
-
   static String m29(arg0) => "4桁のコードを電話番号${arg0}に送信します、次の画面でコードを入力してください";
 
   static String m30(arg0) => "${arg0}に送信された4桁のコードを入力してください";
@@ -277,6 +274,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("すべての変更が失われます。本当に終了しますか？"),
         "editName": MessageLookupByLibrary.simpleMessage("名前を変更"),
         "editProfile": MessageLookupByLibrary.simpleMessage("プロフィールを編集"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("通知をオンにする"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
             "アカウントを削除するためにPINコードを入力してください"),
         "enterYourPhoneNumber":
@@ -306,8 +305,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("エラー30102：無効なアドレス形式です"),
         "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
             "エラー 20129：認証コードを送信する頻度が多すぎます。しばらくしてからもう一度お試しください。"),
-        "errorInvalidEmergencyContact":
-            MessageLookupByLibrary.simpleMessage("エラー 20130：無効な緊急連絡先です"),
         "errorInvalidPinFormat":
             MessageLookupByLibrary.simpleMessage("エラー 20118：無効なPINフォーマットです"),
         "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
@@ -370,8 +367,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("システム設定に従う"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("FacebookでMixinをフォロー"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("TwitterでMixinをフォロー"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("XでMixinをフォロー"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("サポートされていないフォーマットです"),
         "forward": MessageLookupByLibrary.simpleMessage("転送"),
@@ -406,7 +402,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("リンクを使って招待する"),
         "joinGroupWithPlus": MessageLookupByLibrary.simpleMessage("グループに参加"),
         "joinedIn": m27,
-        "landingDeleteContent": m28,
         "landingInvitationDialogContent": m29,
         "landingValidationTitle": m30,
         "learnMore": MessageLookupByLibrary.simpleMessage("こちら"),
@@ -465,8 +460,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPosts": MessageLookupByLibrary.simpleMessage("投稿がありません"),
         "noResults": MessageLookupByLibrary.simpleMessage("結果なし"),
         "notFound": MessageLookupByLibrary.simpleMessage("見つかりません"),
-        "notificationContent":
-            MessageLookupByLibrary.simpleMessage("友達からのメッセージを見逃さないで！"),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "通知は許可されていませんので、通知設定から許可してください。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
@@ -571,7 +564,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "showMixin": MessageLookupByLibrary.simpleMessage("Mixinを表示"),
         "signIn": MessageLookupByLibrary.simpleMessage("ログイン"),
         "signOut": MessageLookupByLibrary.simpleMessage("サインアウト"),
-        "signWithPhoneNumber":
+        "signWithMobileNumber":
             MessageLookupByLibrary.simpleMessage("電話番号でログイン"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("QRコードでログイン"),
         "status": MessageLookupByLibrary.simpleMessage("ステータス"),
@@ -606,7 +599,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("トランザクション履歴を削除することはできません"),
         "transcript": MessageLookupByLibrary.simpleMessage("メッセージ履歴"),
         "transfer": MessageLookupByLibrary.simpleMessage("送金"),
-        "turnOnNotifications": MessageLookupByLibrary.simpleMessage("通知をオンにする"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("メッセージを入力"),
         "unableToOpenFile": m45,
         "unblock": MessageLookupByLibrary.simpleMessage("ブロックを解除"),

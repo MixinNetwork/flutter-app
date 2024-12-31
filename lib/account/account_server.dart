@@ -1494,11 +1494,20 @@ class AccountServer {
     await database.fiatDao.insertAllSdkFiat(data.data);
   }
 
+  Future<db.App?> findOrSyncApp(String id) async =>
+      getAppAndCheckUser(id, null);
+
   Future<db.App?> getAppAndCheckUser(String id, DateTime? updatedAt) async {
     final app = await database.appDao.findAppById(id);
-    if (app?.updatedAt != null && app?.updatedAt == updatedAt) {
-      return app;
+
+    if (app != null) {
+      if (updatedAt == null) {
+        return app;
+      } else if (app.updatedAt == updatedAt) {
+        return app;
+      }
     }
+
     try {
       final user = await client.userApi.getUserById(id);
       await _injector.insertUpdateUsers([user.data]);

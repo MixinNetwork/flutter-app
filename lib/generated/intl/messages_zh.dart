@@ -81,7 +81,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(arg0) => "${arg0} 加入";
 
-  static String m28(arg0) => "您的账户将于 ${arg0} 被删除，如果您继续登录，删除您账户的请求将被取消。";
+  static String m28(arg0, arg1) =>
+      "您在 ${arg0} 申请了删除账号，账号将于 ${arg1} 被删除，如果您继续登录，删除您账户的请求将被取消。";
 
   static String m29(arg0) => "我们将发送4位验证码到手机 ${arg0}, 请在下一个页面输入";
 
@@ -315,6 +316,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("退出将会清除此次所有的改动。"),
         "editName": MessageLookupByLibrary.simpleMessage("修改昵称"),
         "editProfile": MessageLookupByLibrary.simpleMessage("编辑资料"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("启用推送通知"),
         "encryptZipFileWithPassword":
             MessageLookupByLibrary.simpleMessage("使用密码来加密 zip 文件"),
         "enterPinToDeleteAccount":
@@ -347,9 +350,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorInvalidCodeTooFrequent":
             MessageLookupByLibrary.simpleMessage("错误 20129：发送验证码太频繁，请稍后再试"),
         "errorInvalidEmergencyContact":
-            MessageLookupByLibrary.simpleMessage("错误 20130：紧急联系人不正确"),
+            MessageLookupByLibrary.simpleMessage("错误 20130：恢复联系人不正确"),
         "errorInvalidPinFormat":
             MessageLookupByLibrary.simpleMessage("错误 20118：PIN 格式不正确"),
+        "errorLegacyPin": MessageLookupByLibrary.simpleMessage(
+            "错误 20118：为了加强 Mixin 网络的安全，Mixin API 现已暂停 D3M-PIN 升级到 TIP，详情请查看文档并登记等待处理。"),
         "errorNetworkTaskFailed":
             MessageLookupByLibrary.simpleMessage("网络连接失败。检查或切换网络并重试"),
         "errorNoPinToken":
@@ -418,8 +423,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("关注我们的 Facebook"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("关注我们的 Twitter"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("关注我们的 X"),
         "foodAndDrink": MessageLookupByLibrary.simpleMessage("食物与饮料"),
         "formatNotSupported": MessageLookupByLibrary.simpleMessage("不支持该格式"),
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
@@ -520,7 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notSupportBiometric":
             MessageLookupByLibrary.simpleMessage("此设备不支持生物验证"),
         "notificationContent":
-            MessageLookupByLibrary.simpleMessage("不再遗漏好友的消息。"),
+            MessageLookupByLibrary.simpleMessage("启用推送通知以实时更新价格警报和消息。"),
         "notificationPermissionManually":
             MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
         "notifications": MessageLookupByLibrary.simpleMessage("通知"),
@@ -530,6 +534,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneHour": MessageLookupByLibrary.simpleMessage("1 小时"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 年"),
+        "open": MessageLookupByLibrary.simpleMessage("打开"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("打开主页"),
         "openLink": m35,
         "openLogDirectory": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
@@ -628,8 +633,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "showIdentityNumber": MessageLookupByLibrary.simpleMessage("显示 ID"),
         "showMixin": MessageLookupByLibrary.simpleMessage("显示 Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("登录"),
-        "signOut": MessageLookupByLibrary.simpleMessage("登出"),
-        "signWithPhoneNumber": MessageLookupByLibrary.simpleMessage("通过手机号登录"),
+        "signOut": MessageLookupByLibrary.simpleMessage("退出登录"),
+        "signWithMobileNumber": MessageLookupByLibrary.simpleMessage("通过手机号登录"),
         "signWithQrcode": MessageLookupByLibrary.simpleMessage("通过二维码登录"),
         "smileysAndPeople": MessageLookupByLibrary.simpleMessage("表情符号与人物"),
         "snapshotHash": MessageLookupByLibrary.simpleMessage("快照哈希"),
@@ -669,7 +674,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "transferringChatsTips":
             MessageLookupByLibrary.simpleMessage("同步时请不要关闭屏幕并保持 Mixin 在前台运行。"),
         "travelAndPlaces": MessageLookupByLibrary.simpleMessage("旅行与地点"),
-        "turnOnNotifications": MessageLookupByLibrary.simpleMessage("打开通知"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("输入消息"),
         "unableToOpenFile": m45,
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),

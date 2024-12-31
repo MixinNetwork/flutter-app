@@ -23,6 +23,7 @@ import '../../../utils/logger.dart';
 import '../../../utils/message_optimize.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/uri_utils.dart';
+import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
@@ -430,6 +431,29 @@ class _SearchMaoUserWidget extends StatelessWidget {
       width: 14,
       height: 14,
     );
+    Widget? openButton;
+    if (maoUser.user.isBot) {
+      openButton = ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: context.theme.accent,
+          foregroundColor: Colors.white,
+          textStyle: const TextStyle(fontSize: 12),
+          minimumSize: Size.zero,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        ),
+        onPressed: () async {
+          final app =
+              await context.accountServer.findOrSyncApp(maoUser.user.appId!);
+          if (app == null) {
+            e('app not found: ${maoUser.user.appId}');
+            showToastFailed(null);
+            return;
+          }
+          await MixinWebView.instance.openBotWebViewWindow(context, app);
+        },
+        child: Text(context.l10n.open),
+      );
+    }
     return SearchItem(
       avatar: AvatarWidget(
         name: maoUser.user.fullName,
@@ -439,6 +463,12 @@ class _SearchMaoUserWidget extends StatelessWidget {
       ),
       name: maoUser.user.fullName ?? '?',
       description: maoUser.mao,
+      trailing: BadgesWidget(
+        verified: maoUser.user.isVerified,
+        isBot: maoUser.user.appId != null,
+        membership: maoUser.user.membership,
+      ),
+      contentTrailing: openButton,
       descriptionIconWidget: ClipOval(
         child: MixinImage.network(
           _maoIcon,
@@ -490,6 +520,7 @@ class SearchItem extends StatelessWidget {
     ),
     this.nameFontSize = 16,
     this.descriptionIconWidget,
+    this.contentTrailing,
   });
 
   final Widget? avatar;
@@ -507,6 +538,7 @@ class SearchItem extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final EdgeInsetsGeometry padding;
   final double nameFontSize;
+  final Widget? contentTrailing;
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +656,11 @@ class SearchItem extends StatelessWidget {
                   ],
                 ),
               ),
+              if (contentTrailing != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: contentTrailing,
+                ),
             ],
           ),
         ),

@@ -243,7 +243,7 @@ class LandingModeSwitchButton extends HookConsumerWidget {
     final String buttonText;
     switch (mode) {
       case LandingMode.qrcode:
-        buttonText = context.l10n.signWithPhoneNumber;
+        buttonText = context.l10n.signWithMobileNumber;
       case LandingMode.mobile:
         buttonText = context.l10n.signWithQrcode;
     }

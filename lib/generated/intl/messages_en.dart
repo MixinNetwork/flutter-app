@@ -84,8 +84,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(arg0) => "Joined on ${arg0}";
 
-  static String m28(arg0) =>
-      "Your account will be deleted on ${arg0}, if you continue to log in, the request to delete your account will be cancelled.";
+  static String m28(arg0, arg1) =>
+      "You requested to delete your account on ${arg0}. The account will be deleted on ${arg1}. If you continue to login, your account deletion will be cancelled.";
 
   static String m29(arg0) =>
       "We will send a 4-digit code to your phone number ${arg0}, please enter the code in next screen.";
@@ -362,6 +362,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "All changes will be lost. Are you sure you want to exit?"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
+        "enablePushNotification":
+            MessageLookupByLibrary.simpleMessage("Enable push notification"),
         "encryptZipFileWithPassword": MessageLookupByLibrary.simpleMessage(
             "Encrypt zip file with password"),
         "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
@@ -397,9 +399,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
             "ERROR 20129: Send verification code too frequent, please try again later."),
         "errorInvalidEmergencyContact": MessageLookupByLibrary.simpleMessage(
-            "ERROR 20130: Invalid emergency contact"),
+            "ERROR 20130: Invalid recovery contact"),
         "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
             "ERROR 20118: Invalid PIN format."),
+        "errorLegacyPin": MessageLookupByLibrary.simpleMessage(
+            "ERROR 20118: To enhance the security of the Mixin network, Mixin API has temporarily suspended the upgrading from D3M-PIN to TIP. Please refer to the documentation for details and register for processing."),
         "errorNetworkTaskFailed": MessageLookupByLibrary.simpleMessage(
             "Network connection failed. Check or switch your network and try again"),
         "errorNoPinToken": MessageLookupByLibrary.simpleMessage(
@@ -475,8 +479,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followSystem": MessageLookupByLibrary.simpleMessage("Follow System"),
         "followUsOnFacebook":
             MessageLookupByLibrary.simpleMessage("Follow us on Facebook"),
-        "followUsOnTwitter":
-            MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
+        "followUsOnX": MessageLookupByLibrary.simpleMessage("Follow us on X"),
         "foodAndDrink": MessageLookupByLibrary.simpleMessage("Food & Drink"),
         "formatNotSupported":
             MessageLookupByLibrary.simpleMessage("Format not supported"),
@@ -592,7 +595,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notSupportBiometric": MessageLookupByLibrary.simpleMessage(
             "This Device is not supported Biometric authentication"),
         "notificationContent": MessageLookupByLibrary.simpleMessage(
-            "Don\'t miss messages from your friends."),
+            "Enable push notifications to stay updated on price alerts and messages in real time."),
         "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
@@ -603,6 +606,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oneHour": MessageLookupByLibrary.simpleMessage("1 Hour"),
         "oneWeek": MessageLookupByLibrary.simpleMessage("1 Week"),
         "oneYear": MessageLookupByLibrary.simpleMessage("1 Year"),
+        "open": MessageLookupByLibrary.simpleMessage("Open"),
         "openHomePage": MessageLookupByLibrary.simpleMessage("Open Home page"),
         "openLink": m35,
         "openLogDirectory":
@@ -727,8 +731,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "showMixin": MessageLookupByLibrary.simpleMessage("Show Mixin"),
         "signIn": MessageLookupByLibrary.simpleMessage("Sign in"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
-        "signWithPhoneNumber":
-            MessageLookupByLibrary.simpleMessage("Sign in with phone number"),
+        "signWithMobileNumber":
+            MessageLookupByLibrary.simpleMessage("Sign in with mobile number"),
         "signWithQrcode":
             MessageLookupByLibrary.simpleMessage("Sign in with QR code"),
         "smileysAndPeople":
@@ -781,8 +785,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please do not turn off the screen and keep the Mixin running in the foreground while syncing."),
         "travelAndPlaces":
             MessageLookupByLibrary.simpleMessage("Travel & Places"),
-        "turnOnNotifications":
-            MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
         "unableToOpenFile": m45,
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),

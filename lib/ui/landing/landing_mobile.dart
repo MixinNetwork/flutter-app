@@ -81,13 +81,15 @@ class _PhoneNumberInputScene extends StatelessWidget {
                   context: context,
                 );
                 Toast.dismiss();
-                if (response.deactivatedAt?.isNotEmpty ?? false) {
-                  final date =
-                      DateTime.parse(response.deactivatedAt!).toLocal();
+                if (response.deactivationEffectiveAt != null) {
+                  final date = response.deactivationEffectiveAt!.toLocal();
+                  final requestedAt =
+                      response.deactivationRequestedAt!.toLocal();
                   final continueLogin = await showConfirmMixinDialog(
                     context,
                     context.l10n.loginAndAbortAccountDeletion,
                     description: context.l10n.landingDeleteContent(
+                      DateFormat().format(requestedAt),
                       DateFormat().format(date),
                     ),
                     maxWidth: 440,
