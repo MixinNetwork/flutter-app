@@ -105,8 +105,8 @@ class AboutPage extends HookConsumerWidget {
                   children: [
                     CellItem(
                       title: Text(context.l10n.followUsOnX),
-                      onTap: () => openUri(
-                          context, 'https://x.com/MixinMessenger'),
+                      onTap: () =>
+                          openUri(context, 'https://x.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(context.l10n.followUsOnFacebook),
