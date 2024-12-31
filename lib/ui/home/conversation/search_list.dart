@@ -453,6 +453,11 @@ class _SearchMaoUserWidget extends StatelessWidget {
       ),
       keyword: keyword,
       onTap: () async {
+        if (maoUser.user.userId == context.accountServer.userId) {
+          _clear(context);
+          await showUserDialog(context, maoUser.user.userId);
+          return;
+        }
         await ConversationStateNotifier.selectUser(
           context,
           maoUser.user.userId,
