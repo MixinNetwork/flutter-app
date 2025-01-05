@@ -87,18 +87,10 @@ class MessagePost extends StatelessWidget {
                   ),
                 );
               }),
-              Positioned(
+              const Positioned(
                 right: 0,
                 top: 0,
-                child: Container(
-                  decoration: _decoration,
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesPostDetailSvg,
-                    width: 20,
-                    height: 20,
-                  ),
-                ),
+                child: PostDetailIcon(),
               ),
               if (showStatus)
                 Positioned(
@@ -117,6 +109,21 @@ class MessagePost extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      );
+}
+
+class PostDetailIcon extends StatelessWidget {
+  const PostDetailIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        decoration: _decoration,
+        alignment: Alignment.center,
+        child: SvgPicture.asset(
+          Resources.assetsImagesPostDetailSvg,
+          width: 20,
+          height: 20,
         ),
       );
 }
