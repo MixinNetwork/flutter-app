@@ -16,6 +16,7 @@ import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../../message_style.dart';
+import '../post_message.dart';
 import '../text/text_message.dart';
 import '../transcript_message.dart';
 import '../unknown_message.dart';
@@ -107,6 +108,25 @@ class MessageImage extends HookConsumerWidget {
     final isMessageSentOut = (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
+
+    final mediaSize = useMessageConverter(
+        converter: (state) => (state.mediaWidth, state.mediaHeight));
+    final needShowExtendIcon = useMemoized(() {
+      if (size == null) {
+        return false;
+      }
+      final mediaWidth = mediaSize.$1 ?? 0;
+      final mediaHeight = mediaSize.$2 ?? 0;
+      if (mediaWidth == 0 || mediaHeight == 0) {
+        return false;
+      }
+      final mediaAspectRatio = mediaWidth / mediaHeight;
+      final layoutAspectRatio = size!.aspectRatio;
+      if (!layoutAspectRatio.isFinite || layoutAspectRatio == 0) {
+        return false;
+      }
+      return layoutAspectRatio - mediaAspectRatio > 0.01; // 0.01 is a threshold
+    }, [size]);
 
     return InteractiveDecoratedBox(
       onTap: () {
@@ -200,6 +220,12 @@ class MessageImage extends HookConsumerWidget {
                     ),
                   ),
                 ),
+              ),
+            if (needShowExtendIcon)
+              Positioned(
+                top: 8,
+                right: isCurrentUser ? 16 : 8,
+                child: const PostDetailIcon(),
               ),
           ],
         ),
