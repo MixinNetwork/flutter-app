@@ -43,21 +43,21 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - Sentry/HybridSDK (8.41.0)
-  - sentry_flutter (8.11.1):
+  - Sentry/HybridSDK (8.42.0)
+  - sentry_flutter (8.12.0):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.41.0)
-  - sqlite3 (3.47.1):
-    - sqlite3/common (= 3.47.1)
-  - sqlite3/common (3.47.1)
-  - sqlite3/dbstatvtab (3.47.1):
+    - Sentry/HybridSDK (= 8.42.0)
+  - sqlite3 (3.47.2):
+    - sqlite3/common (= 3.47.2)
+  - sqlite3/common (3.47.2)
+  - sqlite3/dbstatvtab (3.47.2):
     - sqlite3/common
-  - sqlite3/fts5 (3.47.1):
+  - sqlite3/fts5 (3.47.2):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.47.1):
+  - sqlite3/perf-threadsafe (3.47.2):
     - sqlite3/common
-  - sqlite3/rtree (3.47.1):
+  - sqlite3/rtree (3.47.2):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
@@ -186,39 +186,39 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_size/macos
 
 SPEC CHECKSUMS:
-  audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
-  desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
-  desktop_keep_screen_on: 855ea723f37225b8fc7895cffa06fe89f4fabd46
-  desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
-  device_info_plus: ce1b7762849d3ec103d0e0517299f2db7ad60720
-  file_selector_macos: cc3858c981fe6889f364731200d6232dac1d812d
-  flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
-  flutter_local_notifications: 7062189aabf7f50938a7b8b6614ffa97656eb0bf
+  audio_session: 48ab6500f7a5e7c64363e206565a5dfe5a0c1441
+  desktop_drop: e0b672a7d84c0a6cbc378595e82cdb15f2970a43
+  desktop_keep_screen_on: bfedcf75be8bd8b4a21db3dcf48667427087792c
+  desktop_webview_window: 7e37af677d6d19294cb433d9b1d878ef78dffa4d
+  device_info_plus: a56e6e74dbbd2bb92f2da12c64ddd4f67a749041
+  file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
+  flutter_app_icon_badge: e05568a57ac0d98a0e7bc35c5b9ae9b118109b1e
+  flutter_local_notifications: 13862b132e32eb858dea558a86d45d08daeacfe7
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  irondash_engine_context: da62996ee25616d2f01bbeb85dc115d813359478
-  local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
-  mixin_logger: 5e5bd35ba38da1ff4939ee5ec83260d7fc5258fc
-  network_info_plus: 2cb02d8435635eae13b3b79279681985121cf30c
-  objective_c: c13d3306e0fbf006bad001fd523e4bf8ebda8953
-  ogg_opus_player: 67fc56771b16586b9b2478f848e632f751400604
-  open_file_mac: 0e554648e2a87ce59e9438e3e5ca3e552e90d89a
-  package_info_plus: 12f1c5c2cfe8727ca46cbd0b26677728972d9a5b
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
+  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
+  mixin_logger: 6b31328b08f546a8defd32cd910370562fc48405
+  network_info_plus: 21d1cd6a015ccb2fdff06a1fbfa88d54b4e92f61
+  objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7
+  ogg_opus_player: 40ad7ee05152b420727fdb922afa0a90763b1817
+  open_file_mac: 01874b6d6a2c1485ac9b126d7105b99102dea2cf
+  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
-  protocol_handler_macos: d10a6c01d6373389ffd2278013ab4c47ed6d6daa
-  rhttp: 337afda4c3e4df31087160719ffca6452c225cc2
-  screen_retriever_macos: 776e0fa5d42c6163d2bf772d22478df4b302b161
-  Sentry: 54d0fe6c0df448497c8ed4cce66ccf7027e1823e
-  sentry_flutter: d8bce6e1d6c4f57d0208e274f745d1eee8bae249
-  sqlite3: 1e522f0938463e44b7faf50393b40bdc1e1e456d
-  sqlite3_flutter_libs: 1b4e98da20ebd4e9b1240269b78cdcf492dbe9f3
-  super_native_extensions: 85efee3a7495b46b04befcfc86ed12069264ebf3
-  url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
-  video_compress: c896234f100791b5fef7f049afa38f6d2ef7b42f
-  video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
-  webview_flutter_wkwebview: 0982481e3d9c78fd5c6f62a002fcd24fc791f1e4
-  window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
-  window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
+  protocol_handler_macos: f9cd7b13bcaf6b0425f7410cbe52376cb843a936
+  rhttp: 08d791d6373089de796318f4cfb172cbcf34e78b
+  screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
+  Sentry: 38ed8bf38eab5812787274bf591e528074c19e02
+  sentry_flutter: a72ca0eb6e78335db7c4ddcddd1b9f6c8ed5b764
+  sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
+  sqlite3_flutter_libs: f0b59f6bb2a18597d0796558725007e5a7428397
+  super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
+  url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
+  video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534
+  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+  webview_flutter_wkwebview: 44d4dee7d7056d5ad185d25b38404436d56c547c
+  window_manager: 1d01fa7ac65a6e6f83b965471b1a7fdd3f06166c
+  window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9
 
 PODFILE CHECKSUM: 3b8f158a5c29479cd85985740fcc6ce70c370046
 
