@@ -30,7 +30,11 @@ extension ImageTypeExtension on ImageType {
     final aspectRatio = image.width / image.height;
     int targetWidth;
     int targetHeight;
-    if (aspectRatio > 1) {
+
+    if (aspectRatio < 1 / 3) {
+      targetHeight = image.height;
+      targetWidth = image.width;
+    } else if (aspectRatio > 1) {
       // landscape
       targetWidth = _kMaxDimension;
       targetHeight = (targetWidth / aspectRatio).round();
