@@ -96,7 +96,7 @@ dependencies:
   map: ^2.0.2
   markdown_widget: ^2.3.2+2
   mime: ^2.0.0
-  mixin_bot_sdk_dart: ^1.2.9
+  mixin_bot_sdk_dart: ^1.2.12
   mixin_logger: ^0.1.2
   network_info_plus: ^6.0.0
   octo_image: ^2.0.0
