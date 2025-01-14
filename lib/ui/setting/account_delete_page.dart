@@ -98,7 +98,7 @@ class AccountDeletePage extends StatelessWidget {
                           onVerification: (code, response) async {
                             final result = await context
                                 .accountServer.client.accountApi
-                                .deactiveVerification(response.id, code);
+                                .deactivateVerification(response.id, code);
                             return result.data.id;
                           },
                         );
@@ -263,7 +263,7 @@ class _DeleteAccountPinDialog extends StatelessWidget {
                 const SizedBox(height: 29),
                 PinInputLayout(
                   doVerify: (String pin) async {
-                    await context.accountServer.client.accountApi.deactive(
+                    await context.accountServer.client.accountApi.deactivate(
                       DeactivateRequest(encryptPin(pin)!, verificationId),
                     );
                     Navigator.pop(context, true);
