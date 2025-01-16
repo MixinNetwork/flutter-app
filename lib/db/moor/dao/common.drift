@@ -185,8 +185,7 @@ SELECT
         ELSE 0.0
     END AS match_score
 FROM users
-WHERE $where AND (users.full_name LIKE '%' || :query || '%' ESCAPE '\' COLLATE NOCASE OR 
-       users.identity_number LIKE '%' || :query || '%' ESCAPE '\' COLLATE NOCASE)
+WHERE $where
 ORDER BY match_score DESC
     limit $limit;
 
@@ -214,7 +213,6 @@ SELECT
     END AS membership,
     CASE 
         WHEN LENGTH(:query) = 0 THEN 0.0
-        WHEN :enableNameLike != TRUE THEN 0.0 
         WHEN name = :query COLLATE NOCASE THEN 1.0 + 1.0/LENGTH(name)
         WHEN name LIKE :query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.6 + 1.0/LENGTH(name)
         WHEN name LIKE '%' || :query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.3 + 1.0/LENGTH(name)
@@ -222,6 +220,6 @@ SELECT
     END AS match_score
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
-WHERE $where AND (:enableNameLike != TRUE OR name LIKE '%' || :query || '%' ESCAPE '\' COLLATE NOCASE)
+WHERE $where
 ORDER BY match_score DESC, conversation.pin_time DESC
     limit $limit;

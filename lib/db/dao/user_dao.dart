@@ -164,7 +164,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
           keyword,
           (users) =>
               users.userId.equals(currentUserId).not() &
-              users.identityNumber.equals('0').not(),
+              users.identityNumber.equals('0').not() &
+              (users.fullName.likeEscape('%$keyword%') |
+                  users.identityNumber.likeEscape('%$keyword%')),
           (users) => maxLimit);
 
   Future updateMuteUntil(String userId, String muteUntil) async {

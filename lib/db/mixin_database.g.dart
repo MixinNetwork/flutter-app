@@ -16647,7 +16647,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $write(limit(this.users), startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT CASE WHEN users.app_id IS NOT NULL AND LENGTH(users.app_id) > 0 THEN \'BOT\' ELSE \'USER\' END AS type, users.user_id AS id, users.full_name AS name, users.avatar_url AS avatar_url, users.is_verified AS is_verified, users.app_id AS app_id, users.membership AS membership, CASE WHEN users.full_name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number = ?1 COLLATE NOCASE THEN 0.9 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.5 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.2 + 1.0 / LENGTH(users.identity_number) ELSE 0.0 END AS match_score FROM users WHERE ${generatedwhere.sql} AND(users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE OR users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE)ORDER BY match_score DESC ${generatedlimit.sql}',
+        'SELECT CASE WHEN users.app_id IS NOT NULL AND LENGTH(users.app_id) > 0 THEN \'BOT\' ELSE \'USER\' END AS type, users.user_id AS id, users.full_name AS name, users.avatar_url AS avatar_url, users.is_verified AS is_verified, users.app_id AS app_id, users.membership AS membership, CASE WHEN users.full_name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number = ?1 COLLATE NOCASE THEN 0.9 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.5 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.2 + 1.0 / LENGTH(users.identity_number) ELSE 0.0 END AS match_score FROM users WHERE ${generatedwhere.sql} ORDER BY match_score DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           ...generatedwhere.introducedVariables,
@@ -16672,10 +16672,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchItem> fuzzySearchConversationItem(
       String query,
-      bool enableNameLike,
       FuzzySearchConversationItem$where where,
       FuzzySearchConversationItem$limit limit) {
-    var $arrayStartIndex = 3;
+    var $arrayStartIndex = 2;
     final generatedwhere = $write(
         where(alias(this.conversations, 'conversation'),
             alias(this.users, 'owner')),
@@ -16689,10 +16688,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT CASE WHEN conversation.category = \'GROUP\' THEN \'GROUP\' ELSE \'CONTACT\' END AS type, conversation.conversation_id AS id, CASE WHEN conversation.category = \'GROUP\' THEN conversation.name ELSE owner.full_name END AS name, CASE WHEN conversation.category = \'GROUP\' THEN conversation.icon_url ELSE owner.avatar_url END AS avatar_url, owner.is_verified AS is_verified, owner.app_id AS app_id, CASE WHEN conversation.category = \'CONTACT\' THEN owner.membership ELSE NULL END AS membership, CASE WHEN LENGTH(?1) = 0 THEN 0.0 WHEN ?2 != TRUE THEN 0.0 WHEN name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(name) WHEN name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(name) WHEN name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(name) ELSE 0.0 END AS match_score FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} AND(?2 != TRUE OR name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE)ORDER BY match_score DESC, conversation.pin_time DESC ${generatedlimit.sql}',
+        'SELECT CASE WHEN conversation.category = \'GROUP\' THEN \'GROUP\' ELSE \'CONTACT\' END AS type, conversation.conversation_id AS id, CASE WHEN conversation.category = \'GROUP\' THEN conversation.name ELSE owner.full_name END AS name, CASE WHEN conversation.category = \'GROUP\' THEN conversation.icon_url ELSE owner.avatar_url END AS avatar_url, owner.is_verified AS is_verified, owner.app_id AS app_id, CASE WHEN conversation.category = \'CONTACT\' THEN owner.membership ELSE NULL END AS membership, CASE WHEN LENGTH(?1) = 0 THEN 0.0 WHEN name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(name) WHEN name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(name) WHEN name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(name) ELSE 0.0 END AS match_score FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} ORDER BY match_score DESC, conversation.pin_time DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
-          Variable<bool>(enableNameLike),
           ...generatedwhere.introducedVariables,
           ...generatedlimit.introducedVariables
         ],

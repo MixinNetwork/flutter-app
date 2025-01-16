@@ -52,3 +52,53 @@ extension SelectedableThrottle<T> on Selectable<T> {
         fetch: getSingleOrNull,
       );
 }
+
+@immutable
+class LikeEscapeOperator extends Expression<bool> {
+  LikeEscapeOperator(
+    this.target,
+    this.regex,
+    this.escape, {
+    this.operator = 'LIKE',
+  });
+  final Expression<String> target;
+  final Expression<String> regex;
+  final Expression<String> escape;
+  final String operator;
+
+  @override
+  final Precedence precedence = Precedence.comparisonEq;
+
+  @override
+  void writeInto(GenerationContext context) {
+    writeInner(context, target);
+    context.writeWhitespace();
+    context.buffer.write(operator);
+    context.writeWhitespace();
+    writeInner(context, regex);
+    context.writeWhitespace();
+    context.buffer.write('ESCAPE');
+    context.writeWhitespace();
+    writeInner(context, escape);
+  }
+
+  @override
+  int get hashCode => Object.hash(target, regex, escape, operator);
+
+  @override
+  bool operator ==(Object other) =>
+      other is LikeEscapeOperator &&
+      other.target == target &&
+      other.regex == regex &&
+      other.escape == escape &&
+      other.operator == operator;
+}
+
+extension LikeEscapeExpression on Expression<String> {
+  Expression<bool> likeEscape(String pattern, {String escape = r'\'}) =>
+      LikeEscapeOperator(
+        this,
+        Variable.withString(pattern),
+        Variable.withString(escape),
+      );
+}
