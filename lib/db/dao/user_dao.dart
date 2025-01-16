@@ -6,6 +6,7 @@ import '../../utils/extension/extension.dart';
 import '../database_event_bus.dart';
 import '../extension/db.dart';
 import '../mixin_database.dart';
+import '../util/util.dart';
 
 part 'user_dao.g.dart';
 
@@ -156,6 +157,17 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
           }
         });
   }
+
+  Selectable<SearchItem> fuzzySearchUserItem(
+          String keyword, String currentUserId) =>
+      db.fuzzySearchUserItem(
+          keyword,
+          (users) =>
+              users.userId.equals(currentUserId).not() &
+              users.identityNumber.equals('0').not() &
+              (users.fullName.likeEscape('%$keyword%') |
+                  users.identityNumber.likeEscape('%$keyword%')),
+          (users) => maxLimit);
 
   Future updateMuteUntil(String userId, String muteUntil) async {
     await (update(db.users)..where((tbl) => tbl.userId.equals(userId)))

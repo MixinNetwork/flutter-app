@@ -323,7 +323,7 @@ class ConversationStateNotifier
 
     unawaited(dismissByConversationId(conversationId));
     context.providerContainer
-        .read(recentConversationIDsProvider)
+        .read(recentConversationIDsProvider.notifier)
         .add(conversationId);
   }
 

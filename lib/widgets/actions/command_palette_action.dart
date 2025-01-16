@@ -5,17 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../constants/resources.dart';
-import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
-import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/recent_conversation_provider.dart';
-import '../../ui/provider/slide_category_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -55,6 +53,138 @@ void _jumpToPosition(ScrollController scrollController, int length, int index) {
   }
 }
 
+class _SearchState {
+  const _SearchState({
+    required this.users,
+    required this.conversations,
+    required this.items,
+  });
+
+  final List<SearchItem> users;
+  final List<SearchItem> conversations;
+  final List<SearchItem> items;
+}
+
+_SearchState _useSearchState({
+  required BuildContext context,
+  required WidgetRef ref,
+  required String keyword,
+}) {
+  final users = useMemoizedStream<List<SearchItem>>(() {
+        if (keyword.trim().isEmpty) {
+          return Stream.value([]);
+        }
+        return context.database.userDao
+            .fuzzySearchUserItem(keyword, context.accountServer.userId)
+            .watchWithStream(
+          eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
+          duration: kVerySlowThrottleDuration,
+        );
+      }, keys: [keyword]).data ??
+      [];
+
+  final recentConversationIds = ref.watch(recentConversationIDsProvider);
+
+  final conversations = useMemoizedStream<List<SearchItem>>(() {
+        if (keyword.trim().isEmpty) {
+          if (recentConversationIds.isEmpty) {
+            return Stream.value([]);
+          }
+
+          return context.database.conversationDao
+              .fuzzySearchConversationItemByIds(recentConversationIds)
+              .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance
+                  .watchUpdateConversationStream(recentConversationIds)
+            ],
+            duration: kSlowThrottleDuration,
+          );
+        }
+        return context.database.conversationDao
+            .fuzzySearchConversationItem(keyword)
+            .watchWithStream(
+          eventStreams: [DataBaseEventBus.instance.updateConversationIdStream],
+          duration: kSlowThrottleDuration,
+        );
+      }, keys: [keyword, recentConversationIds]).data ??
+      [];
+
+  final items = useMemoized(() {
+    final allItems = [...users, ...conversations];
+    return allItems..sort((a, b) => b.matchScore.compareTo(a.matchScore));
+  }, [users, conversations]);
+
+  return _SearchState(
+    users: users,
+    conversations: conversations,
+    items: items,
+  );
+}
+
+class _NavigationState {
+  const _NavigationState({
+    required this.selectedIndex,
+    required this.next,
+    required this.prev,
+    required this.select,
+  });
+
+  final int selectedIndex;
+  final void Function() next;
+  final void Function() prev;
+  final void Function([int? index]) select;
+}
+
+_NavigationState _useNavigationState({
+  required ScrollController scrollController,
+  required List<SearchItem> items,
+  required BuildContext context,
+}) {
+  final selectedIndex = useState<int>(0);
+
+  useEffect(() {
+    selectedIndex.value = 0;
+  }, [items]);
+
+  final next = useCallback(() {
+    final newValue = min(selectedIndex.value + 1, items.length - 1);
+    if (selectedIndex.value == newValue) return;
+    selectedIndex.value = newValue;
+    _jumpToPosition(scrollController, items.length, selectedIndex.value);
+  }, [items]);
+
+  final prev = useCallback(() {
+    final newValue = max(selectedIndex.value - 1, 0);
+    if (selectedIndex.value == newValue) return;
+    selectedIndex.value = newValue;
+    _jumpToPosition(scrollController, items.length, selectedIndex.value);
+  }, [items]);
+
+  final select = useCallback(([int? index]) {
+    if (index != null) {
+      selectedIndex.value = index;
+    }
+
+    if (items.isEmpty) return;
+
+    final item = items[selectedIndex.value];
+    if (item.type == 'GROUP' || item.type == 'CONTACT') {
+      ConversationStateNotifier.selectConversation(context, item.id);
+    } else {
+      ConversationStateNotifier.selectUser(context, item.id);
+    }
+    Navigator.pop(context);
+  }, [items]);
+
+  return _NavigationState(
+    selectedIndex: selectedIndex.value,
+    next: next,
+    prev: prev,
+    select: select,
+  );
+}
+
 class CommandPaletteAction extends Action<ToggleCommandPaletteIntent> {
   CommandPaletteAction(this.context);
 
@@ -90,98 +220,17 @@ class CommandPalettePage extends HookConsumerWidget {
             .distinct()).data ??
         '';
 
-    final users = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
-            return Stream.value(<User>[]);
-          }
-          return context.database.userDao
-              .fuzzySearchUser(
-                  id: context.accountServer.userId,
-                  username: keyword,
-                  identityNumber: keyword)
-              .watchWithStream(
-            eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
-            duration: kVerySlowThrottleDuration,
-          );
-        }, keys: [keyword]).data ??
-        [];
+    final searchState = _useSearchState(
+      context: context,
+      ref: ref,
+      keyword: keyword,
+    );
 
-    final recentConversationIds = ref.watch(recentConversationIDsProvider);
-
-    final conversations = useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
-            if (recentConversationIds.isEmpty) {
-              return Stream.value(<SearchConversationItem>[]);
-            }
-
-            return context.database.conversationDao
-                .searchConversationItemByIn(recentConversationIds)
-                .watchWithStream(
-              eventStreams: [
-                DataBaseEventBus.instance
-                    .watchUpdateConversationStream(recentConversationIds)
-              ],
-              duration: kSlowThrottleDuration,
-            );
-          }
-          return context.database.conversationDao
-              .fuzzySearchConversation(keyword, 32)
-              .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.updateConversationIdStream
-            ],
-            duration: kSlowThrottleDuration,
-          );
-        }, keys: [keyword, recentConversationIds]).data ??
-        [];
-
-    final selectedIndex = useState<int>(0);
-
-    final ids = useMemoized(
-        () => [
-              ...users.map((e) => e.userId),
-              ...conversations.map((e) => e.conversationId)
-            ],
-        [users, conversations]);
-
-    useEffect(() {
-      selectedIndex.value = 0;
-    }, [ids]);
-
-    final next = useCallback(() {
-      final newValue =
-          min(selectedIndex.value + 1, users.length + conversations.length - 1);
-      if (selectedIndex.value == newValue) return;
-      selectedIndex.value = newValue;
-      _jumpToPosition(scrollController, users.length + conversations.length,
-          selectedIndex.value);
-    }, [ids]);
-
-    final prev = useCallback(() {
-      final newValue = max(selectedIndex.value - 1, 0);
-      if (selectedIndex.value == newValue) return;
-      selectedIndex.value = newValue;
-      _jumpToPosition(scrollController, users.length + conversations.length,
-          selectedIndex.value);
-    }, [ids]);
-
-    final select = useCallback(([int? index]) {
-      if (index != null) {
-        selectedIndex.value = index;
-      }
-
-      ref.read(slideCategoryStateProvider.notifier).switchToChatsIfSettings();
-
-      if (selectedIndex.value < users.length) {
-        ConversationStateNotifier.selectUser(context, ids[selectedIndex.value]);
-      } else if ((selectedIndex.value - users.length) < conversations.length) {
-        ConversationStateNotifier.selectConversation(
-            context, ids[selectedIndex.value]);
-      } else {
-        return;
-      }
-      Navigator.pop(context);
-    }, [ids]);
+    final navigationState = _useNavigationState(
+      scrollController: scrollController,
+      items: searchState.items,
+      context: context,
+    );
 
     return FocusableActionDetector(
       shortcuts: {
@@ -206,13 +255,13 @@ class CommandPalettePage extends HookConsumerWidget {
       },
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => next(),
+          onInvoke: (Intent intent) => navigationState.next(),
         ),
         ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => prev(),
+          onInvoke: (Intent intent) => navigationState.prev(),
         ),
         ListSelectionSelectedIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => select(),
+          onInvoke: (Intent intent) => navigationState.select(),
         ),
       },
       child: Material(
@@ -245,7 +294,8 @@ class CommandPalettePage extends HookConsumerWidget {
                   ],
                 ),
               ),
-              if (users.isEmpty && conversations.isEmpty)
+              if (searchState.users.isEmpty &&
+                  searchState.conversations.isEmpty)
                 Expanded(
                   child: Center(
                     child: Column(
@@ -274,74 +324,44 @@ class CommandPalettePage extends HookConsumerWidget {
                   child: CustomScrollView(
                     controller: scrollController,
                     slivers: [
-                      if (users.isNotEmpty)
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              final user = users[index];
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: SearchItem(
-                                  selected: selectedIndex.value == index,
-                                  margin: EdgeInsets.zero,
-                                  padding: const EdgeInsets.all(14),
-                                  avatar: AvatarWidget(
-                                    name: user.fullName,
-                                    userId: user.userId,
-                                    size: 40,
-                                    avatarUrl: user.avatarUrl,
-                                  ),
-                                  name: user.fullName ?? '?',
-                                  trailing: BadgesWidget(
-                                    verified: user.isVerified,
-                                    isBot: user.appId != null,
-                                    membership: user.membership,
-                                  ),
-                                  keyword: keyword,
-                                  onTap: () => select(index),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            final item = searchState.items[index];
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: SearchItemWidget(
+                                selected:
+                                    navigationState.selectedIndex == index,
+                                margin: EdgeInsets.zero,
+                                padding: const EdgeInsets.all(14),
+                                avatar: item.type == 'GROUP'
+                                    ? ConversationAvatarWidget(
+                                        conversationId: item.id,
+                                        size: 40,
+                                        category: ConversationCategory.group,
+                                      )
+                                    : AvatarWidget(
+                                        name: item.name,
+                                        userId: item.id,
+                                        size: 40,
+                                        avatarUrl: item.avatarUrl,
+                                      ),
+                                name: item.name ?? '',
+                                trailing: BadgesWidget(
+                                  verified: item.isVerified,
+                                  isBot: item.type == 'BOT',
+                                  membership: item.membership,
                                 ),
-                              );
-                            },
-                            childCount: users.length,
-                          ),
+                                keyword: keyword.trim(),
+                                onTap: () => navigationState.select(index),
+                              ),
+                            );
+                          },
+                          childCount: searchState.items.length,
                         ),
-                      if (conversations.isNotEmpty)
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              final conversation = conversations[index];
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: SearchItem(
-                                  selected: selectedIndex.value ==
-                                      (users.length + index),
-                                  margin: EdgeInsets.zero,
-                                  padding: const EdgeInsets.all(14),
-                                  avatar: ConversationAvatarWidget(
-                                    conversationId: conversation.conversationId,
-                                    fullName: conversation.validName,
-                                    groupIconUrl: conversation.groupIconUrl,
-                                    avatarUrl: conversation.avatarUrl,
-                                    category: conversation.category,
-                                    size: 40,
-                                    userId: conversation.ownerId,
-                                  ),
-                                  name: conversation.validName,
-                                  trailing: BadgesWidget(
-                                    verified: conversation.isVerified,
-                                    isBot: conversation.appId != null,
-                                    membership: conversation.membership,
-                                  ),
-                                  keyword: keyword,
-                                  onTap: () => select(users.length + index),
-                                ),
-                              );
-                            },
-                            childCount: conversations.length,
-                          ),
-                        ),
+                      ),
                       const SliverToBoxAdapter(child: SizedBox(height: 22)),
                     ],
                   ),
