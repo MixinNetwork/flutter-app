@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_app/db/util/util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
 import '../../ui/provider/slide_category_provider.dart';
@@ -156,6 +157,15 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
           }
         });
   }
+
+  Selectable<SearchItem> fuzzySearchUserItem(
+          String keyword, String currentUserId) =>
+      db.fuzzySearchUserItem(
+          keyword,
+          (users) =>
+              users.userId.equals(currentUserId).not() &
+              users.identityNumber.equals('0').not(),
+          (users) => maxLimit);
 
   Future updateMuteUntil(String userId, String muteUntil) async {
     await (update(db.users)..where((tbl) => tbl.userId.equals(userId)))

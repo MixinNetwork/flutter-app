@@ -326,6 +326,23 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         ]);
       });
 
+  Selectable<SearchItem> fuzzySearchConversationItem(String keyword) =>
+      db.fuzzySearchConversationItem(
+        keyword,
+        true,
+        (conversation, user) =>
+            conversation.category.equalsValue(ConversationCategory.group),
+        (conversation, user) => maxLimit,
+      );
+
+  Selectable<SearchItem> fuzzySearchConversationItemByIds(List<String> ids) =>
+      db.fuzzySearchConversationItem(
+        '',
+        false,
+        (conversation, user) => conversation.conversationId.isIn(ids),
+        (conversation, user) => maxLimit,
+      );
+
   Selectable<String?> announcement(String conversationId) =>
       (db.selectOnly(db.conversations)
             ..addColumns([db.conversations.announcement])

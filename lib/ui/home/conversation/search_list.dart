@@ -176,7 +176,7 @@ class SearchList extends HookConsumerWidget {
           ),
         if (users.isEmpty && isUrl)
           SliverToBoxAdapter(
-            child: SearchItem(
+            child: SearchItemWidget(
               name: context.l10n.openLink(keyword),
               keyword: keyword,
               maxLines: true,
@@ -185,7 +185,7 @@ class SearchList extends HookConsumerWidget {
           ),
         if (users.isEmpty && isMixinNumber)
           SliverToBoxAdapter(
-            child: SearchItem(
+            child: SearchItemWidget(
               name: context.l10n.searchPlaceholderNumber + keyword,
               keyword: keyword,
               maxLines: true,
@@ -229,7 +229,7 @@ class SearchList extends HookConsumerWidget {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final user = users[index];
-                return SearchItem(
+                return SearchItemWidget(
                   avatar: AvatarWidget(
                     name: user.fullName,
                     userId: user.userId,
@@ -339,7 +339,7 @@ class SearchList extends HookConsumerWidget {
 
                   return ConversationMenuWrapper(
                     searchConversation: conversation,
-                    child: SearchItem(
+                    child: SearchItemWidget(
                       avatar: ConversationAvatarWidget(
                         conversationId: conversation.conversationId,
                         fullName: conversation.validName,
@@ -454,7 +454,7 @@ class _SearchMaoUserWidget extends StatelessWidget {
         child: Text(context.l10n.open),
       );
     }
-    return SearchItem(
+    return SearchItemWidget(
       avatar: AvatarWidget(
         name: maoUser.user.fullName,
         userId: maoUser.user.userId,
@@ -499,8 +499,8 @@ class _SearchMaoUserWidget extends StatelessWidget {
   }
 }
 
-class SearchItem extends StatelessWidget {
-  const SearchItem({
+class SearchItemWidget extends StatelessWidget {
+  const SearchItemWidget({
     required this.name,
     required this.keyword,
     required this.onTap,
@@ -592,6 +592,7 @@ class SearchItem extends StatelessWidget {
                                       style: TextStyle(
                                         color: context.theme.accent,
                                       ),
+                                      caseSensitive: false,
                                     ),
                                   ],
                                 ),
@@ -871,7 +872,7 @@ class SearchMessageItem extends HookConsumerWidget {
             size: ConversationPage.conversationItemAvatarSize,
             userId: message.ownerId,
           );
-    return SearchItem(
+    return SearchItemWidget(
       avatar: avatar,
       name: showSender
           ? message.senderFullName ?? ''

@@ -62,7 +62,7 @@ PODS:
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
     - FlutterMacOS
-    - sqlite3 (~> 3.47.2)
+    - sqlite3 (~> 3.47.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
@@ -211,7 +211,7 @@ SPEC CHECKSUMS:
   Sentry: 38ed8bf38eab5812787274bf591e528074c19e02
   sentry_flutter: a72ca0eb6e78335db7c4ddcddd1b9f6c8ed5b764
   sqlite3: 7559e33dae4c78538df563795af3a86fc887ee71
-  sqlite3_flutter_libs: 5235ce0546528db87927a3ef1baff8b7d5107f0e
+  sqlite3_flutter_libs: f0b59f6bb2a18597d0796558725007e5a7428397
   super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
   video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534

@@ -16637,6 +16637,83 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ));
   }
 
+  Selectable<SearchItem> fuzzySearchUserItem(String query,
+      FuzzySearchUserItem$where where, FuzzySearchUserItem$limit limit) {
+    var $arrayStartIndex = 2;
+    final generatedwhere =
+        $write(where(this.users), startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    final generatedlimit =
+        $write(limit(this.users), startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT CASE WHEN users.app_id IS NOT NULL AND LENGTH(users.app_id) > 0 THEN \'BOT\' ELSE \'USER\' END AS type, users.user_id AS id, users.full_name AS name, users.avatar_url AS avatar_url, users.is_verified AS is_verified, users.app_id AS app_id, users.membership AS membership, CASE WHEN users.full_name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number = ?1 COLLATE NOCASE THEN 0.9 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.5 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.2 + 1.0 / LENGTH(users.identity_number) ELSE 0.0 END AS match_score FROM users WHERE ${generatedwhere.sql} AND(users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE OR users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE)ORDER BY match_score DESC ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(query),
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          users,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) => SearchItem(
+          type: row.read<String>('type'),
+          id: row.read<String>('id'),
+          name: row.readNullable<String>('name'),
+          avatarUrl: row.readNullable<String>('avatar_url'),
+          isVerified: row.readNullable<bool>('is_verified'),
+          appId: row.readNullable<String>('app_id'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
+          matchScore: row.read<double>('match_score'),
+        ));
+  }
+
+  Selectable<SearchItem> fuzzySearchConversationItem(
+      String query,
+      bool enableNameLike,
+      FuzzySearchConversationItem$where where,
+      FuzzySearchConversationItem$limit limit) {
+    var $arrayStartIndex = 3;
+    final generatedwhere = $write(
+        where(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    final generatedlimit = $write(
+        limit(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT CASE WHEN conversation.category = \'GROUP\' THEN \'GROUP\' ELSE \'CONTACT\' END AS type, conversation.conversation_id AS id, CASE WHEN conversation.category = \'GROUP\' THEN conversation.name ELSE owner.full_name END AS name, CASE WHEN conversation.category = \'GROUP\' THEN conversation.icon_url ELSE owner.avatar_url END AS avatar_url, owner.is_verified AS is_verified, owner.app_id AS app_id, CASE WHEN conversation.category = \'CONTACT\' THEN owner.membership ELSE NULL END AS membership, CASE WHEN LENGTH(?1) = 0 THEN 0.0 WHEN ?2 = TRUE THEN 0.0 WHEN name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(name) WHEN name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(name) WHEN name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(name) ELSE 0.0 END AS match_score FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} AND(?2 != TRUE OR name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE)ORDER BY match_score DESC, conversation.pin_time DESC ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(query),
+          Variable<bool>(enableNameLike),
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) => SearchItem(
+          type: row.read<String>('type'),
+          id: row.read<String>('id'),
+          name: row.readNullable<String>('name'),
+          avatarUrl: row.readNullable<String>('avatar_url'),
+          isVerified: row.readNullable<bool>('is_verified'),
+          appId: row.readNullable<String>('app_id'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
+          matchScore: row.read<double>('match_score'),
+        ));
+  }
+
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -24747,3 +24824,60 @@ typedef BasePinMessageItems$limit = Limit Function(
     Conversations conversation,
     MessageMentions messageMention,
     ExpiredMessages em);
+
+class SearchItem {
+  final String type;
+  final String id;
+  final String? name;
+  final String? avatarUrl;
+  final bool? isVerified;
+  final String? appId;
+  final Membership? membership;
+  final double matchScore;
+  SearchItem({
+    required this.type,
+    required this.id,
+    this.name,
+    this.avatarUrl,
+    this.isVerified,
+    this.appId,
+    this.membership,
+    required this.matchScore,
+  });
+  @override
+  int get hashCode => Object.hash(
+      type, id, name, avatarUrl, isVerified, appId, membership, matchScore);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SearchItem &&
+          other.type == this.type &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.avatarUrl == this.avatarUrl &&
+          other.isVerified == this.isVerified &&
+          other.appId == this.appId &&
+          other.membership == this.membership &&
+          other.matchScore == this.matchScore);
+  @override
+  String toString() {
+    return (StringBuffer('SearchItem(')
+          ..write('type: $type, ')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('appId: $appId, ')
+          ..write('membership: $membership, ')
+          ..write('matchScore: $matchScore')
+          ..write(')'))
+        .toString();
+  }
+}
+
+typedef FuzzySearchUserItem$where = Expression<bool> Function(Users users);
+typedef FuzzySearchUserItem$limit = Limit Function(Users users);
+typedef FuzzySearchConversationItem$where = Expression<bool> Function(
+    Conversations conversation, Users owner);
+typedef FuzzySearchConversationItem$limit = Limit Function(
+    Conversations conversation, Users owner);
