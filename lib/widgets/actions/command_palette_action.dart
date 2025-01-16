@@ -25,31 +25,38 @@ import '../search_text_field.dart';
 import 'actions.dart';
 
 const _kItemHeight = 72.0;
+const _kBottomPadding = 22.0;
 
 void _jumpToPosition(ScrollController scrollController, int length, int index) {
   if (!scrollController.hasClients) return;
 
   final viewportDimension = scrollController.position.viewportDimension;
-  final offset = scrollController.offset;
+  const itemExtent = _kItemHeight;
+  final contentHeight = length * itemExtent + _kBottomPadding;
+  final maxScrollExtent = contentHeight - viewportDimension;
 
-  final maxScrollExtent = length * _kItemHeight;
-  final maxValidScrollExtent = maxScrollExtent - viewportDimension;
+  final currentOffset = scrollController.offset;
+  final itemOffset = index * itemExtent;
+  final itemEndOffset = itemOffset + itemExtent;
 
-  final startIndex = offset ~/ _kItemHeight;
-  final endIndex = (offset + viewportDimension - _kItemHeight) ~/ _kItemHeight;
+  final isFullyVisible = itemOffset >= currentOffset &&
+      itemEndOffset <= (currentOffset + viewportDimension);
 
-  if (index <= startIndex) {
-    final pixel = (_kItemHeight * index - viewportDimension + _kItemHeight * 2)
-        .clamp(0, maxValidScrollExtent)
-        .toDouble();
-    scrollController.animateTo(pixel,
-        duration: const Duration(milliseconds: 150), curve: Curves.easeIn);
-  } else if (index >= endIndex) {
-    final pixel = (_kItemHeight * index - _kItemHeight)
-        .clamp(0, maxValidScrollExtent)
-        .toDouble();
-    scrollController.animateTo(pixel,
-        duration: const Duration(milliseconds: 150), curve: Curves.easeIn);
+  if (!isFullyVisible) {
+    final middleOffset = itemOffset - (viewportDimension - itemExtent) / 2;
+
+    final remainingContentHeight = contentHeight - itemEndOffset;
+    final halfViewport = (viewportDimension - itemExtent) / 2;
+
+    final targetOffset = remainingContentHeight < halfViewport
+        ? maxScrollExtent
+        : middleOffset.clamp(0.0, maxScrollExtent);
+
+    scrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeInOut,
+    );
   }
 }
 
@@ -335,7 +342,8 @@ class CommandPalettePage extends HookConsumerWidget {
                                 selected:
                                     navigationState.selectedIndex == index,
                                 margin: EdgeInsets.zero,
-                                padding: const EdgeInsets.all(14),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 14),
                                 avatar: item.type == 'GROUP'
                                     ? ConversationAvatarWidget(
                                         conversationId: item.id,
@@ -362,7 +370,8 @@ class CommandPalettePage extends HookConsumerWidget {
                           childCount: searchState.items.length,
                         ),
                       ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 22)),
+                      const SliverToBoxAdapter(
+                          child: SizedBox(height: _kBottomPadding)),
                     ],
                   ),
                 )

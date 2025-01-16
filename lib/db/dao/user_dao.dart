@@ -163,8 +163,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       db.fuzzySearchUserItem(
           keyword,
           (users) =>
-              users.userId.equals(currentUserId).not() &
-              users.identityNumber.equals('0').not() &
+              users.relationship.equalsValue(sdk.UserRelationship.friend) &
               (users.fullName.likeEscape('%$keyword%') |
                   users.identityNumber.likeEscape('%$keyword%')),
           (users) => maxLimit);
