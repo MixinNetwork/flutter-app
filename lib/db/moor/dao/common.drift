@@ -214,7 +214,7 @@ SELECT
     END AS membership,
     CASE 
         WHEN LENGTH(:query) = 0 THEN 0.0
-        WHEN :enableNameLike = TRUE THEN 0.0 
+        WHEN :enableNameLike != TRUE THEN 0.0 
         WHEN name = :query COLLATE NOCASE THEN 1.0 + 1.0/LENGTH(name)
         WHEN name LIKE :query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.6 + 1.0/LENGTH(name)
         WHEN name LIKE '%' || :query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.3 + 1.0/LENGTH(name)
