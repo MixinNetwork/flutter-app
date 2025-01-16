@@ -166,6 +166,8 @@ _NavigationState _useNavigationState({
       selectedIndex.value = index;
     }
 
+    if (items.isEmpty) return;
+
     final item = items[selectedIndex.value];
     if (item.type == 'GROUP' || item.type == 'CONTACT') {
       ConversationStateNotifier.selectConversation(context, item.id);

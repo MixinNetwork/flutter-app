@@ -8,6 +8,7 @@ targets:
           generate_values_in_copy_with: true
           override_hash_and_equals_in_result_sets: true
           scoped_dart_components: true
+          fatal_warnings: true
           sqlite_modules:
             - fts5
             - moor_ffi
