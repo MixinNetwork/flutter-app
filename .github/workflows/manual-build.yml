@@ -40,11 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.inputs.platforms, 'linux') || github.event.inputs.platforms == ''
     steps:
-      # Work around https://github.com/actions/runner-images/issues/8659
-      - uses: mjp41/workaround8649@c8550b715ccdc17f89c8d5c28d7a48eeff9c94a8
-        with:
-          os: ubuntu-latest
-
       - run: g++ --version
       - run: gcc --version
       - run: sudo apt-get install libstdc++6
