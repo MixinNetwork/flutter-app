@@ -26,6 +26,7 @@ import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
@@ -256,7 +257,8 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             quoteMessageCubit.state?.messageId,
             silent: silent,
             compress: currentTab.value == _TabType.image,
-            imageCaption: isOneImage ? imageCaptionController.text : null,
+            imageCaption:
+                isOneImage ? imageCaptionController.text.trim() : null,
           ));
         }
         quoteMessageCubit.state = null;
@@ -288,9 +290,14 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       }
     }
 
+    final canSendStream = useValueNotifierConvertSteam(imageCaptionController)
+        .map((event) =>
+            !isOneImage || imageCaptionController.value.composing.composed);
+
     return _Actions(
       onSend: () => send(false),
       onFileAdded: addFile,
+      canSendStream: canSendStream,
       child: SizedBox(
           width: 480,
           height: 600,
@@ -1186,41 +1193,47 @@ class _TileNormalFile extends HookConsumerWidget {
       );
 }
 
-class _Actions extends StatelessWidget {
+class _Actions extends HookWidget {
   const _Actions({
     required this.child,
     required this.onSend,
     required this.onFileAdded,
+    required this.canSendStream,
   });
 
   final Widget child;
   final VoidCallback onSend;
+  final Stream<bool> canSendStream;
   final void Function(List<_File>) onFileAdded;
 
   @override
-  Widget build(BuildContext context) => FocusableActionDetector(
-        autofocus: true,
-        shortcuts: {
+  Widget build(BuildContext context) {
+    final canSend = useStream(canSendStream).data ?? true;
+    return FocusableActionDetector(
+      autofocus: true,
+      shortcuts: {
+        if (canSend)
           const SingleActivator(LogicalKeyboardKey.enter):
               const _SendFilesIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyV,
-            meta: kPlatformIsDarwin,
-            control: !kPlatformIsDarwin,
-          ): const PasteTextIntent(SelectionChangedCause.keyboard),
-        },
-        actions: {
-          PasteTextIntent: _PasteContextAction(
-            context,
-            (files) => onFileAdded(
-                files.map((file) => _File.auto(file.xFile)).toList()),
-          ),
-          _SendFilesIntent: CallbackAction<_SendFilesIntent>(onInvoke: (_) {
-            onSend();
-          }),
-        },
-        child: child,
-      );
+        SingleActivator(
+          LogicalKeyboardKey.keyV,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const PasteTextIntent(SelectionChangedCause.keyboard),
+      },
+      actions: {
+        PasteTextIntent: _PasteContextAction(
+          context,
+          (files) =>
+              onFileAdded(files.map((file) => _File.auto(file.xFile)).toList()),
+        ),
+        _SendFilesIntent: CallbackAction<_SendFilesIntent>(onInvoke: (_) {
+          onSend();
+        }),
+      },
+      child: child,
+    );
+  }
 }
 
 class _FileInputOverlay extends HookConsumerWidget {
