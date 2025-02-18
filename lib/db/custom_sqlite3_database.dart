@@ -169,6 +169,20 @@ parameter: $parameters
 
   @override
   bool get autocommit => database.autocommit;
+
+  @override
+  VoidPredicate? get commitFilter => database.commitFilter;
+
+  @override
+  set commitFilter(VoidPredicate? commitFilter) {
+    database.commitFilter = commitFilter;
+  }
+
+  @override
+  Stream<void> get commits => database.commits;
+
+  @override
+  Stream<void> get rollbacks => database.rollbacks;
 }
 
 class _PreparedStatementWrapper implements PreparedStatement {
