@@ -69,7 +69,7 @@ class ContactItem extends StatelessWidget {
   final String? avatarUrl;
   final String? userId;
   final String? fullName;
-  final bool? isVerified;
+  final bool isVerified;
   final String? appId;
   final String identityNumber;
   final Membership? membership;

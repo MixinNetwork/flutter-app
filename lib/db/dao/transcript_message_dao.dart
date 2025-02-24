@@ -153,6 +153,7 @@ extension TranscriptMessageItemExtension on TranscriptMessageItem {
         userId: userId ?? '',
         userFullName: userFullName,
         userIdentityNumber: userIdentityNumber ?? '',
+        isVerified: isVerified,
         appId: appId,
         relationship: relationship,
         avatarUrl: avatarUrl,

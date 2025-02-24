@@ -303,6 +303,8 @@ class MessageItemWidget extends HookConsumerWidget {
                   showAvatar: showAvatar,
                   isCurrentUser: isCurrentUser,
                   pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
+                  isBot: message.isBot,
+                  isVerified: message.isVerified,
                   buildMenus: (request) {
                     request.onShowMenu.addListener(() {
                       showedMenuCubit.emit(true);
@@ -849,6 +851,8 @@ class _MessageBubbleMargin extends HookConsumerWidget {
     required this.pinArrowWidth,
     required this.userAvatarUrl,
     required this.showAvatar,
+    required this.isBot,
+    required this.isVerified,
   });
 
   final bool isCurrentUser;
@@ -859,6 +863,8 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   final double pinArrowWidth;
   final String? userAvatarUrl;
   final bool showAvatar;
+  final bool isBot;
+  final bool isVerified;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -880,8 +886,8 @@ class _MessageBubbleMargin extends HookConsumerWidget {
                   userId: userId!,
                   userIdentityNumber: userIdentityNumber,
                   membership: membership,
-                  isBot: false,
-                  verified: false,
+                  isBot: isBot,
+                  verified: isVerified,
                 ),
               ),
             ],

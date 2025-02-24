@@ -329,13 +329,13 @@ class _SearchParticipantList extends HookConsumerWidget {
     required this.onSelected,
     required this.editingController,
     required this.conversationId,
-    this.isBot,
+    required this.isBot,
   });
 
   final ValueChanged<User> onSelected;
   final TextEditingController editingController;
   final String conversationId;
-  final bool? isBot;
+  final bool isBot;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -347,7 +347,7 @@ class _SearchParticipantList extends HookConsumerWidget {
                 .switchMap((value) {
               final userDao = context.database.userDao;
 
-              if (isBot ?? false) {
+              if (isBot) {
                 return value.isEmpty
                     ? userDao.friends().watchWithStream(
                         eventStreams: [
@@ -434,7 +434,7 @@ class _SearchParticipantList extends HookConsumerWidget {
                         ),
                       ),
                       BadgesWidget(
-                        verified: user.isVerified,
+                        verified: user.isVerified ?? false,
                         isBot: user.isBot,
                         membership: user.membership,
                       )

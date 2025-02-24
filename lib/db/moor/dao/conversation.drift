@@ -22,7 +22,7 @@ SELECT conversation.conversation_id AS conversationId,
     conversation.expire_in as expireIn,
     owner.avatar_url AS avatarUrl,
     owner.full_name AS name,
-    owner.is_verified AS ownerVerified,
+    COALESCE(owner.is_verified, FALSE) AS ownerVerified,
     owner.identity_number AS ownerIdentityNumber,
     owner.mute_until AS ownerMuteUntil,
     owner.app_id AS appId,
@@ -76,7 +76,7 @@ SELECT conversation.conversation_id AS conversationId,
     conversation.expire_in as expireIn,
     owner.avatar_url AS avatarUrl,
     owner.full_name AS name,
-    owner.is_verified AS ownerVerified,
+    COALESCE(owner.is_verified, FALSE) AS ownerVerified,
     owner.identity_number AS ownerIdentityNumber,
     owner.mute_until AS ownerMuteUntil,
     owner.app_id AS appId,
@@ -159,7 +159,7 @@ SELECT conversation.conversation_id AS conversationId,
     owner.identity_number AS ownerIdentityNumber,
     owner.full_name AS fullName,
     owner.avatar_url AS avatarUrl,
-    owner.is_verified AS isVerified,
+    COALESCE(owner.is_verified, FALSE) AS isVerified,
     owner.app_id AS appId,
     CASE
         WHEN conversation.category = 'CONTACT' THEN owner.membership
@@ -206,7 +206,7 @@ SELECT conversation.conversation_id AS conversationId,
     owner.identity_number AS ownerIdentityNumber,
     owner.full_name AS fullName,
     owner.avatar_url AS avatarUrl,
-    owner.is_verified AS isVerified,
+    COALESCE(owner.is_verified, FALSE) AS isVerified,
     owner.app_id AS appId,
     CASE
         WHEN conversation.category = 'CONTACT' THEN owner.membership
@@ -240,7 +240,7 @@ SELECT conversation.conversation_id AS conversationId,
     owner.identity_number AS ownerIdentityNumber,
     owner.full_name AS fullName,
     owner.avatar_url AS avatarUrl,
-    owner.is_verified AS isVerified,
+    COALESCE(owner.is_verified, FALSE) AS isVerified,
     owner.app_id AS appId,
     CASE
         WHEN conversation.category = 'CONTACT' THEN owner.membership
@@ -275,7 +275,7 @@ ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE
 
 conversationStorageUsage AS ConversationStorageUsage:
 SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,
-    u.full_name, u.avatar_url, u.is_verified
+    u.full_name, u.avatar_url, COALESCE(u.is_verified, FALSE) AS isVerified
 FROM conversations c
          INNER JOIN users u ON u.user_id = c.owner_id
 WHERE c.category IS NOT NULL;

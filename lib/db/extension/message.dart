@@ -13,6 +13,7 @@ import '../converter/millis_date_converter.dart';
 import '../dao/message_dao.dart';
 import '../mixin_database.dart';
 import 'message_category.dart';
+import 'user.dart';
 
 extension MessageItemExtension on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';
@@ -22,6 +23,8 @@ extension MessageItemExtension on MessageItem {
   bool get isEncrypted => type.startsWith('ENCRYPTED_');
 
   bool get isSecret => isSignal || isEncrypted;
+
+  bool get isBot => UserExtension.isBotIdentityNumber(userIdentityNumber);
 
   bool _isFinishedAttachment() =>
       (type.isImage || type.isVideo || type.isAudio || type.isData) &&

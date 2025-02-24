@@ -245,7 +245,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
         variables: [
           for (var $ in messageIds) Variable<String>($)
         ],
@@ -265,7 +265,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
               Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
           mediaName: row.readNullable<String>('mediaName'),
           appId: row.readNullable<String>('appId'),
-          verified: row.readNullable<bool>('verified'),
+          verified: row.read<bool>('verified'),
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
           ownerId: row.readNullable<String>('ownerId'),
@@ -312,7 +312,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedlimit.introducedVariables
@@ -335,7 +335,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
               Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
           mediaName: row.readNullable<String>('mediaName'),
           appId: row.readNullable<String>('appId'),
-          verified: row.readNullable<bool>('verified'),
+          verified: row.read<bool>('verified'),
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
           ownerId: row.readNullable<String>('ownerId'),
@@ -891,7 +891,7 @@ class SearchMessageDetailItem {
   final DateTime createdAt;
   final String? mediaName;
   final String? appId;
-  final bool? verified;
+  final bool verified;
   final Membership? membership;
   final String? ownerId;
   final String? groupIconUrl;
@@ -911,7 +911,7 @@ class SearchMessageDetailItem {
     required this.createdAt,
     this.mediaName,
     this.appId,
-    this.verified,
+    required this.verified,
     this.membership,
     this.ownerId,
     this.groupIconUrl,

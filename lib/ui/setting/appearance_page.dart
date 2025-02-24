@@ -250,6 +250,8 @@ MessageItem _buildFakeTextMessage(String content) {
     userId: 'fake',
     userIdentityNumber: '0',
     pinned: false,
+    isVerified: false,
+    sharedUserIsVerified: false,
     content: content,
   );
 }

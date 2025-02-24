@@ -69,7 +69,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT transcript.transcript_id AS transcriptId, transcript.message_id AS messageId, message.conversation_id AS conversationId, transcript.category AS type, transcript.content AS content, transcript.created_at AS createdAt, message.status AS status, transcript.media_status AS mediaStatus, transcript.media_waveform AS mediaWaveform, transcript.media_name AS mediaName, transcript.media_mime_type AS mediaMimeType, transcript.media_size AS mediaSize, transcript.media_width AS mediaWidth, transcript.media_height AS mediaHeight, transcript.thumb_image AS thumbImage, transcript.thumb_url AS thumbUrl, transcript.media_url AS mediaUrl, transcript.media_duration AS mediaDuration, transcript.quote_id AS quoteId, transcript.quote_content AS quoteContent, transcript.shared_user_id AS sharedUserId, sender.user_id AS userId, IFNULL(sender.full_name, transcript.user_full_name) AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType FROM transcript_messages AS transcript INNER JOIN messages AS message ON message.message_id = transcript.transcript_id LEFT JOIN users AS sender ON transcript.user_id = sender.user_id LEFT JOIN users AS sharedUser ON transcript.shared_user_id = sharedUser.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = transcript.sticker_id WHERE ${generatedwhere.sql} ORDER BY transcript.created_at, transcript."rowid" ${generatedlimit.sql}',
+        'SELECT transcript.transcript_id AS transcriptId, transcript.message_id AS messageId, message.conversation_id AS conversationId, transcript.category AS type, transcript.content AS content, transcript.created_at AS createdAt, message.status AS status, transcript.media_status AS mediaStatus, transcript.media_waveform AS mediaWaveform, transcript.media_name AS mediaName, transcript.media_mime_type AS mediaMimeType, transcript.media_size AS mediaSize, transcript.media_width AS mediaWidth, transcript.media_height AS mediaHeight, transcript.thumb_image AS thumbImage, transcript.thumb_url AS thumbUrl, transcript.media_url AS mediaUrl, transcript.media_duration AS mediaDuration, transcript.quote_id AS quoteId, transcript.quote_content AS quoteContent, transcript.shared_user_id AS sharedUserId, sender.user_id AS userId, IFNULL(sender.full_name, transcript.user_full_name) AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType FROM transcript_messages AS transcript INNER JOIN messages AS message ON message.message_id = transcript.transcript_id LEFT JOIN users AS sender ON transcript.user_id = sender.user_id LEFT JOIN users AS sharedUser ON transcript.shared_user_id = sharedUser.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = transcript.sticker_id WHERE ${generatedwhere.sql} ORDER BY transcript.created_at, transcript."rowid" ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedlimit.introducedVariables
@@ -112,11 +112,12 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
           relationship: Users.$converterrelationship
               .fromSql(row.readNullable<String>('relationship')),
           avatarUrl: row.readNullable<String>('avatarUrl'),
+          isVerified: row.read<bool>('isVerified'),
           sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
           sharedUserIdentityNumber:
               row.readNullable<String>('sharedUserIdentityNumber'),
           sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-          sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+          sharedUserIsVerified: row.read<bool>('sharedUserIsVerified'),
           sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
           assetUrl: row.readNullable<String>('assetUrl'),
           assetWidth: row.readNullable<int>('assetWidth'),
@@ -164,10 +165,11 @@ class TranscriptMessageItem {
   final String? appId;
   final UserRelationship? relationship;
   final String? avatarUrl;
+  final bool isVerified;
   final String? sharedUserFullName;
   final String? sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
-  final bool? sharedUserIsVerified;
+  final bool sharedUserIsVerified;
   final String? sharedUserAppId;
   final String? assetUrl;
   final int? assetWidth;
@@ -203,10 +205,11 @@ class TranscriptMessageItem {
     this.appId,
     this.relationship,
     this.avatarUrl,
+    required this.isVerified,
     this.sharedUserFullName,
     this.sharedUserIdentityNumber,
     this.sharedUserAvatarUrl,
-    this.sharedUserIsVerified,
+    required this.sharedUserIsVerified,
     this.sharedUserAppId,
     this.assetUrl,
     this.assetWidth,
@@ -244,6 +247,7 @@ class TranscriptMessageItem {
         appId,
         relationship,
         avatarUrl,
+        isVerified,
         sharedUserFullName,
         sharedUserIdentityNumber,
         sharedUserAvatarUrl,
@@ -287,6 +291,7 @@ class TranscriptMessageItem {
           other.appId == this.appId &&
           other.relationship == this.relationship &&
           other.avatarUrl == this.avatarUrl &&
+          other.isVerified == this.isVerified &&
           other.sharedUserFullName == this.sharedUserFullName &&
           other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
           other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
@@ -328,6 +333,7 @@ class TranscriptMessageItem {
           ..write('appId: $appId, ')
           ..write('relationship: $relationship, ')
           ..write('avatarUrl: $avatarUrl, ')
+          ..write('isVerified: $isVerified, ')
           ..write('sharedUserFullName: $sharedUserFullName, ')
           ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
           ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')

@@ -239,7 +239,7 @@ class SearchList extends HookConsumerWidget {
                   name: user.fullName ?? '?',
                   description: context.l10n.contactMixinId(user.identityNumber),
                   trailing: BadgesWidget(
-                    verified: user.isVerified,
+                    verified: user.isVerified ?? false,
                     isBot: user.appId != null,
                     membership: user.membership,
                   ),
@@ -464,7 +464,7 @@ class _SearchMaoUserWidget extends StatelessWidget {
       name: maoUser.user.fullName ?? '?',
       description: maoUser.mao,
       trailing: BadgesWidget(
-        verified: maoUser.user.isVerified,
+        verified: maoUser.user.isVerified ?? false,
         isBot: maoUser.user.appId != null,
         membership: maoUser.user.membership,
       ),
