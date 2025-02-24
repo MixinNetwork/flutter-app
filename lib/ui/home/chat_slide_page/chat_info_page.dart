@@ -426,7 +426,7 @@ class ChatInfoPage extends HookConsumerWidget {
                     ),
                   if (!isGroupConversation && !conversationState.isStranger!)
                     Builder(builder: (context) {
-                      final title = conversationState.isBot!
+                      final title = conversationState.isBot
                           ? context.l10n.removeBot
                           : context.l10n.removeContact;
                       return CellItem(
@@ -652,7 +652,7 @@ class _AddToContactsButton extends StatelessWidget {
                     ));
                   },
                   child: Text(
-                    conversation.isBot!
+                    conversation.isBot
                         ? context.l10n.addBotWithPlus
                         : context.l10n.addContactWithPlus,
                     style: TextStyle(fontSize: 12, color: context.theme.accent),

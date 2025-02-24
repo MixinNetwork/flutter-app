@@ -1,6 +1,7 @@
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../dao/conversation_dao.dart';
+import 'user.dart';
 
 extension SearchConversationItemExtension on SearchConversationItem {
   bool get isGroupConversation => category == ConversationCategory.group;
@@ -21,7 +22,8 @@ extension ConversationItemExtension on ConversationItem {
   bool get isGroupConversation => category == ConversationCategory.group;
 
   bool get isBotConversation =>
-      category == ConversationCategory.contact && appId != null;
+      category == ConversationCategory.contact &&
+      UserExtension.isBotIdentityNumber(ownerIdentityNumber);
 
   bool get isStrangerConversation =>
       category == ConversationCategory.contact &&

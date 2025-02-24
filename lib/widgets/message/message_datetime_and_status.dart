@@ -19,7 +19,7 @@ bool _isRepresentative(
   String userId,
 ) =>
     conversation != null &&
-    (conversation.isBot ?? false) &&
+    (conversation.isBot) &&
     (conversation.user?.userId != message.userId) &&
     (message.userId != userId);
 

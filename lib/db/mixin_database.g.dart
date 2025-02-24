@@ -16403,7 +16403,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -16461,11 +16461,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           avatarUrl: row.readNullable<String>('avatarUrl'),
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
+          isVerified: row.read<bool>('isVerified'),
           sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
           sharedUserIdentityNumber:
               row.readNullable<String>('sharedUserIdentityNumber'),
           sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-          sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+          sharedUserIsVerified: row.read<bool>('sharedUserIsVerified'),
           sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
           sharedUserMembership: Users.$convertermembership
               .fromSql(row.readNullable<String>('sharedUserMembership')),
@@ -16543,7 +16544,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           ...generatedorder.introducedVariables,
@@ -16600,11 +16601,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           avatarUrl: row.readNullable<String>('avatarUrl'),
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
+          isVerified: row.read<bool>('isVerified'),
           sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
           sharedUserIdentityNumber:
               row.readNullable<String>('sharedUserIdentityNumber'),
           sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-          sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+          sharedUserIsVerified: row.read<bool>('sharedUserIsVerified'),
           sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
           sharedUserMembership: Users.$convertermembership
               .fromSql(row.readNullable<String>('sharedUserMembership')),
@@ -16647,7 +16649,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $write(limit(this.users), startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT CASE WHEN users.app_id IS NOT NULL AND LENGTH(users.app_id) > 0 THEN \'BOT\' ELSE \'USER\' END AS type, users.user_id AS id, users.full_name AS name, users.avatar_url AS avatar_url, users.is_verified AS is_verified, users.app_id AS app_id, users.membership AS membership, CASE WHEN users.full_name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number = ?1 COLLATE NOCASE THEN 0.9 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.5 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.2 + 1.0 / LENGTH(users.identity_number) ELSE 0.0 END AS match_score FROM users WHERE ${generatedwhere.sql} ORDER BY match_score DESC ${generatedlimit.sql}',
+        'SELECT CASE WHEN users.app_id IS NOT NULL AND LENGTH(users.app_id) > 0 THEN \'BOT\' ELSE \'USER\' END AS type, users.user_id AS id, users.full_name AS name, users.avatar_url AS avatar_url, COALESCE(users.is_verified, FALSE) AS is_verified, users.app_id AS app_id, users.membership AS membership, CASE WHEN users.full_name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number = ?1 COLLATE NOCASE THEN 0.9 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.5 + 1.0 / LENGTH(users.identity_number) WHEN users.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(users.full_name) WHEN users.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.2 + 1.0 / LENGTH(users.identity_number) ELSE 0.0 END AS match_score FROM users WHERE ${generatedwhere.sql} ORDER BY match_score DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           ...generatedwhere.introducedVariables,
@@ -16662,7 +16664,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           id: row.read<String>('id'),
           name: row.readNullable<String>('name'),
           avatarUrl: row.readNullable<String>('avatar_url'),
-          isVerified: row.readNullable<bool>('is_verified'),
+          isVerified: row.read<bool>('is_verified'),
           appId: row.readNullable<String>('app_id'),
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
@@ -16688,7 +16690,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT CASE WHEN conversation.category = \'GROUP\' THEN \'GROUP\' ELSE \'CONTACT\' END AS type, conversation.conversation_id AS id, CASE WHEN conversation.category = \'GROUP\' THEN conversation.name ELSE owner.full_name END AS name, CASE WHEN conversation.category = \'GROUP\' THEN conversation.icon_url ELSE owner.avatar_url END AS avatar_url, owner.is_verified AS is_verified, owner.app_id AS app_id, CASE WHEN conversation.category = \'CONTACT\' THEN owner.membership ELSE NULL END AS membership, CASE WHEN LENGTH(?1) = 0 THEN 0.0 WHEN name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(name) WHEN name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(name) WHEN name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(name) ELSE 0.0 END AS match_score FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} ORDER BY match_score DESC, conversation.pin_time DESC ${generatedlimit.sql}',
+        'SELECT CASE WHEN conversation.category = \'GROUP\' THEN \'GROUP\' ELSE \'CONTACT\' END AS type, conversation.conversation_id AS id, CASE WHEN conversation.category = \'GROUP\' THEN conversation.name ELSE owner.full_name END AS name, CASE WHEN conversation.category = \'GROUP\' THEN conversation.icon_url ELSE owner.avatar_url END AS avatar_url, COALESCE(owner.is_verified, FALSE) AS is_verified, owner.app_id AS app_id, CASE WHEN conversation.category = \'CONTACT\' THEN owner.membership ELSE NULL END AS membership, CASE WHEN LENGTH(?1) = 0 THEN 0.0 WHEN name = ?1 COLLATE NOCASE THEN 1.0 + 1.0 / LENGTH(name) WHEN name LIKE ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.6 + 1.0 / LENGTH(name) WHEN name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' COLLATE NOCASE THEN 0.3 + 1.0 / LENGTH(name) ELSE 0.0 END AS match_score FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} ORDER BY match_score DESC, conversation.pin_time DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           ...generatedwhere.introducedVariables,
@@ -16704,7 +16706,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           id: row.read<String>('id'),
           name: row.readNullable<String>('name'),
           avatarUrl: row.readNullable<String>('avatar_url'),
-          isVerified: row.readNullable<bool>('is_verified'),
+          isVerified: row.read<bool>('is_verified'),
           appId: row.readNullable<String>('app_id'),
           membership: Users.$convertermembership
               .fromSql(row.readNullable<String>('membership')),
@@ -24450,10 +24452,11 @@ class MessageItem {
   final UserRelationship? relationship;
   final String? avatarUrl;
   final Membership? membership;
+  final bool isVerified;
   final String? sharedUserFullName;
   final String? sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
-  final bool? sharedUserIsVerified;
+  final bool sharedUserIsVerified;
   final String? sharedUserAppId;
   final Membership? sharedUserMembership;
   final String? conversationOwnerId;
@@ -24512,10 +24515,11 @@ class MessageItem {
     this.relationship,
     this.avatarUrl,
     this.membership,
+    required this.isVerified,
     this.sharedUserFullName,
     this.sharedUserIdentityNumber,
     this.sharedUserAvatarUrl,
-    this.sharedUserIsVerified,
+    required this.sharedUserIsVerified,
     this.sharedUserAppId,
     this.sharedUserMembership,
     this.conversationOwnerId,
@@ -24576,6 +24580,7 @@ class MessageItem {
         relationship,
         avatarUrl,
         membership,
+        isVerified,
         sharedUserFullName,
         sharedUserIdentityNumber,
         sharedUserAvatarUrl,
@@ -24642,6 +24647,7 @@ class MessageItem {
           other.relationship == this.relationship &&
           other.avatarUrl == this.avatarUrl &&
           other.membership == this.membership &&
+          other.isVerified == this.isVerified &&
           other.sharedUserFullName == this.sharedUserFullName &&
           other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
           other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
@@ -24706,6 +24712,7 @@ class MessageItem {
           ..write('relationship: $relationship, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('membership: $membership, ')
+          ..write('isVerified: $isVerified, ')
           ..write('sharedUserFullName: $sharedUserFullName, ')
           ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
           ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
@@ -24828,7 +24835,7 @@ class SearchItem {
   final String id;
   final String? name;
   final String? avatarUrl;
-  final bool? isVerified;
+  final bool isVerified;
   final String? appId;
   final Membership? membership;
   final double matchScore;
@@ -24837,7 +24844,7 @@ class SearchItem {
     required this.id,
     this.name,
     this.avatarUrl,
-    this.isVerified,
+    required this.isVerified,
     this.appId,
     this.membership,
     required this.matchScore,

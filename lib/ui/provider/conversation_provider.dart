@@ -55,7 +55,7 @@ class ConversationState extends Equatable {
 
   bool get isLoaded => conversation != null || user != null;
 
-  bool? get isBot => conversation?.isBotConversation ?? user?.isBot;
+  bool get isBot => conversation?.isBotConversation ?? user?.isBot ?? false;
 
   bool get isVerified =>
       conversation?.ownerVerified ?? user?.isVerified ?? false;

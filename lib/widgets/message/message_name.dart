@@ -25,7 +25,7 @@ class MessageName extends ConsumerWidget {
   final String userName;
   final String userId;
   final String userIdentityNumber;
-  final bool? verified;
+  final bool verified;
   final bool isBot;
   final Membership? membership;
 

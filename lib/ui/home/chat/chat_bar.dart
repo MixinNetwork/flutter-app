@@ -59,7 +59,7 @@ class ChatBar extends HookConsumerWidget {
                     if (conversation == null) return;
 
                     if ((conversation.isGroup ?? true) ||
-                        (conversation.isBot ?? true)) {
+                        (conversation.isBot)) {
                       return;
                     }
                     showShareLogDialog(context,
@@ -265,7 +265,7 @@ class ConversationName extends StatelessWidget {
           ),
           BadgesWidget(
             verified: conversationState.isVerified,
-            isBot: conversationState.isBot ?? false,
+            isBot: conversationState.isBot,
             membership: conversationState.membership,
           ),
         ],

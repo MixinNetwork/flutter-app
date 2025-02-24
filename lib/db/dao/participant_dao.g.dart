@@ -59,7 +59,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
   Selectable<ParticipantUser> groupParticipantsByConversationId(
       String conversationId) {
     return customSelect(
-        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam, u.membership AS membership FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
+        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, COALESCE(u.is_verified, FALSE) AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam, u.membership AS membership FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
         variables: [
           Variable<String>(conversationId)
         ],
@@ -80,7 +80,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
           fullName: row.readNullable<String>('fullName'),
           avatarUrl: row.readNullable<String>('avatarUrl'),
           phone: row.readNullable<String>('phone'),
-          isVerified: row.readNullable<bool>('isVerified'),
+          isVerified: row.read<bool>('isVerified'),
           userCreatedAt: NullAwareTypeConverter.wrapFromSql(
               Users.$convertercreatedAt,
               row.readNullable<int>('userCreatedAt')),
@@ -151,7 +151,7 @@ class ParticipantUser {
   final String? fullName;
   final String? avatarUrl;
   final String? phone;
-  final bool? isVerified;
+  final bool isVerified;
   final DateTime? userCreatedAt;
   final DateTime? muteUntil;
   final int? hasPin;
@@ -169,7 +169,7 @@ class ParticipantUser {
     this.fullName,
     this.avatarUrl,
     this.phone,
-    this.isVerified,
+    required this.isVerified,
     this.userCreatedAt,
     this.muteUntil,
     this.hasPin,
