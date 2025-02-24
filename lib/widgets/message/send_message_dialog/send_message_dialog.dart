@@ -448,7 +448,7 @@ class _Contact extends HookConsumerWidget {
         avatarUrl: user.avatarUrl,
         userId: user.userId,
         fullName: user.fullName,
-        isVerified: user.isVerified,
+        isVerified: user.isVerified ?? false,
         appId: user.appId,
         identityNumber: user.identityNumber,
         membership: user.membership,

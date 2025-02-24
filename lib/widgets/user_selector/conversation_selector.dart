@@ -418,7 +418,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
                               title: item.fullName ?? '',
-                              verified: item.isVerified,
+                              verified: item.isVerified ?? false,
                               isBot: item.appId != null,
                               membership: item.membership,
                               showSelector: !singleSelect,
@@ -443,7 +443,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
                               title: item.fullName!,
-                              verified: item.isVerified,
+                              verified: item.isVerified ?? false,
                               isBot: item.appId != null,
                               membership: item.membership,
                               showSelector: !singleSelect,
@@ -653,7 +653,7 @@ class _BaseItem extends StatelessWidget {
   final bool showSelector;
   final bool selected;
 
-  final bool? verified;
+  final bool verified;
   final bool isBot;
   final sdk.Membership? membership;
 

@@ -52,7 +52,7 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
     required this.textEditingValueStream,
     required String conversationId,
     required bool? isGroup,
-    required bool? isBot,
+    required bool isBot,
   }) : super(const MentionState()) {
     final mentionTextStream = textEditingValueStream.map((event) {
       final text = event.text.substring(0, max(event.selection.baseOffset, 0));
@@ -71,7 +71,7 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
         return Stream.value(MentionState(text: keyword));
       }
       if (keyword.isEmpty) {
-        if (isBot ?? false) {
+        if (isBot) {
           return userDao.friends().watchWithStream(
             eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
             duration: kVerySlowThrottleDuration,
@@ -94,7 +94,7 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
         }
       }
 
-      if (isBot ?? false) {
+      if (isBot) {
         return userDao
             .fuzzySearchBotGroupUser(
           currentUserId: multiAuthChangeNotifier.current?.userId ?? '',
@@ -214,8 +214,8 @@ final mentionProvider = StateNotifierProvider.autoDispose
     final authStateNotifier =
         ref.watch(multiAuthStateNotifierProvider.notifier);
     final (conversationId, isGroup, isBot) = ref.watch(
-        conversationProvider.select(
-            (value) => (value?.conversationId, value?.isGroup, value?.isBot)));
+        conversationProvider.select((value) =>
+            (value?.conversationId, value?.isGroup, value?.isBot ?? false)));
 
     if (conversationId == null) {
       return MentionStateNotifier.idle(

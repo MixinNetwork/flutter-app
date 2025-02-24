@@ -230,12 +230,12 @@ class _UserProfile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (fullName, identityNumber, membership, isVerified) = ref.watch(
-        authAccountProvider.select((value) => (
+    final (fullName, identityNumber, membership, isVerified) =
+        ref.watch(authAccountProvider.select((value) => (
               value?.fullName,
               value?.identityNumber,
               value?.membership,
-              value?.isVerified
+              value?.isVerified ?? false,
             )));
 
     return Column(

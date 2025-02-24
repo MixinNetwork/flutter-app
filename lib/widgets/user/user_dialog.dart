@@ -196,7 +196,7 @@ class _UserProfileBody extends StatelessWidget {
                   ),
                 ),
                 BadgesWidget(
-                  verified: user.isVerified,
+                  verified: user.isVerified ?? false,
                   isBot: !anonymous && user.appId != null,
                   membership: user.membership,
                 )

@@ -12,7 +12,7 @@ class BadgesWidget extends StatelessWidget {
     required this.membership,
     super.key,
   });
-  final bool? verified;
+  final bool verified;
   final bool isBot;
   final Membership? membership;
 
