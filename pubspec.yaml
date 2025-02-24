@@ -22,7 +22,7 @@ dependencies:
   ansicolor: ^2.0.3
   archive: ^3.4.10
   async: ^2.8.1
-  audio_session: ^0.1.18
+  audio_session: ^0.1.25
   auto_size_text: ^3.0.0
   bloc: ^8.1.4
   bloc_concurrency: ^0.2.5
