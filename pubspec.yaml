@@ -117,7 +117,7 @@ dependencies:
   simple_animations: ^5.0.2
   sliver_tools: ^0.2.12
   sqlite3_flutter_libs: ^0.5.30
-  stream_transform: ^2.1.0
+  stream_transform: ^2.1.1
   string_tokenizer:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
