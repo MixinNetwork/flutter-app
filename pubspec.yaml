@@ -37,7 +37,7 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: af28658a415cf89383e3c9cf9f8230c79be5566c
       path: packages/common_crypto
-  dbus: ^0.7.10
+  dbus: ^0.7.11
   decimal: ^3.0.2
   desktop_drop:
     git:
@@ -116,8 +116,8 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   simple_animations: ^5.0.2
   sliver_tools: ^0.2.12
-  sqlite3_flutter_libs: ^0.5.30
-  stream_transform: ^2.1.0
+  sqlite3_flutter_libs: ^0.5.31
+  stream_transform: ^2.1.1
   string_tokenizer:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
