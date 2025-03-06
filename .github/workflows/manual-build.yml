@@ -155,7 +155,6 @@ jobs:
         uses: snapcore/action-build@v1
         id: build-snap
         with:
-          snapcraft-args: '--enable-experimental-extensions'
           path: dist/snap
 
       - name: copy snap

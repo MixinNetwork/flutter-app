@@ -5,7 +5,7 @@ description: Mixin Messenger
 license: GPL-3.0
 
 confinement: strict
-base: core22
+base: core24
 grade: stable
 
 slots:
