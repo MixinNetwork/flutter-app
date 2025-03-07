@@ -544,7 +544,7 @@ class ChatInfoPage extends HookConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
-                  context.l10n.created(DateFormat.yMMMd().format(createdAt)),
+                  context.l10n.createdAt(DateFormat.yMMMd().format(createdAt)),
                   style: TextStyle(
                     color: context.theme.secondaryText,
                     fontSize: 12,

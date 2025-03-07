@@ -133,7 +133,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m50(count) => "${Intl.plural(count, one: '周', other: '周')}";
 
-  static String m51(arg0) => "当前版本（${arg0}）不再可用!\n请点击下面的“更新”按钮从应用商店更新到最新版本。";
+  static String m51(arg0) => "当前版本（${arg0}）不再可用!\n请点击下面的“更新”按钮以更新到最新版本。";
 
   static String m52(arg0) => "价值 ${arg0}";
 
@@ -256,7 +256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createCircle": MessageLookupByLibrary.simpleMessage("新建圈子"),
         "createConversation": MessageLookupByLibrary.simpleMessage("新建会话"),
         "createGroup": MessageLookupByLibrary.simpleMessage("新建群组"),
-        "created": m12,
+        "createdAt": m12,
         "createdThisGroup": m13,
         "customTime": MessageLookupByLibrary.simpleMessage("自定义时间"),
         "dark": MessageLookupByLibrary.simpleMessage("深色"),

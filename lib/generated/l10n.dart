@@ -1115,10 +1115,10 @@ class Localization {
   }
 
   /// `Created {arg0}`
-  String created(Object arg0) {
+  String createdAt(Object arg0) {
     return Intl.message(
       'Created $arg0',
-      name: 'created',
+      name: 'createdAt',
       desc: '',
       args: [arg0],
     );
@@ -4708,10 +4708,10 @@ class Localization {
     );
   }
 
-  /// `The current version ({arg0}) is no longer available!\nPlease click "Update" below to update to the latest version from the Google Play.`
+  /// `The current version ({arg0}) is no longer available!\nPlease click "Update" below to update to the latest version.`
   String updateMixinDescription(Object arg0) {
     return Intl.message(
-      'The current version ($arg0) is no longer available!\nPlease click "Update" below to update to the latest version from the Google Play.',
+      'The current version ($arg0) is no longer available!\nPlease click "Update" below to update to the latest version.',
       name: 'updateMixinDescription',
       desc: '',
       args: [arg0],
