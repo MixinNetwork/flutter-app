@@ -58,7 +58,8 @@ Client createClient({
             serverTimeStamp =
                 DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
           }
-          w('request error ${e.requestOptions.uri}: '
+          final requestId = e.response?.headers.value('x-request-id') ?? '';
+          w('request error ${e.requestOptions.uri}, x-request-id = $requestId\n'
               'requestTimeStamp = ${requestTimeStamp?.outputFormat()} '
               'serverTimeStamp = ${serverTimeStamp?.outputFormat()} '
               'now = ${DateTime.now().outputFormat()}');
