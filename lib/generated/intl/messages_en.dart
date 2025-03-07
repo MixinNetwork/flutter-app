@@ -146,7 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'week', other: 'weeks')}";
 
   static String m51(arg0) =>
-      "The current version (${arg0}) is no longer available!\nPlease click \"Update\" below to update to the latest version from the Google Play.";
+      "The current version (${arg0}) is no longer available!\nPlease click \"Update\" below to update to the latest version.";
 
   static String m52(arg0) => "value now ${arg0}";
 
@@ -289,7 +289,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createConversation":
             MessageLookupByLibrary.simpleMessage("New Conversation"),
         "createGroup": MessageLookupByLibrary.simpleMessage("New Group"),
-        "created": m12,
+        "createdAt": m12,
         "createdThisGroup": m13,
         "customTime": MessageLookupByLibrary.simpleMessage("Custom Time"),
         "dark": MessageLookupByLibrary.simpleMessage("Dark"),
