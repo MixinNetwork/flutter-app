@@ -31,19 +31,13 @@ Future<void> setSystemUiWithAppBrightness(Brightness brightness) async {
       if (isWindows10OrGreater()) {
         final isDarkMode = malloc<BOOL>()
           ..value = brightness == Brightness.dark ? 1 : 0;
-        DwmSetWindowAttribute(
-            windowHandle,
-            DWMWINDOWATTRIBUTE.DWMWA_USE_IMMERSIVE_DARK_MODE,
-            isDarkMode,
-            sizeOf<BOOL>());
+        DwmSetWindowAttribute(windowHandle, DWMWA_USE_IMMERSIVE_DARK_MODE,
+            isDarkMode, sizeOf<BOOL>());
         malloc.free(isDarkMode);
 
         final captionColor = malloc<COLORREF>()
           ..value = brightness == Brightness.dark ? 0x2C3136 : 0xFFFFFF;
-        DwmSetWindowAttribute(
-            windowHandle,
-            DWMWINDOWATTRIBUTE.DWMWA_CAPTION_COLOR,
-            captionColor,
+        DwmSetWindowAttribute(windowHandle, DWMWA_CAPTION_COLOR, captionColor,
             sizeOf<COLORREF>());
         malloc.free(captionColor);
       }
