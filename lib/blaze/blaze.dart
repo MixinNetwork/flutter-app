@@ -284,8 +284,8 @@ class Blaze {
   }
 
   Future<void> _sendGZip(BlazeMessage msg) async {
-    channel?.sink.add(
-        GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
+    channel?.sink.add(const GZipEncoder()
+        .encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
 
   void _disconnect([bool resetConnectedState = true]) {
@@ -311,7 +311,7 @@ class Blaze {
     transactions[blazeMessage.id] = transaction;
     d('sendMessage transactions size: ${transactions.length}');
     return transaction.run(
-        () => channel?.sink.add(GZipEncoder()
+        () => channel?.sink.add(const GZipEncoder()
             .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
         () => null);
   }
@@ -367,7 +367,8 @@ BlazeMessage parseBlazeMessage(List<int> list) =>
     _parseBlazeMessageInternal(list);
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
-  final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
+  final content =
+      String.fromCharCodes(const GZipDecoder().decodeBytes(message));
   return BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
 }
 
