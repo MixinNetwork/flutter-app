@@ -186,7 +186,7 @@ dev_dependencies:
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
   flutter_lints: ^5.0.0
   very_good_analysis: ^6.0.0
-  envied_generator: ^0.5.2
+  envied_generator: ^1.0.0
 
 dependency_overrides:
   very_good_analysis: ^6.0.0
