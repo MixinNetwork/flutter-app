@@ -55,19 +55,20 @@ extension SelectedableThrottle<T> on Selectable<T> {
 
 @immutable
 class LikeEscapeOperator extends Expression<bool> {
-  LikeEscapeOperator(
+  const LikeEscapeOperator(
     this.target,
     this.regex,
     this.escape, {
     this.operator = 'LIKE',
   });
+
   final Expression<String> target;
   final Expression<String> regex;
   final Expression<String> escape;
   final String operator;
 
   @override
-  final Precedence precedence = Precedence.comparisonEq;
+  Precedence get precedence => Precedence.comparisonEq;
 
   @override
   void writeInto(GenerationContext context) {

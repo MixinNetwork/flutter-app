@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
@@ -441,7 +440,7 @@ class TransferProtocolSink implements EventSink<Uint8List> {
           // check hMAC
           final hMac = Uint8List.sublistView(data, offset, offset + 32);
           final calculatedHMac = builder.hMac;
-          if (!Uint8ListEquality.equals(hMac, calculatedHMac)) {
+          if (!hMac.equals(calculatedHMac)) {
             e('hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(calculatedHMac)}');
             _sink.addError('hMac check error', StackTrace.current);
             return;
@@ -463,5 +462,18 @@ class TransferProtocolSink implements EventSink<Uint8List> {
   @override
   void close() {
     _sink.close();
+  }
+}
+
+extension on Uint8List {
+  bool equals(Uint8List other) {
+    if (length != other.length) {
+      return false;
+    }
+    var v = 0;
+    for (var i = 0; i < length; i++) {
+      v |= this[i] ^ other[i];
+    }
+    return v == 0;
   }
 }
