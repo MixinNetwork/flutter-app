@@ -53,7 +53,7 @@ dependencies:
   rhttp: ^0.9.6
   flutter_rust_bridge: ^2.6.0
   drift: ^2.25.1
-  ecache: ^2.0.3
+  ecache: ^2.0.4
   emojis: ^0.9.9
   equatable: ^2.0.7
   file_picker: ^8.1.4
