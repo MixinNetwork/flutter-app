@@ -52,7 +52,7 @@ dependencies:
   dio_compatibility_layer: ^0.1.0
   rhttp: ^0.9.6
   flutter_rust_bridge: ^2.6.0
-  drift: ^2.25.1
+  drift: ^2.26.0
   ecache: ^2.0.4
   emojis: ^0.9.9
   equatable: ^2.0.7
@@ -116,7 +116,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   simple_animations: ^5.0.2
   sliver_tools: ^0.2.12
-  sqlite3_flutter_libs: ^0.5.31
+  sqlite3_flutter_libs: ^0.5.32
   stream_transform: ^2.1.1
   string_tokenizer:
     git:
@@ -126,7 +126,7 @@ dependencies:
   super_clipboard: ^0.8.24
   super_context_menu: ^0.8.24
   super_native_extensions: ^0.8.24
-  synchronized: ^3.0.1
+  synchronized: ^3.3.1
   system_tray:
     path: third_party/system_tray
   ui_device:
