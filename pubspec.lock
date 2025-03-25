@@ -511,18 +511,18 @@ packages:
     dependency: "direct main"
     description:
       name: envied
-      sha256: bbff9c76120e4dc5e2e36a46690cf0a26feb65e7765633f4e8d916bcd173a450
+      sha256: a4e2b1d0caa479b5d61332ae516518c175a6d09328a35a0bc0a53894cc5d7e4d
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.4+1"
+    version: "1.1.1"
   envied_generator:
     dependency: "direct dev"
     description:
       name: envied_generator
-      sha256: "517b70de08d13dcd40e97b4e5347e216a0b1c75c99e704f3c85c0474a392d14a"
+      sha256: "894f6c5eb624c60a1ce6f642b6fd7ec68bc3440aa6f1881837aa9acbbeade0c8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.4+1"
+    version: "1.1.1"
   equatable:
     dependency: "direct main"
     description:
