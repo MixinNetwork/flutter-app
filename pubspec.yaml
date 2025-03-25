@@ -164,7 +164,7 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 08c1ce40eb6abfad6049fb6aad8bd30312ec5319
       path: packages/data_detector
-  envied: ^0.5.2
+  envied: ^1.1.1
   sentry_flutter: ^8.12.0
 
 dev_dependencies:
@@ -186,7 +186,7 @@ dev_dependencies:
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
   flutter_lints: ^5.0.0
   very_good_analysis: ^6.0.0
-  envied_generator: ^1.0.0
+  envied_generator: ^1.1.0
 
 dependency_overrides:
   very_good_analysis: ^6.0.0
