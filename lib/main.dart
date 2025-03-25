@@ -108,7 +108,7 @@ Future<void> _runApp(List<String> args) async {
   Hive.init(mixinDocumentsDirectory.path);
 
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: mixinDocumentsDirectory,
+    storageDirectory: HydratedStorageDirectory(mixinDocumentsDirectory.path),
   );
   if (kDebugMode) {
     Bloc.observer = CustomBlocObserver();
