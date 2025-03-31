@@ -956,10 +956,10 @@ packages:
     dependency: "direct main"
     description:
       name: image
-      sha256: "13d3349ace88f12f4a0d175eb5c12dcdd39d35c4c109a8a13dfeb6d0bd9e31c3"
+      sha256: "4e973fcf4caae1a4be2fa0a13157aa38a8f9cb049db6529aa00b4d71abc4d928"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.3"
+    version: "4.5.4"
   image_picker:
     dependency: "direct main"
     description:
@@ -1469,18 +1469,18 @@ packages:
     dependency: "direct main"
     description:
       name: package_info_plus
-      sha256: "67eae327b1b0faf761964a1d2e5d323c797f3799db0e85aa232db8d9e922bc35"
+      sha256: "7976bfe4c583170d6cdc7077e3237560b364149fcd268b5f53d95a991963b191"
       url: "https://pub.dev"
     source: hosted
-    version: "8.2.1"
+    version: "8.3.0"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
       name: package_info_plus_platform_interface
-      sha256: "205ec83335c2ab9107bbba3f8997f9356d72ca3c715d2f038fc773d0366b4c76"
+      sha256: "6c935fb612dff8e3cc9632c2b301720c77450a126114126ffaafe28d2e87956c"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.2.0"
   path:
     dependency: "direct main"
     description:
@@ -2195,10 +2195,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_compress
-      sha256: "5b42d89f3970c956bad7a86c29682b0892c11a4ddf95ae6e29897ee28788e377"
+      sha256: "31bc5cdb9a02ba666456e5e1907393c28e6e0e972980d7d8d619a7beda0d4f20"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.3"
+    version: "3.1.4"
   video_player:
     dependency: "direct main"
     description:
@@ -2283,10 +2283,10 @@ packages:
     dependency: "direct main"
     description:
       name: web_socket_channel
-      sha256: "9f187088ed104edd8662ca07af4b124465893caf063ba29758f97af57e61da8f"
+      sha256: "0b8e2457400d8a859b7b2030786835a28a8e80836ef64402abef392ff4f1d0e5"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.1"
+    version: "3.0.2"
   webcrypto:
     dependency: "direct main"
     description:
