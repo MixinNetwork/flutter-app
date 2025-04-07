@@ -20,7 +20,7 @@ environment:
 dependencies:
   android_id: ^0.4.0
   ansicolor: ^2.0.3
-  archive: ^4.0.4
+  archive: ^4.0.5
   async: ^2.8.1
   audio_session: ^0.1.25
   auto_size_text: ^3.0.0
@@ -56,7 +56,7 @@ dependencies:
   ecache: ^2.0.4
   emojis: ^0.9.9
   equatable: ^2.0.7
-  file_picker: ^9.2.3
+  file_picker: ^10.0.0
   file_selector: ^1.0.3
   file_selector_linux: ^0.9.0
   file_selector_macos: ^0.9.3
@@ -68,7 +68,7 @@ dependencies:
   flutter_app_icon_badge: ^2.0.0
   flutter_bloc: ^9.1.0
   flutter_hooks: ^0.20.5
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^19.0.0
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
@@ -110,7 +110,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   pretty_qr_code: ^3.3.0
   protocol_handler: ^0.2.0
-  provider: ^6.1.2
+  provider: ^6.1.4
   recase: ^4.1.0
   rxdart: ^0.28.0
   scrollable_positioned_list: ^0.3.5
@@ -141,7 +141,7 @@ dependencies:
   watcher: ^1.1.1
   web_socket_channel: ^3.0.2
   webview_flutter: ^4.8.0
-  win32: ^5.11.0
+  win32: ^5.12.0
   win_toast: ^0.3.1
   window_manager: ^0.4.3
   window_size:
@@ -150,7 +150,7 @@ dependencies:
       path: plugins/window_size
       ref: 12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1
   html: ^0.15.4
-  video_player: ^2.9.1
+  video_player: ^2.9.5
   cupertino_icons: ^1.0.6
   video_compress: ^3.1.4
   webcrypto:
@@ -165,7 +165,7 @@ dependencies:
       ref: 08c1ce40eb6abfad6049fb6aad8bd30312ec5319
       path: packages/data_detector
   envied: ^1.1.1
-  sentry_flutter: ^8.12.0
+  sentry_flutter: ^8.14.1
 
 dev_dependencies:
   build_runner: ^2.4.15
