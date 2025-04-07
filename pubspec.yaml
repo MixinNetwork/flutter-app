@@ -110,7 +110,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   pretty_qr_code: ^3.3.0
   protocol_handler: ^0.2.0
-  provider: ^6.1.2
+  provider: ^6.1.4
   recase: ^4.1.0
   rxdart: ^0.28.0
   scrollable_positioned_list: ^0.3.5
