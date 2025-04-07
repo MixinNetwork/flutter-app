@@ -50,7 +50,7 @@ dependencies:
   dio: ^5.8.0+1
   dio_smart_retry: ^7.0.1
   dio_compatibility_layer: ^0.1.0
-  rhttp: ^0.9.6
+  rhttp: ^0.11.1
   flutter_rust_bridge: ^2.6.0
   drift: ^2.26.0
   ecache: ^2.0.4
