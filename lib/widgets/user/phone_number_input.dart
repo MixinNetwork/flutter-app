@@ -11,9 +11,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl_phone_number_input/src/models/country_model.dart';
-import 'package:intl_phone_number_input/src/providers/country_provider.dart';
-import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
+import 'package:intl_phone_number_input_perci/src/models/country_model.dart';
+import 'package:intl_phone_number_input_perci/src/providers/country_provider.dart';
+import 'package:intl_phone_number_input_perci/src/utils/phone_number/phone_number_util.dart';
 
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
