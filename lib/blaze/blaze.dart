@@ -23,11 +23,21 @@ import 'blaze_message_param_session.dart';
 
 const String _wsHost1 = 'wss://blaze.mixin.one:443';
 const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net:443';
+const int _fixedReconnectDelaySeconds = 5;
+
+// --- Connection Events ---
+enum _ConnectionEvent {
+  connect, // Connection request (including initial connection and reconnection)
+  disconnect, // Disconnect request
+  error, // All error situations (including ping timeout, network errors, etc.)
+  retry, // Internal event for timer-triggered retry
+}
 
 enum ConnectedState {
   connecting,
   reconnecting,
   connected,
+  disconnecting,
   disconnected,
   hasLocalTimeError,
 }
@@ -45,13 +55,17 @@ class Blaze {
   ) {
     database.settingProperties.addListener(_onProxySettingChanged);
     proxyConfig = database.settingProperties.activatedProxy;
+
+    // Initialize event stream handler
+    _eventStreamSubscription =
+        _eventController.stream.listen(_handleConnectionEvent);
   }
 
   final String userId;
   final String sessionId;
   final String privateKey;
   final Database database;
-  final Client client; // todo delete
+  final Client client;
   final AckJob ackJob;
   final FloodJob floodJob;
 
@@ -73,21 +87,108 @@ class Blaze {
 
   final transactions = <String, WebSocketTransaction>{};
 
-  ConnectedState get _connectedState => _connectedStateBehaviorSubject.value;
+  ConnectedState get _connectedState =>
+      _connectedStateBehaviorSubject.valueOrNull ?? ConnectedState.disconnected;
 
   set _connectedState(ConnectedState state) {
     if (_connectedStateBehaviorSubject.valueOrNull == state) return;
-
-    _connectedStateBehaviorSubject.value = state;
+    i('[State Transition] ${_connectedStateBehaviorSubject.valueOrNull} -> $state');
+    _connectedStateBehaviorSubject.add(state);
 
     if (state == ConnectedState.connected) {
       _refreshOffset();
     }
+
+    // Cancel retry timer if we are in a state that doesn't need retry
+    if (state == ConnectedState.connected ||
+        state == ConnectedState.disconnected ||
+        state == ConnectedState.disconnecting) {
+      _reconnectTimer?.cancel();
+      _reconnectTimer = null;
+    }
   }
 
   Timer? _checkTimeoutTimer;
+  Timer? _reconnectTimer;
 
-  Future<void> connect() async {
+  // --- Event Stream ---
+  final StreamController<_ConnectionEvent> _eventController =
+      StreamController.broadcast();
+  late StreamSubscription<_ConnectionEvent> _eventStreamSubscription;
+
+  // ==========================================================================
+  // Event Handling Logic (Core State Machine)
+  // ==========================================================================
+
+  void _handleConnectionEvent(_ConnectionEvent event) {
+    i('[_handleConnectionEvent] Received event: $event, Current state: $_connectedState');
+
+    switch (event) {
+      case _ConnectionEvent.connect:
+        // Only allow connection requests if disconnected or waiting for retry
+        if (_connectedState == ConnectedState.disconnected ||
+            _connectedState == ConnectedState.reconnecting ||
+            _connectedState == ConnectedState.hasLocalTimeError) {
+          _connect();
+        } else {
+          i('Ignoring connect request, state is $_connectedState');
+        }
+
+      case _ConnectionEvent.disconnect:
+        if (_connectedState != ConnectedState.disconnected &&
+            _connectedState != ConnectedState.disconnecting) {
+          _disconnect();
+        }
+
+      case _ConnectionEvent.error:
+        // Handle all error situations (including ping timeout, connection errors, etc.)
+        if (_connectedState == ConnectedState.connected ||
+            _connectedState == ConnectedState.connecting) {
+          w('Error occurred in state: $_connectedState. Initiating reconnect sequence.');
+          _disconnect(false);
+          _connectedState = ConnectedState.reconnecting;
+          _scheduleRetry();
+        } else if (_connectedState == ConnectedState.reconnecting) {
+          w('Error occurred during reconnect attempt. Scheduling next retry.');
+          _scheduleRetry();
+        } else {
+          w('Ignoring error in state: $_connectedState');
+        }
+
+      case _ConnectionEvent.retry:
+        // Timer triggered, attempt to reconnect
+        if (_connectedState == ConnectedState.reconnecting) {
+          _connect();
+        } else {
+          i('Ignoring retry event, state changed to $_connectedState');
+        }
+    }
+  }
+
+  // ==========================================================================
+  // Actions Triggered by Event Handler
+  // ==========================================================================
+
+  /// Schedule a retry attempt with fixed delay
+  void _scheduleRetry() {
+    _reconnectTimer?.cancel(); // Cancel previous timer
+    // Ensure we're in a state that should retry
+    if (_connectedState != ConnectedState.reconnecting) {
+      i('Not scheduling retry, state is $_connectedState');
+      return;
+    }
+
+    _host = _host == _wsHost1 ? _wsHost2 : _wsHost1; // Alternate host
+
+    const delay = Duration(seconds: _fixedReconnectDelaySeconds);
+    i('Scheduling retry in $delay to host $_host...');
+    _reconnectTimer = Timer(delay, () {
+      i('Triggering RETRY event: Retry timer fired');
+      _eventController.add(_ConnectionEvent.retry);
+    });
+  }
+
+  void _connect() {
     i('reconnecting set false, ${StackTrace.current}');
     _connectedState = ConnectedState.connecting;
 
@@ -97,85 +198,95 @@ class Blaze {
           userId, sessionId, Key.fromBase64(privateKey), scp, 'GET', '/', '');
       i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
       i('ws _userAgent: $userAgent');
-      _connect(_token!);
+
+      // Ensure previous resources are released before attempting new connection
+      _closeChannelAndSubscription();
+
+      channel = IOWebSocketChannel.connect(
+        _host,
+        protocols: ['Mixin-Blaze-1'],
+        headers: {
+          'User-Agent': userAgent,
+          'Authorization': 'Bearer $_token',
+        },
+        pingInterval: const Duration(seconds: 10),
+        customClient: HttpClient()..setProxy(proxyConfig),
+      );
+
+      subscription =
+          channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
+        (blazeMessage) async {
+          _connectedState = ConnectedState.connected;
+          d('blazeMessage receive: ${blazeMessage.toJson()}');
+
+          if (blazeMessage.action == kErrorAction &&
+              blazeMessage.error?.code == authentication) {
+            _disconnect();
+            return;
+          }
+
+          if (blazeMessage.error == null) {
+            final transaction = transactions[blazeMessage.id];
+            if (transaction != null) {
+              d('transaction success id: ${transaction.tid}');
+              transaction.success(blazeMessage);
+              transactions.removeWhere((key, value) => key == blazeMessage.id);
+            }
+          } else {
+            final transaction = transactions[blazeMessage.id];
+            if (transaction != null) {
+              d('transaction error id: ${transaction.tid}');
+              transaction.error(blazeMessage);
+              transactions.removeWhere((key, value) => key == blazeMessage.id);
+            }
+          }
+
+          if (blazeMessage.data != null &&
+              blazeMessage.isReceiveMessageAction()) {
+            await handleReceiveMessage(blazeMessage);
+          }
+        },
+        onError: (error, s) {
+          i('ws error: $error, s: $s');
+          i('Triggering ERROR event: WebSocket stream error');
+          _eventController.add(_ConnectionEvent.error);
+        },
+        onDone: () {
+          i('web socket done');
+          // Only trigger reconnect if we were in connected state
+          if (_connectedState == ConnectedState.connected) {
+            i('Triggering ERROR event: WebSocket stream unexpectedly closed');
+            _eventController.add(_ConnectionEvent.error);
+          }
+        },
+        cancelOnError: true,
+      );
+
+      // 設置連接超時
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
         i('ws webSocket state: ${channel?.ready}');
 
-        // if (channel?.innerWebSocket?.readyState == WebSocket.open) return;
         if (_connectedState == ConnectedState.connected) return;
-        _connectedState = ConnectedState.disconnected;
 
         i('ws webSocket connect timeout');
-
-        reconnect();
+        i('Triggering ERROR event: Connection timeout');
+        _eventController.add(_ConnectionEvent.error);
       });
+
+      _sendListPending();
     } catch (error, stack) {
       e('ws connect error: $error, $stack');
-      _connectedState = ConnectedState.disconnected;
-      await reconnect();
+      i('Triggering ERROR event: Exception during connection');
+      _eventController.add(_ConnectionEvent.error);
     }
   }
 
-  void _connect(String token) {
-    _disconnect(false);
-    _connectedState = ConnectedState.connecting;
-    channel = IOWebSocketChannel.connect(
-      _host,
-      protocols: ['Mixin-Blaze-1'],
-      headers: {
-        'User-Agent': userAgent,
-        'Authorization': 'Bearer $token',
-      },
-      pingInterval: const Duration(seconds: 10),
-      customClient: HttpClient()..setProxy(proxyConfig),
-    );
-    subscription =
-        channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
-      (blazeMessage) async {
-        _connectedState = ConnectedState.connected;
-        d('blazeMessage receive: ${blazeMessage.toJson()}');
-
-        if (blazeMessage.action == kErrorAction &&
-            blazeMessage.error?.code == authentication) {
-          _connectedState = ConnectedState.disconnected;
-          await reconnect();
-          return;
-        }
-
-        if (blazeMessage.error == null) {
-          final transaction = transactions[blazeMessage.id];
-          if (transaction != null) {
-            d('transaction success id: ${transaction.tid}');
-            transaction.success(blazeMessage);
-            transactions.removeWhere((key, value) => key == blazeMessage.id);
-          }
-        } else {
-          final transaction = transactions[blazeMessage.id];
-          if (transaction != null) {
-            d('transaction error id: ${transaction.tid}');
-            transaction.error(blazeMessage);
-            transactions.removeWhere((key, value) => key == blazeMessage.id);
-          }
-        }
-
-        if (blazeMessage.data != null &&
-            blazeMessage.isReceiveMessageAction()) {
-          await handleReceiveMessage(blazeMessage);
-        }
-      },
-      onError: (error, s) {
-        i('ws error: $error, s: $s');
-        _connectedState = ConnectedState.disconnected;
-        reconnect();
-      },
-      onDone: () {
-        i('web socket done');
-        _connectedState = ConnectedState.disconnected;
-        reconnect();
-      },
-      cancelOnError: true,
-    );
-    _sendListPending();
+  // Close channel and subscription
+  void _closeChannelAndSubscription() {
+    subscription?.cancel();
+    channel?.sink.close();
+    subscription = null;
+    channel = null;
   }
 
   Future<void> handleReceiveMessage(BlazeMessage blazeMessage) async {
@@ -290,22 +401,31 @@ class Blaze {
 
   void _disconnect([bool resetConnectedState = true]) {
     i('ws _disconnect');
-    if (resetConnectedState) _connectedState = ConnectedState.disconnected;
+
+    if (resetConnectedState) {
+      _connectedState = ConnectedState.disconnected;
+    }
+
     _checkTimeoutTimer?.cancel();
-    transactions.clear();
-    subscription?.cancel();
-    channel?.sink.close();
-    subscription = null;
-    channel = null;
     _checkTimeoutTimer = null;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+
+    transactions.clear();
+    _closeChannelAndSubscription();
   }
 
   void waitSyncTime() {
-    _disconnect();
+    _disconnect(false);
     _connectedState = ConnectedState.hasLocalTimeError;
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
+    if (_connectedState != ConnectedState.connected) {
+      w('Cannot send message, not connected. State: $_connectedState');
+      return null;
+    }
+
     d('blaze send: ${blazeMessage.toJson()}');
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
@@ -316,20 +436,38 @@ class Blaze {
         () => null);
   }
 
-  Future<void> reconnect() async {
-    i('_reconnect reconnecting: $_connectedState start: ${StackTrace.current}');
+  // ==========================================================================
+  // 公共 API 方法（觸發事件）
+  // ==========================================================================
+
+  /// 公共方法，請求連接或重新連接
+
+  Future<void> connect() async {
+    i('Public connect called. Current state: $_connectedState');
     if (_connectedState == ConnectedState.connecting ||
         _connectedState == ConnectedState.reconnecting) {
       return;
     }
+
+    _eventController.add(_ConnectionEvent.connect);
+  }
+
+  Future<void> reconnect() async {
+    i('Public reconnect called. Current state: $_connectedState');
+    if (_connectedState == ConnectedState.connecting ||
+        _connectedState == ConnectedState.reconnecting) {
+      return;
+    }
+
     _connectedState = ConnectedState.reconnecting;
-    _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
-      _disconnect(false);
+      // 測試 HTTP 連接
       await client.accountApi.getMe();
-      i('http ping');
-      await connect();
+      i('http ping successful');
+
+      i('Triggering CONNECT event: User requested reconnection');
+      _eventController.add(_ConnectionEvent.connect);
     } catch (e) {
       w('ws ping error: $e');
       if (e is MixinApiError &&
@@ -339,10 +477,8 @@ class Blaze {
         _connectedState = ConnectedState.disconnected;
         return;
       }
-      _connectedState = ConnectedState.disconnected;
-      await Future.delayed(const Duration(seconds: 2));
-      i('reconnecting set false, ${StackTrace.current}');
-      await reconnect();
+      i('Triggering ERROR event: HTTP ping failed');
+      _eventController.add(_ConnectionEvent.error);
     }
   }
 
@@ -351,15 +487,27 @@ class Blaze {
     if (url == proxyConfig) {
       return;
     }
+    i('Proxy settings changed to: $url');
     proxyConfig = url;
-    _connectedState = ConnectedState.disconnected;
-    reconnect();
+
+    i('Triggering DISCONNECT event: Proxy settings changed');
+    _eventController.add(_ConnectionEvent.disconnect);
+
+    // Trigger reconnect after a short delay
+    Future.delayed(const Duration(milliseconds: 100), () {
+      i('Triggering CONNECT event: Reconnecting after proxy change');
+      _eventController.add(_ConnectionEvent.connect);
+    });
   }
 
   void dispose() {
+    i('Disposing Blaze...');
     database.settingProperties.removeListener(_onProxySettingChanged);
+    _eventStreamSubscription.cancel();
+    _eventController.close();
     _disconnect();
     _connectedStateBehaviorSubject.close();
+    i('Blaze disposed.');
   }
 }
 
@@ -378,20 +526,48 @@ class WebSocketTransaction<T> {
   final String tid;
 
   final Completer<T?> _completer = Completer();
+  bool _isCompleted = false;
+  Timer? _timeoutTimer;
 
-  Future<T?> run(Function() fun, T? Function() onTimeout) {
-    fun.call();
-    return _completer.future.timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => onTimeout.call(),
-    );
+  Future<T?> run(Function() fun, T? Function() onTimeout,
+      [Duration timeoutDuration = const Duration(seconds: 5)]) {
+    if (_isCompleted) return _completer.future;
+
+    try {
+      fun.call();
+      // Start timeout timer after function call succeeds
+      _timeoutTimer = Timer(timeoutDuration, () {
+        if (!_isCompleted) {
+          w('WebSocket transaction timeout: $tid');
+          _isCompleted = true;
+          _completer.complete(onTimeout.call()); // Complete with timeout
+        }
+      });
+    } catch (e, s) {
+      w('Error executing transaction function for $tid: $e\n$s');
+      error(null); // Complete with error
+    }
+    return _completer.future;
+  }
+
+  void _clearTimeout() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = null;
   }
 
   void success(T? data) {
-    _completer.complete(data);
+    if (!_isCompleted) {
+      _clearTimeout();
+      _isCompleted = true;
+      _completer.complete(data);
+    }
   }
 
   void error(T? data) {
-    _completer.complete(data);
+    if (!_isCompleted) {
+      _clearTimeout();
+      _isCompleted = true;
+      _completer.complete(data);
+    }
   }
 }
