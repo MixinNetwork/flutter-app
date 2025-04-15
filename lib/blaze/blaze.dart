@@ -262,7 +262,6 @@ class Blaze {
         cancelOnError: true,
       );
 
-      // 設置連接超時
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
         i('ws webSocket state: ${channel?.ready}');
 
