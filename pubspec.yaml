@@ -77,7 +77,7 @@ dependencies:
     git:
       url: https://github.com/boyan01/gal.git
       ref: b42e314284a09c9f0f9fe1e0e76e0c563402449e
-  github: ^9.24.0
+  github: ^9.25.0
   hive: ^2.2.3
   hive_flutter: ^1.0.0
   hooks_riverpod: ^2.5.1
