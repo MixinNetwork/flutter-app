@@ -24,6 +24,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   breakpad_client
+  flutter_local_notifications_windows
   mixin_logger
   ogg_opus_player
   rhttp
