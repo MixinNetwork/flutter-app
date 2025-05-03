@@ -8,37 +8,26 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   SenderKeys(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _groupIdMeta = const VerificationMeta(
-    'groupId',
-  );
+  static const VerificationMeta _groupIdMeta =
+      const VerificationMeta('groupId');
   late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
-    'group_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _senderIdMeta = const VerificationMeta(
-    'senderId',
-  );
+      'group_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _senderIdMeta =
+      const VerificationMeta('senderId');
   late final GeneratedColumn<String> senderId = GeneratedColumn<String>(
-    'sender_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'sender_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
-    'record',
-    aliasedName,
-    false,
-    type: DriftSqlType.blob,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'record', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [groupId, senderId, record];
   @override
@@ -47,33 +36,25 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   String get actualTableName => $name;
   static const String $name = 'sender_keys';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<SenderKey> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<SenderKey> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('group_id')) {
-      context.handle(
-        _groupIdMeta,
-        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
-      );
+      context.handle(_groupIdMeta,
+          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
     if (data.containsKey('sender_id')) {
-      context.handle(
-        _senderIdMeta,
-        senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta),
-      );
+      context.handle(_senderIdMeta,
+          senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta));
     } else if (isInserting) {
       context.missing(_senderIdMeta);
     }
     if (data.containsKey('record')) {
-      context.handle(
-        _recordMeta,
-        record.isAcceptableOrUnknown(data['record']!, _recordMeta),
-      );
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
@@ -86,21 +67,12 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SenderKey(
-      groupId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}group_id'],
-          )!,
-      senderId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}sender_id'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
+      groupId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}group_id'])!,
+      senderId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_id'])!,
+      record: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
     );
   }
 
@@ -110,9 +82,8 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   }
 
   @override
-  List<String> get customConstraints => const [
-    'PRIMARY KEY(group_id, sender_id)',
-  ];
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(group_id, sender_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -121,11 +92,8 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   final String groupId;
   final String senderId;
   final Uint8List record;
-  const SenderKey({
-    required this.groupId,
-    required this.senderId,
-    required this.record,
-  });
+  const SenderKey(
+      {required this.groupId, required this.senderId, required this.record});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -143,10 +111,8 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
     );
   }
 
-  factory SenderKey.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory SenderKey.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SenderKey(
       groupId: serializer.fromJson<String>(json['group_id']),
@@ -216,9 +182,9 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
     required String senderId,
     required Uint8List record,
     this.rowid = const Value.absent(),
-  }) : groupId = Value(groupId),
-       senderId = Value(senderId),
-       record = Value(record);
+  })  : groupId = Value(groupId),
+        senderId = Value(senderId),
+        record = Value(record);
   static Insertable<SenderKey> custom({
     Expression<String>? groupId,
     Expression<String>? senderId,
@@ -233,12 +199,11 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
     });
   }
 
-  SenderKeysCompanion copyWith({
-    Value<String>? groupId,
-    Value<String>? senderId,
-    Value<Uint8List>? record,
-    Value<int>? rowid,
-  }) {
+  SenderKeysCompanion copyWith(
+      {Value<String>? groupId,
+      Value<String>? senderId,
+      Value<Uint8List>? record,
+      Value<int>? rowid}) {
     return SenderKeysCompanion(
       groupId: groupId ?? this.groupId,
       senderId: senderId ?? this.senderId,
@@ -284,150 +249,109 @@ class Identities extends Table with TableInfo<Identities, Identity> {
   Identities(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL',
-  );
-  static const VerificationMeta _addressMeta = const VerificationMeta(
-    'address',
-  );
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
+  static const VerificationMeta _addressMeta =
+      const VerificationMeta('address');
   late final GeneratedColumn<String> address = GeneratedColumn<String>(
-    'address',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _registrationIdMeta = const VerificationMeta(
-    'registrationId',
-  );
+      'address', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _registrationIdMeta =
+      const VerificationMeta('registrationId');
   late final GeneratedColumn<int> registrationId = GeneratedColumn<int>(
-    'registration_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: '',
-  );
-  static const VerificationMeta _publicKeyMeta = const VerificationMeta(
-    'publicKey',
-  );
+      'registration_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _publicKeyMeta =
+      const VerificationMeta('publicKey');
   late final GeneratedColumn<Uint8List> publicKey = GeneratedColumn<Uint8List>(
-    'public_key',
-    aliasedName,
-    false,
-    type: DriftSqlType.blob,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _privateKeyMeta = const VerificationMeta(
-    'privateKey',
-  );
+      'public_key', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _privateKeyMeta =
+      const VerificationMeta('privateKey');
   late final GeneratedColumn<Uint8List> privateKey = GeneratedColumn<Uint8List>(
-    'private_key',
-    aliasedName,
-    true,
-    type: DriftSqlType.blob,
-    requiredDuringInsert: false,
-    $customConstraints: '',
-  );
-  static const VerificationMeta _nextPrekeyIdMeta = const VerificationMeta(
-    'nextPrekeyId',
-  );
+      'private_key', aliasedName, true,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _nextPrekeyIdMeta =
+      const VerificationMeta('nextPrekeyId');
   late final GeneratedColumn<int> nextPrekeyId = GeneratedColumn<int>(
-    'next_prekey_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: '',
-  );
-  static const VerificationMeta _timestampMeta = const VerificationMeta(
-    'timestamp',
-  );
+      'next_prekey_id', aliasedName, true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-    'timestamp',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [
-    id,
-    address,
-    registrationId,
-    publicKey,
-    privateKey,
-    nextPrekeyId,
-    timestamp,
-  ];
+        id,
+        address,
+        registrationId,
+        publicKey,
+        privateKey,
+        nextPrekeyId,
+        timestamp
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'identities';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<Identity> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<Identity> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('address')) {
-      context.handle(
-        _addressMeta,
-        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
-      );
+      context.handle(_addressMeta,
+          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
     } else if (isInserting) {
       context.missing(_addressMeta);
     }
     if (data.containsKey('registration_id')) {
       context.handle(
-        _registrationIdMeta,
-        registrationId.isAcceptableOrUnknown(
-          data['registration_id']!,
           _registrationIdMeta,
-        ),
-      );
+          registrationId.isAcceptableOrUnknown(
+              data['registration_id']!, _registrationIdMeta));
     }
     if (data.containsKey('public_key')) {
-      context.handle(
-        _publicKeyMeta,
-        publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta),
-      );
+      context.handle(_publicKeyMeta,
+          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
     } else if (isInserting) {
       context.missing(_publicKeyMeta);
     }
     if (data.containsKey('private_key')) {
       context.handle(
-        _privateKeyMeta,
-        privateKey.isAcceptableOrUnknown(data['private_key']!, _privateKeyMeta),
-      );
+          _privateKeyMeta,
+          privateKey.isAcceptableOrUnknown(
+              data['private_key']!, _privateKeyMeta));
     }
     if (data.containsKey('next_prekey_id')) {
       context.handle(
-        _nextPrekeyIdMeta,
-        nextPrekeyId.isAcceptableOrUnknown(
-          data['next_prekey_id']!,
           _nextPrekeyIdMeta,
-        ),
-      );
+          nextPrekeyId.isAcceptableOrUnknown(
+              data['next_prekey_id']!, _nextPrekeyIdMeta));
     }
     if (data.containsKey('timestamp')) {
-      context.handle(
-        _timestampMeta,
-        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
-      );
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
@@ -440,38 +364,20 @@ class Identities extends Table with TableInfo<Identities, Identity> {
   Identity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Identity(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      address:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}address'],
-          )!,
-      registrationId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}registration_id'],
-      ),
-      publicKey:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}public_key'],
-          )!,
-      privateKey: attachedDatabase.typeMapping.read(
-        DriftSqlType.blob,
-        data['${effectivePrefix}private_key'],
-      ),
-      nextPrekeyId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}next_prekey_id'],
-      ),
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      address: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
+      registrationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}registration_id']),
+      publicKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}public_key'])!,
+      privateKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}private_key']),
+      nextPrekeyId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}next_prekey_id']),
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
     );
   }
 
@@ -492,15 +398,14 @@ class Identity extends DataClass implements Insertable<Identity> {
   final Uint8List? privateKey;
   final int? nextPrekeyId;
   final int timestamp;
-  const Identity({
-    required this.id,
-    required this.address,
-    this.registrationId,
-    required this.publicKey,
-    this.privateKey,
-    this.nextPrekeyId,
-    required this.timestamp,
-  });
+  const Identity(
+      {required this.id,
+      required this.address,
+      this.registrationId,
+      required this.publicKey,
+      this.privateKey,
+      this.nextPrekeyId,
+      required this.timestamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -524,27 +429,22 @@ class Identity extends DataClass implements Insertable<Identity> {
     return IdentitiesCompanion(
       id: Value(id),
       address: Value(address),
-      registrationId:
-          registrationId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(registrationId),
+      registrationId: registrationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(registrationId),
       publicKey: Value(publicKey),
-      privateKey:
-          privateKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(privateKey),
-      nextPrekeyId:
-          nextPrekeyId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(nextPrekeyId),
+      privateKey: privateKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(privateKey),
+      nextPrekeyId: nextPrekeyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextPrekeyId),
       timestamp: Value(timestamp),
     );
   }
 
-  factory Identity.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory Identity.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Identity(
       id: serializer.fromJson<int>(json['id']),
@@ -570,39 +470,38 @@ class Identity extends DataClass implements Insertable<Identity> {
     };
   }
 
-  Identity copyWith({
-    int? id,
-    String? address,
-    Value<int?> registrationId = const Value.absent(),
-    Uint8List? publicKey,
-    Value<Uint8List?> privateKey = const Value.absent(),
-    Value<int?> nextPrekeyId = const Value.absent(),
-    int? timestamp,
-  }) => Identity(
-    id: id ?? this.id,
-    address: address ?? this.address,
-    registrationId:
-        registrationId.present ? registrationId.value : this.registrationId,
-    publicKey: publicKey ?? this.publicKey,
-    privateKey: privateKey.present ? privateKey.value : this.privateKey,
-    nextPrekeyId: nextPrekeyId.present ? nextPrekeyId.value : this.nextPrekeyId,
-    timestamp: timestamp ?? this.timestamp,
-  );
+  Identity copyWith(
+          {int? id,
+          String? address,
+          Value<int?> registrationId = const Value.absent(),
+          Uint8List? publicKey,
+          Value<Uint8List?> privateKey = const Value.absent(),
+          Value<int?> nextPrekeyId = const Value.absent(),
+          int? timestamp}) =>
+      Identity(
+        id: id ?? this.id,
+        address: address ?? this.address,
+        registrationId:
+            registrationId.present ? registrationId.value : this.registrationId,
+        publicKey: publicKey ?? this.publicKey,
+        privateKey: privateKey.present ? privateKey.value : this.privateKey,
+        nextPrekeyId:
+            nextPrekeyId.present ? nextPrekeyId.value : this.nextPrekeyId,
+        timestamp: timestamp ?? this.timestamp,
+      );
   Identity copyWithCompanion(IdentitiesCompanion data) {
     return Identity(
       id: data.id.present ? data.id.value : this.id,
       address: data.address.present ? data.address.value : this.address,
-      registrationId:
-          data.registrationId.present
-              ? data.registrationId.value
-              : this.registrationId,
+      registrationId: data.registrationId.present
+          ? data.registrationId.value
+          : this.registrationId,
       publicKey: data.publicKey.present ? data.publicKey.value : this.publicKey,
       privateKey:
           data.privateKey.present ? data.privateKey.value : this.privateKey,
-      nextPrekeyId:
-          data.nextPrekeyId.present
-              ? data.nextPrekeyId.value
-              : this.nextPrekeyId,
+      nextPrekeyId: data.nextPrekeyId.present
+          ? data.nextPrekeyId.value
+          : this.nextPrekeyId,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
     );
   }
@@ -623,14 +522,13 @@ class Identity extends DataClass implements Insertable<Identity> {
 
   @override
   int get hashCode => Object.hash(
-    id,
-    address,
-    registrationId,
-    $driftBlobEquality.hash(publicKey),
-    $driftBlobEquality.hash(privateKey),
-    nextPrekeyId,
-    timestamp,
-  );
+      id,
+      address,
+      registrationId,
+      $driftBlobEquality.hash(publicKey),
+      $driftBlobEquality.hash(privateKey),
+      nextPrekeyId,
+      timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -669,9 +567,9 @@ class IdentitiesCompanion extends UpdateCompanion<Identity> {
     this.privateKey = const Value.absent(),
     this.nextPrekeyId = const Value.absent(),
     required int timestamp,
-  }) : address = Value(address),
-       publicKey = Value(publicKey),
-       timestamp = Value(timestamp);
+  })  : address = Value(address),
+        publicKey = Value(publicKey),
+        timestamp = Value(timestamp);
   static Insertable<Identity> custom({
     Expression<int>? id,
     Expression<String>? address,
@@ -692,15 +590,14 @@ class IdentitiesCompanion extends UpdateCompanion<Identity> {
     });
   }
 
-  IdentitiesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? address,
-    Value<int?>? registrationId,
-    Value<Uint8List>? publicKey,
-    Value<Uint8List?>? privateKey,
-    Value<int?>? nextPrekeyId,
-    Value<int>? timestamp,
-  }) {
+  IdentitiesCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? address,
+      Value<int?>? registrationId,
+      Value<Uint8List>? publicKey,
+      Value<Uint8List?>? privateKey,
+      Value<int?>? nextPrekeyId,
+      Value<int>? timestamp}) {
     return IdentitiesCompanion(
       id: id ?? this.id,
       address: address ?? this.address,
@@ -761,34 +658,24 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   Prekeys(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL',
-  );
-  static const VerificationMeta _prekeyIdMeta = const VerificationMeta(
-    'prekeyId',
-  );
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
+  static const VerificationMeta _prekeyIdMeta =
+      const VerificationMeta('prekeyId');
   late final GeneratedColumn<int> prekeyId = GeneratedColumn<int>(
-    'prekey_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'prekey_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
-    'record',
-    aliasedName,
-    false,
-    type: DriftSqlType.blob,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'record', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [id, prekeyId, record];
   @override
@@ -797,28 +684,22 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   String get actualTableName => $name;
   static const String $name = 'prekeys';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<Prekey> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<Prekey> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('prekey_id')) {
-      context.handle(
-        _prekeyIdMeta,
-        prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta),
-      );
+      context.handle(_prekeyIdMeta,
+          prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta));
     } else if (isInserting) {
       context.missing(_prekeyIdMeta);
     }
     if (data.containsKey('record')) {
-      context.handle(
-        _recordMeta,
-        record.isAcceptableOrUnknown(data['record']!, _recordMeta),
-      );
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
@@ -831,21 +712,12 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   Prekey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Prekey(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      prekeyId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}prekey_id'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      prekeyId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}prekey_id'])!,
+      record: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
     );
   }
 
@@ -862,11 +734,8 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   final int id;
   final int prekeyId;
   final Uint8List record;
-  const Prekey({
-    required this.id,
-    required this.prekeyId,
-    required this.record,
-  });
+  const Prekey(
+      {required this.id, required this.prekeyId, required this.record});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -884,10 +753,8 @@ class Prekey extends DataClass implements Insertable<Prekey> {
     );
   }
 
-  factory Prekey.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory Prekey.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Prekey(
       id: serializer.fromJson<int>(json['id']),
@@ -906,10 +773,10 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   }
 
   Prekey copyWith({int? id, int? prekeyId, Uint8List? record}) => Prekey(
-    id: id ?? this.id,
-    prekeyId: prekeyId ?? this.prekeyId,
-    record: record ?? this.record,
-  );
+        id: id ?? this.id,
+        prekeyId: prekeyId ?? this.prekeyId,
+        record: record ?? this.record,
+      );
   Prekey copyWithCompanion(PrekeysCompanion data) {
     return Prekey(
       id: data.id.present ? data.id.value : this.id,
@@ -953,8 +820,8 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
     this.id = const Value.absent(),
     required int prekeyId,
     required Uint8List record,
-  }) : prekeyId = Value(prekeyId),
-       record = Value(record);
+  })  : prekeyId = Value(prekeyId),
+        record = Value(record);
   static Insertable<Prekey> custom({
     Expression<int>? id,
     Expression<int>? prekeyId,
@@ -967,11 +834,8 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
     });
   }
 
-  PrekeysCompanion copyWith({
-    Value<int>? id,
-    Value<int>? prekeyId,
-    Value<Uint8List>? record,
-  }) {
+  PrekeysCompanion copyWith(
+      {Value<int>? id, Value<int>? prekeyId, Value<Uint8List>? record}) {
     return PrekeysCompanion(
       id: id ?? this.id,
       prekeyId: prekeyId ?? this.prekeyId,
@@ -1012,45 +876,31 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   SignedPrekeys(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL',
-  );
-  static const VerificationMeta _prekeyIdMeta = const VerificationMeta(
-    'prekeyId',
-  );
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
+  static const VerificationMeta _prekeyIdMeta =
+      const VerificationMeta('prekeyId');
   late final GeneratedColumn<int> prekeyId = GeneratedColumn<int>(
-    'prekey_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'prekey_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
-    'record',
-    aliasedName,
-    false,
-    type: DriftSqlType.blob,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _timestampMeta = const VerificationMeta(
-    'timestamp',
-  );
+      'record', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-    'timestamp',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [id, prekeyId, record, timestamp];
   @override
@@ -1059,36 +909,28 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   String get actualTableName => $name;
   static const String $name = 'signed_prekeys';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<SignedPrekey> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<SignedPrekey> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('prekey_id')) {
-      context.handle(
-        _prekeyIdMeta,
-        prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta),
-      );
+      context.handle(_prekeyIdMeta,
+          prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta));
     } else if (isInserting) {
       context.missing(_prekeyIdMeta);
     }
     if (data.containsKey('record')) {
-      context.handle(
-        _recordMeta,
-        record.isAcceptableOrUnknown(data['record']!, _recordMeta),
-      );
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
     if (data.containsKey('timestamp')) {
-      context.handle(
-        _timestampMeta,
-        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
-      );
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
@@ -1101,26 +943,14 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   SignedPrekey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SignedPrekey(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      prekeyId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}prekey_id'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      prekeyId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}prekey_id'])!,
+      record: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
     );
   }
 
@@ -1138,12 +968,11 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   final int prekeyId;
   final Uint8List record;
   final int timestamp;
-  const SignedPrekey({
-    required this.id,
-    required this.prekeyId,
-    required this.record,
-    required this.timestamp,
-  });
+  const SignedPrekey(
+      {required this.id,
+      required this.prekeyId,
+      required this.record,
+      required this.timestamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1163,10 +992,8 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
     );
   }
 
-  factory SignedPrekey.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory SignedPrekey.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SignedPrekey(
       id: serializer.fromJson<int>(json['id']),
@@ -1186,17 +1013,14 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
     };
   }
 
-  SignedPrekey copyWith({
-    int? id,
-    int? prekeyId,
-    Uint8List? record,
-    int? timestamp,
-  }) => SignedPrekey(
-    id: id ?? this.id,
-    prekeyId: prekeyId ?? this.prekeyId,
-    record: record ?? this.record,
-    timestamp: timestamp ?? this.timestamp,
-  );
+  SignedPrekey copyWith(
+          {int? id, int? prekeyId, Uint8List? record, int? timestamp}) =>
+      SignedPrekey(
+        id: id ?? this.id,
+        prekeyId: prekeyId ?? this.prekeyId,
+        record: record ?? this.record,
+        timestamp: timestamp ?? this.timestamp,
+      );
   SignedPrekey copyWithCompanion(SignedPrekeysCompanion data) {
     return SignedPrekey(
       id: data.id.present ? data.id.value : this.id,
@@ -1246,9 +1070,9 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
     required int prekeyId,
     required Uint8List record,
     required int timestamp,
-  }) : prekeyId = Value(prekeyId),
-       record = Value(record),
-       timestamp = Value(timestamp);
+  })  : prekeyId = Value(prekeyId),
+        record = Value(record),
+        timestamp = Value(timestamp);
   static Insertable<SignedPrekey> custom({
     Expression<int>? id,
     Expression<int>? prekeyId,
@@ -1263,12 +1087,11 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
     });
   }
 
-  SignedPrekeysCompanion copyWith({
-    Value<int>? id,
-    Value<int>? prekeyId,
-    Value<Uint8List>? record,
-    Value<int>? timestamp,
-  }) {
+  SignedPrekeysCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? prekeyId,
+      Value<Uint8List>? record,
+      Value<int>? timestamp}) {
     return SignedPrekeysCompanion(
       id: id ?? this.id,
       prekeyId: prekeyId ?? this.prekeyId,
@@ -1314,106 +1137,74 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   Sessions(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL',
-  );
-  static const VerificationMeta _addressMeta = const VerificationMeta(
-    'address',
-  );
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
+  static const VerificationMeta _addressMeta =
+      const VerificationMeta('address');
   late final GeneratedColumn<String> address = GeneratedColumn<String>(
-    'address',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'address', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _deviceMeta = const VerificationMeta('device');
   late final GeneratedColumn<int> device = GeneratedColumn<int>(
-    'device',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'device', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List> record = GeneratedColumn<Uint8List>(
-    'record',
-    aliasedName,
-    false,
-    type: DriftSqlType.blob,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _timestampMeta = const VerificationMeta(
-    'timestamp',
-  );
+      'record', aliasedName, false,
+      type: DriftSqlType.blob,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
-    'timestamp',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    address,
-    device,
-    record,
-    timestamp,
-  ];
+  List<GeneratedColumn> get $columns =>
+      [id, address, device, record, timestamp];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'sessions';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<Session> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<Session> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('address')) {
-      context.handle(
-        _addressMeta,
-        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
-      );
+      context.handle(_addressMeta,
+          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
     } else if (isInserting) {
       context.missing(_addressMeta);
     }
     if (data.containsKey('device')) {
-      context.handle(
-        _deviceMeta,
-        device.isAcceptableOrUnknown(data['device']!, _deviceMeta),
-      );
+      context.handle(_deviceMeta,
+          device.isAcceptableOrUnknown(data['device']!, _deviceMeta));
     } else if (isInserting) {
       context.missing(_deviceMeta);
     }
     if (data.containsKey('record')) {
-      context.handle(
-        _recordMeta,
-        record.isAcceptableOrUnknown(data['record']!, _recordMeta),
-      );
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
     if (data.containsKey('timestamp')) {
-      context.handle(
-        _timestampMeta,
-        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
-      );
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
@@ -1426,31 +1217,16 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   Session map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Session(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      address:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}address'],
-          )!,
-      device:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}device'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      address: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
+      device: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}device'])!,
+      record: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}record'])!,
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
     );
   }
 
@@ -1469,13 +1245,12 @@ class Session extends DataClass implements Insertable<Session> {
   final int device;
   final Uint8List record;
   final int timestamp;
-  const Session({
-    required this.id,
-    required this.address,
-    required this.device,
-    required this.record,
-    required this.timestamp,
-  });
+  const Session(
+      {required this.id,
+      required this.address,
+      required this.device,
+      required this.record,
+      required this.timestamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1497,10 +1272,8 @@ class Session extends DataClass implements Insertable<Session> {
     );
   }
 
-  factory Session.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory Session.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Session(
       id: serializer.fromJson<int>(json['id']),
@@ -1522,19 +1295,19 @@ class Session extends DataClass implements Insertable<Session> {
     };
   }
 
-  Session copyWith({
-    int? id,
-    String? address,
-    int? device,
-    Uint8List? record,
-    int? timestamp,
-  }) => Session(
-    id: id ?? this.id,
-    address: address ?? this.address,
-    device: device ?? this.device,
-    record: record ?? this.record,
-    timestamp: timestamp ?? this.timestamp,
-  );
+  Session copyWith(
+          {int? id,
+          String? address,
+          int? device,
+          Uint8List? record,
+          int? timestamp}) =>
+      Session(
+        id: id ?? this.id,
+        address: address ?? this.address,
+        device: device ?? this.device,
+        record: record ?? this.record,
+        timestamp: timestamp ?? this.timestamp,
+      );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
       id: data.id.present ? data.id.value : this.id,
@@ -1559,12 +1332,7 @@ class Session extends DataClass implements Insertable<Session> {
 
   @override
   int get hashCode => Object.hash(
-    id,
-    address,
-    device,
-    $driftBlobEquality.hash(record),
-    timestamp,
-  );
+      id, address, device, $driftBlobEquality.hash(record), timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1595,10 +1363,10 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     required int device,
     required Uint8List record,
     required int timestamp,
-  }) : address = Value(address),
-       device = Value(device),
-       record = Value(record),
-       timestamp = Value(timestamp);
+  })  : address = Value(address),
+        device = Value(device),
+        record = Value(record),
+        timestamp = Value(timestamp);
   static Insertable<Session> custom({
     Expression<int>? id,
     Expression<String>? address,
@@ -1615,13 +1383,12 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     });
   }
 
-  SessionsCompanion copyWith({
-    Value<int>? id,
-    Value<String>? address,
-    Value<int>? device,
-    Value<Uint8List>? record,
-    Value<int>? timestamp,
-  }) {
+  SessionsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? address,
+      Value<int>? device,
+      Value<Uint8List>? record,
+      Value<int>? timestamp}) {
     return SessionsCompanion(
       id: id ?? this.id,
       address: address ?? this.address,
@@ -1671,114 +1438,78 @@ class RatchetSenderKeys extends Table
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   RatchetSenderKeys(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _groupIdMeta = const VerificationMeta(
-    'groupId',
-  );
+  static const VerificationMeta _groupIdMeta =
+      const VerificationMeta('groupId');
   late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
-    'group_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _senderIdMeta = const VerificationMeta(
-    'senderId',
-  );
+      'group_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _senderIdMeta =
+      const VerificationMeta('senderId');
   late final GeneratedColumn<String> senderId = GeneratedColumn<String>(
-    'sender_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'sender_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _messageIdMeta = const VerificationMeta(
-    'messageId',
-  );
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  static const VerificationMeta _messageIdMeta =
+      const VerificationMeta('messageId');
   late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
-    'message_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: '',
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
+      'message_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      $customConstraints: '');
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
   late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
+      'created_at', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
-  List<GeneratedColumn> get $columns => [
-    groupId,
-    senderId,
-    status,
-    messageId,
-    createdAt,
-  ];
+  List<GeneratedColumn> get $columns =>
+      [groupId, senderId, status, messageId, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'ratchet_sender_keys';
   @override
-  VerificationContext validateIntegrity(
-    Insertable<RatchetSenderKey> instance, {
-    bool isInserting = false,
-  }) {
+  VerificationContext validateIntegrity(Insertable<RatchetSenderKey> instance,
+      {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('group_id')) {
-      context.handle(
-        _groupIdMeta,
-        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
-      );
+      context.handle(_groupIdMeta,
+          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
     if (data.containsKey('sender_id')) {
-      context.handle(
-        _senderIdMeta,
-        senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta),
-      );
+      context.handle(_senderIdMeta,
+          senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta));
     } else if (isInserting) {
       context.missing(_senderIdMeta);
     }
     if (data.containsKey('status')) {
-      context.handle(
-        _statusMeta,
-        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
-      );
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
     if (data.containsKey('message_id')) {
-      context.handle(
-        _messageIdMeta,
-        messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta),
-      );
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
     }
     if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
@@ -1791,30 +1522,16 @@ class RatchetSenderKeys extends Table
   RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RatchetSenderKey(
-      groupId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}group_id'],
-          )!,
-      senderId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}sender_id'],
-          )!,
-      status:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}status'],
-          )!,
-      messageId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}message_id'],
-      ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}created_at'],
-          )!,
+      groupId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}group_id'])!,
+      senderId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sender_id'])!,
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      messageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
     );
   }
 
@@ -1824,9 +1541,8 @@ class RatchetSenderKeys extends Table
   }
 
   @override
-  List<String> get customConstraints => const [
-    'PRIMARY KEY(group_id, sender_id)',
-  ];
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(group_id, sender_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -1838,13 +1554,12 @@ class RatchetSenderKey extends DataClass
   final String status;
   final String? messageId;
   final String createdAt;
-  const RatchetSenderKey({
-    required this.groupId,
-    required this.senderId,
-    required this.status,
-    this.messageId,
-    required this.createdAt,
-  });
+  const RatchetSenderKey(
+      {required this.groupId,
+      required this.senderId,
+      required this.status,
+      this.messageId,
+      required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1863,18 +1578,15 @@ class RatchetSenderKey extends DataClass
       groupId: Value(groupId),
       senderId: Value(senderId),
       status: Value(status),
-      messageId:
-          messageId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(messageId),
+      messageId: messageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageId),
       createdAt: Value(createdAt),
     );
   }
 
-  factory RatchetSenderKey.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
+  factory RatchetSenderKey.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RatchetSenderKey(
       groupId: serializer.fromJson<String>(json['group_id']),
@@ -1896,19 +1608,19 @@ class RatchetSenderKey extends DataClass
     };
   }
 
-  RatchetSenderKey copyWith({
-    String? groupId,
-    String? senderId,
-    String? status,
-    Value<String?> messageId = const Value.absent(),
-    String? createdAt,
-  }) => RatchetSenderKey(
-    groupId: groupId ?? this.groupId,
-    senderId: senderId ?? this.senderId,
-    status: status ?? this.status,
-    messageId: messageId.present ? messageId.value : this.messageId,
-    createdAt: createdAt ?? this.createdAt,
-  );
+  RatchetSenderKey copyWith(
+          {String? groupId,
+          String? senderId,
+          String? status,
+          Value<String?> messageId = const Value.absent(),
+          String? createdAt}) =>
+      RatchetSenderKey(
+        groupId: groupId ?? this.groupId,
+        senderId: senderId ?? this.senderId,
+        status: status ?? this.status,
+        messageId: messageId.present ? messageId.value : this.messageId,
+        createdAt: createdAt ?? this.createdAt,
+      );
   RatchetSenderKey copyWithCompanion(RatchetSenderKeysCompanion data) {
     return RatchetSenderKey(
       groupId: data.groupId.present ? data.groupId.value : this.groupId,
@@ -1967,10 +1679,10 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     this.messageId = const Value.absent(),
     required String createdAt,
     this.rowid = const Value.absent(),
-  }) : groupId = Value(groupId),
-       senderId = Value(senderId),
-       status = Value(status),
-       createdAt = Value(createdAt);
+  })  : groupId = Value(groupId),
+        senderId = Value(senderId),
+        status = Value(status),
+        createdAt = Value(createdAt);
   static Insertable<RatchetSenderKey> custom({
     Expression<String>? groupId,
     Expression<String>? senderId,
@@ -1989,14 +1701,13 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     });
   }
 
-  RatchetSenderKeysCompanion copyWith({
-    Value<String>? groupId,
-    Value<String>? senderId,
-    Value<String>? status,
-    Value<String?>? messageId,
-    Value<String>? createdAt,
-    Value<int>? rowid,
-  }) {
+  RatchetSenderKeysCompanion copyWith(
+      {Value<String>? groupId,
+      Value<String>? senderId,
+      Value<String>? status,
+      Value<String?>? messageId,
+      Value<String>? createdAt,
+      Value<int>? rowid}) {
     return RatchetSenderKeysCompanion(
       groupId: groupId ?? this.groupId,
       senderId: senderId ?? this.senderId,
@@ -2050,68 +1761,58 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   $SignalDatabaseManager get managers => $SignalDatabaseManager(this);
   late final SenderKeys senderKeys = SenderKeys(this);
   late final Identities identities = Identities(this);
-  late final Index indexIdentitiesAddress = Index(
-    'index_identities_address',
-    'CREATE UNIQUE INDEX IF NOT EXISTS index_identities_address ON identities (address)',
-  );
+  late final Index indexIdentitiesAddress = Index('index_identities_address',
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_identities_address ON identities (address)');
   late final Prekeys prekeys = Prekeys(this);
-  late final Index indexPrekeysPrekeyId = Index(
-    'index_prekeys_prekey_id',
-    'CREATE UNIQUE INDEX IF NOT EXISTS index_prekeys_prekey_id ON prekeys (prekey_id)',
-  );
+  late final Index indexPrekeysPrekeyId = Index('index_prekeys_prekey_id',
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_prekeys_prekey_id ON prekeys (prekey_id)');
   late final SignedPrekeys signedPrekeys = SignedPrekeys(this);
   late final Index indexSignedPrekeysPrekeyId = Index(
-    'index_signed_prekeys_prekey_id',
-    'CREATE UNIQUE INDEX IF NOT EXISTS index_signed_prekeys_prekey_id ON signed_prekeys (prekey_id)',
-  );
+      'index_signed_prekeys_prekey_id',
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_signed_prekeys_prekey_id ON signed_prekeys (prekey_id)');
   late final Sessions sessions = Sessions(this);
   late final Index indexSessionsAddressDevice = Index(
-    'index_sessions_address_device',
-    'CREATE UNIQUE INDEX IF NOT EXISTS index_sessions_address_device ON sessions (address, device)',
-  );
+      'index_sessions_address_device',
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_sessions_address_device ON sessions (address, device)');
   late final RatchetSenderKeys ratchetSenderKeys = RatchetSenderKeys(this);
   late final IdentityDao identityDao = IdentityDao(this as SignalDatabase);
   late final PreKeyDao preKeyDao = PreKeyDao(this as SignalDatabase);
   late final SenderKeyDao senderKeyDao = SenderKeyDao(this as SignalDatabase);
   late final SessionDao sessionDao = SessionDao(this as SignalDatabase);
-  late final SignedPreKeyDao signedPreKeyDao = SignedPreKeyDao(
-    this as SignalDatabase,
-  );
-  late final RatchetSenderKeyDao ratchetSenderKeyDao = RatchetSenderKeyDao(
-    this as SignalDatabase,
-  );
+  late final SignedPreKeyDao signedPreKeyDao =
+      SignedPreKeyDao(this as SignalDatabase);
+  late final RatchetSenderKeyDao ratchetSenderKeyDao =
+      RatchetSenderKeyDao(this as SignalDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    senderKeys,
-    identities,
-    indexIdentitiesAddress,
-    prekeys,
-    indexPrekeysPrekeyId,
-    signedPrekeys,
-    indexSignedPrekeysPrekeyId,
-    sessions,
-    indexSessionsAddressDevice,
-    ratchetSenderKeys,
-  ];
+        senderKeys,
+        identities,
+        indexIdentitiesAddress,
+        prekeys,
+        indexPrekeysPrekeyId,
+        signedPrekeys,
+        indexSignedPrekeysPrekeyId,
+        sessions,
+        indexSessionsAddressDevice,
+        ratchetSenderKeys
+      ];
 }
 
-typedef $SenderKeysCreateCompanionBuilder =
-    SenderKeysCompanion Function({
-      required String groupId,
-      required String senderId,
-      required Uint8List record,
-      Value<int> rowid,
-    });
-typedef $SenderKeysUpdateCompanionBuilder =
-    SenderKeysCompanion Function({
-      Value<String> groupId,
-      Value<String> senderId,
-      Value<Uint8List> record,
-      Value<int> rowid,
-    });
+typedef $SenderKeysCreateCompanionBuilder = SenderKeysCompanion Function({
+  required String groupId,
+  required String senderId,
+  required Uint8List record,
+  Value<int> rowid,
+});
+typedef $SenderKeysUpdateCompanionBuilder = SenderKeysCompanion Function({
+  Value<String> groupId,
+  Value<String> senderId,
+  Value<Uint8List> record,
+  Value<int> rowid,
+});
 
 class $SenderKeysFilterComposer extends Composer<_$SignalDatabase, SenderKeys> {
   $SenderKeysFilterComposer({
@@ -2122,19 +1823,13 @@ class $SenderKeysFilterComposer extends Composer<_$SignalDatabase, SenderKeys> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get groupId => $composableBuilder(
-    column: $table.groupId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.groupId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get senderId => $composableBuilder(
-    column: $table.senderId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.senderId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.record, builder: (column) => ColumnFilters(column));
 }
 
 class $SenderKeysOrderingComposer
@@ -2147,19 +1842,13 @@ class $SenderKeysOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get groupId => $composableBuilder(
-    column: $table.groupId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.groupId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get senderId => $composableBuilder(
-    column: $table.senderId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.senderId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.record, builder: (column) => ColumnOrderings(column));
 }
 
 class $SenderKeysAnnotationComposer
@@ -2181,105 +1870,89 @@ class $SenderKeysAnnotationComposer
       $composableBuilder(column: $table.record, builder: (column) => column);
 }
 
-class $SenderKeysTableManager
-    extends
-        RootTableManager<
-          _$SignalDatabase,
-          SenderKeys,
-          SenderKey,
-          $SenderKeysFilterComposer,
-          $SenderKeysOrderingComposer,
-          $SenderKeysAnnotationComposer,
-          $SenderKeysCreateCompanionBuilder,
-          $SenderKeysUpdateCompanionBuilder,
-          (SenderKey, BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>),
-          SenderKey,
-          PrefetchHooks Function()
-        > {
+class $SenderKeysTableManager extends RootTableManager<
+    _$SignalDatabase,
+    SenderKeys,
+    SenderKey,
+    $SenderKeysFilterComposer,
+    $SenderKeysOrderingComposer,
+    $SenderKeysAnnotationComposer,
+    $SenderKeysCreateCompanionBuilder,
+    $SenderKeysUpdateCompanionBuilder,
+    (SenderKey, BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>),
+    SenderKey,
+    PrefetchHooks Function()> {
   $SenderKeysTableManager(_$SignalDatabase db, SenderKeys table)
-    : super(
-        TableManagerState(
+      : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SenderKeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SenderKeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SenderKeysAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> groupId = const Value.absent(),
-                Value<String> senderId = const Value.absent(),
-                Value<Uint8List> record = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => SenderKeysCompanion(
-                groupId: groupId,
-                senderId: senderId,
-                record: record,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String groupId,
-                required String senderId,
-                required Uint8List record,
-                Value<int> rowid = const Value.absent(),
-              }) => SenderKeysCompanion.insert(
-                groupId: groupId,
-                senderId: senderId,
-                record: record,
-                rowid: rowid,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          createFilteringComposer: () =>
+              $SenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SenderKeysAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> groupId = const Value.absent(),
+            Value<String> senderId = const Value.absent(),
+            Value<Uint8List> record = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SenderKeysCompanion(
+            groupId: groupId,
+            senderId: senderId,
+            record: record,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String groupId,
+            required String senderId,
+            required Uint8List record,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              SenderKeysCompanion.insert(
+            groupId: groupId,
+            senderId: senderId,
+            record: record,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
-        ),
-      );
+        ));
 }
 
-typedef $SenderKeysProcessedTableManager =
-    ProcessedTableManager<
-      _$SignalDatabase,
-      SenderKeys,
-      SenderKey,
-      $SenderKeysFilterComposer,
-      $SenderKeysOrderingComposer,
-      $SenderKeysAnnotationComposer,
-      $SenderKeysCreateCompanionBuilder,
-      $SenderKeysUpdateCompanionBuilder,
-      (SenderKey, BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>),
-      SenderKey,
-      PrefetchHooks Function()
-    >;
-typedef $IdentitiesCreateCompanionBuilder =
-    IdentitiesCompanion Function({
-      Value<int> id,
-      required String address,
-      Value<int?> registrationId,
-      required Uint8List publicKey,
-      Value<Uint8List?> privateKey,
-      Value<int?> nextPrekeyId,
-      required int timestamp,
-    });
-typedef $IdentitiesUpdateCompanionBuilder =
-    IdentitiesCompanion Function({
-      Value<int> id,
-      Value<String> address,
-      Value<int?> registrationId,
-      Value<Uint8List> publicKey,
-      Value<Uint8List?> privateKey,
-      Value<int?> nextPrekeyId,
-      Value<int> timestamp,
-    });
+typedef $SenderKeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    SenderKeys,
+    SenderKey,
+    $SenderKeysFilterComposer,
+    $SenderKeysOrderingComposer,
+    $SenderKeysAnnotationComposer,
+    $SenderKeysCreateCompanionBuilder,
+    $SenderKeysUpdateCompanionBuilder,
+    (SenderKey, BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>),
+    SenderKey,
+    PrefetchHooks Function()>;
+typedef $IdentitiesCreateCompanionBuilder = IdentitiesCompanion Function({
+  Value<int> id,
+  required String address,
+  Value<int?> registrationId,
+  required Uint8List publicKey,
+  Value<Uint8List?> privateKey,
+  Value<int?> nextPrekeyId,
+  required int timestamp,
+});
+typedef $IdentitiesUpdateCompanionBuilder = IdentitiesCompanion Function({
+  Value<int> id,
+  Value<String> address,
+  Value<int?> registrationId,
+  Value<Uint8List> publicKey,
+  Value<Uint8List?> privateKey,
+  Value<int?> nextPrekeyId,
+  Value<int> timestamp,
+});
 
 class $IdentitiesFilterComposer extends Composer<_$SignalDatabase, Identities> {
   $IdentitiesFilterComposer({
@@ -2290,39 +1963,26 @@ class $IdentitiesFilterComposer extends Composer<_$SignalDatabase, Identities> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.id, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get address => $composableBuilder(
-    column: $table.address,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.address, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get registrationId => $composableBuilder(
-    column: $table.registrationId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.registrationId,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get publicKey => $composableBuilder(
-    column: $table.publicKey,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.publicKey, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get privateKey => $composableBuilder(
-    column: $table.privateKey,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.privateKey, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get nextPrekeyId => $composableBuilder(
-    column: $table.nextPrekeyId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.nextPrekeyId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
 }
 
 class $IdentitiesOrderingComposer
@@ -2335,39 +1995,27 @@ class $IdentitiesOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.id, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get address => $composableBuilder(
-    column: $table.address,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.address, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get registrationId => $composableBuilder(
-    column: $table.registrationId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.registrationId,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get publicKey => $composableBuilder(
-    column: $table.publicKey,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.publicKey, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get privateKey => $composableBuilder(
-    column: $table.privateKey,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.privateKey, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get nextPrekeyId => $composableBuilder(
-    column: $table.nextPrekeyId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.nextPrekeyId,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
 }
 
 class $IdentitiesAnnotationComposer
@@ -2386,130 +2034,108 @@ class $IdentitiesAnnotationComposer
       $composableBuilder(column: $table.address, builder: (column) => column);
 
   GeneratedColumn<int> get registrationId => $composableBuilder(
-    column: $table.registrationId,
-    builder: (column) => column,
-  );
+      column: $table.registrationId, builder: (column) => column);
 
   GeneratedColumn<Uint8List> get publicKey =>
       $composableBuilder(column: $table.publicKey, builder: (column) => column);
 
   GeneratedColumn<Uint8List> get privateKey => $composableBuilder(
-    column: $table.privateKey,
-    builder: (column) => column,
-  );
+      column: $table.privateKey, builder: (column) => column);
 
   GeneratedColumn<int> get nextPrekeyId => $composableBuilder(
-    column: $table.nextPrekeyId,
-    builder: (column) => column,
-  );
+      column: $table.nextPrekeyId, builder: (column) => column);
 
   GeneratedColumn<int> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 }
 
-class $IdentitiesTableManager
-    extends
-        RootTableManager<
-          _$SignalDatabase,
-          Identities,
-          Identity,
-          $IdentitiesFilterComposer,
-          $IdentitiesOrderingComposer,
-          $IdentitiesAnnotationComposer,
-          $IdentitiesCreateCompanionBuilder,
-          $IdentitiesUpdateCompanionBuilder,
-          (Identity, BaseReferences<_$SignalDatabase, Identities, Identity>),
-          Identity,
-          PrefetchHooks Function()
-        > {
+class $IdentitiesTableManager extends RootTableManager<
+    _$SignalDatabase,
+    Identities,
+    Identity,
+    $IdentitiesFilterComposer,
+    $IdentitiesOrderingComposer,
+    $IdentitiesAnnotationComposer,
+    $IdentitiesCreateCompanionBuilder,
+    $IdentitiesUpdateCompanionBuilder,
+    (Identity, BaseReferences<_$SignalDatabase, Identities, Identity>),
+    Identity,
+    PrefetchHooks Function()> {
   $IdentitiesTableManager(_$SignalDatabase db, Identities table)
-    : super(
-        TableManagerState(
+      : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $IdentitiesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $IdentitiesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $IdentitiesAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> address = const Value.absent(),
-                Value<int?> registrationId = const Value.absent(),
-                Value<Uint8List> publicKey = const Value.absent(),
-                Value<Uint8List?> privateKey = const Value.absent(),
-                Value<int?> nextPrekeyId = const Value.absent(),
-                Value<int> timestamp = const Value.absent(),
-              }) => IdentitiesCompanion(
-                id: id,
-                address: address,
-                registrationId: registrationId,
-                publicKey: publicKey,
-                privateKey: privateKey,
-                nextPrekeyId: nextPrekeyId,
-                timestamp: timestamp,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String address,
-                Value<int?> registrationId = const Value.absent(),
-                required Uint8List publicKey,
-                Value<Uint8List?> privateKey = const Value.absent(),
-                Value<int?> nextPrekeyId = const Value.absent(),
-                required int timestamp,
-              }) => IdentitiesCompanion.insert(
-                id: id,
-                address: address,
-                registrationId: registrationId,
-                publicKey: publicKey,
-                privateKey: privateKey,
-                nextPrekeyId: nextPrekeyId,
-                timestamp: timestamp,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          createFilteringComposer: () =>
+              $IdentitiesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $IdentitiesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $IdentitiesAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> address = const Value.absent(),
+            Value<int?> registrationId = const Value.absent(),
+            Value<Uint8List> publicKey = const Value.absent(),
+            Value<Uint8List?> privateKey = const Value.absent(),
+            Value<int?> nextPrekeyId = const Value.absent(),
+            Value<int> timestamp = const Value.absent(),
+          }) =>
+              IdentitiesCompanion(
+            id: id,
+            address: address,
+            registrationId: registrationId,
+            publicKey: publicKey,
+            privateKey: privateKey,
+            nextPrekeyId: nextPrekeyId,
+            timestamp: timestamp,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String address,
+            Value<int?> registrationId = const Value.absent(),
+            required Uint8List publicKey,
+            Value<Uint8List?> privateKey = const Value.absent(),
+            Value<int?> nextPrekeyId = const Value.absent(),
+            required int timestamp,
+          }) =>
+              IdentitiesCompanion.insert(
+            id: id,
+            address: address,
+            registrationId: registrationId,
+            publicKey: publicKey,
+            privateKey: privateKey,
+            nextPrekeyId: nextPrekeyId,
+            timestamp: timestamp,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
-        ),
-      );
+        ));
 }
 
-typedef $IdentitiesProcessedTableManager =
-    ProcessedTableManager<
-      _$SignalDatabase,
-      Identities,
-      Identity,
-      $IdentitiesFilterComposer,
-      $IdentitiesOrderingComposer,
-      $IdentitiesAnnotationComposer,
-      $IdentitiesCreateCompanionBuilder,
-      $IdentitiesUpdateCompanionBuilder,
-      (Identity, BaseReferences<_$SignalDatabase, Identities, Identity>),
-      Identity,
-      PrefetchHooks Function()
-    >;
-typedef $PrekeysCreateCompanionBuilder =
-    PrekeysCompanion Function({
-      Value<int> id,
-      required int prekeyId,
-      required Uint8List record,
-    });
-typedef $PrekeysUpdateCompanionBuilder =
-    PrekeysCompanion Function({
-      Value<int> id,
-      Value<int> prekeyId,
-      Value<Uint8List> record,
-    });
+typedef $IdentitiesProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    Identities,
+    Identity,
+    $IdentitiesFilterComposer,
+    $IdentitiesOrderingComposer,
+    $IdentitiesAnnotationComposer,
+    $IdentitiesCreateCompanionBuilder,
+    $IdentitiesUpdateCompanionBuilder,
+    (Identity, BaseReferences<_$SignalDatabase, Identities, Identity>),
+    Identity,
+    PrefetchHooks Function()>;
+typedef $PrekeysCreateCompanionBuilder = PrekeysCompanion Function({
+  Value<int> id,
+  required int prekeyId,
+  required Uint8List record,
+});
+typedef $PrekeysUpdateCompanionBuilder = PrekeysCompanion Function({
+  Value<int> id,
+  Value<int> prekeyId,
+  Value<Uint8List> record,
+});
 
 class $PrekeysFilterComposer extends Composer<_$SignalDatabase, Prekeys> {
   $PrekeysFilterComposer({
@@ -2520,19 +2146,13 @@ class $PrekeysFilterComposer extends Composer<_$SignalDatabase, Prekeys> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.id, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get prekeyId => $composableBuilder(
-    column: $table.prekeyId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.prekeyId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.record, builder: (column) => ColumnFilters(column));
 }
 
 class $PrekeysOrderingComposer extends Composer<_$SignalDatabase, Prekeys> {
@@ -2544,19 +2164,13 @@ class $PrekeysOrderingComposer extends Composer<_$SignalDatabase, Prekeys> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.id, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get prekeyId => $composableBuilder(
-    column: $table.prekeyId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.prekeyId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.record, builder: (column) => ColumnOrderings(column));
 }
 
 class $PrekeysAnnotationComposer extends Composer<_$SignalDatabase, Prekeys> {
@@ -2577,92 +2191,79 @@ class $PrekeysAnnotationComposer extends Composer<_$SignalDatabase, Prekeys> {
       $composableBuilder(column: $table.record, builder: (column) => column);
 }
 
-class $PrekeysTableManager
-    extends
-        RootTableManager<
-          _$SignalDatabase,
-          Prekeys,
-          Prekey,
-          $PrekeysFilterComposer,
-          $PrekeysOrderingComposer,
-          $PrekeysAnnotationComposer,
-          $PrekeysCreateCompanionBuilder,
-          $PrekeysUpdateCompanionBuilder,
-          (Prekey, BaseReferences<_$SignalDatabase, Prekeys, Prekey>),
-          Prekey,
-          PrefetchHooks Function()
-        > {
+class $PrekeysTableManager extends RootTableManager<
+    _$SignalDatabase,
+    Prekeys,
+    Prekey,
+    $PrekeysFilterComposer,
+    $PrekeysOrderingComposer,
+    $PrekeysAnnotationComposer,
+    $PrekeysCreateCompanionBuilder,
+    $PrekeysUpdateCompanionBuilder,
+    (Prekey, BaseReferences<_$SignalDatabase, Prekeys, Prekey>),
+    Prekey,
+    PrefetchHooks Function()> {
   $PrekeysTableManager(_$SignalDatabase db, Prekeys table)
-    : super(
-        TableManagerState(
+      : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $PrekeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $PrekeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $PrekeysAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<int> prekeyId = const Value.absent(),
-                Value<Uint8List> record = const Value.absent(),
-              }) =>
-                  PrekeysCompanion(id: id, prekeyId: prekeyId, record: record),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required int prekeyId,
-                required Uint8List record,
-              }) => PrekeysCompanion.insert(
-                id: id,
-                prekeyId: prekeyId,
-                record: record,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          createFilteringComposer: () =>
+              $PrekeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $PrekeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $PrekeysAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> prekeyId = const Value.absent(),
+            Value<Uint8List> record = const Value.absent(),
+          }) =>
+              PrekeysCompanion(
+            id: id,
+            prekeyId: prekeyId,
+            record: record,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int prekeyId,
+            required Uint8List record,
+          }) =>
+              PrekeysCompanion.insert(
+            id: id,
+            prekeyId: prekeyId,
+            record: record,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
-        ),
-      );
+        ));
 }
 
-typedef $PrekeysProcessedTableManager =
-    ProcessedTableManager<
-      _$SignalDatabase,
-      Prekeys,
-      Prekey,
-      $PrekeysFilterComposer,
-      $PrekeysOrderingComposer,
-      $PrekeysAnnotationComposer,
-      $PrekeysCreateCompanionBuilder,
-      $PrekeysUpdateCompanionBuilder,
-      (Prekey, BaseReferences<_$SignalDatabase, Prekeys, Prekey>),
-      Prekey,
-      PrefetchHooks Function()
-    >;
-typedef $SignedPrekeysCreateCompanionBuilder =
-    SignedPrekeysCompanion Function({
-      Value<int> id,
-      required int prekeyId,
-      required Uint8List record,
-      required int timestamp,
-    });
-typedef $SignedPrekeysUpdateCompanionBuilder =
-    SignedPrekeysCompanion Function({
-      Value<int> id,
-      Value<int> prekeyId,
-      Value<Uint8List> record,
-      Value<int> timestamp,
-    });
+typedef $PrekeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    Prekeys,
+    Prekey,
+    $PrekeysFilterComposer,
+    $PrekeysOrderingComposer,
+    $PrekeysAnnotationComposer,
+    $PrekeysCreateCompanionBuilder,
+    $PrekeysUpdateCompanionBuilder,
+    (Prekey, BaseReferences<_$SignalDatabase, Prekeys, Prekey>),
+    Prekey,
+    PrefetchHooks Function()>;
+typedef $SignedPrekeysCreateCompanionBuilder = SignedPrekeysCompanion Function({
+  Value<int> id,
+  required int prekeyId,
+  required Uint8List record,
+  required int timestamp,
+});
+typedef $SignedPrekeysUpdateCompanionBuilder = SignedPrekeysCompanion Function({
+  Value<int> id,
+  Value<int> prekeyId,
+  Value<Uint8List> record,
+  Value<int> timestamp,
+});
 
 class $SignedPrekeysFilterComposer
     extends Composer<_$SignalDatabase, SignedPrekeys> {
@@ -2674,24 +2275,16 @@ class $SignedPrekeysFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.id, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get prekeyId => $composableBuilder(
-    column: $table.prekeyId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.prekeyId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.record, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
 }
 
 class $SignedPrekeysOrderingComposer
@@ -2704,24 +2297,16 @@ class $SignedPrekeysOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.id, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get prekeyId => $composableBuilder(
-    column: $table.prekeyId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.prekeyId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.record, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
 }
 
 class $SignedPrekeysAnnotationComposer
@@ -2746,107 +2331,91 @@ class $SignedPrekeysAnnotationComposer
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 }
 
-class $SignedPrekeysTableManager
-    extends
-        RootTableManager<
-          _$SignalDatabase,
-          SignedPrekeys,
-          SignedPrekey,
-          $SignedPrekeysFilterComposer,
-          $SignedPrekeysOrderingComposer,
-          $SignedPrekeysAnnotationComposer,
-          $SignedPrekeysCreateCompanionBuilder,
-          $SignedPrekeysUpdateCompanionBuilder,
-          (
-            SignedPrekey,
-            BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>,
-          ),
-          SignedPrekey,
-          PrefetchHooks Function()
-        > {
+class $SignedPrekeysTableManager extends RootTableManager<
+    _$SignalDatabase,
+    SignedPrekeys,
+    SignedPrekey,
+    $SignedPrekeysFilterComposer,
+    $SignedPrekeysOrderingComposer,
+    $SignedPrekeysAnnotationComposer,
+    $SignedPrekeysCreateCompanionBuilder,
+    $SignedPrekeysUpdateCompanionBuilder,
+    (
+      SignedPrekey,
+      BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>
+    ),
+    SignedPrekey,
+    PrefetchHooks Function()> {
   $SignedPrekeysTableManager(_$SignalDatabase db, SignedPrekeys table)
-    : super(
-        TableManagerState(
+      : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SignedPrekeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SignedPrekeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SignedPrekeysAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<int> prekeyId = const Value.absent(),
-                Value<Uint8List> record = const Value.absent(),
-                Value<int> timestamp = const Value.absent(),
-              }) => SignedPrekeysCompanion(
-                id: id,
-                prekeyId: prekeyId,
-                record: record,
-                timestamp: timestamp,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required int prekeyId,
-                required Uint8List record,
-                required int timestamp,
-              }) => SignedPrekeysCompanion.insert(
-                id: id,
-                prekeyId: prekeyId,
-                record: record,
-                timestamp: timestamp,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          createFilteringComposer: () =>
+              $SignedPrekeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SignedPrekeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SignedPrekeysAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> prekeyId = const Value.absent(),
+            Value<Uint8List> record = const Value.absent(),
+            Value<int> timestamp = const Value.absent(),
+          }) =>
+              SignedPrekeysCompanion(
+            id: id,
+            prekeyId: prekeyId,
+            record: record,
+            timestamp: timestamp,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int prekeyId,
+            required Uint8List record,
+            required int timestamp,
+          }) =>
+              SignedPrekeysCompanion.insert(
+            id: id,
+            prekeyId: prekeyId,
+            record: record,
+            timestamp: timestamp,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
-        ),
-      );
+        ));
 }
 
-typedef $SignedPrekeysProcessedTableManager =
-    ProcessedTableManager<
-      _$SignalDatabase,
-      SignedPrekeys,
+typedef $SignedPrekeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    SignedPrekeys,
+    SignedPrekey,
+    $SignedPrekeysFilterComposer,
+    $SignedPrekeysOrderingComposer,
+    $SignedPrekeysAnnotationComposer,
+    $SignedPrekeysCreateCompanionBuilder,
+    $SignedPrekeysUpdateCompanionBuilder,
+    (
       SignedPrekey,
-      $SignedPrekeysFilterComposer,
-      $SignedPrekeysOrderingComposer,
-      $SignedPrekeysAnnotationComposer,
-      $SignedPrekeysCreateCompanionBuilder,
-      $SignedPrekeysUpdateCompanionBuilder,
-      (
-        SignedPrekey,
-        BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>,
-      ),
-      SignedPrekey,
-      PrefetchHooks Function()
-    >;
-typedef $SessionsCreateCompanionBuilder =
-    SessionsCompanion Function({
-      Value<int> id,
-      required String address,
-      required int device,
-      required Uint8List record,
-      required int timestamp,
-    });
-typedef $SessionsUpdateCompanionBuilder =
-    SessionsCompanion Function({
-      Value<int> id,
-      Value<String> address,
-      Value<int> device,
-      Value<Uint8List> record,
-      Value<int> timestamp,
-    });
+      BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>
+    ),
+    SignedPrekey,
+    PrefetchHooks Function()>;
+typedef $SessionsCreateCompanionBuilder = SessionsCompanion Function({
+  Value<int> id,
+  required String address,
+  required int device,
+  required Uint8List record,
+  required int timestamp,
+});
+typedef $SessionsUpdateCompanionBuilder = SessionsCompanion Function({
+  Value<int> id,
+  Value<String> address,
+  Value<int> device,
+  Value<Uint8List> record,
+  Value<int> timestamp,
+});
 
 class $SessionsFilterComposer extends Composer<_$SignalDatabase, Sessions> {
   $SessionsFilterComposer({
@@ -2857,29 +2426,19 @@ class $SessionsFilterComposer extends Composer<_$SignalDatabase, Sessions> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.id, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get address => $composableBuilder(
-    column: $table.address,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.address, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get device => $composableBuilder(
-    column: $table.device,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.device, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.record, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
 }
 
 class $SessionsOrderingComposer extends Composer<_$SignalDatabase, Sessions> {
@@ -2891,29 +2450,19 @@ class $SessionsOrderingComposer extends Composer<_$SignalDatabase, Sessions> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.id, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get address => $composableBuilder(
-    column: $table.address,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.address, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get device => $composableBuilder(
-    column: $table.device,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.device, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get record => $composableBuilder(
-    column: $table.record,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.record, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
 }
 
 class $SessionsAnnotationComposer extends Composer<_$SignalDatabase, Sessions> {
@@ -2940,107 +2489,93 @@ class $SessionsAnnotationComposer extends Composer<_$SignalDatabase, Sessions> {
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 }
 
-class $SessionsTableManager
-    extends
-        RootTableManager<
-          _$SignalDatabase,
-          Sessions,
-          Session,
-          $SessionsFilterComposer,
-          $SessionsOrderingComposer,
-          $SessionsAnnotationComposer,
-          $SessionsCreateCompanionBuilder,
-          $SessionsUpdateCompanionBuilder,
-          (Session, BaseReferences<_$SignalDatabase, Sessions, Session>),
-          Session,
-          PrefetchHooks Function()
-        > {
+class $SessionsTableManager extends RootTableManager<
+    _$SignalDatabase,
+    Sessions,
+    Session,
+    $SessionsFilterComposer,
+    $SessionsOrderingComposer,
+    $SessionsAnnotationComposer,
+    $SessionsCreateCompanionBuilder,
+    $SessionsUpdateCompanionBuilder,
+    (Session, BaseReferences<_$SignalDatabase, Sessions, Session>),
+    Session,
+    PrefetchHooks Function()> {
   $SessionsTableManager(_$SignalDatabase db, Sessions table)
-    : super(
-        TableManagerState(
+      : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SessionsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SessionsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SessionsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> address = const Value.absent(),
-                Value<int> device = const Value.absent(),
-                Value<Uint8List> record = const Value.absent(),
-                Value<int> timestamp = const Value.absent(),
-              }) => SessionsCompanion(
-                id: id,
-                address: address,
-                device: device,
-                record: record,
-                timestamp: timestamp,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String address,
-                required int device,
-                required Uint8List record,
-                required int timestamp,
-              }) => SessionsCompanion.insert(
-                id: id,
-                address: address,
-                device: device,
-                record: record,
-                timestamp: timestamp,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          createFilteringComposer: () =>
+              $SessionsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SessionsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SessionsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> address = const Value.absent(),
+            Value<int> device = const Value.absent(),
+            Value<Uint8List> record = const Value.absent(),
+            Value<int> timestamp = const Value.absent(),
+          }) =>
+              SessionsCompanion(
+            id: id,
+            address: address,
+            device: device,
+            record: record,
+            timestamp: timestamp,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String address,
+            required int device,
+            required Uint8List record,
+            required int timestamp,
+          }) =>
+              SessionsCompanion.insert(
+            id: id,
+            address: address,
+            device: device,
+            record: record,
+            timestamp: timestamp,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
-        ),
-      );
+        ));
 }
 
-typedef $SessionsProcessedTableManager =
-    ProcessedTableManager<
-      _$SignalDatabase,
-      Sessions,
-      Session,
-      $SessionsFilterComposer,
-      $SessionsOrderingComposer,
-      $SessionsAnnotationComposer,
-      $SessionsCreateCompanionBuilder,
-      $SessionsUpdateCompanionBuilder,
-      (Session, BaseReferences<_$SignalDatabase, Sessions, Session>),
-      Session,
-      PrefetchHooks Function()
-    >;
-typedef $RatchetSenderKeysCreateCompanionBuilder =
-    RatchetSenderKeysCompanion Function({
-      required String groupId,
-      required String senderId,
-      required String status,
-      Value<String?> messageId,
-      required String createdAt,
-      Value<int> rowid,
-    });
-typedef $RatchetSenderKeysUpdateCompanionBuilder =
-    RatchetSenderKeysCompanion Function({
-      Value<String> groupId,
-      Value<String> senderId,
-      Value<String> status,
-      Value<String?> messageId,
-      Value<String> createdAt,
-      Value<int> rowid,
-    });
+typedef $SessionsProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    Sessions,
+    Session,
+    $SessionsFilterComposer,
+    $SessionsOrderingComposer,
+    $SessionsAnnotationComposer,
+    $SessionsCreateCompanionBuilder,
+    $SessionsUpdateCompanionBuilder,
+    (Session, BaseReferences<_$SignalDatabase, Sessions, Session>),
+    Session,
+    PrefetchHooks Function()>;
+typedef $RatchetSenderKeysCreateCompanionBuilder = RatchetSenderKeysCompanion
+    Function({
+  required String groupId,
+  required String senderId,
+  required String status,
+  Value<String?> messageId,
+  required String createdAt,
+  Value<int> rowid,
+});
+typedef $RatchetSenderKeysUpdateCompanionBuilder = RatchetSenderKeysCompanion
+    Function({
+  Value<String> groupId,
+  Value<String> senderId,
+  Value<String> status,
+  Value<String?> messageId,
+  Value<String> createdAt,
+  Value<int> rowid,
+});
 
 class $RatchetSenderKeysFilterComposer
     extends Composer<_$SignalDatabase, RatchetSenderKeys> {
@@ -3052,29 +2587,19 @@ class $RatchetSenderKeysFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get groupId => $composableBuilder(
-    column: $table.groupId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.groupId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get senderId => $composableBuilder(
-    column: $table.senderId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.senderId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.status, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get messageId => $composableBuilder(
-    column: $table.messageId,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.messageId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 }
 
 class $RatchetSenderKeysOrderingComposer
@@ -3087,29 +2612,19 @@ class $RatchetSenderKeysOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get groupId => $composableBuilder(
-    column: $table.groupId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.groupId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get senderId => $composableBuilder(
-    column: $table.senderId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.senderId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get status => $composableBuilder(
-    column: $table.status,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.status, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get messageId => $composableBuilder(
-    column: $table.messageId,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.messageId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
 
 class $RatchetSenderKeysAnnotationComposer
@@ -3137,104 +2652,85 @@ class $RatchetSenderKeysAnnotationComposer
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
-class $RatchetSenderKeysTableManager
-    extends
-        RootTableManager<
-          _$SignalDatabase,
-          RatchetSenderKeys,
-          RatchetSenderKey,
-          $RatchetSenderKeysFilterComposer,
-          $RatchetSenderKeysOrderingComposer,
-          $RatchetSenderKeysAnnotationComposer,
-          $RatchetSenderKeysCreateCompanionBuilder,
-          $RatchetSenderKeysUpdateCompanionBuilder,
-          (
-            RatchetSenderKey,
-            BaseReferences<
-              _$SignalDatabase,
-              RatchetSenderKeys,
-              RatchetSenderKey
-            >,
-          ),
-          RatchetSenderKey,
-          PrefetchHooks Function()
-        > {
+class $RatchetSenderKeysTableManager extends RootTableManager<
+    _$SignalDatabase,
+    RatchetSenderKeys,
+    RatchetSenderKey,
+    $RatchetSenderKeysFilterComposer,
+    $RatchetSenderKeysOrderingComposer,
+    $RatchetSenderKeysAnnotationComposer,
+    $RatchetSenderKeysCreateCompanionBuilder,
+    $RatchetSenderKeysUpdateCompanionBuilder,
+    (
+      RatchetSenderKey,
+      BaseReferences<_$SignalDatabase, RatchetSenderKeys, RatchetSenderKey>
+    ),
+    RatchetSenderKey,
+    PrefetchHooks Function()> {
   $RatchetSenderKeysTableManager(_$SignalDatabase db, RatchetSenderKeys table)
-    : super(
-        TableManagerState(
+      : super(TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $RatchetSenderKeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $RatchetSenderKeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $RatchetSenderKeysAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> groupId = const Value.absent(),
-                Value<String> senderId = const Value.absent(),
-                Value<String> status = const Value.absent(),
-                Value<String?> messageId = const Value.absent(),
-                Value<String> createdAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => RatchetSenderKeysCompanion(
-                groupId: groupId,
-                senderId: senderId,
-                status: status,
-                messageId: messageId,
-                createdAt: createdAt,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String groupId,
-                required String senderId,
-                required String status,
-                Value<String?> messageId = const Value.absent(),
-                required String createdAt,
-                Value<int> rowid = const Value.absent(),
-              }) => RatchetSenderKeysCompanion.insert(
-                groupId: groupId,
-                senderId: senderId,
-                status: status,
-                messageId: messageId,
-                createdAt: createdAt,
-                rowid: rowid,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          createFilteringComposer: () =>
+              $RatchetSenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $RatchetSenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $RatchetSenderKeysAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> groupId = const Value.absent(),
+            Value<String> senderId = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<String?> messageId = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RatchetSenderKeysCompanion(
+            groupId: groupId,
+            senderId: senderId,
+            status: status,
+            messageId: messageId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String groupId,
+            required String senderId,
+            required String status,
+            Value<String?> messageId = const Value.absent(),
+            required String createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              RatchetSenderKeysCompanion.insert(
+            groupId: groupId,
+            senderId: senderId,
+            status: status,
+            messageId: messageId,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
-        ),
-      );
+        ));
 }
 
-typedef $RatchetSenderKeysProcessedTableManager =
-    ProcessedTableManager<
-      _$SignalDatabase,
-      RatchetSenderKeys,
+typedef $RatchetSenderKeysProcessedTableManager = ProcessedTableManager<
+    _$SignalDatabase,
+    RatchetSenderKeys,
+    RatchetSenderKey,
+    $RatchetSenderKeysFilterComposer,
+    $RatchetSenderKeysOrderingComposer,
+    $RatchetSenderKeysAnnotationComposer,
+    $RatchetSenderKeysCreateCompanionBuilder,
+    $RatchetSenderKeysUpdateCompanionBuilder,
+    (
       RatchetSenderKey,
-      $RatchetSenderKeysFilterComposer,
-      $RatchetSenderKeysOrderingComposer,
-      $RatchetSenderKeysAnnotationComposer,
-      $RatchetSenderKeysCreateCompanionBuilder,
-      $RatchetSenderKeysUpdateCompanionBuilder,
-      (
-        RatchetSenderKey,
-        BaseReferences<_$SignalDatabase, RatchetSenderKeys, RatchetSenderKey>,
-      ),
-      RatchetSenderKey,
-      PrefetchHooks Function()
-    >;
+      BaseReferences<_$SignalDatabase, RatchetSenderKeys, RatchetSenderKey>
+    ),
+    RatchetSenderKey,
+    PrefetchHooks Function()>;
 
 class $SignalDatabaseManager {
   final _$SignalDatabase _db;

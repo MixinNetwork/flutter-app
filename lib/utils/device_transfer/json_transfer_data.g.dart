@@ -9,11 +9,8 @@ part of 'json_transfer_data.dart';
 JsonTransferData _$JsonTransferDataFromJson(Map<String, dynamic> json) =>
     JsonTransferData(
       data: json['data'] as Map<String, dynamic>,
-      type: $enumDecode(
-        _$JsonTransferDataTypeEnumMap,
-        json['type'],
-        unknownValue: JsonTransferDataType.unknown,
-      ),
+      type: $enumDecode(_$JsonTransferDataTypeEnumMap, json['type'],
+          unknownValue: JsonTransferDataType.unknown),
     );
 
 Map<String, dynamic> _$JsonTransferDataToJson(JsonTransferData instance) =>

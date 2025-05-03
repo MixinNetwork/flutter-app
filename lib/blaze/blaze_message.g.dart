@@ -7,15 +7,14 @@ part of 'blaze_message.dart';
 // **************************************************************************
 
 BlazeMessage _$BlazeMessageFromJson(Map<String, dynamic> json) => BlazeMessage(
-  id: json['id'] as String,
-  action: json['action'] as String,
-  data: json['data'],
-  params: json['params'],
-  error:
-      json['error'] == null
+      id: json['id'] as String,
+      action: json['action'] as String,
+      data: json['data'],
+      params: json['params'],
+      error: json['error'] == null
           ? null
           : MixinError.fromJson(json['error'] as Map<String, dynamic>),
-);
+    );
 
 Map<String, dynamic> _$BlazeMessageToJson(BlazeMessage instance) =>
     <String, dynamic>{

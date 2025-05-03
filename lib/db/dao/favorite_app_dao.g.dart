@@ -55,9 +55,13 @@ mixin _$FavoriteAppDaoMixin on DatabaseAccessor<MixinDatabase> {
 
   Selectable<App> getFavoriteAppsByUserId(String userId) {
     return customSelect(
-      'SELECT a.* FROM favorite_apps AS fa INNER JOIN apps AS a ON fa.app_id = a.app_id WHERE fa.user_id = ?1',
-      variables: [Variable<String>(userId)],
-      readsFrom: {favoriteApps, apps},
-    ).asyncMap(apps.mapFromRow);
+        'SELECT a.* FROM favorite_apps AS fa INNER JOIN apps AS a ON fa.app_id = a.app_id WHERE fa.user_id = ?1',
+        variables: [
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          favoriteApps,
+          apps,
+        }).asyncMap(apps.mapFromRow);
   }
 }

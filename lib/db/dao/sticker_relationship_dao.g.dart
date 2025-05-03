@@ -46,17 +46,25 @@ mixin _$StickerRelationshipDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<String> stickerSystemAlbumId(String stickerId) {
     return customSelect(
-      'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
-      variables: [Variable<String>(stickerId)],
-      readsFrom: {stickerAlbums, stickerRelationships},
-    ).map((QueryRow row) => row.read<String>('album_id'));
+        'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
+        variables: [
+          Variable<String>(stickerId)
+        ],
+        readsFrom: {
+          stickerAlbums,
+          stickerRelationships,
+        }).map((QueryRow row) => row.read<String>('album_id'));
   }
 
   Selectable<StickerAlbum> stickerSystemAlbum(String stickerId) {
     return customSelect(
-      'SELECT sa.* FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
-      variables: [Variable<String>(stickerId)],
-      readsFrom: {stickerRelationships, stickerAlbums},
-    ).asyncMap(stickerAlbums.mapFromRow);
+        'SELECT sa.* FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
+        variables: [
+          Variable<String>(stickerId)
+        ],
+        readsFrom: {
+          stickerRelationships,
+          stickerAlbums,
+        }).asyncMap(stickerAlbums.mapFromRow);
   }
 }

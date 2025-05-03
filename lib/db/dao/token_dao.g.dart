@@ -45,10 +45,10 @@ mixin _$TokenDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<int> countAssets() {
-    return customSelect(
-      'SELECT COUNT(1) AS _c0 FROM tokens',
-      variables: [],
-      readsFrom: {tokens},
-    ).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect('SELECT COUNT(1) AS _c0 FROM tokens',
+        variables: [],
+        readsFrom: {
+          tokens,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 }

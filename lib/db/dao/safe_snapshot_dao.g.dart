@@ -44,78 +44,60 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
-  Selectable<SafeSnapshotItem> _snapshotItem(
-    SnapshotItem$where where,
-    SnapshotItem$order order,
-    SnapshotItem$limit limit,
-  ) {
+  Selectable<SafeSnapshotItem> _snapshotItem(SnapshotItem$where where,
+      SnapshotItem$order order, SnapshotItem$limit limit) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
-      where(
-        alias(this.safeSnapshots, 's'),
-        alias(this.users, 'u'),
-        alias(this.tokens, 't'),
-      ),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+        where(alias(this.safeSnapshots, 's'), alias(this.users, 'u'),
+            alias(this.tokens, 't')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedorder = $write(
-      order?.call(
-            alias(this.safeSnapshots, 's'),
-            alias(this.users, 'u'),
-            alias(this.tokens, 't'),
-          ) ??
-          const OrderBy.nothing(),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+        order?.call(alias(this.safeSnapshots, 's'), alias(this.users, 'u'),
+                alias(this.tokens, 't')) ??
+            const OrderBy.nothing(),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
-      limit(
-        alias(this.safeSnapshots, 's'),
-        alias(this.users, 'u'),
-        alias(this.tokens, 't'),
-      ),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+        limit(alias(this.safeSnapshots, 's'), alias(this.users, 'u'),
+            alias(this.tokens, 't')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT s.snapshot_id, s.type, s.asset_id, s.amount, s.created_at, s.opponent_id, s.trace_id, s.memo, s.confirmations, s.transaction_hash, s.opening_balance, s.closing_balance, u.avatar_url, u.full_name AS opponent_ful_name, t.symbol AS asset_symbol, t.confirmations AS asset_confirmations FROM safe_snapshots AS s LEFT JOIN users AS u ON u.user_id = s.opponent_id LEFT JOIN tokens AS t ON t.asset_id = s.asset_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
-      variables: [
-        ...generatedwhere.introducedVariables,
-        ...generatedorder.introducedVariables,
-        ...generatedlimit.introducedVariables,
-      ],
-      readsFrom: {
-        safeSnapshots,
-        users,
-        tokens,
-        ...generatedwhere.watchedTables,
-        ...generatedorder.watchedTables,
-        ...generatedlimit.watchedTables,
-      },
-    ).map(
-      (QueryRow row) => SafeSnapshotItem(
-        snapshotId: row.read<String>('snapshot_id'),
-        type: row.read<String>('type'),
-        assetId: row.read<String>('asset_id'),
-        amount: row.read<String>('amount'),
-        createdAt: row.read<String>('created_at'),
-        opponentId: row.read<String>('opponent_id'),
-        traceId: row.readNullable<String>('trace_id'),
-        memo: row.read<String>('memo'),
-        confirmations: row.readNullable<int>('confirmations'),
-        transactionHash: row.read<String>('transaction_hash'),
-        openingBalance: row.readNullable<String>('opening_balance'),
-        closingBalance: row.readNullable<String>('closing_balance'),
-        avatarUrl: row.readNullable<String>('avatar_url'),
-        opponentFulName: row.readNullable<String>('opponent_ful_name'),
-        assetSymbol: row.readNullable<String>('asset_symbol'),
-        assetConfirmations: row.readNullable<int>('asset_confirmations'),
-      ),
-    );
+        'SELECT s.snapshot_id, s.type, s.asset_id, s.amount, s.created_at, s.opponent_id, s.trace_id, s.memo, s.confirmations, s.transaction_hash, s.opening_balance, s.closing_balance, u.avatar_url, u.full_name AS opponent_ful_name, t.symbol AS asset_symbol, t.confirmations AS asset_confirmations FROM safe_snapshots AS s LEFT JOIN users AS u ON u.user_id = s.opponent_id LEFT JOIN tokens AS t ON t.asset_id = s.asset_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        variables: [
+          ...generatedwhere.introducedVariables,
+          ...generatedorder.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          safeSnapshots,
+          users,
+          tokens,
+          ...generatedwhere.watchedTables,
+          ...generatedorder.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) => SafeSnapshotItem(
+          snapshotId: row.read<String>('snapshot_id'),
+          type: row.read<String>('type'),
+          assetId: row.read<String>('asset_id'),
+          amount: row.read<String>('amount'),
+          createdAt: row.read<String>('created_at'),
+          opponentId: row.read<String>('opponent_id'),
+          traceId: row.readNullable<String>('trace_id'),
+          memo: row.read<String>('memo'),
+          confirmations: row.readNullable<int>('confirmations'),
+          transactionHash: row.read<String>('transaction_hash'),
+          openingBalance: row.readNullable<String>('opening_balance'),
+          closingBalance: row.readNullable<String>('closing_balance'),
+          avatarUrl: row.readNullable<String>('avatar_url'),
+          opponentFulName: row.readNullable<String>('opponent_ful_name'),
+          assetSymbol: row.readNullable<String>('asset_symbol'),
+          assetConfirmations: row.readNullable<int>('asset_confirmations'),
+        ));
   }
 
   Future<int> deletePendingSnapshotByHash(String transactionHash) {
@@ -128,11 +110,11 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   }
 
   Selectable<int> countSnapshots() {
-    return customSelect(
-      'SELECT COUNT(1) AS _c0 FROM safe_snapshots',
-      variables: [],
-      readsFrom: {safeSnapshots},
-    ).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect('SELECT COUNT(1) AS _c0 FROM safe_snapshots',
+        variables: [],
+        readsFrom: {
+          safeSnapshots,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 }
 
@@ -173,23 +155,22 @@ class SafeSnapshotItem {
   });
   @override
   int get hashCode => Object.hash(
-    snapshotId,
-    type,
-    assetId,
-    amount,
-    createdAt,
-    opponentId,
-    traceId,
-    memo,
-    confirmations,
-    transactionHash,
-    openingBalance,
-    closingBalance,
-    avatarUrl,
-    opponentFulName,
-    assetSymbol,
-    assetConfirmations,
-  );
+      snapshotId,
+      type,
+      assetId,
+      amount,
+      createdAt,
+      opponentId,
+      traceId,
+      memo,
+      confirmations,
+      transactionHash,
+      openingBalance,
+      closingBalance,
+      avatarUrl,
+      opponentFulName,
+      assetSymbol,
+      assetConfirmations);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -234,8 +215,8 @@ class SafeSnapshotItem {
   }
 }
 
-typedef SnapshotItem$where =
-    Expression<bool> Function(SafeSnapshots s, Users u, Tokens t);
-typedef SnapshotItem$order =
-    OrderBy Function(SafeSnapshots s, Users u, Tokens t);
+typedef SnapshotItem$where = Expression<bool> Function(
+    SafeSnapshots s, Users u, Tokens t);
+typedef SnapshotItem$order = OrderBy Function(
+    SafeSnapshots s, Users u, Tokens t);
 typedef SnapshotItem$limit = Limit Function(SafeSnapshots s, Users u, Tokens t);

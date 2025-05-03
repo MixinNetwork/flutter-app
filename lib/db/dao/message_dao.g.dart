@@ -45,166 +45,154 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<QuoteMessageItem> _baseQuoteMessageItem(
-    BaseQuoteMessageItem$where where,
-    BaseQuoteMessageItem$order order,
-    BaseQuoteMessageItem$limit limit,
-  ) {
+      BaseQuoteMessageItem$where where,
+      BaseQuoteMessageItem$order order,
+      BaseQuoteMessageItem$limit limit) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
-      where(
-        alias(this.messages, 'message'),
-        alias(this.users, 'sender'),
-        alias(this.stickers, 'sticker'),
-        alias(this.users, 'shareUser'),
-        alias(this.messageMentions, 'messageMention'),
-      ),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    final generatedorder = $write(
-      order?.call(
+        where(
             alias(this.messages, 'message'),
             alias(this.users, 'sender'),
             alias(this.stickers, 'sticker'),
             alias(this.users, 'shareUser'),
-            alias(this.messageMentions, 'messageMention'),
-          ) ??
-          const OrderBy.nothing(),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+            alias(this.messageMentions, 'messageMention')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
+    $arrayStartIndex += generatedwhere.amountOfVariables;
+    final generatedorder = $write(
+        order?.call(
+                alias(this.messages, 'message'),
+                alias(this.users, 'sender'),
+                alias(this.stickers, 'sticker'),
+                alias(this.users, 'shareUser'),
+                alias(this.messageMentions, 'messageMention')) ??
+            const OrderBy.nothing(),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedorder.amountOfVariables;
     final generatedlimit = $write(
-      limit(
-        alias(this.messages, 'message'),
-        alias(this.users, 'sender'),
-        alias(this.stickers, 'sticker'),
-        alias(this.users, 'shareUser'),
-        alias(this.messageMentions, 'messageMention'),
-      ),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+        limit(
+            alias(this.messages, 'message'),
+            alias(this.users, 'sender'),
+            alias(this.stickers, 'sticker'),
+            alias(this.users, 'shareUser'),
+            alias(this.messageMentions, 'messageMention')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
-      variables: [
-        ...generatedwhere.introducedVariables,
-        ...generatedorder.introducedVariables,
-        ...generatedlimit.introducedVariables,
-      ],
-      readsFrom: {
-        messages,
-        users,
-        stickers,
-        messageMentions,
-        ...generatedwhere.watchedTables,
-        ...generatedorder.watchedTables,
-        ...generatedlimit.watchedTables,
-      },
-    ).map(
-      (QueryRow row) => QuoteMessageItem(
-        messageId: row.read<String>('messageId'),
-        conversationId: row.read<String>('conversationId'),
-        userId: row.read<String>('userId'),
-        userFullName: row.readNullable<String>('userFullName'),
-        userIdentityNumber: row.read<String>('userIdentityNumber'),
-        appId: row.readNullable<String>('appId'),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$convertercreatedAt.fromSql(
-          row.read<int>('createdAt'),
-        ),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        mediaStatus: Messages.$convertermediaStatus.fromSql(
-          row.readNullable<String>('mediaStatus'),
-        ),
-        mediaWaveform: row.readNullable<String>('mediaWaveform'),
-        mediaName: row.readNullable<String>('mediaName'),
-        mediaMimeType: row.readNullable<String>('mediaMimeType'),
-        mediaSize: row.readNullable<int>('mediaSize'),
-        mediaWidth: row.readNullable<int>('mediaWidth'),
-        mediaHeight: row.readNullable<int>('mediaHeight'),
-        thumbImage: row.readNullable<String>('thumbImage'),
-        thumbUrl: row.readNullable<String>('thumbUrl'),
-        mediaUrl: row.readNullable<String>('mediaUrl'),
-        mediaDuration: row.readNullable<String>('mediaDuration'),
-        stickerId: row.readNullable<String>('stickerId'),
-        assetUrl: row.readNullable<String>('assetUrl'),
-        assetWidth: row.readNullable<int>('assetWidth'),
-        assetHeight: row.readNullable<int>('assetHeight'),
-        assetName: row.readNullable<String>('assetName'),
-        assetType: row.readNullable<String>('assetType'),
-        sharedUserId: row.readNullable<String>('sharedUserId'),
-        sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.readNullable<String>(
-          'sharedUserIdentityNumber',
-        ),
-        sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
-        sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
-      ),
-    );
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        variables: [
+          ...generatedwhere.introducedVariables,
+          ...generatedorder.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          stickers,
+          messageMentions,
+          ...generatedwhere.watchedTables,
+          ...generatedorder.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) => QuoteMessageItem(
+          messageId: row.read<String>('messageId'),
+          conversationId: row.read<String>('conversationId'),
+          userId: row.read<String>('userId'),
+          userFullName: row.readNullable<String>('userFullName'),
+          userIdentityNumber: row.read<String>('userIdentityNumber'),
+          appId: row.readNullable<String>('appId'),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          mediaStatus: Messages.$convertermediaStatus
+              .fromSql(row.readNullable<String>('mediaStatus')),
+          mediaWaveform: row.readNullable<String>('mediaWaveform'),
+          mediaName: row.readNullable<String>('mediaName'),
+          mediaMimeType: row.readNullable<String>('mediaMimeType'),
+          mediaSize: row.readNullable<int>('mediaSize'),
+          mediaWidth: row.readNullable<int>('mediaWidth'),
+          mediaHeight: row.readNullable<int>('mediaHeight'),
+          thumbImage: row.readNullable<String>('thumbImage'),
+          thumbUrl: row.readNullable<String>('thumbUrl'),
+          mediaUrl: row.readNullable<String>('mediaUrl'),
+          mediaDuration: row.readNullable<String>('mediaDuration'),
+          stickerId: row.readNullable<String>('stickerId'),
+          assetUrl: row.readNullable<String>('assetUrl'),
+          assetWidth: row.readNullable<int>('assetWidth'),
+          assetHeight: row.readNullable<int>('assetHeight'),
+          assetName: row.readNullable<String>('assetName'),
+          assetType: row.readNullable<String>('assetType'),
+          sharedUserId: row.readNullable<String>('sharedUserId'),
+          sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
+          sharedUserIdentityNumber:
+              row.readNullable<String>('sharedUserIdentityNumber'),
+          sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
+          sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
+          sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+        ));
   }
 
   Selectable<MessageStatus> messageStatusById(String messageId) {
     return customSelect(
-      'SELECT status FROM messages WHERE message_id = ?1 LIMIT 1',
-      variables: [Variable<String>(messageId)],
-      readsFrom: {messages},
-    ).map(
-      (QueryRow row) =>
-          Messages.$converterstatus.fromSql(row.read<String>('status')),
-    );
+        'SELECT status FROM messages WHERE message_id = ?1 LIMIT 1',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) =>
+        Messages.$converterstatus.fromSql(row.read<String>('status')));
   }
 
   Selectable<SendingMessage> sendingMessage(String messageId) {
     return customSelect(
-      'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.caption, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
-      variables: [Variable<String>(messageId)],
-      readsFrom: {messages, resendSessionMessages},
-    ).map(
-      (QueryRow row) => SendingMessage(
-        messageId: row.read<String>('message_id'),
-        conversationId: row.read<String>('conversation_id'),
-        userId: row.read<String>('user_id'),
-        category: row.read<String>('category'),
-        content: row.readNullable<String>('content'),
-        mediaUrl: row.readNullable<String>('media_url'),
-        mediaMimeType: row.readNullable<String>('media_mime_type'),
-        mediaSize: row.readNullable<int>('media_size'),
-        mediaDuration: row.readNullable<String>('media_duration'),
-        mediaWidth: row.readNullable<int>('media_width'),
-        mediaHeight: row.readNullable<int>('media_height'),
-        mediaHash: row.readNullable<String>('media_hash'),
-        thumbImage: row.readNullable<String>('thumb_image'),
-        mediaKey: row.readNullable<String>('media_key'),
-        mediaDigest: row.readNullable<String>('media_digest'),
-        mediaStatus: Messages.$convertermediaStatus.fromSql(
-          row.readNullable<String>('media_status'),
-        ),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        createdAt: Messages.$convertercreatedAt.fromSql(
-          row.read<int>('created_at'),
-        ),
-        action: row.readNullable<String>('action'),
-        participantId: row.readNullable<String>('participant_id'),
-        snapshotId: row.readNullable<String>('snapshot_id'),
-        hyperlink: row.readNullable<String>('hyperlink'),
-        name: row.readNullable<String>('name'),
-        albumId: row.readNullable<String>('album_id'),
-        stickerId: row.readNullable<String>('sticker_id'),
-        sharedUserId: row.readNullable<String>('shared_user_id'),
-        mediaWaveform: row.readNullable<String>('media_waveform'),
-        caption: row.readNullable<String>('caption'),
-        quoteMessageId: row.readNullable<String>('quote_message_id'),
-        quoteContent: row.readNullable<String>('quote_content'),
-        resendStatus: row.readNullable<int>('resend_status'),
-        resendUserId: row.readNullable<String>('resend_user_id'),
-        resendSessionId: row.readNullable<String>('resend_session_id'),
-      ),
-    );
+        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.caption, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+          resendSessionMessages,
+        }).map((QueryRow row) => SendingMessage(
+          messageId: row.read<String>('message_id'),
+          conversationId: row.read<String>('conversation_id'),
+          userId: row.read<String>('user_id'),
+          category: row.read<String>('category'),
+          content: row.readNullable<String>('content'),
+          mediaUrl: row.readNullable<String>('media_url'),
+          mediaMimeType: row.readNullable<String>('media_mime_type'),
+          mediaSize: row.readNullable<int>('media_size'),
+          mediaDuration: row.readNullable<String>('media_duration'),
+          mediaWidth: row.readNullable<int>('media_width'),
+          mediaHeight: row.readNullable<int>('media_height'),
+          mediaHash: row.readNullable<String>('media_hash'),
+          thumbImage: row.readNullable<String>('thumb_image'),
+          mediaKey: row.readNullable<String>('media_key'),
+          mediaDigest: row.readNullable<String>('media_digest'),
+          mediaStatus: Messages.$convertermediaStatus
+              .fromSql(row.readNullable<String>('media_status')),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('created_at')),
+          action: row.readNullable<String>('action'),
+          participantId: row.readNullable<String>('participant_id'),
+          snapshotId: row.readNullable<String>('snapshot_id'),
+          hyperlink: row.readNullable<String>('hyperlink'),
+          name: row.readNullable<String>('name'),
+          albumId: row.readNullable<String>('album_id'),
+          stickerId: row.readNullable<String>('sticker_id'),
+          sharedUserId: row.readNullable<String>('shared_user_id'),
+          mediaWaveform: row.readNullable<String>('media_waveform'),
+          caption: row.readNullable<String>('caption'),
+          quoteMessageId: row.readNullable<String>('quote_message_id'),
+          quoteContent: row.readNullable<String>('quote_content'),
+          resendStatus: row.readNullable<int>('resend_status'),
+          resendUserId: row.readNullable<String>('resend_user_id'),
+          resendSessionId: row.readNullable<String>('resend_session_id'),
+        ));
   }
 
   Selectable<NotificationMessage> notificationMessage(List<String> messageId) {
@@ -212,85 +200,83 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageId = $expandVar($arrayStartIndex, messageId.length);
     $arrayStartIndex += messageId.length;
     return customSelect(
-      'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
-      variables: [for (var $ in messageId) Variable<String>($)],
-      readsFrom: {messages, users, conversations, messageMentions},
-    ).map(
-      (QueryRow row) => NotificationMessage(
-        messageId: row.read<String>('messageId'),
-        conversationId: row.read<String>('conversationId'),
-        senderId: row.read<String>('senderId'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        quoteContent: row.readNullable<String>('quoteContent'),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        groupName: row.readNullable<String>('groupName'),
-        muteUntil: NullAwareTypeConverter.wrapFromSql(
-          Conversations.$convertermuteUntil,
-          row.readNullable<int>('muteUntil'),
-        ),
-        ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
-          Users.$convertermuteUntil,
-          row.readNullable<int>('ownerMuteUntil'),
-        ),
-        ownerUserId: row.readNullable<String>('ownerUserId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        createdAt: Messages.$convertercreatedAt.fromSql(
-          row.read<int>('createdAt'),
-        ),
-        category: Conversations.$convertercategory.fromSql(
-          row.readNullable<String>('category'),
-        ),
-        actionName: row.readNullable<String>('actionName'),
-        relationship: Users.$converterrelationship.fromSql(
-          row.readNullable<String>('relationship'),
-        ),
-        participantFullName: row.readNullable<String>('participantFullName'),
-        participantUserId: row.readNullable<String>('participantUserId'),
-      ),
-    );
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
+        variables: [
+          for (var $ in messageId) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messageMentions,
+        }).map((QueryRow row) => NotificationMessage(
+          messageId: row.read<String>('messageId'),
+          conversationId: row.read<String>('conversationId'),
+          senderId: row.read<String>('senderId'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          quoteContent: row.readNullable<String>('quoteContent'),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          groupName: row.readNullable<String>('groupName'),
+          muteUntil: NullAwareTypeConverter.wrapFromSql(
+              Conversations.$convertermuteUntil,
+              row.readNullable<int>('muteUntil')),
+          ownerMuteUntil: NullAwareTypeConverter.wrapFromSql(
+              Users.$convertermuteUntil,
+              row.readNullable<int>('ownerMuteUntil')),
+          ownerUserId: row.readNullable<String>('ownerUserId'),
+          ownerFullName: row.readNullable<String>('ownerFullName'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          actionName: row.readNullable<String>('actionName'),
+          relationship: Users.$converterrelationship
+              .fromSql(row.readNullable<String>('relationship')),
+          participantFullName: row.readNullable<String>('participantFullName'),
+          participantUserId: row.readNullable<String>('participantUserId'),
+        ));
   }
 
   Selectable<SearchMessageDetailItem> searchMessageByIds(
-    List<String> messageIds,
-  ) {
+      List<String> messageIds) {
     var $arrayStartIndex = 1;
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-      'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
-      variables: [for (var $ in messageIds) Variable<String>($)],
-      readsFrom: {messages, users, conversations},
-    ).map(
-      (QueryRow row) => SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$convertercreatedAt.fromSql(
-          row.read<int>('createdAt'),
-        ),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.read<bool>('verified'),
-        membership: Users.$convertermembership.fromSql(
-          row.readNullable<String>('membership'),
-        ),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory.fromSql(
-          row.readNullable<String>('category'),
-        ),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      ),
-    );
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
+        variables: [
+          for (var $ in messageIds) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+        }).map((QueryRow row) => SearchMessageDetailItem(
+          messageId: row.read<String>('messageId'),
+          senderId: row.read<String>('senderId'),
+          senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          mediaName: row.readNullable<String>('mediaName'),
+          appId: row.readNullable<String>('appId'),
+          verified: row.read<bool>('verified'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
+          ownerId: row.readNullable<String>('ownerId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          conversationId: row.read<String>('conversationId'),
+          ownerFullName: row.readNullable<String>('ownerFullName'),
+          ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+        ));
   }
 
   Selectable<MiniMessageItem> miniMessageByIds(List<String> messageIds) {
@@ -298,116 +284,102 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-      'SELECT conversation_id AS conversationId, message_id AS messageId FROM messages WHERE message_id IN ($expandedmessageIds)',
-      variables: [for (var $ in messageIds) Variable<String>($)],
-      readsFrom: {messages},
-    ).map(
-      (QueryRow row) => MiniMessageItem(
-        conversationId: row.read<String>('conversationId'),
-        messageId: row.read<String>('messageId'),
-      ),
-    );
+        'SELECT conversation_id AS conversationId, message_id AS messageId FROM messages WHERE message_id IN ($expandedmessageIds)',
+        variables: [
+          for (var $ in messageIds) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => MiniMessageItem(
+          conversationId: row.read<String>('conversationId'),
+          messageId: row.read<String>('messageId'),
+        ));
   }
 
   Selectable<SearchMessageDetailItem> _searchMessage(
-    SearchMessage$where where,
-    SearchMessage$limit limit,
-  ) {
+      SearchMessage$where where, SearchMessage$limit limit) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
-      where(
-        alias(this.messages, 'm'),
-        alias(this.conversations, 'c'),
-        alias(this.users, 'u'),
-        alias(this.users, 'owner'),
-      ),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u'), alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedlimit = $write(
-      limit(
-        alias(this.messages, 'm'),
-        alias(this.conversations, 'c'),
-        alias(this.users, 'u'),
-        alias(this.users, 'owner'),
-      ),
-      hasMultipleTables: true,
-      startIndex: $arrayStartIndex,
-    );
+        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u'), alias(this.users, 'owner')),
+        hasMultipleTables: true,
+        startIndex: $arrayStartIndex);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
-      variables: [
-        ...generatedwhere.introducedVariables,
-        ...generatedlimit.introducedVariables,
-      ],
-      readsFrom: {
-        messages,
-        users,
-        conversations,
-        ...generatedwhere.watchedTables,
-        ...generatedlimit.watchedTables,
-      },
-    ).map(
-      (QueryRow row) => SearchMessageDetailItem(
-        messageId: row.read<String>('messageId'),
-        senderId: row.read<String>('senderId'),
-        senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
-        senderFullName: row.readNullable<String>('senderFullName'),
-        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-        type: row.read<String>('type'),
-        content: row.readNullable<String>('content'),
-        createdAt: Messages.$convertercreatedAt.fromSql(
-          row.read<int>('createdAt'),
-        ),
-        mediaName: row.readNullable<String>('mediaName'),
-        appId: row.readNullable<String>('appId'),
-        verified: row.read<bool>('verified'),
-        membership: Users.$convertermembership.fromSql(
-          row.readNullable<String>('membership'),
-        ),
-        ownerId: row.readNullable<String>('ownerId'),
-        groupIconUrl: row.readNullable<String>('groupIconUrl'),
-        category: Conversations.$convertercategory.fromSql(
-          row.readNullable<String>('category'),
-        ),
-        groupName: row.readNullable<String>('groupName'),
-        conversationId: row.read<String>('conversationId'),
-        ownerFullName: row.readNullable<String>('ownerFullName'),
-        ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
-      ),
-    );
+        'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC ${generatedlimit.sql}',
+        variables: [
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) => SearchMessageDetailItem(
+          messageId: row.read<String>('messageId'),
+          senderId: row.read<String>('senderId'),
+          senderAvatarUrl: row.readNullable<String>('senderAvatarUrl'),
+          senderFullName: row.readNullable<String>('senderFullName'),
+          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+          type: row.read<String>('type'),
+          content: row.readNullable<String>('content'),
+          createdAt:
+              Messages.$convertercreatedAt.fromSql(row.read<int>('createdAt')),
+          mediaName: row.readNullable<String>('mediaName'),
+          appId: row.readNullable<String>('appId'),
+          verified: row.read<bool>('verified'),
+          membership: Users.$convertermembership
+              .fromSql(row.readNullable<String>('membership')),
+          ownerId: row.readNullable<String>('ownerId'),
+          groupIconUrl: row.readNullable<String>('groupIconUrl'),
+          category: Conversations.$convertercategory
+              .fromSql(row.readNullable<String>('category')),
+          groupName: row.readNullable<String>('groupName'),
+          conversationId: row.read<String>('conversationId'),
+          ownerFullName: row.readNullable<String>('ownerFullName'),
+          ownerAvatarUrl: row.readNullable<String>('ownerAvatarUrl'),
+        ));
   }
 
   Selectable<int> countMessages() {
-    return customSelect(
-      'SELECT count(1) AS _c0 FROM messages',
-      variables: [],
-      readsFrom: {messages},
-    ).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect('SELECT count(1) AS _c0 FROM messages',
+        variables: [],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<int> countMediaMessages() {
     return customSelect(
-      'SELECT count(1) AS _c0 FROM messages WHERE category IN (\'SIGNAL_IMAGE\', \'SIGNAL_VIDEO\', \'SIGNAL_DATA\', \'SIGNAL_AUDIO\', \'PLAIN_IMAGE\', \'PLAIN_VIDEO\', \'PLAIN_DATA\', \'PLAIN_AUDIO\', \'ENCRYPTED_IMAGE\', \'ENCRYPTED_VIDEO\', \'ENCRYPTED_DATA\', \'ENCRYPTED_AUDIO\')',
-      variables: [],
-      readsFrom: {messages},
-    ).map((QueryRow row) => row.read<int>('_c0'));
+        'SELECT count(1) AS _c0 FROM messages WHERE category IN (\'SIGNAL_IMAGE\', \'SIGNAL_VIDEO\', \'SIGNAL_DATA\', \'SIGNAL_AUDIO\', \'PLAIN_IMAGE\', \'PLAIN_VIDEO\', \'PLAIN_DATA\', \'PLAIN_AUDIO\', \'ENCRYPTED_IMAGE\', \'ENCRYPTED_VIDEO\', \'ENCRYPTED_DATA\', \'ENCRYPTED_AUDIO\')',
+        variables: [],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<QuoteMinimal> bigQuoteMessage(int rowId, int limit) {
     return customSelect(
-      'SELECT "rowid", conversation_id, quote_message_id FROM messages WHERE "rowid" > ?1 AND quote_message_id IS NOT NULL AND quote_message_id != \'\' AND length(quote_content) > 10240 GROUP BY quote_message_id ORDER BY "rowid" ASC LIMIT ?2',
-      variables: [Variable<int>(rowId), Variable<int>(limit)],
-      readsFrom: {messages},
-    ).map(
-      (QueryRow row) => QuoteMinimal(
-        rowid: row.read<int>('rowid'),
-        conversationId: row.read<String>('conversation_id'),
-        quoteMessageId: row.readNullable<String>('quote_message_id'),
-      ),
-    );
+        'SELECT "rowid", conversation_id, quote_message_id FROM messages WHERE "rowid" > ?1 AND quote_message_id IS NOT NULL AND quote_message_id != \'\' AND length(quote_content) > 10240 GROUP BY quote_message_id ORDER BY "rowid" ASC LIMIT ?2',
+        variables: [
+          Variable<int>(rowId),
+          Variable<int>(limit)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => QuoteMinimal(
+          rowid: row.read<int>('rowid'),
+          conversationId: row.read<String>('conversation_id'),
+          quoteMessageId: row.readNullable<String>('quote_message_id'),
+        ));
   }
 }
 
@@ -482,40 +454,40 @@ class QuoteMessageItem {
   });
   @override
   int get hashCode => Object.hashAll([
-    messageId,
-    conversationId,
-    userId,
-    userFullName,
-    userIdentityNumber,
-    appId,
-    type,
-    content,
-    createdAt,
-    status,
-    mediaStatus,
-    mediaWaveform,
-    mediaName,
-    mediaMimeType,
-    mediaSize,
-    mediaWidth,
-    mediaHeight,
-    thumbImage,
-    thumbUrl,
-    mediaUrl,
-    mediaDuration,
-    stickerId,
-    assetUrl,
-    assetWidth,
-    assetHeight,
-    assetName,
-    assetType,
-    sharedUserId,
-    sharedUserFullName,
-    sharedUserIdentityNumber,
-    sharedUserAvatarUrl,
-    sharedUserIsVerified,
-    sharedUserAppId,
-  ]);
+        messageId,
+        conversationId,
+        userId,
+        userFullName,
+        userIdentityNumber,
+        appId,
+        type,
+        content,
+        createdAt,
+        status,
+        mediaStatus,
+        mediaWaveform,
+        mediaName,
+        mediaMimeType,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        thumbImage,
+        thumbUrl,
+        mediaUrl,
+        mediaDuration,
+        stickerId,
+        assetUrl,
+        assetWidth,
+        assetHeight,
+        assetName,
+        assetType,
+        sharedUserId,
+        sharedUserFullName,
+        sharedUserIdentityNumber,
+        sharedUserAvatarUrl,
+        sharedUserIsVerified,
+        sharedUserAppId
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -594,30 +566,24 @@ class QuoteMessageItem {
   }
 }
 
-typedef BaseQuoteMessageItem$where =
-    Expression<bool> Function(
-      Messages message,
-      Users sender,
-      Stickers sticker,
-      Users shareUser,
-      MessageMentions messageMention,
-    );
-typedef BaseQuoteMessageItem$order =
-    OrderBy Function(
-      Messages message,
-      Users sender,
-      Stickers sticker,
-      Users shareUser,
-      MessageMentions messageMention,
-    );
-typedef BaseQuoteMessageItem$limit =
-    Limit Function(
-      Messages message,
-      Users sender,
-      Stickers sticker,
-      Users shareUser,
-      MessageMentions messageMention,
-    );
+typedef BaseQuoteMessageItem$where = Expression<bool> Function(
+    Messages message,
+    Users sender,
+    Stickers sticker,
+    Users shareUser,
+    MessageMentions messageMention);
+typedef BaseQuoteMessageItem$order = OrderBy Function(
+    Messages message,
+    Users sender,
+    Stickers sticker,
+    Users shareUser,
+    MessageMentions messageMention);
+typedef BaseQuoteMessageItem$limit = Limit Function(
+    Messages message,
+    Users sender,
+    Stickers sticker,
+    Users shareUser,
+    MessageMentions messageMention);
 
 class SendingMessage {
   final String messageId;
@@ -690,40 +656,40 @@ class SendingMessage {
   });
   @override
   int get hashCode => Object.hashAll([
-    messageId,
-    conversationId,
-    userId,
-    category,
-    content,
-    mediaUrl,
-    mediaMimeType,
-    mediaSize,
-    mediaDuration,
-    mediaWidth,
-    mediaHeight,
-    mediaHash,
-    thumbImage,
-    mediaKey,
-    mediaDigest,
-    mediaStatus,
-    status,
-    createdAt,
-    action,
-    participantId,
-    snapshotId,
-    hyperlink,
-    name,
-    albumId,
-    stickerId,
-    sharedUserId,
-    mediaWaveform,
-    caption,
-    quoteMessageId,
-    quoteContent,
-    resendStatus,
-    resendUserId,
-    resendSessionId,
-  ]);
+        messageId,
+        conversationId,
+        userId,
+        category,
+        content,
+        mediaUrl,
+        mediaMimeType,
+        mediaSize,
+        mediaDuration,
+        mediaWidth,
+        mediaHeight,
+        mediaHash,
+        thumbImage,
+        mediaKey,
+        mediaDigest,
+        mediaStatus,
+        status,
+        createdAt,
+        action,
+        participantId,
+        snapshotId,
+        hyperlink,
+        name,
+        albumId,
+        stickerId,
+        sharedUserId,
+        mediaWaveform,
+        caption,
+        quoteMessageId,
+        quoteContent,
+        resendStatus,
+        resendUserId,
+        resendSessionId
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -845,26 +811,25 @@ class NotificationMessage {
   });
   @override
   int get hashCode => Object.hash(
-    messageId,
-    conversationId,
-    senderId,
-    senderFullName,
-    type,
-    content,
-    quoteContent,
-    status,
-    groupName,
-    muteUntil,
-    ownerMuteUntil,
-    ownerUserId,
-    ownerFullName,
-    createdAt,
-    category,
-    actionName,
-    relationship,
-    participantFullName,
-    participantUserId,
-  );
+      messageId,
+      conversationId,
+      senderId,
+      senderFullName,
+      type,
+      content,
+      quoteContent,
+      status,
+      groupName,
+      muteUntil,
+      ownerMuteUntil,
+      ownerUserId,
+      ownerFullName,
+      createdAt,
+      category,
+      actionName,
+      relationship,
+      participantFullName,
+      participantUserId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -958,26 +923,25 @@ class SearchMessageDetailItem {
   });
   @override
   int get hashCode => Object.hash(
-    messageId,
-    senderId,
-    senderAvatarUrl,
-    senderFullName,
-    status,
-    type,
-    content,
-    createdAt,
-    mediaName,
-    appId,
-    verified,
-    membership,
-    ownerId,
-    groupIconUrl,
-    category,
-    groupName,
-    conversationId,
-    ownerFullName,
-    ownerAvatarUrl,
-  );
+      messageId,
+      senderId,
+      senderAvatarUrl,
+      senderFullName,
+      status,
+      type,
+      content,
+      createdAt,
+      mediaName,
+      appId,
+      verified,
+      membership,
+      ownerId,
+      groupIconUrl,
+      category,
+      groupName,
+      conversationId,
+      ownerFullName,
+      ownerAvatarUrl);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1031,7 +995,10 @@ class SearchMessageDetailItem {
 class MiniMessageItem {
   final String conversationId;
   final String messageId;
-  MiniMessageItem({required this.conversationId, required this.messageId});
+  MiniMessageItem({
+    required this.conversationId,
+    required this.messageId,
+  });
   @override
   int get hashCode => Object.hash(conversationId, messageId);
   @override
@@ -1050,15 +1017,10 @@ class MiniMessageItem {
   }
 }
 
-typedef SearchMessage$where =
-    Expression<bool> Function(
-      Messages m,
-      Conversations c,
-      Users u,
-      Users owner,
-    );
-typedef SearchMessage$limit =
-    Limit Function(Messages m, Conversations c, Users u, Users owner);
+typedef SearchMessage$where = Expression<bool> Function(
+    Messages m, Conversations c, Users u, Users owner);
+typedef SearchMessage$limit = Limit Function(
+    Messages m, Conversations c, Users u, Users owner);
 
 class QuoteMinimal {
   final int rowid;
