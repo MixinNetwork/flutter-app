@@ -234,7 +234,7 @@ class _CircleList extends HookConsumerWidget {
               final circle = list.value[index];
               return Consumer(
                 key: Key(circle.circleId),
-                builder: (BuildContext context, ref, __) {
+                builder: (BuildContext context, ref, _) {
                   final selected = ref.watch(
                     slideCategoryStateProvider.select((value) {
                       final conversationCircleItem = list.value[index];

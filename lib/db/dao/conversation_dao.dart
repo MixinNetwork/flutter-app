@@ -28,7 +28,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       .asyncMap((event) => allUnseenIgnoreMuteMessageCount().getSingle());
 
   Selectable<int> allUnseenIgnoreMuteMessageCount() =>
-      _baseUnseenMessageCount((conversation, owner, __) {
+      _baseUnseenMessageCount((conversation, owner, _) {
         final now = const MillisDateConverter().toSql(DateTime.now());
         final groupExpression =
             conversation.category.equalsValue(ConversationCategory.group) &
@@ -258,7 +258,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> conversationsCountByCircleId(String circleId) =>
       _baseConversationItemCount(
-        (_, __, circleConversation) =>
+        (_, _, circleConversation) =>
             circleConversation.circleId.equals(circleId),
       );
 
@@ -269,9 +269,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   ) => _baseConversationItemsByCircleId(
     (conversation, o, circleConversation, lm, ls, s, p, em) =>
         circleConversation.circleId.equals(circleId),
-    (conversation, _, __, ___, ____, _____, _____i, em) =>
+    (conversation, _, _, _, _, _, _i, em) =>
         _baseConversationItemOrder(conversation),
-    (_, __, ___, ____, ______, _______, ________, em) => Limit(limit, offset),
+    (_, _, _, _, _, _, _, em) => Limit(limit, offset),
   );
 
   Future<bool> conversationHasDataByCircleId(String circleId) =>
@@ -290,9 +290,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, o, circleConversation, lm, ls, s, p, em) =>
             circleConversation.circleId.equals(circleId) &
             conversation.unseenMessageCount.isBiggerThanValue(0),
-        (conversation, _, __, ___, ____, _____, _____i, em) =>
+        (conversation, _, _, _, _, _, _i, em) =>
             _baseConversationItemOrder(conversation),
-        (_, __, ___, ____, ______, _______, ________, em) => maxLimit,
+        (_, _, _, _, _, _, _, em) => maxLimit,
       );
 
   Future<int> pin(String conversationId) =>
@@ -361,16 +361,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       return _fuzzySearchConversationInCircle(
         query.trim().escapeSql(),
         category!.id,
-        (conversation, owner, message, _, cc, __) =>
+        (conversation, owner, message, _, cc, _) =>
             filterUnseen
                 ? conversation.unseenMessageCount.isBiggerThanValue(0)
                 : ignoreWhere,
-        (conversation, owner, message, _, cc, __) => Limit(limit, null),
+        (conversation, owner, message, _, cc, _) => Limit(limit, null),
       );
     }
     return _fuzzySearchConversation(
       query.trim().escapeSql(),
-      (Conversations conversation, Users owner, Messages message, _, __) {
+      (Conversations conversation, Users owner, Messages message, _, _) {
         Expression<bool> predicate = ignoreWhere;
         switch (category?.type) {
           case SlideCategoryType.contacts:
@@ -395,14 +395,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         }
         return predicate;
       },
-      (Conversations conversation, Users owner, Messages message, _, __) =>
+      (Conversations conversation, Users owner, Messages message, _, _) =>
           Limit(limit, null),
     );
   }
 
   Selectable<SearchConversationItem> searchConversationItemByIn(
     List<String> ids,
-  ) => _searchConversationItemByIn(ids, (conversation, _, __, ___, ____) {
+  ) => _searchConversationItemByIn(ids, (conversation, _, _, _, _) {
     if (ids.isEmpty) return ignoreOrderBy;
 
     final conversationId =

@@ -205,7 +205,7 @@ class QuoteMessage extends HookConsumerWidget {
           image: MixinImage.network(
             thumbUrl ?? '',
             placeholder: () => placeholder,
-            errorBuilder: (_, __, ___) => placeholder,
+            errorBuilder: (_, _, _) => placeholder,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
@@ -425,7 +425,7 @@ class _QuoteImage extends HookWidget {
         ),
       ),
       errorBuilder:
-          (_, __, ___) => ImageByBlurHashOrBase64(imageData: thumbImage!),
+          (_, _, _) => ImageByBlurHashOrBase64(imageData: thumbImage!),
     );
   }
 }

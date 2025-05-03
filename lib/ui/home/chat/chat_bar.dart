@@ -78,7 +78,7 @@ class ChatBar extends HookConsumerWidget {
       children: [
         Consumer(
           builder:
-              (_, ref, __) =>
+              (_, ref, _) =>
                   routeMode
                       ? MoveWindowBarrier(
                         child: MixinBackButton(

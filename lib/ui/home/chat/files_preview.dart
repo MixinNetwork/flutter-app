@@ -1047,7 +1047,7 @@ class _TileBigImage extends HookConsumerWidget {
               child: MixinImage.file(
                 File(file.path),
                 fit: BoxFit.fitWidth,
-                errorBuilder: (_, __, ___) => const SizedBox(),
+                errorBuilder: (_, _, _) => const SizedBox(),
               ),
             ),
             Container(
