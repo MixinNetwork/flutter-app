@@ -138,7 +138,7 @@ class _InputContainer extends HookConsumerWidget {
       };
     }, [conversationId, originalDraft]);
 
-    final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
+    final focusNode = useFocusNode(onKeyEvent: (_, _) => KeyEventResult.ignored);
 
     useEffect(() {
       if (!context.textFieldAutoGainFocus) {

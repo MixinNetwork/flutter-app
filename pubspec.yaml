@@ -15,7 +15,7 @@ publish_to: none
 version: 2.3.0+399
 
 environment:
-  sdk: "^3.5.0"
+  sdk: "^3.7.0"
 
 dependencies:
   android_id: ^0.4.0
