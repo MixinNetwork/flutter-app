@@ -22,17 +22,17 @@ TransferDataCommand _$TransferDataCommandFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$TransferDataCommandToJson(
-        TransferDataCommand instance) =>
-    <String, dynamic>{
-      'device_id': instance.deviceId,
-      'action': instance.action,
-      'version': instance.version,
-      'ip': instance.ip,
-      'port': instance.port,
-      'secret_key': instance.secretKey,
-      'platform': instance.platform,
-      'code': instance.code,
-      'total': instance.total,
-      'user_id': instance.userId,
-      'progress': instance.progress,
-    };
+  TransferDataCommand instance,
+) => <String, dynamic>{
+  'device_id': instance.deviceId,
+  'action': instance.action,
+  'version': instance.version,
+  'ip': instance.ip,
+  'port': instance.port,
+  'secret_key': instance.secretKey,
+  'platform': instance.platform,
+  'code': instance.code,
+  'total': instance.total,
+  'user_id': instance.userId,
+  'progress': instance.progress,
+};

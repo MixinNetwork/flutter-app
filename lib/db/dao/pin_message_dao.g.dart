@@ -45,51 +45,45 @@ mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<PinMessageItemResult> pinMessageItem(
-      String messageId, String conversationId) {
+    String messageId,
+    String conversationId,
+  ) {
     return customSelect(
-        'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN pin_messages AS pinMessage ON ?1 = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?2 AND message.category = \'MESSAGE_PIN\' AND message.quote_message_id = ?1 ORDER BY message.created_at DESC LIMIT 1',
-        variables: [
-          Variable<String>(messageId),
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          messages,
-          users,
-          pinMessages,
-        }).map((QueryRow row) => PinMessageItemResult(
-          content: row.readNullable<String>('content'),
-          userFullName: row.readNullable<String>('userFullName'),
-        ));
+      'SELECT message.content AS content, sender.full_name AS userFullName FROM messages AS message INNER JOIN pin_messages AS pinMessage ON ?1 = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id WHERE message.conversation_id = ?2 AND message.category = \'MESSAGE_PIN\' AND message.quote_message_id = ?1 ORDER BY message.created_at DESC LIMIT 1',
+      variables: [
+        Variable<String>(messageId),
+        Variable<String>(conversationId),
+      ],
+      readsFrom: {messages, users, pinMessages},
+    ).map(
+      (QueryRow row) => PinMessageItemResult(
+        content: row.readNullable<String>('content'),
+        userFullName: row.readNullable<String>('userFullName'),
+      ),
+    );
   }
 
   Selectable<String> pinMessageIds(String conversationId) {
     return customSelect(
-        'SELECT pinMessage.message_id FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id WHERE pinMessage.conversation_id = ?1 ORDER BY message.created_at DESC',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          pinMessages,
-          messages,
-        }).map((QueryRow row) => row.read<String>('message_id'));
+      'SELECT pinMessage.message_id FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id WHERE pinMessage.conversation_id = ?1 ORDER BY message.created_at DESC',
+      variables: [Variable<String>(conversationId)],
+      readsFrom: {pinMessages, messages},
+    ).map((QueryRow row) => row.read<String>('message_id'));
   }
 
   Selectable<int> countPinMessages() {
-    return customSelect('SELECT COUNT(1) AS _c0 FROM pin_messages',
-        variables: [],
-        readsFrom: {
-          pinMessages,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect(
+      'SELECT COUNT(1) AS _c0 FROM pin_messages',
+      variables: [],
+      readsFrom: {pinMessages},
+    ).map((QueryRow row) => row.read<int>('_c0'));
   }
 }
 
 class PinMessageItemResult {
   final String? content;
   final String? userFullName;
-  PinMessageItemResult({
-    this.content,
-    this.userFullName,
-  });
+  PinMessageItemResult({this.content, this.userFullName});
   @override
   int get hashCode => Object.hash(content, userFullName);
   @override

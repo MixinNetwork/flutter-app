@@ -7,13 +7,13 @@ part of 'proxy.dart';
 // **************************************************************************
 
 ProxyConfig _$ProxyConfigFromJson(Map<String, dynamic> json) => ProxyConfig(
-      type: $enumDecode(_$ProxyTypeEnumMap, json['type']),
-      host: json['host'] as String,
-      port: (json['port'] as num).toInt(),
-      id: json['id'] as String,
-      username: json['username'] as String?,
-      password: json['password'] as String?,
-    );
+  type: $enumDecode(_$ProxyTypeEnumMap, json['type']),
+  host: json['host'] as String,
+  port: (json['port'] as num).toInt(),
+  id: json['id'] as String,
+  username: json['username'] as String?,
+  password: json['password'] as String?,
+);
 
 Map<String, dynamic> _$ProxyConfigToJson(ProxyConfig instance) =>
     <String, dynamic>{
@@ -25,7 +25,4 @@ Map<String, dynamic> _$ProxyConfigToJson(ProxyConfig instance) =>
       'password': instance.password,
     };
 
-const _$ProxyTypeEnumMap = {
-  ProxyType.http: 'http',
-  ProxyType.socks5: 'socks5',
-};
+const _$ProxyTypeEnumMap = {ProxyType.http: 'http', ProxyType.socks5: 'socks5'};

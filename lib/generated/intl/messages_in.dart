@@ -85,317 +85,379 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "about": MessageLookupByLibrary.simpleMessage("Tentang"),
-        "accessDenied": MessageLookupByLibrary.simpleMessage("Akses ditolak"),
-        "account": MessageLookupByLibrary.simpleMessage("Akun"),
-        "addContact": MessageLookupByLibrary.simpleMessage("Tambahkan Kontak"),
-        "addGroupDescription":
-            MessageLookupByLibrary.simpleMessage("Tambahkan deskripsi grup"),
-        "addParticipants":
-            MessageLookupByLibrary.simpleMessage("Tambahkan Peserta"),
-        "addStickerFailed":
-            MessageLookupByLibrary.simpleMessage("Gagal menambahkan stiker"),
-        "address": MessageLookupByLibrary.simpleMessage("Alamat"),
-        "admin": MessageLookupByLibrary.simpleMessage("admin"),
-        "alertKeyContactContactMessage":
-            MessageLookupByLibrary.simpleMessage("berbagi kontak"),
-        "appearance": MessageLookupByLibrary.simpleMessage("Tampilan"),
-        "audio": MessageLookupByLibrary.simpleMessage("Audio"),
-        "block": MessageLookupByLibrary.simpleMessage("Blokir"),
-        "botNotFound":
-            MessageLookupByLibrary.simpleMessage("Aplikasi tidak ditemukan"),
-        "bots": MessageLookupByLibrary.simpleMessage("BOT"),
-        "botsTitle": MessageLookupByLibrary.simpleMessage("Bot"),
-        "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
-            "Tidak dapat mengenal kode QR"),
-        "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
-        "card": MessageLookupByLibrary.simpleMessage("Kartu"),
-        "change": MessageLookupByLibrary.simpleMessage("Ubah"),
-        "chatDeleteMessage": m2,
-        "chatGroupAdd": m3,
-        "chatGroupExit": m4,
-        "chatGroupJoin": m5,
-        "chatGroupRemove": m6,
-        "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
-            "https://mixinmessenger.zendesk.com/hc/articles/360043776071"),
-        "circleSubtitle": m8,
-        "circleTitle": m9,
-        "circles": MessageLookupByLibrary.simpleMessage("Lingkaran"),
-        "clear": MessageLookupByLibrary.simpleMessage("Bersihkan"),
-        "clearChat": MessageLookupByLibrary.simpleMessage("Bersihkan Obrolan"),
-        "confirm": MessageLookupByLibrary.simpleMessage("Konfirmasi"),
-        "contact": MessageLookupByLibrary.simpleMessage("Kontak"),
-        "contactMixinId": m10,
-        "contactMuteTitle":
-            MessageLookupByLibrary.simpleMessage("Matikan notifikasi selama…"),
-        "contentTooLong":
-            MessageLookupByLibrary.simpleMessage("Konten terlalu panjang"),
-        "contentVoice":
-            MessageLookupByLibrary.simpleMessage("[Panggilan suara]"),
-        "continueText": MessageLookupByLibrary.simpleMessage("Lanjutkan"),
-        "conversation": MessageLookupByLibrary.simpleMessage("Percakapan"),
-        "copy": MessageLookupByLibrary.simpleMessage("Salin"),
-        "copyInvite": MessageLookupByLibrary.simpleMessage("Salin Tautan"),
-        "create": MessageLookupByLibrary.simpleMessage("Buat"),
-        "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage(
-            "Penggunaan Data dan Penyimpanan"),
-        "dataError": MessageLookupByLibrary.simpleMessage("Kesalahan data"),
-        "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
-            "Database sedang ditingkatkan, mungkin perlu beberapa menit, jangan tutup Aplikasi ini."),
-        "deleteForEveryone":
-            MessageLookupByLibrary.simpleMessage("Hapus untuk Semua Orang"),
-        "deleteForMe": MessageLookupByLibrary.simpleMessage("Hapus untuk saya"),
-        "deleteGroup": MessageLookupByLibrary.simpleMessage("Hapus Grup"),
-        "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
-        "developer": MessageLookupByLibrary.simpleMessage("Pengembang"),
-        "dismissAsAdmin":
-            MessageLookupByLibrary.simpleMessage("Singkirkan admin"),
-        "done": MessageLookupByLibrary.simpleMessage("Selesai"),
-        "durationIsTooShort":
-            MessageLookupByLibrary.simpleMessage("Durasi terlalu pendek"),
-        "editCircleName":
-            MessageLookupByLibrary.simpleMessage("Edit Nama Lingkaran"),
-        "editConversations":
-            MessageLookupByLibrary.simpleMessage("Edit Percakapan"),
-        "editGroupDescription":
-            MessageLookupByLibrary.simpleMessage("Edit deskripsi grup"),
-        "editGroupName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
-        "editName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
-        "enablePushNotification":
-            MessageLookupByLibrary.simpleMessage("Aktifkan Notifikasi"),
-        "enterYourPhoneNumber":
-            MessageLookupByLibrary.simpleMessage("Masukkan nomor ponsel Anda"),
-        "errorAuthentication": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 401: Masuk untuk melanjutkan"),
-        "errorBadData": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 10002: Data permintaan memiliki bidang yang tidak valid"),
-        "errorBlockchain": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 30100: Blockchain tidak sinkron, coba lagi nanti."),
-        "errorConnectionTimeout": MessageLookupByLibrary.simpleMessage(
-            "Batas waktu sambungan jaringan"),
-        "errorFullGroup": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20116: Obrolan grup sudah penuh."),
-        "errorInsufficientBalance": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20117: Saldo tidak cukup"),
-        "errorInvalidAddressPlain": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 30102: Format alamat tidak valid."),
-        "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20129: Terlalu sering mengirim kode verifikasi, coba lagi nanti."),
-        "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20118: Format PIN tidak valid"),
-        "errorNotFound": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 404: Tidak ditemukan"),
-        "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
-            "Tidak mendukung format audio, harap buka dengan aplikasi lain."),
-        "errorNumberReachedLimit": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20132: Jumlahnya telah mencapai batas."),
-        "errorOldVersion": m19,
-        "errorOpenLocation": MessageLookupByLibrary.simpleMessage(
-            "Tidak dapat menemukan aplikasi peta"),
-        "errorPermission": MessageLookupByLibrary.simpleMessage(
-            "Harap buka izin yang diperlukan"),
-        "errorPhoneInvalidFormat": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20110: Nomor telepon tidak valid"),
-        "errorPhoneSmsDelivery": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 10003: Gagal mengirim SMS"),
-        "errorPhoneVerificationCodeExpired":
-            MessageLookupByLibrary.simpleMessage(
-                "KESALAHAN 20114: Kode verifikasi telepon sudah tidak berlaku"),
-        "errorPhoneVerificationCodeInvalid":
-            MessageLookupByLibrary.simpleMessage(
-                "KESALAHAN 20113: Kode verifikasi telepon tidak valid"),
-        "errorPinCheckTooManyRequest": MessageLookupByLibrary.simpleMessage(
-            "Anda telah mencoba lebih dari 5 kali, harap tunggu setidaknya 24 jam untuk mencoba lagi."),
-        "errorPinIncorrect":
-            MessageLookupByLibrary.simpleMessage("KESALAHAN 20119: PIN salah"),
-        "errorPinIncorrectWithTimes": m20,
-        "errorRecaptchaIsInvalid": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 10004: Recaptcha tidak valid"),
-        "errorServer5xxCode": m21,
-        "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 429: Batas nilai terlampaui"),
-        "errorTooManyStickers": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20126: Terlalu banyak stiker"),
-        "errorTooSmallTransferAmount": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20120: Jumlahnya terlalu kecil"),
-        "errorTooSmallWithdrawAmount": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20127: Jumlah penarikan dana terlalu kecil"),
-        "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
-            "Tidak dapat menemukan aplikasi yang dapat membuka media ini."),
-        "errorUnknownWithCode": m22,
-        "errorUnknownWithMessage": m23,
-        "errorUsedPhone": MessageLookupByLibrary.simpleMessage(
-            "KESALAHAN 20122: Ponsel digunakan oleh orang lain."),
-        "errorUserInvalidFormat":
-            MessageLookupByLibrary.simpleMessage("ID pengguna tidak valid"),
-        "errorWithdrawalMemoFormatIncorrect":
-            MessageLookupByLibrary.simpleMessage(
-                "KESALAHAN 20131: Format memo penarikan salah."),
-        "exit": MessageLookupByLibrary.simpleMessage("Keluar"),
-        "exitGroup": MessageLookupByLibrary.simpleMessage("Keluar dari Grup"),
-        "fee": MessageLookupByLibrary.simpleMessage("Biaya"),
-        "file": MessageLookupByLibrary.simpleMessage("File"),
-        "fileChooserError":
-            MessageLookupByLibrary.simpleMessage("Kesalahan pemilih file"),
-        "fileDoesNotExist":
-            MessageLookupByLibrary.simpleMessage("File tidak ada"),
-        "fileError": MessageLookupByLibrary.simpleMessage("Kesalahan file"),
-        "files": MessageLookupByLibrary.simpleMessage("File"),
-        "followSystem": MessageLookupByLibrary.simpleMessage("Otomatis"),
-        "followUsOnFacebook":
-            MessageLookupByLibrary.simpleMessage("Ikuti kami di Facebook"),
-        "followUsOnX": MessageLookupByLibrary.simpleMessage("Ikuti kami di X"),
-        "formatNotSupported":
-            MessageLookupByLibrary.simpleMessage("Format tidak didukung"),
-        "forward": MessageLookupByLibrary.simpleMessage("Teruskan"),
-        "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
-            "Anda sudah bergabung dalam grup"),
-        "groupCantSend": MessageLookupByLibrary.simpleMessage(
-            "Anda tidak dapat mengirim pesan ke grup ini karena Anda bukan lagi peserta."),
-        "groupName": MessageLookupByLibrary.simpleMessage("Nama Grup"),
-        "groupPopMenuMessage": m24,
-        "groupPopMenuRemove": m25,
-        "helpCenter": MessageLookupByLibrary.simpleMessage("Pusat bantuan"),
-        "hour": m26,
-        "initializing": MessageLookupByLibrary.simpleMessage("Memulai..."),
-        "invalidStickerFormat":
-            MessageLookupByLibrary.simpleMessage("Format stiker tidak valid"),
-        "inviteInfo": MessageLookupByLibrary.simpleMessage(
-            "Siapapun yang memiliki Mixin dapat mengikuti tautan ini untuk bergabung dengan grup ini. Hanya bagikan dengan orang yang Anda percaya."),
-        "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
-            "Undang ke Grup melalui Tautan"),
-        "joinedIn": m27,
-        "landingInvitationDialogContent": m29,
-        "landingValidationTitle": m30,
-        "learnMore":
-            MessageLookupByLibrary.simpleMessage("Pelajari Selengkapnya"),
-        "live": MessageLookupByLibrary.simpleMessage("Siaran Langsung"),
-        "loadingTime": MessageLookupByLibrary.simpleMessage(
-            "Waktu sistem tidak normal, silakan gunakan lagi setelah perbaikan dilakukan"),
-        "location": MessageLookupByLibrary.simpleMessage("Lokasi"),
-        "logIn": MessageLookupByLibrary.simpleMessage("Masuk"),
-        "makeGroupAdmin":
-            MessageLookupByLibrary.simpleMessage("Jadikan admin grup"),
-        "media": MessageLookupByLibrary.simpleMessage("Media"),
-        "memo": MessageLookupByLibrary.simpleMessage("Memo"),
-        "messageE2ee": MessageLookupByLibrary.simpleMessage(
-            "Pesan ke percakapan ini dienkripsi end-to-end, ketuk untuk info selengkapnya."),
-        "messageNotFound":
-            MessageLookupByLibrary.simpleMessage("Pesan tidak ditemukan"),
-        "messageNotSupport": MessageLookupByLibrary.simpleMessage(
-            "Jenis pesan ini tidak didukung, harap tingkatkan Mixin ke versi terbaru."),
-        "mixinMessengerDesktop":
-            MessageLookupByLibrary.simpleMessage("Mixin Messenger Desktop"),
-        "more": MessageLookupByLibrary.simpleMessage("Lebih banyak"),
-        "multisigTransaction":
-            MessageLookupByLibrary.simpleMessage("Transaksi Multisig"),
-        "myMixinId": m32,
-        "na": MessageLookupByLibrary.simpleMessage("N/A"),
-        "name": MessageLookupByLibrary.simpleMessage("Nama"),
-        "networkError":
-            MessageLookupByLibrary.simpleMessage("Kesalahan jaringan"),
-        "next": MessageLookupByLibrary.simpleMessage("Berikutnya"),
-        "noAudio": MessageLookupByLibrary.simpleMessage("TIDAK ADA SUARA"),
-        "noCamera": MessageLookupByLibrary.simpleMessage("Tidak ada kamera"),
-        "noFiles": MessageLookupByLibrary.simpleMessage("TIDAK ADA FILE"),
-        "noLinks": MessageLookupByLibrary.simpleMessage("TIDAK ADA TAUTAN"),
-        "noMedia": MessageLookupByLibrary.simpleMessage("TIDAK ADA MEDIA"),
-        "noNetworkConnection": MessageLookupByLibrary.simpleMessage(
-            "Tidak ada sambungan jaringan"),
-        "noPosts": MessageLookupByLibrary.simpleMessage("TIDAK ADA POSTINGAN"),
-        "noResults": MessageLookupByLibrary.simpleMessage("Tidak ada hasil"),
-        "notFound": MessageLookupByLibrary.simpleMessage("Tidak ditemukan"),
-        "notifications": MessageLookupByLibrary.simpleMessage("Notifikasi"),
-        "oneHour": MessageLookupByLibrary.simpleMessage("1 Jam"),
-        "oneWeek": MessageLookupByLibrary.simpleMessage("1 Minggu"),
-        "oneYear": MessageLookupByLibrary.simpleMessage("1 Tahun"),
-        "openHomePage": MessageLookupByLibrary.simpleMessage("Buka Beranda"),
-        "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
-        "pendingConfirmation": m37,
-        "phoneNumber": MessageLookupByLibrary.simpleMessage("Nomor Telepon"),
-        "photos": MessageLookupByLibrary.simpleMessage("Foto"),
-        "post": MessageLookupByLibrary.simpleMessage("Postingan"),
-        "privacyPolicy":
-            MessageLookupByLibrary.simpleMessage("Kebijakan Privasi"),
-        "raw": MessageLookupByLibrary.simpleMessage("Raw"),
-        "rebate": MessageLookupByLibrary.simpleMessage("Potongan harga"),
-        "recaptchaTimeout":
-            MessageLookupByLibrary.simpleMessage("Batas waktu recaptcha"),
-        "receiver": MessageLookupByLibrary.simpleMessage("Penerima"),
-        "recentChats": MessageLookupByLibrary.simpleMessage("OBROLAN"),
-        "refresh": MessageLookupByLibrary.simpleMessage("Muat ulang"),
-        "removeBot": MessageLookupByLibrary.simpleMessage("Hapus Bot"),
-        "removeContact": MessageLookupByLibrary.simpleMessage("Hapus kontak"),
-        "report": MessageLookupByLibrary.simpleMessage("Laporkan"),
-        "resendCode": MessageLookupByLibrary.simpleMessage("Kirim ulang kode"),
-        "resendCodeIn": m39,
-        "retry": MessageLookupByLibrary.simpleMessage("COBA LAGI"),
-        "retryUploadFailed":
-            MessageLookupByLibrary.simpleMessage("Unggahan ulang gagal."),
-        "revokeMultisigTransaction":
-            MessageLookupByLibrary.simpleMessage("Cabut Transaksi Multisig"),
-        "save": MessageLookupByLibrary.simpleMessage("Simpan"),
-        "sayHi": MessageLookupByLibrary.simpleMessage("Katakan Hai"),
-        "scamWarning": MessageLookupByLibrary.simpleMessage(
-            "Peringatan: Banyak pengguna yang melaporkan akun ini sebagai scam. Harap berhati-hati, terutama jika meminta uang Anda"),
-        "search": MessageLookupByLibrary.simpleMessage("Cari"),
-        "searchConversation":
-            MessageLookupByLibrary.simpleMessage("Cari Percakapan"),
-        "searchRelatedMessage": m40,
-        "secretUrl": MessageLookupByLibrary.simpleMessage(
-            "https://mixin.one/pages/1000007"),
-        "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
-        "select": MessageLookupByLibrary.simpleMessage("Pilih"),
-        "send": MessageLookupByLibrary.simpleMessage("Kirim"),
-        "settingAuthSearchHint":
-            MessageLookupByLibrary.simpleMessage("Mixin ID, Nama"),
-        "share": MessageLookupByLibrary.simpleMessage("Bagikan"),
-        "shareError":
-            MessageLookupByLibrary.simpleMessage("Bagikan kesalahan."),
-        "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan Tautan"),
-        "shareMessageDescription": m43,
-        "shareMessageDescriptionEmpty": m44,
-        "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
-        "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
-        "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),
-        "signWithMobileNumber":
-            MessageLookupByLibrary.simpleMessage("Masuk dengan nomor telepon"),
-        "status": MessageLookupByLibrary.simpleMessage("Status"),
-        "sticker": MessageLookupByLibrary.simpleMessage("Stiker"),
-        "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
-            "Memerlukan ukuran file stiker yang lebih besar dari 1KB dan kurang dari 1MB, lebar dan tinggi antara 128px dan 1024px."),
-        "storageUsage":
-            MessageLookupByLibrary.simpleMessage("Penggunaan Penyimpanan"),
-        "successful": MessageLookupByLibrary.simpleMessage("Berhasil"),
-        "termsOfService":
-            MessageLookupByLibrary.simpleMessage("Ketentuan Layanan"),
-        "theme": MessageLookupByLibrary.simpleMessage("Tema"),
-        "thisMessageWasDeleted":
-            MessageLookupByLibrary.simpleMessage("Pesan ini telah dihapus"),
-        "time": MessageLookupByLibrary.simpleMessage("Waktu"),
-        "today": MessageLookupByLibrary.simpleMessage("Hari ini"),
-        "transactionHash":
-            MessageLookupByLibrary.simpleMessage("Hash Transaksi"),
-        "transactionId": MessageLookupByLibrary.simpleMessage("ID Transaksi"),
-        "transactionType":
-            MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
-        "transactions": MessageLookupByLibrary.simpleMessage("Transaksi"),
-        "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
-        "unblock": MessageLookupByLibrary.simpleMessage("Batal Blokir"),
-        "unmute": MessageLookupByLibrary.simpleMessage("Suarakan"),
-        "updateMixin": MessageLookupByLibrary.simpleMessage("Perbarui Mixin"),
-        "updateMixinDescription": m51,
-        "upgrading": MessageLookupByLibrary.simpleMessage("Meningkatkan"),
-        "userNotFound":
-            MessageLookupByLibrary.simpleMessage("Pengguna tidak ditemukan"),
-        "verifyPin": MessageLookupByLibrary.simpleMessage("Verifikasikan PIN"),
-        "video": MessageLookupByLibrary.simpleMessage("Video"),
-        "videos": MessageLookupByLibrary.simpleMessage("Video"),
-        "whatsYourName":
-            MessageLookupByLibrary.simpleMessage("Siapa nama Anda?"),
-        "withdrawal": MessageLookupByLibrary.simpleMessage("Penarikan"),
-        "you": MessageLookupByLibrary.simpleMessage("Anda"),
-        "youDeletedThisMessage":
-            MessageLookupByLibrary.simpleMessage("Anda menghapus pesan ini")
-      };
+    "about": MessageLookupByLibrary.simpleMessage("Tentang"),
+    "accessDenied": MessageLookupByLibrary.simpleMessage("Akses ditolak"),
+    "account": MessageLookupByLibrary.simpleMessage("Akun"),
+    "addContact": MessageLookupByLibrary.simpleMessage("Tambahkan Kontak"),
+    "addGroupDescription": MessageLookupByLibrary.simpleMessage(
+      "Tambahkan deskripsi grup",
+    ),
+    "addParticipants": MessageLookupByLibrary.simpleMessage(
+      "Tambahkan Peserta",
+    ),
+    "addStickerFailed": MessageLookupByLibrary.simpleMessage(
+      "Gagal menambahkan stiker",
+    ),
+    "address": MessageLookupByLibrary.simpleMessage("Alamat"),
+    "admin": MessageLookupByLibrary.simpleMessage("admin"),
+    "alertKeyContactContactMessage": MessageLookupByLibrary.simpleMessage(
+      "berbagi kontak",
+    ),
+    "appearance": MessageLookupByLibrary.simpleMessage("Tampilan"),
+    "audio": MessageLookupByLibrary.simpleMessage("Audio"),
+    "block": MessageLookupByLibrary.simpleMessage("Blokir"),
+    "botNotFound": MessageLookupByLibrary.simpleMessage(
+      "Aplikasi tidak ditemukan",
+    ),
+    "bots": MessageLookupByLibrary.simpleMessage("BOT"),
+    "botsTitle": MessageLookupByLibrary.simpleMessage("Bot"),
+    "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
+      "Tidak dapat mengenal kode QR",
+    ),
+    "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
+    "card": MessageLookupByLibrary.simpleMessage("Kartu"),
+    "change": MessageLookupByLibrary.simpleMessage("Ubah"),
+    "chatDeleteMessage": m2,
+    "chatGroupAdd": m3,
+    "chatGroupExit": m4,
+    "chatGroupJoin": m5,
+    "chatGroupRemove": m6,
+    "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
+      "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+    ),
+    "circleSubtitle": m8,
+    "circleTitle": m9,
+    "circles": MessageLookupByLibrary.simpleMessage("Lingkaran"),
+    "clear": MessageLookupByLibrary.simpleMessage("Bersihkan"),
+    "clearChat": MessageLookupByLibrary.simpleMessage("Bersihkan Obrolan"),
+    "confirm": MessageLookupByLibrary.simpleMessage("Konfirmasi"),
+    "contact": MessageLookupByLibrary.simpleMessage("Kontak"),
+    "contactMixinId": m10,
+    "contactMuteTitle": MessageLookupByLibrary.simpleMessage(
+      "Matikan notifikasi selama…",
+    ),
+    "contentTooLong": MessageLookupByLibrary.simpleMessage(
+      "Konten terlalu panjang",
+    ),
+    "contentVoice": MessageLookupByLibrary.simpleMessage("[Panggilan suara]"),
+    "continueText": MessageLookupByLibrary.simpleMessage("Lanjutkan"),
+    "conversation": MessageLookupByLibrary.simpleMessage("Percakapan"),
+    "copy": MessageLookupByLibrary.simpleMessage("Salin"),
+    "copyInvite": MessageLookupByLibrary.simpleMessage("Salin Tautan"),
+    "create": MessageLookupByLibrary.simpleMessage("Buat"),
+    "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage(
+      "Penggunaan Data dan Penyimpanan",
+    ),
+    "dataError": MessageLookupByLibrary.simpleMessage("Kesalahan data"),
+    "databaseUpgradeTips": MessageLookupByLibrary.simpleMessage(
+      "Database sedang ditingkatkan, mungkin perlu beberapa menit, jangan tutup Aplikasi ini.",
+    ),
+    "deleteForEveryone": MessageLookupByLibrary.simpleMessage(
+      "Hapus untuk Semua Orang",
+    ),
+    "deleteForMe": MessageLookupByLibrary.simpleMessage("Hapus untuk saya"),
+    "deleteGroup": MessageLookupByLibrary.simpleMessage("Hapus Grup"),
+    "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
+    "developer": MessageLookupByLibrary.simpleMessage("Pengembang"),
+    "dismissAsAdmin": MessageLookupByLibrary.simpleMessage("Singkirkan admin"),
+    "done": MessageLookupByLibrary.simpleMessage("Selesai"),
+    "durationIsTooShort": MessageLookupByLibrary.simpleMessage(
+      "Durasi terlalu pendek",
+    ),
+    "editCircleName": MessageLookupByLibrary.simpleMessage(
+      "Edit Nama Lingkaran",
+    ),
+    "editConversations": MessageLookupByLibrary.simpleMessage(
+      "Edit Percakapan",
+    ),
+    "editGroupDescription": MessageLookupByLibrary.simpleMessage(
+      "Edit deskripsi grup",
+    ),
+    "editGroupName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
+    "editName": MessageLookupByLibrary.simpleMessage("Edit Nama"),
+    "enablePushNotification": MessageLookupByLibrary.simpleMessage(
+      "Aktifkan Notifikasi",
+    ),
+    "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage(
+      "Masukkan nomor ponsel Anda",
+    ),
+    "errorAuthentication": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 401: Masuk untuk melanjutkan",
+    ),
+    "errorBadData": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 10002: Data permintaan memiliki bidang yang tidak valid",
+    ),
+    "errorBlockchain": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 30100: Blockchain tidak sinkron, coba lagi nanti.",
+    ),
+    "errorConnectionTimeout": MessageLookupByLibrary.simpleMessage(
+      "Batas waktu sambungan jaringan",
+    ),
+    "errorFullGroup": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20116: Obrolan grup sudah penuh.",
+    ),
+    "errorInsufficientBalance": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20117: Saldo tidak cukup",
+    ),
+    "errorInvalidAddressPlain": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 30102: Format alamat tidak valid.",
+    ),
+    "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20129: Terlalu sering mengirim kode verifikasi, coba lagi nanti.",
+    ),
+    "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20118: Format PIN tidak valid",
+    ),
+    "errorNotFound": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 404: Tidak ditemukan",
+    ),
+    "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
+      "Tidak mendukung format audio, harap buka dengan aplikasi lain.",
+    ),
+    "errorNumberReachedLimit": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20132: Jumlahnya telah mencapai batas.",
+    ),
+    "errorOldVersion": m19,
+    "errorOpenLocation": MessageLookupByLibrary.simpleMessage(
+      "Tidak dapat menemukan aplikasi peta",
+    ),
+    "errorPermission": MessageLookupByLibrary.simpleMessage(
+      "Harap buka izin yang diperlukan",
+    ),
+    "errorPhoneInvalidFormat": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20110: Nomor telepon tidak valid",
+    ),
+    "errorPhoneSmsDelivery": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 10003: Gagal mengirim SMS",
+    ),
+    "errorPhoneVerificationCodeExpired": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20114: Kode verifikasi telepon sudah tidak berlaku",
+    ),
+    "errorPhoneVerificationCodeInvalid": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20113: Kode verifikasi telepon tidak valid",
+    ),
+    "errorPinCheckTooManyRequest": MessageLookupByLibrary.simpleMessage(
+      "Anda telah mencoba lebih dari 5 kali, harap tunggu setidaknya 24 jam untuk mencoba lagi.",
+    ),
+    "errorPinIncorrect": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20119: PIN salah",
+    ),
+    "errorPinIncorrectWithTimes": m20,
+    "errorRecaptchaIsInvalid": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 10004: Recaptcha tidak valid",
+    ),
+    "errorServer5xxCode": m21,
+    "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 429: Batas nilai terlampaui",
+    ),
+    "errorTooManyStickers": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20126: Terlalu banyak stiker",
+    ),
+    "errorTooSmallTransferAmount": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20120: Jumlahnya terlalu kecil",
+    ),
+    "errorTooSmallWithdrawAmount": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20127: Jumlah penarikan dana terlalu kecil",
+    ),
+    "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
+      "Tidak dapat menemukan aplikasi yang dapat membuka media ini.",
+    ),
+    "errorUnknownWithCode": m22,
+    "errorUnknownWithMessage": m23,
+    "errorUsedPhone": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20122: Ponsel digunakan oleh orang lain.",
+    ),
+    "errorUserInvalidFormat": MessageLookupByLibrary.simpleMessage(
+      "ID pengguna tidak valid",
+    ),
+    "errorWithdrawalMemoFormatIncorrect": MessageLookupByLibrary.simpleMessage(
+      "KESALAHAN 20131: Format memo penarikan salah.",
+    ),
+    "exit": MessageLookupByLibrary.simpleMessage("Keluar"),
+    "exitGroup": MessageLookupByLibrary.simpleMessage("Keluar dari Grup"),
+    "fee": MessageLookupByLibrary.simpleMessage("Biaya"),
+    "file": MessageLookupByLibrary.simpleMessage("File"),
+    "fileChooserError": MessageLookupByLibrary.simpleMessage(
+      "Kesalahan pemilih file",
+    ),
+    "fileDoesNotExist": MessageLookupByLibrary.simpleMessage("File tidak ada"),
+    "fileError": MessageLookupByLibrary.simpleMessage("Kesalahan file"),
+    "files": MessageLookupByLibrary.simpleMessage("File"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Otomatis"),
+    "followUsOnFacebook": MessageLookupByLibrary.simpleMessage(
+      "Ikuti kami di Facebook",
+    ),
+    "followUsOnX": MessageLookupByLibrary.simpleMessage("Ikuti kami di X"),
+    "formatNotSupported": MessageLookupByLibrary.simpleMessage(
+      "Format tidak didukung",
+    ),
+    "forward": MessageLookupByLibrary.simpleMessage("Teruskan"),
+    "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
+      "Anda sudah bergabung dalam grup",
+    ),
+    "groupCantSend": MessageLookupByLibrary.simpleMessage(
+      "Anda tidak dapat mengirim pesan ke grup ini karena Anda bukan lagi peserta.",
+    ),
+    "groupName": MessageLookupByLibrary.simpleMessage("Nama Grup"),
+    "groupPopMenuMessage": m24,
+    "groupPopMenuRemove": m25,
+    "helpCenter": MessageLookupByLibrary.simpleMessage("Pusat bantuan"),
+    "hour": m26,
+    "initializing": MessageLookupByLibrary.simpleMessage("Memulai..."),
+    "invalidStickerFormat": MessageLookupByLibrary.simpleMessage(
+      "Format stiker tidak valid",
+    ),
+    "inviteInfo": MessageLookupByLibrary.simpleMessage(
+      "Siapapun yang memiliki Mixin dapat mengikuti tautan ini untuk bergabung dengan grup ini. Hanya bagikan dengan orang yang Anda percaya.",
+    ),
+    "inviteToGroupViaLink": MessageLookupByLibrary.simpleMessage(
+      "Undang ke Grup melalui Tautan",
+    ),
+    "joinedIn": m27,
+    "landingInvitationDialogContent": m29,
+    "landingValidationTitle": m30,
+    "learnMore": MessageLookupByLibrary.simpleMessage("Pelajari Selengkapnya"),
+    "live": MessageLookupByLibrary.simpleMessage("Siaran Langsung"),
+    "loadingTime": MessageLookupByLibrary.simpleMessage(
+      "Waktu sistem tidak normal, silakan gunakan lagi setelah perbaikan dilakukan",
+    ),
+    "location": MessageLookupByLibrary.simpleMessage("Lokasi"),
+    "logIn": MessageLookupByLibrary.simpleMessage("Masuk"),
+    "makeGroupAdmin": MessageLookupByLibrary.simpleMessage(
+      "Jadikan admin grup",
+    ),
+    "media": MessageLookupByLibrary.simpleMessage("Media"),
+    "memo": MessageLookupByLibrary.simpleMessage("Memo"),
+    "messageE2ee": MessageLookupByLibrary.simpleMessage(
+      "Pesan ke percakapan ini dienkripsi end-to-end, ketuk untuk info selengkapnya.",
+    ),
+    "messageNotFound": MessageLookupByLibrary.simpleMessage(
+      "Pesan tidak ditemukan",
+    ),
+    "messageNotSupport": MessageLookupByLibrary.simpleMessage(
+      "Jenis pesan ini tidak didukung, harap tingkatkan Mixin ke versi terbaru.",
+    ),
+    "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
+      "Mixin Messenger Desktop",
+    ),
+    "more": MessageLookupByLibrary.simpleMessage("Lebih banyak"),
+    "multisigTransaction": MessageLookupByLibrary.simpleMessage(
+      "Transaksi Multisig",
+    ),
+    "myMixinId": m32,
+    "na": MessageLookupByLibrary.simpleMessage("N/A"),
+    "name": MessageLookupByLibrary.simpleMessage("Nama"),
+    "networkError": MessageLookupByLibrary.simpleMessage("Kesalahan jaringan"),
+    "next": MessageLookupByLibrary.simpleMessage("Berikutnya"),
+    "noAudio": MessageLookupByLibrary.simpleMessage("TIDAK ADA SUARA"),
+    "noCamera": MessageLookupByLibrary.simpleMessage("Tidak ada kamera"),
+    "noFiles": MessageLookupByLibrary.simpleMessage("TIDAK ADA FILE"),
+    "noLinks": MessageLookupByLibrary.simpleMessage("TIDAK ADA TAUTAN"),
+    "noMedia": MessageLookupByLibrary.simpleMessage("TIDAK ADA MEDIA"),
+    "noNetworkConnection": MessageLookupByLibrary.simpleMessage(
+      "Tidak ada sambungan jaringan",
+    ),
+    "noPosts": MessageLookupByLibrary.simpleMessage("TIDAK ADA POSTINGAN"),
+    "noResults": MessageLookupByLibrary.simpleMessage("Tidak ada hasil"),
+    "notFound": MessageLookupByLibrary.simpleMessage("Tidak ditemukan"),
+    "notifications": MessageLookupByLibrary.simpleMessage("Notifikasi"),
+    "oneHour": MessageLookupByLibrary.simpleMessage("1 Jam"),
+    "oneWeek": MessageLookupByLibrary.simpleMessage("1 Minggu"),
+    "oneYear": MessageLookupByLibrary.simpleMessage("1 Tahun"),
+    "openHomePage": MessageLookupByLibrary.simpleMessage("Buka Beranda"),
+    "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
+    "pendingConfirmation": m37,
+    "phoneNumber": MessageLookupByLibrary.simpleMessage("Nomor Telepon"),
+    "photos": MessageLookupByLibrary.simpleMessage("Foto"),
+    "post": MessageLookupByLibrary.simpleMessage("Postingan"),
+    "privacyPolicy": MessageLookupByLibrary.simpleMessage("Kebijakan Privasi"),
+    "raw": MessageLookupByLibrary.simpleMessage("Raw"),
+    "rebate": MessageLookupByLibrary.simpleMessage("Potongan harga"),
+    "recaptchaTimeout": MessageLookupByLibrary.simpleMessage(
+      "Batas waktu recaptcha",
+    ),
+    "receiver": MessageLookupByLibrary.simpleMessage("Penerima"),
+    "recentChats": MessageLookupByLibrary.simpleMessage("OBROLAN"),
+    "refresh": MessageLookupByLibrary.simpleMessage("Muat ulang"),
+    "removeBot": MessageLookupByLibrary.simpleMessage("Hapus Bot"),
+    "removeContact": MessageLookupByLibrary.simpleMessage("Hapus kontak"),
+    "report": MessageLookupByLibrary.simpleMessage("Laporkan"),
+    "resendCode": MessageLookupByLibrary.simpleMessage("Kirim ulang kode"),
+    "resendCodeIn": m39,
+    "retry": MessageLookupByLibrary.simpleMessage("COBA LAGI"),
+    "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
+      "Unggahan ulang gagal.",
+    ),
+    "revokeMultisigTransaction": MessageLookupByLibrary.simpleMessage(
+      "Cabut Transaksi Multisig",
+    ),
+    "save": MessageLookupByLibrary.simpleMessage("Simpan"),
+    "sayHi": MessageLookupByLibrary.simpleMessage("Katakan Hai"),
+    "scamWarning": MessageLookupByLibrary.simpleMessage(
+      "Peringatan: Banyak pengguna yang melaporkan akun ini sebagai scam. Harap berhati-hati, terutama jika meminta uang Anda",
+    ),
+    "search": MessageLookupByLibrary.simpleMessage("Cari"),
+    "searchConversation": MessageLookupByLibrary.simpleMessage(
+      "Cari Percakapan",
+    ),
+    "searchRelatedMessage": m40,
+    "secretUrl": MessageLookupByLibrary.simpleMessage(
+      "https://mixin.one/pages/1000007",
+    ),
+    "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
+    "select": MessageLookupByLibrary.simpleMessage("Pilih"),
+    "send": MessageLookupByLibrary.simpleMessage("Kirim"),
+    "settingAuthSearchHint": MessageLookupByLibrary.simpleMessage(
+      "Mixin ID, Nama",
+    ),
+    "share": MessageLookupByLibrary.simpleMessage("Bagikan"),
+    "shareError": MessageLookupByLibrary.simpleMessage("Bagikan kesalahan."),
+    "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan Tautan"),
+    "shareMessageDescription": m43,
+    "shareMessageDescriptionEmpty": m44,
+    "sharedMedia": MessageLookupByLibrary.simpleMessage("Media Bersama"),
+    "show": MessageLookupByLibrary.simpleMessage("Tampilkan"),
+    "signIn": MessageLookupByLibrary.simpleMessage("Masuk"),
+    "signWithMobileNumber": MessageLookupByLibrary.simpleMessage(
+      "Masuk dengan nomor telepon",
+    ),
+    "status": MessageLookupByLibrary.simpleMessage("Status"),
+    "sticker": MessageLookupByLibrary.simpleMessage("Stiker"),
+    "stickerAddInvalidSize": MessageLookupByLibrary.simpleMessage(
+      "Memerlukan ukuran file stiker yang lebih besar dari 1KB dan kurang dari 1MB, lebar dan tinggi antara 128px dan 1024px.",
+    ),
+    "storageUsage": MessageLookupByLibrary.simpleMessage(
+      "Penggunaan Penyimpanan",
+    ),
+    "successful": MessageLookupByLibrary.simpleMessage("Berhasil"),
+    "termsOfService": MessageLookupByLibrary.simpleMessage("Ketentuan Layanan"),
+    "theme": MessageLookupByLibrary.simpleMessage("Tema"),
+    "thisMessageWasDeleted": MessageLookupByLibrary.simpleMessage(
+      "Pesan ini telah dihapus",
+    ),
+    "time": MessageLookupByLibrary.simpleMessage("Waktu"),
+    "today": MessageLookupByLibrary.simpleMessage("Hari ini"),
+    "transactionHash": MessageLookupByLibrary.simpleMessage("Hash Transaksi"),
+    "transactionId": MessageLookupByLibrary.simpleMessage("ID Transaksi"),
+    "transactionType": MessageLookupByLibrary.simpleMessage("Jenis Transaksi"),
+    "transactions": MessageLookupByLibrary.simpleMessage("Transaksi"),
+    "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
+    "unblock": MessageLookupByLibrary.simpleMessage("Batal Blokir"),
+    "unmute": MessageLookupByLibrary.simpleMessage("Suarakan"),
+    "updateMixin": MessageLookupByLibrary.simpleMessage("Perbarui Mixin"),
+    "updateMixinDescription": m51,
+    "upgrading": MessageLookupByLibrary.simpleMessage("Meningkatkan"),
+    "userNotFound": MessageLookupByLibrary.simpleMessage(
+      "Pengguna tidak ditemukan",
+    ),
+    "verifyPin": MessageLookupByLibrary.simpleMessage("Verifikasikan PIN"),
+    "video": MessageLookupByLibrary.simpleMessage("Video"),
+    "videos": MessageLookupByLibrary.simpleMessage("Video"),
+    "whatsYourName": MessageLookupByLibrary.simpleMessage("Siapa nama Anda?"),
+    "withdrawal": MessageLookupByLibrary.simpleMessage("Penarikan"),
+    "you": MessageLookupByLibrary.simpleMessage("Anda"),
+    "youDeletedThisMessage": MessageLookupByLibrary.simpleMessage(
+      "Anda menghapus pesan ini",
+    ),
+  };
 }

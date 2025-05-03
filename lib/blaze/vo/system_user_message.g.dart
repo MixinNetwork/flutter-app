@@ -18,6 +18,4 @@ Map<String, dynamic> _$SystemUserMessageToJson(SystemUserMessage instance) =>
       'user_id': instance.userId,
     };
 
-const _$SystemUserActionEnumMap = {
-  SystemUserAction.update: 'UPDATE',
-};
+const _$SystemUserActionEnumMap = {SystemUserAction.update: 'UPDATE'};

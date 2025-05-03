@@ -45,95 +45,107 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
-      BaseTranscriptMessageItem$where where,
-      BaseTranscriptMessageItem$limit limit) {
+    BaseTranscriptMessageItem$where where,
+    BaseTranscriptMessageItem$limit limit,
+  ) {
     var $arrayStartIndex = 1;
     final generatedwhere = $write(
-        where(
-            alias(this.transcriptMessages, 'transcript'),
-            alias(this.messages, 'message'),
-            alias(this.users, 'sender'),
-            alias(this.users, 'sharedUser'),
-            alias(this.stickers, 'sticker')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
+      where(
+        alias(this.transcriptMessages, 'transcript'),
+        alias(this.messages, 'message'),
+        alias(this.users, 'sender'),
+        alias(this.users, 'sharedUser'),
+        alias(this.stickers, 'sticker'),
+      ),
+      hasMultipleTables: true,
+      startIndex: $arrayStartIndex,
+    );
     $arrayStartIndex += generatedwhere.amountOfVariables;
     final generatedlimit = $write(
-        limit(
-            alias(this.transcriptMessages, 'transcript'),
-            alias(this.messages, 'message'),
-            alias(this.users, 'sender'),
-            alias(this.users, 'sharedUser'),
-            alias(this.stickers, 'sticker')),
-        hasMultipleTables: true,
-        startIndex: $arrayStartIndex);
+      limit(
+        alias(this.transcriptMessages, 'transcript'),
+        alias(this.messages, 'message'),
+        alias(this.users, 'sender'),
+        alias(this.users, 'sharedUser'),
+        alias(this.stickers, 'sticker'),
+      ),
+      hasMultipleTables: true,
+      startIndex: $arrayStartIndex,
+    );
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT transcript.transcript_id AS transcriptId, transcript.message_id AS messageId, message.conversation_id AS conversationId, transcript.category AS type, transcript.content AS content, transcript.created_at AS createdAt, message.status AS status, transcript.media_status AS mediaStatus, transcript.media_waveform AS mediaWaveform, transcript.media_name AS mediaName, transcript.media_mime_type AS mediaMimeType, transcript.media_size AS mediaSize, transcript.media_width AS mediaWidth, transcript.media_height AS mediaHeight, transcript.thumb_image AS thumbImage, transcript.thumb_url AS thumbUrl, transcript.media_url AS mediaUrl, transcript.media_duration AS mediaDuration, transcript.quote_id AS quoteId, transcript.quote_content AS quoteContent, transcript.shared_user_id AS sharedUserId, sender.user_id AS userId, IFNULL(sender.full_name, transcript.user_full_name) AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType FROM transcript_messages AS transcript INNER JOIN messages AS message ON message.message_id = transcript.transcript_id LEFT JOIN users AS sender ON transcript.user_id = sender.user_id LEFT JOIN users AS sharedUser ON transcript.shared_user_id = sharedUser.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = transcript.sticker_id WHERE ${generatedwhere.sql} ORDER BY transcript.created_at, transcript."rowid" ${generatedlimit.sql}',
-        variables: [
-          ...generatedwhere.introducedVariables,
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          transcriptMessages,
-          messages,
-          users,
-          stickers,
-          ...generatedwhere.watchedTables,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) => TranscriptMessageItem(
-          transcriptId: row.read<String>('transcriptId'),
-          messageId: row.read<String>('messageId'),
-          conversationId: row.read<String>('conversationId'),
-          type: row.read<String>('type'),
-          content: row.readNullable<String>('content'),
-          createdAt: TranscriptMessages.$convertercreatedAt
-              .fromSql(row.read<int>('createdAt')),
-          status: Messages.$converterstatus.fromSql(row.read<String>('status')),
-          mediaStatus: TranscriptMessages.$convertermediaStatus
-              .fromSql(row.readNullable<String>('mediaStatus')),
-          mediaWaveform: row.readNullable<String>('mediaWaveform'),
-          mediaName: row.readNullable<String>('mediaName'),
-          mediaMimeType: row.readNullable<String>('mediaMimeType'),
-          mediaSize: row.readNullable<int>('mediaSize'),
-          mediaWidth: row.readNullable<int>('mediaWidth'),
-          mediaHeight: row.readNullable<int>('mediaHeight'),
-          thumbImage: row.readNullable<String>('thumbImage'),
-          thumbUrl: row.readNullable<String>('thumbUrl'),
-          mediaUrl: row.readNullable<String>('mediaUrl'),
-          mediaDuration: row.readNullable<String>('mediaDuration'),
-          quoteId: row.readNullable<String>('quoteId'),
-          quoteContent: row.readNullable<String>('quoteContent'),
-          sharedUserId: row.readNullable<String>('sharedUserId'),
-          userId: row.readNullable<String>('userId'),
-          userFullName: row.readNullable<String>('userFullName'),
-          userIdentityNumber: row.readNullable<String>('userIdentityNumber'),
-          appId: row.readNullable<String>('appId'),
-          relationship: Users.$converterrelationship
-              .fromSql(row.readNullable<String>('relationship')),
-          avatarUrl: row.readNullable<String>('avatarUrl'),
-          isVerified: row.read<bool>('isVerified'),
-          sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
-          sharedUserIdentityNumber:
-              row.readNullable<String>('sharedUserIdentityNumber'),
-          sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
-          sharedUserIsVerified: row.read<bool>('sharedUserIsVerified'),
-          sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
-          assetUrl: row.readNullable<String>('assetUrl'),
-          assetWidth: row.readNullable<int>('assetWidth'),
-          assetHeight: row.readNullable<int>('assetHeight'),
-          stickerId: row.readNullable<String>('stickerId'),
-          assetName: row.readNullable<String>('assetName'),
-          assetType: row.readNullable<String>('assetType'),
-        ));
+      'SELECT transcript.transcript_id AS transcriptId, transcript.message_id AS messageId, message.conversation_id AS conversationId, transcript.category AS type, transcript.content AS content, transcript.created_at AS createdAt, message.status AS status, transcript.media_status AS mediaStatus, transcript.media_waveform AS mediaWaveform, transcript.media_name AS mediaName, transcript.media_mime_type AS mediaMimeType, transcript.media_size AS mediaSize, transcript.media_width AS mediaWidth, transcript.media_height AS mediaHeight, transcript.thumb_image AS thumbImage, transcript.thumb_url AS thumbUrl, transcript.media_url AS mediaUrl, transcript.media_duration AS mediaDuration, transcript.quote_id AS quoteId, transcript.quote_content AS quoteContent, transcript.shared_user_id AS sharedUserId, sender.user_id AS userId, IFNULL(sender.full_name, transcript.user_full_name) AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType FROM transcript_messages AS transcript INNER JOIN messages AS message ON message.message_id = transcript.transcript_id LEFT JOIN users AS sender ON transcript.user_id = sender.user_id LEFT JOIN users AS sharedUser ON transcript.shared_user_id = sharedUser.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = transcript.sticker_id WHERE ${generatedwhere.sql} ORDER BY transcript.created_at, transcript."rowid" ${generatedlimit.sql}',
+      variables: [
+        ...generatedwhere.introducedVariables,
+        ...generatedlimit.introducedVariables,
+      ],
+      readsFrom: {
+        transcriptMessages,
+        messages,
+        users,
+        stickers,
+        ...generatedwhere.watchedTables,
+        ...generatedlimit.watchedTables,
+      },
+    ).map(
+      (QueryRow row) => TranscriptMessageItem(
+        transcriptId: row.read<String>('transcriptId'),
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        type: row.read<String>('type'),
+        content: row.readNullable<String>('content'),
+        createdAt: TranscriptMessages.$convertercreatedAt.fromSql(
+          row.read<int>('createdAt'),
+        ),
+        status: Messages.$converterstatus.fromSql(row.read<String>('status')),
+        mediaStatus: TranscriptMessages.$convertermediaStatus.fromSql(
+          row.readNullable<String>('mediaStatus'),
+        ),
+        mediaWaveform: row.readNullable<String>('mediaWaveform'),
+        mediaName: row.readNullable<String>('mediaName'),
+        mediaMimeType: row.readNullable<String>('mediaMimeType'),
+        mediaSize: row.readNullable<int>('mediaSize'),
+        mediaWidth: row.readNullable<int>('mediaWidth'),
+        mediaHeight: row.readNullable<int>('mediaHeight'),
+        thumbImage: row.readNullable<String>('thumbImage'),
+        thumbUrl: row.readNullable<String>('thumbUrl'),
+        mediaUrl: row.readNullable<String>('mediaUrl'),
+        mediaDuration: row.readNullable<String>('mediaDuration'),
+        quoteId: row.readNullable<String>('quoteId'),
+        quoteContent: row.readNullable<String>('quoteContent'),
+        sharedUserId: row.readNullable<String>('sharedUserId'),
+        userId: row.readNullable<String>('userId'),
+        userFullName: row.readNullable<String>('userFullName'),
+        userIdentityNumber: row.readNullable<String>('userIdentityNumber'),
+        appId: row.readNullable<String>('appId'),
+        relationship: Users.$converterrelationship.fromSql(
+          row.readNullable<String>('relationship'),
+        ),
+        avatarUrl: row.readNullable<String>('avatarUrl'),
+        isVerified: row.read<bool>('isVerified'),
+        sharedUserFullName: row.readNullable<String>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.readNullable<String>(
+          'sharedUserIdentityNumber',
+        ),
+        sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<bool>('sharedUserIsVerified'),
+        sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+        assetUrl: row.readNullable<String>('assetUrl'),
+        assetWidth: row.readNullable<int>('assetWidth'),
+        assetHeight: row.readNullable<int>('assetHeight'),
+        stickerId: row.readNullable<String>('stickerId'),
+        assetName: row.readNullable<String>('assetName'),
+        assetType: row.readNullable<String>('assetType'),
+      ),
+    );
   }
 
   Selectable<int> countTranscriptMessages() {
-    return customSelect('SELECT COUNT(1) AS _c0 FROM transcript_messages',
-        variables: [],
-        readsFrom: {
-          transcriptMessages,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect(
+      'SELECT COUNT(1) AS _c0 FROM transcript_messages',
+      variables: [],
+      readsFrom: {transcriptMessages},
+    ).map((QueryRow row) => row.read<int>('_c0'));
   }
 }
 
@@ -220,46 +232,46 @@ class TranscriptMessageItem {
   });
   @override
   int get hashCode => Object.hashAll([
-        transcriptId,
-        messageId,
-        conversationId,
-        type,
-        content,
-        createdAt,
-        status,
-        mediaStatus,
-        mediaWaveform,
-        mediaName,
-        mediaMimeType,
-        mediaSize,
-        mediaWidth,
-        mediaHeight,
-        thumbImage,
-        thumbUrl,
-        mediaUrl,
-        mediaDuration,
-        quoteId,
-        quoteContent,
-        sharedUserId,
-        userId,
-        userFullName,
-        userIdentityNumber,
-        appId,
-        relationship,
-        avatarUrl,
-        isVerified,
-        sharedUserFullName,
-        sharedUserIdentityNumber,
-        sharedUserAvatarUrl,
-        sharedUserIsVerified,
-        sharedUserAppId,
-        assetUrl,
-        assetWidth,
-        assetHeight,
-        stickerId,
-        assetName,
-        assetType
-      ]);
+    transcriptId,
+    messageId,
+    conversationId,
+    type,
+    content,
+    createdAt,
+    status,
+    mediaStatus,
+    mediaWaveform,
+    mediaName,
+    mediaMimeType,
+    mediaSize,
+    mediaWidth,
+    mediaHeight,
+    thumbImage,
+    thumbUrl,
+    mediaUrl,
+    mediaDuration,
+    quoteId,
+    quoteContent,
+    sharedUserId,
+    userId,
+    userFullName,
+    userIdentityNumber,
+    appId,
+    relationship,
+    avatarUrl,
+    isVerified,
+    sharedUserFullName,
+    sharedUserIdentityNumber,
+    sharedUserAvatarUrl,
+    sharedUserIsVerified,
+    sharedUserAppId,
+    assetUrl,
+    assetWidth,
+    assetHeight,
+    stickerId,
+    assetName,
+    assetType,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -350,15 +362,19 @@ class TranscriptMessageItem {
   }
 }
 
-typedef BaseTranscriptMessageItem$where = Expression<bool> Function(
-    TranscriptMessages transcript,
-    Messages message,
-    Users sender,
-    Users sharedUser,
-    Stickers sticker);
-typedef BaseTranscriptMessageItem$limit = Limit Function(
-    TranscriptMessages transcript,
-    Messages message,
-    Users sender,
-    Users sharedUser,
-    Stickers sticker);
+typedef BaseTranscriptMessageItem$where =
+    Expression<bool> Function(
+      TranscriptMessages transcript,
+      Messages message,
+      Users sender,
+      Users sharedUser,
+      Stickers sticker,
+    );
+typedef BaseTranscriptMessageItem$limit =
+    Limit Function(
+      TranscriptMessages transcript,
+      Messages message,
+      Users sender,
+      Users sharedUser,
+      Stickers sticker,
+    );
