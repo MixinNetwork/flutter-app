@@ -50,11 +50,11 @@ jobs:
           SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           EOF
 
-      - name: Run Build Runner
-        run: dart run build_runner build --delete-conflicting-outputs
-
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
+
+      - name: Run Build Runner
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Analyze project source
         run: dart analyze --fatal-infos
