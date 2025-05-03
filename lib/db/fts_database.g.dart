@@ -230,9 +230,6 @@ class MessagesMetas extends Table with TableInfo<MessagesMetas, MessagesMeta> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -306,7 +303,6 @@ class MessagesMetas extends Table with TableInfo<MessagesMetas, MessagesMeta> {
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 

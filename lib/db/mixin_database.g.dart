@@ -30,9 +30,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _categoryMeta = const VerificationMeta(
-    'category',
-  );
   late final GeneratedColumnWithTypeConverter<ConversationCategory?, String>
   category = GeneratedColumn<String>(
     'category',
@@ -95,9 +92,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -107,9 +101,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(Conversations.$convertercreatedAt);
-  static const VerificationMeta _pinTimeMeta = const VerificationMeta(
-    'pinTime',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> pinTime =
       GeneratedColumn<int>(
         'pin_time',
@@ -130,8 +121,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _lastMessageCreatedAtMeta =
-      const VerificationMeta('lastMessageCreatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime?, int>
   lastMessageCreatedAt = GeneratedColumn<int>(
     'last_message_created_at',
@@ -163,7 +152,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumnWithTypeConverter<ConversationStatus, int> status =
       GeneratedColumn<int>(
         'status',
@@ -181,9 +169,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     $customConstraints: '',
-  );
-  static const VerificationMeta _muteUntilMeta = const VerificationMeta(
-    'muteUntil',
   );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> muteUntil =
       GeneratedColumn<int>(
@@ -255,7 +240,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
       );
     }
-    context.handle(_categoryMeta, const VerificationResult.success());
     if (data.containsKey('name')) {
       context.handle(
         _nameMeta,
@@ -289,8 +273,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         payType.isAcceptableOrUnknown(data['pay_type']!, _payTypeMeta),
       );
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_pinTimeMeta, const VerificationResult.success());
     if (data.containsKey('last_message_id')) {
       context.handle(
         _lastMessageIdMeta,
@@ -300,10 +282,6 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         ),
       );
     }
-    context.handle(
-      _lastMessageCreatedAtMeta,
-      const VerificationResult.success(),
-    );
     if (data.containsKey('last_read_message_id')) {
       context.handle(
         _lastReadMessageIdMeta,
@@ -322,14 +300,12 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         ),
       );
     }
-    context.handle(_statusMeta, const VerificationResult.success());
     if (data.containsKey('draft')) {
       context.handle(
         _draftMeta,
         draft.isAcceptableOrUnknown(data['draft']!, _draftMeta),
       );
     }
-    context.handle(_muteUntilMeta, const VerificationResult.success());
     if (data.containsKey('expire_in')) {
       context.handle(
         _expireInMeta,
@@ -1282,9 +1258,6 @@ class Messages extends Table with TableInfo<Messages, Message> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _mediaStatusMeta = const VerificationMeta(
-    'mediaStatus',
-  );
   late final GeneratedColumnWithTypeConverter<MediaStatus?, String>
   mediaStatus = GeneratedColumn<String>(
     'media_status',
@@ -1294,7 +1267,6 @@ class Messages extends Table with TableInfo<Messages, Message> {
     requiredDuringInsert: false,
     $customConstraints: '',
   ).withConverter<MediaStatus?>(Messages.$convertermediaStatus);
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumnWithTypeConverter<MessageStatus, String> status =
       GeneratedColumn<String>(
         'status',
@@ -1304,9 +1276,6 @@ class Messages extends Table with TableInfo<Messages, Message> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<MessageStatus>(Messages.$converterstatus);
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -1614,9 +1583,6 @@ class Messages extends Table with TableInfo<Messages, Message> {
         ),
       );
     }
-    context.handle(_mediaStatusMeta, const VerificationResult.success());
-    context.handle(_statusMeta, const VerificationResult.success());
-    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('action')) {
       context.handle(
         _actionMeta,
@@ -2883,9 +2849,6 @@ class Users extends Table with TableInfo<Users, User> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _relationshipMeta = const VerificationMeta(
-    'relationship',
-  );
   late final GeneratedColumnWithTypeConverter<UserRelationship?, String>
   relationship = GeneratedColumn<String>(
     'relationship',
@@ -2895,9 +2858,6 @@ class Users extends Table with TableInfo<Users, User> {
     requiredDuringInsert: false,
     $customConstraints: '',
   ).withConverter<UserRelationship?>(Users.$converterrelationship);
-  static const VerificationMeta _membershipMeta = const VerificationMeta(
-    'membership',
-  );
   late final GeneratedColumnWithTypeConverter<Membership?, String> membership =
       GeneratedColumn<String>(
         'membership',
@@ -2949,9 +2909,6 @@ class Users extends Table with TableInfo<Users, User> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -2961,9 +2918,6 @@ class Users extends Table with TableInfo<Users, User> {
         requiredDuringInsert: false,
         $customConstraints: '',
       ).withConverter<DateTime?>(Users.$convertercreatedAtn);
-  static const VerificationMeta _muteUntilMeta = const VerificationMeta(
-    'muteUntil',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> muteUntil =
       GeneratedColumn<int>(
         'mute_until',
@@ -3093,8 +3047,6 @@ class Users extends Table with TableInfo<Users, User> {
     } else if (isInserting) {
       context.missing(_identityNumberMeta);
     }
-    context.handle(_relationshipMeta, const VerificationResult.success());
-    context.handle(_membershipMeta, const VerificationResult.success());
     if (data.containsKey('full_name')) {
       context.handle(
         _fullNameMeta,
@@ -3119,8 +3071,6 @@ class Users extends Table with TableInfo<Users, User> {
         isVerified.isAcceptableOrUnknown(data['is_verified']!, _isVerifiedMeta),
       );
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_muteUntilMeta, const VerificationResult.success());
     if (data.containsKey('has_pin')) {
       context.handle(
         _hasPinMeta,
@@ -3917,9 +3867,6 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -4092,7 +4039,6 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('opponent_id')) {
       context.handle(
         _opponentIdMeta,
@@ -4909,9 +4855,6 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _withdrawalMeta = const VerificationMeta(
-    'withdrawal',
-  );
   late final GeneratedColumnWithTypeConverter<SafeWithdrawal?, String>
   withdrawal = GeneratedColumn<String>(
     'withdrawal',
@@ -4921,9 +4864,6 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
     requiredDuringInsert: false,
     $customConstraints: '',
   ).withConverter<SafeWithdrawal?>(SafeSnapshots.$converterwithdrawal);
-  static const VerificationMeta _depositMeta = const VerificationMeta(
-    'deposit',
-  );
   late final GeneratedColumnWithTypeConverter<SafeDeposit?, String> deposit =
       GeneratedColumn<String>(
         'deposit',
@@ -5083,8 +5023,6 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
         ),
       );
     }
-    context.handle(_withdrawalMeta, const VerificationResult.success());
-    context.handle(_depositMeta, const VerificationResult.success());
     if (data.containsKey('inscription_hash')) {
       context.handle(
         _inscriptionHashMeta,
@@ -7899,9 +7837,6 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -7911,9 +7846,6 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(Stickers.$convertercreatedAt);
-  static const VerificationMeta _lastUseAtMeta = const VerificationMeta(
-    'lastUseAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> lastUseAt =
       GeneratedColumn<int>(
         'last_use_at',
@@ -8004,8 +7936,6 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
     } else if (isInserting) {
       context.missing(_assetHeightMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_lastUseAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -9108,9 +9038,6 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -9153,7 +9080,6 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
     } else if (isInserting) {
       context.missing(_conversationIdMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -9700,9 +9626,6 @@ class Addresses extends Table with TableInfo<Addresses, Address> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> updatedAt =
       GeneratedColumn<int>(
         'updated_at',
@@ -9818,7 +9741,6 @@ class Addresses extends Table with TableInfo<Addresses, Address> {
     } else if (isInserting) {
       context.missing(_labelMeta);
     }
-    context.handle(_updatedAtMeta, const VerificationResult.success());
     if (data.containsKey('reserve')) {
       context.handle(
         _reserveMeta,
@@ -10397,9 +10319,6 @@ class Apps extends Table with TableInfo<Apps, App> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> updatedAt =
       GeneratedColumn<int>(
         'updated_at',
@@ -10539,7 +10458,6 @@ class Apps extends Table with TableInfo<Apps, App> {
         ),
       );
     }
-    context.handle(_updatedAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -11104,9 +11022,6 @@ class CircleConversations extends Table
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -11116,9 +11031,6 @@ class CircleConversations extends Table
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(CircleConversations.$convertercreatedAt);
-  static const VerificationMeta _pinTimeMeta = const VerificationMeta(
-    'pinTime',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> pinTime =
       GeneratedColumn<int>(
         'pin_time',
@@ -11173,8 +11085,6 @@ class CircleConversations extends Table
         userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
       );
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_pinTimeMeta, const VerificationResult.success());
     return context;
   }
 
@@ -11486,9 +11396,6 @@ class Circles extends Table with TableInfo<Circles, Circle> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -11498,9 +11405,6 @@ class Circles extends Table with TableInfo<Circles, Circle> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(Circles.$convertercreatedAt);
-  static const VerificationMeta _orderedAtMeta = const VerificationMeta(
-    'orderedAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> orderedAt =
       GeneratedColumn<int>(
         'ordered_at',
@@ -11540,8 +11444,6 @@ class Circles extends Table with TableInfo<Circles, Circle> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_orderedAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -11817,9 +11719,6 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -11859,7 +11758,6 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -12092,9 +11990,6 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -12220,7 +12115,6 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
     } else if (isInserting) {
       context.missing(_actionMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('order_id')) {
       context.handle(
         _orderIdMeta,
@@ -13156,9 +13050,6 @@ class ParticipantSession extends Table
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -13236,7 +13127,6 @@ class ParticipantSession extends Table
         ),
       );
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('public_key')) {
       context.handle(
         _publicKeyMeta,
@@ -13588,7 +13478,6 @@ class Participants extends Table with TableInfo<Participants, Participant> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _roleMeta = const VerificationMeta('role');
   late final GeneratedColumnWithTypeConverter<ParticipantRole?, String> role =
       GeneratedColumn<String>(
         'role',
@@ -13598,9 +13487,6 @@ class Participants extends Table with TableInfo<Participants, Participant> {
         requiredDuringInsert: false,
         $customConstraints: '',
       ).withConverter<ParticipantRole?>(Participants.$converterrole);
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -13648,8 +13534,6 @@ class Participants extends Table with TableInfo<Participants, Participant> {
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    context.handle(_roleMeta, const VerificationResult.success());
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -13945,9 +13829,6 @@ class ResendSessionMessages extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -14009,7 +13890,6 @@ class ResendSessionMessages extends Table
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -14339,9 +14219,6 @@ class SentSessionSenderKeys extends Table
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -14419,7 +14296,6 @@ class SentSessionSenderKeys extends Table
         ),
       );
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -14774,9 +14650,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -14786,9 +14659,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(StickerAlbums.$convertercreatedAt);
-  static const VerificationMeta _updateAtMeta = const VerificationMeta(
-    'updateAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> updateAt =
       GeneratedColumn<int>(
         'update_at',
@@ -14923,8 +14793,6 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     } else if (isInserting) {
       context.missing(_iconUrlMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_updateAtMeta, const VerificationResult.success());
     if (data.containsKey('ordered_at')) {
       context.handle(
         _orderedAtMeta,
@@ -15749,9 +15617,6 @@ class TranscriptMessages extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -15849,9 +15714,6 @@ class TranscriptMessages extends Table
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _mediaStatusMeta = const VerificationMeta(
-    'mediaStatus',
-  );
   late final GeneratedColumnWithTypeConverter<MediaStatus?, String>
   mediaStatus = GeneratedColumn<String>(
     'media_status',
@@ -15915,9 +15777,6 @@ class TranscriptMessages extends Table
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     $customConstraints: '',
-  );
-  static const VerificationMeta _mediaCreatedAtMeta = const VerificationMeta(
-    'mediaCreatedAt',
   );
   late final GeneratedColumnWithTypeConverter<DateTime?, int> mediaCreatedAt =
       GeneratedColumn<int>(
@@ -16078,7 +15937,6 @@ class TranscriptMessages extends Table
     } else if (isInserting) {
       context.missing(_categoryMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('content')) {
       context.handle(
         _contentMeta,
@@ -16136,7 +15994,6 @@ class TranscriptMessages extends Table
         ),
       );
     }
-    context.handle(_mediaStatusMeta, const VerificationResult.success());
     if (data.containsKey('media_waveform')) {
       context.handle(
         _mediaWaveformMeta,
@@ -16173,7 +16030,6 @@ class TranscriptMessages extends Table
         ),
       );
     }
-    context.handle(_mediaCreatedAtMeta, const VerificationResult.success());
     if (data.containsKey('sticker_id')) {
       context.handle(
         _stickerIdMeta,
@@ -17483,9 +17339,6 @@ class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -17525,7 +17378,6 @@ class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -17746,7 +17598,6 @@ class Properties extends Table with TableInfo<Properties, Property> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _groupMeta = const VerificationMeta('group');
   late final GeneratedColumnWithTypeConverter<PropertyGroup, String> group =
       GeneratedColumn<String>(
         'group',
@@ -17787,7 +17638,6 @@ class Properties extends Table with TableInfo<Properties, Property> {
     } else if (isInserting) {
       context.missing(_keyMeta);
     }
-    context.handle(_groupMeta, const VerificationResult.success());
     if (data.containsKey('value')) {
       context.handle(
         _valueMeta,
@@ -18060,9 +17910,6 @@ class InscriptionCollections extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -18072,9 +17919,6 @@ class InscriptionCollections extends Table
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(InscriptionCollections.$convertercreatedAt);
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> updatedAt =
       GeneratedColumn<int>(
         'updated_at',
@@ -18158,8 +18002,6 @@ class InscriptionCollections extends Table
     } else if (isInserting) {
       context.missing(_iconUrlMeta);
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_updatedAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -18617,9 +18459,6 @@ class InscriptionItems extends Table
     requiredDuringInsert: false,
     $customConstraints: '',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -18629,9 +18468,6 @@ class InscriptionItems extends Table
         requiredDuringInsert: true,
         $customConstraints: 'NOT NULL',
       ).withConverter<DateTime>(InscriptionItems.$convertercreatedAt);
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> updatedAt =
       GeneratedColumn<int>(
         'updated_at',
@@ -18726,8 +18562,6 @@ class InscriptionItems extends Table
         occupiedAt.isAcceptableOrUnknown(data['occupied_at']!, _occupiedAtMeta),
       );
     }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_updatedAtMeta, const VerificationResult.success());
     return context;
   }
 
