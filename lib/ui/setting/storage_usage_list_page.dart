@@ -79,7 +79,7 @@ class _Content extends HookConsumerWidget {
         final (item, size) = list[index];
         return _Item(item: item, size: size);
       },
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemCount: list.length,
     );
   }

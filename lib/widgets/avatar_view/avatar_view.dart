@@ -200,7 +200,7 @@ class AvatarWidget extends StatelessWidget {
               width: size,
               height: size,
               placeholder: () => placeholder,
-              errorBuilder: (_, __, ___) => placeholder,
+              errorBuilder: (_, _, _) => placeholder,
             )
             : placeholder;
 

@@ -37,7 +37,7 @@ class InscriptionContent extends HookWidget {
             when type.startsWith('image') =>
           MixinImage.network(
             contentUrl,
-            errorBuilder: (_, __, ___) => defaultInscriptionImage,
+            errorBuilder: (_, _, _) => defaultInscriptionImage,
             placeholder: () => defaultInscriptionImage,
           ),
         Inscription(
@@ -133,7 +133,7 @@ class _TextInscriptionContent extends HookWidget {
                     dimension: constraints.maxWidth / 3,
                     child: MixinImage.network(
                       iconUrl,
-                      errorBuilder: (_, __, ___) => defaultCollectionImage,
+                      errorBuilder: (_, _, _) => defaultCollectionImage,
                       placeholder: () => defaultCollectionImage,
                     ),
                   ),

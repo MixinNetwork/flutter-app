@@ -121,7 +121,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     if (category?.type == SlideCategoryType.circle) {
       final circleId = category!.id;
       return _fuzzySearchUserInCircle(
-        (_, conversation, __) {
+        (_, conversation, _) {
           if (!isIncludeConversation) {
             return conversation.status.isNull();
           }

@@ -121,8 +121,7 @@ class _InscriptionLayout extends StatelessWidget {
                           dimension: 22,
                           child: MixinImage.network(
                             inscription?.iconUrl ?? '',
-                            errorBuilder:
-                                (_, __, ___) => defaultCollectionImage,
+                            errorBuilder: (_, _, _) => defaultCollectionImage,
                             placeholder: () => defaultCollectionImage,
                           ),
                         ),

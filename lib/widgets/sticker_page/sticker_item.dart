@@ -82,7 +82,7 @@ class StickerItem extends HookConsumerWidget {
                 listener();
               },
               errorBuilder:
-                  errorWidget != null ? (_, __, ___) => errorWidget! : null,
+                  errorWidget != null ? (_, _, _) => errorWidget! : null,
             )
             : MixinImage.network(
               assetUrl,
@@ -90,7 +90,7 @@ class StickerItem extends HookConsumerWidget {
               width: width,
               fit: BoxFit.contain,
               errorBuilder:
-                  errorWidget != null ? (_, __, ___) => errorWidget! : null,
+                  errorWidget != null ? (_, _, _) => errorWidget! : null,
             );
 
     if (width == null || height == null) {
