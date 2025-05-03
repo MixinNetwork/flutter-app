@@ -6,7 +6,7 @@ import 'database_provider.dart';
 
 class _IsBotGroupState extends DistinctStateNotifier<bool> {
   _IsBotGroupState(String conversationId, ConversationDao? conversationDao)
-      : super(false) {
+    : super(false) {
     if (conversationDao == null) return;
 
     conversationDao
@@ -16,8 +16,11 @@ class _IsBotGroupState extends DistinctStateNotifier<bool> {
   }
 }
 
-final isBotGroupProvider = StateNotifierProvider.autoDispose
-    .family<_IsBotGroupState, bool, String>((ref, conversationId) {
+final isBotGroupProvider = StateNotifierProvider.autoDispose.family<
+  _IsBotGroupState,
+  bool,
+  String
+>((ref, conversationId) {
   // Minimize frequent calls to isBotGroup by keeping it alive for 10 minutes
   final keepAlive = ref.keepAlive();
   ref.onDispose(
@@ -25,7 +28,7 @@ final isBotGroupProvider = StateNotifierProvider.autoDispose
   );
 
   return _IsBotGroupState(
-      conversationId,
-      ref.watch(
-          databaseProvider.select((value) => value.value?.conversationDao)));
+    conversationId,
+    ref.watch(databaseProvider.select((value) => value.value?.conversationDao)),
+  );
 });

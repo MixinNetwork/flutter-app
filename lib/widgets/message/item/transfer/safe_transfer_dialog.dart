@@ -23,31 +23,34 @@ Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
       child: _SafeTransferDialog(snapshotId: snapshotId),
     );
 
-final _snapshotTypeProvider =
-    Provider.family.autoDispose<String, SafeSnapshot>((ref, snapshot) {
-  if (snapshot.type == SnapshotType.pending) {
-    return SnapshotType.pending;
-  } else if (snapshot.withdrawal != null) {
-    return SnapshotType.withdrawal;
-  } else if (snapshot.deposit != null) {
-    return SnapshotType.deposit;
-  } else {
-    return SnapshotType.transfer;
-  }
-});
+final _snapshotTypeProvider = Provider.family.autoDispose<String, SafeSnapshot>(
+  (ref, snapshot) {
+    if (snapshot.type == SnapshotType.pending) {
+      return SnapshotType.pending;
+    } else if (snapshot.withdrawal != null) {
+      return SnapshotType.withdrawal;
+    } else if (snapshot.deposit != null) {
+      return SnapshotType.deposit;
+    } else {
+      return SnapshotType.transfer;
+    }
+  },
+);
 
-final _userProvider =
-    StreamProvider.family.autoDispose<User?, String>((ref, userId) {
+final _userProvider = StreamProvider.family.autoDispose<User?, String>((
+  ref,
+  userId,
+) {
   final accountServer = ref.read(accountServerProvider).requireValue;
 
   final stream = accountServer.database.userDao
       .userById(userId)
       .watchSingleOrNullWithStream(
-    eventStreams: [
-      DataBaseEventBus.instance.watchUpdateUserStream([userId])
-    ],
-    duration: kSlowThrottleDuration,
-  );
+        eventStreams: [
+          DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+        ],
+        duration: kSlowThrottleDuration,
+      );
 
   return stream.map((event) {
     if (event == null) accountServer.refreshUsers([userId]);
@@ -76,15 +79,12 @@ class _SafeTransferDialog extends HookConsumerWidget {
     if (tokenId != null) {
       token = ref.watch(tokenProvider(tokenId));
     }
-    useEffect(
-      () {
-        if (tokenId == null) {
-          return;
-        }
-        context.accountServer.updateTokenById(assetId: tokenId);
-      },
-      [tokenId],
-    );
+    useEffect(() {
+      if (tokenId == null) {
+        return;
+      }
+      context.accountServer.updateTokenById(assetId: tokenId);
+    }, [tokenId]);
 
     final snapshotValue = snapshot.valueOrNull;
     final tokenValue = token.valueOrNull;
@@ -142,10 +142,7 @@ class _SafeTransferDialog extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Container(
-                    color: context.theme.divider,
-                    height: 10,
-                  ),
+                  Container(color: context.theme.divider, height: 10),
                   _SafeTransactionDetailInfo(
                     snapshot: snapshotValue,
                     token: tokenValue,
@@ -168,30 +165,33 @@ final _fiatRateProvider = StreamProvider.autoDispose<double?>((ref) {
     return const Stream.empty();
   }
   final db = accountServer.database.mixinDatabase;
-  final fiatCurrency =
-      ref.watch(authAccountProvider.select((value) => value?.fiatCurrency));
+  final fiatCurrency = ref.watch(
+    authAccountProvider.select((value) => value?.fiatCurrency),
+  );
   if (fiatCurrency == null) {
     return const Stream.empty();
   }
-  return (db.select(db.fiats)..where((tbl) => tbl.code.equals(fiatCurrency)))
-      .map((e) => e.rate)
-      .watchSingle();
+  return (db.select(db.fiats)..where(
+    (tbl) => tbl.code.equals(fiatCurrency),
+  )).map((e) => e.rate).watchSingle();
 });
 
 final _tickerProvider = FutureProvider.family
-    .autoDispose<Ticker?, (String tokenId, String snapshotCreatedAt)>(
-        (ref, snapshot) async {
-  final accountServer = ref.watch(accountServerProvider).valueOrNull;
-  if (accountServer == null) {
-    return null;
-  }
-  final (tokenId, createdAt) = snapshot;
-  final response = await accountServer.client.snapshotApi.getTicker(
-    tokenId,
-    offset: createdAt,
-  );
-  return response.data;
-});
+    .autoDispose<Ticker?, (String tokenId, String snapshotCreatedAt)>((
+      ref,
+      snapshot,
+    ) async {
+      final accountServer = ref.watch(accountServerProvider).valueOrNull;
+      if (accountServer == null) {
+        return null;
+      }
+      final (tokenId, createdAt) = snapshot;
+      final response = await accountServer.client.snapshotApi.getTicker(
+        tokenId,
+        offset: createdAt,
+      );
+      return response.data;
+    });
 
 class _ValuesDescription extends HookConsumerWidget {
   const _ValuesDescription({
@@ -206,37 +206,40 @@ class _ValuesDescription extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ticker = ref
-        .watch(_tickerProvider((snapshot.assetId, snapshot.createdAt)))
-        .valueOrNull;
+    final ticker =
+        ref
+            .watch(_tickerProvider((snapshot.assetId, snapshot.createdAt)))
+            .valueOrNull;
 
     final String? thatTimeValue;
 
-    final current = (snapshot.amount.asDecimal *
-            token.priceUsd.asDecimal *
-            fiatRate.asDecimal)
-        .abs();
-    final unitValue = context
-        .currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble());
+    final current =
+        (snapshot.amount.asDecimal *
+                token.priceUsd.asDecimal *
+                fiatRate.asDecimal)
+            .abs();
+    final unitValue = context.currencyFormat(
+      (current / snapshot.amount.asDecimal.abs()).toDouble(),
+    );
     final symbol = token.symbol.overflow;
-    final currentValue = '${context.l10n.valueNow(
-      context.currencyFormat(current),
-    )}($unitValue/$symbol)';
+    final currentValue =
+        '${context.l10n.valueNow(context.currencyFormat(current))}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
       thatTimeValue = context.l10n.valueThen(context.l10n.na);
     } else {
-      final past = (snapshot.amount.asDecimal *
-              ticker.priceUsd.asDecimal *
-              fiatRate.asDecimal)
-          .abs();
-      final unitValue = context
-          .currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble());
-      thatTimeValue = '${context.l10n.valueThen(
-        context.currencyFormat(past),
-      )}($unitValue/$symbol)';
+      final past =
+          (snapshot.amount.asDecimal *
+                  ticker.priceUsd.asDecimal *
+                  fiatRate.asDecimal)
+              .abs();
+      final unitValue = context.currencyFormat(
+        (past / snapshot.amount.asDecimal.abs()).toDouble(),
+      );
+      thatTimeValue =
+          '${context.l10n.valueThen(context.currencyFormat(past))}($unitValue/$symbol)';
     }
     return DefaultTextStyle.merge(
       style: TextStyle(
@@ -247,10 +250,7 @@ class _ValuesDescription extends HookConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomSelectableText(
-            currentValue,
-            enableInteractiveSelection: false,
-          ),
+          CustomSelectableText(currentValue, enableInteractiveSelection: false),
           if (thatTimeValue != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
@@ -336,14 +336,16 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
               snapshot.deposit != null) ...[
             TransactionInfoTile(
               title: Text(context.l10n.depositHash),
-              subtitle:
-                  CustomSelectableText(snapshot.deposit?.depositHash ?? ''),
+              subtitle: CustomSelectableText(
+                snapshot.deposit?.depositHash ?? '',
+              ),
             ),
           ] else if (type == SnapshotType.withdrawal) ...[
             TransactionInfoTile(
               title: Text(context.l10n.to),
-              subtitle:
-                  CustomSelectableText(snapshot.withdrawal?.receiver ?? ''),
+              subtitle: CustomSelectableText(
+                snapshot.withdrawal?.receiver ?? '',
+              ),
             ),
             // ignore: unnecessary_parenthesis
             if ((snapshot.withdrawal?.withdrawalHash).isNullOrBlank())
@@ -361,14 +363,16 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
               TransactionInfoTile(
                 title: Text(context.l10n.withdrawalHash),
                 subtitle: CustomSelectableText(
-                    snapshot.withdrawal?.withdrawalHash ?? ''),
+                  snapshot.withdrawal?.withdrawalHash ?? '',
+                ),
               ),
           ],
           TransactionInfoTile(
             title: Text(context.l10n.time),
-            subtitle:
-                CustomSelectableText('${DateFormat.yMMMMd().format(createdAt)} '
-                    '${DateFormat.Hms().format(createdAt)}'),
+            subtitle: CustomSelectableText(
+              '${DateFormat.yMMMMd().format(createdAt)} '
+              '${DateFormat.Hms().format(createdAt)}',
+            ),
           ),
         ],
       ),

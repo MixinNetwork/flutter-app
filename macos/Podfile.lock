@@ -1,6 +1,4 @@
 PODS:
-  - audio_session (0.0.1):
-    - FlutterMacOS
   - desktop_drop (0.0.1):
     - FlutterMacOS
   - desktop_keep_screen_on (0.0.1):
@@ -9,34 +7,18 @@ PODS:
     - FlutterMacOS
   - device_info_plus (0.0.1):
     - FlutterMacOS
-  - file_picker (0.0.1):
-    - FlutterMacOS
-  - file_selector_macos (0.0.1):
-    - FlutterMacOS
   - flutter_app_icon_badge (0.0.1):
-    - FlutterMacOS
-  - flutter_local_notifications (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - irondash_engine_context (0.0.1):
     - FlutterMacOS
-  - local_auth_darwin (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - mixin_logger (0.0.1):
-    - FlutterMacOS
-  - network_info_plus (0.0.1):
     - FlutterMacOS
   - objective_c (0.0.1):
     - FlutterMacOS
   - ogg_opus_player (0.0.1):
     - FlutterMacOS
   - open_file_mac (0.0.1):
-    - FlutterMacOS
-  - package_info_plus (0.0.1):
-    - FlutterMacOS
-  - path_provider_foundation (0.0.1):
-    - Flutter
     - FlutterMacOS
   - PLCrashReporter (1.11.2)
   - protocol_handler_macos (0.0.1):
@@ -45,44 +27,9 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - Sentry/HybridSDK (8.46.0)
-  - sentry_flutter (8.14.1):
-    - Flutter
-    - FlutterMacOS
-    - Sentry/HybridSDK (= 8.46.0)
-  - sqlite3 (3.49.1):
-    - sqlite3/common (= 3.49.1)
-  - sqlite3/common (3.49.1)
-  - sqlite3/dbstatvtab (3.49.1):
-    - sqlite3/common
-  - sqlite3/fts5 (3.49.1):
-    - sqlite3/common
-  - sqlite3/math (3.49.1):
-    - sqlite3/common
-  - sqlite3/perf-threadsafe (3.49.1):
-    - sqlite3/common
-  - sqlite3/rtree (3.49.1):
-    - sqlite3/common
-  - sqlite3_flutter_libs (0.0.1):
-    - Flutter
-    - FlutterMacOS
-    - sqlite3 (~> 3.49.1)
-    - sqlite3/dbstatvtab
-    - sqlite3/fts5
-    - sqlite3/math
-    - sqlite3/perf-threadsafe
-    - sqlite3/rtree
   - super_native_extensions (0.0.1):
     - FlutterMacOS
-  - url_launcher_macos (0.0.1):
-    - FlutterMacOS
   - video_compress (0.3.0):
-    - FlutterMacOS
-  - video_player_avfoundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - webview_flutter_wkwebview (0.0.1):
-    - Flutter
     - FlutterMacOS
   - window_manager (0.2.0):
     - FlutterMacOS
@@ -90,48 +37,31 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - desktop_keep_screen_on (from `Flutter/ephemeral/.symlinks/plugins/desktop_keep_screen_on/macos`)
   - desktop_webview_window (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
-  - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
-  - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - flutter_app_icon_badge (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos`)
-  - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
-  - local_auth_darwin (from `Flutter/ephemeral/.symlinks/plugins/local_auth_darwin/darwin`)
   - mixin_logger (from `Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos`)
-  - network_info_plus (from `Flutter/ephemeral/.symlinks/plugins/network_info_plus/macos`)
   - objective_c (from `Flutter/ephemeral/.symlinks/plugins/objective_c/macos`)
   - ogg_opus_player (from `Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/macos`)
   - open_file_mac (from `Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos`)
-  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
-  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - PLCrashReporter
   - protocol_handler_macos (from `Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos`)
   - rhttp (from `Flutter/ephemeral/.symlinks/plugins/rhttp/macos`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
-  - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
-  - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
-  - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - video_compress (from `Flutter/ephemeral/.symlinks/plugins/video_compress/macos`)
-  - video_player_avfoundation (from `Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin`)
-  - webview_flutter_wkwebview (from `Flutter/ephemeral/.symlinks/plugins/webview_flutter_wkwebview/darwin`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
   - window_size (from `Flutter/ephemeral/.symlinks/plugins/window_size/macos`)
 
 SPEC REPOS:
   trunk:
     - PLCrashReporter
-    - Sentry
-    - sqlite3
 
 EXTERNAL SOURCES:
-  audio_session:
-    :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
   desktop_keep_screen_on:
@@ -140,92 +70,53 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
-  file_picker:
-    :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
-  file_selector_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
   flutter_app_icon_badge:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos
-  flutter_local_notifications:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   irondash_engine_context:
     :path: Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos
-  local_auth_darwin:
-    :path: Flutter/ephemeral/.symlinks/plugins/local_auth_darwin/darwin
   mixin_logger:
     :path: Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos
-  network_info_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/network_info_plus/macos
   objective_c:
     :path: Flutter/ephemeral/.symlinks/plugins/objective_c/macos
   ogg_opus_player:
     :path: Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/macos
   open_file_mac:
     :path: Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos
-  package_info_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
-  path_provider_foundation:
-    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   protocol_handler_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos
   rhttp:
     :path: Flutter/ephemeral/.symlinks/plugins/rhttp/macos
   screen_retriever_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
-  sentry_flutter:
-    :path: Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos
-  sqlite3_flutter_libs:
-    :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin
   super_native_extensions:
     :path: Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos
-  url_launcher_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
   video_compress:
     :path: Flutter/ephemeral/.symlinks/plugins/video_compress/macos
-  video_player_avfoundation:
-    :path: Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin
-  webview_flutter_wkwebview:
-    :path: Flutter/ephemeral/.symlinks/plugins/webview_flutter_wkwebview/darwin
   window_manager:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
   window_size:
     :path: Flutter/ephemeral/.symlinks/plugins/window_size/macos
 
 SPEC CHECKSUMS:
-  audio_session: eaca2512cf2b39212d724f35d11f46180ad3a33e
   desktop_drop: e0b672a7d84c0a6cbc378595e82cdb15f2970a43
   desktop_keep_screen_on: bfedcf75be8bd8b4a21db3dcf48667427087792c
   desktop_webview_window: 7e37af677d6d19294cb433d9b1d878ef78dffa4d
   device_info_plus: a56e6e74dbbd2bb92f2da12c64ddd4f67a749041
-  file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
-  file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
   flutter_app_icon_badge: e05568a57ac0d98a0e7bc35c5b9ae9b118109b1e
-  flutter_local_notifications: 4bf37a31afde695b56091b4ae3e4d9c7a7e6cda0
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
-  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   mixin_logger: 6b31328b08f546a8defd32cd910370562fc48405
-  network_info_plus: 21d1cd6a015ccb2fdff06a1fbfa88d54b4e92f61
   objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7
   ogg_opus_player: 40ad7ee05152b420727fdb922afa0a90763b1817
   open_file_mac: 01874b6d6a2c1485ac9b126d7105b99102dea2cf
-  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
   protocol_handler_macos: f9cd7b13bcaf6b0425f7410cbe52376cb843a936
   rhttp: 08d791d6373089de796318f4cfb172cbcf34e78b
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
-  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
-  sentry_flutter: 942017adbe00f963061cb11ec260414a990b7a42
-  sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
-  sqlite3_flutter_libs: f6acaa2172e6bb3e2e70c771661905080e8ebcf2
   super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
-  url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
   video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534
-  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
-  webview_flutter_wkwebview: 44d4dee7d7056d5ad185d25b38404436d56c547c
   window_manager: 1d01fa7ac65a6e6f83b965471b1a7fdd3f06166c
   window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9
 

@@ -29,10 +29,8 @@ class Toast {
     dismiss();
     _entry = showOverlay(
       context: context,
-      (context, progress) => Opacity(
-        opacity: progress,
-        child: builder(context),
-      ),
+      (context, progress) =>
+          Opacity(opacity: progress, child: builder(context)),
       duration: duration ?? Duration.zero,
     );
   }
@@ -59,56 +57,47 @@ class ToastWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IgnorePointer(
-        ignoring: ignoring,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            color: barrierColor,
-            alignment: Alignment.center,
-            child: Container(
-              constraints: const BoxConstraints(
-                minWidth: 130,
+    ignoring: ignoring,
+    child: Material(
+      color: Colors.transparent,
+      child: Container(
+        color: barrierColor,
+        alignment: Alignment.center,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 130),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Color.fromRGBO(62, 65, 72, 0.7),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 20),
+              if (icon != null) SizedBox(height: 30, width: 30, child: icon),
+              if (icon != null) const SizedBox(height: 12),
+              Text(
+                text,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                color: Color.fromRGBO(62, 65, 72, 0.7),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 20),
-                  if (icon != null)
-                    SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: icon,
-                    ),
-                  if (icon != null) const SizedBox(height: 12),
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 void showToastSuccessful({BuildContext? context}) => Toast.createView(
-      context: context,
-      builder: (context) => ToastWidget(
+  context: context,
+  builder:
+      (context) => ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Successful(),
         text: context.l10n.successful,
       ),
-    );
+);
 
 class ToastError extends Error {
   factory ToastError(String message) => ToastError._internal(message: message);
@@ -145,39 +134,39 @@ class ToastError extends Error {
 void showToastFailed(Object? error, {BuildContext? context}) =>
     Toast.createView(
       context: context,
-      builder: (context) => ToastWidget(
-        barrierColor: Colors.transparent,
-        icon: const _Failed(),
-        text: ToastError.errorToString(context, error),
-      ),
+      builder:
+          (context) => ToastWidget(
+            barrierColor: Colors.transparent,
+            icon: const _Failed(),
+            text: ToastError.errorToString(context, error),
+          ),
     );
 
 void showToast(String message, {BuildContext? context}) => Toast.createView(
-      context: context,
-      builder: (context) => ToastWidget(
-        barrierColor: Colors.transparent,
-        text: message,
-      ),
-    );
+  context: context,
+  builder:
+      (context) => ToastWidget(barrierColor: Colors.transparent, text: message),
+);
 
 void showToastLoading({BuildContext? context}) => Toast.createView(
-      context: context,
-      builder: (context) => ToastWidget(
+  context: context,
+  builder:
+      (context) => ToastWidget(
         icon: const _Loading(),
         text: context.l10n.loading,
         ignoring: false,
       ),
-      duration: null,
-    );
+  duration: null,
+);
 
 class _Loading extends StatelessWidget {
   const _Loading();
 
   @override
   Widget build(BuildContext context) => const CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation(Colors.white),
-        strokeWidth: 3,
-      );
+    valueColor: AlwaysStoppedAnimation(Colors.white),
+    strokeWidth: 3,
+  );
 }
 
 class _Failed extends StatelessWidget {

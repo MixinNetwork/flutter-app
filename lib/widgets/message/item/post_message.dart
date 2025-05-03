@@ -25,8 +25,9 @@ class PostMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final content =
-        useMessageConverter(converter: (state) => state.content ?? '');
+    final content = useMessageConverter(
+      converter: (state) => state.content ?? '',
+    );
 
     return MessageBubble(
       child: ConstrainedBox(
@@ -58,59 +59,55 @@ class MessagePost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
-        onTap: clickable
+    onTap:
+        clickable
             ? () => PostPreview.push(context, message: context.message)
             : null,
-        behavior: HitTestBehavior.deferToChild,
-        child: Container(
-          padding: padding,
-          decoration: decoration,
-          child: Stack(
-            children: [
-              HookBuilder(builder: (context) {
-                final postContent =
-                    useMemoized(content.postOptimize, [content]);
+    behavior: HitTestBehavior.deferToChild,
+    child: Container(
+      padding: padding,
+      decoration: decoration,
+      child: Stack(
+        children: [
+          HookBuilder(
+            builder: (context) {
+              final postContent = useMemoized(content.postOptimize, [content]);
 
-                return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: showStatus ? 48 : 0,
-                    minWidth: 128,
-                    maxHeight: 400,
-                  ),
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context)
-                        .copyWith(scrollbars: false),
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: MarkdownColumn(data: postContent),
-                    ),
-                  ),
-                );
-              }),
-              const Positioned(
-                right: 0,
-                top: 0,
-                child: PostDetailIcon(),
-              ),
-              if (showStatus)
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    decoration: _decoration,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    child: const MessageDatetimeAndStatus(
-                      color: Color.fromRGBO(255, 255, 255, 1),
-                    ),
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: showStatus ? 48 : 0,
+                  minWidth: 128,
+                  maxHeight: 400,
+                ),
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(
+                    context,
+                  ).copyWith(scrollbars: false),
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: MarkdownColumn(data: postContent),
                   ),
                 ),
-            ],
+              );
+            },
           ),
-        ),
-      );
+          const Positioned(right: 0, top: 0, child: PostDetailIcon()),
+          if (showStatus)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Container(
+                decoration: _decoration,
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: const MessageDatetimeAndStatus(
+                  color: Color.fromRGBO(255, 255, 255, 1),
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  );
 }
 
 class PostDetailIcon extends StatelessWidget {
@@ -118,70 +115,59 @@ class PostDetailIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        decoration: _decoration,
-        alignment: Alignment.center,
-        child: SvgPicture.asset(
-          Resources.assetsImagesPostDetailSvg,
-          width: 20,
-          height: 20,
-        ),
-      );
+    decoration: _decoration,
+    alignment: Alignment.center,
+    child: SvgPicture.asset(
+      Resources.assetsImagesPostDetailSvg,
+      width: 20,
+      height: 20,
+    ),
+  );
 }
 
 class PostPreview extends StatelessWidget {
-  const PostPreview({
-    required this.message,
-    super.key,
-  });
+  const PostPreview({required this.message, super.key});
 
   static Future<void> push(
     BuildContext context, {
     required MessageItem message,
-  }) =>
-      showGeneralDialog(
-        context: context,
-        barrierColor: Colors.transparent,
-        barrierDismissible: true,
-        barrierLabel:
-            MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        pageBuilder: (BuildContext buildContext, Animation<double> animation,
-                Animation<double> secondaryAnimation) =>
-            InheritedTheme.capture(
-                    from: context,
-                    to: Navigator.of(context, rootNavigator: true).context)
-                .wrap(
-          PostPreview(
-            message: message,
-          ),
-        ),
-      );
+  }) => showGeneralDialog(
+    context: context,
+    barrierColor: Colors.transparent,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    pageBuilder:
+        (
+          BuildContext buildContext,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => InheritedTheme.capture(
+          from: context,
+          to: Navigator.of(context, rootNavigator: true).context,
+        ).wrap(PostPreview(message: message)),
+  );
 
   final MessageItem message;
 
   @override
   Widget build(BuildContext context) => Material(
-        color: context.theme.background,
-        child: Column(
-          children: [
-            MixinAppBar(
-              leading: const SizedBox(),
-              actions: [
-                MixinCloseButton(
-                  onTap: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            Expanded(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Markdown(
-                  data: message.content ?? '',
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
-                ),
-              ),
-            ),
-          ],
+    color: context.theme.background,
+    child: Column(
+      children: [
+        MixinAppBar(
+          leading: const SizedBox(),
+          actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
         ),
-      );
+        Expanded(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Markdown(
+              data: message.content ?? '',
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

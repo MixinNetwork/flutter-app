@@ -46,42 +46,40 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<AssetItem> assetItem(String assetId) {
     return customSelect(
-        'SELECT asset.*, chain.symbol AS chainSymbol, chain.icon_url AS chainIconUrl, chain.name AS chainName, chain.threshold AS chainThreshold FROM assets AS asset LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id WHERE asset.asset_id = ?1 LIMIT 1',
-        variables: [
-          Variable<String>(assetId)
-        ],
-        readsFrom: {
-          chains,
-          assets,
-        }).map((QueryRow row) => AssetItem(
-          assetId: row.read<String>('asset_id'),
-          symbol: row.read<String>('symbol'),
-          name: row.read<String>('name'),
-          iconUrl: row.read<String>('icon_url'),
-          balance: row.read<String>('balance'),
-          destination: row.read<String>('destination'),
-          tag: row.readNullable<String>('tag'),
-          priceBtc: row.read<String>('price_btc'),
-          priceUsd: row.read<String>('price_usd'),
-          chainId: row.read<String>('chain_id'),
-          changeUsd: row.read<String>('change_usd'),
-          changeBtc: row.read<String>('change_btc'),
-          confirmations: row.read<int>('confirmations'),
-          assetKey: row.readNullable<String>('asset_key'),
-          reserve: row.readNullable<String>('reserve'),
-          chainSymbol: row.readNullable<String>('chainSymbol'),
-          chainIconUrl: row.readNullable<String>('chainIconUrl'),
-          chainName: row.readNullable<String>('chainName'),
-          chainThreshold: row.readNullable<int>('chainThreshold'),
-        ));
+      'SELECT asset.*, chain.symbol AS chainSymbol, chain.icon_url AS chainIconUrl, chain.name AS chainName, chain.threshold AS chainThreshold FROM assets AS asset LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id WHERE asset.asset_id = ?1 LIMIT 1',
+      variables: [Variable<String>(assetId)],
+      readsFrom: {chains, assets},
+    ).map(
+      (QueryRow row) => AssetItem(
+        assetId: row.read<String>('asset_id'),
+        symbol: row.read<String>('symbol'),
+        name: row.read<String>('name'),
+        iconUrl: row.read<String>('icon_url'),
+        balance: row.read<String>('balance'),
+        destination: row.read<String>('destination'),
+        tag: row.readNullable<String>('tag'),
+        priceBtc: row.read<String>('price_btc'),
+        priceUsd: row.read<String>('price_usd'),
+        chainId: row.read<String>('chain_id'),
+        changeUsd: row.read<String>('change_usd'),
+        changeBtc: row.read<String>('change_btc'),
+        confirmations: row.read<int>('confirmations'),
+        assetKey: row.readNullable<String>('asset_key'),
+        reserve: row.readNullable<String>('reserve'),
+        chainSymbol: row.readNullable<String>('chainSymbol'),
+        chainIconUrl: row.readNullable<String>('chainIconUrl'),
+        chainName: row.readNullable<String>('chainName'),
+        chainThreshold: row.readNullable<int>('chainThreshold'),
+      ),
+    );
   }
 
   Selectable<int> countAssets() {
-    return customSelect('SELECT COUNT(1) AS _c0 FROM assets',
-        variables: [],
-        readsFrom: {
-          assets,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect(
+      'SELECT COUNT(1) AS _c0 FROM assets',
+      variables: [],
+      readsFrom: {assets},
+    ).map((QueryRow row) => row.read<int>('_c0'));
   }
 }
 
@@ -128,25 +126,26 @@ class AssetItem {
   });
   @override
   int get hashCode => Object.hash(
-      assetId,
-      symbol,
-      name,
-      iconUrl,
-      balance,
-      destination,
-      tag,
-      priceBtc,
-      priceUsd,
-      chainId,
-      changeUsd,
-      changeBtc,
-      confirmations,
-      assetKey,
-      reserve,
-      chainSymbol,
-      chainIconUrl,
-      chainName,
-      chainThreshold);
+    assetId,
+    symbol,
+    name,
+    iconUrl,
+    balance,
+    destination,
+    tag,
+    priceBtc,
+    priceUsd,
+    chainId,
+    changeUsd,
+    changeBtc,
+    confirmations,
+    assetKey,
+    reserve,
+    chainSymbol,
+    chainIconUrl,
+    chainName,
+    chainThreshold,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

@@ -52,27 +52,33 @@ Client createClient({
               e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
           DateTime? serverTimeStamp;
 
-          final serverTime =
-              int.tryParse(e.response?.headers.value('x-server-time') ?? '');
+          final serverTime = int.tryParse(
+            e.response?.headers.value('x-server-time') ?? '',
+          );
           if (serverTime != null) {
-            serverTimeStamp =
-                DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
+            serverTimeStamp = DateTime.fromMicrosecondsSinceEpoch(
+              serverTime ~/ 1000,
+            );
           }
           final requestId = e.response?.headers.value('x-request-id') ?? '';
-          w('request error ${e.requestOptions.uri}, x-request-id = $requestId\n'
-              'requestTimeStamp = ${requestTimeStamp?.outputFormat()} '
-              'serverTimeStamp = ${serverTimeStamp?.outputFormat()} '
-              'now = ${DateTime.now().outputFormat()}');
+          w(
+            'request error ${e.requestOptions.uri}, x-request-id = $requestId\n'
+            'requestTimeStamp = ${requestTimeStamp?.outputFormat()} '
+            'serverTimeStamp = ${serverTimeStamp?.outputFormat()} '
+            'now = ${DateTime.now().outputFormat()}',
+          );
           handler.next(e);
         },
       ),
-      InterceptorsWrapper(onRequest: (options, handler) async {
-        options.headers['User-Agent'] = await _userAgent;
-        options.headers['Mixin-Device-Id'] = await _deviceId;
-        options.headers['Accept-Language'] =
-            PlatformDispatcher.instance.locale.languageCode;
-        handler.next(options);
-      }),
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          options.headers['User-Agent'] = await _userAgent;
+          options.headers['Mixin-Device-Id'] = await _deviceId;
+          options.headers['Accept-Language'] =
+              PlatformDispatcher.instance.locale.languageCode;
+          handler.next(options);
+        },
+      ),
     ],
   );
   return client;

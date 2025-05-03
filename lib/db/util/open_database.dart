@@ -14,23 +14,23 @@ import '../../utils/file.dart';
 import '../custom_sqlite3_database.dart';
 
 QueryExecutor _openDatabase(File file) => LazyDatabase(() {
-      // Create the parent directory if it doesn't exist. sqlite will emit
-      // confusing misuse warnings otherwise
-      final dir = file.parent;
-      if (!dir.existsSync()) {
-        dir.createSync(recursive: true);
-      }
-      final db = sqlite3.open(file.path);
-      return NativeDatabase.opened(
-        DatabaseProfiler(db, explain: kDebugMode),
-        setup: (rawDb) {
-          rawDb
-            ..execute('PRAGMA journal_mode=WAL;')
-            ..execute('PRAGMA foreign_keys=ON;')
-            ..execute('PRAGMA synchronous=NORMAL;');
-        },
-      );
-    });
+  // Create the parent directory if it doesn't exist. sqlite will emit
+  // confusing misuse warnings otherwise
+  final dir = file.parent;
+  if (!dir.existsSync()) {
+    dir.createSync(recursive: true);
+  }
+  final db = sqlite3.open(file.path);
+  return NativeDatabase.opened(
+    DatabaseProfiler(db, explain: kDebugMode),
+    setup: (rawDb) {
+      rawDb
+        ..execute('PRAGMA journal_mode=WAL;')
+        ..execute('PRAGMA foreign_keys=ON;')
+        ..execute('PRAGMA synchronous=NORMAL;');
+    },
+  );
+});
 
 /// Connect to the database.
 Future<QueryExecutor> openQueryExecutor({
@@ -54,16 +54,18 @@ Future<QueryExecutor> openQueryExecutor({
 
   final write = await writeIsolate.connect();
 
-  final reads = await Future.wait(List.generate(readCount, (i) async {
-    final isolate = await _crateIsolate(
-      identityNumber: identityNumber,
-      portName: '${foregroundPortName}_$i',
-      dbName: dbName,
-      fromMainIsolate: fromMainIsolate,
-      debugName: 'one_mixin_drift_read_$i',
-    );
-    return isolate.connect();
-  }));
+  final reads = await Future.wait(
+    List.generate(readCount, (i) async {
+      final isolate = await _crateIsolate(
+        identityNumber: identityNumber,
+        portName: '${foregroundPortName}_$i',
+        dbName: dbName,
+        fromMainIsolate: fromMainIsolate,
+        debugName: 'one_mixin_drift_read_$i',
+      );
+      return isolate.connect();
+    }),
+  );
 
   return MultiExecutor.withReadPool(
     reads: reads.map((e) => e.executor).toList(),
@@ -88,7 +90,8 @@ Future<DriftIsolate> _crateIsolate({
   if (existingIsolate == null) {
     assert(fromMainIsolate, 'Isolate should be created from main isolate');
     final dbFile = File(
-        p.join(mixinDocumentsDirectory.path, identityNumber, '$dbName.db'));
+      p.join(mixinDocumentsDirectory.path, identityNumber, '$dbName.db'),
+    );
     final receivePort = ReceivePort();
     await Isolate.spawn(
       _startBackground,
@@ -106,9 +109,7 @@ Future<DriftIsolate> _crateIsolate({
 void _startBackground(_IsolateStartRequest request) {
   ansiColorDisabled = Platform.isIOS;
   final executor = _openDatabase(request.dbFile);
-  final isolate = DriftIsolate.inCurrent(
-    () => DatabaseConnection(executor),
-  );
+  final isolate = DriftIsolate.inCurrent(() => DatabaseConnection(executor));
   request.sendMoorIsolate.send(isolate);
 }
 

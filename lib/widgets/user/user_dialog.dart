@@ -22,18 +22,23 @@ import '../more_extended_text.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
-Future<void> showUserDialog(BuildContext context, String? userId,
-    [String? identityNumber]) async {
+Future<void> showUserDialog(
+  BuildContext context,
+  String? userId, [
+  String? identityNumber,
+]) async {
   var _userId = userId;
   assert(_userId != null || identityNumber != null);
 
-  final existed =
-      await context.database.userDao.hasUser(_userId ?? identityNumber!);
+  final existed = await context.database.userDao.hasUser(
+    _userId ?? identityNumber!,
+  );
   if (existed) {
     Toast.dismiss();
-    _userId ??= (await context.database.userDao
-            .findMultiUserIdsByIdentityNumbers([identityNumber!]))
-        .first;
+    _userId ??=
+        (await context.database.userDao.findMultiUserIdsByIdentityNumbers([
+          identityNumber!,
+        ])).first;
     await showMixinDialog(context: context, child: UserDialog(userId: _userId));
     return;
   }
@@ -42,80 +47,70 @@ Future<void> showUserDialog(BuildContext context, String? userId,
 
   User? user;
   if (_userId != null) {
-    user = (await context.accountServer.refreshUsers([_userId], force: true))
-        ?.firstOrNull;
+    user =
+        (await context.accountServer.refreshUsers([
+          _userId,
+        ], force: true))?.firstOrNull;
   }
 
   if (user == null && identityNumber != null) {
     user =
-        (await context.accountServer.updateUserByIdentityNumber(identityNumber))
-            ?.firstOrNull;
+        (await context.accountServer.updateUserByIdentityNumber(
+          identityNumber,
+        ))?.firstOrNull;
   }
 
   if (user == null) {
-    showToastFailed(
-      ToastError(
-        context.l10n.userNotFound,
-      ),
-    );
+    showToastFailed(ToastError(context.l10n.userNotFound));
     return;
   }
 
-  _userId ??= (await context.database.userDao
-          .findMultiUserIdsByIdentityNumbers([identityNumber!]))
-      .first;
+  _userId ??=
+      (await context.database.userDao.findMultiUserIdsByIdentityNumbers([
+        identityNumber!,
+      ])).first;
 
   Toast.dismiss();
   await showMixinDialog(
     context: context,
-    child: UserDialog(
-      userId: _userId,
-      refreshUser: false,
-    ),
+    child: UserDialog(userId: _userId, refreshUser: false),
   );
 }
 
 class UserDialog extends StatelessWidget {
-  const UserDialog({
-    required this.userId,
-    super.key,
-    this.refreshUser = true,
-  });
+  const UserDialog({required this.userId, super.key, this.refreshUser = true});
 
   final String userId;
   final bool refreshUser;
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 340,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(
+        width: 340,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Row(
               children: [
-                const Row(
-                  children: [
-                    Spacer(),
-                    Padding(
-                      padding: EdgeInsets.only(right: 12, top: 12),
-                      child: MixinCloseButton(),
-                    ),
-                  ],
+                Spacer(),
+                Padding(
+                  padding: EdgeInsets.only(right: 12, top: 12),
+                  child: MixinCloseButton(),
                 ),
-                _UserProfileLoader(userId, refreshUser: refreshUser),
               ],
             ),
-          ),
-        ],
-      );
+            _UserProfileLoader(userId, refreshUser: refreshUser),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _UserProfileLoader extends HookConsumerWidget {
-  const _UserProfileLoader(
-    this.userId, {
-    this.refreshUser = true,
-  });
+  const _UserProfileLoader(this.userId, {this.refreshUser = true});
 
   final String userId;
   final bool refreshUser;
@@ -123,13 +118,18 @@ class _UserProfileLoader extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountServer = context.accountServer;
-    final user = useMemoizedStream(
-        () => accountServer.database.userDao
-                .userById(userId)
-                .watchSingleOrNullWithStream(eventStreams: [
-              DataBaseEventBus.instance.watchUpdateUserStream([userId])
-            ], duration: kDefaultThrottleDuration),
-        keys: [userId]).data;
+    final user =
+        useMemoizedStream(
+          () => accountServer.database.userDao
+              .userById(userId)
+              .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+                ],
+                duration: kDefaultThrottleDuration,
+              ),
+          keys: [userId],
+        ).data;
 
     useEffect(() {
       if (refreshUser) {
@@ -143,9 +143,7 @@ class _UserProfileLoader extends HookConsumerWidget {
 }
 
 class _UserProfileBody extends StatelessWidget {
-  const _UserProfileBody({
-    required this.user,
-  });
+  const _UserProfileBody({required this.user});
 
   final User user;
 
@@ -166,7 +164,8 @@ class _UserProfileBody extends StatelessWidget {
                   .contains(LogicalKeyboardKey.altLeft);
               if (copy) {
                 Clipboard.setData(
-                    ClipboardData(text: 'mixin://users/${user.userId}'));
+                  ClipboardData(text: 'mixin://users/${user.userId}'),
+                );
               }
             },
             child: AvatarWidget(
@@ -199,7 +198,7 @@ class _UserProfileBody extends StatelessWidget {
                   verified: user.isVerified ?? false,
                   isBot: !anonymous && user.appId != null,
                   membership: user.membership,
-                )
+                ),
               ],
             ),
           ),
@@ -230,8 +229,10 @@ class _UserProfileBody extends StatelessWidget {
               if (isDeactivated)
                 Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   alignment: Alignment.center,
                   margin: const EdgeInsets.only(top: 20, right: 20, left: 20),
                   decoration: BoxDecoration(
@@ -240,9 +241,7 @@ class _UserProfileBody extends StatelessWidget {
                   ),
                   child: Text(
                     context.l10n.userDeleteHint,
-                    style: TextStyle(
-                      color: context.theme.red,
-                    ),
+                    style: TextStyle(color: context.theme.red),
                   ),
                 ),
               if (!anonymous)
@@ -260,59 +259,49 @@ class _UserProfileBody extends StatelessWidget {
 }
 
 class _BioText extends StatelessWidget {
-  const _BioText({
-    required this.biography,
-  });
+  const _BioText({required this.biography});
 
   final String biography;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxHeight: 120,
-          minWidth: 160,
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: MoreExtendedText(
-              biography,
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
+    constraints: const BoxConstraints(maxHeight: 120, minWidth: 160),
+    child: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 36),
+        child: MoreExtendedText(
+          biography,
+          style: TextStyle(
+            color: context.theme.text,
+            fontSize: 14,
+            height: 1.5,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _AddToContactsButton extends StatelessWidget {
-  const _AddToContactsButton({
-    required this.user,
-  });
+  const _AddToContactsButton({required this.user});
 
   final User user;
 
   @override
   Widget build(BuildContext context) => DialogAddOrJoinButton(
-        onTap: () {
-          assert(user.fullName != null, ' username should not be null.');
-          runFutureWithToast(
-            context.accountServer.addUser(
-              user.userId,
-              user.fullName,
-            ),
-          );
-        },
-        title: Text(
-          user.isBot
-              ? context.l10n.addBotWithPlus
-              : context.l10n.addContactWithPlus,
-          style: TextStyle(fontSize: 12, color: context.theme.accent),
-        ),
+    onTap: () {
+      assert(user.fullName != null, ' username should not be null.');
+      runFutureWithToast(
+        context.accountServer.addUser(user.userId, user.fullName),
       );
+    },
+    title: Text(
+      user.isBot
+          ? context.l10n.addBotWithPlus
+          : context.l10n.addContactWithPlus,
+      style: TextStyle(fontSize: 12, color: context.theme.accent),
+    ),
+  );
 }
 
 class _UserProfileButtonBar extends StatelessWidget {
@@ -335,13 +324,14 @@ class _UserProfileButtonBar extends StatelessWidget {
             onlyContact: false,
             action: CustomPopupMenuButton(
               alignment: Alignment.bottomCenter,
-              itemBuilder: (context) => [
-                CustomPopupMenuItem(
-                  icon: Resources.assetsImagesContextMenuCopySvg,
-                  title: context.l10n.copyLink,
-                  value: null,
-                ),
-              ],
+              itemBuilder:
+                  (context) => [
+                    CustomPopupMenuItem(
+                      icon: Resources.assetsImagesContextMenuCopySvg,
+                      title: context.l10n.copyLink,
+                      value: null,
+                    ),
+                  ],
               onSelected: (_) async {
                 final codeUrl = user.codeUrl;
                 if (codeUrl == null) {
@@ -380,10 +370,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               // skip self.
               return;
             }
-            await ConversationStateNotifier.selectUser(
-              context,
-              user.userId,
-            );
+            await ConversationStateNotifier.selectUser(context, user.userId);
             Navigator.pop(context);
           },
           color: context.theme.icon,
@@ -401,14 +388,15 @@ class _UserProfileButtonBar extends StatelessWidget {
             Navigator.pop(context);
           },
           color: context.theme.icon,
-        )
+        ),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 45),
       child: Row(
-        mainAxisAlignment: children.length == 1
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            children.length == 1
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.spaceBetween,
         children: children,
       ),
     );

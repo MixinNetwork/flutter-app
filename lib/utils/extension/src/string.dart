@@ -1,10 +1,11 @@
 part of '../extension.dart';
 
 extension StringExtension on String {
-  String get overflow => Characters(this)
-      // ignore: avoid-non-ascii-symbols
-      .replaceAll(Characters(''), Characters('\u{200B}'))
-      .toString();
+  String get overflow =>
+      Characters(this)
+          // ignore: avoid-non-ascii-symbols
+          .replaceAll(Characters(''), Characters('\u{200B}'))
+          .toString();
 
   String fts5ContentFilter() {
     final text = trim();
@@ -61,7 +62,8 @@ extension StringExtension on String {
     for (var i = 0; i < characters.length; i++) {
       final c = characters[i];
       final lookAhead = i < characters.length - 1 ? characters[i + 1] : char;
-      final isSameType = (c.isAlphabet() && lookAhead.isAlphabet()) ||
+      final isSameType =
+          (c.isAlphabet() && lookAhead.isAlphabet()) ||
           (c.isNumeric() && lookAhead.isNumeric());
       final needSpace = !isSameType && c != ' ';
       result.write(c);
@@ -101,10 +103,12 @@ extension SqlStringExt on String {
     if (tokenize && kPlatformIsDarwin) {
       // use string_tokenizer to tokenize the string.
       tokens = tokens
-          .map((e) => string_tokenizer.tokenize(
-                e,
-                options: [string_tokenizer.TokenizerUnit.wordBoundary],
-              ))
+          .map(
+            (e) => string_tokenizer.tokenize(
+              e,
+              options: [string_tokenizer.TokenizerUnit.wordBoundary],
+            ),
+          )
           // to avoid some special case which will cause the tokenizer spilt the
           // number and alphabet into two tokens, we need to merge them.
           // for example: "1a" might be spilt into "1" and "a", but we need to

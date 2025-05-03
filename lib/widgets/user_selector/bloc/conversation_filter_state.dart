@@ -14,28 +14,22 @@ class ConversationFilterState extends Equatable {
   final String? keyword;
 
   Set<String> get appIds => {
-        ...recentConversations.map((e) => e.ownerId).nonNulls,
-        ...[...bots, ...friends].map((e) => e.userId),
-      };
+    ...recentConversations.map((e) => e.ownerId).nonNulls,
+    ...[...bots, ...friends].map((e) => e.userId),
+  };
 
   @override
-  List<Object?> get props => [
-        friends,
-        bots,
-        keyword,
-        recentConversations,
-      ];
+  List<Object?> get props => [friends, bots, keyword, recentConversations];
 
   ConversationFilterState copyWith({
     List<ConversationItem>? recentConversations,
     List<User>? friends,
     List<User>? bots,
     String? keyword,
-  }) =>
-      ConversationFilterState(
-        recentConversations: recentConversations ?? this.recentConversations,
-        friends: friends ?? this.friends,
-        bots: bots ?? this.bots,
-        keyword: keyword ?? this.keyword,
-      );
+  }) => ConversationFilterState(
+    recentConversations: recentConversations ?? this.recentConversations,
+    friends: friends ?? this.friends,
+    bots: bots ?? this.bots,
+    keyword: keyword ?? this.keyword,
+  );
 }

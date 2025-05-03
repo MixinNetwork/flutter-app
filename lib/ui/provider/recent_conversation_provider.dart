@@ -8,9 +8,10 @@ class RecentConversationIDsNotifier
   RecentConversationIDsNotifier() : super([]);
 
   void add(String conversationId) {
-    final newList = ([...state]
-      ..remove(conversationId)
-      ..add(conversationId));
+    final newList =
+        ([...state]
+          ..remove(conversationId)
+          ..add(conversationId));
     if (newList.isEmpty) return;
 
     state = newList.sublist(max(newList.length - 5, 0), newList.length);
@@ -20,7 +21,9 @@ class RecentConversationIDsNotifier
 }
 
 final recentConversationIDsProvider = StateNotifierProvider.autoDispose<
-    RecentConversationIDsNotifier, List<String>>((ref) {
+  RecentConversationIDsNotifier,
+  List<String>
+>((ref) {
   ref.keepAlive();
   return RecentConversationIDsNotifier();
 });

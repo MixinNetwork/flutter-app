@@ -7,10 +7,7 @@ import '../logger.dart';
 
 // remove this once https://github.com/flutter/flutter/issues/111113 is fixed.
 class TextInputActionHandler extends StatefulWidget {
-  const TextInputActionHandler({
-    required this.child,
-    super.key,
-  });
+  const TextInputActionHandler({required this.child, super.key});
 
   final Widget child;
 
@@ -36,10 +33,7 @@ class _TextInputActionHandlerState extends State<TextInputActionHandler> {
     if (!Platform.isMacOS) {
       return widget.child;
     }
-    return Actions(
-      actions: _actions,
-      child: widget.child,
-    );
+    return Actions(actions: _actions, child: widget.child);
   }
 }
 
@@ -92,17 +86,21 @@ class EmojiTextEditingController extends TextEditingController {
 
   TextSpan _buildSpan({required String text, TextStyle? style}) {
     final children = <TextSpan>[];
-    text.splitEmoji(onEmoji: (text) {
-      children.add(
-        TextSpan(
-          text: text,
-          style: style?.copyWith(fontFamily: kEmojiFontFamily) ??
-              TextStyle(fontFamily: kEmojiFontFamily),
-        ),
-      );
-    }, onText: (text) {
-      children.add(TextSpan(text: text, style: style));
-    });
+    text.splitEmoji(
+      onEmoji: (text) {
+        children.add(
+          TextSpan(
+            text: text,
+            style:
+                style?.copyWith(fontFamily: kEmojiFontFamily) ??
+                TextStyle(fontFamily: kEmojiFontFamily),
+          ),
+        );
+      },
+      onText: (text) {
+        children.add(TextSpan(text: text, style: style));
+      },
+    );
     return TextSpan(children: children, style: style);
   }
 
@@ -112,9 +110,9 @@ class EmojiTextEditingController extends TextEditingController {
     required bool withComposing,
     TextStyle? style,
   }) {
-    assert(!value.composing.isValid ||
-        !withComposing ||
-        value.isComposingRangeValid);
+    assert(
+      !value.composing.isValid || !withComposing || value.isComposingRangeValid,
+    );
     // If the composing range is out of range for the current text, ignore it to
     // preserve the tree integrity, otherwise in release mode a RangeError will
     // be thrown and this EditableText will be built with a broken subtree.
@@ -127,7 +125,7 @@ class EmojiTextEditingController extends TextEditingController {
 
     final composingStyle =
         style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
-            const TextStyle(decoration: TextDecoration.underline);
+        const TextStyle(decoration: TextDecoration.underline);
     return TextSpan(
       style: style,
       children: <TextSpan>[

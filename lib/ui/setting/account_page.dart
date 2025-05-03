@@ -12,36 +12,36 @@ class AccountPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.account),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            alignment: Alignment.topCenter,
-            padding: const EdgeInsets.only(top: 40),
-            child: Column(
-              children: [
-                CellGroup(
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: CellItem(
-                    title: Text(context.l10n.changeNumber),
-                    onTap: () => showChangeNumberDialog(context),
-                  ),
-                ),
-                CellGroup(
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: CellItem(
-                    title: Text(context.l10n.deleteMyAccount),
-                    onTap: () => ref
+    backgroundColor: context.theme.background,
+    appBar: MixinAppBar(title: Text(context.l10n.account)),
+    body: SingleChildScrollView(
+      child: Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.only(top: 40),
+        child: Column(
+          children: [
+            CellGroup(
+              cellBackgroundColor: context.theme.settingCellBackgroundColor,
+              child: CellItem(
+                title: Text(context.l10n.changeNumber),
+                onTap: () => showChangeNumberDialog(context),
+              ),
+            ),
+            CellGroup(
+              cellBackgroundColor: context.theme.settingCellBackgroundColor,
+              child: CellItem(
+                title: Text(context.l10n.deleteMyAccount),
+                onTap:
+                    () => ref
                         .read(responsiveNavigatorProvider.notifier)
                         .pushPage(
-                            ResponsiveNavigatorStateNotifier.accountDeletePage),
-                  ),
-                )
-              ],
+                          ResponsiveNavigatorStateNotifier.accountDeletePage,
+                        ),
+              ),
             ),
-          ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

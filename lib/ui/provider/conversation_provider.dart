@@ -87,17 +87,17 @@ class ConversationState extends Equatable {
 
   @override
   List<Object?> get props => [
-        conversationId,
-        userId,
-        initIndexMessageId,
-        conversation,
-        user,
-        lastReadMessageId,
-        refreshKey,
-        initialSidePage,
-        participant,
-        keyword,
-      ];
+    conversationId,
+    userId,
+    initIndexMessageId,
+    conversation,
+    user,
+    lastReadMessageId,
+    refreshKey,
+    initialSidePage,
+    participant,
+    keyword,
+  ];
 
   ConversationState copyWith({
     String? conversationId,
@@ -111,20 +111,19 @@ class ConversationState extends Equatable {
     Object? refreshKey,
     String? initialSidePage,
     String? keyword,
-  }) =>
-      ConversationState(
-        conversationId: conversationId ?? this.conversationId,
-        userId: userId ?? this.userId,
-        initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
-        conversation: conversation ?? this.conversation,
-        user: user ?? this.user,
-        app: app ?? this.app,
-        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
-        refreshKey: refreshKey ?? this.refreshKey,
-        initialSidePage: initialSidePage ?? this.initialSidePage,
-        participant: participant ?? this.participant,
-        keyword: keyword ?? this.keyword,
-      );
+  }) => ConversationState(
+    conversationId: conversationId ?? this.conversationId,
+    userId: userId ?? this.userId,
+    initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
+    conversation: conversation ?? this.conversation,
+    user: user ?? this.user,
+    app: app ?? this.app,
+    lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
+    refreshKey: refreshKey ?? this.refreshKey,
+    initialSidePage: initialSidePage ?? this.initialSidePage,
+    participant: participant ?? this.participant,
+    keyword: keyword ?? this.keyword,
+  );
 }
 
 EncryptCategory _getEncryptCategory(App? app) {
@@ -137,77 +136,90 @@ EncryptCategory _getEncryptCategory(App? app) {
 }
 
 class ConversationStateNotifier
-    extends DistinctStateNotifier<ConversationState?> with SubscriberMixin {
+    extends DistinctStateNotifier<ConversationState?>
+    with SubscriberMixin {
   ConversationStateNotifier({
     required AccountServer accountServer,
     required ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier,
-  })  : _responsiveNavigatorStateNotifier = responsiveNavigatorStateNotifier,
-        _accountServer = accountServer,
-        super(null) {
-    addSubscription(stream
-        .map((event) => event?.conversationId)
-        .distinct()
-        .listen(_accountServer.selectConversation));
+  }) : _responsiveNavigatorStateNotifier = responsiveNavigatorStateNotifier,
+       _accountServer = accountServer,
+       super(null) {
+    addSubscription(
+      stream
+          .map((event) => event?.conversationId)
+          .distinct()
+          .listen(_accountServer.selectConversation),
+    );
     addSubscription(
       stream
           .map((event) => (event?.conversationId, event?.userId))
           .where((event) => event.$1 != null)
           .distinct()
           .switchMap((event) {
-        final (String? conversationId, String? userId) = event;
-        return _database.conversationDao
-            .conversationItem(conversationId!)
-            .watchSingleOrNullWithStream(
-          eventStreams: [
-            DataBaseEventBus.instance
-                .watchUpdateConversationStream([conversationId]),
-            if (userId != null)
-              DataBaseEventBus.instance.watchUpdateUserStream([userId])
-          ],
-          duration: kSlowThrottleDuration,
-          prepend: false,
-        );
-      }).listen((event) {
-        String? userId;
-        if (event != null && !event.isGroupConversation) {
-          userId = event.ownerId;
-        }
-        state = state?.copyWith(conversation: event, userId: userId);
-      }),
+            final (String? conversationId, String? userId) = event;
+            return _database.conversationDao
+                .conversationItem(conversationId!)
+                .watchSingleOrNullWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateConversationStream([
+                      conversationId,
+                    ]),
+                    if (userId != null)
+                      DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+                  ],
+                  duration: kSlowThrottleDuration,
+                  prepend: false,
+                );
+          })
+          .listen((event) {
+            String? userId;
+            if (event != null && !event.isGroupConversation) {
+              userId = event.ownerId;
+            }
+            state = state?.copyWith(conversation: event, userId: userId);
+          }),
     );
     addSubscription(
-      stream.map((event) => event?.userId).distinct().switchMap((userId) {
-        if (userId == null) return Stream.value(null);
-        return _database.userDao.userById(userId).watchSingleOrNullWithStream(
-          eventStreams: [
-            DataBaseEventBus.instance.watchUpdateUserStream([userId])
-          ],
-          duration: kDefaultThrottleDuration,
-          prepend: false,
-        );
-      }).listen((event) => state = state?.copyWith(user: event)),
+      stream
+          .map((event) => event?.userId)
+          .distinct()
+          .switchMap((userId) {
+            if (userId == null) return Stream.value(null);
+            return _database.userDao
+                .userById(userId)
+                .watchSingleOrNullWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+                  ],
+                  duration: kDefaultThrottleDuration,
+                  prepend: false,
+                );
+          })
+          .listen((event) => state = state?.copyWith(user: event)),
     );
     addSubscription(
       stream
           .map((event) => event?.conversationId)
           .where((event) => event != null)
           .distinct()
-          .switchMap((conversationId) => _database.participantDao
-                  .participantById(conversationId!, _currentUserId)
-                  .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateParticipantStream(
-                    conversationIds: [conversationId],
-                    userIds: [_currentUserId],
-                    and: true,
-                  )
-                ],
-                duration: kSlowThrottleDuration,
-                prepend: false,
-              ))
+          .switchMap(
+            (conversationId) => _database.participantDao
+                .participantById(conversationId!, _currentUserId)
+                .watchSingleOrNullWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateParticipantStream(
+                      conversationIds: [conversationId],
+                      userIds: [_currentUserId],
+                      and: true,
+                    ),
+                  ],
+                  duration: kSlowThrottleDuration,
+                  prepend: false,
+                ),
+          )
           .listen((Participant? event) {
-        state = state?.copyWith(participant: event);
-      }),
+            state = state?.copyWith(participant: event);
+          }),
     );
 
     appActiveListener.addListener(onListen);
@@ -250,8 +262,9 @@ class ConversationStateNotifier
 
     final accountServer = context.accountServer;
     final database = context.database;
-    final conversationNotifier =
-        context.providerContainer.read(conversationProvider.notifier);
+    final conversationNotifier = context.providerContainer.read(
+      conversationProvider.notifier,
+    );
     final state = conversationNotifier.state;
 
     ConversationItem? _conversation;
@@ -266,7 +279,8 @@ class ConversationStateNotifier
       }
     }
 
-    _conversation = conversation ??
+    _conversation =
+        conversation ??
         _conversation ??
         await _conversationItem(context, conversationId);
 
@@ -285,7 +299,8 @@ class ConversationStateNotifier
       return showToastFailed(null);
     }
 
-    final _initIndexMessageId = initIndexMessageId ??
+    final _initIndexMessageId =
+        initIndexMessageId ??
         (hasUnreadMessage ? _conversation.lastReadMessageId : null);
 
     lastReadMessageId =
@@ -293,13 +308,15 @@ class ConversationStateNotifier
 
     final ownerId = _conversation.ownerId;
 
-    final appFuture = (!_conversation.isGroupConversation && ownerId != null)
-        ? database.appDao.findAppById(ownerId)
-        : null;
+    final appFuture =
+        (!_conversation.isGroupConversation && ownerId != null)
+            ? database.appDao.findAppById(ownerId)
+            : null;
 
-    final participantFuture = database.participantDao
-        .participantById(conversationId, accountServer.userId)
-        .getSingleOrNull();
+    final participantFuture =
+        database.participantDao
+            .participantById(conversationId, accountServer.userId)
+            .getSingleOrNull();
 
     final conversationState = ConversationState(
       conversationId: conversationId,
@@ -318,8 +335,9 @@ class ConversationStateNotifier
 
     conversationNotifier.state = conversationState;
 
-    conversationNotifier._responsiveNavigatorStateNotifier
-        .pushPage(ResponsiveNavigatorStateNotifier.chatPage);
+    conversationNotifier._responsiveNavigatorStateNotifier.pushPage(
+      ResponsiveNavigatorStateNotifier.chatPage,
+    );
 
     unawaited(dismissByConversationId(conversationId));
     context.providerContainer
@@ -335,8 +353,9 @@ class ConversationStateNotifier
   }) async {
     final accountServer = context.accountServer;
     final database = context.database;
-    final conversationNotifier =
-        context.providerContainer.read(conversationProvider.notifier);
+    final conversationNotifier = context.providerContainer.read(
+      conversationProvider.notifier,
+    );
 
     final conversationId = generateConversationId(userId, accountServer.userId);
 
@@ -370,25 +389,30 @@ class ConversationStateNotifier
       refreshKey: Object(),
     );
 
-    conversationNotifier._responsiveNavigatorStateNotifier
-        .pushPage(ResponsiveNavigatorStateNotifier.chatPage);
+    conversationNotifier._responsiveNavigatorStateNotifier.pushPage(
+      ResponsiveNavigatorStateNotifier.chatPage,
+    );
 
     unawaited(dismissByConversationId(conversationId));
   }
 
   static Future<ConversationItem?> _conversationItem(
-      BuildContext context, String conversationId) async {
-    final conversations = context
-        .read<ConversationListBloc>()
-        .state
-        .map
-        .values
-        .cast<ConversationItem?>()
-        .toList();
+    BuildContext context,
+    String conversationId,
+  ) async {
+    final conversations =
+        context
+            .read<ConversationListBloc>()
+            .state
+            .map
+            .values
+            .cast<ConversationItem?>()
+            .toList();
 
     return conversations.firstWhere(
-            (element) => element?.conversationId == conversationId,
-            orElse: () => null) ??
+          (element) => element?.conversationId == conversationId,
+          orElse: () => null,
+        ) ??
         await context.database.conversationDao
             .conversationItem(conversationId)
             .getSingleOrNull();
@@ -403,7 +427,9 @@ class _LastConversationNotifier
 }
 
 final conversationProvider = StateNotifierProvider.autoDispose<
-    ConversationStateNotifier, ConversationState?>((ref) {
+  ConversationStateNotifier,
+  ConversationState?
+>((ref) {
   final keepAlive = ref.keepAlive();
 
   final accountServerAsync = ref.watch(accountServerProvider);
@@ -412,13 +438,16 @@ final conversationProvider = StateNotifierProvider.autoDispose<
     throw Exception('accountServer is not ready');
   }
 
-  final responsiveNavigatorNotifier =
-      ref.watch(responsiveNavigatorProvider.notifier);
+  final responsiveNavigatorNotifier = ref.watch(
+    responsiveNavigatorProvider.notifier,
+  );
 
   ref
     ..listen(accountServerProvider, (previous, next) => keepAlive.close())
-    ..listen(responsiveNavigatorProvider.notifier,
-        (previous, next) => keepAlive.close());
+    ..listen(
+      responsiveNavigatorProvider.notifier,
+      (previous, next) => keepAlive.close(),
+    );
 
   return ConversationStateNotifier(
     accountServer: accountServerAsync.requireValue,
@@ -427,7 +456,9 @@ final conversationProvider = StateNotifierProvider.autoDispose<
 });
 
 final _lastConversationProvider = StateNotifierProvider.autoDispose<
-    _LastConversationNotifier, ConversationState?>((ref) {
+  _LastConversationNotifier,
+  ConversationState?
+>((ref) {
   final conversation = ref.read(conversationProvider);
   final lastConversationNotifier = _LastConversationNotifier(conversation);
   ref.listen(conversationProvider, (previous, next) {
@@ -438,9 +469,10 @@ final _lastConversationProvider = StateNotifierProvider.autoDispose<
 });
 
 final filterLastConversationProvider = StateNotifierProvider.autoDispose.family<
-    _LastConversationNotifier,
-    ConversationState?,
-    bool Function(ConversationState?)>((ref, filter) {
+  _LastConversationNotifier,
+  ConversationState?,
+  bool Function(ConversationState?)
+>((ref, filter) {
   final conversation = ref.read(conversationProvider);
   final lastConversationNotifier = _LastConversationNotifier(conversation);
   ref.listen(conversationProvider, (previous, next) {
@@ -450,20 +482,25 @@ final filterLastConversationProvider = StateNotifierProvider.autoDispose.family<
   return lastConversationNotifier;
 });
 
-final lastConversationProvider =
-    _lastConversationProvider.select((value) => value);
+final lastConversationProvider = _lastConversationProvider.select(
+  (value) => value,
+);
 
-final lastConversationIdProvider =
-    lastConversationProvider.select((value) => value?.conversationId);
+final lastConversationIdProvider = lastConversationProvider.select(
+  (value) => value?.conversationId,
+);
 
-final currentConversationIdProvider =
-    conversationProvider.select((value) => value?.conversationId);
+final currentConversationIdProvider = conversationProvider.select(
+  (value) => value?.conversationId,
+);
 
-final currentConversationNameProvider =
-    conversationProvider.select((value) => value?.conversation?.name);
+final currentConversationNameProvider = conversationProvider.select(
+  (value) => value?.conversation?.name,
+);
 
-final currentConversationHasParticipantProvider =
-    conversationProvider.select((value) {
+final currentConversationHasParticipantProvider = conversationProvider.select((
+  value,
+) {
   if (value?.conversation == null) return true;
   if (value?.conversation?.category == ConversationCategory.contact) {
     return true;

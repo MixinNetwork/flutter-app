@@ -14,14 +14,19 @@ class _UserCacheState extends DistinctStateNotifier<User?> {
 }
 
 //  !!! Only query once in 10 minutes !!!
-final userCacheProvider = StateNotifierProvider.autoDispose
-    .family<_UserCacheState, User?, String>((ref, userId) {
+final userCacheProvider = StateNotifierProvider.autoDispose.family<
+  _UserCacheState,
+  User?,
+  String
+>((ref, userId) {
   // Minimize frequent calls to isBotGroup by keeping it alive for 10 minutes
   final keepAlive = ref.keepAlive();
   ref.onDispose(
     () => Future.delayed(const Duration(minutes: 10), keepAlive.close),
   );
 
-  return _UserCacheState(userId,
-      ref.watch(databaseProvider.select((value) => value.value?.userDao)));
+  return _UserCacheState(
+    userId,
+    ref.watch(databaseProvider.select((value) => value.value?.userDao)),
+  );
 });

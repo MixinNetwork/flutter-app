@@ -4,10 +4,7 @@ part 'pin_message_payload.g.dart';
 
 @JsonSerializable()
 class PinMessagePayload {
-  PinMessagePayload({
-    required this.action,
-    required this.messageIds,
-  });
+  PinMessagePayload({required this.action, required this.messageIds});
 
   factory PinMessagePayload.fromJson(Map<String, dynamic> json) =>
       _$PinMessagePayloadFromJson(json);
@@ -24,5 +21,5 @@ enum PinMessagePayloadAction {
   @JsonValue('PIN')
   pin,
   @JsonValue('UNPIN')
-  unpin
+  unpin,
 }

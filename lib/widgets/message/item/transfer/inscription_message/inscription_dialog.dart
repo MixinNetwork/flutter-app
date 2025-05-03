@@ -18,19 +18,20 @@ import 'inscription_message.dart';
 Future<void> showInscriptionDialog(
   BuildContext context,
   String inscriptionHash,
-) =>
-    showMixinDialog(
-      context: context,
-      child: _InscriptionDialog(inscriptionHash),
-    );
+) => showMixinDialog(
+  context: context,
+  child: _InscriptionDialog(inscriptionHash),
+);
 
 final _inscriptionProvider = StreamProvider.family<Inscription?, String>(
-    (ref, inscriptionHash) => ref
-        .read(databaseProvider)
-        .requireValue
-        .inscriptionItemDao
-        .inscriptionByHash(inscriptionHash)
-        .watchSingleOrNull());
+  (ref, inscriptionHash) =>
+      ref
+          .read(databaseProvider)
+          .requireValue
+          .inscriptionItemDao
+          .inscriptionByHash(inscriptionHash)
+          .watchSingleOrNull(),
+);
 
 class _InscriptionDialog extends ConsumerWidget {
   const _InscriptionDialog(this.inscriptionHash);
@@ -48,10 +49,7 @@ class _InscriptionDialog extends ConsumerWidget {
         fit: StackFit.expand,
         children: [
           const Material(color: Colors.black87),
-          Opacity(
-            opacity: 0.3,
-            child: _BlurBackground(inscription),
-          ),
+          Opacity(opacity: 0.3, child: _BlurBackground(inscription)),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -117,59 +115,55 @@ class _InscriptionDetailLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: InscriptionContent(
-                inscription: inscription,
-                mode: InscriptionContentMode.large,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _ItemInfoTile(
-              title: Text(context.l10n.hash),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ColoredHashWidget(
-                    inscriptionHex: inscription.inscriptionHash,
-                    blockSize: const ui.Size(7, 24),
-                    space: 4,
-                  ),
-                  const SizedBox(height: 4),
-                  CustomSelectableText(
-                    inscription.inscriptionHash,
-                    style:
-                        TextStyle(color: darkBrightnessThemeData.secondaryText),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            _ItemInfoTile(
-              title: Text(context.l10n.id),
-              subtitle: Text('#${inscription.sequence}'),
-            ),
-            const SizedBox(height: 20),
-            _ItemInfoTile(
-              title: Text(context.l10n.collection),
-              subtitle: Text(inscription.name ?? ''),
-            ),
-            const SizedBox(height: 20),
-          ],
+    padding: const EdgeInsets.symmetric(horizontal: 30),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: InscriptionContent(
+            inscription: inscription,
+            mode: InscriptionContentMode.large,
+          ),
         ),
-      );
+        const SizedBox(height: 20),
+        _ItemInfoTile(
+          title: Text(context.l10n.hash),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ColoredHashWidget(
+                inscriptionHex: inscription.inscriptionHash,
+                blockSize: const ui.Size(7, 24),
+                space: 4,
+              ),
+              const SizedBox(height: 4),
+              CustomSelectableText(
+                inscription.inscriptionHash,
+                style: TextStyle(color: darkBrightnessThemeData.secondaryText),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        _ItemInfoTile(
+          title: Text(context.l10n.id),
+          subtitle: Text('#${inscription.sequence}'),
+        ),
+        const SizedBox(height: 20),
+        _ItemInfoTile(
+          title: Text(context.l10n.collection),
+          subtitle: Text(inscription.name ?? ''),
+        ),
+        const SizedBox(height: 20),
+      ],
+    ),
+  );
 }
 
 class _ItemInfoTile extends StatelessWidget {
-  const _ItemInfoTile({
-    required this.title,
-    required this.subtitle,
-  });
+  const _ItemInfoTile({required this.title, required this.subtitle});
 
   final Widget title;
   final Widget subtitle;
@@ -182,18 +176,12 @@ class _ItemInfoTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DefaultTextStyle.merge(
-          style: TextStyle(
-            color: theme.secondaryText,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: theme.secondaryText, fontSize: 16),
           child: title,
         ),
         const SizedBox(height: 8),
         DefaultTextStyle.merge(
-          style: TextStyle(
-            color: theme.text,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: theme.text, fontSize: 16),
           child: subtitle,
         ),
       ],

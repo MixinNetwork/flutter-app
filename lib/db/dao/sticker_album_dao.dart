@@ -30,24 +30,27 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> insert(StickerAlbumsCompanion stickerAlbum) =>
       into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum).then((value) {
-        DataBaseEventBus.instance
-            .updateSticker([MiniSticker(albumId: stickerAlbum.albumId.value)]);
+        DataBaseEventBus.instance.updateSticker([
+          MiniSticker(albumId: stickerAlbum.albumId.value),
+        ]);
 
         return value;
       });
 
   Future<int> deleteStickerAlbum(StickerAlbum stickerAlbum) =>
       delete(db.stickerAlbums).delete(stickerAlbum).then((value) {
-        DataBaseEventBus.instance
-            .updateSticker([MiniSticker(albumId: stickerAlbum.albumId)]);
+        DataBaseEventBus.instance.updateSticker([
+          MiniSticker(albumId: stickerAlbum.albumId),
+        ]);
 
         return value;
       });
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> systemAlbums() =>
       select(db.stickerAlbums)
-        ..where((tbl) =>
-            tbl.category.equals('SYSTEM') & tbl.isVerified.equals(true))
+        ..where(
+          (tbl) => tbl.category.equals('SYSTEM') & tbl.isVerified.equals(true),
+        )
         ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
   SimpleSelectStatement<StickerAlbums, StickerAlbum> personalAlbum() =>
@@ -71,17 +74,18 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
   Future<int> updateAdded(String albumId, bool added) =>
       (update(db.stickerAlbums)..where((tbl) => tbl.albumId.equals(albumId)))
           .write(
-        StickerAlbumsCompanion(
-          added: Value(added),
-          orderedAt: !added ? const Value(0) : const Value.absent(),
-        ),
-      )
+            StickerAlbumsCompanion(
+              added: Value(added),
+              orderedAt: !added ? const Value(0) : const Value.absent(),
+            ),
+          )
           .then((value) {
-        DataBaseEventBus.instance
-            .updateSticker([MiniSticker(albumId: albumId)]);
+            DataBaseEventBus.instance.updateSticker([
+              MiniSticker(albumId: albumId),
+            ]);
 
-        return value;
-      });
+            return value;
+          });
 
   Future<void> updateOrders(List<StickerAlbum> value) {
     final newList = value.asMap().entries.map((e) {
@@ -89,11 +93,12 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
       final album = e.value;
       return album.copyWith(orderedAt: index);
     });
-    return batch((batch) =>
-            batch.insertAllOnConflictUpdate(db.stickerAlbums, newList))
-        .then((value) {
-      DataBaseEventBus.instance
-          .updateSticker(newList.map((e) => MiniSticker(albumId: e.albumId)));
+    return batch(
+      (batch) => batch.insertAllOnConflictUpdate(db.stickerAlbums, newList),
+    ).then((value) {
+      DataBaseEventBus.instance.updateSticker(
+        newList.map((e) => MiniSticker(albumId: e.albumId)),
+      );
       return value;
     });
   }
@@ -102,12 +107,15 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
         ..addColumns([db.stickerAlbums.createdAt])
         ..orderBy([OrderingTerm.desc(db.stickerAlbums.createdAt)])
         ..limit(1))
-      .map((row) => db.stickerAlbums.createdAt.converter
-          .fromSql(row.read(db.stickerAlbums.createdAt)));
+      .map(
+        (row) => db.stickerAlbums.createdAt.converter.fromSql(
+          row.read(db.stickerAlbums.createdAt),
+        ),
+      );
 
   Selectable<int?> maxOrder() {
     final max = db.stickerAlbums.orderedAt.max();
-    return (selectOnly(db.stickerAlbums)..addColumns([max]))
-        .map((row) => row.read(max));
+    return (selectOnly(db.stickerAlbums)
+      ..addColumns([max])).map((row) => row.read(max));
   }
 }

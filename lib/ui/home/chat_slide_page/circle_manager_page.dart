@@ -24,28 +24,30 @@ class CircleManagerPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final circles = useMemoizedStream<List<ConversationCircleManagerItem>>(
+    final circles =
+        useMemoizedStream<List<ConversationCircleManagerItem>>(
           () => context.database.circleDao
               .circleByConversationId(conversationId)
               .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.updateCircleConversationStream
-            ],
-            duration: kDefaultThrottleDuration,
-          ),
+                eventStreams: [
+                  DataBaseEventBus.instance.updateCircleConversationStream,
+                ],
+                duration: kDefaultThrottleDuration,
+              ),
           keys: [conversationId],
           initialData: [],
         ).data ??
         [];
-    final otherCircles = useMemoizedStream<List<ConversationCircleManagerItem>>(
+    final otherCircles =
+        useMemoizedStream<List<ConversationCircleManagerItem>>(
           () => context.database.circleDao
               .otherCircleByConversationId(conversationId)
               .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.updateCircleConversationStream
-            ],
-            duration: kDefaultThrottleDuration,
-          ),
+                eventStreams: [
+                  DataBaseEventBus.instance.updateCircleConversationStream,
+                ],
+                duration: kDefaultThrottleDuration,
+              ),
           keys: [conversationId],
           initialData: [],
         ).data ??
@@ -59,8 +61,11 @@ class CircleManagerPage extends HookConsumerWidget {
           ActionButton(
             name: Resources.assetsImagesIcAddSvg,
             onTap: () async {
-              final (conversationId, userId) = ref.read(conversationProvider
-                  .select((value) => (value?.conversationId, value?.userId)));
+              final (conversationId, userId) = ref.read(
+                conversationProvider.select(
+                  (value) => (value?.conversationId, value?.userId),
+                ),
+              );
 
               if (conversationId == null || userId == null) return;
 
@@ -128,94 +133,93 @@ class _CircleManagerItem extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Container(
-        height: 80,
-        color: context.theme.primary,
-        child: Row(
+    height: 80,
+    color: context.theme.primary,
+    child: Row(
+      children: [
+        GestureDetector(
+          onTap: () async {
+            final (conversationId, userId) = ref.read(
+              conversationProvider.select(
+                (value) => (value?.conversationId, value?.userId),
+              ),
+            );
+
+            if (conversationId == null || userId == null) return;
+
+            if (selected) {
+              await runFutureWithToast(
+                context.accountServer.circleRemoveConversation(
+                  circleId,
+                  conversationId,
+                ),
+              );
+              return;
+            }
+
+            await runFutureWithToast(
+              context.accountServer.editCircleConversation(circleId, [
+                CircleConversationRequest(
+                  action: CircleConversationAction.add,
+                  conversationId: conversationId,
+                  userId: userId,
+                ),
+              ]),
+            );
+          },
+          child: Container(
+            height: 80,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SvgPicture.asset(
+              selected
+                  ? Resources.assetsImagesCircleRemoveSvg
+                  : Resources.assetsImagesCircleAddSvg,
+              height: 16,
+              width: 16,
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        ClipOval(
+          child: Container(
+            color: context.dynamicColor(
+              const Color.fromRGBO(246, 247, 250, 1),
+              darkColor: const Color.fromRGBO(245, 247, 250, 1),
+            ),
+            height: 50,
+            width: 50,
+            alignment: Alignment.center,
+            child: SvgPicture.asset(
+              Resources.assetsImagesCircleSvg,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                getCircleColorById(circleId),
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () async {
-                final (conversationId, userId) = ref.read(conversationProvider
-                    .select((value) => (value?.conversationId, value?.userId)));
-
-                if (conversationId == null || userId == null) return;
-
-                if (selected) {
-                  await runFutureWithToast(
-                    context.accountServer
-                        .circleRemoveConversation(circleId, conversationId),
-                  );
-                  return;
-                }
-
-                await runFutureWithToast(
-                  context.accountServer.editCircleConversation(
-                    circleId,
-                    [
-                      CircleConversationRequest(
-                        action: CircleConversationAction.add,
-                        conversationId: conversationId,
-                        userId: userId,
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: Container(
-                height: 80,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SvgPicture.asset(
-                  selected
-                      ? Resources.assetsImagesCircleRemoveSvg
-                      : Resources.assetsImagesCircleAddSvg,
-                  height: 16,
-                  width: 16,
-                ),
-              ),
+            Text(
+              name,
+              style: TextStyle(color: context.theme.text, fontSize: 16),
             ),
-            const SizedBox(width: 4),
-            ClipOval(
-              child: Container(
-                color: context.dynamicColor(
-                  const Color.fromRGBO(246, 247, 250, 1),
-                  darkColor: const Color.fromRGBO(245, 247, 250, 1),
-                ),
-                height: 50,
-                width: 50,
-                alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  Resources.assetsImagesCircleSvg,
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    getCircleColorById(circleId),
-                    BlendMode.srcIn,
-                  ),
-                ),
+            const SizedBox(height: 6),
+            Text(
+              context.l10n.circleSubtitle(count, count),
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 14,
               ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  context.l10n.circleSubtitle(count, count),
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
             ),
           ],
         ),
-      );
+      ],
+    ),
+  );
 }

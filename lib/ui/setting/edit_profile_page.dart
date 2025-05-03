@@ -19,13 +19,15 @@ class EditProfilePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final (fullName, biography, identityNumber, phone, createdAt) = ref.watch(
-      authAccountProvider.select((value) => (
-            value?.fullName,
-            value?.biography,
-            value?.identityNumber,
-            value?.phone,
-            value?.createdAt,
-          )),
+      authAccountProvider.select(
+        (value) => (
+          value?.fullName,
+          value?.biography,
+          value?.identityNumber,
+          value?.phone,
+          value?.createdAt,
+        ),
+      ),
     );
 
     final nameTextEditingController = useTextEditingController(text: fullName);
@@ -64,15 +66,17 @@ class EditProfilePage extends HookConsumerWidget {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            Builder(builder: (context) {
-              final account = context.account!;
-              return AvatarWidget(
-                userId: account.userId,
-                name: account.fullName,
-                avatarUrl: account.avatarUrl,
-                size: 100,
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final account = context.account!;
+                return AvatarWidget(
+                  userId: account.userId,
+                  name: account.fullName,
+                  avatarUrl: account.avatarUrl,
+                  size: 100,
+                );
+              },
+            ),
             const SizedBox(height: 10),
             Text(
               'Mixin ID: $identityNumber',
@@ -105,8 +109,9 @@ class EditProfilePage extends HookConsumerWidget {
             const SizedBox(height: 70),
             Text(
               createdAt != null
-                  ? context.l10n
-                      .joinedIn(DateFormat.yMMMd().format(createdAt.toLocal()))
+                  ? context.l10n.joinedIn(
+                    DateFormat.yMMMd().format(createdAt.toLocal()),
+                  )
                   : '',
               style: TextStyle(
                 fontSize: 14,
@@ -137,24 +142,21 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const outlineInputBorder = OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Colors.transparent,
-      ),
-      borderRadius: BorderRadius.all(
-        Radius.circular(8),
-      ),
+      borderSide: BorderSide(color: Colors.transparent),
+      borderRadius: BorderRadius.all(Radius.circular(8)),
       gapPadding: 0,
     );
 
-    final backgroundColor = readOnly
-        ? context.dynamicColor(
-            const Color.fromRGBO(236, 238, 242, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.04),
-          )
-        : context.dynamicColor(
-            const Color.fromRGBO(255, 255, 255, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-          );
+    final backgroundColor =
+        readOnly
+            ? context.dynamicColor(
+              const Color.fromRGBO(236, 238, 242, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.04),
+            )
+            : context.dynamicColor(
+              const Color.fromRGBO(255, 255, 255, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+            );
 
     return _DynamicHorizontalPadding(
       child: Column(
@@ -199,8 +201,9 @@ class _Item extends StatelessWidget {
                 color: context.theme.secondaryText,
               ),
             ),
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
+            contextMenuBuilder:
+                (context, state) =>
+                    MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
         ],
       ),
@@ -215,17 +218,17 @@ class _DynamicHorizontalPadding extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          const maxPadding = 90.0;
-          const minPadding = 20.0;
-          final padding = math.min(
-            maxPadding,
-            math.max(minPadding, (constraints.maxWidth - 500) / 2),
-          );
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: padding),
-            child: child,
-          );
-        },
+    builder: (context, constraints) {
+      const maxPadding = 90.0;
+      const minPadding = 20.0;
+      final padding = math.min(
+        maxPadding,
+        math.max(minPadding, (constraints.maxWidth - 500) / 2),
       );
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: padding),
+        child: child,
+      );
+    },
+  );
 }

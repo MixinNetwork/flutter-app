@@ -13,18 +13,19 @@ class StoragePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (photoAutoDownload, videoAutoDownload, fileAutoDownload) =
-        ref.watch(settingProvider.select((value) => (
-              value.photoAutoDownload,
-              value.videoAutoDownload,
-              value.fileAutoDownload,
-            )));
+    final (photoAutoDownload, videoAutoDownload, fileAutoDownload) = ref.watch(
+      settingProvider.select(
+        (value) => (
+          value.photoAutoDownload,
+          value.videoAutoDownload,
+          value.fileAutoDownload,
+        ),
+      ),
+    );
 
     return Scaffold(
       backgroundColor: context.theme.background,
-      appBar: MixinAppBar(
-        title: Text(context.l10n.dataAndStorageUsage),
-      ),
+      appBar: MixinAppBar(title: Text(context.l10n.dataAndStorageUsage)),
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.topCenter,
@@ -40,37 +41,47 @@ class StoragePage extends HookConsumerWidget {
                     CellItem(
                       title: Text(context.l10n.photos),
                       trailing: Transform.scale(
-                          scale: 0.7,
-                          child: CupertinoSwitch(
-                            activeTrackColor: context.theme.accent,
-                            value: photoAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingChangeNotifier
-                                .photoAutoDownload = value,
-                          )),
+                        scale: 0.7,
+                        child: CupertinoSwitch(
+                          activeTrackColor: context.theme.accent,
+                          value: photoAutoDownload,
+                          onChanged:
+                              (bool value) =>
+                                  context
+                                      .settingChangeNotifier
+                                      .photoAutoDownload = value,
+                        ),
+                      ),
                     ),
                     CellItem(
                       title: Text(context.l10n.videos),
                       trailing: Transform.scale(
-                          scale: 0.7,
-                          child: CupertinoSwitch(
-                            activeTrackColor: context.theme.accent,
-                            value: videoAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingChangeNotifier
-                                .videoAutoDownload = value,
-                          )),
+                        scale: 0.7,
+                        child: CupertinoSwitch(
+                          activeTrackColor: context.theme.accent,
+                          value: videoAutoDownload,
+                          onChanged:
+                              (bool value) =>
+                                  context
+                                      .settingChangeNotifier
+                                      .videoAutoDownload = value,
+                        ),
+                      ),
                     ),
                     CellItem(
                       title: Text(context.l10n.files),
                       trailing: Transform.scale(
-                          scale: 0.7,
-                          child: CupertinoSwitch(
-                            activeTrackColor: context.theme.accent,
-                            value: fileAutoDownload,
-                            onChanged: (bool value) => context
-                                .settingChangeNotifier.fileAutoDownload = value,
-                          )),
+                        scale: 0.7,
+                        child: CupertinoSwitch(
+                          activeTrackColor: context.theme.accent,
+                          value: fileAutoDownload,
+                          onChanged:
+                              (bool value) =>
+                                  context
+                                      .settingChangeNotifier
+                                      .fileAutoDownload = value,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -89,11 +100,14 @@ class StoragePage extends HookConsumerWidget {
                 cellBackgroundColor: context.theme.settingCellBackgroundColor,
                 child: CellItem(
                   title: Text(context.l10n.storageUsage),
-                  onTap: () => ref
-                      .read(responsiveNavigatorProvider.notifier)
-                      .pushPage(ResponsiveNavigatorStateNotifier.storageUsage),
+                  onTap:
+                      () => ref
+                          .read(responsiveNavigatorProvider.notifier)
+                          .pushPage(
+                            ResponsiveNavigatorStateNotifier.storageUsage,
+                          ),
                 ),
-              )
+              ),
             ],
           ),
         ),

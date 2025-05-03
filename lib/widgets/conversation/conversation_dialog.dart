@@ -13,17 +13,23 @@ import '../dialog.dart';
 import '../high_light_text.dart';
 import '../toast.dart';
 
-Future<void> showConversationDialog(BuildContext context,
-    ConversationResponse conversationResponse, String code) async {
-  final localExisted = await context.database.conversationDao
-      .hasConversation(conversationResponse.conversationId);
+Future<void> showConversationDialog(
+  BuildContext context,
+  ConversationResponse conversationResponse,
+  String code,
+) async {
+  final localExisted = await context.database.conversationDao.hasConversation(
+    conversationResponse.conversationId,
+  );
   if (!localExisted) {
-    await context.accountServer
-        .refreshConversation(conversationResponse.conversationId);
+    await context.accountServer.refreshConversation(
+      conversationResponse.conversationId,
+    );
   }
 
-  final existed = conversationResponse.participants
-      .any((element) => element.userId == context.account?.userId);
+  final existed = conversationResponse.participants.any(
+    (element) => element.userId == context.account?.userId,
+  );
   if (existed) {
     showToast(context.l10n.groupAlreadyIn);
     await ConversationStateNotifier.selectConversation(
@@ -33,10 +39,11 @@ Future<void> showConversationDialog(BuildContext context,
     return;
   }
 
-  final userIds = conversationResponse.participants
-      .sublist(0, min(conversationResponse.participants.length, 4))
-      .map((e) => e.userId)
-      .toList();
+  final userIds =
+      conversationResponse.participants
+          .sublist(0, min(conversationResponse.participants.length, 4))
+          .map((e) => e.userId)
+          .toList();
   final users = await context.accountServer.refreshUsers(userIds);
 
   Toast.dismiss();
@@ -63,31 +70,31 @@ class _ConversationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 340,
-            child: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(
+        width: 340,
+        child: Column(
+          children: [
+            const Row(
               children: [
-                const Row(
-                  children: [
-                    Spacer(),
-                    Padding(
-                      padding: EdgeInsets.only(right: 12, top: 12),
-                      child: MixinCloseButton(),
-                    ),
-                  ],
-                ),
-                _ConversationInfo(
-                  conversationResponse: conversationResponse,
-                  users: users,
-                  code: code,
+                Spacer(),
+                Padding(
+                  padding: EdgeInsets.only(right: 12, top: 12),
+                  child: MixinCloseButton(),
                 ),
               ],
             ),
-          ),
-        ],
-      );
+            _ConversationInfo(
+              conversationResponse: conversationResponse,
+              users: users,
+              code: code,
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _ConversationInfo extends HookConsumerWidget {
@@ -103,46 +110,41 @@ class _ConversationInfo extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ClipOval(
-            child: SizedBox.square(
-              dimension: 90,
-              child: AvatarPuzzlesWidget(users, 90),
-            ),
-          ),
-          const SizedBox(height: 8),
-          CustomSelectableText(
-            conversationResponse.name,
-            style: TextStyle(
-              color: context.theme.text,
-              fontSize: 16,
-              height: 1,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          CustomSelectableText(
-            context.l10n
-                .participantsCount(conversationResponse.participants.length),
-            style: TextStyle(
-              color: context.theme.secondaryText,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 8),
-          DialogAddOrJoinButton(
-            onTap: () => runFutureWithToast(
-              () async {
-                await context.accountServer.joinGroup(code);
-                await ConversationStateNotifier.selectConversation(
-                    context, conversationResponse.conversationId);
-                Navigator.pop(context);
-              }(),
-            ),
-            title: Text(context.l10n.joinGroupWithPlus),
-          ),
-          const SizedBox(height: 56),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      ClipOval(
+        child: SizedBox.square(
+          dimension: 90,
+          child: AvatarPuzzlesWidget(users, 90),
+        ),
+      ),
+      const SizedBox(height: 8),
+      CustomSelectableText(
+        conversationResponse.name,
+        style: TextStyle(color: context.theme.text, fontSize: 16, height: 1),
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 4),
+      CustomSelectableText(
+        context.l10n.participantsCount(
+          conversationResponse.participants.length,
+        ),
+        style: TextStyle(color: context.theme.secondaryText, fontSize: 12),
+      ),
+      const SizedBox(height: 8),
+      DialogAddOrJoinButton(
+        onTap:
+            () => runFutureWithToast(() async {
+              await context.accountServer.joinGroup(code);
+              await ConversationStateNotifier.selectConversation(
+                context,
+                conversationResponse.conversationId,
+              );
+              Navigator.pop(context);
+            }()),
+        title: Text(context.l10n.joinGroupWithPlus),
+      ),
+      const SizedBox(height: 56),
+    ],
+  );
 }

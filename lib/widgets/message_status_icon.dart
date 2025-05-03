@@ -13,11 +13,7 @@ import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 
 class MessageStatusIcon extends StatelessWidget {
-  const MessageStatusIcon({
-    required this.status,
-    super.key,
-    this.color,
-  });
+  const MessageStatusIcon({required this.status, super.key, this.color});
 
   final MessageStatus? status;
 
@@ -67,19 +63,13 @@ class _VisibilityAwareAnimatedSendingIcon extends HookConsumerWidget {
         visible.value = info.visibleFraction > 0;
       },
       key: key,
-      child: _AnimatedMessageSendingIcon(
-        color: color,
-        play: visible.value,
-      ),
+      child: _AnimatedMessageSendingIcon(color: color, play: visible.value),
     );
   }
 }
 
 class _AnimatedMessageSendingIcon extends HookConsumerWidget {
-  const _AnimatedMessageSendingIcon({
-    required this.color,
-    required this.play,
-  });
+  const _AnimatedMessageSendingIcon({required this.color, required this.play});
 
   final Color color;
   final bool play;
@@ -132,11 +122,12 @@ class _MessageSendingIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 1;
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = 1;
 
     final center = Offset(size.width / 2, size.height / 2);
 
@@ -149,23 +140,25 @@ class _MessageSendingIconPainter extends CustomPainter {
     // draw hour hand
     const hourHandLength = 3;
     final hourAngle = math.pi * 2 * (1 - hour / 12);
-    final hourHand = Path()
-      ..moveTo(center.dx, center.dy)
-      ..lineTo(
-        center.dx + math.sin(hourAngle) * hourHandLength,
-        center.dy + math.cos(hourAngle) * hourHandLength,
-      );
+    final hourHand =
+        Path()
+          ..moveTo(center.dx, center.dy)
+          ..lineTo(
+            center.dx + math.sin(hourAngle) * hourHandLength,
+            center.dy + math.cos(hourAngle) * hourHandLength,
+          );
     canvas.drawPath(hourHand, paint);
 
     // draw minute hand
     const minuteHandLength = 4;
     final minuteAngle = math.pi * 2 * (1 - minute / 60);
-    final minuteHand = Path()
-      ..moveTo(center.dx, center.dy)
-      ..lineTo(
-        center.dx + math.sin(minuteAngle) * minuteHandLength,
-        center.dy + math.cos(minuteAngle) * minuteHandLength,
-      );
+    final minuteHand =
+        Path()
+          ..moveTo(center.dx, center.dy)
+          ..lineTo(
+            center.dx + math.sin(minuteAngle) * minuteHandLength,
+            center.dy + math.cos(minuteAngle) * minuteHandLength,
+          );
     canvas.drawPath(minuteHand, paint);
   }
 

@@ -13,10 +13,7 @@ import '../../utils/hydrated_bloc.dart';
 import '../../utils/rivepod.dart';
 
 class AuthState extends Equatable {
-  const AuthState({
-    required this.account,
-    required this.privateKey,
-  });
+  const AuthState({required this.account, required this.privateKey});
 
   factory AuthState.fromMap(Map<String, dynamic> map) {
     final account = map['account'] as Map<String, dynamic>;
@@ -45,20 +42,19 @@ class AuthState extends Equatable {
   List<Object?> get props => [account, privateKey];
 
   Map<String, dynamic> toMap() => {
-        'account': account.toJson(),
-        'privateKey': privateKey,
-      };
+    'account': account.toJson(),
+    'privateKey': privateKey,
+  };
 }
 
 class MultiAuthState extends Equatable {
-  const MultiAuthState({
-    Set<AuthState> auths = const {},
-  }) : _auths = auths;
+  const MultiAuthState({Set<AuthState> auths = const {}}) : _auths = auths;
 
   factory MultiAuthState.fromMap(Map<String, dynamic> map) {
     final list = map['auths'] as Iterable<dynamic>?;
     return MultiAuthState(
-      auths: list
+      auths:
+          list
               ?.map((e) => AuthState.fromMap(e as Map<String, dynamic>))
               .toSet() ??
           {},
@@ -76,8 +72,8 @@ class MultiAuthState extends Equatable {
   List<Object> get props => [_auths];
 
   Map<String, dynamic> toMap() => {
-        'auths': _auths.map((x) => x.toMap()).toList(),
-      };
+    'auths': _auths.map((x) => x.toMap()).toList(),
+  };
 
   String toJson() => json.encode(toMap());
 }
@@ -91,16 +87,17 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     state = MultiAuthState(
       auths: {
         ...state._auths.where(
-            (element) => element.account.userId != authState.account.userId),
+          (element) => element.account.userId != authState.account.userId,
+        ),
         authState,
       },
     );
   }
 
   void updateAccount(Account account) {
-    var authState = state._auths
-        .cast<AuthState?>()
-        .firstWhere((element) => element?.account.userId == account.userId);
+    var authState = state._auths.cast<AuthState?>().firstWhere(
+      (element) => element?.account.userId == account.userId,
+    );
     if (authState == null) {
       i('update account, but ${account.userId} auth state not found.');
       return;
@@ -109,7 +106,8 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
     state = MultiAuthState(
       auths: {
         ...state._auths.where(
-            (element) => element.account.userId != authState?.account.userId),
+          (element) => element.account.userId != authState?.account.userId,
+        ),
         authState,
       },
     );
@@ -117,8 +115,9 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
 
   void signOut() {
     if (state._auths.isEmpty) return;
-    state =
-        MultiAuthState(auths: state._auths.toSet()..remove(state._auths.last));
+    state = MultiAuthState(
+      auths: state._auths.toSet()..remove(state._auths.last),
+    );
   }
 
   @override
@@ -133,9 +132,10 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
 @Deprecated('Use multiAuthNotifierProvider instead')
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
-final multiAuthStateNotifierProvider =
-    StateNotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>(
-        (ref) {
+final multiAuthStateNotifierProvider = StateNotifierProvider.autoDispose<
+  MultiAuthStateNotifier,
+  MultiAuthState
+>((ref) {
   ref.keepAlive();
 
   final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
@@ -151,7 +151,8 @@ final multiAuthStateNotifierProvider =
   return MultiAuthStateNotifier(const MultiAuthState());
 });
 
-final authProvider =
-    multiAuthStateNotifierProvider.select((value) => value.current);
+final authProvider = multiAuthStateNotifierProvider.select(
+  (value) => value.current,
+);
 
 final authAccountProvider = authProvider.select((value) => value?.account);

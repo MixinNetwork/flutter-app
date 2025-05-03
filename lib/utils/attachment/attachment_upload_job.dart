@@ -72,15 +72,16 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
     });
 
     isolate = await Isolate.spawn(
-        _upload,
-        _AttachmentUploadJobOption(
-          path: path,
-          url: url,
-          keys: keys,
-          iv: iv,
-          sendPort: _receivePort.sendPort,
-          proxy: proxy,
-        ));
+      _upload,
+      _AttachmentUploadJobOption(
+        path: path,
+        url: url,
+        keys: keys,
+        iv: iv,
+        sendPort: _receivePort.sendPort,
+        proxy: proxy,
+      ),
+    );
 
     return completer.future;
   }
@@ -105,8 +106,9 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
   Stream<List<int>> uploadStream;
   int length;
   if (options.keys != null && options.iv != null) {
-    uploadStream =
-        file.openRead().encrypt(options.keys!, options.iv!, (_digest) {
+    uploadStream = file.openRead().encrypt(options.keys!, options.iv!, (
+      _digest,
+    ) {
       digest = _digest;
     });
 
@@ -125,13 +127,10 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
         throw Exception(error);
       }),
       options: Options(
-        headers: {
-          ..._uploadHeaders,
-          HttpHeaders.contentLengthHeader: length,
-        },
+        headers: {..._uploadHeaders, HttpHeaders.contentLengthHeader: length},
       ),
-      onSendProgress: (int count, int total) =>
-          options.sendPort.send((count, total)),
+      onSendProgress:
+          (int count, int total) => options.sendPort.send((count, total)),
       cancelToken: cancelToken,
     );
 

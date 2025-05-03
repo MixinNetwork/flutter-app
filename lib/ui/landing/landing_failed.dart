@@ -19,10 +19,7 @@ const _kSqliteNotADb = 26;
 const _kSqliteIOErr = 10;
 
 class DatabaseOpenFailedPage extends StatelessWidget {
-  const DatabaseOpenFailedPage({
-    required this.error,
-    super.key,
-  });
+  const DatabaseOpenFailedPage({required this.error, super.key});
 
   final SqliteException error;
 
@@ -59,7 +56,7 @@ class DatabaseOpenFailedPage extends StatelessWidget {
             exit(1);
           },
           text: context.l10n.exit,
-        )
+        ),
       ],
     );
   }
@@ -70,43 +67,51 @@ class _RecreateDatabaseButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => TextButton(
-        onPressed: () async {
-          final identityNumber = context.account?.identityNumber;
-          if (identityNumber == null) return;
+    onPressed: () async {
+      final identityNumber = context.account?.identityNumber;
+      if (identityNumber == null) return;
 
-          final result = await showConfirmMixinDialog(
-            context,
-            context.l10n.databaseRecreateTips,
-            positiveText: context.l10n.create,
-          );
-          if (result != DialogEvent.positive) {
-            return;
-          }
-          await ref.read(databaseProvider.notifier).close();
-          // Rename the old database file to a new name with timestamp.
-          final now = DateTime.now();
-          renameFileWithTime(
-              p.join(mixinDocumentsDirectory.path, identityNumber,
-                  '$kDbFileName.db'),
-              now);
-          await Future.forEach(
-            [
-              File(p.join(mixinDocumentsDirectory.path, identityNumber,
-                  '$kDbFileName.db-shm')),
-              File(p.join(mixinDocumentsDirectory.path, identityNumber,
-                  '$kDbFileName.db-wal'))
-            ].where((e) => e.existsSync()),
-            (element) => element.delete(),
-          );
-          await ref.read(databaseProvider.notifier).open();
-        },
-        child: Text(
-          context.l10n.continueText,
-          style: TextStyle(
-            color: context.theme.red,
-          ),
-        ),
+      final result = await showConfirmMixinDialog(
+        context,
+        context.l10n.databaseRecreateTips,
+        positiveText: context.l10n.create,
       );
+      if (result != DialogEvent.positive) {
+        return;
+      }
+      await ref.read(databaseProvider.notifier).close();
+      // Rename the old database file to a new name with timestamp.
+      final now = DateTime.now();
+      renameFileWithTime(
+        p.join(mixinDocumentsDirectory.path, identityNumber, '$kDbFileName.db'),
+        now,
+      );
+      await Future.forEach(
+        [
+          File(
+            p.join(
+              mixinDocumentsDirectory.path,
+              identityNumber,
+              '$kDbFileName.db-shm',
+            ),
+          ),
+          File(
+            p.join(
+              mixinDocumentsDirectory.path,
+              identityNumber,
+              '$kDbFileName.db-wal',
+            ),
+          ),
+        ].where((e) => e.existsSync()),
+        (element) => element.delete(),
+      );
+      await ref.read(databaseProvider.notifier).open();
+    },
+    child: Text(
+      context.l10n.continueText,
+      style: TextStyle(color: context.theme.red),
+    ),
+  );
 }
 
 class _Button extends StatelessWidget {
@@ -117,13 +122,13 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: context.theme.accent,
-          foregroundColor: Colors.white,
-        ),
-        onPressed: onTap,
-        child: Text(text),
-      );
+    style: ElevatedButton.styleFrom(
+      backgroundColor: context.theme.accent,
+      foregroundColor: Colors.white,
+    ),
+    onPressed: onTap,
+    child: Text(text),
+  );
 }
 
 class LandingFailedPage extends StatelessWidget {
@@ -140,36 +145,33 @@ class LandingFailedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LandingScaffold(
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+    child: Column(
+      children: [
+        const SizedBox(height: 32),
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: context.theme.text,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Text(
-                message,
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-            const Spacer(),
-            ...actions,
-            const SizedBox(height: 32),
-          ],
+          ),
         ),
-      );
+        const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Text(
+            message,
+            style: TextStyle(color: context.theme.text, fontSize: 14),
+          ),
+        ),
+        const Spacer(),
+        ...actions,
+        const SizedBox(height: 32),
+      ],
+    ),
+  );
 }

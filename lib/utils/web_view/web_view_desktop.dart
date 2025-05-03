@@ -42,11 +42,13 @@ class DesktopMixinWebView extends MixinWebView {
   ) async {
     assert(context.auth != null);
 
-    final mode = context.settingChangeNotifier.brightness ??
+    final mode =
+        context.settingChangeNotifier.brightness ??
         MediaQuery.platformBrightnessOf(context);
     final info = await getPackageInfo();
     debugPrint(
-        'info: appName: ${info.appName} packageName: ${info.packageName} version: ${info.version} buildNumber: ${info.buildNumber} buildSignature: ${info.buildSignature} ');
+      'info: appName: ${info.appName} packageName: ${info.packageName} version: ${info.version} buildNumber: ${info.buildNumber} buildSignature: ${info.buildSignature} ',
+    );
     return {
       'app_version': info.version,
       'immersive': false,
@@ -54,7 +56,7 @@ class DesktopMixinWebView extends MixinWebView {
       'platform': 'Desktop',
       'locale': Localizations.localeOf(context).toLanguageTag(),
       'conversation_id': conversationId ?? '',
-      'currency': context.account?.fiatCurrency
+      'currency': context.account?.fiatCurrency,
     };
   }
 
@@ -86,15 +88,17 @@ class DesktopMixinWebView extends MixinWebView {
         userDataFolderWindows: _webViewUserDataFolder,
       ),
     );
-    final mixinContext =
-        jsonEncode(await _mixinContext(context, conversationId));
+    final mixinContext = jsonEncode(
+      await _mixinContext(context, conversationId),
+    );
     webView
       ..setBrightness(brightness)
       ..addScriptToExecuteOnDocumentCreated(
         _mixinContextProviderJavaScript(mixinContext),
       );
-    await webView
-        .setApplicationNameForUserAgent(' Mixin/${packageInfo.version}');
+    await webView.setApplicationNameForUserAgent(
+      ' Mixin/${packageInfo.version}',
+    );
     webView.launch(url);
   }
 
@@ -107,14 +111,15 @@ class DesktopMixinWebView extends MixinWebView {
 }
 
 bool runWebViewNavigationBar(List<String> args) => runWebViewTitleBarWidget(
-      args,
-      builder: (context) => const BrightnessData(
+  args,
+  builder:
+      (context) => const BrightnessData(
         brightnessThemeData: lightBrightnessThemeData,
         value: 1,
         child: WebViewNavigationBar(),
       ),
-      backgroundColor: const Color(0xFFF0E7EA),
-    );
+  backgroundColor: const Color(0xFFF0E7EA),
+);
 
 class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
   const _BotWebViewRuntimeInstallDialog();
@@ -137,15 +142,21 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
             children: [
               Text(context.l10n.webview2RuntimeInstallDescription),
               const SizedBox(height: 10),
-              CustomSelectableText.rich(TextSpan(children: [
-                TextSpan(text: context.l10n.downloadLink),
+              CustomSelectableText.rich(
                 TextSpan(
-                  text: runtimeDownloadLink.overflow,
-                  style: TextStyle(color: context.theme.accent),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => openUri(context, runtimeDownloadLink),
+                  children: [
+                    TextSpan(text: context.l10n.downloadLink),
+                    TextSpan(
+                      text: runtimeDownloadLink.overflow,
+                      style: TextStyle(color: context.theme.accent),
+                      recognizer:
+                          TapGestureRecognizer()
+                            ..onTap =
+                                () => openUri(context, runtimeDownloadLink),
+                    ),
+                  ],
                 ),
-              ])),
+              ),
               const SizedBox(height: 10),
             ],
           ),

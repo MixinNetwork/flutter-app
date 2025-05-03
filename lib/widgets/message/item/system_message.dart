@@ -13,23 +13,24 @@ class SystemMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final actionName =
-        useMessageConverter(converter: (state) => state.actionName);
-    final participantUserId =
-        useMessageConverter(converter: (state) => state.participantUserId);
+    final actionName = useMessageConverter(
+      converter: (state) => state.actionName,
+    );
+    final participantUserId = useMessageConverter(
+      converter: (state) => state.participantUserId,
+    );
     final senderId = useMessageConverter(converter: (state) => state.userId);
-    final participantFullName =
-        useMessageConverter(converter: (state) => state.participantFullName);
-    final userFullName =
-        useMessageConverter(converter: (state) => state.userFullName);
+    final participantFullName = useMessageConverter(
+      converter: (state) => state.participantFullName,
+    );
+    final userFullName = useMessageConverter(
+      converter: (state) => state.userFullName,
+    );
     final content = useMessageConverter(converter: (state) => state.content);
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 4,
-          horizontal: 8,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: DecoratedBox(
@@ -40,10 +41,7 @@ class SystemMessage extends HookConsumerWidget {
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 5,
-                horizontal: 10,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               child: CustomText(
                 generateSystemText(
                   actionName: actionName,
@@ -56,9 +54,7 @@ class SystemMessage extends HookConsumerWidget {
                 ),
                 style: TextStyle(
                   fontSize: context.messageStyle.secondaryFontSize,
-                  color: context.dynamicColor(
-                    const Color.fromRGBO(0, 0, 0, 1),
-                  ),
+                  color: context.dynamicColor(const Color.fromRGBO(0, 0, 0, 1)),
                 ),
               ),
             ),
@@ -123,8 +119,9 @@ String generateSystemText({
       final senderName =
           senderIsCurrentUser ? Localization.current.you : senderFullName!;
       if (expireIn == null) {
-        text =
-            Localization.current.changedDisappearingMessageSettings(senderName);
+        text = Localization.current.changedDisappearingMessageSettings(
+          senderName,
+        );
       } else if (expireIn <= 0) {
         text = Localization.current.disableDisappearingMessage(senderName);
       } else {

@@ -99,36 +99,41 @@ class _MessageContext with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        isTranscriptPage,
-        isPinnedPage,
-        showNip,
-        isCurrentUser,
-        message,
-      ];
+    isTranscriptPage,
+    isPinnedPage,
+    showNip,
+    isCurrentUser,
+    message,
+  ];
 }
 
 bool useIsTranscriptPage() =>
     useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-        converter: (state) => state.isTranscriptPage);
+      converter: (state) => state.isTranscriptPage,
+    );
 
 bool useIsPinnedPage() =>
     useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-        converter: (state) => state.isPinnedPage);
+      converter: (state) => state.isPinnedPage,
+    );
 
 bool useShowNip() =>
     useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-        converter: (state) => state.showNip);
+      converter: (state) => state.showNip,
+    );
 
 bool useIsCurrentUser() =>
     useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-        converter: (state) => state.isCurrentUser);
+      converter: (state) => state.isCurrentUser,
+    );
 
 MessageItem useMessage() =>
     useMessageConverter<MessageItem>(converter: (state) => state);
 
 T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
     useBlocStateConverter<_MessageContextCubit, _MessageContext, T>(
-        converter: (state) => converter(state.message));
+      converter: (state) => converter(state.message),
+    );
 
 extension MessageContextExtension on BuildContext {
   MessageItem get message => read<_MessageContextCubit>().state.message;
@@ -225,11 +230,12 @@ class MessageItemWidget extends HookConsumerWidget {
 
     final isGroupOrBotGroupConversation =
         message.conversionCategory == ConversationCategory.group ||
-            message.userId != message.conversationOwnerId ||
-            ref.watch(isBotGroupProvider(message.conversationId));
+        message.userId != message.conversationOwnerId ||
+        ref.watch(isBotGroupProvider(message.conversationId));
 
-    final enableShowAvatar =
-        ref.watch(settingProvider.select((value) => value.messageShowAvatar));
+    final enableShowAvatar = ref.watch(
+      settingProvider.select((value) => value.messageShowAvatar),
+    );
     final showAvatar = isGroupOrBotGroupConversation && enableShowAvatar;
 
     final showNip =
@@ -248,12 +254,14 @@ class MessageItemWidget extends HookConsumerWidget {
     }
 
     final showedMenuCubit = useBloc(() => SimpleCubit(false));
-    final focusNode =
-        useFocusScopeNode(debugLabel: 'message_item_${message.messageId}');
+    final focusNode = useFocusScopeNode(
+      debugLabel: 'message_item_${message.messageId}',
+    );
 
     final blinkCubit = context.read<BlinkCubit>();
 
-    final blinkColor = useMemoizedStream(
+    final blinkColor =
+        useMemoizedStream(
           () => Rx.combineLatest2(
             blinkCubit.stream.startWith(blinkCubit.state),
             showedMenuCubit.stream.startWith(showedMenuCubit.state),
@@ -319,25 +327,30 @@ class MessageItemWidget extends HookConsumerWidget {
                     if (!enable) return null;
 
                     final role = ref.read(
-                        conversationProvider.select((value) => value?.role));
+                      conversationProvider.select((value) => value?.role),
+                    );
 
-                    final pinEnabled = !isTranscriptPage &&
+                    final pinEnabled =
+                        !isTranscriptPage &&
                         message.type.canReply &&
                         const [
                           MessageStatus.delivered,
                           MessageStatus.read,
-                          MessageStatus.sent
+                          MessageStatus.sent,
                         ].contains(message.status) &&
                         role != null;
-                    final enableReply = !isTranscriptPage &&
+                    final enableReply =
+                        !isTranscriptPage &&
                         message.type.canReply &&
                         !isPinnedPage;
                     final enableForward =
                         !isTranscriptPage && message.canForward;
                     final enableSelect = !isTranscriptPage;
-                    final enableSaveMobile = kPlatformIsMobile &&
+                    final enableSaveMobile =
+                        kPlatformIsMobile &&
                         (message.type.isImage || message.type.isVideo);
-                    final enableSaveDesktop = kPlatformIsDesktop &&
+                    final enableSaveDesktop =
+                        kPlatformIsDesktop &&
                         message.mediaStatus == MediaStatus.done &&
                         message.mediaUrl?.isNotEmpty == true &&
                         (message.type.isData ||
@@ -368,9 +381,12 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.reply),
                           title: context.l10n.reply,
-                          callback: () => context.providerContainer
-                              .read(quoteMessageProvider.notifier)
-                              .state = message,
+                          callback:
+                              () =>
+                                  context
+                                      .providerContainer
+                                      .read(quoteMessageProvider.notifier)
+                                      .state = message,
                         ),
                     ];
 
@@ -399,17 +415,20 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.select),
                           title: context.l10n.select,
-                          callback: () => ref
-                              .read(messageSelectionProvider)
-                              .selectMessage(message),
+                          callback:
+                              () => ref
+                                  .read(messageSelectionProvider)
+                                  .selectMessage(message),
                         ),
                       if (pinEnabled)
                         MenuAction(
                           image: MenuImage.icon(
-                              message.pinned ? IconFonts.unPin : IconFonts.pin),
-                          title: message.pinned
-                              ? context.l10n.unpin
-                              : context.l10n.pinTitle,
+                            message.pinned ? IconFonts.unPin : IconFonts.pin,
+                          ),
+                          title:
+                              message.pinned
+                                  ? context.l10n.unpin
+                                  : context.l10n.pinTitle,
                           callback: () async {
                             final pinMessageMinimal = PinMessageMinimal(
                               messageId: message.messageId,
@@ -434,87 +453,109 @@ class MessageItemWidget extends HookConsumerWidget {
 
                     final copyActions = <MenuAction>[];
                     if (message.type.isPost) {
-                      copyActions.add(MenuAction(
-                        image: MenuImage.icon(IconFonts.copy),
-                        title: context.l10n.copy,
-                        callback: () {
-                          Clipboard.setData(
-                              ClipboardData(text: message.content ?? ''));
-                        },
-                      ));
+                      copyActions.add(
+                        MenuAction(
+                          image: MenuImage.icon(IconFonts.copy),
+                          title: context.l10n.copy,
+                          callback: () {
+                            Clipboard.setData(
+                              ClipboardData(text: message.content ?? ''),
+                            );
+                          },
+                        ),
+                      );
                     } else if (message.type.isImage) {
-                      copyActions.add(MenuAction(
-                        image: MenuImage.icon(IconFonts.copy),
-                        title: context.l10n.copyImage,
-                        callback: () {
-                          copyFile(
-                            context.accountServer.convertMessageAbsolutePath(
-                              message,
-                              isTranscriptPage,
-                            ),
-                          );
-                        },
-                      ));
+                      copyActions.add(
+                        MenuAction(
+                          image: MenuImage.icon(IconFonts.copy),
+                          title: context.l10n.copyImage,
+                          callback: () {
+                            copyFile(
+                              context.accountServer.convertMessageAbsolutePath(
+                                message,
+                                isTranscriptPage,
+                              ),
+                            );
+                          },
+                        ),
+                      );
                       if (!message.caption.isNullOrBlank()) {
                         final selectedContent = _findSelectedContent(context);
                         if (selectedContent != null) {
-                          copyActions.add(MenuAction(
-                            image: MenuImage.icon(IconFonts.copy),
-                            title: context.l10n.copySelectedText,
-                            callback: () {
-                              Clipboard.setData(ClipboardData(
-                                  text: selectedContent.plainText));
-                            },
-                          ));
+                          copyActions.add(
+                            MenuAction(
+                              image: MenuImage.icon(IconFonts.copy),
+                              title: context.l10n.copySelectedText,
+                              callback: () {
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: selectedContent.plainText,
+                                  ),
+                                );
+                              },
+                            ),
+                          );
                         } else {
-                          copyActions.add(MenuAction(
-                            image: MenuImage.icon(IconFonts.copy),
-                            title: context.l10n.copyText,
-                            callback: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: message.caption ?? ''));
-                            },
-                          ));
+                          copyActions.add(
+                            MenuAction(
+                              image: MenuImage.icon(IconFonts.copy),
+                              title: context.l10n.copyText,
+                              callback: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: message.caption ?? ''),
+                                );
+                              },
+                            ),
+                          );
                         }
                       }
                     } else if (message.type.isText) {
                       final selectedContent = _findSelectedContent(context);
-                      copyActions.add(MenuAction(
-                        image: MenuImage.icon(IconFonts.copy),
-                        title: selectedContent == null
-                            ? context.l10n.copy
-                            : context.l10n.copySelectedText,
-                        callback: () {
-                          if (selectedContent != null) {
-                            Clipboard.setData(
-                                ClipboardData(text: selectedContent.plainText));
-                          } else {
-                            Clipboard.setData(
-                                ClipboardData(text: message.content ?? ''));
-                          }
-                        },
-                      ));
+                      copyActions.add(
+                        MenuAction(
+                          image: MenuImage.icon(IconFonts.copy),
+                          title:
+                              selectedContent == null
+                                  ? context.l10n.copy
+                                  : context.l10n.copySelectedText,
+                          callback: () {
+                            if (selectedContent != null) {
+                              Clipboard.setData(
+                                ClipboardData(text: selectedContent.plainText),
+                              );
+                            } else {
+                              Clipboard.setData(
+                                ClipboardData(text: message.content ?? ''),
+                              );
+                            }
+                          },
+                        ),
+                      );
                     } else if (message.type.isAppCard) {
                       final selectedContent = _findSelectedContent(context);
                       if (selectedContent != null) {
-                        copyActions.add(MenuAction(
-                          image: MenuImage.icon(IconFonts.copy),
-                          title: context.l10n.copySelectedText,
-                          callback: () {
-                            String text;
-                            try {
-                              final data = AppCardData.fromJson(
+                        copyActions.add(
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.copy),
+                            title: context.l10n.copySelectedText,
+                            callback: () {
+                              String text;
+                              try {
+                                final data = AppCardData.fromJson(
                                   jsonDecode(message.content!)
-                                      as Map<String, dynamic>);
-                              text = data.generateCopyTextWithBreakLine(
-                                  selectedContent.plainText);
-                            } catch (error) {
-                              e('ActionCard decode error: $error');
-                              text = selectedContent.plainText;
-                            }
-                            Clipboard.setData(ClipboardData(text: text));
-                          },
-                        ));
+                                      as Map<String, dynamic>,
+                                );
+                                text = data.generateCopyTextWithBreakLine(
+                                  selectedContent.plainText,
+                                );
+                              } catch (error) {
+                                e('ActionCard decode error: $error');
+                                text = selectedContent.plainText;
+                              }
+                              Clipboard.setData(ClipboardData(text: text));
+                            },
+                          ),
+                        );
                       }
                     }
 
@@ -523,15 +564,25 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.download),
                           title: context.l10n.saveToCameraRoll,
-                          callback: () => saveAs(context, context.accountServer,
-                              message, isTranscriptPage),
+                          callback:
+                              () => saveAs(
+                                context,
+                                context.accountServer,
+                                message,
+                                isTranscriptPage,
+                              ),
                         ),
                       if (enableSaveDesktop)
                         MenuAction(
                           image: MenuImage.icon(IconFonts.download),
                           title: context.l10n.saveAs,
-                          callback: () => saveAs(context, context.accountServer,
-                              message, isTranscriptPage),
+                          callback:
+                              () => saveAs(
+                                context,
+                                context.accountServer,
+                                message,
+                                isTranscriptPage,
+                              ),
                         ),
                     ];
                     final deleteActions = [
@@ -544,10 +595,9 @@ class MessageItemWidget extends HookConsumerWidget {
                             if (message.type.isText) {
                               content = message.content;
                             }
-                            await context.accountServer.sendRecallMessage(
-                              [message.messageId],
-                              conversationId: message.conversationId,
-                            );
+                            await context.accountServer.sendRecallMessage([
+                              message.messageId,
+                            ], conversationId: message.conversationId);
                             if (content != null) {
                               context.providerContainer
                                   .read(recallMessageNotifierProvider)
@@ -559,8 +609,10 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.delete),
                           title: context.l10n.deleteForMe,
-                          callback: () => context.accountServer
-                              .deleteMessage(message.messageId),
+                          callback:
+                              () => context.accountServer.deleteMessage(
+                                message.messageId,
+                              ),
                         ),
                     ];
 
@@ -569,8 +621,10 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.copy),
                           title: 'Copy message',
-                          callback: () => Clipboard.setData(
-                              ClipboardData(text: message.toString())),
+                          callback:
+                              () => Clipboard.setData(
+                                ClipboardData(text: message.toString()),
+                              ),
                         ),
                     ];
 
@@ -676,8 +730,10 @@ class MessageItemWidget extends HookConsumerWidget {
       child = VisibilityDetector(
         onVisibilityChanged: (VisibilityInfo info) {
           if (info.visibleFraction < 1) return;
-          context.accountServer
-              .markMentionRead(message.messageId, message.conversationId);
+          context.accountServer.markMentionRead(
+            message.messageId,
+            message.conversationId,
+          );
         },
         key: ValueKey(message.messageId),
         child: child,
@@ -693,15 +749,17 @@ class MessageItemWidget extends HookConsumerWidget {
         isCurrentUser: isCurrentUser,
         message: message,
         child: Builder(
-          builder: (context) => GestureDetector(
-            onTap: () => _quickReply(context),
-            child: Padding(
-              padding: sameUserPrev
-                  ? EdgeInsets.zero
-                  : const EdgeInsets.only(top: 8),
-              child: child,
-            ),
-          ),
+          builder:
+              (context) => GestureDetector(
+                onTap: () => _quickReply(context),
+                child: Padding(
+                  padding:
+                      sameUserPrev
+                          ? EdgeInsets.zero
+                          : const EdgeInsets.only(top: 8),
+                  child: child,
+                ),
+              ),
         ),
       ),
     );
@@ -723,9 +781,7 @@ class MessageItemWidget extends HookConsumerWidget {
       final accountServer = context.accountServer;
 
       final mixinResponse = await accountServer.client.accountApi.addSticker(
-        StickerRequest(
-          stickerId: message.stickerId,
-        ),
+        StickerRequest(stickerId: message.stickerId),
       );
 
       final database = context.database;
@@ -738,10 +794,12 @@ class MessageItemWidget extends HookConsumerWidget {
         final data = mixinResponse.data;
         await database.mixinDatabase.transaction(() async {
           await database.stickerDao.insert(data.asStickersCompanion);
-          await database.stickerRelationshipDao.insert(StickerRelationship(
-            albumId: personalAlbum.albumId,
-            stickerId: data.stickerId,
-          ));
+          await database.stickerRelationshipDao.insert(
+            StickerRelationship(
+              albumId: personalAlbum.albumId,
+              stickerId: data.stickerId,
+            ),
+          );
         });
       }
       showToastSuccessful();
@@ -781,24 +839,22 @@ class MessageContext extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     _MessageContext newMessageContext() => _MessageContext(
-          isTranscriptPage: isTranscriptPage,
-          isPinnedPage: isPinnedPage,
-          showNip: showNip,
-          isCurrentUser: isCurrentUser,
-          message: message,
-        );
+      isTranscriptPage: isTranscriptPage,
+      isPinnedPage: isPinnedPage,
+      showNip: showNip,
+      isCurrentUser: isCurrentUser,
+      message: message,
+    );
 
-    final messageContextCubit =
-        useBloc(() => _MessageContextCubit(newMessageContext()));
+    final messageContextCubit = useBloc(
+      () => _MessageContextCubit(newMessageContext()),
+    );
 
     useEffect(() {
       messageContextCubit.emit(newMessageContext());
     }, [isTranscriptPage, isPinnedPage, showNip, isCurrentUser, message]);
 
-    return Provider.value(
-      value: messageContextCubit,
-      child: child,
-    );
+    return Provider.value(value: messageContextCubit, child: child);
   }
 }
 
@@ -808,8 +864,10 @@ Future<void> saveAs(
   MessageItem message,
   bool isTranscriptPage,
 ) async {
-  final path =
-      accountServer.convertMessageAbsolutePath(message, isTranscriptPage);
+  final path = accountServer.convertMessageAbsolutePath(
+    message,
+    isTranscriptPage,
+  );
   if (Platform.isAndroid || Platform.isIOS) {
     if (message.type.isImage || message.type.isVideo) {
       try {
@@ -868,8 +926,9 @@ class _MessageBubbleMargin extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userIdentityNumber =
-        useMessageConverter(converter: (m) => m.userIdentityNumber);
+    final userIdentityNumber = useMessageConverter(
+      converter: (m) => m.userIdentityNumber,
+    );
     final membership = useMessageConverter(converter: (m) => m.membership);
 
     final messageColumn = Column(
@@ -948,25 +1007,22 @@ class _UnreadMessageBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: context.theme.background,
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        alignment: Alignment.center,
-        child: Text(
-          context.l10n.unreadMessages,
-          style: TextStyle(
-            color: context.theme.secondaryText,
-            fontSize: context.messageStyle.secondaryFontSize,
-          ),
-        ),
-      );
+    color: context.theme.background,
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    margin: const EdgeInsets.symmetric(vertical: 6),
+    alignment: Alignment.center,
+    child: Text(
+      context.l10n.unreadMessages,
+      style: TextStyle(
+        color: context.theme.secondaryText,
+        fontSize: context.messageStyle.secondaryFontSize,
+      ),
+    ),
+  );
 }
 
 class _MessageSelectionWrapper extends HookConsumerWidget {
-  const _MessageSelectionWrapper({
-    required this.child,
-    required this.message,
-  });
+  const _MessageSelectionWrapper({required this.child, required this.message});
 
   final Widget child;
 
@@ -976,14 +1032,19 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
 
-    final selected = ref.watch(messageSelectionProvider.select(
-        (value) => value.selectedMessageIds.contains(message.messageId)));
+    final selected = ref.watch(
+      messageSelectionProvider.select(
+        (value) => value.selectedMessageIds.contains(message.messageId),
+      ),
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: inMultiSelectMode
-          ? () => ref.read(messageSelectionProvider).toggleSelection(message)
-          : null,
+      onTap:
+          inMultiSelectMode
+              ? () =>
+                  ref.read(messageSelectionProvider).toggleSelection(message)
+              : null,
       child: Row(
         children: [
           _AnimatedSelectionIcon(
@@ -991,10 +1052,7 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
             inSelectedMode: inMultiSelectMode,
           ),
           Expanded(
-            child: IgnorePointer(
-              ignoring: inMultiSelectMode,
-              child: child,
-            ),
+            child: IgnorePointer(ignoring: inMultiSelectMode, child: child),
           ),
         ],
       ),
@@ -1019,17 +1077,14 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
     );
 
     final animation = useMemoized(
-        () => animationController.drive(
-              Tween<double>(
-                begin: 0,
-                end: 48,
-              ).chain(
-                CurveTween(
-                  curve: Curves.easeInOut,
-                ),
-              ),
-            ),
-        [animationController]);
+      () => animationController.drive(
+        Tween<double>(
+          begin: 0,
+          end: 48,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
+      ),
+      [animationController],
+    );
 
     useEffect(() {
       if (inSelectedMode) {

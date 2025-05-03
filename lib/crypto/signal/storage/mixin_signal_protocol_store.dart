@@ -4,8 +4,12 @@ import 'mixin_identity_key_store.dart';
 import 'mixin_session_store.dart';
 
 class MixinSignalProtocolStore extends SignalProtocolStore {
-  MixinSignalProtocolStore(this.preKeyStore, this.signedPreKeyStore,
-      this.identityKeyStore, this.sessionStore);
+  MixinSignalProtocolStore(
+    this.preKeyStore,
+    this.signedPreKeyStore,
+    this.identityKeyStore,
+    this.sessionStore,
+  );
 
   final PreKeyStore preKeyStore;
   final SignedPreKeyStore signedPreKeyStore;
@@ -83,25 +87,33 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
 
   @override
   Future storeSession(
-      SignalProtocolAddress address, SessionRecord record) async {
+    SignalProtocolAddress address,
+    SessionRecord record,
+  ) async {
     await sessionStore.storeSession(address, record);
   }
 
   @override
   Future<void> storeSignedPreKey(
-      int signedPreKeyId, SignedPreKeyRecord record) async {
+    int signedPreKeyId,
+    SignedPreKeyRecord record,
+  ) async {
     await signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
   }
 
   @override
-  Future<bool> isTrustedIdentity(SignalProtocolAddress address,
-          IdentityKey? identityKey, Direction direction) async =>
+  Future<bool> isTrustedIdentity(
+    SignalProtocolAddress address,
+    IdentityKey? identityKey,
+    Direction direction,
+  ) async =>
       identityKeyStore.isTrustedIdentity(address, identityKey, direction);
 
   @override
   Future<bool> saveIdentity(
-          SignalProtocolAddress address, IdentityKey? identityKey) async =>
-      identityKeyStore.saveIdentity(address, identityKey);
+    SignalProtocolAddress address,
+    IdentityKey? identityKey,
+  ) async => identityKeyStore.saveIdentity(address, identityKey);
 
   Future<void> removeIdentity(SignalProtocolAddress address) async {
     await identityKeyStore.removeIdentity(address);

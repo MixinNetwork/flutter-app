@@ -9,17 +9,11 @@ import 'logger.dart';
 
 const _eventBusPortName = 'mixin_global_isolate_event_bus';
 
-enum _EventType {
-  register,
-  event,
-}
+enum _EventType { register, event }
 
 @immutable
 class _Event {
-  const _Event({
-    required this.data,
-    required this.type,
-  });
+  const _Event({required this.data, required this.type});
 
   final dynamic data;
   final _EventType type;
@@ -44,8 +38,10 @@ abstract class EventBus {
       _singleton ??= EventBus._otherIsolateEventBus();
 
   static void initialize() {
-    assert(_singleton == null,
-        'EventBus has been initialized. ${Isolate.current.debugName}');
+    assert(
+      _singleton == null,
+      'EventBus has been initialized. ${Isolate.current.debugName}',
+    );
     _singleton = _MainEventBus();
   }
 
@@ -62,8 +58,10 @@ class _DummyEventBus implements EventBus {
 
   @override
   void fire(dynamic event) {
-    e('ignore dispatch event, because main event bus is not initialized.'
-        ' ${Isolate.current.debugName}');
+    e(
+      'ignore dispatch event, because main event bus is not initialized.'
+      ' ${Isolate.current.debugName}',
+    );
   }
 }
 
@@ -127,10 +125,9 @@ class _MainEventBus implements EventBus {
 class _OtherIsolateEventBus implements EventBus {
   _OtherIsolateEventBus._fromPort(this._mainBusPort) {
     final busId = const Uuid().v4();
-    _mainBusPort.send(_Event(
-      data: [busId, _receivePort.sendPort],
-      type: _EventType.register,
-    ));
+    _mainBusPort.send(
+      _Event(data: [busId, _receivePort.sendPort], type: _EventType.register),
+    );
     _receivePort.listen((event) {
       if (event is! _Event) {
         assert(false, 'Invalid event type. $event');
@@ -144,10 +141,7 @@ class _OtherIsolateEventBus implements EventBus {
           _controller.add(event.data);
       }
     });
-    Isolate.current.addOnExitListener(
-      _mainBusPort,
-      response: busId,
-    );
+    Isolate.current.addOnExitListener(_mainBusPort, response: busId);
   }
 
   final _controller = StreamController.broadcast();

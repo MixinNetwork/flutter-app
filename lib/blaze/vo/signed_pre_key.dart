@@ -19,9 +19,5 @@ class SignedPreKey extends OneTimePreKey with EquatableMixin {
   Map<String, dynamic> toJson() => _$SignedPreKeyToJson(this);
 
   @override
-  List<Object?> get props => [
-        keyId,
-        pubKey,
-        signature,
-      ];
+  List<Object?> get props => [keyId, pubKey, signature];
 }

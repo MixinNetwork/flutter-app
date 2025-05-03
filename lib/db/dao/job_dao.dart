@@ -12,19 +12,13 @@ import '../mixin_database.dart';
 part 'job_dao.g.dart';
 
 class MiniJobItem with EquatableMixin {
-  const MiniJobItem({
-    required this.jobId,
-    required this.action,
-  });
+  const MiniJobItem({required this.jobId, required this.action});
 
   final String jobId;
   final String action;
 
   @override
-  List<Object?> get props => [
-        jobId,
-        action,
-      ];
+  List<Object?> get props => [jobId, action];
 }
 
 @DriftAccessor()
@@ -36,12 +30,13 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   static const silentKey = 'silent';
   static const expireInKey = 'expireIn';
 
-  Future<int> insert(Job job) =>
-      into(db.jobs).insertOnConflictUpdate(job).whenComplete(
-            () => DataBaseEventBus.instance.addJob(
-              MiniJobItem(jobId: job.jobId, action: job.action),
-            ),
-          );
+  Future<int> insert(Job job) => into(db.jobs)
+      .insertOnConflictUpdate(job)
+      .whenComplete(
+        () => DataBaseEventBus.instance.addJob(
+          MiniJobItem(jobId: job.jobId, action: job.action),
+        ),
+      );
 
   Future<Job> createSendingJob(
     String messageId,
@@ -51,9 +46,10 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     int? expireIn,
   }) async {
     Future<int> getConversationExpireIn() async {
-      final conversation = await db.conversationDao
-          .conversationItem(conversationId)
-          .getSingleOrNull();
+      final conversation =
+          await db.conversationDao
+              .conversationItem(conversationId)
+              .getSingleOrNull();
       return conversation?.expireIn ?? 0;
     }
 
@@ -76,52 +72,73 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   }
 
   Future<void> deleteJobs(List<String> jobIds) => batch(
-      (b) => b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds)));
+    (b) => b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds)),
+  );
 
   Future<void> deleteJobById(String jobId) => batch(
-      (b) => b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId)));
+    (b) => b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId)),
+  );
 
   Future<void> deleteJobByAction(String action) => batch(
-      (b) => b.deleteWhere(db.jobs, (Jobs row) => row.action.equals(action)));
+    (b) => b.deleteWhere(db.jobs, (Jobs row) => row.action.equals(action)),
+  );
 
-  SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.equals(kAcknowledgeMessageReceipts) &
-        row.blazeMessage.isNotNull())
-    ..limit(100);
+  SimpleSelectStatement<Jobs, Job> ackJobs() =>
+      select(db.jobs)
+        ..where(
+          (Jobs row) =>
+              row.action.equals(kAcknowledgeMessageReceipts) &
+              row.blazeMessage.isNotNull(),
+        )
+        ..limit(100);
 
-  SimpleSelectStatement<Jobs, Job> sessionAckJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.equals(kCreateMessage) & row.blazeMessage.isNotNull())
-    ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-    ..limit(100);
+  SimpleSelectStatement<Jobs, Job> sessionAckJobs() =>
+      select(db.jobs)
+        ..where(
+          (Jobs row) =>
+              row.action.equals(kCreateMessage) & row.blazeMessage.isNotNull(),
+        )
+        ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+        ..limit(100);
 
-  SimpleSelectStatement<Jobs, Job> sendingJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.isIn([kSendingMessage, kPinMessage, kRecallMessage]) &
-        row.blazeMessage.isNotNull())
-    ..limit(100);
+  SimpleSelectStatement<Jobs, Job> sendingJobs() =>
+      select(db.jobs)
+        ..where(
+          (Jobs row) =>
+              row.action.isIn([kSendingMessage, kPinMessage, kRecallMessage]) &
+              row.blazeMessage.isNotNull(),
+        )
+        ..limit(100);
 
-  SimpleSelectStatement<Jobs, Job> updateAssetJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.equals(kUpdateAsset) & row.blazeMessage.isNotNull())
-    ..limit(100);
+  SimpleSelectStatement<Jobs, Job> updateAssetJobs() =>
+      select(db.jobs)
+        ..where(
+          (Jobs row) =>
+              row.action.equals(kUpdateAsset) & row.blazeMessage.isNotNull(),
+        )
+        ..limit(100);
 
-  SimpleSelectStatement<Jobs, Job> updateTokenJobs() => select(db.jobs)
-    ..where((Jobs row) =>
-        row.action.equals(kUpdateToken) & row.blazeMessage.isNotNull())
-    ..limit(100);
+  SimpleSelectStatement<Jobs, Job> updateTokenJobs() =>
+      select(db.jobs)
+        ..where(
+          (Jobs row) =>
+              row.action.equals(kUpdateToken) & row.blazeMessage.isNotNull(),
+        )
+        ..limit(100);
 
   SimpleSelectStatement<Jobs, Job> syncInscriptionMessageJobs() =>
       select(db.jobs)
-        ..where((Jobs row) =>
-            row.action.equals(kSyncInscriptionMessage) &
-            row.blazeMessage.isNotNull())
+        ..where(
+          (Jobs row) =>
+              row.action.equals(kSyncInscriptionMessage) &
+              row.blazeMessage.isNotNull(),
+        )
         ..limit(100);
 
-  SimpleSelectStatement<Jobs, Job> updateStickerJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(kUpdateSticker))
-    ..limit(100);
+  SimpleSelectStatement<Jobs, Job> updateStickerJobs() =>
+      select(db.jobs)
+        ..where((Jobs row) => row.action.equals(kUpdateSticker))
+        ..limit(100);
 
   SimpleSelectStatement<Jobs, Job> migrateFtsJobs() =>
       select(db.jobs)..where((Jobs row) => row.action.equals(kMigrateFts));
@@ -130,18 +147,18 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
       select(db.jobs)..where((Jobs row) => row.action.equals(action));
 
   Future<Job?> jobById(String jobId) =>
-      (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
-          .getSingleOrNull();
+      (select(db.jobs)
+        ..where((tbl) => tbl.jobId.equals(jobId))).getSingleOrNull();
 
   Future<void> insertAll(List<Job> jobs) => batch((batch) {
-        batch.insertAllOnConflictUpdate(db.jobs, jobs);
-      }).whenComplete(() {
-        for (final job in jobs) {
-          DataBaseEventBus.instance.addJob(
-            MiniJobItem(jobId: job.jobId, action: job.action),
-          );
-        }
-      });
+    batch.insertAllOnConflictUpdate(db.jobs, jobs);
+  }).whenComplete(() {
+    for (final job in jobs) {
+      DataBaseEventBus.instance.addJob(
+        MiniJobItem(jobId: job.jobId, action: job.action),
+      );
+    }
+  });
 
   Future<void> insertNoReplace(Job job) async {
     final exists = await jobById(job.jobId);

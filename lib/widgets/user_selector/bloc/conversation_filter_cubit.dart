@@ -34,20 +34,25 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     if (onlyContact) {
       conversations = [];
     } else {
-      conversations = await accountServer.database.conversationDao
-          .conversationItems()
-          .get();
-      contactConversationIds = conversations
-          .where((element) =>
-              element.isContactConversation && element.ownerId != null)
-          .map((e) => e.ownerId)
-          .nonNulls
-          .toSet();
-      botConversationIds = conversations
-          .where((element) => element.isBotConversation)
-          .map((e) => e.appId)
-          .nonNulls
-          .toSet();
+      conversations =
+          await accountServer.database.conversationDao
+              .conversationItems()
+              .get();
+      contactConversationIds =
+          conversations
+              .where(
+                (element) =>
+                    element.isContactConversation && element.ownerId != null,
+              )
+              .map((e) => e.ownerId)
+              .nonNulls
+              .toSet();
+      botConversationIds =
+          conversations
+              .where((element) => element.isBotConversation)
+              .map((e) => e.appId)
+              .nonNulls
+              .toSet();
     }
 
     friends = <User>[];
@@ -55,12 +60,12 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
 
     final Iterable<User> users =
         await accountServer.database.userDao.notInFriends([
-      ...contactConversationIds,
-      ...botConversationIds,
-    ]).get();
-    users
-        .where((element) => !filteredIds.contains(element.userId))
-        .forEach((e) {
+          ...contactConversationIds,
+          ...botConversationIds,
+        ]).get();
+    users.where((element) => !filteredIds.contains(element.userId)).forEach((
+      e,
+    ) {
       if (e.isBot) {
         bots.add(e);
       } else {
@@ -79,30 +84,40 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
 
   void _filterList() {
     if (state.keyword?.isEmpty ?? true) {
-      return emit(state.copyWith(
-        recentConversations: conversations,
-        friends: friends,
-        bots: bots,
-        keyword: state.keyword,
-      ));
+      return emit(
+        state.copyWith(
+          recentConversations: conversations,
+          friends: friends,
+          bots: bots,
+          keyword: state.keyword,
+        ),
+      );
     }
     final keyword = state.keyword!.toLowerCase();
 
-    final recentConversations = conversations
-        .where((element) => element.isGroupConversation
-            ? element.groupName != null &&
-                element.groupName!.toLowerCase().contains(keyword)
-            : element.name!.toLowerCase().contains(keyword) ||
-                element.ownerIdentityNumber.toLowerCase().startsWith(keyword))
-        .toList()
-      ..sort(compareValuesBy((e) {
-        if (e.isGroupConversation) {
-          return e.groupName!.toLowerCase().indexOf(keyword);
-        }
-        final indexOf = e.name?.toLowerCase().indexOf(keyword) ?? -1;
-        if (indexOf != -1) return indexOf;
-        return e.ownerIdentityNumber.indexOf(keyword);
-      }));
+    final recentConversations =
+        conversations
+            .where(
+              (element) =>
+                  element.isGroupConversation
+                      ? element.groupName != null &&
+                          element.groupName!.toLowerCase().contains(keyword)
+                      : element.name!.toLowerCase().contains(keyword) ||
+                          element.ownerIdentityNumber.toLowerCase().startsWith(
+                            keyword,
+                          ),
+            )
+            .toList()
+          ..sort(
+            compareValuesBy((e) {
+              if (e.isGroupConversation) {
+                return e.groupName!.toLowerCase().indexOf(keyword);
+              }
+              final indexOf = e.name?.toLowerCase().indexOf(keyword) ?? -1;
+              if (indexOf != -1) return indexOf;
+              return e.ownerIdentityNumber.indexOf(keyword);
+            }),
+          );
 
     bool where(User element) =>
         (element.fullName != null &&
@@ -117,11 +132,13 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     final filterFriends = friends.where(where).toList()..sort(sort);
     final filterBots = bots.where(where).toList()..sort(sort);
 
-    emit(state.copyWith(
-      recentConversations: recentConversations,
-      friends: filterFriends,
-      bots: filterBots,
-      keyword: state.keyword,
-    ));
+    emit(
+      state.copyWith(
+        recentConversations: recentConversations,
+        friends: filterFriends,
+        bots: filterBots,
+        keyword: state.keyword,
+      ),
+    );
   }
 }

@@ -14,7 +14,9 @@ const gcmIvLength = 12;
 List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
   final iv = generateRandomKey(gcmIvLength);
   final params = ParametersWithIV<KeyParameter>(
-      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
+    KeyParameter(Uint8List.fromList(key)),
+    Uint8List.fromList(iv),
+  );
   final gcmCipher = GCMBlockCipher(AESEngine())..init(true, params);
   final encrypted = gcmCipher.process(Uint8List.fromList(plainText));
   return [...iv, ...encrypted];
@@ -22,7 +24,9 @@ List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
 
 Uint8List aesGcmDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
   final params = ParametersWithIV<KeyParameter>(
-      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
+    KeyParameter(Uint8List.fromList(key)),
+    Uint8List.fromList(iv),
+  );
   final gcmCipher = GCMBlockCipher(AESEngine())..init(false, params);
   return gcmCipher.process(Uint8List.fromList(cipherText));
 }
@@ -31,31 +35,36 @@ List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
   final cbcCipher = CBCBlockCipher(AESEngine());
   final nonce = iv ?? generateRandomKey(16);
   final ivParams = ParametersWithIV<KeyParameter>(
-      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(nonce));
+    KeyParameter(Uint8List.fromList(key)),
+    Uint8List.fromList(nonce),
+  );
   final paddingParams =
-      // ignore: prefer_void_to_null
-      PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
-          ivParams, null);
+  // ignore: prefer_void_to_null
+  PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+    ivParams,
+    null,
+  );
 
   final paddedCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
     ..init(true, paddingParams);
 
   final result = paddedCipher.process(Uint8List.fromList(plainText));
 
-  return [
-    ...nonce,
-    ...result,
-  ];
+  return [...nonce, ...result];
 }
 
 List<int> aesDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
   final cbcCipher = CBCBlockCipher(AESEngine());
   final ivParams = ParametersWithIV<KeyParameter>(
-      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
+    KeyParameter(Uint8List.fromList(key)),
+    Uint8List.fromList(iv),
+  );
   final paddingParams =
-      // ignore: prefer_void_to_null
-      PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
-          ivParams, null);
+  // ignore: prefer_void_to_null
+  PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+    ivParams,
+    null,
+  );
   final paddedCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
     ..init(false, paddingParams);
   return paddedCipher.process(Uint8List.fromList(cipherText));

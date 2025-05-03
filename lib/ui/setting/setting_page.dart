@@ -34,22 +34,22 @@ class SettingPage extends HookConsumerWidget {
     if (hasDrawer.value) {
       leading = ActionButton(
         onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        child: Icon(
-          Icons.menu,
-          size: 20,
-          color: context.theme.icon,
-        ),
+        child: Icon(Icons.menu, size: 20, color: context.theme.icon),
       );
     }
 
     final appActive = useValueListenable(appActiveListener);
-    final hasNotificationPermission = useMemoizedFuture(
-        requestNotificationPermission, null,
-        keys: [appActive]).data;
+    final hasNotificationPermission =
+        useMemoizedFuture(
+          requestNotificationPermission,
+          null,
+          keys: [appActive],
+        ).data;
     final controller = useScrollController();
 
-    final userHasPin = ref
-        .watch(authProvider.select((value) => value?.account.hasPin == true));
+    final userHasPin = ref.watch(
+      authProvider.select((value) => value?.account.hasPin == true),
+    );
 
     return Column(
       children: [
@@ -92,30 +92,37 @@ class SettingPage extends HookConsumerWidget {
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcNotificationSvg,
-                            pageName: ResponsiveNavigatorStateNotifier
-                                .notificationPage,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier
+                                    .notificationPage,
                             title: context.l10n.notifications,
-                            trailing: hasNotificationPermission == false
-                                ? Padding(
-                                    padding: const EdgeInsets.all(4),
-                                    child: SvgPicture.asset(
-                                      Resources.assetsImagesTriangleWarningSvg,
-                                      colorFilter: ColorFilter.mode(
-                                          context.theme.red, BlendMode.srcIn),
-                                      width: 22,
-                                      height: 22,
-                                    ),
-                                  )
-                                : const Arrow(),
-                            color: hasNotificationPermission == false
-                                ? context.theme.red
-                                : context.theme.text,
+                            trailing:
+                                hasNotificationPermission == false
+                                    ? Padding(
+                                      padding: const EdgeInsets.all(4),
+                                      child: SvgPicture.asset(
+                                        Resources
+                                            .assetsImagesTriangleWarningSvg,
+                                        colorFilter: ColorFilter.mode(
+                                          context.theme.red,
+                                          BlendMode.srcIn,
+                                        ),
+                                        width: 22,
+                                        height: 22,
+                                      ),
+                                    )
+                                    : const Arrow(),
+                            color:
+                                hasNotificationPermission == false
+                                    ? context.theme.red
+                                    : context.theme.text,
                           ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcStorageUsageSvg,
-                            pageName: ResponsiveNavigatorStateNotifier
-                                .dataAndStorageUsagePage,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier
+                                    .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
                           _Item(
@@ -191,29 +198,37 @@ class _Item extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(responsiveNavigatorProvider.select((value) =>
-        !value.routeMode &&
-        value.pages.any((element) => pageName == element.name)));
+    final selected = ref.watch(
+      responsiveNavigatorProvider.select(
+        (value) =>
+            !value.routeMode &&
+            value.pages.any((element) => pageName == element.name),
+      ),
+    );
 
     return CellItem(
-      leading: (leadingAssetName != null
-          ? SvgPicture.asset(
-              leadingAssetName!,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                  color ?? context.theme.text, BlendMode.srcIn),
-            )
-          : null),
+      leading:
+          (leadingAssetName != null
+              ? SvgPicture.asset(
+                leadingAssetName!,
+                width: 24,
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  color ?? context.theme.text,
+                  BlendMode.srcIn,
+                ),
+              )
+              : null),
       title: AutoSizeText(title, maxLines: 1),
       color: color ?? context.theme.text,
       selected: selected,
       onTap: () {
         if (onTap == null && pageName != null) {
           context.providerContainer.read(responsiveNavigatorProvider.notifier)
-            ..popWhere((page) => ResponsiveNavigatorStateNotifier
-                .settingPageNameSet
-                .contains(page.name))
+            ..popWhere(
+              (page) => ResponsiveNavigatorStateNotifier.settingPageNameSet
+                  .contains(page.name),
+            )
             ..pushPage(pageName!);
           return;
         }
@@ -230,26 +245,31 @@ class _UserProfile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (fullName, identityNumber, membership, isVerified) =
-        ref.watch(authAccountProvider.select((value) => (
-              value?.fullName,
-              value?.identityNumber,
-              value?.membership,
-              value?.isVerified ?? false,
-            )));
+    final (fullName, identityNumber, membership, isVerified) = ref.watch(
+      authAccountProvider.select(
+        (value) => (
+          value?.fullName,
+          value?.identityNumber,
+          value?.membership,
+          value?.isVerified ?? false,
+        ),
+      ),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Builder(builder: (context) {
-          final account = context.account!;
-          return AvatarWidget(
-            userId: account.userId,
-            name: account.fullName,
-            avatarUrl: account.avatarUrl,
-            size: 90,
-          );
-        }),
+        Builder(
+          builder: (context) {
+            final account = context.account!;
+            return AvatarWidget(
+              userId: account.userId,
+              name: account.fullName,
+              avatarUrl: account.avatarUrl,
+              size: 90,
+            );
+          },
+        ),
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -270,7 +290,7 @@ class _UserProfile extends HookConsumerWidget {
                 verified: isVerified,
                 isBot: false,
                 membership: membership,
-              )
+              ),
             ],
           ),
         ),

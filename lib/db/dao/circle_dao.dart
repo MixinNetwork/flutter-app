@@ -11,9 +11,10 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
 
   Future<void> insertUpdate(Circle circle) async {
     await transaction(() async {
-      final c = await (select(db.circles)
-            ..where((tbl) => tbl.circleId.equals(circle.circleId)))
-          .getSingleOrNull();
+      final c =
+          await (select(db.circles)..where(
+            (tbl) => tbl.circleId.equals(circle.circleId),
+          )).getSingleOrNull();
       return null == c
           ? into(db.circles).insert(circle)
           : into(db.circles).insertOnConflictUpdate(circle);
@@ -22,16 +23,15 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
   }
 
   Future<int> deleteCircleById(String circleId) =>
-      (delete(db.circles)..where((tbl) => tbl.circleId.equals(circleId)))
-          .go()
-          .then((value) {
+      (delete(db.circles)
+        ..where((tbl) => tbl.circleId.equals(circleId))).go().then((value) {
         DataBaseEventBus.instance.updateCircle();
         return value;
       });
 
   Future<Circle?> findCircleById(String circleId) =>
-      (select(db.circles)..where((t) => t.circleId.equals(circleId)))
-          .getSingleOrNull();
+      (select(db.circles)
+        ..where((t) => t.circleId.equals(circleId))).getSingleOrNull();
 
   Future<void> updateOrders(List<ConversationCircleItem> value) {
     final now = DateTime.now();
@@ -46,8 +46,8 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
       );
     });
     return batch(
-            (batch) => batch.insertAllOnConflictUpdate(db.circles, newCircles))
-        .then((value) {
+      (batch) => batch.insertAllOnConflictUpdate(db.circles, newCircles),
+    ).then((value) {
       DataBaseEventBus.instance.updateCircle();
       return value;
     });

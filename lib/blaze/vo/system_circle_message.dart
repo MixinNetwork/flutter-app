@@ -7,7 +7,11 @@ part 'system_circle_message.g.dart';
 @JsonSerializable()
 class SystemCircleMessage {
   SystemCircleMessage(
-      this.action, this.circleId, this.userId, this.conversationId);
+    this.action,
+    this.circleId,
+    this.userId,
+    this.conversationId,
+  );
 
   factory SystemCircleMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemCircleMessageFromJson(json);

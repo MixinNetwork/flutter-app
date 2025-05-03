@@ -33,9 +33,7 @@ import 'menu_wrapper.dart';
 import 'network_status.dart';
 
 class ConversationList extends HookConsumerWidget {
-  const ConversationList({
-    required Key key,
-  }) : super(key: key);
+  const ConversationList({required Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,16 +43,18 @@ class ConversationList extends HookConsumerWidget {
     final conversationListBloc = context.read<ConversationListBloc>();
     final pagingState =
         useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
-      bloc: conversationListBloc,
-    );
+          bloc: conversationListBloc,
+        );
     final conversationId = ref.watch(currentConversationIdProvider);
 
     final routeMode = ref.watch(navigatorRouteModeProvider);
 
-    final itemPositionsListener =
-        conversationListBloc.itemPositionsListener(slideCategoryState);
-    final itemScrollController =
-        conversationListBloc.itemScrollController(slideCategoryState);
+    final itemPositionsListener = conversationListBloc.itemPositionsListener(
+      slideCategoryState,
+    );
+    final itemScrollController = conversationListBloc.itemScrollController(
+      slideCategoryState,
+    );
 
     if (itemPositionsListener == null || itemScrollController == null) {
       return const SizedBox();
@@ -62,40 +62,43 @@ class ConversationList extends HookConsumerWidget {
 
     Widget child;
 
-    child = pagingState.count == 0
-        ? pagingState.hasData
-            ? Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(context.theme.accent),
-                ),
-              )
-            : const _Empty()
-        : ScrollablePositionedList.builder(
-            key: PageStorageKey(slideCategoryState),
-            itemPositionsListener: itemPositionsListener,
-            itemCount: pagingState.count,
-            itemScrollController: itemScrollController,
-            itemBuilder: (context, index) {
-              final conversation = pagingState.map[index];
-              if (conversation == null) return const SizedBox(height: 80);
-              final selected =
-                  conversation.conversationId == conversationId && !routeMode;
-              return ConversationMenuWrapper(
-                conversation: conversation,
-                removeChatFromCircle: true,
-                child: ConversationItemWidget(
-                  selected: selected,
+    child =
+        pagingState.count == 0
+            ? pagingState.hasData
+                ? Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(context.theme.accent),
+                  ),
+                )
+                : const _Empty()
+            : ScrollablePositionedList.builder(
+              key: PageStorageKey(slideCategoryState),
+              itemPositionsListener: itemPositionsListener,
+              itemCount: pagingState.count,
+              itemScrollController: itemScrollController,
+              itemBuilder: (context, index) {
+                final conversation = pagingState.map[index];
+                if (conversation == null) return const SizedBox(height: 80);
+                final selected =
+                    conversation.conversationId == conversationId && !routeMode;
+                return ConversationMenuWrapper(
                   conversation: conversation,
-                  onTap: () {
-                    ConversationStateNotifier.selectConversation(
-                        context, conversation.conversationId,
-                        conversation: conversation);
-                  },
-                ),
-              );
-            },
-          );
+                  removeChatFromCircle: true,
+                  child: ConversationItemWidget(
+                    selected: selected,
+                    conversation: conversation,
+                    onTap: () {
+                      ConversationStateNotifier.selectConversation(
+                        context,
+                        conversation.conversationId,
+                        conversation: conversation,
+                      );
+                    },
+                  ),
+                );
+              },
+            );
 
     return Column(
       children: [
@@ -119,22 +122,22 @@ class _Empty extends StatelessWidget {
       const Color.fromRGBO(229, 233, 240, 1),
     );
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        SvgPicture.asset(
-          Resources.assetsImagesEmptyFileSvg,
-          height: 78,
-          width: 58,
-          colorFilter: ColorFilter.mode(dynamicColor, BlendMode.srcIn),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          context.l10n.noData,
-          style: TextStyle(
-            color: dynamicColor,
-            fontSize: 14,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            Resources.assetsImagesEmptyFileSvg,
+            height: 78,
+            width: 58,
+            colorFilter: ColorFilter.mode(dynamicColor, BlendMode.srcIn),
           ),
-        ),
-      ]),
+          const SizedBox(height: 24),
+          Text(
+            context.l10n.noData,
+            style: TextStyle(color: dynamicColor, fontSize: 14),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -162,12 +165,13 @@ class ConversationItemWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: DecoratedBox(
-            decoration: selected
-                ? BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    color: context.theme.listSelected,
-                  )
-                : const BoxDecoration(),
+            decoration:
+                selected
+                    ? BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      color: context.theme.listSelected,
+                    )
+                    : const BoxDecoration(),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
@@ -211,8 +215,9 @@ class ConversationItemWidget extends StatelessWidget {
                                 builder: (context, ref, _) {
                                   final text = ref.watch(
                                     formattedDateTimeProvider(
-                                        conversation.lastMessageCreatedAt ??
-                                            conversation.createdAt),
+                                      conversation.lastMessageCreatedAt ??
+                                          conversation.createdAt,
+                                    ),
                                   );
                                   return Text(
                                     text,
@@ -229,7 +234,7 @@ class ConversationItemWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -241,47 +246,46 @@ class ConversationItemWidget extends StatelessWidget {
 }
 
 class _ItemConversationSubtitle extends StatelessWidget {
-  const _ItemConversationSubtitle({
-    required this.conversation,
-  });
+  const _ItemConversationSubtitle({required this.conversation});
 
   final ConversationItem conversation;
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: 20,
-        child: Row(
-          children: [
-            Expanded(
-              child: _MessagePreview(
-                messageColor: context.theme.secondaryText,
-                conversation: conversation,
+    height: 20,
+    child: Row(
+      children: [
+        Expanded(
+          child: _MessagePreview(
+            messageColor: context.theme.secondaryText,
+            conversation: conversation,
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (conversation.mentionCount > 0)
+              UnreadText(
+                data: '@',
+                textColor: const Color.fromRGBO(255, 255, 255, 1),
+                backgroundColor: context.theme.accent,
               ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                if (conversation.mentionCount > 0)
-                  UnreadText(
-                    data: '@',
-                    textColor: const Color.fromRGBO(255, 255, 255, 1),
-                    backgroundColor: context.theme.accent,
-                  ),
-                if ((conversation.unseenMessageCount ?? 0) > 0)
-                  UnreadText(
-                    data: '${conversation.unseenMessageCount}',
-                    textColor: const Color.fromRGBO(255, 255, 255, 1),
-                    backgroundColor: conversation.isMute
+            if ((conversation.unseenMessageCount ?? 0) > 0)
+              UnreadText(
+                data: '${conversation.unseenMessageCount}',
+                textColor: const Color.fromRGBO(255, 255, 255, 1),
+                backgroundColor:
+                    conversation.isMute
                         ? context.theme.secondaryText
                         : context.theme.accent,
-                  ),
-                if ((conversation.unseenMessageCount ?? 0) <= 0)
-                  _StatusRow(conversation: conversation),
-              ].joinList(const SizedBox(width: 8)),
-            ),
-          ],
+              ),
+            if ((conversation.unseenMessageCount ?? 0) <= 0)
+              _StatusRow(conversation: conversation),
+          ].joinList(const SizedBox(width: 8)),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _MessagePreview extends StatelessWidget {
@@ -303,8 +307,10 @@ class _MessagePreview extends StatelessWidget {
         if (!hasDraft) _MessageStatusIcon(conversation: conversation),
         if (!hasDraft) const SizedBox(width: 2),
         Expanded(
-          child:
-              _MessageContent(conversation: conversation, hasDraft: hasDraft),
+          child: _MessageContent(
+            conversation: conversation,
+            hasDraft: hasDraft,
+          ),
         ),
       ],
     );
@@ -312,87 +318,90 @@ class _MessagePreview extends StatelessWidget {
 }
 
 class _MessageContent extends HookConsumerWidget {
-  const _MessageContent({
-    required this.conversation,
-    required this.hasDraft,
-  });
+  const _MessageContent({required this.conversation, required this.hasDraft});
 
   final ConversationItem conversation;
   final bool hasDraft;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = useMemoizedFuture(
-      () async {
-        if (hasDraft) return conversation.draft;
-        final isGroup = conversation.category == ConversationCategory.group ||
-            conversation.senderId != conversation.ownerId;
+    final text =
+        useMemoizedFuture(
+          () async {
+            if (hasDraft) return conversation.draft;
+            final isGroup =
+                conversation.category == ConversationCategory.group ||
+                conversation.senderId != conversation.ownerId;
 
-        final mentionCache = ref.read(mentionCacheProvider);
+            final mentionCache = ref.read(mentionCacheProvider);
 
-        if (conversation.contentType == MessageCategory.systemConversation) {
-          return generateSystemText(
-            actionName: conversation.actionName,
-            participantUserId: conversation.participantUserId,
-            senderId: conversation.senderId,
-            currentUserId: context.accountServer.userId,
-            participantFullName: conversation.participantFullName,
-            senderFullName: conversation.senderFullName,
-            expireIn: int.tryParse(conversation.content ?? '0'),
-          );
-        } else if (conversation.contentType.isPin) {
-          final pinMessageMinimal =
-              PinMessageMinimal.fromJsonString(conversation.content ?? '');
-          if (pinMessageMinimal == null) {
-            return context.l10n.chatPinMessage(
-                conversation.senderFullName ?? '', context.l10n.aMessage);
-          }
-          final preview = await generatePinPreviewText(
-            pinMessageMinimal: pinMessageMinimal,
-            mentionCache: mentionCache,
-          );
-          return context.l10n
-              .chatPinMessage(conversation.senderFullName ?? '', preview);
-        }
+            if (conversation.contentType ==
+                MessageCategory.systemConversation) {
+              return generateSystemText(
+                actionName: conversation.actionName,
+                participantUserId: conversation.participantUserId,
+                senderId: conversation.senderId,
+                currentUserId: context.accountServer.userId,
+                participantFullName: conversation.participantFullName,
+                senderFullName: conversation.senderFullName,
+                expireIn: int.tryParse(conversation.content ?? '0'),
+              );
+            } else if (conversation.contentType.isPin) {
+              final pinMessageMinimal = PinMessageMinimal.fromJsonString(
+                conversation.content ?? '',
+              );
+              if (pinMessageMinimal == null) {
+                return context.l10n.chatPinMessage(
+                  conversation.senderFullName ?? '',
+                  context.l10n.aMessage,
+                );
+              }
+              final preview = await generatePinPreviewText(
+                pinMessageMinimal: pinMessageMinimal,
+                mentionCache: mentionCache,
+              );
+              return context.l10n.chatPinMessage(
+                conversation.senderFullName ?? '',
+                preview,
+              );
+            }
 
-        return messagePreviewOptimize(
-          conversation.messageStatus,
-          conversation.contentType,
-          mentionCache.replaceMention(
-            conversation.content,
-            await mentionCache.checkMentionCache({conversation.content}),
-          ),
-          conversation.senderId == context.accountServer.userId,
-          isGroup,
-          conversation.senderFullName,
-        );
-      },
-      null,
-      keys: [
-        conversation.actionName,
-        conversation.messageStatus,
-        conversation.contentType,
-        conversation.content,
-        conversation.senderId,
-        conversation.ownerId,
-        conversation.relationship,
-        conversation.participantFullName,
-        conversation.senderFullName,
-        conversation.groupName,
-        conversation.draft,
-        hasDraft,
-      ],
-    ).data;
-
-    final icon = useMemoized(
-        () => messagePreviewIcon(
+            return messagePreviewOptimize(
               conversation.messageStatus,
               conversation.contentType,
-            ),
-        [
-          conversation.messageStatus,
-          conversation.contentType,
-        ]);
+              mentionCache.replaceMention(
+                conversation.content,
+                await mentionCache.checkMentionCache({conversation.content}),
+              ),
+              conversation.senderId == context.accountServer.userId,
+              isGroup,
+              conversation.senderFullName,
+            );
+          },
+          null,
+          keys: [
+            conversation.actionName,
+            conversation.messageStatus,
+            conversation.contentType,
+            conversation.content,
+            conversation.senderId,
+            conversation.ownerId,
+            conversation.relationship,
+            conversation.participantFullName,
+            conversation.senderFullName,
+            conversation.groupName,
+            conversation.draft,
+            hasDraft,
+          ],
+        ).data;
+
+    final icon = useMemoized(
+      () => messagePreviewIcon(
+        conversation.messageStatus,
+        conversation.contentType,
+      ),
+      [conversation.messageStatus, conversation.contentType],
+    );
 
     if (conversation.contentType == null && !hasDraft) return const SizedBox();
 
@@ -408,19 +417,13 @@ class _MessageContent extends HookConsumerWidget {
         if (hasDraft)
           Text(
             '${context.l10n.draft}:',
-            style: TextStyle(
-              color: context.theme.red,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: context.theme.red, fontSize: 14),
           ),
         if (text != null)
           Expanded(
             child: CustomText(
               text.overflow,
-              style: TextStyle(
-                color: dynamicColor,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: dynamicColor, fontSize: 14),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -431,9 +434,7 @@ class _MessageContent extends HookConsumerWidget {
 }
 
 class _MessageStatusIcon extends StatelessWidget {
-  const _MessageStatusIcon({
-    required this.conversation,
-  });
+  const _MessageStatusIcon({required this.conversation});
 
   final ConversationItem conversation;
 
@@ -446,39 +447,37 @@ class _MessageStatusIcon extends StatelessWidget {
         !conversation.contentType.isRecall &&
         !conversation.contentType.isGroupCall &&
         !conversation.contentType.isPin) {
-      return MessageStatusIcon(
-        status: conversation.messageStatus,
-      );
+      return MessageStatusIcon(status: conversation.messageStatus);
     }
     return const SizedBox();
   }
 }
 
 class _StatusRow extends StatelessWidget {
-  const _StatusRow({
-    required this.conversation,
-  });
+  const _StatusRow({required this.conversation});
 
   final ConversationItem conversation;
 
   @override
   Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (conversation.isMute)
-            SvgPicture.asset(
-              Resources.assetsImagesMuteSvg,
-              colorFilter: ColorFilter.mode(
-                context.theme.secondaryText,
-                BlendMode.srcIn,
-              ),
-            ),
-          if (conversation.pinTime != null)
-            SvgPicture.asset(
-              Resources.assetsImagesPinSvg,
-              colorFilter: ColorFilter.mode(
-                  context.theme.secondaryText, BlendMode.srcIn),
-            ),
-        ].joinList(const SizedBox(width: 4)),
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      if (conversation.isMute)
+        SvgPicture.asset(
+          Resources.assetsImagesMuteSvg,
+          colorFilter: ColorFilter.mode(
+            context.theme.secondaryText,
+            BlendMode.srcIn,
+          ),
+        ),
+      if (conversation.pinTime != null)
+        SvgPicture.asset(
+          Resources.assetsImagesPinSvg,
+          colorFilter: ColorFilter.mode(
+            context.theme.secondaryText,
+            BlendMode.srcIn,
+          ),
+        ),
+    ].joinList(const SizedBox(width: 4)),
+  );
 }

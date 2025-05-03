@@ -51,19 +51,25 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localTimeError = useMemoizedStream(
-            () => context.accountServer.connectedStateStream
-                .map((event) => event == ConnectedState.hasLocalTimeError)
-                .distinct(),
-            keys: [context.accountServer]).data ??
+    final localTimeError =
+        useMemoizedStream(
+          () =>
+              context.accountServer.connectedStateStream
+                  .map((event) => event == ConnectedState.hasLocalTimeError)
+                  .distinct(),
+          keys: [context.accountServer],
+        ).data ??
         false;
 
-    final isEmptyUserName = ref.watch(authAccountProvider
-        .select((value) => value?.fullName?.isEmpty ?? true));
+    final isEmptyUserName = ref.watch(
+      authAccountProvider.select((value) => value?.fullName?.isEmpty ?? true),
+    );
 
-    final updateRequired = useMemoizedStream(
-            () => context.accountServer.isUpdateRequired,
-            keys: [context.accountServer]).data ??
+    final updateRequired =
+        useMemoizedStream(
+          () => context.accountServer.isUpdateRequired,
+          keys: [context.accountServer],
+        ).data ??
         false;
 
     return DeviceTransferHandlerWidget(
@@ -73,8 +79,9 @@ class HomePage extends HookConsumerWidget {
             fit: StackFit.expand,
             children: [
               LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) =>
-                    _HomePage(constraints: constraints),
+                builder:
+                    (BuildContext context, BoxConstraints constraints) =>
+                        _HomePage(constraints: constraints),
               ),
               if (isEmptyUserName) const _SetupNameWidget(),
               if (localTimeError) const _LocalTimeError(),
@@ -103,19 +110,13 @@ class _RequiredUpdateWidget extends HookWidget {
               children: [
                 Text(
                   context.l10n.updateMixin,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: context.theme.text, fontSize: 16),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   context.l10n.updateMixinDescription(info?.version ?? ''),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: context.theme.text, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
                 MixinButton(
@@ -127,11 +128,7 @@ class _RequiredUpdateWidget extends HookWidget {
               ],
             ),
           ),
-          const Positioned(
-            bottom: 16,
-            right: 16,
-            child: VersionInfoWidget(),
-          ),
+          const Positioned(bottom: 16, right: 16, child: VersionInfoWidget()),
         ],
       ),
     );
@@ -142,43 +139,40 @@ class _LocalTimeError extends StatelessWidget {
   const _LocalTimeError();
 
   @override
-  Widget build(BuildContext context) => HookBuilder(builder: (context) {
-        final loading = useState(false);
-        return Material(
-          color: context.theme.background,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.l10n.loadingTime,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (loading.value)
-                  CircularProgressIndicator(
-                    color: context.theme.accent,
-                  ),
-                if (!loading.value)
-                  MixinButton(
-                    onTap: () async {
-                      loading.value = true;
-                      try {
-                        await context.accountServer.reconnectBlaze();
-                      } catch (_) {}
+  Widget build(BuildContext context) => HookBuilder(
+    builder: (context) {
+      final loading = useState(false);
+      return Material(
+        color: context.theme.background,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.l10n.loadingTime,
+                style: TextStyle(color: context.theme.text, fontSize: 16),
+              ),
+              const SizedBox(height: 24),
+              if (loading.value)
+                CircularProgressIndicator(color: context.theme.accent),
+              if (!loading.value)
+                MixinButton(
+                  onTap: () async {
+                    loading.value = true;
+                    try {
+                      await context.accountServer.reconnectBlaze();
+                    } catch (_) {}
 
-                      loading.value = false;
-                    },
-                    child: Text(context.l10n.continueText),
-                  ),
-              ],
-            ),
+                    loading.value = false;
+                  },
+                  child: Text(context.l10n.continueText),
+                ),
+            ],
           ),
-        );
-      });
+        ),
+      );
+    },
+  );
 }
 
 class _SetupNameWidget extends HookConsumerWidget {
@@ -233,20 +227,21 @@ class HasDrawerValueNotifier extends ValueNotifier<bool> {
 }
 
 class _HomePage extends HookConsumerWidget {
-  const _HomePage({
-    required this.constraints,
-  });
+  const _HomePage({required this.constraints});
 
   final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final maxWidth = constraints.maxWidth;
-    final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
-        .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
+    final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth).clamp(
+      kSlidePageMinWidth,
+      kSlidePageMaxWidth,
+    );
 
-    final userCollapse =
-        ref.watch(settingProvider.select((value) => value.collapsedSidebar));
+    final userCollapse = ref.watch(
+      settingProvider.select((value) => value.collapsedSidebar),
+    );
 
     final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
     final collapse = userCollapse || autoCollapse;
@@ -256,8 +251,9 @@ class _HomePage extends HookConsumerWidget {
       targetWidth = 0;
     }
 
-    final hasDrawerValueNotifier =
-        useMemoized(() => HasDrawerValueNotifier(targetWidth == 0));
+    final hasDrawerValueNotifier = useMemoized(
+      () => HasDrawerValueNotifier(targetWidth == 0),
+    );
 
     final hasDrawer = useListenable(hasDrawerValueNotifier);
 
@@ -266,22 +262,24 @@ class _HomePage extends HookConsumerWidget {
         ChangeNotifierProvider.value(value: hasDrawerValueNotifier),
         Provider(
           create: (context) => AudioMessagePlayService(context.accountServer),
-          dispose: (BuildContext context, AudioMessagePlayService service) =>
-              service.dispose(),
+          dispose:
+              (BuildContext context, AudioMessagePlayService service) =>
+                  service.dispose(),
         ),
       ],
       child: Scaffold(
         backgroundColor: context.theme.primary,
         drawerEnableOpenDragGesture: false,
-        drawer: hasDrawer.value && targetWidth == 0
-            ? Drawer(
-                child: Container(
-                  width: kSlidePageMaxWidth,
-                  color: context.theme.primary,
-                  child: const SlidePage(showCollapse: false),
-                ),
-              )
-            : null,
+        drawer:
+            hasDrawer.value && targetWidth == 0
+                ? Drawer(
+                  child: Container(
+                    width: kSlidePageMaxWidth,
+                    color: context.theme.primary,
+                    child: const SlidePage(showCollapse: false),
+                  ),
+                )
+                : null,
         body: SafeArea(
           child: AppProtocolHandler(
             child: Row(
@@ -293,9 +291,9 @@ class _HomePage extends HookConsumerWidget {
                   builder:
                       (BuildContext context, double? value, Widget? child) =>
                           SizedBox(
-                    width: value,
-                    child: value == 0 ? null : child,
-                  ),
+                            width: value,
+                            child: value == 0 ? null : child,
+                          ),
                   child: OverflowBox(
                     alignment: Alignment.centerLeft,
                     minWidth: kSlidePageMinWidth,
@@ -342,26 +340,32 @@ class _CenterPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isSetting = ref.watch(slideCategoryStateProvider
-        .select((value) => value.type == SlideCategoryType.setting));
+    final isSetting = ref.watch(
+      slideCategoryStateProvider.select(
+        (value) => value.type == SlideCategoryType.setting,
+      ),
+    );
 
     ref.listen(slideCategoryStateProvider, (previous, next) {
       final isSetting = next.type == SlideCategoryType.setting;
 
-      final responsiveNavigatorNotifier =
-          context.providerContainer.read(responsiveNavigatorProvider.notifier);
+      final responsiveNavigatorNotifier = context.providerContainer.read(
+        responsiveNavigatorProvider.notifier,
+      );
 
       responsiveNavigatorNotifier.popWhere((page) {
         if (responsiveNavigatorNotifier.state.routeMode) return true;
 
-        return ResponsiveNavigatorStateNotifier.settingPageNameSet
-            .contains(page.name);
+        return ResponsiveNavigatorStateNotifier.settingPageNameSet.contains(
+          page.name,
+        );
       });
 
       if (isSetting && !responsiveNavigatorNotifier.state.routeMode) {
         ref.read(conversationProvider.notifier).unselected();
         responsiveNavigatorNotifier.pushPage(
-            ResponsiveNavigatorStateNotifier.settingPageNameSet.first);
+          ResponsiveNavigatorStateNotifier.settingPageNameSet.first,
+        );
       }
     });
 
@@ -369,19 +373,13 @@ class _CenterPage extends HookConsumerWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: context.theme.primary,
-          border: Border(
-            right: BorderSide(
-              color: context.theme.divider,
-            ),
-          ),
+          border: Border(right: BorderSide(color: context.theme.divider)),
         ),
         child: IndexedStack(
           index: isSetting ? 1 : 0,
           sizing: StackFit.expand,
           children: const [
-            AutomaticKeepAliveClientWidget(
-              child: ConversationPage(),
-            ),
+            AutomaticKeepAliveClientWidget(child: ConversationPage()),
             AutomaticKeepAliveClientWidget(child: SettingPage()),
           ],
         ),

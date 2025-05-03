@@ -18,12 +18,10 @@ class StorageUsageListPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.storageUsage),
-        ),
-        body: const _Content(),
-      );
+    backgroundColor: context.theme.background,
+    appBar: MixinAppBar(title: Text(context.l10n.storageUsage)),
+    body: const _Content(),
+  );
 }
 
 class _Content extends HookConsumerWidget {
@@ -31,33 +29,41 @@ class _Content extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final watchEvent = useMemoizedStream(
-      () => DirectoryWatcher(context.accountServer.getMediaFilePath())
-          .events
-          .throttleTime(const Duration(milliseconds: 400)),
-    ).data;
+    final watchEvent =
+        useMemoizedStream(
+          () => DirectoryWatcher(
+            context.accountServer.getMediaFilePath(),
+          ).events.throttleTime(const Duration(milliseconds: 400)),
+        ).data;
 
     final list =
-        useMemoizedFuture<List<(ConversationStorageUsage, int)>?>(() async {
-      try {
-        final accountServer = context.accountServer;
-        final list = await accountServer.database.conversationDao
-            .conversationStorageUsage()
-            .get();
-        final result = await Future.wait(
-          list.map(
-            (e) async => (
-              e,
-              await accountServer.getConversationMediaSize(e.conversationId),
-            ),
-          ),
-        );
-        result.sort((a, b) => b.$2 - a.$2);
-        return result;
-      } catch (e) {
-        return [];
-      }
-    }, null, keys: [watchEvent]).data;
+        useMemoizedFuture<List<(ConversationStorageUsage, int)>?>(
+          () async {
+            try {
+              final accountServer = context.accountServer;
+              final list =
+                  await accountServer.database.conversationDao
+                      .conversationStorageUsage()
+                      .get();
+              final result = await Future.wait(
+                list.map(
+                  (e) async => (
+                    e,
+                    await accountServer.getConversationMediaSize(
+                      e.conversationId,
+                    ),
+                  ),
+                ),
+              );
+              result.sort((a, b) => b.$2 - a.$2);
+              return result;
+            } catch (e) {
+              return [];
+            }
+          },
+          null,
+          keys: [watchEvent],
+        ).data;
 
     if (list == null) {
       return Center(
@@ -80,10 +86,7 @@ class _Content extends HookConsumerWidget {
 }
 
 class _Item extends HookConsumerWidget {
-  const _Item({
-    required this.item,
-    required this.size,
-  });
+  const _Item({required this.item, required this.size});
 
   final ConversationStorageUsage item;
   final int size;
@@ -119,13 +122,16 @@ class _Item extends HookConsumerWidget {
               ),
             ],
           ),
-          onTap: () => ref.read(responsiveNavigatorProvider.notifier).pushPage(
-            ResponsiveNavigatorStateNotifier.storageUsageDetail,
-            arguments: (
-              conversationValidName(item.name, item.fullName),
-              item.conversationId,
-            ),
-          ),
+          onTap:
+              () => ref
+                  .read(responsiveNavigatorProvider.notifier)
+                  .pushPage(
+                    ResponsiveNavigatorStateNotifier.storageUsageDetail,
+                    arguments: (
+                      conversationValidName(item.name, item.fullName),
+                      item.conversationId,
+                    ),
+                  ),
         ),
       ),
     );

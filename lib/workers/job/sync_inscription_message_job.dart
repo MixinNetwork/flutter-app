@@ -11,10 +11,7 @@ import '../../utils/load_balancer_utils.dart';
 import '../job_queue.dart';
 
 class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
-  SyncInscriptionMessageJob({
-    required super.database,
-    required this.client,
-  });
+  SyncInscriptionMessageJob({required super.database, required this.client});
 
   final Client client;
 
@@ -82,8 +79,9 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
       return;
     }
 
-    var inscription =
-        await _inscriptionItemDao.findInscriptionByHash(inscriptionHash);
+    var inscription = await _inscriptionItemDao.findInscriptionByHash(
+      inscriptionHash,
+    );
     if (inscription == null) {
       try {
         final resp = await client.tokenApi.getInscriptionItem(inscriptionHash);
@@ -94,31 +92,38 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
       }
     }
 
-    var collection =
-        await _collectionDao.findCollectionByHash(inscription.collectionHash);
+    var collection = await _collectionDao.findCollectionByHash(
+      inscription.collectionHash,
+    );
     if (collection == null) {
       try {
-        final resp = await client.tokenApi
-            .getInscriptionCollection(inscription.collectionHash);
+        final resp = await client.tokenApi.getInscriptionCollection(
+          inscription.collectionHash,
+        );
         collection = await _collectionDao.insertSdkCollection(resp.data);
       } catch (error, stacktrace) {
-        e('error to get inscription collection for ${inscription.collectionHash}($inscriptionHash)',
-            error, stacktrace);
+        e(
+          'error to get inscription collection for ${inscription.collectionHash}($inscriptionHash)',
+          error,
+          stacktrace,
+        );
         return;
       }
     }
 
     await database.messageDao.updateMessageContent(
       messageId,
-      jsonEncode(Inscription(
-        collectionHash: collection.collectionHash,
-        inscriptionHash: inscriptionHash,
-        sequence: inscription.sequence,
-        contentType: inscription.contentType,
-        contentUrl: inscription.contentUrl,
-        name: collection.name,
-        iconUrl: collection.iconUrl,
-      )),
+      jsonEncode(
+        Inscription(
+          collectionHash: collection.collectionHash,
+          inscriptionHash: inscriptionHash,
+          sequence: inscription.sequence,
+          contentType: inscription.contentType,
+          contentUrl: inscription.contentUrl,
+          name: collection.name,
+          iconUrl: collection.iconUrl,
+        ),
+      ),
     );
   }
 }

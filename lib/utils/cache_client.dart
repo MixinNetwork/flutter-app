@@ -30,7 +30,9 @@ class CacheClient extends BaseClient {
 
     final response = await super.get(url, headers: headers);
     if (response.statusCode == 200) {
-      i('$logTag: save response(${response.statusCode}) to cache: $url $cacheKey');
+      i(
+        '$logTag: save response(${response.statusCode}) to cache: $url $cacheKey',
+      );
       await _saveCache(cacheKey, response.bodyBytes);
     }
     return response;

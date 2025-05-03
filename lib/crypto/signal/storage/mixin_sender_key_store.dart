@@ -16,7 +16,9 @@ class MixinSenderKeyStore extends SenderKeyStore {
   @override
   Future<SenderKeyRecord> loadSenderKey(SenderKeyName senderKeyName) async {
     final senderKey = await senderKeyDao.getSenderKey(
-        senderKeyName.groupId, senderKeyName.sender.toString());
+      senderKeyName.groupId,
+      senderKeyName.sender.toString(),
+    );
     try {
       if (senderKey != null) {
         return SenderKeyRecord.fromSerialized(senderKey.record);
@@ -29,15 +31,22 @@ class MixinSenderKeyStore extends SenderKeyStore {
 
   @override
   Future<void> storeSenderKey(
-      SenderKeyName senderKeyName, SenderKeyRecord record) async {
-    await senderKeyDao.insert(SenderKey(
+    SenderKeyName senderKeyName,
+    SenderKeyRecord record,
+  ) async {
+    await senderKeyDao.insert(
+      SenderKey(
         groupId: senderKeyName.groupId,
         senderId: senderKeyName.sender.toString(),
-        record: record.serialize()));
+        record: record.serialize(),
+      ),
+    );
   }
 
   Future<void> removeSenderKey(SenderKeyName senderKeyName) async {
     await senderKeyDao.deleteByGroupIdAndSenderId(
-        senderKeyName.groupId, senderKeyName.sender.toString());
+      senderKeyName.groupId,
+      senderKeyName.sender.toString(),
+    );
   }
 }

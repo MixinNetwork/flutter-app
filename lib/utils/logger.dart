@@ -39,10 +39,12 @@ Future<String> _dumpAppAndSystemInfo() async {
   final packageInfo = await getPackageInfo();
   info
     ..writeln(
-        'AppVersion ${packageInfo.version} BuildNumber: ${packageInfo.buildNumber}')
+      'AppVersion ${packageInfo.version} BuildNumber: ${packageInfo.buildNumber}',
+    )
     ..writeln('BuildType: ${_getBuildType()}')
     ..writeln(
-        'Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}')
+      'Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
+    )
     ..writeln('DartRuntime: ${Platform.version}')
     ..writeln('NumberOfProcessors: ${Platform.numberOfProcessors} cores')
     ..writeln('DiskUsage: ${dumpFreeDiskSpaceToString()}');

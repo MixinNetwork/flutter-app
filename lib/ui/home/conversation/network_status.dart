@@ -18,10 +18,11 @@ class NetworkStatus extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connectedState = useMemoizedStream(
-            () => context.accountServer.connectedStateStream.distinct(),
-            initialData: ConnectedState.connecting)
-        .requireData;
+    final connectedState =
+        useMemoizedStream(
+          () => context.accountServer.connectedStateStream.distinct(),
+          initialData: ConnectedState.connecting,
+        ).requireData;
 
     final hasDisconnectedBefore = useRef(false);
 
@@ -35,28 +36,34 @@ class NetworkStatus extends HookConsumerWidget {
       children: [
         CustomContextMenuWidget(
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          menuProvider: (request) => Menu(children: [
-            MenuAction(
-              title: context.l10n.openLogDirectory,
-              callback: () =>
-                  openUri(context, mixinLogDirectory.uri.toString()),
-            ),
-          ]),
+          menuProvider:
+              (request) => Menu(
+                children: [
+                  MenuAction(
+                    title: context.l10n.openLogDirectory,
+                    callback:
+                        () =>
+                            openUri(context, mixinLogDirectory.uri.toString()),
+                  ),
+                ],
+              ),
           child: _NetworkNotConnect(
-            visible: connectedState != ConnectedState.connected &&
+            visible:
+                connectedState != ConnectedState.connected &&
                 hasDisconnectedBefore.value,
           ),
         ),
         AnimatedSize(
           duration: const Duration(milliseconds: 150),
-          child: connectedState == ConnectedState.connecting ||
-                  connectedState == ConnectedState.reconnecting
-              ? LinearProgressIndicator(
-                  backgroundColor: Colors.transparent,
-                  color: context.theme.accent,
-                  minHeight: 2,
-                )
-              : const SizedBox(),
+          child:
+              connectedState == ConnectedState.connecting ||
+                      connectedState == ConnectedState.reconnecting
+                  ? LinearProgressIndicator(
+                    backgroundColor: Colors.transparent,
+                    color: context.theme.accent,
+                    minHeight: 2,
+                  )
+                  : const SizedBox(),
         ),
       ],
     );
@@ -64,71 +71,70 @@ class NetworkStatus extends HookConsumerWidget {
 }
 
 class _NetworkNotConnect extends StatelessWidget {
-  const _NetworkNotConnect({
-    required this.visible,
-  });
+  const _NetworkNotConnect({required this.visible});
 
   final bool visible;
 
   @override
   Widget build(BuildContext context) {
     Widget child;
-    child = visible
-        ? Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
-            color: context.theme.warning.withValues(alpha: 0.2),
-            child: Row(children: [
-              ClipOval(
-                child: Container(
-                  color: context.theme.warning,
-                  width: 20,
-                  height: 20,
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: 2,
-                    height: 10,
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesExclamationMarkSvg,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                      width: 2,
-                      height: 10,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DefaultTextStyle.merge(
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 14,
-                  ),
-                  child: Row(
-                    children: [
-                      Text(context.l10n.networkConnectionFailed),
-                      const Spacer(),
-                      MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            i('ui: click reconnect');
-                            context.accountServer.reconnectBlaze();
-                          },
-                          child: Text(
-                            context.l10n.retry,
-                            style: TextStyle(color: context.theme.accent),
+    child =
+        visible
+            ? Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
+              color: context.theme.warning.withValues(alpha: 0.2),
+              child: Row(
+                children: [
+                  ClipOval(
+                    child: Container(
+                      color: context.theme.warning,
+                      width: 20,
+                      height: 20,
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: 2,
+                        height: 10,
+                        child: SvgPicture.asset(
+                          Resources.assetsImagesExclamationMarkSvg,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
                           ),
+                          width: 2,
+                          height: 10,
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              )
-            ]))
-        : const SizedBox();
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DefaultTextStyle.merge(
+                      style: TextStyle(color: context.theme.text, fontSize: 14),
+                      child: Row(
+                        children: [
+                          Text(context.l10n.networkConnectionFailed),
+                          const Spacer(),
+                          MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () {
+                                i('ui: click reconnect');
+                                context.accountServer.reconnectBlaze();
+                              },
+                              child: Text(
+                                context.l10n.retry,
+                                style: TextStyle(color: context.theme.accent),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+            : const SizedBox();
 
     return AnimatedSize(
       alignment: Alignment.topCenter,

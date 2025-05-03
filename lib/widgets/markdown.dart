@@ -19,11 +19,9 @@ class MarkdownColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widgets = MarkdownGenerator(
-      textGenerator: (node, config, visitor) => CustomTextNode(
-        node.textContent,
-        config,
-        visitor,
-      ),
+      textGenerator:
+          (node, config, visitor) =>
+              CustomTextNode(node.textContent, config, visitor),
       generators: _kMixinGenerators,
       richTextBuilder: CustomText.rich,
     ).buildWidgets(
@@ -59,46 +57,45 @@ class Markdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DefaultTextStyle.merge(
-        style: TextStyle(color: context.theme.text),
-        child: MarkdownWidget(
-          data: data,
-          padding: padding,
-          physics: physics,
-          config: _createMarkdownConfig(
-            context: context,
-            darkMode: context.brightness == Brightness.dark,
-          ),
-          markdownGenerator: MarkdownGenerator(
-            textGenerator: (node, config, visitor) => CustomTextNode(
-              node.textContent,
-              config,
-              visitor,
-            ),
-            generators: _kMixinGenerators,
-            richTextBuilder: CustomText.rich,
-          ),
-        ),
-      );
+    style: TextStyle(color: context.theme.text),
+    child: MarkdownWidget(
+      data: data,
+      padding: padding,
+      physics: physics,
+      config: _createMarkdownConfig(
+        context: context,
+        darkMode: context.brightness == Brightness.dark,
+      ),
+      markdownGenerator: MarkdownGenerator(
+        textGenerator:
+            (node, config, visitor) =>
+                CustomTextNode(node.textContent, config, visitor),
+        generators: _kMixinGenerators,
+        richTextBuilder: CustomText.rich,
+      ),
+    ),
+  );
 }
 
 MarkdownConfig _createMarkdownConfig({
   required BuildContext context,
   required bool darkMode,
-}) =>
-    MarkdownConfig(configs: [
-      if (darkMode) ...[
-        HrConfig.darkConfig,
-        H2Config.darkConfig,
-        H3Config.darkConfig,
-        H4Config.darkConfig,
-        H5Config.darkConfig,
-        H6Config.darkConfig,
-        PreConfig.darkConfig,
-        PConfig.darkConfig,
-        CodeConfig.darkConfig,
-      ],
-      _MixinH1Config(darkMode),
-      ImgConfig(builder: (url, attributes) {
+}) => MarkdownConfig(
+  configs: [
+    if (darkMode) ...[
+      HrConfig.darkConfig,
+      H2Config.darkConfig,
+      H3Config.darkConfig,
+      H4Config.darkConfig,
+      H5Config.darkConfig,
+      H6Config.darkConfig,
+      PreConfig.darkConfig,
+      PConfig.darkConfig,
+      CodeConfig.darkConfig,
+    ],
+    _MixinH1Config(darkMode),
+    ImgConfig(
+      builder: (url, attributes) {
         double? width;
         double? height;
         if (attributes['width'] != null) {
@@ -110,34 +107,33 @@ MarkdownConfig _createMarkdownConfig({
         final imageUrl = url;
         return ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
-          child: MixinImage.network(
-            imageUrl,
-            width: width,
-            height: height,
-          ),
+          child: MixinImage.network(imageUrl, width: width, height: height),
         );
-      }),
-      LinkConfig(
-          style: TextStyle(color: context.theme.accent),
-          onTap: (href) {
-            if (href.isEmpty) return;
-            openUri(context, href);
-          }),
-      ListConfig(
-        marker: (bool isOrdered, int depth, int index) {
-          final style = DefaultTextStyle.of(context).style;
-          final height = (style.fontSize ?? 16) * (style.height ?? 1.25);
-          return getDefaultMarker(
-            isOrdered,
-            depth,
-            context.theme.text,
-            index,
-            height / 2 + 1,
-            MarkdownConfig(),
-          );
-        },
-      )
-    ]);
+      },
+    ),
+    LinkConfig(
+      style: TextStyle(color: context.theme.accent),
+      onTap: (href) {
+        if (href.isEmpty) return;
+        openUri(context, href);
+      },
+    ),
+    ListConfig(
+      marker: (bool isOrdered, int depth, int index) {
+        final style = DefaultTextStyle.of(context).style;
+        final height = (style.fontSize ?? 16) * (style.height ?? 1.25);
+        return getDefaultMarker(
+          isOrdered,
+          depth,
+          context.theme.text,
+          index,
+          height / 2 + 1,
+          MarkdownConfig(),
+        );
+      },
+    ),
+  ],
+);
 
 class _MixinH1Config extends HeadingConfig {
   _MixinH1Config(this.dark);
@@ -149,11 +145,11 @@ class _MixinH1Config extends HeadingConfig {
 
   @override
   TextStyle get style => TextStyle(
-        fontSize: 32,
-        height: 40 / 32,
-        color: dark ? Colors.white : null,
-        fontWeight: FontWeight.bold,
-      );
+    fontSize: 32,
+    height: 40 / 32,
+    color: dark ? Colors.white : null,
+    fontWeight: FontWeight.bold,
+  );
 
   @override
   String get tag => MarkdownTag.h1.name;
@@ -170,12 +166,16 @@ List<SpanNode> _parseHtml(
   TextStyle? parentStyle,
 }) {
   try {
-    final text =
-        node.textContent.replaceAll(RegExp(r'(\r?\n)|(\r?\t)|(\r)'), '');
+    final text = node.textContent.replaceAll(
+      RegExp(r'(\r?\n)|(\r?\t)|(\r)'),
+      '',
+    );
     if (!text.contains(htmlRep)) return [TextNode(text: node.text)];
     final document = parseFragment(text);
-    return HtmlToSpanVisitor(visitor: visitor, parentStyle: parentStyle)
-        .toVisit(document.nodes.toList());
+    return HtmlToSpanVisitor(
+      visitor: visitor,
+      parentStyle: parentStyle,
+    ).toVisit(document.nodes.toList());
   } catch (e) {
     onError?.call(e);
     return [TextNode(text: node.text)];
@@ -191,8 +191,8 @@ class HtmlElement extends m.Element {
 
 class HtmlToSpanVisitor extends TreeVisitor {
   HtmlToSpanVisitor({WidgetVisitor? visitor, TextStyle? parentStyle})
-      : visitor = visitor ?? WidgetVisitor(),
-        parentStyle = parentStyle ?? const TextStyle();
+    : visitor = visitor ?? WidgetVisitor(),
+      parentStyle = parentStyle ?? const TextStyle();
   final List<SpanNode> _spans = [];
   final List<SpanNode> _spansStack = [];
   final WidgetVisitor visitor;
@@ -261,8 +261,10 @@ class CustomTextNode extends ElementNode {
     }
     _parseHtml(
       m.Text(text),
-      visitor:
-          WidgetVisitor(config: visitor.config, generators: visitor.generators),
+      visitor: WidgetVisitor(
+        config: visitor.config,
+        generators: visitor.generators,
+      ),
       parentStyle: parentStyle,
     ).forEach(accept);
   }
@@ -271,11 +273,8 @@ class CustomTextNode extends ElementNode {
 final _kMixinGenerators = <SpanNodeGeneratorWithTag>[
   SpanNodeGeneratorWithTag(
     tag: MarkdownTag.pre.name,
-    generator: (e, config, visitor) => _MixinCodeBlockNode(
-      e,
-      config.pre,
-      visitor,
-    ),
+    generator:
+        (e, config, visitor) => _MixinCodeBlockNode(e, config.pre, visitor),
   ),
 ];
 
@@ -319,6 +318,7 @@ class _MixinCodeBlockNode extends CodeBlockNode {
       ),
     );
     return WidgetSpan(
-        child: preConfig.wrapper?.call(widget, content, language) ?? widget);
+      child: preConfig.wrapper?.call(widget, content, language) ?? widget,
+    );
   }
 }

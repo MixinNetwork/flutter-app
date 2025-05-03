@@ -18,12 +18,14 @@ Future<Iterable<File>> getClipboardFiles() async {
     return [];
   }
 
-  final fileReaders =
-      reader.items.where((item) => item.canProvide(Formats.fileUri));
+  final fileReaders = reader.items.where(
+    (item) => item.canProvide(Formats.fileUri),
+  );
 
   if (fileReaders.isNotEmpty) {
     final uris = await Future.wait(
-        fileReaders.map((item) => item.readValue(Formats.fileUri)));
+      fileReaders.map((item) => item.readValue(Formats.fileUri)),
+    );
 
     final files = uris.nonNulls
         .map((e) => e.toFilePath(windows: Platform.isWindows))
@@ -32,8 +34,10 @@ Future<Iterable<File>> getClipboardFiles() async {
     if (files.isNotEmpty) return files;
   }
 
-  final list = await Future.wait(reader.items
-      .map((reader) => (
+  final list = await Future.wait(
+    reader.items
+        .map(
+          (reader) => (
             reader,
             reader.getFormats([
               Formats.jpeg,
@@ -41,24 +45,26 @@ Future<Iterable<File>> getClipboardFiles() async {
               Formats.gif,
               Formats.webp,
               Formats.bmp,
-            ]).whereType<FileFormat>()
-          ))
-      .where((element) => element.$2.isNotEmpty)
-      .map((item) async {
-    final (reader, formats) = item;
+            ]).whereType<FileFormat>(),
+          ),
+        )
+        .where((element) => element.$2.isNotEmpty)
+        .map((item) async {
+          final (reader, formats) = item;
 
-    var imageBytes = await reader.readFile(formats.firstOrNull!);
-    if (imageBytes == null) return null;
+          var imageBytes = await reader.readFile(formats.firstOrNull!);
+          if (imageBytes == null) return null;
 
-    if (Platform.isWindows) {
-      final image = await decodeImageFromList(imageBytes);
-      final data = await image.toByteData(format: ImageByteFormat.png);
-      if (data == null) return null;
-      imageBytes = Uint8List.view(data.buffer);
-    }
+          if (Platform.isWindows) {
+            final image = await decodeImageFromList(imageBytes);
+            final data = await image.toByteData(format: ImageByteFormat.png);
+            if (data == null) return null;
+            imageBytes = Uint8List.view(data.buffer);
+          }
 
-    return saveBytesToTempFile(imageBytes, TempFileType.pasteboardImage);
-  }));
+          return saveBytesToTempFile(imageBytes, TempFileType.pasteboardImage);
+        }),
+  );
 
   return list.nonNulls;
 }
@@ -68,8 +74,8 @@ Future<void> copyFile(String? filePath) async {
     return showToastFailed(null);
   }
   try {
-    final dataWriterItem = DataWriterItem()
-      ..add(Formats.fileUri(Uri.file(filePath)));
+    final dataWriterItem =
+        DataWriterItem()..add(Formats.fileUri(Uri.file(filePath)));
 
     final clipboard = SystemClipboard.instance;
     if (clipboard == null) {

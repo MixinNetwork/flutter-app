@@ -35,7 +35,8 @@ class ClampingViewport extends Viewport {
   RenderViewport createRenderObject(BuildContext context) =>
       ClampingRenderViewport(
         axisDirection: axisDirection,
-        crossAxisDirection: crossAxisDirection ??
+        crossAxisDirection:
+            crossAxisDirection ??
             Viewport.getDefaultCrossAxisDirection(context, axisDirection),
         anchor: anchor,
         offset: offset,
@@ -160,15 +161,19 @@ class ClampingRenderViewport extends RenderViewport {
     double correction;
     var count = 0;
     do {
-      correction = _attemptLayout(mainAxisExtent, crossAxisExtent,
-          offset.pixels + centerOffsetAdjustment + _correctedOffset);
+      correction = _attemptLayout(
+        mainAxisExtent,
+        crossAxisExtent,
+        offset.pixels + centerOffsetAdjustment + _correctedOffset,
+      );
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
         // *** Difference from [RenderViewport].
         final top =
             _minScrollExtent + (mainAxisExtent * anchor) - _correctedOffset;
-        final bottom = _maxScrollExtent -
+        final bottom =
+            _maxScrollExtent -
             (mainAxisExtent * (1.0 - anchor)) -
             _correctedOffset;
         final maxScrollOffset = math.max(math.min(0, top), bottom);
@@ -194,7 +199,8 @@ class ClampingRenderViewport extends RenderViewport {
         }
 
         // *** If max scroll offset changed, and the positions is bottom ***
-        final maxScrollOffsetChanged = _lastMaxScrollOffset != null &&
+        final maxScrollOffsetChanged =
+            _lastMaxScrollOffset != null &&
             _lastMaxScrollOffset != maxScrollOffset;
         final positionIsBottom = offset.pixels == maxScrollOffset;
         final correction = maxScrollOffset - offset.pixels;
@@ -211,7 +217,9 @@ class ClampingRenderViewport extends RenderViewport {
         }
 
         if (offset.applyContentDimensions(
-            minScrollOffset.toDouble(), maxScrollOffset.toDouble())) {
+          minScrollOffset.toDouble(),
+          maxScrollOffset.toDouble(),
+        )) {
           break;
         }
         // *** End of difference from [RenderViewport].
@@ -222,29 +230,33 @@ class ClampingRenderViewport extends RenderViewport {
       if (count >= _maxLayoutCycles) {
         assert(count != 1);
         throw FlutterError(
-            'A RenderViewport exceeded its maximum number of layout cycles.\n'
-            'RenderViewport render objects, during layout, can retry if either their '
-            'slivers or their ViewportOffset decide that the offset should be corrected '
-            'to take into account information collected during that layout.\n'
-            'In the case of this RenderViewport object, however, this happened $count '
-            'times and still there was no consensus on the scroll offset. This usually '
-            'indicates a bug. Specifically, it means that one of the following three '
-            'problems is being experienced by the RenderViewport object:\n'
-            ' * One of the RenderSliver children or the ViewportOffset have a bug such'
-            ' that they always think that they need to correct the offset regardless.\n'
-            ' * Some combination of the RenderSliver children and the ViewportOffset'
-            ' have a bad interaction such that one applies a correction then another'
-            ' applies a reverse correction, leading to an infinite loop of corrections.\n'
-            ' * There is a pathological case that would eventually resolve, but it is'
-            ' so complicated that it cannot be resolved in any reasonable number of'
-            ' layout passes.');
+          'A RenderViewport exceeded its maximum number of layout cycles.\n'
+          'RenderViewport render objects, during layout, can retry if either their '
+          'slivers or their ViewportOffset decide that the offset should be corrected '
+          'to take into account information collected during that layout.\n'
+          'In the case of this RenderViewport object, however, this happened $count '
+          'times and still there was no consensus on the scroll offset. This usually '
+          'indicates a bug. Specifically, it means that one of the following three '
+          'problems is being experienced by the RenderViewport object:\n'
+          ' * One of the RenderSliver children or the ViewportOffset have a bug such'
+          ' that they always think that they need to correct the offset regardless.\n'
+          ' * Some combination of the RenderSliver children and the ViewportOffset'
+          ' have a bad interaction such that one applies a correction then another'
+          ' applies a reverse correction, leading to an infinite loop of corrections.\n'
+          ' * There is a pathological case that would eventually resolve, but it is'
+          ' so complicated that it cannot be resolved in any reasonable number of'
+          ' layout passes.',
+        );
       }
       return true;
     }());
   }
 
   double _attemptLayout(
-      double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
+    double mainAxisExtent,
+    double crossAxisExtent,
+    double correctedOffset,
+  ) {
     assert(!mainAxisExtent.isNaN);
     assert(mainAxisExtent >= 0.0);
     assert(crossAxisExtent.isFinite);
@@ -258,10 +270,12 @@ class ClampingRenderViewport extends RenderViewport {
     // to the zero scroll offset (the line between the forward slivers and the
     // reverse slivers).
     final centerOffset = mainAxisExtent * anchor - correctedOffset;
-    final reverseDirectionRemainingPaintExtent =
-        centerOffset.clamp(0.0, mainAxisExtent);
-    final forwardDirectionRemainingPaintExtent =
-        (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+    final reverseDirectionRemainingPaintExtent = centerOffset.clamp(
+      0.0,
+      mainAxisExtent,
+    );
+    final forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset)
+        .clamp(0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
@@ -272,8 +286,10 @@ class ClampingRenderViewport extends RenderViewport {
 
     final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final centerCacheOffset = centerOffset + _calculatedCacheExtent!;
-    final reverseDirectionRemainingCacheExtent =
-        centerCacheOffset.clamp(0.0, fullCacheExtent);
+    final reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(
+      0.0,
+      fullCacheExtent,
+    );
     final forwardDirectionRemainingCacheExtent =
         (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
@@ -292,8 +308,10 @@ class ClampingRenderViewport extends RenderViewport {
         growthDirection: GrowthDirection.reverse,
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
-        cacheOrigin: (mainAxisExtent - centerOffset)
-            .clamp(-_calculatedCacheExtent!, 0.0),
+        cacheOrigin: (mainAxisExtent - centerOffset).clamp(
+          -_calculatedCacheExtent!,
+          0.0,
+        ),
       );
       if (result != 0.0) return -result;
     }
@@ -303,9 +321,10 @@ class ClampingRenderViewport extends RenderViewport {
       child: center,
       scrollOffset: math.max(0, -centerOffset),
       overlap: leadingNegativeChild == null ? math.min(0, -centerOffset) : 0.0,
-      layoutOffset: centerOffset >= mainAxisExtent
-          ? centerOffset
-          : reverseDirectionRemainingPaintExtent,
+      layoutOffset:
+          centerOffset >= mainAxisExtent
+              ? centerOffset
+              : reverseDirectionRemainingPaintExtent,
       remainingPaintExtent: forwardDirectionRemainingPaintExtent,
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,
@@ -321,7 +340,9 @@ class ClampingRenderViewport extends RenderViewport {
 
   @override
   void updateOutOfBandData(
-      GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
+    GrowthDirection growthDirection,
+    SliverGeometry childLayoutGeometry,
+  ) {
     switch (growthDirection) {
       case GrowthDirection.forward:
         _maxScrollExtent += childLayoutGeometry.scrollExtent;

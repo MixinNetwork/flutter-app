@@ -90,24 +90,22 @@ class DatabaseProfiler extends Database {
     bool persistent = false,
     bool vtab = true,
     bool checkNoTail = false,
-  }) =>
-      _PreparedStatementWrapper(
-        database.prepare(
-          sql,
-          persistent: persistent,
-          vtab: vtab,
-          checkNoTail: checkNoTail,
-        ),
-        logWrapper,
-      );
+  }) => _PreparedStatementWrapper(
+    database.prepare(
+      sql,
+      persistent: persistent,
+      vtab: vtab,
+      checkNoTail: checkNoTail,
+    ),
+    logWrapper,
+  );
 
   @override
   List<PreparedStatement> prepareMultiple(
     String sql, {
     bool persistent = false,
     bool vtab = true,
-  }) =>
-      database.prepareMultiple(sql, persistent: persistent, vtab: vtab);
+  }) => database.prepareMultiple(sql, persistent: persistent, vtab: vtab);
 
   @override
   ResultSet select(String sql, [List<Object?> parameters = const []]) =>
@@ -136,16 +134,21 @@ class DatabaseProfiler extends Database {
       var needPrint = false;
 
       if (explain) {
-        final list =
-            database.select('EXPLAIN QUERY PLAN $sql', parameters ?? []);
+        final list = database.select(
+          'EXPLAIN QUERY PLAN $sql',
+          parameters ?? [],
+        );
 
         details = list.map((e) => e['detail']).whereType<String>();
 
-        needPrint = details
-            .where((String detail) =>
-                detail.startsWith('SCAN') ||
-                detail.startsWith('USE TEMP B-TREE'))
-            .isNotEmpty;
+        needPrint =
+            details
+                .where(
+                  (String detail) =>
+                      detail.startsWith('SCAN') ||
+                      detail.startsWith('USE TEMP B-TREE'),
+                )
+                .isNotEmpty;
       }
 
       w('''
@@ -190,7 +193,7 @@ class _PreparedStatementWrapper implements PreparedStatement {
 
   final PreparedStatement stmt;
   final T Function<T>(T Function() run, String sql, List<Object?>? parameters)
-      logWrapper;
+  logWrapper;
 
   @override
   void dispose() => stmt.dispose();

@@ -46,18 +46,20 @@ class ConversationAvatarWidget extends HookConsumerWidget {
 
     final _userId = conversation?.ownerId ?? userId;
 
-    final list = useMemoizedStream(
+    final list =
+        useMemoizedStream(
           () {
             if (_category == ConversationCategory.group) {
               return context.database.participantDao
                   .participantsAvatar(_conversationId!)
                   .watchWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateParticipantStream(
-                      conversationIds: [_conversationId])
-                ],
-                duration: kVerySlowThrottleDuration * 2,
-              );
+                    eventStreams: [
+                      DataBaseEventBus.instance.watchUpdateParticipantStream(
+                        conversationIds: [_conversationId],
+                      ),
+                    ],
+                    duration: kVerySlowThrottleDuration * 2,
+                  );
             }
             return const Stream<List<User>>.empty();
           },
@@ -69,13 +71,15 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     return SizedBox.fromSize(
       size: Size.square(size),
       child: ClipOval(
-        child: _category == ConversationCategory.contact
-            ? AvatarWidget(
-                userId: _userId,
-                name: _name,
-                avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
-                size: size)
-            : AvatarPuzzlesWidget(list, size),
+        child:
+            _category == ConversationCategory.contact
+                ? AvatarWidget(
+                  userId: _userId,
+                  name: _name,
+                  avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
+                  size: size,
+                )
+                : AvatarPuzzlesWidget(list, size),
       ),
     );
   }
@@ -100,20 +104,19 @@ class AvatarPuzzlesWidget extends HookConsumerWidget {
           avatarUrl: users.single.avatarUrl,
         );
       case 2:
-        return Row(
-          children: users.map(_buildAvatarImage).toList(),
-        );
+        return Row(children: users.map(_buildAvatarImage).toList());
       case 3:
         return Row(
           children: [
             Expanded(
-                child: AvatarWidget(
-              userId: users.first.userId,
-              name: users.first.fullName,
-              avatarUrl: users.first.avatarUrl,
-              size: size,
-              clipOval: false,
-            )),
+              child: AvatarWidget(
+                userId: users.first.userId,
+                name: users.first.fullName,
+                avatarUrl: users.first.avatarUrl,
+                size: size,
+                clipOval: false,
+              ),
+            ),
             Expanded(
               child: Column(
                 children: users.sublist(1).map(_buildAvatarImage).toList(),
@@ -123,29 +126,29 @@ class AvatarPuzzlesWidget extends HookConsumerWidget {
         );
       default:
         return Row(
-          children: [
-            users.sublist(0, 2),
-            users.sublist(2),
-          ]
-              .map((e) => Expanded(
-                    child: Column(
-                      children: e.map(_buildAvatarImage).toList(),
+          children:
+              [users.sublist(0, 2), users.sublist(2)]
+                  .map(
+                    (e) => Expanded(
+                      child: Column(
+                        children: e.map(_buildAvatarImage).toList(),
+                      ),
                     ),
-                  ))
-              .toList(),
+                  )
+                  .toList(),
         );
     }
   }
 
   Widget _buildAvatarImage(User user) => Expanded(
-        child: AvatarWidget(
-          userId: user.userId,
-          name: user.fullName,
-          avatarUrl: user.avatarUrl,
-          size: size,
-          clipOval: false,
-        ),
-      );
+    child: AvatarWidget(
+      userId: user.userId,
+      name: user.fullName,
+      avatarUrl: user.avatarUrl,
+      size: size,
+      clipOval: false,
+    ),
+  );
 }
 
 class AvatarWidget extends StatelessWidget {
@@ -170,9 +173,10 @@ class AvatarWidget extends StatelessWidget {
       size: Size.square(size),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: userId != null
-              ? getAvatarColorById(userId!)
-              : context.theme.listSelected,
+          color:
+              userId != null
+                  ? getAvatarColorById(userId!)
+                  : context.theme.listSelected,
         ),
         child: Center(
           child: Text(
@@ -189,15 +193,16 @@ class AvatarWidget extends StatelessWidget {
       ),
     );
 
-    final child = avatarUrl?.isNotEmpty == true
-        ? MixinImage.network(
-            avatarUrl!,
-            width: size,
-            height: size,
-            placeholder: () => placeholder,
-            errorBuilder: (_, __, ___) => placeholder,
-          )
-        : placeholder;
+    final child =
+        avatarUrl?.isNotEmpty == true
+            ? MixinImage.network(
+              avatarUrl!,
+              width: size,
+              height: size,
+              placeholder: () => placeholder,
+              errorBuilder: (_, __, ___) => placeholder,
+            )
+            : placeholder;
 
     if (clipOval) return ClipOval(child: child);
     return child;

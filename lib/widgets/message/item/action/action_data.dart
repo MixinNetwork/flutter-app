@@ -6,11 +6,7 @@ part 'action_data.g.dart';
 
 @JsonSerializable()
 class ActionData {
-  ActionData(
-    this.label,
-    this.color,
-    this.action,
-  );
+  ActionData(this.label, this.color, this.action);
 
   factory ActionData.fromJson(Map<String, dynamic> json) =>
       _$ActionDataFromJson(json);

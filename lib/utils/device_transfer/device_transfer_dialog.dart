@@ -20,10 +20,7 @@ Future<void> showDeviceTransferDialog(BuildContext context) async =>
       context: context,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        child: const Material(
-          color: Colors.transparent,
-          child: _Navigator(),
-        ),
+        child: const Material(color: Colors.transparent, child: _Navigator()),
       ),
     );
 
@@ -61,7 +58,7 @@ class _NavigatorState with EquatableMixin {
 
 class _NavigatorCubit extends Cubit<_NavigatorState> {
   _NavigatorCubit()
-      : super(_NavigatorState([_DeviceTransferPageType.deviceTransfer]));
+    : super(_NavigatorState([_DeviceTransferPageType.deviceTransfer]));
 
   void push(_DeviceTransferPageType page) {
     emit(_NavigatorState([...state.pages, page]));
@@ -95,46 +92,45 @@ class _DeviceTransferPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: const Text('Chat Backup and Restore'),
-            leading: const SizedBox.shrink(),
-            actions: [
-              MixinCloseButton(
-                onTap: () =>
-                    Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-              ),
-            ],
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      MixinAppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('Chat Backup and Restore'),
+        leading: const SizedBox.shrink(),
+        actions: [
+          MixinCloseButton(
+            onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
           ),
-          const SizedBox(height: 20),
-          CellGroup(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: CellItem(
-              title: const Text('sync from other device'),
-              onTap: () {
-                context
-                    .read<_NavigatorCubit>()
-                    .push(_DeviceTransferPageType.restore);
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
-          CellGroup(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: CellItem(
-              title: const Text('sync to other device'),
-              onTap: () {
-                context
-                    .read<_NavigatorCubit>()
-                    .push(_DeviceTransferPageType.backup);
-              },
-            ),
-          ),
-          const SizedBox(height: 32),
         ],
-      );
+      ),
+      const SizedBox(height: 20),
+      CellGroup(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: CellItem(
+          title: const Text('sync from other device'),
+          onTap: () {
+            context.read<_NavigatorCubit>().push(
+              _DeviceTransferPageType.restore,
+            );
+          },
+        ),
+      ),
+      const SizedBox(height: 16),
+      CellGroup(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: CellItem(
+          title: const Text('sync to other device'),
+          onTap: () {
+            context.read<_NavigatorCubit>().push(
+              _DeviceTransferPageType.backup,
+            );
+          },
+        ),
+      ),
+      const SizedBox(height: 32),
+    ],
+  );
 }
 
 class _DialogBackButton extends HookConsumerWidget {
@@ -146,17 +142,18 @@ class _DialogBackButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final canPopup =
         useBlocStateConverter<_NavigatorCubit, _NavigatorState, bool>(
-            converter: (state) => state.pages.length > 1);
+          converter: (state) => state.pages.length > 1,
+        );
     return !canPopup
         ? const SizedBox.shrink()
         : Center(
-            child: MixinBackButton(
-              onTap: () {
-                onTapped?.call();
-                context.read<_NavigatorCubit>().pop();
-              },
-            ),
-          );
+          child: MixinBackButton(
+            onTap: () {
+              onTapped?.call();
+              context.read<_NavigatorCubit>().pop();
+            },
+          ),
+        );
   }
 }
 
@@ -165,51 +162,47 @@ class _RestorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: const Text('sync from other device'),
-            leading: const _DialogBackButton(),
-            actions: [
-              MixinCloseButton(
-                onTap: () =>
-                    Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-              ),
-            ],
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      MixinAppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('sync from other device'),
+        leading: const _DialogBackButton(),
+        actions: [
+          MixinCloseButton(
+            onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
           ),
-          const SizedBox(height: 32),
-          SvgPicture.asset(Resources.assetsImagesDeviceTransferSvg),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Text(
-              'restore chat tip',
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 40),
-          CellGroup(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: CellItem(
-              title: const Text('restore chat'),
-              color: context.theme.accent,
-              trailing: null,
-              onTap: () {
-                EventBus.instance.fire(DeviceTransferCommand.pullToRemote);
-                context
-                    .read<_NavigatorCubit>()
-                    .push(_DeviceTransferPageType.restoreWaitingConnect);
-              },
-            ),
-          ),
-          const SizedBox(height: 40),
         ],
-      );
+      ),
+      const SizedBox(height: 32),
+      SvgPicture.asset(Resources.assetsImagesDeviceTransferSvg),
+      const SizedBox(height: 20),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 36),
+        child: Text(
+          'restore chat tip',
+          style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: 40),
+      CellGroup(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: CellItem(
+          title: const Text('restore chat'),
+          color: context.theme.accent,
+          trailing: null,
+          onTap: () {
+            EventBus.instance.fire(DeviceTransferCommand.pullToRemote);
+            context.read<_NavigatorCubit>().push(
+              _DeviceTransferPageType.restoreWaitingConnect,
+            );
+          },
+        ),
+      ),
+      const SizedBox(height: 40),
+    ],
+  );
 }
 
 class _RestoreWaitingConnectPage extends HookConsumerWidget {
@@ -248,10 +241,7 @@ class _RestoreWaitingConnectPage extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Text(
             'waiting other device connection',
-            style: TextStyle(
-              color: context.theme.secondaryText,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
             textAlign: TextAlign.center,
           ),
         ),
@@ -274,57 +264,53 @@ class _BackupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MixinAppBar(
-            backgroundColor: Colors.transparent,
-            title: const Text('backup to other device'),
-            leading: const _DialogBackButton(),
-            actions: [
-              MixinCloseButton(
-                onTap: () =>
-                    Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-              ),
-            ],
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      MixinAppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('backup to other device'),
+        leading: const _DialogBackButton(),
+        actions: [
+          MixinCloseButton(
+            onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
           ),
-          const SizedBox(height: 32),
-          SvgPicture.asset(
-            Resources.assetsImagesDeviceTransferSvg,
-            colorFilter: ColorFilter.mode(
-              context.theme.secondaryText,
-              BlendMode.srcIn,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Text(
-              'tips for backup to other device',
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 40),
-          CellGroup(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: CellItem(
-              title: const Text('backup chat'),
-              color: context.theme.accent,
-              trailing: null,
-              onTap: () {
-                EventBus.instance.fire(DeviceTransferCommand.pushToRemote);
-                context
-                    .read<_NavigatorCubit>()
-                    .push(_DeviceTransferPageType.backupWaitingConnect);
-              },
-            ),
-          ),
-          const SizedBox(height: 40),
         ],
-      );
+      ),
+      const SizedBox(height: 32),
+      SvgPicture.asset(
+        Resources.assetsImagesDeviceTransferSvg,
+        colorFilter: ColorFilter.mode(
+          context.theme.secondaryText,
+          BlendMode.srcIn,
+        ),
+      ),
+      const SizedBox(height: 20),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 36),
+        child: Text(
+          'tips for backup to other device',
+          style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: 40),
+      CellGroup(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: CellItem(
+          title: const Text('backup chat'),
+          color: context.theme.accent,
+          trailing: null,
+          onTap: () {
+            EventBus.instance.fire(DeviceTransferCommand.pushToRemote);
+            context.read<_NavigatorCubit>().push(
+              _DeviceTransferPageType.backupWaitingConnect,
+            );
+          },
+        ),
+      ),
+      const SizedBox(height: 40),
+    ],
+  );
 }
 
 class _BackupWaitingConnectPage extends HookConsumerWidget {
@@ -363,10 +349,7 @@ class _BackupWaitingConnectPage extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Text(
             'restore waiting other device',
-            style: TextStyle(
-              color: context.theme.secondaryText,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
             textAlign: TextAlign.center,
           ),
         ),

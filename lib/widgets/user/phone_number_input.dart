@@ -24,10 +24,7 @@ import '../az_selection.dart';
 import '../dialog.dart';
 
 class PhoneNumberInputLayout extends HookConsumerWidget {
-  const PhoneNumberInputLayout({
-    required this.onNextStep,
-    super.key,
-  });
+  const PhoneNumberInputLayout({required this.onNextStep, super.key});
 
   final void Function(String number) onNextStep;
 
@@ -37,15 +34,10 @@ class PhoneNumberInputLayout extends HookConsumerWidget {
         useMemoizedFuture(() => compute(_getCountries, null), null).data;
     if (countries == null || countries.isEmpty) {
       return Center(
-        child: CircularProgressIndicator(
-          color: context.theme.accent,
-        ),
+        child: CircularProgressIndicator(color: context.theme.accent),
       );
     }
-    return _PhoneNumberInputScene(
-      countries: countries,
-      onNextStep: onNextStep,
-    );
+    return _PhoneNumberInputScene(countries: countries, onNextStep: onNextStep);
   }
 }
 
@@ -62,15 +54,14 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final phoneInputController = useTextEditingController();
     final countryMap = useMemoized(
-        () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
-        [countries]);
-    final defaultCountry = useMemoized(
-      () {
-        i('locale: ${PlatformDispatcher.instance.locale.countryCode}');
-        return countryMap[PlatformDispatcher.instance.locale.countryCode] ??
-            countries.first;
-      },
+      () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
+      [countries],
     );
+    final defaultCountry = useMemoized(() {
+      i('locale: ${PlatformDispatcher.instance.locale.countryCode}');
+      return countryMap[PlatformDispatcher.instance.locale.countryCode] ??
+          countries.first;
+    });
     final selectedCountry = useState<Country>(defaultCountry);
     final portalVisibility = useState<bool>(false);
 
@@ -80,8 +71,9 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
         nextButtonEnable.value = false;
         try {
           final valid = await PhoneNumberUtil.isValidNumber(
-              phoneNumber: phoneInputController.text,
-              isoCode: selectedCountry.value.alpha2Code ?? '');
+            phoneNumber: phoneInputController.text,
+            isoCode: selectedCountry.value.alpha2Code ?? '',
+          );
           if (valid != true) {
             return;
           }
@@ -154,14 +146,13 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
             const Spacer(),
             MixinButton(
               disable: !nextButtonEnable.value,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 60,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
               onTap: () {
                 final dialCode = selectedCountry.value.dialCode;
-                assert(dialCode != null,
-                    'dialCode is null. ${selectedCountry.value}');
+                assert(
+                  dialCode != null,
+                  'dialCode is null. ${selectedCountry.value}',
+                );
                 if (dialCode == null) {
                   e('Invalid dial code: ${selectedCountry.value}');
                   return;
@@ -200,67 +191,56 @@ class _MobileInput extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => TextField(
-        controller: controller,
-        style: TextStyle(
-          fontSize: 16,
-          color: context.theme.text,
-        ),
-        textInputAction: TextInputAction.next,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
-        ],
-        autofillHints: const [
-          AutofillHints.telephoneNumber,
-        ],
-        keyboardType: TextInputType.phone,
-        decoration: InputDecoration(
-          fillColor: context.theme.sidebarSelected,
-          filled: true,
-          hintStyle: TextStyle(
-            fontSize: 16,
-            color: context.theme.secondaryText,
-          ),
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-            borderSide: BorderSide.none,
-          ),
-          prefixIcon: InkWell(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            onTap: onCountryDiaClick,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: 20),
-                Text(
-                  country.dialCode ?? '',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.theme.text,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                AnimatedRotation(
-                  turns: countryPortalExpand ? -0.25 : 0.25,
-                  duration: const Duration(milliseconds: 200),
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesIcArrowRightSvg,
-                    width: 30,
-                    height: 30,
-                    colorFilter: ColorFilter.mode(
-                      context.theme.secondaryText,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-              ],
+    controller: controller,
+    style: TextStyle(fontSize: 16, color: context.theme.text),
+    textInputAction: TextInputAction.next,
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
+    ],
+    autofillHints: const [AutofillHints.telephoneNumber],
+    keyboardType: TextInputType.phone,
+    decoration: InputDecoration(
+      fillColor: context.theme.sidebarSelected,
+      filled: true,
+      hintStyle: TextStyle(fontSize: 16, color: context.theme.secondaryText),
+      border: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+        borderSide: BorderSide.none,
+      ),
+      prefixIcon: InkWell(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        onTap: onCountryDiaClick,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 20),
+            Text(
+              country.dialCode ?? '',
+              style: TextStyle(fontSize: 16, color: context.theme.text),
             ),
-          ),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20),
+            const SizedBox(width: 8),
+            AnimatedRotation(
+              turns: countryPortalExpand ? -0.25 : 0.25,
+              duration: const Duration(milliseconds: 200),
+              child: SvgPicture.asset(
+                Resources.assetsImagesIcArrowRightSvg,
+                width: 30,
+                height: 30,
+                colorFilter: ColorFilter.mode(
+                  context.theme.secondaryText,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            const SizedBox(width: 20),
+          ],
         ),
-      );
+      ),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(vertical: 20),
+    ),
+  );
 }
 
 // for compute
@@ -282,25 +262,27 @@ class _CountryPickPortal extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groupedCountries = useMemoized(
-      () => countries
-          .groupListsBy((country) => country.alpha2Code?.substring(0, 1)),
+      () => countries.groupListsBy(
+        (country) => country.alpha2Code?.substring(0, 1),
+      ),
       [countries],
     );
     final countryList = useMemoized(
-        () => groupedCountries.entries
-            .sortedBy<String>((element) => element.key ?? '')
-            .map((entry) => <dynamic>[
+      () =>
+          groupedCountries.entries
+              .sortedBy<String>((element) => element.key ?? '')
+              .map(
+                (entry) => <dynamic>[
                   entry.key,
-                  ...entry.value.sortedBy<String>((e) => e.name ?? '')
-                ])
-            .expand((element) => element)
-            .toList(),
-        [groupedCountries]);
+                  ...entry.value.sortedBy<String>((e) => e.name ?? ''),
+                ],
+              )
+              .expand((element) => element)
+              .toList(),
+      [groupedCountries],
+    );
 
-    final items = [
-      selected,
-      ...countryList,
-    ];
+    final items = [selected, ...countryList];
 
     final controller = useScrollController();
 
@@ -311,11 +293,11 @@ class _CountryPickPortal extends HookConsumerWidget {
           .distinct()
           .throttleTime(const Duration(milliseconds: 300))
           .listen((char) {
-        final stopwatch = Stopwatch()..start();
-        final offset = math.max<double>(40.0 * items.indexOf(char), 0);
-        controller.position.jumpTo(offset);
-        d('scroll to $char ${stopwatch.elapsedMilliseconds}');
-      });
+            final stopwatch = Stopwatch()..start();
+            final offset = math.max<double>(40.0 * items.indexOf(char), 0);
+            controller.position.jumpTo(offset);
+            d('scroll to $char ${stopwatch.elapsedMilliseconds}');
+          });
       return subscription.cancel;
     }, [animatedTarget]);
 
@@ -357,35 +339,30 @@ class _CountryPickPortal extends HookConsumerWidget {
             ),
             onSelection: animatedTarget.add,
           ),
-        )
+        ),
       ],
     );
   }
 }
 
 class _CharIndexItem extends StatelessWidget {
-  const _CharIndexItem({
-    required this.char,
-  });
+  const _CharIndexItem({required this.char});
 
   final String char;
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            const SizedBox(width: 20),
-            Text(
-              char,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.secondaryText,
-              ),
-            ),
-          ],
+    height: 40,
+    child: Row(
+      children: [
+        const SizedBox(width: 20),
+        Text(
+          char,
+          style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _CountryItem extends StatelessWidget {
@@ -401,29 +378,29 @@ class _CountryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        onTap: onTap,
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            fontSize: 14,
-            color: isSelected ? context.theme.accent : context.theme.text,
-          ),
-          child: SizedBox(
-            height: 40,
-            child: Row(
-              children: [
-                const SizedBox(width: 20),
-                SizedBox(
-                  width: 80,
-                  child: Text(country.dialCode ?? ''),
-                ),
-                Text(country.nameTranslations?[
-                        Localizations.localeOf(context).languageCode] ??
-                    country.name ??
-                    ''),
-                const SizedBox(width: 20),
-              ],
+    onTap: onTap,
+    child: DefaultTextStyle.merge(
+      style: TextStyle(
+        fontSize: 14,
+        color: isSelected ? context.theme.accent : context.theme.text,
+      ),
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            const SizedBox(width: 20),
+            SizedBox(width: 80, child: Text(country.dialCode ?? '')),
+            Text(
+              country.nameTranslations?[Localizations.localeOf(
+                    context,
+                  ).languageCode] ??
+                  country.name ??
+                  '',
             ),
-          ),
+            const SizedBox(width: 20),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }

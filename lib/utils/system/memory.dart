@@ -16,15 +16,20 @@ String dumpFreeDiskSpaceToString() {
       final lpFreeBytesAvailableToCaller = calloc<Uint64>();
       final lpTotalNumberOfBytes = calloc<Uint64>();
       final lpTotalNumberOfFreeBytes = calloc<Uint64>();
-      GetDiskFreeSpaceEx(lpDirectoryName, lpFreeBytesAvailableToCaller,
-          lpTotalNumberOfBytes, lpTotalNumberOfFreeBytes);
+      GetDiskFreeSpaceEx(
+        lpDirectoryName,
+        lpFreeBytesAvailableToCaller,
+        lpTotalNumberOfBytes,
+        lpTotalNumberOfFreeBytes,
+      );
       final freeBytesAvailableToCaller =
           lpFreeBytesAvailableToCaller.value.bytesToGbString;
       final totalNumberOfBytes = lpTotalNumberOfBytes.value.bytesToGbString;
       final totalNumberOfFreeBytes =
           lpTotalNumberOfFreeBytes.value.bytesToGbString;
 
-      final str = 'freeBytesAvailableToCaller: $freeBytesAvailableToCaller GB, '
+      final str =
+          'freeBytesAvailableToCaller: $freeBytesAvailableToCaller GB, '
           'totalNumberOfBytes: $totalNumberOfBytes GB, '
           'totalNumberOfFreeBytes: $totalNumberOfFreeBytes GB';
 

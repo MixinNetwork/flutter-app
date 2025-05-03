@@ -86,7 +86,9 @@ class DeviceTransferSender {
     if (_speedController != null) {
       _speedController?.updateLocalProgress();
 
-      i('onPacketSend: ${_speedController!._localSendCount} ${_speedController!._remoteReceivedCount}');
+      i(
+        'onPacketSend: ${_speedController!._localSendCount} ${_speedController!._remoteReceivedCount}',
+      );
 
       while (!_speedController!.canSend()) {
         i('sender speed control: wait for remote progress update.');
@@ -102,7 +104,8 @@ class DeviceTransferSender {
   }
 
   Future<(int port, TransferSecretKey key)> startServerSocket(
-      int verificationCode) async {
+    int verificationCode,
+  ) async {
     assert(!_debugStarting, 'server socket starting');
     if (_socket != null) {
       w('startServerSocket: already started');
@@ -138,69 +141,79 @@ class DeviceTransferSender {
       Stream<TransferPacket>.eventTransformed(
         socket,
         (sink) => TransferProtocolSink(sink, protocolTempFileDir, transferKey),
-      ).asyncListen((event) {
-        if (event is TransferCommandPacket) {
-          final command = event.command;
-          switch (command.action) {
-            case kTransferCommandActionConnect:
-              if (command.code == verificationCode) {
-                i('sender verify code success. start transfer ${socket.remoteAddress.address}:${socket.remotePort}');
-                _clientSocket = transferSocket;
-                _pendingVerificationSockets.remove(socket);
-                for (final s in _pendingVerificationSockets) {
-                  s
-                    ..close()
-                    ..destroy();
+      ).asyncListen(
+        (event) {
+          if (event is TransferCommandPacket) {
+            final command = event.command;
+            switch (command.action) {
+              case kTransferCommandActionConnect:
+                if (command.code == verificationCode) {
+                  i(
+                    'sender verify code success. start transfer ${socket.remoteAddress.address}:${socket.remotePort}',
+                  );
+                  _clientSocket = transferSocket;
+                  _pendingVerificationSockets.remove(socket);
+                  for (final s in _pendingVerificationSockets) {
+                    s
+                      ..close()
+                      ..destroy();
+                  }
+                  _pendingVerificationSockets.clear();
+                  onSenderStart?.call();
+                  _processTransfer(transferSocket).onError((error, stacktrace) {
+                    e('sender: process transfer error: $error $stacktrace');
+                  });
+                } else {
+                  e(
+                    'sender verify code failed. except $verificationCode, '
+                    'but got ${command.code}',
+                  );
+                  for (final s in _pendingVerificationSockets) {
+                    s
+                      ..close()
+                      ..destroy();
+                  }
+                  _pendingVerificationSockets.clear();
+                  close(debugReason: 'verify code failed');
                 }
-                _pendingVerificationSockets.clear();
-                onSenderStart?.call();
-                _processTransfer(transferSocket).onError((error, stacktrace) {
-                  e('sender: process transfer error: $error $stacktrace');
-                });
-              } else {
-                e('sender verify code failed. except $verificationCode, '
-                    'but got ${command.code}');
-                for (final s in _pendingVerificationSockets) {
-                  s
-                    ..close()
-                    ..destroy();
-                }
-                _pendingVerificationSockets.clear();
-                close(debugReason: 'verify code failed');
-              }
-            case kTransferCommandActionFinish:
-              i('client finished. close connection');
-              _finished = true;
-              close();
-            case kTransferCommandActionClose:
-              w('client closed. close connection');
-              close();
-            case kTransferCommandActionProgress:
-              final progress = command.progress!;
-              _notifyProgressUpdate(progress);
+              case kTransferCommandActionFinish:
+                i('client finished. close connection');
+                _finished = true;
+                close();
+              case kTransferCommandActionClose:
+                w('client closed. close connection');
+                close();
+              case kTransferCommandActionProgress:
+                final progress = command.progress!;
+                _notifyProgressUpdate(progress);
+            }
           }
-        }
-      }, onDone: () {
-        w('sender: client connected done. $remoteHost'
-            ' isFinished: $_finished, verified: ${_clientSocket == transferSocket}');
-        if (_clientSocket != null && _clientSocket != transferSocket) {
-          w('connection done, but not the verified client. ignore.');
-          return;
-        }
-        if (_clientSocket == null) {
-          w('connection done, but current no verified client. ignore.');
-          return;
-        }
-        close(debugReason: 'client connected done');
-      }, onError: (error, stacktrace) {
-        if (_clientSocket != null && _clientSocket != transferSocket) {
-          i('connection error, but not the verified client. ignore.');
-          return;
-        }
-        onSenderFailed?.call();
-        e('sender: server socket error: $error $stacktrace');
-        close(debugReason: 'socket error');
-      });
+        },
+        onDone: () {
+          w(
+            'sender: client connected done. $remoteHost'
+            ' isFinished: $_finished, verified: ${_clientSocket == transferSocket}',
+          );
+          if (_clientSocket != null && _clientSocket != transferSocket) {
+            w('connection done, but not the verified client. ignore.');
+            return;
+          }
+          if (_clientSocket == null) {
+            w('connection done, but current no verified client. ignore.');
+            return;
+          }
+          close(debugReason: 'client connected done');
+        },
+        onError: (error, stacktrace) {
+          if (_clientSocket != null && _clientSocket != transferSocket) {
+            i('connection error, but not the verified client. ignore.');
+            return;
+          }
+          onSenderFailed?.call();
+          e('sender: server socket error: $error $stacktrace');
+          close(debugReason: 'socket error');
+        },
+      );
     });
     onSenderServerCreated?.call();
     return (serverSocket.port, transferKey);
@@ -209,7 +222,9 @@ class DeviceTransferSender {
   /// transfer data to client.
   Future<void> _processTransfer(TransferSocket socket) async {
     Future<void> runWithLog(
-        Future<int> Function(TransferSocket) process, String name) async {
+      Future<int> Function(TransferSocket) process,
+      String name,
+    ) async {
       final stopwatch = Stopwatch()..start();
       i('_processTransfer start $name');
       final count = await process(socket);
@@ -219,7 +234,8 @@ class DeviceTransferSender {
     // send total count
     await runWithLog((socket) async {
       final db = database.mixinDatabase;
-      final count = await db.messageDao.countMediaMessages().getSingle() +
+      final count =
+          await db.messageDao.countMediaMessages().getSingle() +
           await db.messageDao.countMessages().getSingle() +
           await db.stickerDao.countStickers().getSingle() +
           await db.assetDao.countAssets().getSingle() +
@@ -236,10 +252,9 @@ class DeviceTransferSender {
           await database.expiredMessageDao.countExpiredMessages().getSingle() +
           await database.messageMentionDao.getMessageMentionsCount() +
           await database.appDao.getAppsCount();
-      await socket.addCommand(TransferDataCommand.start(
-        deviceId: deviceId,
-        total: count,
-      ));
+      await socket.addCommand(
+        TransferDataCommand.start(deviceId: deviceId, total: count),
+      );
       _speedController = TransferSpeedController(transferTotalCount: count);
       return count;
     }, 'send_total_count');
@@ -256,7 +271,9 @@ class DeviceTransferSender {
     await runWithLog(_processTransferSnapshot, 'snapshot');
     await runWithLog(_processTransferSafeSnapshot, 'safeSnapshot');
     await runWithLog(
-        _processTransferInscriptionCollection, 'inscriptionCollection');
+      _processTransferInscriptionCollection,
+      'inscriptionCollection',
+    );
     await runWithLog(_processTransferInscriptionItem, 'inscriptionItem');
     await runWithLog(_processTransferTranscriptMessage, 'transcriptMessage');
     await runWithLog(_processTransferPinMessage, 'pinMessage');
@@ -264,10 +281,12 @@ class DeviceTransferSender {
     await runWithLog(_processTransferMessageMention, 'messageMention');
     await runWithLog(_processTransferExpiredMessage, 'expiredMessage');
 
-    await socket.addCommand(TransferDataCommand.simple(
-      deviceId: deviceId,
-      action: kTransferCommandActionFinish,
-    ));
+    await socket.addCommand(
+      TransferDataCommand.simple(
+        deviceId: deviceId,
+        action: kTransferCommandActionFinish,
+      ),
+    );
   }
 
   Future<int> _processTransferConversation(TransferSocket socket) async {
@@ -294,8 +313,10 @@ class DeviceTransferSender {
   Future<int> _processTransferUser(TransferSocket socket) async {
     var offset = 0;
     while (true) {
-      final users =
-          await database.userDao.getUsers(limit: _kQueryLimit, offset: offset);
+      final users = await database.userDao.getUsers(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
       offset += users.length;
       for (final user in users) {
         await socket.addUser(TransferDataUser.fromDbUser(user));
@@ -311,8 +332,10 @@ class DeviceTransferSender {
   Future<int> _processTransferApp(TransferSocket socket) async {
     var offset = 0;
     while (true) {
-      final apps =
-          await database.appDao.getApps(limit: _kQueryLimit, offset: offset);
+      final apps = await database.appDao.getApps(
+        limit: _kQueryLimit,
+        offset: offset,
+      );
       offset += apps.length;
       for (final app in apps) {
         await socket.addApp(TransferDataApp.fromDbApp(app));
@@ -355,9 +378,7 @@ class DeviceTransferSender {
       );
       offset += stickers.length;
       for (final sticker in stickers) {
-        await socket.addSticker(
-          TransferDataSticker.fromDbSticker(sticker),
-        );
+        await socket.addSticker(TransferDataSticker.fromDbSticker(sticker));
         await onPacketSend();
       }
       if (stickers.length < _kQueryLimit) {
@@ -370,9 +391,7 @@ class DeviceTransferSender {
   Future<int> _processTransferAsset(TransferSocket socket) async {
     final assets = await database.assetDao.getAssets();
     for (final asset in assets) {
-      await socket.addAsset(
-        TransferDataAsset.fromDbAsset(asset),
-      );
+      await socket.addAsset(TransferDataAsset.fromDbAsset(asset));
       await onPacketSend();
     }
     return assets.length;
@@ -381,9 +400,7 @@ class DeviceTransferSender {
   Future<int> _processTransferToken(TransferSocket socket) async {
     final tokens = await database.tokenDao.getTokens();
     for (final token in tokens) {
-      await socket.addToken(
-        TransferDataToken.fromDbToken(token),
-      );
+      await socket.addToken(TransferDataToken.fromDbToken(token));
       await onPacketSend();
     }
     return tokens.length;
@@ -398,9 +415,7 @@ class DeviceTransferSender {
       );
       offset += snapshots.length;
       for (final snapshot in snapshots) {
-        await socket.addSnapshot(
-          TransferDataSnapshot.fromDbSnapshot(snapshot),
-        );
+        await socket.addSnapshot(TransferDataSnapshot.fromDbSnapshot(snapshot));
         await onPacketSend();
       }
       if (snapshots.length < _kQueryLimit) {
@@ -451,14 +466,12 @@ class DeviceTransferSender {
   }
 
   Future<int> _processTransferInscriptionCollection(
-      TransferSocket socket) async {
+    TransferSocket socket,
+  ) async {
     var offset = 0;
     while (true) {
-      final items =
-          await database.inscriptionCollectionDao.getInscriptionCollections(
-        limit: _kQueryLimit,
-        offset: offset,
-      );
+      final items = await database.inscriptionCollectionDao
+          .getInscriptionCollections(limit: _kQueryLimit, offset: offset);
       offset += items.length;
       for (final item in items) {
         await socket.addInscriptionCollection(item);
@@ -485,17 +498,17 @@ class DeviceTransferSender {
     var lastMessageRowId = -1;
     var count = 0;
     while (true) {
-      final messages = await database.messageDao
-          .getDeviceTransferMessages(lastMessageRowId, _kQueryLimit);
+      final messages = await database.messageDao.getDeviceTransferMessages(
+        lastMessageRowId,
+        _kQueryLimit,
+      );
       if (messages.isEmpty) {
         break;
       }
       count += messages.length;
       lastMessageRowId = messages.last.$1;
       for (final (_, message) in messages) {
-        await socket.addMessage(
-          TransferDataMessage.fromDbMessage(message),
-        );
+        await socket.addMessage(TransferDataMessage.fromDbMessage(message));
         await onPacketSend();
         if (message.category.isAttachment) {
           if (message.mediaStatus == MediaStatus.done ||
@@ -512,7 +525,9 @@ class DeviceTransferSender {
               e('attachment not exist: $path');
             }
           } else {
-            w('attachment not done/read: ${message.messageId} ${message.mediaStatus}');
+            w(
+              'attachment not done/read: ${message.messageId} ${message.mediaStatus}',
+            );
           }
         }
       }
@@ -523,8 +538,10 @@ class DeviceTransferSender {
   Future<int> _processTransferMessageMention(TransferSocket socket) async {
     var offset = 0;
     while (true) {
-      final messages = await database.messageMentionDao
-          .getMessageMentions(_kQueryLimit, offset);
+      final messages = await database.messageMentionDao.getMessageMentions(
+        _kQueryLimit,
+        offset,
+      );
       offset += messages.length;
       for (final message in messages) {
         await socket.addMessageMention(message);
@@ -540,11 +557,8 @@ class DeviceTransferSender {
   Future<int> _processTransferTranscriptMessage(TransferSocket socket) async {
     var offset = 0;
     while (true) {
-      final messages =
-          await database.transcriptMessageDao.getTranscriptMessages(
-        limit: _kQueryLimit,
-        offset: offset,
-      );
+      final messages = await database.transcriptMessageDao
+          .getTranscriptMessages(limit: _kQueryLimit, offset: offset);
       offset += messages.length;
       for (final message in messages) {
         await socket.addTranscriptMessage(
@@ -565,7 +579,9 @@ class DeviceTransferSender {
               e('attachment not exist: $path');
             }
           } else {
-            w('attachment not done: ${message.messageId} ${message.mediaStatus}');
+            w(
+              'attachment not done: ${message.messageId} ${message.mediaStatus}',
+            );
           }
         }
       }
@@ -579,12 +595,10 @@ class DeviceTransferSender {
   Future<int> _processTransferExpiredMessage(TransferSocket socket) async {
     var offset = 0;
     while (true) {
-      final messages = await database.expiredMessageDao
-          .getAllExpiredMessages(
-            _kQueryLimit,
-            offset,
-          )
-          .get();
+      final messages =
+          await database.expiredMessageDao
+              .getAllExpiredMessages(_kQueryLimit, offset)
+              .get();
       offset += messages.length;
       for (final message in messages) {
         await socket.addExpiredMessage(

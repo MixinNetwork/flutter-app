@@ -13,19 +13,20 @@ import '../../widgets/buttons.dart';
 import '../../widgets/high_light_text.dart';
 
 Future<void> showLogPage(BuildContext context) => showGeneralDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      barrierDismissible: true,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      pageBuilder: (BuildContext buildContext, Animation<double> animation,
-              Animation<double> secondaryAnimation) =>
-          InheritedTheme.capture(
-                  from: context,
-                  to: Navigator.of(context, rootNavigator: true).context)
-              .wrap(
-        const _LogPage(),
-      ),
-    );
+  context: context,
+  barrierColor: Colors.transparent,
+  barrierDismissible: true,
+  barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+  pageBuilder:
+      (
+        BuildContext buildContext,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => InheritedTheme.capture(
+        from: context,
+        to: Navigator.of(context, rootNavigator: true).context,
+      ).wrap(const _LogPage()),
+);
 
 class _LogPage extends HookWidget {
   const _LogPage();
@@ -44,16 +45,16 @@ class _LogPage extends HookWidget {
                 color: context.theme.icon,
                 onTap: () {
                   scheduleMicrotask(() {
-                    i('scheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotask');
+                    i(
+                      'scheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotaskscheduleMicrotask',
+                    );
                   });
                   launchUrl(Uri.file(mixinLogDirectory.path));
                 },
                 child: const Icon(Icons.launch),
               ),
               const SizedBox(width: 8),
-              MixinCloseButton(
-                onTap: () => Navigator.pop(context),
-              ),
+              MixinCloseButton(onTap: () => Navigator.pop(context)),
             ],
           ),
           Expanded(
@@ -64,8 +65,10 @@ class _LogPage extends HookWidget {
                 itemBuilder: (context, index) {
                   final log = _logs[_logs.length - 1 - index];
                   return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 2,
+                      horizontal: 4,
+                    ),
                     child: CustomText(log),
                   );
                 },

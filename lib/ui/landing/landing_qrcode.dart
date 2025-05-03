@@ -20,16 +20,15 @@ class LandingQrCodeWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = useMemoized(() => Localizations.localeOf(context));
 
-    final landingCubit = useBloc(() => LandingQrCodeCubit(
-          context.multiAuthChangeNotifier,
-          locale,
-        ));
+    final landingCubit = useBloc(
+      () => LandingQrCodeCubit(context.multiAuthChangeNotifier, locale),
+    );
 
     final status =
         useBlocStateConverter<LandingQrCodeCubit, LandingState, LandingStatus>(
-      bloc: landingCubit,
-      converter: (state) => state.status,
-    );
+          bloc: landingCubit,
+          converter: (state) => state.status,
+        );
 
     final Widget child;
     if (status == LandingStatus.init) {
@@ -50,13 +49,7 @@ class LandingQrCodeWidget extends HookConsumerWidget {
       child = Stack(
         fit: StackFit.expand,
         children: [
-          const Column(
-            children: [
-              Spacer(),
-              _QrCode(),
-              Spacer(),
-            ],
-          ),
+          const Column(children: [Spacer(), _QrCode(), Spacer()]),
           if (kPlatformIsMobile)
             const Align(
               alignment: Alignment.bottomCenter,
@@ -68,10 +61,7 @@ class LandingQrCodeWidget extends HookConsumerWidget {
         ],
       );
     }
-    return BlocProvider.value(
-      value: landingCubit,
-      child: child,
-    );
+    return BlocProvider.value(value: landingCubit, child: child);
   }
 }
 
@@ -82,16 +72,18 @@ class _QrCode extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final url =
         useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-            converter: (state) => state.authUrl);
+          converter: (state) => state.authUrl,
+        );
 
     final visible =
         useBlocStateConverter<LandingQrCodeCubit, LandingState, bool>(
-            converter: (state) => state.status == LandingStatus.needReload);
+          converter: (state) => state.status == LandingStatus.needReload,
+        );
 
     final errorMessage =
         useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-      converter: (state) => state.errorMessage,
-    );
+          converter: (state) => state.errorMessage,
+        );
 
     Widget? qrCode;
 
@@ -118,8 +110,9 @@ class _QrCode extends HookConsumerWidget {
                   visible: visible,
                   child: _Retry(
                     errorMessage: errorMessage,
-                    onTap: () =>
-                        context.read<LandingQrCodeCubit>().requestAuthUrl(),
+                    onTap:
+                        () =>
+                            context.read<LandingQrCodeCubit>().requestAuthUrl(),
                   ),
                 ),
               ],
@@ -129,10 +122,7 @@ class _QrCode extends HookConsumerWidget {
         const SizedBox(height: 16),
         Text(
           context.l10n.loginByQrcode,
-          style: TextStyle(
-            fontSize: 16,
-            color: context.theme.text,
-          ),
+          style: TextStyle(fontSize: 16, color: context.theme.text),
         ),
         const SizedBox(height: 16),
         Padding(
@@ -162,10 +152,7 @@ class _QrCode extends HookConsumerWidget {
 }
 
 class _Loading extends StatelessWidget {
-  const _Loading({
-    required this.title,
-    required this.message,
-  });
+  const _Loading({required this.title, required this.message});
 
   final String title;
   final String message;
@@ -209,10 +196,7 @@ class _Loading extends StatelessWidget {
 }
 
 class _Retry extends StatelessWidget {
-  const _Retry({
-    required this.onTap,
-    this.errorMessage,
-  });
+  const _Retry({required this.onTap, this.errorMessage});
 
   final VoidCallback onTap;
 
@@ -220,40 +204,38 @@ class _Retry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: const BoxDecoration(
-          color: Color.fromRGBO(0, 0, 0, 0.86),
-        ),
-        child: GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Tooltip(
-            message: errorMessage ?? '',
-            excludeFromSemantics: true,
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    Resources.assetsImagesIcRetrySvg,
-                    width: 40,
-                    height: 40,
-                  ),
-                  const SizedBox(height: 14),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      context.l10n.clickToReloadQrcode,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color.fromRGBO(255, 255, 255, 0.9),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
+    decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 0.86)),
+    child: GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Tooltip(
+        message: errorMessage ?? '',
+        excludeFromSemantics: true,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                Resources.assetsImagesIcRetrySvg,
+                width: 40,
+                height: 40,
               ),
-            ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  context.l10n.clickToReloadQrcode,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color.fromRGBO(255, 255, 255, 0.9),
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

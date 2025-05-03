@@ -22,10 +22,7 @@ import '../setting/log_page.dart';
 import 'landing_mobile.dart';
 import 'landing_qrcode.dart';
 
-enum LandingMode {
-  qrcode,
-  mobile,
-}
+enum LandingMode { qrcode, mobile }
 
 class LandingModeCubit extends Cubit<LandingMode> {
   LandingModeCubit() : super(LandingMode.qrcode);
@@ -38,8 +35,9 @@ class LandingPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accountServerHasError =
-        ref.watch(accountServerProvider.select((value) => value.hasError));
+    final accountServerHasError = ref.watch(
+      accountServerProvider.select((value) => value.hasError),
+    );
 
     final modeCubit = useBloc(LandingModeCubit.new);
     final mode = useBlocState<LandingModeCubit, LandingMode>(bloc: modeCubit);
@@ -129,7 +127,8 @@ class _LoginFailed extends HookConsumerWidget {
                 backgroundTransparent: true,
                 onTap: () async {
                   await Clipboard.setData(
-                      ClipboardData(text: '$errorText\n$stackTraceText'));
+                    ClipboardData(text: '$errorText\n$stackTraceText'),
+                  );
                   showToastSuccessful();
                 },
                 child: Text(context.l10n.copy),
@@ -150,9 +149,9 @@ class _LoginFailed extends HookConsumerWidget {
                       privateKey: authState.privateKey,
                       loginByPhoneNumber:
                           AccountKeyValue.instance.primarySessionId == null,
-                    )
-                        .accountApi
-                        .logout(LogoutRequest(authState.account.sessionId));
+                    ).accountApi.logout(
+                      LogoutRequest(authState.account.sessionId),
+                    );
                   } catch (err, stacktrace) {
                     e('logout error: $err $stacktrace');
                   }
@@ -171,47 +170,40 @@ class _LoginFailed extends HookConsumerWidget {
 }
 
 class LandingScaffold extends HookConsumerWidget {
-  const LandingScaffold({
-    required this.child,
-    super.key,
-  });
+  const LandingScaffold({required this.child, super.key});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Portal(
-        child: Scaffold(
-          backgroundColor: context.dynamicColor(
-            const Color(0xFFE5E5E5),
-            darkColor: const Color.fromRGBO(35, 39, 43, 1),
-          ),
-          resizeToAvoidBottomInset: false,
-          body: Stack(
-            children: [
-              Center(
-                child: SizedBox(
-                  width: 520,
-                  height: 418,
-                  child: Material(
-                    color: context.theme.popUp,
-                    borderRadius: const BorderRadius.all(Radius.circular(13)),
-                    elevation: 10,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(13)),
-                      child: child,
-                    ),
-                  ),
+    child: Scaffold(
+      backgroundColor: context.dynamicColor(
+        const Color(0xFFE5E5E5),
+        darkColor: const Color.fromRGBO(35, 39, 43, 1),
+      ),
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: 520,
+              height: 418,
+              child: Material(
+                color: context.theme.popUp,
+                borderRadius: const BorderRadius.all(Radius.circular(13)),
+                elevation: 10,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(13)),
+                  child: child,
                 ),
               ),
-              const Positioned(
-                bottom: 16,
-                right: 16,
-                child: VersionInfoWidget(),
-              ),
-            ],
+            ),
           ),
-        ),
-      );
+          const Positioned(bottom: 16, right: 16, child: VersionInfoWidget()),
+        ],
+      ),
+    ),
+  );
 }
 
 class VersionInfoWidget extends HookWidget {
@@ -225,10 +217,7 @@ class VersionInfoWidget extends HookWidget {
       onTap: () => showLogPage(context),
       child: Text(
         info?.versionAndBuildNumber ?? '',
-        style: TextStyle(
-          fontSize: 14,
-          color: context.theme.secondaryText,
-        ),
+        style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
       ),
     );
   }

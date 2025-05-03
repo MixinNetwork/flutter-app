@@ -7,7 +7,9 @@ import 'package:isolate/isolate.dart';
 LoadBalancer? loadBalancer;
 
 Future<R> runLoadBalancer<R, P>(
-        FutureOr<R> Function(P argument) function, P argument) =>
+  FutureOr<R> Function(P argument) function,
+  P argument,
+) =>
     loadBalancer != null
         ? loadBalancer!.run(function, argument)
         : compute(function, argument);

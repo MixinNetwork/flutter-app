@@ -22,20 +22,19 @@ Future<T?> showVerificationDialog<T>(
   required VerificationResponse verificationResponse,
   required RequestVerification reRequestVerification,
   required VerifyPhoneCode<T> onVerification,
-}) =>
-    showMixinDialog<T>(
-      context: context,
-      child: _VerificationCodeDialog(
-        phoneNumber: phoneNumber,
-        initialVerificationResponse: verificationResponse,
-        reRequestVerification: reRequestVerification,
-        onVerification: onVerification,
-      ),
-    );
+}) => showMixinDialog<T>(
+  context: context,
+  child: _VerificationCodeDialog(
+    phoneNumber: phoneNumber,
+    initialVerificationResponse: verificationResponse,
+    reRequestVerification: reRequestVerification,
+    onVerification: onVerification,
+  ),
+);
 
 typedef RequestVerification = Future<VerificationResponse> Function();
-typedef VerifyPhoneCode<T> = Future<T> Function(
-    String code, VerificationResponse response);
+typedef VerifyPhoneCode<T> =
+    Future<T> Function(String code, VerificationResponse response);
 
 class _VerificationCodeDialog<T> extends StatelessWidget {
   const _VerificationCodeDialog({
@@ -53,35 +52,35 @@ class _VerificationCodeDialog<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 520,
-        height: 326,
-        child: Column(
-          children: [
-            const SizedBox(height: 56),
-            Material(
-              color: context.theme.popUp,
-              child: VerificationCodeInputLayout(
-                phoneNumber: phoneNumber,
-                initialVerificationResponse: initialVerificationResponse,
-                reRequestVerification: reRequestVerification,
-                onVerification: (code, response) async {
-                  showToastLoading();
-                  try {
-                    final result = await onVerification(code, response);
-                    d('_VerificationCodeDialog: result: $result');
-                    Navigator.pop(context, result);
-                    Toast.dismiss();
-                  } catch (error, stacktrace) {
-                    e('_VerificationCodeDialog error: $error $stacktrace');
-                    showToastFailed(error);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(height: 77),
-          ],
+    width: 520,
+    height: 326,
+    child: Column(
+      children: [
+        const SizedBox(height: 56),
+        Material(
+          color: context.theme.popUp,
+          child: VerificationCodeInputLayout(
+            phoneNumber: phoneNumber,
+            initialVerificationResponse: initialVerificationResponse,
+            reRequestVerification: reRequestVerification,
+            onVerification: (code, response) async {
+              showToastLoading();
+              try {
+                final result = await onVerification(code, response);
+                d('_VerificationCodeDialog: result: $result');
+                Navigator.pop(context, result);
+                Toast.dismiss();
+              } catch (error, stacktrace) {
+                e('_VerificationCodeDialog error: $error $stacktrace');
+                showToastFailed(error);
+              }
+            },
+          ),
         ),
-      );
+        const SizedBox(height: 77),
+      ],
+    ),
+  );
 }
 
 Future<VerificationResponse> requestVerificationCode({
@@ -147,8 +146,9 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final codeInputController = useTextEditingController();
-    final verification =
-        useRef<VerificationResponse>(initialVerificationResponse);
+    final verification = useRef<VerificationResponse>(
+      initialVerificationResponse,
+    );
     useListenable(codeInputController);
     return Column(
       children: [
@@ -173,9 +173,7 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
             autoDisposeControllers: false,
             controller: codeInputController,
             appContext: context,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             keyboardType: TextInputType.number,
             onCompleted: (code) => onVerification(code, verification.value),
             useHapticFeedback: true,
@@ -185,10 +183,7 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
               fieldWidth: 15,
               borderWidth: 2,
             ),
-            textStyle: TextStyle(
-              fontSize: 18,
-              color: context.theme.text,
-            ),
+            textStyle: TextStyle(fontSize: 18, color: context.theme.text),
             onChanged: (String value) {},
           ),
         ),
@@ -204,9 +199,7 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
             } on MixinApiError catch (error) {
               e('Error requesting verification code: $error');
               final mixinError = error.error! as MixinError;
-              showToastFailed(
-                ToastError(mixinError.toDisplayString(context)),
-              );
+              showToastFailed(ToastError(mixinError.toDisplayString(context)));
               return false;
             } catch (error) {
               e('Error requesting verification code: $error');
@@ -229,41 +222,35 @@ class ResendCodeWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final nextDuration = useState(60);
     useEffect(() {
-      final timer = Timer.periodic(
-        const Duration(seconds: 1),
-        (timer) {
-          if (nextDuration.value > 0) {
-            nextDuration.value = math.max(0, nextDuration.value - 1);
-          }
-        },
-      );
+      final timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (nextDuration.value > 0) {
+          nextDuration.value = math.max(0, nextDuration.value - 1);
+        }
+      });
       return timer.cancel;
     }, [nextDuration]);
 
     return nextDuration.value > 0
         ? Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            context.l10n.resendCodeIn(nextDuration.value),
+            style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
+          ),
+        )
+        : InteractiveDecoratedBox(
+          onTap: () async {
+            if (await onResend()) {
+              nextDuration.value = 60;
+            }
+          },
+          child: Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              context.l10n.resendCodeIn(nextDuration.value),
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.secondaryText,
-              ),
+              context.l10n.resendCode,
+              style: TextStyle(fontSize: 14, color: context.theme.accent),
             ),
-          )
-        : InteractiveDecoratedBox(
-            onTap: () async {
-              if (await onResend()) {
-                nextDuration.value = 60;
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                context.l10n.resendCode,
-                style: TextStyle(fontSize: 14, color: context.theme.accent),
-              ),
-            ),
-          );
+          ),
+        );
   }
 }

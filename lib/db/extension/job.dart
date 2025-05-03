@@ -21,103 +21,110 @@ Job createAckJob(
   );
   final jobId =
       '${blazeMessage.messageId}${blazeMessage.status}$action'.nameUuid();
-  d('createAckJob messageId: ${blazeMessage.messageId} action: $action jobId: $jobId, status: $status expireAt: $expireAt');
+  d(
+    'createAckJob messageId: ${blazeMessage.messageId} action: $action jobId: $jobId, status: $status expireAt: $expireAt',
+  );
   return Job(
-      jobId: jobId,
-      action: action,
-      priority: 5,
-      blazeMessage: jsonEncode(blazeMessage),
-      createdAt: DateTime.now(),
-      runCount: 0);
+    jobId: jobId,
+    action: action,
+    priority: 5,
+    blazeMessage: jsonEncode(blazeMessage),
+    createdAt: DateTime.now(),
+    runCount: 0,
+  );
 }
 
 Future<Job> createMentionReadAckJob(
-        String conversationId, String messageId) async =>
-    Job(
-      jobId: const Uuid().v4(),
-      action: kCreateMessage,
-      createdAt: DateTime.now(),
-      conversationId: conversationId,
-      runCount: 0,
-      priority: 5,
-      blazeMessage: await jsonEncodeWithIsolate(BlazeAckMessage(
-        messageId: messageId,
-        status: 'MENTION_READ',
-        expireAt: null,
-      )),
-    );
+  String conversationId,
+  String messageId,
+) async => Job(
+  jobId: const Uuid().v4(),
+  action: kCreateMessage,
+  createdAt: DateTime.now(),
+  conversationId: conversationId,
+  runCount: 0,
+  priority: 5,
+  blazeMessage: await jsonEncodeWithIsolate(
+    BlazeAckMessage(
+      messageId: messageId,
+      status: 'MENTION_READ',
+      expireAt: null,
+    ),
+  ),
+);
 
 Job createSendPinJob(String conversationId, String encoded) => Job(
-      conversationId: conversationId,
-      jobId: const Uuid().v4(),
-      action: kPinMessage,
-      priority: 5,
-      blazeMessage: encoded,
-      createdAt: DateTime.now(),
-      runCount: 0,
-    );
+  conversationId: conversationId,
+  jobId: const Uuid().v4(),
+  action: kPinMessage,
+  priority: 5,
+  blazeMessage: encoded,
+  createdAt: DateTime.now(),
+  runCount: 0,
+);
 
 Future<Job> createSendRecallJob(
-        String conversationId, String messageId) async =>
-    Job(
-      conversationId: conversationId,
-      jobId: const Uuid().v4(),
-      action: kRecallMessage,
-      priority: 5,
-      blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
-      createdAt: DateTime.now(),
-      runCount: 0,
-    );
+  String conversationId,
+  String messageId,
+) async => Job(
+  conversationId: conversationId,
+  jobId: const Uuid().v4(),
+  action: kRecallMessage,
+  priority: 5,
+  blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
+  createdAt: DateTime.now(),
+  runCount: 0,
+);
 
 Job createUpdateStickerJob(String stickerId) => Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateSticker,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: stickerId,
-    );
+  jobId: const Uuid().v4(),
+  action: kUpdateSticker,
+  priority: 5,
+  runCount: 0,
+  createdAt: DateTime.now(),
+  blazeMessage: stickerId,
+);
 
 Job createUpdateAssetJob(String assetId) => Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateAsset,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: assetId,
-    );
+  jobId: const Uuid().v4(),
+  action: kUpdateAsset,
+  priority: 5,
+  runCount: 0,
+  createdAt: DateTime.now(),
+  blazeMessage: assetId,
+);
 
 Job createUpdateTokenJob(String assetId) => Job(
-      jobId: const Uuid().v4(),
-      action: kUpdateToken,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: assetId,
-    );
+  jobId: const Uuid().v4(),
+  action: kUpdateToken,
+  priority: 5,
+  runCount: 0,
+  createdAt: DateTime.now(),
+  blazeMessage: assetId,
+);
 
 Job createSyncInscriptionMessageJob(String messageId) => Job(
-      jobId: const Uuid().v4(),
-      action: kSyncInscriptionMessage,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: messageId,
-    );
+  jobId: const Uuid().v4(),
+  action: kSyncInscriptionMessage,
+  priority: 5,
+  runCount: 0,
+  createdAt: DateTime.now(),
+  blazeMessage: messageId,
+);
 
 Job createMigrationFtsJob(int? messageRowId) => Job(
-      jobId: const Uuid().v4(),
-      action: kMigrateFts,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-      blazeMessage: messageRowId?.toString(),
-    );
+  jobId: const Uuid().v4(),
+  action: kMigrateFts,
+  priority: 5,
+  runCount: 0,
+  createdAt: DateTime.now(),
+  blazeMessage: messageRowId?.toString(),
+);
 
 Job createCleanupQuoteContentJob() => Job(
-      jobId: const Uuid().v4(),
-      action: kCleanupQuoteContent,
-      priority: 5,
-      runCount: 0,
-      createdAt: DateTime.now(),
-    );
+  jobId: const Uuid().v4(),
+  action: kCleanupQuoteContent,
+  priority: 5,
+  runCount: 0,
+  createdAt: DateTime.now(),
+);

@@ -23,22 +23,15 @@ class ProxyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.proxy),
-        ),
-        body: ConstrainedBox(
-          constraints: const BoxConstraints.expand(),
-          child: const SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 40),
-                _ProxySettingWidget(),
-              ],
-            ),
-          ),
-        ),
-      );
+    backgroundColor: context.theme.background,
+    appBar: MixinAppBar(title: Text(context.l10n.proxy)),
+    body: ConstrainedBox(
+      constraints: const BoxConstraints.expand(),
+      child: const SingleChildScrollView(
+        child: Column(children: [SizedBox(height: 40), _ProxySettingWidget()]),
+      ),
+    ),
+  );
 }
 
 class _ProxySettingWidget extends HookConsumerWidget {
@@ -46,15 +39,17 @@ class _ProxySettingWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enableProxy = useListenableConverter(
+    final enableProxy =
+        useListenableConverter(
           context.database.settingProperties,
           converter: (settingProperties) => settingProperties.enableProxy,
         ).data ??
         false;
-    final hasProxyConfig = useListenableConverter(
+    final hasProxyConfig =
+        useListenableConverter(
           context.database.settingProperties,
-          converter: (settingProperties) =>
-              settingProperties.proxyList.isNotEmpty,
+          converter:
+              (settingProperties) => settingProperties.proxyList.isNotEmpty,
         ).data ??
         false;
     return Column(
@@ -65,15 +60,18 @@ class _ProxySettingWidget extends HookConsumerWidget {
           child: CellItem(
             title: Text(context.l10n.proxy),
             trailing: Transform.scale(
-                scale: 0.7,
-                child: CupertinoSwitch(
-                  activeTrackColor: context.theme.accent,
-                  value: hasProxyConfig && enableProxy,
-                  onChanged: !hasProxyConfig
-                      ? null
-                      : (bool value) => context
-                          .database.settingProperties.enableProxy = value,
-                )),
+              scale: 0.7,
+              child: CupertinoSwitch(
+                activeTrackColor: context.theme.accent,
+                value: hasProxyConfig && enableProxy,
+                onChanged:
+                    !hasProxyConfig
+                        ? null
+                        : (bool value) =>
+                            context.database.settingProperties.enableProxy =
+                                value,
+              ),
+            ),
           ),
         ),
         CellGroup(
@@ -82,10 +80,7 @@ class _ProxySettingWidget extends HookConsumerWidget {
             children: [
               CellItem(
                 title: Text(context.l10n.addProxy),
-                leading: Icon(
-                  Icons.add,
-                  color: context.theme.icon,
-                ),
+                leading: Icon(Icons.add, color: context.theme.icon),
                 trailing: null,
                 onTap: () {
                   showMixinDialog(
@@ -109,34 +104,34 @@ class _ProxyItemList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proxyList = useListenableConverter(
+    final proxyList =
+        useListenableConverter(
           context.database.settingProperties,
           converter: (settingProperties) => settingProperties.proxyList,
         ).data ??
         const [];
-    final selectedProxyId = useListenableConverter(
+    final selectedProxyId =
+        useListenableConverter(
           context.database.settingProperties,
           converter: (settingProperties) => settingProperties.selectedProxyId,
         ).data ??
         proxyList.firstOrNull?.id;
     return Column(
-      children: proxyList
-          .map(
-            (proxy) => _ProxyItemWidget(
-              proxy: proxy,
-              selected: selectedProxyId == proxy.id,
-            ),
-          )
-          .toList(),
+      children:
+          proxyList
+              .map(
+                (proxy) => _ProxyItemWidget(
+                  proxy: proxy,
+                  selected: selectedProxyId == proxy.id,
+                ),
+              )
+              .toList(),
     );
   }
 }
 
 class _ProxyItemWidget extends StatelessWidget {
-  const _ProxyItemWidget({
-    required this.proxy,
-    required this.selected,
-  });
+  const _ProxyItemWidget({required this.proxy, required this.selected});
 
   final ProxyConfig proxy;
 
@@ -144,53 +139,44 @@ class _ProxyItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: context.theme.settingCellBackgroundColor,
-        child: ListTile(
-          leading: SizedBox(
-            height: double.infinity,
-            width: 20,
-            child: selected
-                ? Icon(
-                    Icons.check,
-                    color: context.theme.icon,
-                    size: 20,
-                  )
+    color: context.theme.settingCellBackgroundColor,
+    child: ListTile(
+      leading: SizedBox(
+        height: double.infinity,
+        width: 20,
+        child:
+            selected
+                ? Icon(Icons.check, color: context.theme.icon, size: 20)
                 : null,
-          ),
-          minLeadingWidth: 0,
-          title: Text(
-            '${proxy.host}:${proxy.port}',
-            style: TextStyle(
-              fontSize: 16,
-              color: context.theme.text,
-            ),
-          ),
-          subtitle: Text(
-            proxy.type.name,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.secondaryText,
-            ),
-          ),
-          trailing: ActionButton(
-            name: Resources.assetsImagesDeleteSvg,
-            color: context.theme.icon,
-            onTap: () {
-              context.database.settingProperties.removeProxy(proxy.id);
-              if (selected) {
-                context.database.settingProperties.selectedProxyId = null;
-                context.database.settingProperties.enableProxy = false;
-              }
-            },
-          ),
-          onTap: () {
-            if (selected) {
-              return;
-            }
-            context.database.settingProperties.selectedProxyId = proxy.id;
-          },
-        ),
-      );
+      ),
+      minLeadingWidth: 0,
+      title: Text(
+        '${proxy.host}:${proxy.port}',
+        style: TextStyle(fontSize: 16, color: context.theme.text),
+      ),
+      subtitle: Text(
+        proxy.type.name,
+        style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
+      ),
+      trailing: ActionButton(
+        name: Resources.assetsImagesDeleteSvg,
+        color: context.theme.icon,
+        onTap: () {
+          context.database.settingProperties.removeProxy(proxy.id);
+          if (selected) {
+            context.database.settingProperties.selectedProxyId = null;
+            context.database.settingProperties.enableProxy = false;
+          }
+        },
+      ),
+      onTap: () {
+        if (selected) {
+          return;
+        }
+        context.database.settingProperties.selectedProxyId = proxy.id;
+      },
+    ),
+  );
 }
 
 class _ProxyAddDialog extends HookConsumerWidget {
@@ -296,30 +282,28 @@ class _ProxyTypeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: context.theme.listSelected,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        child: ListTileTheme(
-          data: ListTileThemeData(
-            dense: true,
-            textColor: context.theme.text,
-          ),
-          child: Column(
-            children: [
-              ListTile(
-                title: const Text('HTTP'),
-                trailing: proxyType.value == ProxyType.http
+    color: context.theme.listSelected,
+    borderRadius: const BorderRadius.all(Radius.circular(8)),
+    child: ListTileTheme(
+      data: ListTileThemeData(dense: true, textColor: context.theme.text),
+      child: Column(
+        children: [
+          ListTile(
+            title: const Text('HTTP'),
+            trailing:
+                proxyType.value == ProxyType.http
                     ? SvgPicture.asset(
-                        Resources.assetsImagesCheckedSvg,
-                        width: 24,
-                        height: 24,
-                      )
+                      Resources.assetsImagesCheckedSvg,
+                      width: 24,
+                      height: 24,
+                    )
                     : null,
-                onTap: () => proxyType.value = ProxyType.http,
-              ),
-            ],
+            onTap: () => proxyType.value = ProxyType.http,
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class _ProxyInputWidget extends StatelessWidget {
@@ -338,73 +322,65 @@ class _ProxyInputWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: firstController,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.text,
-            ),
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(kDefaultTextInputLimit)
-            ],
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: firstHintText,
-              hintStyle: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 14,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 18,
-              ),
-              border: const OutlineInputBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(8),
-                ),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: context.theme.listSelected,
-            ),
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
-          ),
-          Divider(height: 1, color: context.theme.divider),
-          TextField(
-            controller: secondController,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.text,
-            ),
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(kDefaultTextInputLimit)
-            ],
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: secondHintText,
-              hintStyle: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 14,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 18,
-              ),
-              border: const OutlineInputBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(8),
-                ),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: context.theme.listSelected,
-            ),
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
-          ),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TextField(
+        controller: firstController,
+        style: TextStyle(fontSize: 14, color: context.theme.text),
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
         ],
-      );
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: firstHintText,
+          hintStyle: TextStyle(
+            color: context.theme.secondaryText,
+            fontSize: 14,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 18,
+          ),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: context.theme.listSelected,
+        ),
+        contextMenuBuilder:
+            (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
+      ),
+      Divider(height: 1, color: context.theme.divider),
+      TextField(
+        controller: secondController,
+        style: TextStyle(fontSize: 14, color: context.theme.text),
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
+        ],
+        decoration: InputDecoration(
+          isDense: true,
+          hintText: secondHintText,
+          hintStyle: TextStyle(
+            color: context.theme.secondaryText,
+            fontSize: 14,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 18,
+          ),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: context.theme.listSelected,
+        ),
+        contextMenuBuilder:
+            (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
+      ),
+    ],
+  );
 }

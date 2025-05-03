@@ -26,43 +26,50 @@ class InscriptionContent extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultInscriptionImage =
-        SvgPicture.asset(Resources.assetsImagesInscriptionPlaceholderSvg);
+    final defaultInscriptionImage = SvgPicture.asset(
+      Resources.assetsImagesInscriptionPlaceholderSvg,
+    );
 
     return AspectRatio(
-        aspectRatio: 1,
-        child: switch (inscription) {
-          Inscription(contentType: final type, contentUrl: final contentUrl)
-              when type.startsWith('image') =>
-            MixinImage.network(
-              contentUrl,
-              errorBuilder: (_, __, ___) => defaultInscriptionImage,
-              placeholder: () => defaultInscriptionImage,
-            ),
-          Inscription(
-            contentType: final type,
-            contentUrl: final contentUrl,
-            iconUrl: final iconUrl?
-          )
-              when type.startsWith('text') =>
-            _TextInscriptionContent(
-              contentUrl: contentUrl,
-              iconUrl: iconUrl,
-              mode: mode,
-            ),
-          _ => defaultInscriptionImage,
-        });
+      aspectRatio: 1,
+      child: switch (inscription) {
+        Inscription(contentType: final type, contentUrl: final contentUrl)
+            when type.startsWith('image') =>
+          MixinImage.network(
+            contentUrl,
+            errorBuilder: (_, __, ___) => defaultInscriptionImage,
+            placeholder: () => defaultInscriptionImage,
+          ),
+        Inscription(
+          contentType: final type,
+          contentUrl: final contentUrl,
+          iconUrl: final iconUrl?,
+        )
+            when type.startsWith('text') =>
+          _TextInscriptionContent(
+            contentUrl: contentUrl,
+            iconUrl: iconUrl,
+            mode: mode,
+          ),
+        _ => defaultInscriptionImage,
+      },
+    );
   }
 }
 
 // Replace all invisible characters with a placeholder ■
 @visibleForTesting
 String inscriptionDisplayContent(String content) => content.replaceAll(
-    RegExp(r'[\s\p{Other}\p{Cf}\p{Cc}\p{Cn}]', unicode: true), '■');
+  RegExp(r'[\s\p{Other}\p{Cf}\p{Cc}\p{Cn}]', unicode: true),
+  '■',
+);
 
 class _TextInscriptionContent extends HookWidget {
-  const _TextInscriptionContent(
-      {required this.contentUrl, required this.iconUrl, required this.mode});
+  const _TextInscriptionContent({
+    required this.contentUrl,
+    required this.iconUrl,
+    required this.mode,
+  });
 
   final String contentUrl;
   final String iconUrl;
@@ -70,23 +77,28 @@ class _TextInscriptionContent extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultCollectionImage =
-        SvgPicture.asset(Resources.assetsImagesCollectionPlaceholderSvg);
+    final defaultCollectionImage = SvgPicture.asset(
+      Resources.assetsImagesCollectionPlaceholderSvg,
+    );
 
     final client = useMemoized(
-        () => CacheClient(context.database.settingProperties.activatedProxy,
-            cacheInscriptionTextFolderName),
-        []);
+      () => CacheClient(
+        context.database.settingProperties.activatedProxy,
+        cacheInscriptionTextFolderName,
+      ),
+      [],
+    );
 
-    final text = useMemoizedFuture(
-      () async {
-        final response = await client.get(Uri.parse(contentUrl));
-        final text = utf8.decode(response.bodyBytes, allowMalformed: true);
-        return inscriptionDisplayContent(text);
-      },
-      null,
-      keys: [client, contentUrl],
-    ).data;
+    final text =
+        useMemoizedFuture(
+          () async {
+            final response = await client.get(Uri.parse(contentUrl));
+            final text = utf8.decode(response.bodyBytes, allowMalformed: true);
+            return inscriptionDisplayContent(text);
+          },
+          null,
+          keys: [client, contentUrl],
+        ).data;
 
     return Stack(
       fit: StackFit.expand,
@@ -132,14 +144,15 @@ class _TextInscriptionContent extends HookWidget {
                     right: constraints.maxWidth / 10,
                     left: constraints.maxWidth / 10,
                   ),
-                  child: mode == InscriptionContentMode.large
-                      ? autoSizeText
-                      : _MinLinesWrapper(
-                          text: text,
-                          style: textStyle,
-                          minLines: mode.maxLines,
-                          child: autoSizeText,
-                        ),
+                  child:
+                      mode == InscriptionContentMode.large
+                          ? autoSizeText
+                          : _MinLinesWrapper(
+                            text: text,
+                            style: textStyle,
+                            minLines: mode.maxLines,
+                            child: autoSizeText,
+                          ),
                 ),
               ],
             );

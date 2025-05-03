@@ -27,15 +27,9 @@ class BlazeMessage {
   String id;
   @JsonKey(name: 'action')
   String action;
-  @JsonKey(
-    name: 'params',
-    toJson: dynamicToJson,
-  )
+  @JsonKey(name: 'params', toJson: dynamicToJson)
   dynamic params;
-  @JsonKey(
-    name: 'data',
-    toJson: dynamicToJson,
-  )
+  @JsonKey(name: 'data', toJson: dynamicToJson)
   dynamic data;
   @JsonKey(name: 'error')
   MixinError? error;
@@ -56,16 +50,23 @@ BlazeMessage createParamBlazeMessage(BlazeMessageParam param) =>
 
 BlazeMessage createPendingBlazeMessage(BlazeMessageParamOffset offset) =>
     BlazeMessage(
-        id: const Uuid().v4(), action: kListPendingMessage, params: offset);
+      id: const Uuid().v4(),
+      action: kListPendingMessage,
+      params: offset,
+    );
 
 BlazeMessage createConsumeSessionSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(
-        id: const Uuid().v4(),
-        action: kConsumeSessionSignalKeys,
-        params: param);
+      id: const Uuid().v4(),
+      action: kConsumeSessionSignalKeys,
+      params: param,
+    );
 
 BlazeMessage createSignalKeyMessage(BlazeMessageParam param) => BlazeMessage(
-    id: const Uuid().v4(), action: kCreateSignalKeyMessages, params: param);
+  id: const Uuid().v4(),
+  action: kCreateSignalKeyMessages,
+  params: param,
+);
 
 BlazeMessage createCountSignalKeys() =>
     BlazeMessage(id: const Uuid().v4(), action: kCountSignalKeys);
@@ -74,20 +75,23 @@ BlazeMessage createSyncSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(id: const Uuid().v4(), action: kSyncSignalKeys, params: param);
 
 BlazeMessageParam createConsumeSignalKeysParam(
-        List<BlazeMessageParamSession> recipients) =>
-    BlazeMessageParam(recipients: recipients);
+  List<BlazeMessageParamSession> recipients,
+) => BlazeMessageParam(recipients: recipients);
 
 BlazeMessageParam createPlainJsonParam(
-        String conversationId, String userId, String encoded,
-        {String? sessionId}) =>
-    BlazeMessageParam(
-        conversationId: conversationId,
-        recipientId: userId,
-        messageId: const Uuid().v4(),
-        category: MessageCategory.plainJson,
-        data: encoded,
-        status: MessageStatus.sending.toString(),
-        sessionId: sessionId);
+  String conversationId,
+  String userId,
+  String encoded, {
+  String? sessionId,
+}) => BlazeMessageParam(
+  conversationId: conversationId,
+  recipientId: userId,
+  messageId: const Uuid().v4(),
+  category: MessageCategory.plainJson,
+  data: encoded,
+  status: MessageStatus.sending.toString(),
+  sessionId: sessionId,
+);
 
 BlazeMessageParam createSyncSignalKeysParam(SignalKeyRequest? request) =>
     BlazeMessageParam(keys: request);

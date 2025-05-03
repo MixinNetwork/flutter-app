@@ -29,12 +29,7 @@ class _StickerData with EquatableMixin {
   final String? assetType;
 
   @override
-  List<Object?> get props => [
-        assetUrl,
-        assetWidth,
-        assetHeight,
-        assetType,
-      ];
+  List<Object?> get props => [assetUrl, assetWidth, assetHeight, assetType];
 }
 
 class StickerMessageWidget extends HookConsumerWidget {
@@ -42,62 +37,63 @@ class StickerMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stickerId =
-        useMessageConverter(converter: (state) => state.stickerId);
-
-    final messageAssetUrl =
-        useMessageConverter(converter: (state) => state.assetUrl);
-
-    final messageStickerData = useMemoized(
-      () {
-        if (messageAssetUrl == null) {
-          return null;
-        }
-        final message = context.message;
-        assert(
-          message.assetType != null,
-          'messageAssetUrl is not null, but assetType is null',
-        );
-        return _StickerData(
-          assetUrl: messageAssetUrl,
-          assetWidth: message.assetWidth,
-          assetHeight: message.assetHeight,
-          assetType: message.assetType,
-        );
-      },
-      [stickerId, messageAssetUrl],
+    final stickerId = useMessageConverter(
+      converter: (state) => state.stickerId,
     );
 
-    final stickerData = useMemoizedStream(
-          () {
-            if (messageStickerData != null) {
-              return const Stream<_StickerData>.empty();
-            } else {
-              assert(
-                stickerId != null,
-                'stickerId is null. ${context.message.messageId}',
-              );
-              if (stickerId == null) return const Stream<_StickerData?>.empty();
-              d('stickerData2: $stickerId, ${context.message.messageId}');
-              return context.database.stickerDao
-                  .sticker(stickerId)
-                  .watchSingleOrNullWithStream(eventStreams: [
-                    DataBaseEventBus.instance
-                        .watchUpdateStickerStream(stickerIds: [stickerId])
-                  ], duration: kDefaultThrottleDuration)
-                  .whereNotNull()
-                  .map(
-                    (event) => _StickerData(
-                      assetUrl: event.assetUrl,
-                      assetWidth: event.assetWidth,
-                      assetHeight: event.assetHeight,
-                      assetType: event.assetType,
+    final messageAssetUrl = useMessageConverter(
+      converter: (state) => state.assetUrl,
+    );
+
+    final messageStickerData = useMemoized(() {
+      if (messageAssetUrl == null) {
+        return null;
+      }
+      final message = context.message;
+      assert(
+        message.assetType != null,
+        'messageAssetUrl is not null, but assetType is null',
+      );
+      return _StickerData(
+        assetUrl: messageAssetUrl,
+        assetWidth: message.assetWidth,
+        assetHeight: message.assetHeight,
+        assetType: message.assetType,
+      );
+    }, [stickerId, messageAssetUrl]);
+
+    final stickerData =
+        useMemoizedStream(() {
+          if (messageStickerData != null) {
+            return const Stream<_StickerData>.empty();
+          } else {
+            assert(
+              stickerId != null,
+              'stickerId is null. ${context.message.messageId}',
+            );
+            if (stickerId == null) return const Stream<_StickerData?>.empty();
+            d('stickerData2: $stickerId, ${context.message.messageId}');
+            return context.database.stickerDao
+                .sticker(stickerId)
+                .watchSingleOrNullWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateStickerStream(
+                      stickerIds: [stickerId],
                     ),
-                  );
-            }
-          },
-          keys: [messageStickerData, stickerId],
-        ).data ??
+                  ],
+                  duration: kDefaultThrottleDuration,
+                )
+                .whereNotNull()
+                .map(
+                  (event) => _StickerData(
+                    assetUrl: event.assetUrl,
+                    assetWidth: event.assetWidth,
+                    assetHeight: event.assetHeight,
+                    assetType: event.assetType,
+                  ),
+                );
+          }
+        }, keys: [messageStickerData, stickerId]).data ??
         messageStickerData;
 
     final assetType = stickerData?.assetType;

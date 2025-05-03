@@ -34,14 +34,14 @@ void main() {
     }
   });
 
-  Future<List<int>> searchWithOption(String keyword,
-      {bool tokenize = true}) async {
+  Future<List<int>> searchWithOption(
+    String keyword, {
+    bool tokenize = true,
+  }) async {
     final k = keyword.escapeFts5(tokenize: tokenize);
     const query = 'SELECT rowid FROM messages_fts WHERE messages_fts MATCH ?1';
-    final row = await database.customSelect(
-      query,
-      variables: [Variable(k)],
-    ).get();
+    final row =
+        await database.customSelect(query, variables: [Variable(k)]).get();
     return row.map((e) => e.read<int>('rowid')).toList();
   }
 

@@ -10,10 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/logger.dart';
 
 class _ImageByBase64 extends HookConsumerWidget {
-  const _ImageByBase64(
-    this.base64String, {
-    this.fit = BoxFit.cover,
-  });
+  const _ImageByBase64(this.base64String, {this.fit = BoxFit.cover});
 
   final String base64String;
   final BoxFit? fit;
@@ -42,8 +39,8 @@ class _ImageByBlurHash extends HookConsumerWidget {
     required this.blurHash,
     this.width = _kDefaultBlurHashSize,
     this.height = _kDefaultBlurHashSize,
-  })  : assert(width > 0),
-        assert(height > 0);
+  }) : assert(width > 0),
+       assert(height > 0);
 
   final BlurHash blurHash;
   final int width;
@@ -66,10 +63,7 @@ class _ImageByBlurHash extends HookConsumerWidget {
         },
       );
     }, [blurHash, width, height]);
-    return RawImage(
-      fit: BoxFit.cover,
-      image: image.value,
-    );
+    return RawImage(fit: BoxFit.cover, image: image.value);
   }
 }
 

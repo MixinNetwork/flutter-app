@@ -17,8 +17,9 @@ class RecallMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCurrentUser = useIsCurrentUser();
-    final messageId =
-        useMessageConverter(converter: (state) => state.messageId);
+    final messageId = useMessageConverter(
+      converter: (state) => state.messageId,
+    );
 
     final recalledText = ref.watch(recalledTextProvider(messageId));
 
@@ -27,30 +28,37 @@ class RecallMessage extends HookConsumerWidget {
       children: [
         SvgPicture.asset(
           Resources.assetsImagesRecallSvg,
-          colorFilter:
-              ColorFilter.mode(context.theme.secondaryText, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+            context.theme.secondaryText,
+            BlendMode.srcIn,
+          ),
           width: 16,
           height: 16,
         ),
         const SizedBox(width: 4),
         Flexible(
           child: Text.rich(
-            TextSpan(children: [
-              TextSpan(
-                text: isCurrentUser
-                    ? context.l10n.youDeletedThisMessage
-                    : context.l10n.thisMessageWasDeleted,
-              ),
-              if (recalledText != null)
+            TextSpan(
+              children: [
                 TextSpan(
-                  text: ' ${context.l10n.reedit}',
-                  style: TextStyle(color: context.theme.accent),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => ref
-                        .read(recallMessageNotifierProvider)
-                        .onReedit(recalledText),
+                  text:
+                      isCurrentUser
+                          ? context.l10n.youDeletedThisMessage
+                          : context.l10n.thisMessageWasDeleted,
                 ),
-            ]),
+                if (recalledText != null)
+                  TextSpan(
+                    text: ' ${context.l10n.reedit}',
+                    style: TextStyle(color: context.theme.accent),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap =
+                              () => ref
+                                  .read(recallMessageNotifierProvider)
+                                  .onReedit(recalledText),
+                  ),
+              ],
+            ),
             style: TextStyle(
               fontSize: context.messageStyle.primaryFontSize,
               color: context.theme.text,
@@ -59,8 +67,6 @@ class RecallMessage extends HookConsumerWidget {
         ),
       ],
     );
-    return MessageBubble(
-      child: content,
-    );
+    return MessageBubble(child: content);
   }
 }

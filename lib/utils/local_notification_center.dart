@@ -50,9 +50,9 @@ abstract class _NotificationManager {
   void onNotificationSelected(Uri uri) => _payloadStreamController.add(uri);
 
   Stream<Uri> notificationActionEvent(NotificationScheme notificationScheme) =>
-      _payloadStreamController.stream
-          .whereNotNull()
-          .where((e) => e.scheme == enumConvertToString(notificationScheme));
+      _payloadStreamController.stream.whereNotNull().where(
+        (e) => e.scheme == enumConvertToString(notificationScheme),
+      );
 }
 
 // Implement by FlutterLocalNotificationsPlugin.
@@ -76,8 +76,10 @@ class _LocalNotificationManager extends _NotificationManager {
         defaultSound: ThemeLinuxSound('message'),
       ),
     );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: _onSelectNotification);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: _onSelectNotification,
+    );
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 
@@ -109,22 +111,21 @@ class _LocalNotificationManager extends _NotificationManager {
       platformChannelSpecifics,
       payload: uri.toString(),
     );
-    notifications.add(Notification(
-      conversationId: conversationId,
-      messageId: messageId,
-      notification: (uri, id),
-    ));
+    notifications.add(
+      Notification(
+        conversationId: conversationId,
+        messageId: messageId,
+        notification: (uri, id),
+      ),
+    );
   }
 
   @override
   Future<bool?> requestPermission() async => flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-          MacOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+        MacOSFlutterLocalNotificationsPlugin
+      >()
+      ?.requestPermissions(alert: true, badge: true, sound: true);
 
   Future<dynamic> _onSelectNotification(NotificationResponse details) async {
     final payload = details.payload;
@@ -133,9 +134,10 @@ class _LocalNotificationManager extends _NotificationManager {
     if (uri == null) return;
 
     final notification = notifications.cast<Notification?>().firstWhere(
-        (element) =>
-            element != null && (element.notification as (Uri, int)).$1 == uri,
-        orElse: () => null);
+      (element) =>
+          element != null && (element.notification as (Uri, int)).$1 == uri,
+      orElse: () => null,
+    );
     if (notification != null) notifications.remove(notification);
 
     if (Platform.isLinux) {
@@ -147,22 +149,27 @@ class _LocalNotificationManager extends _NotificationManager {
 
   @override
   Future<void> dismissByConversationId(String conversationId) async {
-    final list = await Future.wait(notifications
-        .where((element) => element.conversationId == conversationId)
-        .map((e) async {
-      final (_, id) = e.notification as (Uri, int);
-      await flutterLocalNotificationsPlugin.cancel(id);
-      return e;
-    }));
+    final list = await Future.wait(
+      notifications
+          .where((element) => element.conversationId == conversationId)
+          .map((e) async {
+            final (_, id) = e.notification as (Uri, int);
+            await flutterLocalNotificationsPlugin.cancel(id);
+            return e;
+          }),
+    );
     return list.forEach(notifications.remove);
   }
 
   @override
   Future<void> dismissByMessageId(
-      String messageId, String conversationId) async {
+    String messageId,
+    String conversationId,
+  ) async {
     final notification = notifications.cast<Notification?>().firstWhere(
-        (element) => element?.messageId == messageId,
-        orElse: () => null);
+      (element) => element?.messageId == messageId,
+      orElse: () => null,
+    );
     if (notification == null) return;
     final (_, id) = notification.notification as (Uri, int);
     await flutterLocalNotificationsPlugin.cancel(id);
@@ -214,7 +221,7 @@ class _WindowsNotificationManager extends _NotificationManager {
                 ToastVisualBindingChildText(text: body ?? '', id: 2),
               ],
             ),
-          )
+          ),
         ],
       ),
       tag: messageId,
@@ -232,19 +239,14 @@ class _WindowsNotificationManager extends _NotificationManager {
     String messageId,
     String conversationId,
   ) async {
-    await WinToast.instance().dismiss(
-      tag: messageId,
-      group: conversationId,
-    );
+    await WinToast.instance().dismiss(tag: messageId, group: conversationId);
   }
 
   @override
   Future<bool?> requestPermission() async => null;
 }
 
-enum NotificationScheme {
-  conversation,
-}
+enum NotificationScheme { conversation }
 
 _NotificationManager? _notificationManager;
 int _id = 0;
@@ -288,21 +290,22 @@ Future<void> showNotification({
   required String conversationId,
   required String messageId,
   String? body,
-}) async =>
-    await _notificationManager?.showNotification(
-      title: title,
-      uri: uri,
-      id: _incrementAndGetId(),
-      body: body,
-      conversationId: conversationId,
-      messageId: messageId,
-    );
+}) async => await _notificationManager?.showNotification(
+  title: title,
+  uri: uri,
+  id: _incrementAndGetId(),
+  body: body,
+  conversationId: conversationId,
+  messageId: messageId,
+);
 
 Future<void> dismissByConversationId(String conversationId) async =>
     await _notificationManager?.dismissByConversationId(conversationId);
 
 Future<void> dismissByMessageId(
-        String messageId, String conversationId) async =>
+  String messageId,
+  String conversationId,
+) async =>
     await _notificationManager?.dismissByMessageId(messageId, conversationId);
 
 Future<bool?> requestNotificationPermission() async =>

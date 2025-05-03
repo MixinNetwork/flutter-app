@@ -16,10 +16,8 @@ class MessageLayout extends MultiChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderMessageLayout(
-        spacing: spacing,
-        clipBehavior: clipBehavior,
-      );
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderMessageLayout(spacing: spacing, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(
@@ -41,8 +39,8 @@ class _RenderMessageLayout extends RenderBox
     List<RenderBox>? children,
     double spacing = 0.0,
     Clip clipBehavior = Clip.none,
-  })  : _spacing = spacing,
-        _clipBehavior = clipBehavior {
+  }) : _spacing = spacing,
+       _clipBehavior = clipBehavior {
     addAll(children);
   }
 
@@ -117,8 +115,10 @@ class _RenderMessageLayout extends RenderBox
   Size computeDryLayout(BoxConstraints constraints) =>
       _computeDryLayout(constraints);
 
-  Size _computeDryLayout(BoxConstraints constraints,
-      [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
+  Size _computeDryLayout(
+    BoxConstraints constraints, [
+    ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild,
+  ]) {
     final childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
     final widthLimit = constraints.maxWidth;
 
@@ -180,10 +180,13 @@ class _RenderMessageLayout extends RenderBox
     statusChild.layout(childConstraints, parentUsesSize: true);
 
     final boxWidth = _calculateWidth(
-        widthLimit, contentChild.size.width, statusChild.size.width);
+      widthLimit,
+      contentChild.size.width,
+      statusChild.size.width,
+    );
     final lastLineHasSpace =
         _calculateRenderParagraphLastLineHasSpace(boxWidth) ||
-            _calculateRenderEditableLastLineHasSpace(boxWidth);
+        _calculateRenderEditableLastLineHasSpace(boxWidth);
 
     size = constraints.constrain(
       _calculateSize(
@@ -232,15 +235,17 @@ class _RenderMessageLayout extends RenderBox
     final statusX = widthLimit - statusChild.size.width - spacing;
 
     // Get the last text position.
-    final positionForOffset = renderParagraph
-        .getPositionForOffset(contentChild.paintBounds.bottomRight);
+    final positionForOffset = renderParagraph.getPositionForOffset(
+      contentChild.paintBounds.bottomRight,
+    );
 
-    final boxesForSelection =
-        renderParagraph.getBoxesForSelection(TextSelection(
-      baseOffset:
-          positionForOffset.offset == 0 ? 0 : positionForOffset.offset - 1,
-      extentOffset: positionForOffset.offset,
-    ));
+    final boxesForSelection = renderParagraph.getBoxesForSelection(
+      TextSelection(
+        baseOffset:
+            positionForOffset.offset == 0 ? 0 : positionForOffset.offset - 1,
+        extentOffset: positionForOffset.offset,
+      ),
+    );
 
     return boxesForSelection.isNotEmpty &&
         boxesForSelection.first.right.ceil() <= statusX;
@@ -255,8 +260,9 @@ class _RenderMessageLayout extends RenderBox
     final length =
         renderEditable.textSelectionDelegate.textEditingValue.text.length;
 
-    final endpointsForSelection = renderEditable
-        .getEndpointsForSelection(TextSelection.collapsed(offset: length));
+    final endpointsForSelection = renderEditable.getEndpointsForSelection(
+      TextSelection.collapsed(offset: length),
+    );
 
     // RenderEditable._kCaretGap = 1;
     return endpointsForSelection.isNotEmpty &&

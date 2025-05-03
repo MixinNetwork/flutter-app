@@ -29,33 +29,26 @@ import '../chat/chat_page.dart';
 import '../conversation/search_list.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
-  const SearchMessagePage(
-    this.conversationState, {
-    super.key,
-  });
+  const SearchMessagePage(this.conversationState, {super.key});
 
   final ConversationState conversationState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categories = useMemoized(() => [
-          _Category(
-            context.l10n.text,
-            const [
-              MessageCategory.plainText,
-              MessageCategory.signalText,
-              MessageCategory.encryptedText,
-            ],
-          ),
-          _Category(
-            context.l10n.post,
-            const [
-              MessageCategory.plainPost,
-              MessageCategory.signalPost,
-              MessageCategory.encryptedPost,
-            ],
-          ),
-        ]);
+    final categories = useMemoized(
+      () => [
+        _Category(context.l10n.text, const [
+          MessageCategory.plainText,
+          MessageCategory.signalText,
+          MessageCategory.encryptedText,
+        ]),
+        _Category(context.l10n.post, const [
+          MessageCategory.plainPost,
+          MessageCategory.signalPost,
+          MessageCategory.encryptedPost,
+        ]),
+      ],
+    );
 
     final selectedCategories = useState<List<String>?>(null);
 
@@ -65,7 +58,8 @@ class SearchMessagePage extends HookConsumerWidget {
     final selectedUser = useState<User?>(null);
 
     final keywordStream = useValueNotifierConvertSteam(editingController);
-    final keywordIsEmpty = useMemoizedStream(
+    final keywordIsEmpty =
+        useMemoizedStream(
           () => keywordStream.map((event) => event.text.isEmpty).distinct(),
         ).data ??
         editingController.text.isEmpty;
@@ -118,13 +112,14 @@ class SearchMessagePage extends HookConsumerWidget {
                             const _ResetModeIntent(),
                     },
                     actions: {
-                      _ResetModeIntent:
-                          CallbackAction(onInvoke: (Intent intent) {
-                        if (selectedUser.value != null) {
-                          return selectedUser.value = null;
-                        }
-                        if (userMode.value) return userMode.value = false;
-                      }),
+                      _ResetModeIntent: CallbackAction(
+                        onInvoke: (Intent intent) {
+                          if (selectedUser.value != null) {
+                            return selectedUser.value = null;
+                          }
+                          if (userMode.value) return userMode.value = false;
+                        },
+                      ),
                     },
                     child: SearchTextField(
                       fontSize: 16,
@@ -132,30 +127,32 @@ class SearchMessagePage extends HookConsumerWidget {
                       controller: editingController,
                       hintText: context.l10n.search,
                       showClear: userMode.value,
-                      leading: userMode.value
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  context.l10n.fromWithColon,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: context.theme.text,
-                                  ),
-                                ),
-                                if (selectedUser.value != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: AvatarWidget(
-                                      size: 20,
-                                      name: selectedUser.value?.fullName,
-                                      avatarUrl: selectedUser.value?.avatarUrl,
-                                      userId: selectedUser.value?.userId,
+                      leading:
+                          userMode.value
+                              ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    context.l10n.fromWithColon,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: context.theme.text,
                                     ),
                                   ),
-                              ],
-                            )
-                          : null,
+                                  if (selectedUser.value != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: AvatarWidget(
+                                        size: 20,
+                                        name: selectedUser.value?.fullName,
+                                        avatarUrl:
+                                            selectedUser.value?.avatarUrl,
+                                        userId: selectedUser.value?.userId,
+                                      ),
+                                    ),
+                                ],
+                              )
+                              : null,
                       onTapClear: () {
                         userMode.value = false;
                         selectedUser.value = null;
@@ -198,59 +195,63 @@ class SearchMessagePage extends HookConsumerWidget {
           AnimatedSize(
             alignment: Alignment.bottomCenter,
             duration: const Duration(milliseconds: 200),
-            child: Builder(builder: (context) {
-              if (keywordIsEmpty ||
-                  (userMode.value && selectedUser.value == null)) {
-                return const SizedBox(height: 8);
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Container(
-                  padding: const EdgeInsets.only(left: 16),
-                  height: 32,
-                  alignment: Alignment.center,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.zero,
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-                      return _CategoryItem(
-                        name: category.name,
-                        categories: category.categories,
-                        selectedCategories: selectedCategories.value,
-                        onSelected: (List<String> value) {
-                          if (selectedCategories.value == value) {
-                            selectedCategories.value = null;
-                            return;
-                          }
-                          selectedCategories.value = value;
-                        },
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const SizedBox(width: 8),
+            child: Builder(
+              builder: (context) {
+                if (keywordIsEmpty ||
+                    (userMode.value && selectedUser.value == null)) {
+                  return const SizedBox(height: 8);
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 16),
+                    height: 32,
+                    alignment: Alignment.center,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.zero,
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        return _CategoryItem(
+                          name: category.name,
+                          categories: category.categories,
+                          selectedCategories: selectedCategories.value,
+                          onSelected: (List<String> value) {
+                            if (selectedCategories.value == value) {
+                              selectedCategories.value = null;
+                              return;
+                            }
+                            selectedCategories.value = value;
+                          },
+                        );
+                      },
+                      separatorBuilder:
+                          (BuildContext context, int index) =>
+                              const SizedBox(width: 8),
+                    ),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
           ),
           Expanded(
-            child: userMode.value && selectedUser.value == null
-                ? _SearchParticipantList(
-                    editingController: editingController,
-                    onSelected: (user) {
-                      editingController.text = '';
-                      selectedUser.value = user;
-                    },
-                    conversationId: conversationState.conversationId,
-                    isBot: conversationState.isBot,
-                  )
-                : _SearchMessageList(
-                    selectedUserId: selectedUser.value?.userId,
-                    categories: selectedCategories.value,
-                    conversationId: conversationState.conversationId,
-                  ),
+            child:
+                userMode.value && selectedUser.value == null
+                    ? _SearchParticipantList(
+                      editingController: editingController,
+                      onSelected: (user) {
+                        editingController.text = '';
+                        selectedUser.value = user;
+                      },
+                      conversationId: conversationState.conversationId,
+                      isBot: conversationState.isBot,
+                    )
+                    : _SearchMessageList(
+                      selectedUserId: selectedUser.value?.userId,
+                      categories: selectedCategories.value,
+                      conversationId: conversationState.conversationId,
+                    ),
           ),
         ],
       ),
@@ -271,9 +272,11 @@ class _SearchMessageList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (_, initKeyword) =
-        useMemoized(() => context.read<SearchConversationKeywordCubit>().state);
-    final keyword = useMemoizedStream(
+    final (_, initKeyword) = useMemoized(
+      () => context.read<SearchConversationKeywordCubit>().state,
+    );
+    final keyword =
+        useMemoizedStream(
           () => context
               .read<SearchConversationKeywordCubit>()
               .stream
@@ -295,7 +298,8 @@ class _SearchMessageList extends HookConsumerWidget {
     );
 
     final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-        bloc: searchMessageCubit);
+      bloc: searchMessageCubit,
+    );
 
     return ScrollablePositionedList.builder(
       itemPositionsListener: searchMessageCubit.itemPositionsListener,
@@ -341,65 +345,74 @@ class _SearchParticipantList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keywordStream = useValueNotifierConvertSteam(editingController);
 
-    final filteredUser = useMemoizedStream(() => keywordStream
-                .throttleTime(const Duration(milliseconds: 100))
-                .map((event) => event.text)
-                .switchMap((value) {
-              final userDao = context.database.userDao;
+    final filteredUser =
+        useMemoizedStream(
+          () => keywordStream
+              .throttleTime(const Duration(milliseconds: 100))
+              .map((event) => event.text)
+              .switchMap((value) {
+                final userDao = context.database.userDao;
 
-              if (isBot) {
-                return value.isEmpty
-                    ? userDao.friends().watchWithStream(
+                if (isBot) {
+                  return value.isEmpty
+                      ? userDao.friends().watchWithStream(
                         eventStreams: [
-                          DataBaseEventBus.instance.updateUserIdsStream
+                          DataBaseEventBus.instance.updateUserIdsStream,
                         ],
                         duration: kSlowThrottleDuration,
                       )
-                    : userDao
-                        .fuzzySearchBotGroupUser(
-                            currentUserId: context
-                                    .multiAuthChangeNotifier.current?.userId ??
+                      : userDao
+                          .fuzzySearchBotGroupUser(
+                            currentUserId:
+                                context
+                                    .multiAuthChangeNotifier
+                                    .current
+                                    ?.userId ??
                                 '',
                             conversationId: conversationId,
-                            keyword: value)
-                        .watchWithStream(
-                        eventStreams: [
-                          DataBaseEventBus
-                              .instance.insertOrReplaceMessageIdsStream,
-                          DataBaseEventBus.instance.deleteMessageIdStream,
-                          DataBaseEventBus.instance.updateUserIdsStream,
-                        ],
-                        duration: kVerySlowThrottleDuration,
-                      );
-              }
+                            keyword: value,
+                          )
+                          .watchWithStream(
+                            eventStreams: [
+                              DataBaseEventBus
+                                  .instance
+                                  .insertOrReplaceMessageIdsStream,
+                              DataBaseEventBus.instance.deleteMessageIdStream,
+                              DataBaseEventBus.instance.updateUserIdsStream,
+                            ],
+                            duration: kVerySlowThrottleDuration,
+                          );
+                }
 
-              if (value.isEmpty) {
+                if (value.isEmpty) {
+                  return userDao
+                      .groupParticipants(conversationId)
+                      .watchWithStream(
+                        eventStreams: [
+                          DataBaseEventBus.instance
+                              .watchUpdateParticipantStream(
+                                conversationIds: [conversationId],
+                              ),
+                        ],
+                        duration: kSlowThrottleDuration,
+                      );
+                }
                 return userDao
-                    .groupParticipants(conversationId)
-                    .watchWithStream(
-                  eventStreams: [
-                    DataBaseEventBus.instance.watchUpdateParticipantStream(
-                      conversationIds: [conversationId],
+                    .fuzzySearchGroupUser(
+                      context.account?.userId ?? '',
+                      conversationId,
+                      value,
                     )
-                  ],
-                  duration: kSlowThrottleDuration,
-                );
-              }
-              return userDao
-                  .fuzzySearchGroupUser(
-                context.account?.userId ?? '',
-                conversationId,
-                value,
-              )
-                  .watchWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateParticipantStream(
-                    conversationIds: [conversationId],
-                  )
-                ],
-                duration: kSlowThrottleDuration,
-              );
-            })).data ??
+                    .watchWithStream(
+                      eventStreams: [
+                        DataBaseEventBus.instance.watchUpdateParticipantStream(
+                          conversationIds: [conversationId],
+                        ),
+                      ],
+                      duration: kSlowThrottleDuration,
+                    );
+              }),
+        ).data ??
         [];
 
     return ListView.builder(
@@ -437,7 +450,7 @@ class _SearchParticipantList extends HookConsumerWidget {
                         verified: user.isVerified ?? false,
                         isBot: user.isBot,
                         membership: user.membership,
-                      )
+                      ),
                     ],
                   ),
                 ),

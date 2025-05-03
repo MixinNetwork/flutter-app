@@ -10,8 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('tet PropertyStorage', () async {
     final database = MixinDatabase(NativeDatabase.memory());
-    final storage =
-        PropertyStorage(PropertyGroup.setting, database.propertyDao);
+    final storage = PropertyStorage(
+      PropertyGroup.setting,
+      database.propertyDao,
+    );
 
     expect(storage.get<bool>('test_empty'), null);
     storage.set('test_empty', false);

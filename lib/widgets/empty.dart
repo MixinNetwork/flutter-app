@@ -9,11 +9,6 @@ class Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            color: context.theme.secondaryText,
-          ),
-        ),
-      );
+    child: Text(text, style: TextStyle(color: context.theme.secondaryText)),
+  );
 }

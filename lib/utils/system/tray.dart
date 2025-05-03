@@ -37,21 +37,16 @@ class SystemTrayWidget extends HookConsumerWidget {
       if (!_enableTray) {
         return;
       }
-      _systemTray.setContextMenu(
-        [
-          MenuItem(
-            label: show,
-            onClicked: windowManager.show,
-          ),
-          MenuSeparator(),
-          MenuItem(
-            label: exitStr,
-            onClicked: () {
-              exit(0);
-            },
-          ),
-        ],
-      );
+      _systemTray.setContextMenu([
+        MenuItem(label: show, onClicked: windowManager.show),
+        MenuSeparator(),
+        MenuItem(
+          label: exitStr,
+          onClicked: () {
+            exit(0);
+          },
+        ),
+      ]);
     }, [show, exitStr]);
 
     return child;
@@ -80,11 +75,13 @@ Future<void> _initSystemTray() async {
   }
 
   // We first init the systray menu and then add the menu entries
-  unawaited(_systemTray.initSystemTray(
-    title: 'Mixin',
-    iconPath: path,
-    toolTip: 'Mixin',
-  ));
+  unawaited(
+    _systemTray.initSystemTray(
+      title: 'Mixin',
+      iconPath: path,
+      toolTip: 'Mixin',
+    ),
+  );
 
   // handle system tray event
   _systemTray.registerSystemTrayEventHandler((eventName) {

@@ -143,8 +143,9 @@ class Database {
     final result = <SearchMessageDetailItem>[];
 
     for (final messageId in messageIds) {
-      final message =
-          messages.firstWhereOrNull((m) => m.messageId == messageId);
+      final message = messages.firstWhereOrNull(
+        (m) => m.messageId == messageId,
+      );
       if (message != null) {
         result.add(message);
       } else {
@@ -165,10 +166,11 @@ class Database {
     Future<List<String>> getConversationIds() async {
       final List<String> conversations;
       if (unseenConversationOnly) {
-        conversations = await conversationDao
-            .unseenConversationByCategory(category.type)
-            .map((item) => item.conversationId)
-            .get();
+        conversations =
+            await conversationDao
+                .unseenConversationByCategory(category.type)
+                .map((item) => item.conversationId)
+                .get();
       } else {
         conversations = await conversationDao
             .conversationItemsByCategory(category.type, 1000, 0)
@@ -189,7 +191,9 @@ class Database {
         }
         final conversationIds = await getConversationIds();
         if (conversationIds.isEmpty) {
-          i('fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds');
+          i(
+            'fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds',
+          );
           return Future.value(const []);
         }
         return fuzzySearchMessage(
@@ -204,7 +208,9 @@ class Database {
       case SlideCategoryType.contacts:
         final conversationIds = await getConversationIds();
         if (conversationIds.isEmpty) {
-          i('fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds');
+          i(
+            'fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds',
+          );
           return Future.value(const []);
         }
         return fuzzySearchMessage(
@@ -217,18 +223,22 @@ class Database {
         final circleId = category.id!;
         final List<String> conversationIds;
         if (unseenConversationOnly) {
-          conversationIds = await conversationDao
-              .unseenConversationsByCircleId(circleId)
-              .map((item) => item.conversationId)
-              .get();
+          conversationIds =
+              await conversationDao
+                  .unseenConversationsByCircleId(circleId)
+                  .map((item) => item.conversationId)
+                  .get();
         } else {
-          conversationIds = await conversationDao
-              .conversationsByCircleId(circleId, 1000, 0)
-              .map((item) => item.conversationId)
-              .get();
+          conversationIds =
+              await conversationDao
+                  .conversationsByCircleId(circleId, 1000, 0)
+                  .map((item) => item.conversationId)
+                  .get();
         }
         if (conversationIds.isEmpty) {
-          i('fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds');
+          i(
+            'fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds',
+          );
           return Future.value(const []);
         }
         return fuzzySearchMessage(

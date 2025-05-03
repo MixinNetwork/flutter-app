@@ -80,9 +80,12 @@ class BlazeMessageParam {
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }
 
-BlazeMessageParam createSignalKeyMessageParam(String conversationId,
-        List<BlazeSignalKeyMessage> messages, String conversationChecksum) =>
-    BlazeMessageParam(
-        conversationId: conversationId,
-        messages: messages,
-        conversationChecksum: conversationChecksum);
+BlazeMessageParam createSignalKeyMessageParam(
+  String conversationId,
+  List<BlazeSignalKeyMessage> messages,
+  String conversationChecksum,
+) => BlazeMessageParam(
+  conversationId: conversationId,
+  messages: messages,
+  conversationChecksum: conversationChecksum,
+);

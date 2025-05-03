@@ -20,37 +20,34 @@ extension SelectedableThrottle<T> on Selectable<T> {
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
     bool prepend = true,
-  }) =>
-      _watchWithStream(
-        eventStreams: eventStreams,
-        duration: duration,
-        prepend: prepend,
-        fetch: get,
-      );
+  }) => _watchWithStream(
+    eventStreams: eventStreams,
+    duration: duration,
+    prepend: prepend,
+    fetch: get,
+  );
 
   Stream<T> watchSingleWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
     bool prepend = true,
-  }) =>
-      _watchWithStream(
-        eventStreams: eventStreams,
-        duration: duration,
-        prepend: prepend,
-        fetch: getSingle,
-      );
+  }) => _watchWithStream(
+    eventStreams: eventStreams,
+    duration: duration,
+    prepend: prepend,
+    fetch: getSingle,
+  );
 
   Stream<T?> watchSingleOrNullWithStream({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
     bool prepend = true,
-  }) =>
-      _watchWithStream(
-        eventStreams: eventStreams,
-        duration: duration,
-        prepend: prepend,
-        fetch: getSingleOrNull,
-      );
+  }) => _watchWithStream(
+    eventStreams: eventStreams,
+    duration: duration,
+    prepend: prepend,
+    fetch: getSingleOrNull,
+  );
 }
 
 @immutable

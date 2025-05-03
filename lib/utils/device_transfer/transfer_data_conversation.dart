@@ -102,23 +102,23 @@ class TransferDataConversation {
   Map<String, dynamic> toJson() => _$TransferDataConversationToJson(this);
 
   db.Conversation toDbConversation() => db.Conversation(
-        conversationId: conversationId,
-        ownerId: ownerId,
-        category: category,
-        name: name,
-        announcement: announcement,
-        codeUrl: codeUrl,
-        payType: payType,
-        createdAt: createdAt,
-        pinTime: pinTime,
-        lastMessageId: lastMessageId,
-        lastMessageCreatedAt: lastMessageCreatedAt,
-        lastReadMessageId: lastReadMessageId,
-        unseenMessageCount: unseenMessageCount,
-        status: status,
-        muteUntil: muteUntil,
-        expireIn: expireIn,
-      );
+    conversationId: conversationId,
+    ownerId: ownerId,
+    category: category,
+    name: name,
+    announcement: announcement,
+    codeUrl: codeUrl,
+    payType: payType,
+    createdAt: createdAt,
+    pinTime: pinTime,
+    lastMessageId: lastMessageId,
+    lastMessageCreatedAt: lastMessageCreatedAt,
+    lastReadMessageId: lastReadMessageId,
+    unseenMessageCount: unseenMessageCount,
+    status: status,
+    muteUntil: muteUntil,
+    expireIn: expireIn,
+  );
 
   @override
   String toString() => 'TransferConversationData: $conversationId';

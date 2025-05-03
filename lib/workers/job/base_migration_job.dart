@@ -5,10 +5,7 @@ import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
 abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
-  BaseMigrationJob({
-    required super.database,
-    required this.action,
-  }) {
+  BaseMigrationJob({required super.database, required this.action}) {
     DataBaseEventBus.instance.addJobStream
         .where((event) => event.action == action)
         .listen((event) => start());
@@ -23,7 +20,9 @@ abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
       return jobs;
     }
     if (jobs.length != 1) {
-      e('BaseMigrationJob: $action ${jobs.length} jobs found, only first job will be executed');
+      e(
+        'BaseMigrationJob: $action ${jobs.length} jobs found, only first job will be executed',
+      );
     }
     final first = jobs.first;
 
@@ -43,14 +42,18 @@ abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
 
   @override
   Future<void> run(List<Job> jobs) async {
-    assert(jobs.length == 1,
-        'BaseMigrationJob $action should only have one job, but got ${jobs.length}');
+    assert(
+      jobs.length == 1,
+      'BaseMigrationJob $action should only have one job, but got ${jobs.length}',
+    );
     if (jobs.isEmpty) {
       return;
     }
     final job = jobs.first;
-    assert(job.action == action,
-        'BaseMigrationJob mismatch, expect $action, but got ${job.action}');
+    assert(
+      job.action == action,
+      'BaseMigrationJob mismatch, expect $action, but got ${job.action}',
+    );
     try {
       i('BaseMigrationJob $action start');
       await migration(job);

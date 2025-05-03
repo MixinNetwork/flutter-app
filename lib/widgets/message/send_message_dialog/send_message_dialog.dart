@@ -103,11 +103,17 @@ Future<bool> showSendDialog(
     return _sendMessageToUserId(context, user, _category, result);
   }
   if (conversationId == null) {
-    final currentConversation =
-        context.providerContainer.read(conversationProvider);
+    final currentConversation = context.providerContainer.read(
+      conversationProvider,
+    );
     if (currentConversation != null) {
-      await _sendMessage(context, currentConversation.conversationId,
-          currentConversation.encryptCategory, _category, result);
+      await _sendMessage(
+        context,
+        currentConversation.conversationId,
+        currentConversation.encryptCategory,
+        _category,
+        result,
+      );
       return true;
     }
   }
@@ -120,8 +126,12 @@ Future<bool> showSendDialog(
   return true;
 }
 
-Future<bool> _sendMessageToUserId(BuildContext context, String userId,
-    _Category category, dynamic data) async {
+Future<bool> _sendMessageToUserId(
+  BuildContext context,
+  String userId,
+  _Category category,
+  dynamic data,
+) async {
   if (!Uuid.isValidUUID(fromString: userId)) {
     return false;
   }
@@ -136,16 +146,23 @@ Future<bool> _sendMessageToUserId(BuildContext context, String userId,
     Toast.dismiss();
   }
 
-  final conversationId =
-      generateConversationId(context.accountServer.userId, userId);
+  final conversationId = generateConversationId(
+    context.accountServer.userId,
+    userId,
+  );
   await ConversationStateNotifier.selectUser(context, userId);
   final conversation = context.providerContainer.read(conversationProvider);
   if (conversation == null) {
     return false;
   }
   await _sendMessage(
-      context, conversationId, conversation.encryptCategory, category, data,
-      recipientId: userId);
+    context,
+    conversationId,
+    conversation.encryptCategory,
+    category,
+    data,
+    recipientId: userId,
+  );
   return true;
 }
 
@@ -177,7 +194,9 @@ class _SendPage extends HookConsumerWidget {
       }
       if (app != null) {
         return context.l10n.shareMessageDescription(
-            '${app?.name}(${app?.appNumber})', _category);
+          '${app?.name}(${app?.appNumber})',
+          _category,
+        );
       }
       return context.l10n.shareMessageDescriptionEmpty(_category);
     }, [category, app]);
@@ -207,9 +226,10 @@ class _SendPage extends HookConsumerWidget {
         encryptCategory = result?.firstOrNull?.encryptCategory;
       }
       if (encryptCategory == null && _conversationId != null) {
-        final conversation = await context.database.conversationDao
-            .conversationItem(_conversationId)
-            .getSingleOrNull();
+        final conversation =
+            await context.database.conversationDao
+                .conversationItem(_conversationId)
+                .getSingleOrNull();
         final ownerId = conversation?.ownerId;
         final isBotConversation = conversation?.isBotConversation;
         if (ownerId == null || isBotConversation == null) return;
@@ -220,7 +240,12 @@ class _SendPage extends HookConsumerWidget {
       if (_conversationId == null || encryptCategory == null) return;
 
       await _sendMessage(
-          context, _conversationId, encryptCategory, category, data);
+        context,
+        _conversationId,
+        encryptCategory,
+        category,
+        data,
+      );
       Navigator.pop(context);
     }
 
@@ -247,9 +272,10 @@ class _SendPage extends HookConsumerWidget {
               borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             alignment: Alignment.center,
-            padding: category == _Category.app_card
-                ? null
-                : const EdgeInsets.all(34),
+            padding:
+                category == _Category.app_card
+                    ? null
+                    : const EdgeInsets.all(34),
             child: child,
           ),
           const SizedBox(height: 54),
@@ -268,9 +294,14 @@ class _SendPage extends HookConsumerWidget {
   }
 }
 
-Future<void> _sendMessage(BuildContext context, String conversationId,
-    EncryptCategory encryptCategory, _Category category, dynamic data,
-    {String? recipientId}) async {
+Future<void> _sendMessage(
+  BuildContext context,
+  String conversationId,
+  EncryptCategory encryptCategory,
+  _Category category,
+  dynamic data, {
+  String? recipientId,
+}) async {
   if (category == _Category.text) {
     return context.accountServer.sendTextMessage(
       data as String,
@@ -346,10 +377,7 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child = Padding(
-      padding: padding,
-      child: this.child,
-    );
+    Widget child = Padding(padding: padding, child: this.child);
     if (clip) {
       child = ClipPath(
         clipper: _bubbleClipper,
@@ -358,8 +386,10 @@ class _MessageBubble extends StatelessWidget {
     }
     return CustomPaint(
       painter: BubblePainter(
-        color:
-            context.dynamicColor(lightOtherBubble, darkColor: darkOtherBubble),
+        color: context.dynamicColor(
+          lightOtherBubble,
+          darkColor: darkOtherBubble,
+        ),
         clipper: _bubbleClipper,
       ),
       child: child,
@@ -374,14 +404,14 @@ class _Text extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _MessageBubble(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: MessageItemWidget.primaryFontSize,
-            color: context.theme.text,
-          ),
-        ),
-      );
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: MessageItemWidget.primaryFontSize,
+        color: context.theme.text,
+      ),
+    ),
+  );
 }
 
 class _Image extends HookConsumerWidget {
@@ -391,9 +421,9 @@ class _Image extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => MixinImage.network(
-        image.url,
-        placeholder: () => ColoredBox(color: context.theme.secondaryText),
-      );
+    image.url,
+    placeholder: () => ColoredBox(color: context.theme.secondaryText),
+  );
 }
 
 class _Sticker extends HookConsumerWidget {
@@ -403,19 +433,27 @@ class _Sticker extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sticker = useMemoizedFuture(() async {
-      final sticker = await context.database.stickerDao
-          .sticker(stickerId)
-          .getSingleOrNull();
+    final sticker =
+        useMemoizedFuture(
+          () async {
+            final sticker =
+                await context.database.stickerDao
+                    .sticker(stickerId)
+                    .getSingleOrNull();
 
-      if (sticker != null) return sticker;
+            if (sticker != null) return sticker;
 
-      final s = await context.accountServer.client.accountApi
-          .getStickerById(stickerId);
-      await context.database.stickerDao.insert(s.data.asStickersCompanion);
+            final s = await context.accountServer.client.accountApi
+                .getStickerById(stickerId);
+            await context.database.stickerDao.insert(
+              s.data.asStickersCompanion,
+            );
 
-      return context.database.stickerDao.sticker(stickerId).getSingle();
-    }, null, keys: [stickerId]).data;
+            return context.database.stickerDao.sticker(stickerId).getSingle();
+          },
+          null,
+          keys: [stickerId],
+        ).data;
 
     if (sticker == null) return const SizedBox();
 
@@ -436,10 +474,15 @@ class _Contact extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = useMemoizedFuture(() async {
-      final list = await context.accountServer.refreshUsers([userId]);
-      return (list != null && list.isNotEmpty) ? list.first : null;
-    }, null, keys: [userId]).data;
+    final user =
+        useMemoizedFuture(
+          () async {
+            final list = await context.accountServer.refreshUsers([userId]);
+            return (list != null && list.isNotEmpty) ? list.first : null;
+          },
+          null,
+          keys: [userId],
+        ).data;
 
     if (user == null) return const SizedBox();
 
@@ -464,16 +507,13 @@ class _Post extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox.expand(
-        child: Padding(
-          padding: const EdgeInsets.all(36),
-          child: _MessageBubble(
-            child: MessagePost(
-              showStatus: false,
-              content: content,
-            ),
-          ),
-        ),
-      );
+    child: Padding(
+      padding: const EdgeInsets.all(36),
+      child: _MessageBubble(
+        child: MessagePost(showStatus: false, content: content),
+      ),
+    ),
+  );
 }
 
 class _AppCard extends StatelessWidget {

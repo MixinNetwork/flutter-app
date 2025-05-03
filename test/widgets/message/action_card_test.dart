@@ -9,7 +9,7 @@ void main() {
         'test title',
         'test description',
         'titletest description',
-        'title\ntest description'
+        'title\ntest description',
       ),
       ('', '', '', ''),
       ('', 'test description', 'test description', 'test description'),
@@ -23,13 +23,23 @@ void main() {
         'test title',
         'test description',
         'test titletest description',
-        'test title\ntest description'
+        'test title\ntest description',
       ),
     ];
 
     for (final test in tests) {
-      final data = AppCardData('', '', test.$1, test.$2, '', '', true,
-          [ActionData('', '', '')], '', null);
+      final data = AppCardData(
+        '',
+        '',
+        test.$1,
+        test.$2,
+        '',
+        '',
+        true,
+        [ActionData('', '', '')],
+        '',
+        null,
+      );
       expect(data.generateCopyTextWithBreakLine(test.$3), test.$4);
     }
   });

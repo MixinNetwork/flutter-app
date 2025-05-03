@@ -45,54 +45,58 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<ParticipantSessionKey> participantSessionKeyWithoutSelf(
-      String conversationId, String userId) {
+    String conversationId,
+    String userId,
+  ) {
     return customSelect(
-        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id != ?2 LIMIT 1',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId)
-        ],
-        readsFrom: {
-          participantSession,
-        }).map((QueryRow row) => ParticipantSessionKey(
-          conversationId: row.read<String>('conversation_id'),
-          userId: row.read<String>('user_id'),
-          sessionId: row.read<String>('session_id'),
-          publicKey: row.readNullable<String>('public_key'),
-        ));
+      'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id != ?2 LIMIT 1',
+      variables: [Variable<String>(conversationId), Variable<String>(userId)],
+      readsFrom: {participantSession},
+    ).map(
+      (QueryRow row) => ParticipantSessionKey(
+        conversationId: row.read<String>('conversation_id'),
+        userId: row.read<String>('user_id'),
+        sessionId: row.read<String>('session_id'),
+        publicKey: row.readNullable<String>('public_key'),
+      ),
+    );
   }
 
   Selectable<ParticipantSessionKey> otherParticipantSessionKey(
-      String conversationId, String userId, String sessionId) {
+    String conversationId,
+    String userId,
+    String sessionId,
+  ) {
     return customSelect(
-        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id == ?2 AND session_id != ?3 ORDER BY created_at DESC LIMIT 1',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId),
-          Variable<String>(sessionId)
-        ],
-        readsFrom: {
-          participantSession,
-        }).map((QueryRow row) => ParticipantSessionKey(
-          conversationId: row.read<String>('conversation_id'),
-          userId: row.read<String>('user_id'),
-          sessionId: row.read<String>('session_id'),
-          publicKey: row.readNullable<String>('public_key'),
-        ));
+      'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id == ?2 AND session_id != ?3 ORDER BY created_at DESC LIMIT 1',
+      variables: [
+        Variable<String>(conversationId),
+        Variable<String>(userId),
+        Variable<String>(sessionId),
+      ],
+      readsFrom: {participantSession},
+    ).map(
+      (QueryRow row) => ParticipantSessionKey(
+        conversationId: row.read<String>('conversation_id'),
+        userId: row.read<String>('user_id'),
+        sessionId: row.read<String>('session_id'),
+        publicKey: row.readNullable<String>('public_key'),
+      ),
+    );
   }
 
   Selectable<ParticipantSessionData> notSendSessionParticipants(
-      String conversationId, String sessionId) {
+    String conversationId,
+    String sessionId,
+  ) {
     return customSelect(
-        'SELECT p.* FROM participant_session AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.session_id != ?2 AND u.app_id IS NULL AND p.sent_to_server IS NULL',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(sessionId)
-        ],
-        readsFrom: {
-          participantSession,
-          users,
-        }).asyncMap(participantSession.mapFromRow);
+      'SELECT p.* FROM participant_session AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.session_id != ?2 AND u.app_id IS NULL AND p.sent_to_server IS NULL',
+      variables: [
+        Variable<String>(conversationId),
+        Variable<String>(sessionId),
+      ],
+      readsFrom: {participantSession, users},
+    ).asyncMap(participantSession.mapFromRow);
   }
 }
 

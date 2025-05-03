@@ -68,7 +68,7 @@ final circleColors = [
   const Color(0xFF45B7FE),
   const Color(0xFF00ECD0),
   const Color(0xFFFFCCC0),
-  const Color(0xFFCEA06B)
+  const Color(0xFFCEA06B),
 ];
 
 final avatarColors = [
@@ -101,7 +101,7 @@ final avatarColors = [
   const Color(0xFFBABAE8),
   const Color(0xFFBABCD5),
   const Color(0xFFAD98DA),
-  const Color(0xFFC097D9)
+  const Color(0xFFC097D9),
 ];
 
 final nameColors = [
@@ -154,5 +154,5 @@ final nameColors = [
   const Color(0xFF64B5D9),
   const Color(0xFF3E9CCB),
   const Color(0xFF2887C4),
-  const Color(0xFF52A98B)
+  const Color(0xFF52A98B),
 ];

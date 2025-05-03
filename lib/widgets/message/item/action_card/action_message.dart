@@ -25,18 +25,16 @@ class ActionCardMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final content = useMessageConverter(converter: (state) => state.content);
-    final appCardData = useMemoized(
-      () {
-        try {
-          return AppCardData.fromJson(
-              jsonDecode(content!) as Map<String, dynamic>);
-        } catch (error) {
-          e('ActionCard decode error: $error');
-          return null;
-        }
-      },
-      [content],
-    );
+    final appCardData = useMemoized(() {
+      try {
+        return AppCardData.fromJson(
+          jsonDecode(content!) as Map<String, dynamic>,
+        );
+      } catch (error) {
+        e('ActionCard decode error: $error');
+        return null;
+      }
+    }, [content]);
 
     if (appCardData == null) return const UnknownMessage();
 
@@ -79,11 +77,7 @@ class AppCardItem extends HookConsumerWidget {
       children: [
         ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          child: MixinImage.network(
-            data.iconUrl,
-            height: 40,
-            width: 40,
-          ),
+          child: MixinImage.network(data.iconUrl, height: 40, width: 40),
         ),
         const SizedBox(width: 8),
         Flexible(

@@ -41,22 +41,24 @@ class MessageName extends ConsumerWidget {
           fontSize: context.messageStyle.secondaryFontSize,
           color: getNameColorById(userId),
         ),
-      )
+      ),
     ];
 
     if (showIdentityNumber && userIdentityNumber != '0') {
       children
         ..add(const SizedBox(width: 2))
-        ..add(Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: Text(
-            '@$userIdentityNumber',
-            style: TextStyle(
-              fontSize: context.messageStyle.statusFontSize,
-              color: context.theme.text.withValues(alpha: 0.5),
+        ..add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Text(
+              '@$userIdentityNumber',
+              style: TextStyle(
+                fontSize: context.messageStyle.statusFontSize,
+                color: context.theme.text.withValues(alpha: 0.5),
+              ),
             ),
           ),
-        ));
+        );
     }
 
     children.add(
@@ -76,10 +78,7 @@ class MessageName extends ConsumerWidget {
         onTap: () => showUserDialog(context, userId),
         cursor: SystemMouseCursors.click,
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 10,
-            bottom: 2,
-          ),
+          padding: const EdgeInsets.only(left: 10, bottom: 2),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,

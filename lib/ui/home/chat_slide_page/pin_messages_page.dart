@@ -31,21 +31,22 @@ class PinMessagesPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conversationId = conversationState.conversationId;
 
-    final rawList = useMemoizedStream<List<MessageItem>>(
-      () => context.database.pinMessageDao
-          .messageItems(conversationId)
-          .watchWithStream(
-        eventStreams: [
-          DataBaseEventBus.instance.watchPinMessageStream(
-            conversationIds: [conversationId],
-          ),
-          DataBaseEventBus.instance.updateAssetStream,
-          DataBaseEventBus.instance.updateStickerStream,
-        ],
-        duration: kSlowThrottleDuration,
-      ),
-      keys: [conversationId],
-    ).data;
+    final rawList =
+        useMemoizedStream<List<MessageItem>>(
+          () => context.database.pinMessageDao
+              .messageItems(conversationId)
+              .watchWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchPinMessageStream(
+                    conversationIds: [conversationId],
+                  ),
+                  DataBaseEventBus.instance.updateAssetStream,
+                  DataBaseEventBus.instance.updateStickerStream,
+                ],
+                duration: kSlowThrottleDuration,
+              ),
+          keys: [conversationId],
+        ).data;
 
     final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
@@ -64,19 +65,22 @@ class PinMessagesPage extends HookConsumerWidget {
 
     return MultiProvider(
       providers: [
-        BlocProvider.value(
-          value: searchConversationKeywordCubit,
-        ),
+        BlocProvider.value(value: searchConversationKeywordCubit),
         Provider(
-          create: (_) => AudioMessagesPlayAgent(list,
-              (m) => context.accountServer.convertMessageAbsolutePath(m, true)),
+          create:
+              (_) => AudioMessagesPlayAgent(
+                list,
+                (m) =>
+                    context.accountServer.convertMessageAbsolutePath(m, true),
+              ),
         ),
       ],
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
-          title:
-              Text(context.l10n.pinnedMessageTitle(list.length, list.length)),
+          title: Text(
+            context.l10n.pinnedMessageTitle(list.length, list.length),
+          ),
           backgroundColor: context.theme.popUp,
           actions: [
             if (!Navigator.of(context).canPop())
@@ -121,33 +125,40 @@ class PinMessagesPage extends HookConsumerWidget {
                 await showMixinDialog<bool>(
                   context: context,
                   child: Builder(
-                      builder: (context) => AlertDialogLayout(
-                            title:
-                                Text(context.l10n.unpinAllMessagesConfirmation),
-                            content: const SizedBox(),
-                            actions: [
-                              MixinButton(
-                                  backgroundTransparent: true,
-                                  onTap: () => Navigator.pop(context),
-                                  child: Text(context.l10n.cancel)),
-                              MixinButton(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  context.accountServer.unpinMessage(
-                                    conversationId: conversationId,
-                                    pinMessageMinimals: list
-                                        .map((e) => PinMessageMinimal(
+                    builder:
+                        (context) => AlertDialogLayout(
+                          title: Text(
+                            context.l10n.unpinAllMessagesConfirmation,
+                          ),
+                          content: const SizedBox(),
+                          actions: [
+                            MixinButton(
+                              backgroundTransparent: true,
+                              onTap: () => Navigator.pop(context),
+                              child: Text(context.l10n.cancel),
+                            ),
+                            MixinButton(
+                              onTap: () {
+                                Navigator.pop(context);
+                                context.accountServer.unpinMessage(
+                                  conversationId: conversationId,
+                                  pinMessageMinimals:
+                                      list
+                                          .map(
+                                            (e) => PinMessageMinimal(
                                               type: e.type,
                                               messageId: e.messageId,
                                               content: e.content,
-                                            ))
-                                        .toList(),
-                                  );
-                                },
-                                child: Text(context.l10n.confirm),
-                              ),
-                            ],
-                          )),
+                                            ),
+                                          )
+                                          .toList(),
+                                );
+                              },
+                              child: Text(context.l10n.confirm),
+                            ),
+                          ],
+                        ),
+                  ),
                 );
               },
               child: Container(
@@ -155,10 +166,7 @@ class PinMessagesPage extends HookConsumerWidget {
                 alignment: Alignment.center,
                 child: Text(
                   context.l10n.unpinAllMessages,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.theme.accent,
-                  ),
+                  style: TextStyle(fontSize: 16, color: context.theme.accent),
                 ),
               ),
             ),

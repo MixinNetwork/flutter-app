@@ -39,6 +39,14 @@ class GiphyImage with EquatableMixin {
   Map<String, dynamic> toJson() => _$GiphyImageToJson(this);
 
   @override
-  List<Object?> get props =>
-      [url, width, height, size, mp4, mp4Size, webp, webpSize];
+  List<Object?> get props => [
+    url,
+    width,
+    height,
+    size,
+    mp4,
+    mp4Size,
+    webp,
+    webpSize,
+  ];
 }

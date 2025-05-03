@@ -10,19 +10,19 @@ class RatchetSenderKeyDao extends DatabaseAccessor<SignalDatabase>
   RatchetSenderKeyDao(super.db);
 
   Future<RatchetSenderKey?> getRatchetSenderKey(
-          String groupId, String senderId) async =>
-      (select(db.ratchetSenderKeys)
-            ..where((tbl) =>
-                tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId)))
-          .getSingleOrNull();
+    String groupId,
+    String senderId,
+  ) async =>
+      (select(db.ratchetSenderKeys)..where(
+        (tbl) => tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
+      )).getSingleOrNull();
 
   Future deleteByGroupIdAndSenderId(String groupId, String senderId) async =>
-      (delete(db.ratchetSenderKeys)
-            ..where((tbl) =>
-                tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId)))
-          .go();
+      (delete(db.ratchetSenderKeys)..where(
+        (tbl) => tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
+      )).go();
 
   Future insertSenderKey(
-          RatchetSenderKeysCompanion ratchetSenderKeysCompanion) async =>
-      into(db.ratchetSenderKeys).insert(ratchetSenderKeysCompanion);
+    RatchetSenderKeysCompanion ratchetSenderKeysCompanion,
+  ) async => into(db.ratchetSenderKeys).insert(ratchetSenderKeysCompanion);
 }

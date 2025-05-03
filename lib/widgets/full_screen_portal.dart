@@ -28,10 +28,12 @@ class FullScreenPortal extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final visibleBloc =
-        useBloc<FullScreenVisibleCubit>(() => FullScreenVisibleCubit(false));
-    final visible =
-        useBlocState<FullScreenVisibleCubit, bool>(bloc: visibleBloc);
+    final visibleBloc = useBloc<FullScreenVisibleCubit>(
+      () => FullScreenVisibleCubit(false),
+    );
+    final visible = useBlocState<FullScreenVisibleCubit, bool>(
+      bloc: visibleBloc,
+    );
     return BlocProvider.value(
       value: visibleBloc,
       child: Barrier(
@@ -45,10 +47,9 @@ class FullScreenPortal extends HookConsumerWidget {
             duration: duration,
             tween: Tween(begin: 0, end: visible ? 1 : 0),
             curve: curve,
-            builder: (context, progress, child) => Opacity(
-              opacity: progress,
-              child: child,
-            ),
+            builder:
+                (context, progress, child) =>
+                    Opacity(opacity: progress, child: child),
             child: visible ? Builder(builder: portalBuilder) : const SizedBox(),
           ),
           child: Builder(builder: builder),

@@ -9,20 +9,22 @@ Future<int> generateSignalDatabaseIdentityKeyPair(
   List<int>? privateKey,
 ) async {
   final registrationId = generateRegistrationId(false);
-  final identityKeyPair = privateKey == null
-      ? generateIdentityKeyPair()
-      : generateIdentityKeyPairFromPrivate(privateKey);
+  final identityKeyPair =
+      privateKey == null
+          ? generateIdentityKeyPair()
+          : generateIdentityKeyPairFromPrivate(privateKey);
   final identity = IdentitiesCompanion.insert(
-      address: '-1',
-      registrationId: Value(registrationId),
-      publicKey: identityKeyPair.getPublicKey().serialize(),
-      privateKey: Value(identityKeyPair.getPrivateKey().serialize()),
-      timestamp: DateTime.now().millisecondsSinceEpoch);
+    address: '-1',
+    registrationId: Value(registrationId),
+    publicKey: identityKeyPair.getPublicKey().serialize(),
+    privateKey: Value(identityKeyPair.getPrivateKey().serialize()),
+    timestamp: DateTime.now().millisecondsSinceEpoch,
+  );
   await db.identityDao.insert(identity);
   return registrationId;
 }
 
-Future<IdentityKeyPair?> getIdentityKeyPair(SignalDatabase db) async =>
-    db.identityDao
-        .getLocalIdentity()
-        .then((value) => value?.getIdentityKeyPair());
+Future<IdentityKeyPair?> getIdentityKeyPair(SignalDatabase db) async => db
+    .identityDao
+    .getLocalIdentity()
+    .then((value) => value?.getIdentityKeyPair());

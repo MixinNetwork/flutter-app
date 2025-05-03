@@ -20,21 +20,15 @@ class _LoadMorePagingInsertOrReplaceEvent<T> extends _LoadMorePagingEvent {
 }
 
 class LoadMorePagingState<T> extends Equatable {
-  const LoadMorePagingState({
-    this.list = const [],
-  });
+  const LoadMorePagingState({this.list = const []});
 
   final List<T> list;
 
   @override
   List<Object?> get props => [list];
 
-  LoadMorePagingState<T> copyWith({
-    List<T>? list,
-  }) =>
-      LoadMorePagingState<T>(
-        list: list ?? this.list,
-      );
+  LoadMorePagingState<T> copyWith({List<T>? list}) =>
+      LoadMorePagingState<T>(list: list ?? this.list);
 }
 
 class LoadMorePagingBloc<T>
@@ -62,8 +56,9 @@ class LoadMorePagingBloc<T>
       emit(state.copyWith(list: await loadMoreData(state.list)));
     } else if (event is _LoadMorePagingInsertOrReplaceEvent<T>) {
       if (state.list.isEmpty) return;
-      final index =
-          state.list.indexWhere((element) => isSameKey(element, event.item));
+      final index = state.list.indexWhere(
+        (element) => isSameKey(element, event.item),
+      );
       List<T> list;
       if (index == -1) {
         list = [event.item, ...state.list];

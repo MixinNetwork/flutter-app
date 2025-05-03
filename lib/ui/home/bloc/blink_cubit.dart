@@ -5,28 +5,18 @@ import 'package:flutter/material.dart';
 import '../../../bloc/subscribe_mixin.dart';
 
 class BlinkState extends Equatable {
-  const BlinkState({
-    this.color = Colors.transparent,
-    this.messageId,
-  });
+  const BlinkState({this.color = Colors.transparent, this.messageId});
 
   final Color color;
   final String? messageId;
 
   @override
-  List<Object?> get props => [
-        color,
-        messageId,
-      ];
+  List<Object?> get props => [color, messageId];
 
-  BlinkState copyWith({
-    Color? color,
-    String? messageId,
-  }) =>
-      BlinkState(
-        color: color ?? this.color,
-        messageId: messageId ?? this.messageId,
-      );
+  BlinkState copyWith({Color? color, String? messageId}) => BlinkState(
+    color: color ?? this.color,
+    messageId: messageId ?? this.messageId,
+  );
 }
 
 class BlinkCubit extends Cubit<BlinkState> with SubscribeMixin {
@@ -50,9 +40,7 @@ class BlinkCubit extends Cubit<BlinkState> with SubscribeMixin {
   );
 
   void _onUpdate() {
-    emit(state.copyWith(
-      color: colorTween.evaluate(animationController),
-    ));
+    emit(state.copyWith(color: colorTween.evaluate(animationController)));
   }
 
   void _onComplete(AnimationStatus status) {
@@ -61,9 +49,7 @@ class BlinkCubit extends Cubit<BlinkState> with SubscribeMixin {
   }
 
   void blinkByMessageId(String messageId) {
-    emit(BlinkState(
-      messageId: messageId,
-    ));
+    emit(BlinkState(messageId: messageId));
     animationController
       ..reset()
       ..forward();

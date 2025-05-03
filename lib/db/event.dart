@@ -17,19 +17,16 @@ class MiniNotificationMessage with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        conversationId,
-        messageId,
-        senderId,
-        createdAt,
-        type,
-      ];
+    conversationId,
+    messageId,
+    senderId,
+    createdAt,
+    type,
+  ];
 }
 
 class MiniSticker with EquatableMixin {
-  MiniSticker({
-    this.stickerId,
-    this.albumId,
-  });
+  MiniSticker({this.stickerId, this.albumId});
 
   final String? stickerId;
   final String? albumId;
@@ -39,17 +36,11 @@ class MiniSticker with EquatableMixin {
 }
 
 class MiniTranscriptMessage with EquatableMixin {
-  MiniTranscriptMessage({
-    required this.transcriptId,
-    this.messageId,
-  });
+  MiniTranscriptMessage({required this.transcriptId, this.messageId});
 
   final String transcriptId;
   final String? messageId;
 
   @override
-  List<Object?> get props => [
-        transcriptId,
-        messageId,
-      ];
+  List<Object?> get props => [transcriptId, messageId];
 }

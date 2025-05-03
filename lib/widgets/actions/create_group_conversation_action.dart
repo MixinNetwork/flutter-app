@@ -28,17 +28,15 @@ class CreateGroupConversationAction
       onlyContact: true,
     );
     if (result == null || result.isEmpty) return;
-    final userIds = result
-        .where((e) => e.userId != null)
-        .map(
-          (e) => e.userId!,
-        )
-        .toList();
+    final userIds =
+        result.where((e) => e.userId != null).map((e) => e.userId!).toList();
 
     final name = await showMixinDialog<String>(
       context: context,
-      child:
-          _NewConversationConfirm([context.accountServer.userId, ...userIds]),
+      child: _NewConversationConfirm([
+        context.accountServer.userId,
+        ...userIds,
+      ]),
     );
     if (name?.isEmpty ?? true) return;
 
@@ -49,20 +47,20 @@ class CreateGroupConversationAction
 }
 
 class _NewConversationConfirm extends HookConsumerWidget {
-  const _NewConversationConfirm(
-    this.userIds,
-  );
+  const _NewConversationConfirm(this.userIds);
 
   final List<String> userIds;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final users = useMemoizedFuture(
-      () => context.database.userDao
-          .usersByIn(userIds.sublist(0, math.min(4, userIds.length)))
-          .get(),
-      <User>[],
-    ).requireData;
+    final users =
+        useMemoizedFuture(
+          () =>
+              context.database.userDao
+                  .usersByIn(userIds.sublist(0, math.min(4, userIds.length)))
+                  .get(),
+          <User>[],
+        ).requireData;
 
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);
@@ -82,10 +80,7 @@ class _NewConversationConfirm extends HookConsumerWidget {
           const SizedBox(height: 8),
           Text(
             context.l10n.participantsCount(userIds.length),
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.secondaryText,
-            ),
+            style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
           ),
           const SizedBox(height: 48),
           DialogTextField(
@@ -97,9 +92,10 @@ class _NewConversationConfirm extends HookConsumerWidget {
       ),
       actions: [
         MixinButton(
-            backgroundTransparent: true,
-            onTap: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel)),
+          backgroundTransparent: true,
+          onTap: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),

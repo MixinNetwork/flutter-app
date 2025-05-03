@@ -28,38 +28,40 @@ class LandingCubit<T> extends Cubit<T> {
     T initialState, {
     String? userAgent,
     String? deviceId,
-  })  : client = Client(
-          dioOptions: BaseOptions(
-            headers: {
-              'Accept-Language': locale.languageCode,
-              if (userAgent != null) 'User-Agent': userAgent,
-              if (deviceId != null) 'Mixin-Device-Id': deviceId,
-            },
-          ),
-        ),
-        super(initialState);
+  }) : client = Client(
+         dioOptions: BaseOptions(
+           headers: {
+             'Accept-Language': locale.languageCode,
+             if (userAgent != null) 'User-Agent': userAgent,
+             if (deviceId != null) 'Mixin-Device-Id': deviceId,
+           },
+         ),
+       ),
+       super(initialState);
   final Client client;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
 }
 
 class LandingQrCodeCubit extends LandingCubit<LandingState> {
   LandingQrCodeCubit(
-      MultiAuthStateNotifier multiAuthChangeNotifier, Locale locale)
-      : super(
-          multiAuthChangeNotifier,
-          locale,
-          LandingState(
-            status: multiAuthChangeNotifier.current != null
-                ? LandingStatus.provisioning
-                : LandingStatus.init,
-          ),
-        ) {
+    MultiAuthStateNotifier multiAuthChangeNotifier,
+    Locale locale,
+  ) : super(
+        multiAuthChangeNotifier,
+        locale,
+        LandingState(
+          status:
+              multiAuthChangeNotifier.current != null
+                  ? LandingStatus.provisioning
+                  : LandingStatus.init,
+        ),
+      ) {
     if (multiAuthChangeNotifier.current != null) return;
     requestAuthUrl();
   }
 
   final StreamController<(int, String, signal.ECKeyPair)>
-      periodicStreamController =
+  periodicStreamController =
       StreamController<(int, String, signal.ECKeyPair)>();
 
   StreamSubscription? _periodicSubscription;
@@ -73,23 +75,29 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
   Future<void> requestAuthUrl() async {
     _cancelPeriodicSubscription();
     try {
-      final rsp = await client.provisioningApi
-          .getProvisioningId(Platform.operatingSystem);
+      final rsp = await client.provisioningApi.getProvisioningId(
+        Platform.operatingSystem,
+      );
       final keyPair = signal.Curve.generateKeyPair();
-      final pubKey =
-          Uri.encodeComponent(base64Encode(keyPair.publicKey.serialize()));
+      final pubKey = Uri.encodeComponent(
+        base64Encode(keyPair.publicKey.serialize()),
+      );
 
-      emit(state.copyWith(
-        authUrl: 'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
-        status: LandingStatus.ready,
-      ));
+      emit(
+        state.copyWith(
+          authUrl:
+              'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
+          status: LandingStatus.ready,
+        ),
+      );
 
       _periodicSubscription = Stream.periodic(
-        const Duration(milliseconds: 1500),
-        (i) => i,
-      )
+            const Duration(milliseconds: 1500),
+            (i) => i,
+          )
           .asyncBufferMap(
-              (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair))
+            (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair),
+          )
           .listen((event) {});
     } catch (error, stack) {
       e('requestAuthUrl failed: $error $stack');
@@ -124,8 +132,9 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
     try {
       final (acount, privateKey) = await _verify(secret, keyPair);
-      multiAuthChangeNotifier
-          .signIn(AuthState(account: acount, privateKey: privateKey));
+      multiAuthChangeNotifier.signIn(
+        AuthState(account: acount, privateKey: privateKey),
+      );
     } catch (error, stack) {
       emit(state.needReload('Failed to verify: $error'));
       e('_verify: $error $stack');
@@ -133,9 +142,13 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
   }
 
   FutureOr<(Account, String)> _verify(
-      String secret, signal.ECKeyPair keyPair) async {
-    final result =
-        signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
+    String secret,
+    signal.ECKeyPair keyPair,
+  ) async {
+    final result = signal.decrypt(
+      base64Encode(keyPair.privateKey.serialize()),
+      secret,
+    );
     final msg =
         json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
 
@@ -168,10 +181,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
     await CryptoKeyValue.instance.init(rsp.data.identityNumber);
     CryptoKeyValue.instance.localRegistrationId = registrationId;
 
-    return (
-      rsp.data,
-      privateKey,
-    );
+    return (rsp.data, privateKey);
   }
 
   @override
@@ -189,10 +199,10 @@ class LandingMobileCubit extends LandingCubit<void> {
     required String deviceId,
     required String userAgent,
   }) : super(
-          multiAuthChangeNotifier,
-          locale,
-          null,
-          deviceId: deviceId,
-          userAgent: userAgent,
-        );
+         multiAuthChangeNotifier,
+         locale,
+         null,
+         deviceId: deviceId,
+         userAgent: userAgent,
+       );
 }

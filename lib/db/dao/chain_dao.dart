@@ -7,12 +7,12 @@ part 'chain_dao.g.dart';
 
 extension ChainConverter on sdk.Chain {
   ChainsCompanion get asChainsCompanion => ChainsCompanion.insert(
-        chainId: chainId,
-        name: name,
-        symbol: symbol,
-        iconUrl: iconUrl,
-        threshold: threshold,
-      );
+    chainId: chainId,
+    name: name,
+    symbol: symbol,
+    iconUrl: iconUrl,
+    threshold: threshold,
+  );
 }
 
 @DriftAccessor(include: {'../moor/dao/chain.drift'})

@@ -24,9 +24,9 @@ mixin SubscribeMixin<State> on BlocBase<State> {
 
   @override
   Future<void> close() async {
-    await Future.wait(subscriptions
-        .where((element) => element != null)
-        .map((e) => e!.cancel()));
+    await Future.wait(
+      subscriptions.where((element) => element != null).map((e) => e!.cancel()),
+    );
     subscriptions.clear();
     await super.close();
   }

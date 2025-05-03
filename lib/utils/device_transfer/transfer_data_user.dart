@@ -31,23 +31,23 @@ class TransferDataUser {
       _$TransferDataUserFromJson(json);
 
   factory TransferDataUser.fromDbUser(db.User user) => TransferDataUser(
-        userId: user.userId,
-        identityNumber: user.identityNumber,
-        relationship: user.relationship,
-        fullName: user.fullName,
-        avatarUrl: user.avatarUrl,
-        phone: user.phone,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt,
-        muteUntil: user.muteUntil,
-        hasPin: user.hasPin == 1,
-        appId: user.appId,
-        biography: user.biography ?? '',
-        isScam: user.isScam == 1,
-        codeUrl: user.codeUrl,
-        codeId: user.codeId,
-        membership: user.membership,
-      );
+    userId: user.userId,
+    identityNumber: user.identityNumber,
+    relationship: user.relationship,
+    fullName: user.fullName,
+    avatarUrl: user.avatarUrl,
+    phone: user.phone,
+    isVerified: user.isVerified,
+    createdAt: user.createdAt,
+    muteUntil: user.muteUntil,
+    hasPin: user.hasPin == 1,
+    appId: user.appId,
+    biography: user.biography ?? '',
+    isScam: user.isScam == 1,
+    codeUrl: user.codeUrl,
+    codeId: user.codeId,
+    membership: user.membership,
+  );
 
   @JsonKey(name: 'user_id')
   final String userId;
@@ -98,23 +98,23 @@ class TransferDataUser {
   Map<String, dynamic> toJson() => _$TransferDataUserToJson(this);
 
   db.User toDbUser() => db.User(
-        userId: userId,
-        identityNumber: identityNumber,
-        relationship: relationship,
-        fullName: fullName,
-        avatarUrl: avatarUrl,
-        phone: phone,
-        isVerified: isVerified,
-        createdAt: createdAt,
-        muteUntil: muteUntil,
-        hasPin: hasPin == true ? 1 : 0,
-        appId: appId,
-        biography: biography,
-        isScam: isScam == true ? 1 : 0,
-        codeUrl: codeUrl,
-        codeId: codeId,
-        membership: membership,
-      );
+    userId: userId,
+    identityNumber: identityNumber,
+    relationship: relationship,
+    fullName: fullName,
+    avatarUrl: avatarUrl,
+    phone: phone,
+    isVerified: isVerified,
+    createdAt: createdAt,
+    muteUntil: muteUntil,
+    hasPin: hasPin == true ? 1 : 0,
+    appId: appId,
+    biography: biography,
+    isScam: isScam == true ? 1 : 0,
+    codeUrl: codeUrl,
+    codeId: codeId,
+    membership: membership,
+  );
 
   @override
   String toString() => 'TransferDataUser($userId)';

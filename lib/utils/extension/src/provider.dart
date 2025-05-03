@@ -11,20 +11,22 @@ extension ProviderExtension on BuildContext {
   SettingChangeNotifier get settingChangeNotifier =>
       providerContainer.read(settingProvider);
 
-  AccountServer get accountServer =>
-      providerContainer.read(accountServerProvider.select((value) {
-        if (!value.hasValue) throw Exception('AccountServerProvider not ready');
-        return value.requireValue;
-      }));
+  AccountServer get accountServer => providerContainer.read(
+    accountServerProvider.select((value) {
+      if (!value.hasValue) throw Exception('AccountServerProvider not ready');
+      return value.requireValue;
+    }),
+  );
 
   AudioMessagePlayService get audioMessageService =>
       read<AudioMessagePlayService>();
 
-  Database get database =>
-      providerContainer.read(databaseProvider.select((value) {
-        if (!value.hasValue) throw Exception('DatabaseProvider not ready');
-        return value.requireValue;
-      }));
+  Database get database => providerContainer.read(
+    databaseProvider.select((value) {
+      if (!value.hasValue) throw Exception('DatabaseProvider not ready');
+      return value.requireValue;
+    }),
+  );
 
   Localization get l10n => Localization.maybeOf(this) ?? Localization.current;
 
@@ -35,10 +37,7 @@ extension ProviderExtension on BuildContext {
   Brightness get brightness =>
       settingChangeNotifier.brightness ?? MediaQuery.platformBrightnessOf(this);
 
-  Color dynamicColor(
-    Color color, {
-    Color? darkColor,
-  }) =>
+  Color dynamicColor(Color color, {Color? darkColor}) =>
       BrightnessData.dynamicColor(this, color, darkColor: darkColor);
 
   ProviderContainer get providerContainer =>

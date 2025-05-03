@@ -13,11 +13,11 @@ class InscriptionCollectionDao extends DatabaseAccessor<MixinDatabase>
 
   Future<InscriptionCollection?> findCollectionByHash(String hash) async =>
       (select(inscriptionCollections)
-            ..where((tbl) => tbl.collectionHash.equals(hash)))
-          .getSingleOrNull();
+        ..where((tbl) => tbl.collectionHash.equals(hash))).getSingleOrNull();
 
   Future<InscriptionCollection> insertSdkCollection(
-      sdk.InscriptionCollection collection) async {
+    sdk.InscriptionCollection collection,
+  ) async {
     final item = collection.asDbItem;
     await into(inscriptionCollections).insert(item);
     return item;
@@ -26,11 +26,9 @@ class InscriptionCollectionDao extends DatabaseAccessor<MixinDatabase>
   Future<void> insert(
     InscriptionCollection collection, {
     required bool updateIfConflict,
-  }) =>
-      into(db.inscriptionCollections).simpleInsert(
-        collection,
-        updateIfConflict: updateIfConflict,
-      );
+  }) => into(
+    db.inscriptionCollections,
+  ).simpleInsert(collection, updateIfConflict: updateIfConflict);
 
   Future<List<InscriptionCollection>> getInscriptionCollections({
     required int limit,
@@ -44,13 +42,13 @@ class InscriptionCollectionDao extends DatabaseAccessor<MixinDatabase>
 
 extension _InscriptionCollectionExt on sdk.InscriptionCollection {
   InscriptionCollection get asDbItem => InscriptionCollection(
-        collectionHash: collectionHash,
-        supply: supply,
-        unit: unit,
-        symbol: symbol,
-        name: name,
-        iconUrl: iconUrl,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-      );
+    collectionHash: collectionHash,
+    supply: supply,
+    unit: unit,
+    symbol: symbol,
+    name: name,
+    iconUrl: iconUrl,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
 }

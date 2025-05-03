@@ -14,8 +14,10 @@ class MixinSessionStore extends SessionStore {
 
   @override
   Future<bool> containsSession(SignalProtocolAddress address) async {
-    final session =
-        await sessionDao.getSession(address.getName(), address.getDeviceId());
+    final session = await sessionDao.getSession(
+      address.getName(),
+      address.getDeviceId(),
+    );
     if (session == null) {
       return false;
     }
@@ -29,7 +31,8 @@ class MixinSessionStore extends SessionStore {
   Future deleteAllSessions(String name) async {
     final devices = await getSubDeviceSessions(name);
     await deleteSession(
-        SignalProtocolAddress(name, SignalProtocol.defaultDeviceId));
+      SignalProtocolAddress(name, SignalProtocol.defaultDeviceId),
+    );
     for (final device in devices) {
       await deleteSession(SignalProtocolAddress(name, device));
     }
@@ -37,8 +40,10 @@ class MixinSessionStore extends SessionStore {
 
   @override
   Future deleteSession(SignalProtocolAddress address) async {
-    final session =
-        await sessionDao.getSession(address.getName(), address.getDeviceId());
+    final session = await sessionDao.getSession(
+      address.getName(),
+      address.getDeviceId(),
+    );
     if (session != null) {
       await sessionDao.deleteSession(session);
     }
@@ -50,8 +55,10 @@ class MixinSessionStore extends SessionStore {
 
   @override
   Future<SessionRecord> loadSession(SignalProtocolAddress address) async {
-    final session =
-        await sessionDao.getSession(address.getName(), address.getDeviceId());
+    final session = await sessionDao.getSession(
+      address.getName(),
+      address.getDeviceId(),
+    );
     if (session != null) {
       return SessionRecord.fromSerialized(session.record);
     }
@@ -60,24 +67,34 @@ class MixinSessionStore extends SessionStore {
 
   @override
   Future storeSession(
-      SignalProtocolAddress address, SessionRecord record) async {
-    final session =
-        await sessionDao.getSession(address.getName(), address.getDeviceId());
+    SignalProtocolAddress address,
+    SessionRecord record,
+  ) async {
+    final session = await sessionDao.getSession(
+      address.getName(),
+      address.getDeviceId(),
+    );
     if (session == null) {
-      await sessionDao.insertSession(SessionsCompanion.insert(
+      await sessionDao.insertSession(
+        SessionsCompanion.insert(
           address: address.getName(),
           device: address.getDeviceId(),
           record: record.serialize(),
-          timestamp: DateTime.now().millisecondsSinceEpoch));
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
     }
     final sessionRecord = session?.record;
     if (sessionRecord != null &&
         !listEquals(sessionRecord, record.serialize())) {
-      await sessionDao.insertSession(SessionsCompanion.insert(
+      await sessionDao.insertSession(
+        SessionsCompanion.insert(
           address: address.getName(),
           device: address.getDeviceId(),
           record: record.serialize(),
-          timestamp: DateTime.now().millisecondsSinceEpoch));
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
     }
   }
 }

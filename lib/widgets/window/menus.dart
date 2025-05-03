@@ -58,13 +58,11 @@ class MacMenuBarStateNotifier
 
 final macMenuBarProvider =
     StateNotifierProvider<MacMenuBarStateNotifier, ConversationMenuHandle?>(
-        (ref) => MacMenuBarStateNotifier(null));
+      (ref) => MacMenuBarStateNotifier(null),
+    );
 
 class MacosMenuBar extends HookConsumerWidget {
-  const MacosMenuBar({
-    required this.child,
-    super.key,
-  });
+  const MacosMenuBar({required this.child, super.key});
 
   final Widget child;
 
@@ -84,66 +82,65 @@ class _Menus extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final signed =
-        ref.watch(accountServerProvider.select((value) => value.hasValue));
+    final signed = ref.watch(
+      accountServerProvider.select((value) => value.hasValue),
+    );
 
     final handle = ref.watch(macMenuBarProvider);
 
-    final muted = useMemoizedStream(
+    final muted =
+        useMemoizedStream(
           () => handle?.isMuted ?? const Stream<bool>.empty(),
           keys: [handle],
         ).data ??
         false;
 
-    final pinned = useMemoizedStream(
+    final pinned =
+        useMemoizedStream(
           () => handle?.isPinned ?? const Stream<bool>.empty(),
           keys: [handle],
         ).data ??
         false;
 
-    final hasPasscode = useMemoizedStream(signed
-                ? SecurityKeyValue.instance.watchHasPasscode
-                : () => Stream.value(false))
-            .data ??
+    final hasPasscode =
+        useMemoizedStream(
+          signed
+              ? SecurityKeyValue.instance.watchHasPasscode
+              : () => Stream.value(false),
+        ).data ??
         false;
 
     PlatformMenu buildConversationMenu() => PlatformMenu(
-          label: context.l10n.conversation,
-          menus: [
-            if (muted)
-              PlatformMenuItem(
-                label: context.l10n.unmute,
-                onSelected: handle?.unmute,
-              )
-            else
-              PlatformMenuItem(
-                label: context.l10n.mute,
-                onSelected: handle?.mute,
-              ),
-            PlatformMenuItem(
-              label: context.l10n.search,
-              onSelected: handle?.showSearch,
-            ),
-            PlatformMenuItem(
-              label: context.l10n.deleteChat,
-              onSelected: handle?.delete,
-            ),
-            if (pinned)
-              PlatformMenuItem(
-                label: context.l10n.unpin,
-                onSelected: handle?.unPin,
-              )
-            else
-              PlatformMenuItem(
-                label: context.l10n.pinTitle,
-                onSelected: handle?.pin,
-              ),
-            PlatformMenuItem(
-              label: context.l10n.toggleChatInfo,
-              onSelected: handle?.toggleSideBar,
-            ),
-          ],
-        );
+      label: context.l10n.conversation,
+      menus: [
+        if (muted)
+          PlatformMenuItem(
+            label: context.l10n.unmute,
+            onSelected: handle?.unmute,
+          )
+        else
+          PlatformMenuItem(label: context.l10n.mute, onSelected: handle?.mute),
+        PlatformMenuItem(
+          label: context.l10n.search,
+          onSelected: handle?.showSearch,
+        ),
+        PlatformMenuItem(
+          label: context.l10n.deleteChat,
+          onSelected: handle?.delete,
+        ),
+        if (pinned)
+          PlatformMenuItem(label: context.l10n.unpin, onSelected: handle?.unPin)
+        else
+          PlatformMenuItem(
+            label: context.l10n.pinTitle,
+            onSelected: handle?.pin,
+          ),
+        PlatformMenuItem(
+          label: context.l10n.toggleChatInfo,
+          onSelected: handle?.toggleSideBar,
+        ),
+      ],
+    );
 
     const methodChannel = MethodChannel('mixin_desktop/platform_menus');
 
@@ -151,42 +148,50 @@ class _Menus extends HookConsumerWidget {
       PlatformMenu(
         label: 'Mixin',
         menus: [
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: '${context.l10n.about} Mixin',
-              onSelected: () => methodChannel.invokeMethod('showAbout'),
-            ),
-          ]),
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: context.l10n.preferences,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.comma,
-                meta: true,
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: '${context.l10n.about} Mixin',
+                onSelected: () => methodChannel.invokeMethod('showAbout'),
               ),
-              onSelected: signed
-                  ? () {
-                      windowManager.show();
-                      ref
-                          .read(slideCategoryStateProvider.notifier)
-                          .select(SlideCategoryType.setting);
-                    }
-                  : null,
-            ),
-          ]),
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: context.l10n.lock,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyL,
-                meta: true,
-                shift: true,
+            ],
+          ),
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: context.l10n.preferences,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.comma,
+                  meta: true,
+                ),
+                onSelected:
+                    signed
+                        ? () {
+                          windowManager.show();
+                          ref
+                              .read(slideCategoryStateProvider.notifier)
+                              .select(SlideCategoryType.setting);
+                        }
+                        : null,
               ),
-              onSelected: hasPasscode
-                  ? () => EventBus.instance.fire(LockEvent.lock)
-                  : null,
-            ),
-          ]),
+            ],
+          ),
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: context.l10n.lock,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyL,
+                  meta: true,
+                  shift: true,
+                ),
+                onSelected:
+                    hasPasscode
+                        ? () => EventBus.instance.fire(LockEvent.lock)
+                        : null,
+              ),
+            ],
+          ),
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
@@ -195,14 +200,15 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.keyK,
                   meta: true,
                 ),
-                onSelected: signed
-                    ? () {
-                        Actions.invoke<ToggleCommandPaletteIntent>(
-                          context,
-                          const ToggleCommandPaletteIntent(),
-                        );
-                      }
-                    : null,
+                onSelected:
+                    signed
+                        ? () {
+                          Actions.invoke<ToggleCommandPaletteIntent>(
+                            context,
+                            const ToggleCommandPaletteIntent(),
+                          );
+                        }
+                        : null,
               ),
               PlatformMenuItem(
                 label: context.l10n.hideMixin,
@@ -231,70 +237,80 @@ class _Menus extends HookConsumerWidget {
       PlatformMenu(
         label: context.l10n.file,
         menus: [
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: context.l10n.createConversation,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyN,
-                meta: true,
-              ),
-              onSelected: signed
-                  ? () {
-                      windowManager.show();
-                      Actions.invoke<CreateConversationIntent>(
-                        context,
-                        const CreateConversationIntent(),
-                      );
-                    }
-                  : null,
-            ),
-            PlatformMenuItem(
-              label: context.l10n.createGroup,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyN,
-                shift: true,
-                meta: true,
-              ),
-              onSelected: signed
-                  ? () {
-                      windowManager.show();
-                      Actions.invoke<CreateGroupConversationIntent>(
-                        context,
-                        const CreateGroupConversationIntent(),
-                      );
-                    }
-                  : null,
-            ),
-            if (kDebugMode)
-              PlatformMenuItemGroup(members: [
-                PlatformMenuItem(
-                  label: 'chat backup and restore',
-                  onSelected: signed
-                      ? () {
-                          showDeviceTransferDialog(context);
-                        }
-                      : null,
-                )
-              ]),
-            PlatformMenuItem(
-              label: context.l10n.createCircle,
-              onSelected: signed
-                  ? () {
-                      windowManager.show();
-                      Actions.invoke<CreateCircleIntent>(
-                        context,
-                        const CreateCircleIntent(),
-                      );
-                    }
-                  : null,
-            ),
-            PlatformMenuItemGroup(members: [
+          PlatformMenuItemGroup(
+            members: [
               PlatformMenuItem(
-                label: context.l10n.closeWindow,
-                onSelected: windowManager.close,
-              )
-            ]),
-          ]),
+                label: context.l10n.createConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyN,
+                  meta: true,
+                ),
+                onSelected:
+                    signed
+                        ? () {
+                          windowManager.show();
+                          Actions.invoke<CreateConversationIntent>(
+                            context,
+                            const CreateConversationIntent(),
+                          );
+                        }
+                        : null,
+              ),
+              PlatformMenuItem(
+                label: context.l10n.createGroup,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyN,
+                  shift: true,
+                  meta: true,
+                ),
+                onSelected:
+                    signed
+                        ? () {
+                          windowManager.show();
+                          Actions.invoke<CreateGroupConversationIntent>(
+                            context,
+                            const CreateGroupConversationIntent(),
+                          );
+                        }
+                        : null,
+              ),
+              if (kDebugMode)
+                PlatformMenuItemGroup(
+                  members: [
+                    PlatformMenuItem(
+                      label: 'chat backup and restore',
+                      onSelected:
+                          signed
+                              ? () {
+                                showDeviceTransferDialog(context);
+                              }
+                              : null,
+                    ),
+                  ],
+                ),
+              PlatformMenuItem(
+                label: context.l10n.createCircle,
+                onSelected:
+                    signed
+                        ? () {
+                          windowManager.show();
+                          Actions.invoke<CreateCircleIntent>(
+                            context,
+                            const CreateCircleIntent(),
+                          );
+                        }
+                        : null,
+              ),
+              PlatformMenuItemGroup(
+                members: [
+                  PlatformMenuItem(
+                    label: context.l10n.closeWindow,
+                    onSelected: windowManager.close,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
       buildConversationMenu(),
@@ -311,60 +327,69 @@ class _Menus extends HookConsumerWidget {
           ),
           PlatformMenuItem(
             label: context.l10n.zoom,
-            onSelected: () async => !await windowManager.isMaximized()
-                ? windowManager.maximize()
-                : windowManager.restore(),
+            onSelected:
+                () async =>
+                    !await windowManager.isMaximized()
+                        ? windowManager.maximize()
+                        : windowManager.restore(),
           ),
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: context.l10n.previousConversation,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.arrowUp,
-                meta: true,
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: context.l10n.previousConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.arrowUp,
+                  meta: true,
+                ),
+                onSelected:
+                    signed
+                        ? () {
+                          Actions.maybeInvoke(
+                            context,
+                            const PreviousConversationIntent(),
+                          );
+                        }
+                        : null,
               ),
-              onSelected: signed
-                  ? () {
-                      Actions.maybeInvoke(
-                        context,
-                        const PreviousConversationIntent(),
-                      );
-                    }
-                  : null,
-            ),
-            PlatformMenuItem(
-              label: context.l10n.nextConversation,
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.arrowDown,
-                meta: true,
+              PlatformMenuItem(
+                label: context.l10n.nextConversation,
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.arrowDown,
+                  meta: true,
+                ),
+                onSelected:
+                    signed
+                        ? () {
+                          Actions.maybeInvoke(
+                            context,
+                            const NextConversationIntent(),
+                          );
+                        }
+                        : null,
               ),
-              onSelected: signed
-                  ? () {
-                      Actions.maybeInvoke(
-                          context, const NextConversationIntent());
-                    }
-                  : null,
-            ),
-          ]),
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: 'Mixin',
-              shortcut: const SingleActivator(
-                LogicalKeyboardKey.keyO,
-                meta: true,
-              ),
-              onSelected: windowManager.show,
-            ),
-          ]),
-          PlatformMenuItemGroup(members: [
-            PlatformMenuItem(
-              label: context.l10n.bringAllToFront,
-              onSelected: windowManager.show,
-            ),
-          ]),
-          PlatformMenuItem(
-            label: 'Mixin',
-            onSelected: windowManager.show,
+            ],
           ),
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: 'Mixin',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.keyO,
+                  meta: true,
+                ),
+                onSelected: windowManager.show,
+              ),
+            ],
+          ),
+          PlatformMenuItemGroup(
+            members: [
+              PlatformMenuItem(
+                label: context.l10n.bringAllToFront,
+                onSelected: windowManager.show,
+              ),
+            ],
+          ),
+          PlatformMenuItem(label: 'Mixin', onSelected: windowManager.show),
         ],
       ),
       PlatformMenu(
@@ -372,8 +397,8 @@ class _Menus extends HookConsumerWidget {
         menus: [
           PlatformMenuItem(
             label: context.l10n.helpCenter,
-            onSelected: () =>
-                openUri(context, 'https://mixinmessenger.zendesk.com'),
+            onSelected:
+                () => openUri(context, 'https://mixinmessenger.zendesk.com'),
           ),
           PlatformMenuItem(
             label: context.l10n.termsOfService,
@@ -381,8 +406,8 @@ class _Menus extends HookConsumerWidget {
           ),
           PlatformMenuItem(
             label: context.l10n.privacyPolicy,
-            onSelected: () =>
-                openUri(context, 'https://mixin.one/pages/privacy'),
+            onSelected:
+                () => openUri(context, 'https://mixin.one/pages/privacy'),
           ),
         ],
       ),

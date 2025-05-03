@@ -24,23 +24,22 @@ class AudioPlayerBar extends HookConsumerWidget {
 
     final state = useAudioMessagePlayerState();
 
-    final conversationItem = useMemoizedStream(
-      () {
-        if (message == null) {
-          return Stream.value(null);
-        }
-        return context.database.conversationDao
-            .conversationItem(message.conversationId)
-            .watchSingleOrNullWithStream(
-          eventStreams: [
-            DataBaseEventBus.instance
-                .watchUpdateConversationStream([message.conversationId]),
-          ],
-          duration: kSlowThrottleDuration,
-        );
-      },
-      keys: [message?.conversationId],
-    ).data;
+    final conversationItem =
+        useMemoizedStream(() {
+          if (message == null) {
+            return Stream.value(null);
+          }
+          return context.database.conversationDao
+              .conversationItem(message.conversationId)
+              .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateConversationStream([
+                    message.conversationId,
+                  ]),
+                ],
+                duration: kSlowThrottleDuration,
+              );
+        }, keys: [message?.conversationId]).data;
 
     final selectedConversationId = ref.watch(currentConversationIdProvider);
 
@@ -70,9 +69,10 @@ class AudioPlayerBar extends HookConsumerWidget {
               children: [
                 const _PlaybackSpeedButton(),
                 ActionButton(
-                  name: state.isPlaying
-                      ? Resources.assetsImagesPlayerPauseSvg
-                      : Resources.assetsImagesPlayerPlaySvg,
+                  name:
+                      state.isPlaying
+                          ? Resources.assetsImagesPlayerPauseSvg
+                          : Resources.assetsImagesPlayerPlaySvg,
                   color: context.theme.icon,
                   onTap: () {
                     if (state.isPlaying) {
@@ -157,33 +157,33 @@ class _Icon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: 32,
-        width: 40,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: conversation == null
+    height: 32,
+    width: 40,
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child:
+              conversation == null
                   ? const SizedBox.square(dimension: 32)
                   : ConversationAvatarWidget(
-                      conversation: conversation,
-                      size: 32,
-                    ),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: SvgPicture.asset(
-                Resources.assetsImagesAudioSvg,
-                colorFilter:
-                    ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
-                width: 16,
-                height: 16,
-              ),
-            ),
-          ],
+                    conversation: conversation,
+                    size: 32,
+                  ),
         ),
-      );
+        Align(
+          alignment: Alignment.bottomRight,
+          child: SvgPicture.asset(
+            Resources.assetsImagesAudioSvg,
+            colorFilter: ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
+            width: 16,
+            height: 16,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ProgressBar extends HookConsumerWidget {

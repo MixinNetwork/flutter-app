@@ -4,8 +4,9 @@ extension CurrencyExtension on BuildContext {
   String currencyFormat(dynamic value) =>
       currentCurrencyNumberFormat.format(num.tryParse('$value'));
 
-  String currencyFormatWithoutSymbol(dynamic value) => currencyFormat(value)
-      .replaceAll(currentCurrencyNumberFormat.currencySymbol, '');
+  String currencyFormatWithoutSymbol(dynamic value) => currencyFormat(
+    value,
+  ).replaceAll(currentCurrencyNumberFormat.currencySymbol, '');
 
   String get currencyFormatCoin => NumberFormat().format(num.tryParse('$this'));
 
@@ -99,6 +100,7 @@ extension SnapshotItemExtension on SnapshotItem {
 
   bool get isPositive => (double.tryParse(amount) ?? 0) > 0;
 }
+
 //
 // extension AddressExtension on Addresse {
 //   String displayAddress() {

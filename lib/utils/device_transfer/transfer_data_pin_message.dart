@@ -32,10 +32,10 @@ class TransferDataPinMessage {
   final DateTime createdAt;
 
   db.PinMessage toDbPinMessage() => db.PinMessage(
-        messageId: messageId,
-        conversationId: conversationId,
-        createdAt: createdAt,
-      );
+    messageId: messageId,
+    conversationId: conversationId,
+    createdAt: createdAt,
+  );
 
   Map<String, dynamic> toJson() => _$TransferDataPinMessageToJson(this);
 

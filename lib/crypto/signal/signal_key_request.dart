@@ -13,16 +13,25 @@ part 'signal_key_request.g.dart';
 class SignalKeyRequest with EquatableMixin {
   SignalKeyRequest(this.identityKey, this.signedPreKey, this.oneTimePreKeys);
 
-  factory SignalKeyRequest.from(IdentityKey ik, SignedPreKeyRecord spk,
-      {List<PreKeyRecord>? preKeyRecords}) {
+  factory SignalKeyRequest.from(
+    IdentityKey ik,
+    SignedPreKeyRecord spk, {
+    List<PreKeyRecord>? preKeyRecords,
+  }) {
     final identityKey = base64.encode(ik.serialize());
     final publicBase64 = base64.encode(spk.getKeyPair().publicKey.serialize());
     final signatureBase64 = base64.encode(spk.signature);
     final signedPreKey = SignedPreKey(spk.id, publicBase64, signatureBase64);
     final oneTimePreKeys = <OneTimePreKey>[];
     if (preKeyRecords != null) {
-      preKeyRecords.forEach((e) => oneTimePreKeys.add(OneTimePreKey(
-          e.id, base64.encode(e.getKeyPair().publicKey.serialize()))));
+      preKeyRecords.forEach(
+        (e) => oneTimePreKeys.add(
+          OneTimePreKey(
+            e.id,
+            base64.encode(e.getKeyPair().publicKey.serialize()),
+          ),
+        ),
+      );
     }
     return SignalKeyRequest(identityKey, signedPreKey, oneTimePreKeys);
   }
@@ -40,9 +49,5 @@ class SignalKeyRequest with EquatableMixin {
   Map<String, dynamic> toJson() => _$SignalKeyRequestToJson(this);
 
   @override
-  List<Object?> get props => [
-        identityKey,
-        signedPreKey,
-        oneTimePreKeys,
-      ];
+  List<Object?> get props => [identityKey, signedPreKey, oneTimePreKeys];
 }

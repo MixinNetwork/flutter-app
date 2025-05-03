@@ -32,23 +32,28 @@ part 'attachment_download_job.dart';
 
 part 'attachment_upload_job.dart';
 
-final _dio = (() {
-  final dio = Dio(BaseOptions(
-    connectTimeout: const Duration(milliseconds: 150 * 1000),
-    receiveTimeout: const Duration(milliseconds: 150 * 1000),
-  ));
+final _dio =
+    (() {
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(milliseconds: 150 * 1000),
+          receiveTimeout: const Duration(milliseconds: 150 * 1000),
+        ),
+      );
 
-  dio.interceptors.add(RetryInterceptor(
-    dio: dio,
-    logPrint: i,
-    retryDelays: const [
-      Duration(seconds: 1),
-      Duration(seconds: 2),
-      Duration(seconds: 3),
-    ],
-  ));
-  return dio;
-})();
+      dio.interceptors.add(
+        RetryInterceptor(
+          dio: dio,
+          logPrint: i,
+          retryDelays: const [
+            Duration(seconds: 1),
+            Duration(seconds: 2),
+            Duration(seconds: 3),
+          ],
+        ),
+      );
+      return dio;
+    })();
 
 // isolate kill message
 const _killMessage = 'kill';
@@ -72,13 +77,16 @@ abstract class _AttachmentJobBase {
 
 class AttachmentUtilBase {
   AttachmentUtilBase(this.mediaPath)
-      : transcriptPath = p.join(mediaPath, 'Transcripts') {
+    : transcriptPath = p.join(mediaPath, 'Transcripts') {
     Directory(transcriptPath).create(recursive: true);
   }
 
   factory AttachmentUtilBase.of(String identityNumber) {
-    final mediaPath =
-        p.join(mixinDocumentsDirectory.path, identityNumber, 'Media');
+    final mediaPath = p.join(
+      mixinDocumentsDirectory.path,
+      identityNumber,
+      'Media',
+    );
     return AttachmentUtilBase(mediaPath);
   }
 
@@ -106,7 +114,9 @@ class AttachmentUtilBase {
     assert(conversationId != null);
     assert(category != null);
     return p.join(
-        getAttachmentDirectoryPath(category!, conversationId!), fileName);
+      getAttachmentDirectoryPath(category!, conversationId!),
+      fileName,
+    );
   }
 
   String getAttachmentDirectoryPath(String category, String conversationId) {
@@ -147,9 +157,11 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
     if (httpClientAdapter is IOHttpClientAdapter) {
-      httpClientAdapter.createHttpClient = () => HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
+      httpClientAdapter.createHttpClient =
+          () =>
+              HttpClient()
+                ..badCertificateCallback =
+                    (X509Certificate cert, String host, int port) => true;
     } else {
       w('httpClientAdapter is not IOHttpClientAdapter');
     }
@@ -168,7 +180,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     Future<bool> checkDownloaded() async =>
         await _messageDao.messageHasMediaStatus(messageId, MediaStatus.done) ||
         await _messageDao.transcriptMessageHasMediaStatus(
-            messageId, MediaStatus.done);
+          messageId,
+          MediaStatus.done,
+        );
 
     if (!_hasAttachmentJob(messageId) && await checkDownloaded()) {
       await syncMessageMedia(messageId);
@@ -178,9 +192,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     return false;
   }
 
-  Future<void> downloadAttachment({
-    required String messageId,
-  }) async {
+  Future<void> downloadAttachment({required String messageId}) async {
     if (await checkSyncMessageMedia(messageId)) return;
 
     await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
@@ -246,8 +258,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
     try {
       final json = await jsonDecodeWithIsolate(content);
-      final attachmentExtra =
-          AttachmentExtra.fromJson(json as Map<String, dynamic>);
+      final attachmentExtra = AttachmentExtra.fromJson(
+        json as Map<String, dynamic>,
+      );
       attachmentId = attachmentExtra.attachmentId;
       shareable = attachmentExtra.shareable;
     } catch (e) {
@@ -259,7 +272,8 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       conversationId,
       messageId,
       message?.name ?? transcriptMessage?.mediaName,
-      mimeType: attachmentMessage?.mimeType ??
+      mimeType:
+          attachmentMessage?.mimeType ??
           message?.mediaMimeType ??
           transcriptMessage?.mediaMimeType,
       isTranscript: message == null,
@@ -289,10 +303,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         );
 
         if ((mediaKey == null || mediaDigest == null) && message != null) {
-          setKeyAndDigestInvalid(
-            message.mediaKey,
-            message.mediaDigest,
-          );
+          setKeyAndDigestInvalid(message.mediaKey, message.mediaDigest);
         }
 
         if ((mediaKey == null || mediaDigest == null) &&
@@ -306,12 +317,14 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         final attachmentDownloadJob = _AttachmentDownloadJob(
           path: path,
           url: response.data.viewUrl!,
-          keys: mediaKey != null
-              ? await base64DecodeWithIsolate(mediaKey!)
-              : null,
-          digest: mediaDigest != null
-              ? await base64DecodeWithIsolate(mediaDigest!)
-              : null,
+          keys:
+              mediaKey != null
+                  ? await base64DecodeWithIsolate(mediaKey!)
+                  : null,
+          digest:
+              mediaDigest != null
+                  ? await base64DecodeWithIsolate(mediaDigest!)
+                  : null,
         );
 
         _setAttachmentJob(messageId, attachmentDownloadJob);
@@ -324,12 +337,14 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         final fileSize = await file.length();
 
         if (attachmentMessage != null) {
-          final content = await jsonEncodeWithIsolate(AttachmentExtra(
-            attachmentId: response.data.attachmentId,
-            messageId: messageId,
-            createdAt: response.data.createdAt,
-            shareable: shareable,
-          ).toJson());
+          final content = await jsonEncodeWithIsolate(
+            AttachmentExtra(
+              attachmentId: response.data.attachmentId,
+              messageId: messageId,
+              createdAt: response.data.createdAt,
+              shareable: shareable,
+            ).toJson(),
+          );
 
           await _messageDao.updateMessageContent(messageId, content);
         }
@@ -401,18 +416,22 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       );
       await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
       return AttachmentResult(
-          response.data.attachmentId,
-          category.isSignal || category.isEncrypted
-              ? await base64EncodeWithIsolate(keys!)
-              : null,
-          category.isSignal || category.isEncrypted
-              ? await base64EncodeWithIsolate(digest!)
-              : null,
-          response.data.createdAt);
+        response.data.attachmentId,
+        category.isSignal || category.isEncrypted
+            ? await base64EncodeWithIsolate(keys!)
+            : null,
+        category.isSignal || category.isEncrypted
+            ? await base64EncodeWithIsolate(digest!)
+            : null,
+        response.data.createdAt,
+      );
     } catch (error, s) {
       w('upload failed error: $error, $s');
-      showToastFailed(ToastError.builder(
-          (context) => context.l10n.errorUploadAttachmentFailed));
+      showToastFailed(
+        ToastError.builder(
+          (context) => context.l10n.errorUploadAttachmentFailed,
+        ),
+      );
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
       return null;
     } finally {
@@ -431,9 +450,10 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     String? mimeType,
     bool isTranscript = false,
   }) {
-    final path = isTranscript
-        ? transcriptPath
-        : getAttachmentDirectoryPath(category, conversationId!);
+    final path =
+        isTranscript
+            ? transcriptPath
+            : getAttachmentDirectoryPath(category, conversationId!);
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
@@ -464,8 +484,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     String identityNumber,
   ) {
     final documentDirectory = mixinDocumentsDirectory;
-    final mediaDirectory =
-        File(p.join(documentDirectory.path, identityNumber, 'Media'));
+    final mediaDirectory = File(
+      p.join(documentDirectory.path, identityNumber, 'Media'),
+    );
     return AttachmentUtil(
       client,
       database.messageDao,
@@ -512,7 +533,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   Future<bool> syncMessageMedia(String messageId) async {
     Future<bool> fromMessage() async {
       if (await _messageDao.messageHasMediaStatus(
-          messageId, MediaStatus.done)) {
+        messageId,
+        MediaStatus.done,
+      )) {
         final message = await _messageDao.findMessageByMessageId(messageId);
         final path = convertAbsolutePath(
           category: message!.category,
@@ -554,10 +577,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       return false;
     }
 
-    final result = await Future.wait([
-      fromMessage(),
-      fromOtherTranscript(),
-    ]);
+    final result = await Future.wait([fromMessage(), fromOtherTranscript()]);
     return result.any((result) => result);
   }
 
@@ -567,39 +587,55 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
             .get())
         .map((e) => e.transcriptId);
     await Future.forEach<String>(transcriptIds, (transcriptId) async {
-      final list = await _transcriptMessageDao
-          .transcriptMessageByTranscriptId(transcriptId)
-          .get();
-      final attachmentList =
-          list.where((element) => element.category.isAttachment);
+      final list =
+          await _transcriptMessageDao
+              .transcriptMessageByTranscriptId(transcriptId)
+              .get();
+      final attachmentList = list.where(
+        (element) => element.category.isAttachment,
+      );
 
       if (attachmentList.isEmpty) return;
 
-      final status = attachmentList
-              .every((element) => element.mediaStatus == MediaStatus.done)
-          ? MediaStatus.done
-          : MediaStatus.canceled;
+      final status =
+          attachmentList.every(
+                (element) => element.mediaStatus == MediaStatus.done,
+              )
+              ? MediaStatus.done
+              : MediaStatus.canceled;
       await _messageDao.updateMediaStatus(transcriptId, status);
     });
   }
 
   Future<void> _updateMessageQuotedContent(
-      String messageId, String? conversationId) async {
+    String messageId,
+    String? conversationId,
+  ) async {
     if (conversationId == null) {
       d('_updateMessageQuotedContent: conversationId is null');
       return;
     }
-    if (await _messageDao.countMessageByQuoteId(conversationId, messageId,
-            nullQuoteContentOnly: false) >
+    if (await _messageDao.countMessageByQuoteId(
+          conversationId,
+          messageId,
+          nullQuoteContentOnly: false,
+        ) >
         0) {
-      final messageItem =
-          await _messageDao.findMessageItemById(conversationId, messageId);
+      final messageItem = await _messageDao.findMessageItemById(
+        conversationId,
+        messageId,
+      );
       if (messageItem != null) {
         await _messageDao.updateQuoteContentByQuoteId(
-            conversationId, messageId, messageItem.toJson());
+          conversationId,
+          messageId,
+          messageItem.toJson(),
+        );
       }
     } else {
-      d('_updateMessageQuotedContent: no message quoted this message $conversationId $messageId');
+      d(
+        '_updateMessageQuotedContent: no message quoted this message $conversationId $messageId',
+      );
     }
   }
 }

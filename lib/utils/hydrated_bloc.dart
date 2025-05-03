@@ -11,18 +11,17 @@ T? fromHydratedJson<T>(
   return fromJson(castJson ?? <String, dynamic>{});
 }
 
-Map<String, dynamic>? toHydratedJson(
-  Map<String, dynamic> state,
-) =>
+Map<String, dynamic>? toHydratedJson(Map<String, dynamic> state) =>
     _cast<Map<String, dynamic>>(_traverseWrite(state).value);
 
 dynamic _traverseRead(dynamic value) {
   if (value is Map) {
     return value.map<String, dynamic>(
-        (dynamic key, dynamic value) => MapEntry<String, dynamic>(
-              _cast<String>(key) ?? '',
-              _traverseRead(value),
-            ));
+      (dynamic key, dynamic value) => MapEntry<String, dynamic>(
+        _cast<String>(key) ?? '',
+        _traverseRead(value),
+      ),
+    );
   }
   if (value is List) {
     for (var i = 0; i < value.length; i++) {
@@ -42,10 +41,10 @@ class _Traversed {
   _Traversed._({required this.outcome, required this.value});
 
   _Traversed.atomic(dynamic value)
-      : this._(outcome: _Outcome.atomic, value: value);
+    : this._(outcome: _Outcome.atomic, value: value);
 
   _Traversed.complex(dynamic value)
-      : this._(outcome: _Outcome.complex, value: value);
+    : this._(outcome: _Outcome.complex, value: value);
   final _Outcome outcome;
   final dynamic value;
 }
@@ -72,9 +71,10 @@ dynamic _traverseComplexJson(dynamic object) {
     List<dynamic>? list;
     for (var i = 0; i < object.length; i++) {
       final traversed = _traverseWrite(object[i]);
-      list ??= traversed.outcome == _Outcome.atomic
-          ? object.sublist(0)
-          : (<dynamic>[]..length = object.length);
+      list ??=
+          traversed.outcome == _Outcome.atomic
+              ? object.sublist(0)
+              : (<dynamic>[]..length = object.length);
       list[i] = traversed.value;
     }
     return list;

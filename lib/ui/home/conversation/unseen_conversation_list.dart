@@ -34,13 +34,15 @@ class UnseenConversationList extends HookConsumerWidget {
           removeChatFromCircle: true,
           child: ConversationItemWidget(
             conversation: conversation,
-            selected: conversation.conversationId == currentConversationId &&
+            selected:
+                conversation.conversationId == currentConversationId &&
                 !routeMode,
-            onTap: () => ConversationStateNotifier.selectConversation(
-              context,
-              conversation.conversationId,
-              conversation: conversation,
-            ),
+            onTap:
+                () => ConversationStateNotifier.selectConversation(
+                  context,
+                  conversation.conversationId,
+                  conversation: conversation,
+                ),
           ),
         );
       },

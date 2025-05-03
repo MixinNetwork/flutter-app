@@ -29,13 +29,7 @@ import 'giphy_page.dart';
 import 'sticker_item.dart';
 import 'sticker_store.dart';
 
-enum PresetStickerGroup {
-  store,
-  emoji,
-  recent,
-  favorite,
-  gif;
-}
+enum PresetStickerGroup { store, emoji, recent, favorite, gif }
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
@@ -51,118 +45,121 @@ class StickerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: Colors.transparent,
-        elevation: 5,
+    color: Colors.transparent,
+    elevation: 5,
+    borderRadius: const BorderRadius.all(Radius.circular(11)),
+    child: Container(
+      width: 464,
+      height: 407,
+      decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(11)),
-        child: Container(
-          width: 464,
-          height: 407,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(11)),
-            color: context.dynamicColor(
-              const Color.fromRGBO(255, 255, 255, 1),
-              darkColor: const Color.fromRGBO(62, 65, 72, 1),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(11)),
-            child: Column(
-              children: [
-                Expanded(
-                  child: TabBarView(
-                    controller: tabController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: List.generate(
-                      tabLength,
-                      (index) {
-                        if (index < presetStickerGroups.length) {
-                          final preset = presetStickerGroups[index];
-                          switch (preset) {
-                            case PresetStickerGroup.store:
-                              return _StickerStoreEmptyPage();
-                            case PresetStickerGroup.emoji:
-                              return const AutomaticKeepAliveClientWidget(
-                                child: EmojiPage(),
-                              );
-                            case PresetStickerGroup.recent:
-                              return _StickerAlbumPage(
-                                getStickers: () => context.database.stickerDao
-                                    .recentUsedStickers()
-                                    .watchWithStream(
-                                  eventStreams: [
-                                    DataBaseEventBus
-                                        .instance.updateStickerStream
-                                  ],
-                                  duration: kVerySlowThrottleDuration,
-                                ),
-                                updateUsedAt: false,
-                              );
-                            case PresetStickerGroup.favorite:
-                              return _StickerAlbumPage(
-                                getStickers: () => context.database.stickerDao
-                                    .personalStickers()
-                                    .watchWithStream(
-                                  eventStreams: [
-                                    DataBaseEventBus
-                                        .instance.updateStickerStream
-                                  ],
-                                  duration: kVerySlowThrottleDuration,
-                                ),
-                                delete: (sticker) {
-                                  final ctx = Navigator.of(context).context;
-                                  showToastLoading(context: ctx);
-                                  try {
-                                    ctx.accountServer.client.accountApi
-                                        .removeSticker([sticker.stickerId]);
-                                    ctx.database.stickerDao
-                                        .deletePersonalSticker(
-                                            sticker.stickerId);
-                                    showToastSuccessful(context: ctx);
-                                  } catch (error, stacktrace) {
-                                    e('removeSticker error: $error, $stacktrace');
-                                    showToastFailed(error, context: ctx);
-                                  }
-                                },
-                                canAddSticker: true,
-                              );
-                            case PresetStickerGroup.gif:
-                              return const AutomaticKeepAliveClientWidget(
-                                child: GiphyPage(),
-                              );
-                          }
-                        }
-                        return _StickerAlbumPage(
-                          getStickers: () {
-                            final albumId =
-                                BlocProvider.of<StickerAlbumsCubit>(context)
-                                    .state[index - presetStickerGroups.length]
-                                    .albumId;
-                            return context.database.stickerDao
-                                .stickerByAlbumId(albumId)
-                                .watchWithStream(
-                              eventStreams: [
-                                DataBaseEventBus.instance
-                                    .watchUpdateStickerStream(
-                                        albumIds: [albumId])
-                              ],
-                              duration: kVerySlowThrottleDuration,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                _StickerAlbumBar(
-                  tabLength: tabLength,
-                  tabController: tabController,
-                  presetStickerGroups: presetStickerGroups,
-                ),
-              ],
-            ),
-          ),
+        color: context.dynamicColor(
+          const Color.fromRGBO(255, 255, 255, 1),
+          darkColor: const Color.fromRGBO(62, 65, 72, 1),
         ),
-      );
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
+        child: Column(
+          children: [
+            Expanded(
+              child: TabBarView(
+                controller: tabController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: List.generate(tabLength, (index) {
+                  if (index < presetStickerGroups.length) {
+                    final preset = presetStickerGroups[index];
+                    switch (preset) {
+                      case PresetStickerGroup.store:
+                        return _StickerStoreEmptyPage();
+                      case PresetStickerGroup.emoji:
+                        return const AutomaticKeepAliveClientWidget(
+                          child: EmojiPage(),
+                        );
+                      case PresetStickerGroup.recent:
+                        return _StickerAlbumPage(
+                          getStickers:
+                              () => context.database.stickerDao
+                                  .recentUsedStickers()
+                                  .watchWithStream(
+                                    eventStreams: [
+                                      DataBaseEventBus
+                                          .instance
+                                          .updateStickerStream,
+                                    ],
+                                    duration: kVerySlowThrottleDuration,
+                                  ),
+                          updateUsedAt: false,
+                        );
+                      case PresetStickerGroup.favorite:
+                        return _StickerAlbumPage(
+                          getStickers:
+                              () => context.database.stickerDao
+                                  .personalStickers()
+                                  .watchWithStream(
+                                    eventStreams: [
+                                      DataBaseEventBus
+                                          .instance
+                                          .updateStickerStream,
+                                    ],
+                                    duration: kVerySlowThrottleDuration,
+                                  ),
+                          delete: (sticker) {
+                            final ctx = Navigator.of(context).context;
+                            showToastLoading(context: ctx);
+                            try {
+                              ctx.accountServer.client.accountApi.removeSticker(
+                                [sticker.stickerId],
+                              );
+                              ctx.database.stickerDao.deletePersonalSticker(
+                                sticker.stickerId,
+                              );
+                              showToastSuccessful(context: ctx);
+                            } catch (error, stacktrace) {
+                              e('removeSticker error: $error, $stacktrace');
+                              showToastFailed(error, context: ctx);
+                            }
+                          },
+                          canAddSticker: true,
+                        );
+                      case PresetStickerGroup.gif:
+                        return const AutomaticKeepAliveClientWidget(
+                          child: GiphyPage(),
+                        );
+                    }
+                  }
+                  return _StickerAlbumPage(
+                    getStickers: () {
+                      final albumId =
+                          BlocProvider.of<StickerAlbumsCubit>(
+                            context,
+                          ).state[index - presetStickerGroups.length].albumId;
+                      return context.database.stickerDao
+                          .stickerByAlbumId(albumId)
+                          .watchWithStream(
+                            eventStreams: [
+                              DataBaseEventBus.instance
+                                  .watchUpdateStickerStream(
+                                    albumIds: [albumId],
+                                  ),
+                            ],
+                            duration: kVerySlowThrottleDuration,
+                          );
+                    },
+                  );
+                }),
+              ),
+            ),
+            _StickerAlbumBar(
+              tabLength: tabLength,
+              tabController: tabController,
+              presetStickerGroups: presetStickerGroups,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _StickerAlbumPage extends HookConsumerWidget {
@@ -219,50 +216,50 @@ class _AddStickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
-        hoveringDecoration: BoxDecoration(
-          color: context.dynamicColor(
-            const Color.fromRGBO(229, 231, 235, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+    hoveringDecoration: BoxDecoration(
+      color: context.dynamicColor(
+        const Color.fromRGBO(229, 231, 235, 1),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+      ),
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+    ),
+    onTap: () async {
+      try {
+        final ctx = Navigator.of(context).context;
+        final image = await ImagePicker().pickImage(
+          source: ImageSource.gallery,
+        );
+        if (image == null) {
+          return;
+        }
+        await showAddStickerDialog(ctx, filepath: image.path);
+      } catch (error, stacktrace) {
+        e('pickFiles error: $error, $stacktrace');
+        showToastFailed(error);
+      }
+    },
+    child: Center(
+      child: SvgPicture.asset(
+        Resources.assetsImagesAddStickerSvg,
+        width: 78,
+        height: 78,
+        colorFilter: ColorFilter.mode(
+          context.theme.secondaryText,
+          BlendMode.srcIn,
         ),
-        onTap: () async {
-          try {
-            final ctx = Navigator.of(context).context;
-            final image =
-                await ImagePicker().pickImage(source: ImageSource.gallery);
-            if (image == null) {
-              return;
-            }
-            await showAddStickerDialog(ctx, filepath: image.path);
-          } catch (error, stacktrace) {
-            e('pickFiles error: $error, $stacktrace');
-            showToastFailed(error);
-          }
-        },
-        child: Center(
-          child: SvgPicture.asset(Resources.assetsImagesAddStickerSvg,
-              width: 78,
-              height: 78,
-              colorFilter: ColorFilter.mode(
-                context.theme.secondaryText,
-                BlendMode.srcIn,
-              )),
-        ),
-      );
+      ),
+    ),
+  );
 }
 
 class _StickerStoreEmptyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
-        child: Text(
-          context.l10n.stickerStore,
-          style: TextStyle(
-            color: context.theme.secondaryText,
-            fontSize: 18,
-          ),
-        ),
-      );
+    child: Text(
+      context.l10n.stickerStore,
+      style: TextStyle(color: context.theme.secondaryText, fontSize: 18),
+    ),
+  );
 }
 
 class _StickerAlbumPageItem extends HookConsumerWidget {
@@ -289,14 +286,18 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
         final conversationItem = ref.read(conversationProvider);
         if (conversationItem == null) return;
 
-        final albumId = await accountServer.database.stickerRelationshipDao
-            .stickerSystemAlbumId(sticker.stickerId)
-            .getSingleOrNull();
+        final albumId =
+            await accountServer.database.stickerRelationshipDao
+                .stickerSystemAlbumId(sticker.stickerId)
+                .getSingleOrNull();
 
         await Future.wait([
           if (updateUsedAt)
             accountServer.database.stickerDao.updateUsedAt(
-                sticker.albumId, sticker.stickerId, DateTime.now()),
+              sticker.albumId,
+              sticker.stickerId,
+              DateTime.now(),
+            ),
           accountServer.sendStickerMessage(
             sticker.stickerId,
             albumId,
@@ -317,23 +318,27 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
         padding: const EdgeInsets.all(8),
         child: RepaintBoundary(
           child: Builder(
-            builder: (context) => StickerItem(
-              assetUrl: sticker.assetUrl,
-              assetType: sticker.assetType,
-            ),
+            builder:
+                (context) => StickerItem(
+                  assetUrl: sticker.assetUrl,
+                  assetType: sticker.assetType,
+                ),
           ),
         ),
       ),
     );
     if (delete != null) {
       widget = CustomContextMenuWidget(
-        menuProvider: (request) => Menu(children: [
-          MenuAction(
-            title: context.l10n.delete,
-            image: MenuImage.icon(IconFonts.delete),
-            callback: () => delete?.call(sticker),
-          ),
-        ]),
+        menuProvider:
+            (request) => Menu(
+              children: [
+                MenuAction(
+                  title: context.l10n.delete,
+                  image: MenuImage.icon(IconFonts.delete),
+                  callback: () => delete?.call(sticker),
+                ),
+              ],
+            ),
         child: widget,
       );
     }
@@ -433,59 +438,62 @@ class _StickerAlbumBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
-        size: const Size.square(48),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: _StickerGroupIconHoverContainer(
-            child: Center(
-              child: Center(
-                child: Builder(
-                  builder: (context) {
-                    final presetStickerAlbum = {
-                      PresetStickerGroup.store:
-                          AccountKeyValue.instance.hasNewAlbum
-                              ? Resources.assetsImagesStickerStoreRedDotSvg
-                              : Resources.assetsImagesStickerStoreSvg,
-                      PresetStickerGroup.emoji:
-                          Resources.assetsImagesEmojiStickerSvg,
-                      PresetStickerGroup.recent:
-                          Resources.assetsImagesRecentStickerSvg,
-                      PresetStickerGroup.favorite:
-                          Resources.assetsImagesPersonalStickerSvg,
-                      PresetStickerGroup.gif:
-                          Resources.assetsImagesGifStickerSvg,
-                    };
+    size: const Size.square(48),
+    child: Padding(
+      padding: const EdgeInsets.all(4),
+      child: _StickerGroupIconHoverContainer(
+        child: Center(
+          child: Center(
+            child: Builder(
+              builder: (context) {
+                final presetStickerAlbum = {
+                  PresetStickerGroup.store:
+                      AccountKeyValue.instance.hasNewAlbum
+                          ? Resources.assetsImagesStickerStoreRedDotSvg
+                          : Resources.assetsImagesStickerStoreSvg,
+                  PresetStickerGroup.emoji:
+                      Resources.assetsImagesEmojiStickerSvg,
+                  PresetStickerGroup.recent:
+                      Resources.assetsImagesRecentStickerSvg,
+                  PresetStickerGroup.favorite:
+                      Resources.assetsImagesPersonalStickerSvg,
+                  PresetStickerGroup.gif: Resources.assetsImagesGifStickerSvg,
+                };
 
-                    if (index < presetStickerGroups.length) {
-                      return SvgPicture.asset(
-                        presetStickerAlbum[presetStickerGroups[index]]!,
-                        colorFilter: index != 0
+                if (index < presetStickerGroups.length) {
+                  return SvgPicture.asset(
+                    presetStickerAlbum[presetStickerGroups[index]]!,
+                    colorFilter:
+                        index != 0
                             ? ColorFilter.mode(
-                                context.theme.secondaryText,
-                                BlendMode.srcIn,
-                              )
+                              context.theme.secondaryText,
+                              BlendMode.srcIn,
+                            )
                             : null,
-                        width: 24,
-                        height: 24,
-                      );
-                    }
+                    width: 24,
+                    height: 24,
+                  );
+                }
 
-                    return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
-                        String>(
-                      converter: (state) =>
+                return BlocConverter<
+                  StickerAlbumsCubit,
+                  List<StickerAlbum>,
+                  String
+                >(
+                  converter:
+                      (state) =>
                           state[index - presetStickerGroups.length].iconUrl,
-                      builder: (context, iconUrl) => StickerGroupIcon(
-                        iconUrl: iconUrl,
-                        size: 28,
-                      ),
-                    );
-                  },
-                ),
-              ),
+                  builder:
+                      (context, iconUrl) =>
+                          StickerGroupIcon(iconUrl: iconUrl, size: 28),
+                );
+              },
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _StickerGroupIconHoverContainer extends HookConsumerWidget {
@@ -505,12 +513,13 @@ class _StickerGroupIconHoverContainer extends HookConsumerWidget {
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: isHovering.value
-              ? context.dynamicColor(
-                  const Color.fromRGBO(229, 231, 235, 1),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                )
-              : null,
+          color:
+              isHovering.value
+                  ? context.dynamicColor(
+                    const Color.fromRGBO(229, 231, 235, 1),
+                    darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                  )
+                  : null,
           borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: child,

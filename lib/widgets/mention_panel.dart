@@ -33,20 +33,26 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
   final TextEditingController textEditingController;
   final Widget child;
   final AutoDisposeStateNotifierProvider<MentionStateNotifier, MentionState>
-      mentionProviderInstance;
+  mentionProviderInstance;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scrollController = ref.watch(mentionProviderInstance.notifier
-        .select((value) => value.scrollController));
+    final scrollController = ref.watch(
+      mentionProviderInstance.notifier.select(
+        (value) => value.scrollController,
+      ),
+    );
     final mentionState = ref.watch(mentionProviderInstance);
     final visible = mentionState.users.isNotEmpty;
 
     final selectable =
         useValueListenable(textEditingController).composing.composed && visible;
 
-    final isGroupOrBot = ref.watch(conversationProvider
-        .select((value) => (value?.isGroup == true) || (value?.isBot == true)));
+    final isGroupOrBot = ref.watch(
+      conversationProvider.select(
+        (value) => (value?.isGroup == true) || (value?.isBot == true),
+      ),
+    );
 
     return FocusableActionDetector(
       enabled: selectable,
@@ -60,24 +66,22 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
         const SingleActivator(LogicalKeyboardKey.enter):
             const ListSelectionSelectedIntent(),
         if (kPlatformIsDarwin) ...{
-          const SingleActivator(
-            LogicalKeyboardKey.keyN,
-            control: true,
-          ): const ListSelectionNextIntent(),
-          const SingleActivator(
-            LogicalKeyboardKey.keyP,
-            control: true,
-          ): const ListSelectionPrevIntent(),
-        }
+          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
+              const ListSelectionNextIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyP, control: true):
+              const ListSelectionPrevIntent(),
+        },
       },
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) =>
-              ref.read(mentionProviderInstance.notifier).next(),
+          onInvoke:
+              (Intent intent) =>
+                  ref.read(mentionProviderInstance.notifier).next(),
         ),
         ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) =>
-              ref.read(mentionProviderInstance.notifier).prev(),
+          onInvoke:
+              (Intent intent) =>
+                  ref.read(mentionProviderInstance.notifier).prev(),
         ),
         ListSelectionSelectedIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) {
@@ -104,10 +108,11 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeOut,
               tween: Tween(begin: 0, end: visible ? 1 : 0),
-              builder: (context, progress, child) => FractionalTranslation(
-                translation: Offset(0, 1 - progress),
-                child: child,
-              ),
+              builder:
+                  (context, progress, child) => FractionalTranslation(
+                    translation: Offset(0, 1 - progress),
+                    child: child,
+                  ),
               child: _MentionPanel(
                 mentionState: mentionState,
                 scrollController: scrollController,
@@ -135,9 +140,7 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
     textEditingController
       ..text = newText
       ..selection = TextSelection.fromPosition(
-        TextPosition(
-          offset: beforeSelectionOffset.length,
-        ),
+        TextPosition(offset: beforeSelectionOffset.length),
       );
   }
 }
@@ -155,21 +158,20 @@ class _MentionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.theme.popUp,
-        ),
-        child: ListView.builder(
-          controller: scrollController,
-          itemCount: mentionState.users.length,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) => _MentionItem(
+    decoration: BoxDecoration(color: context.theme.popUp),
+    child: ListView.builder(
+      controller: scrollController,
+      itemCount: mentionState.users.length,
+      shrinkWrap: true,
+      itemBuilder:
+          (BuildContext context, int index) => _MentionItem(
             user: mentionState.users[index],
             keyword: mentionState.text,
             selected: mentionState.index == index,
             onSelect: onSelect,
           ),
-        ),
-      );
+    ),
+  );
 }
 
 class _MentionItem extends StatelessWidget {
@@ -187,67 +189,63 @@ class _MentionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox.color(
-        decoration:
-            selected ? BoxDecoration(color: context.theme.listSelected) : null,
-        onTap: () => onSelect?.call(user),
-        child: Container(
-          height: kMentionItemHeight,
-          padding: const EdgeInsets.all(8),
-          child: Row(
+    decoration:
+        selected ? BoxDecoration(color: context.theme.listSelected) : null,
+    onTap: () => onSelect?.call(user),
+    child: Container(
+      height: kMentionItemHeight,
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          AvatarWidget(
+            userId: user.userId,
+            name: user.fullName,
+            avatarUrl: user.avatarUrl,
+            size: 32,
+          ),
+          const SizedBox(width: 6),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AvatarWidget(
-                userId: user.userId,
-                name: user.fullName,
-                avatarUrl: user.avatarUrl,
-                size: 32,
-              ),
-              const SizedBox(width: 6),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    user.fullName ?? '',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.theme.text,
-                      height: 1,
+              CustomText(
+                user.fullName ?? '',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.theme.text,
+                  height: 1,
+                ),
+                textMatchers: [
+                  EmojiTextMatcher(),
+                  if (keyword != null)
+                    KeyWordTextMatcher(
+                      keyword!,
+                      style: TextStyle(color: context.theme.accent),
                     ),
-                    textMatchers: [
-                      EmojiTextMatcher(),
-                      if (keyword != null)
-                        KeyWordTextMatcher(
-                          keyword!,
-                          style: TextStyle(
-                            color: context.theme.accent,
-                          ),
-                        ),
-                    ],
-                    maxLines: 1,
-                  ),
-                  const SizedBox(height: 2),
-                  CustomText(
-                    user.identityNumber,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.theme.secondaryText,
-                    ),
-                    textMatchers: [
-                      EmojiTextMatcher(),
-                      if (keyword != null)
-                        KeyWordTextMatcher(
-                          keyword!,
-                          style: TextStyle(
-                            color: context.theme.accent,
-                          ),
-                        ),
-                    ],
-                    maxLines: 1,
-                  ),
                 ],
+                maxLines: 1,
+              ),
+              const SizedBox(height: 2),
+              CustomText(
+                user.identityNumber,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.theme.secondaryText,
+                ),
+                textMatchers: [
+                  EmojiTextMatcher(),
+                  if (keyword != null)
+                    KeyWordTextMatcher(
+                      keyword!,
+                      style: TextStyle(color: context.theme.accent),
+                    ),
+                ],
+                maxLines: 1,
               ),
             ],
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }

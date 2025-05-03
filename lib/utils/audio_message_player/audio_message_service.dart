@@ -33,27 +33,29 @@ class AudioMessagePlayService {
 
   void initListen() {
     _subscriptions.add(
-      _player.playbackStream.asyncMap((playbackState) async {
-        if (!playbackState.isCompleted) return;
+      _player.playbackStream
+          .asyncMap((playbackState) async {
+            if (!playbackState.isCompleted) return;
 
-        final media = _player.current;
+            final media = _player.current;
 
-        if (_isMediaList || media == null) {
-          await AudioSession.instance.deactivate();
-          return;
-        }
-        final currentMessage = media.messageItem;
-        final message =
-            await _accountServer.database.messageDao.findNextAudioMessageItem(
-          conversationId: currentMessage.conversationId,
-          messageId: currentMessage.messageId,
-        );
-        if (message == null) {
-          await AudioSession.instance.deactivate();
-          return;
-        }
-        await playAudioMessage(message, resetPlaySpeed: false);
-      }).listen((event) {}),
+            if (_isMediaList || media == null) {
+              await AudioSession.instance.deactivate();
+              return;
+            }
+            final currentMessage = media.messageItem;
+            final message = await _accountServer.database.messageDao
+                .findNextAudioMessageItem(
+                  conversationId: currentMessage.conversationId,
+                  messageId: currentMessage.messageId,
+                );
+            if (message == null) {
+              await AudioSession.instance.deactivate();
+              return;
+            }
+            await playAudioMessage(message, resetPlaySpeed: false);
+          })
+          .listen((event) {}),
     );
   }
 
@@ -64,8 +66,10 @@ class AudioMessagePlayService {
       ..clear();
   }
 
-  Future<void> playAudioMessage(MessageItem message,
-      {bool resetPlaySpeed = true}) async {
+  Future<void> playAudioMessage(
+    MessageItem message, {
+    bool resetPlaySpeed = true,
+  }) async {
     _player.stop();
     _isMediaList = false;
 
@@ -77,8 +81,12 @@ class AudioMessagePlayService {
     if (!file.existsSync()) return;
 
     if (message.mediaStatus == MediaStatus.done) {
-      unawaited(_accountServer.database.messageDao
-          .updateMediaStatus(message.messageId, MediaStatus.read));
+      unawaited(
+        _accountServer.database.messageDao.updateMediaStatus(
+          message.messageId,
+          MediaStatus.read,
+        ),
+      );
     }
 
     await AudioSession.instance.activePlayback();
@@ -87,7 +95,7 @@ class AudioMessagePlayService {
       MessageMedia(
         message,
         convertMessageAbsolutePath: _accountServer.convertMessageAbsolutePath,
-      )
+      ),
     ], resetPlaySpeed: resetPlaySpeed);
   }
 
@@ -98,15 +106,17 @@ class AudioMessagePlayService {
     _player.stop();
     _isMediaList = true;
     await AudioSession.instance.activePlayback();
-    _player.play(messages
-        .map(
-          (e) => MessageMedia(
-            e,
-            convertMessageAbsolutePath: convertMessageAbsolutePath,
-          ),
-        )
-        .where((e) => File(e.mediaPath).existsSync())
-        .toList());
+    _player.play(
+      messages
+          .map(
+            (e) => MessageMedia(
+              e,
+              convertMessageAbsolutePath: convertMessageAbsolutePath,
+            ),
+          )
+          .where((e) => File(e.mediaPath).existsSync())
+          .toList(),
+    );
   }
 
   void stop() {
@@ -131,52 +141,45 @@ class AudioMessagePlayService {
 bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
   final context = useContext();
 
-  final result = useMemoizedStream(
-    () {
-      final ams = context.audioMessageService;
+  final result = useMemoizedStream(() {
+    final ams = context.audioMessageService;
 
-      return CombineLatestStream.combine2<MessageMedia?, bool,
-          (MessageMedia?, bool)>(
-        ams._player.currentStream,
-        ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
-        (a, b) => (a, b),
-      ).map((event) {
-        if (!event.$2) return false;
+    return CombineLatestStream.combine2<
+      MessageMedia?,
+      bool,
+      (MessageMedia?, bool)
+    >(
+      ams._player.currentStream,
+      ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
+      (a, b) => (a, b),
+    ).map((event) {
+      if (!event.$2) return false;
 
-        final message = event.$1?.messageItem;
+      final message = event.$1?.messageItem;
 
-        return message?.messageId == messageId &&
-            isMediaList == ams._isMediaList;
-      }).distinct();
-    },
-    keys: [messageId, isMediaList, context],
-  );
+      return message?.messageId == messageId && isMediaList == ams._isMediaList;
+    }).distinct();
+  }, keys: [messageId, isMediaList, context]);
   return result.data ?? false;
 }
 
 PlaybackState useAudioMessagePlayerState() {
   final context = useContext();
 
-  final result = useMemoizedStream(
-    () {
-      final ams = context.audioMessageService;
-      return ams._player.playbackStream.distinct();
-    },
-    keys: [context],
-  );
+  final result = useMemoizedStream(() {
+    final ams = context.audioMessageService;
+    return ams._player.playbackStream.distinct();
+  }, keys: [context]);
   return result.data ?? PlaybackState.idle;
 }
 
 MessageItem? useCurrentPlayingMessage() {
   final context = useContext();
 
-  final result = useMemoizedStream(
-    () {
-      final ams = context.audioMessageService;
-      return ams._player.currentStream.map((e) => e?.messageItem).distinct();
-    },
-    keys: [context],
-  );
+  final result = useMemoizedStream(() {
+    final ams = context.audioMessageService;
+    return ams._player.currentStream.map((e) => e?.messageItem).distinct();
+  }, keys: [context]);
   return result.data;
 }
 
@@ -199,8 +202,9 @@ double useAudioPlayerPosition() {
       }
       // Avoid update too often. since there is performance issue in Flutter.
       // https://github.com/flutter/flutter/issues/85781
-      timer = Timer.periodic(Duration(milliseconds: isImagePlay ? 40 : 200),
-          (timer) {
+      timer = Timer.periodic(Duration(milliseconds: isImagePlay ? 40 : 200), (
+        timer,
+      ) {
         position.value = ams.currentPosition.inMilliseconds.toDouble();
       });
     });

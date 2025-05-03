@@ -19,13 +19,13 @@ class TransferDataParticipant {
       _$TransferDataParticipantFromJson(json);
 
   factory TransferDataParticipant.fromDbParticipant(
-          db.Participant participant) =>
-      TransferDataParticipant(
-        conversationId: participant.conversationId,
-        userId: participant.userId,
-        role: participant.role,
-        createdAt: participant.createdAt,
-      );
+    db.Participant participant,
+  ) => TransferDataParticipant(
+    conversationId: participant.conversationId,
+    userId: participant.userId,
+    role: participant.role,
+    createdAt: participant.createdAt,
+  );
 
   @JsonKey(name: 'conversation_id')
   final String conversationId;
@@ -37,11 +37,11 @@ class TransferDataParticipant {
   final DateTime createdAt;
 
   db.Participant toDbParticipant() => db.Participant(
-        conversationId: conversationId,
-        userId: userId,
-        role: role,
-        createdAt: createdAt,
-      );
+    conversationId: conversationId,
+    userId: userId,
+    role: role,
+    createdAt: createdAt,
+  );
 
   Map<String, dynamic> toJson() => _$TransferDataParticipantToJson(this);
 }

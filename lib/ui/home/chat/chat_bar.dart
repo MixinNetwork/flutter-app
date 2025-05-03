@@ -31,9 +31,9 @@ class ChatBar extends HookConsumerWidget {
 
     final chatSideRouteMode =
         useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
-      bloc: chatSideCubit,
-      converter: (state) => state.routeMode,
-    );
+          bloc: chatSideCubit,
+          converter: (state) => state.routeMode,
+        );
 
     final routeMode = ref.watch(navigatorRouteModeProvider);
 
@@ -45,55 +45,59 @@ class ChatBar extends HookConsumerWidget {
       required Widget child,
       HitTestBehavior behavior = HitTestBehavior.opaque,
       bool longPressToShareLog = false,
-    }) =>
-        MoveWindowBarrier(
-          child: InteractiveDecoratedBox(
-            onTap: () {
-              if (inMultiSelectMode) {
-                return;
-              }
-              chatSideCubit.toggleInfoPage();
-            },
-            onLongPress: longPressToShareLog
+    }) => MoveWindowBarrier(
+      child: InteractiveDecoratedBox(
+        onTap: () {
+          if (inMultiSelectMode) {
+            return;
+          }
+          chatSideCubit.toggleInfoPage();
+        },
+        onLongPress:
+            longPressToShareLog
                 ? (details) {
-                    if (conversation == null) return;
+                  if (conversation == null) return;
 
-                    if ((conversation.isGroup ?? true) ||
-                        (conversation.isBot)) {
-                      return;
-                    }
-                    showShareLogDialog(context,
-                        conversationName: conversation.name ?? '');
+                  if ((conversation.isGroup ?? true) || (conversation.isBot)) {
+                    return;
                   }
+                  showShareLogDialog(
+                    context,
+                    conversationName: conversation.name ?? '',
+                  );
+                }
                 : null,
-            behavior: behavior,
-            child: child,
-          ),
-        );
+        behavior: behavior,
+        child: child,
+      ),
+    );
 
     if (conversation == null) return const SizedBox();
 
     return Row(
       children: [
         Consumer(
-          builder: (_, ref, __) => routeMode
-              ? MoveWindowBarrier(
-                  child: MixinBackButton(
-                    color: actionColor,
-                    onTap: () =>
-                        ref.read(conversationProvider.notifier).unselected(),
-                  ),
-                )
-              : const SizedBox(width: 16),
+          builder:
+              (_, ref, __) =>
+                  routeMode
+                      ? MoveWindowBarrier(
+                        child: MixinBackButton(
+                          color: actionColor,
+                          onTap:
+                              () =>
+                                  ref
+                                      .read(conversationProvider.notifier)
+                                      .unselected(),
+                        ),
+                      )
+                      : const SizedBox(width: 16),
         ),
         toggleInfoPageWrapper(
           longPressToShareLog: true,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ConversationAvatar(
-                conversationState: conversation,
-              ),
+              ConversationAvatar(conversationState: conversation),
               const SizedBox(width: 10),
             ],
           ),
@@ -102,38 +106,39 @@ class ChatBar extends HookConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IgnorePointer(
-                child: ConversationName(
-                  conversationState: conversation,
-                ),
-              ),
-              const SizedBox(height: 4),
-              IgnorePointer(
-                child: ConversationIDOrCount(
-                  conversationState: conversation,
-                ),
-              ),
-            ]
-                .map((e) => toggleInfoPageWrapper(
-                      child: e,
-                      behavior: HitTestBehavior.deferToChild,
-                    ))
-                .toList(),
+            children:
+                [
+                      IgnorePointer(
+                        child: ConversationName(
+                          conversationState: conversation,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      IgnorePointer(
+                        child: ConversationIDOrCount(
+                          conversationState: conversation,
+                        ),
+                      ),
+                    ]
+                    .map(
+                      (e) => toggleInfoPageWrapper(
+                        child: e,
+                        behavior: HitTestBehavior.deferToChild,
+                      ),
+                    )
+                    .toList(),
           ),
         ),
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
           alignment: Alignment.centerLeft,
-          child: MoveWindowBarrier(
-            child: _BotIcon(conversation: conversation),
-          ),
+          child: MoveWindowBarrier(child: _BotIcon(conversation: conversation)),
         ),
         if (inMultiSelectMode)
           MoveWindowBarrier(
             child: TextButton(
-              onPressed: () =>
-                  ref.read(messageSelectionProvider).clearSelection(),
+              onPressed:
+                  () => ref.read(messageSelectionProvider).clearSelection(),
               child: Text(context.l10n.cancel),
             ),
           )
@@ -156,13 +161,14 @@ class ChatBar extends HookConsumerWidget {
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.centerLeft,
             child: MoveWindowBarrier(
-              child: chatSideRouteMode
-                  ? const SizedBox()
-                  : ActionButton(
-                      name: Resources.assetsImagesIcScreenSvg,
-                      color: actionColor,
-                      onTap: chatSideCubit.toggleInfoPage,
-                    ),
+              child:
+                  chatSideRouteMode
+                      ? const SizedBox()
+                      : ActionButton(
+                        name: Resources.assetsImagesIcScreenSvg,
+                        color: actionColor,
+                        onTap: chatSideCubit.toggleInfoPage,
+                      ),
             ),
           ),
           const SizedBox(width: 16),
@@ -186,27 +192,22 @@ class ConversationIDOrCount extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isGroup = conversationState?.isGroup ?? false;
 
-    final countStream = useMemoized(
-      () {
-        if (isGroup) {
-          return context.database.participantDao
-              .conversationParticipantsCount(conversationState!.conversationId)
-              .watchSingleWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.watchUpdateParticipantStream(
-                  conversationIds: [conversationState!.conversationId])
-            ],
-            duration: kVerySlowThrottleDuration,
-          );
-        }
+    final countStream = useMemoized(() {
+      if (isGroup) {
+        return context.database.participantDao
+            .conversationParticipantsCount(conversationState!.conversationId)
+            .watchSingleWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance.watchUpdateParticipantStream(
+                  conversationIds: [conversationState!.conversationId],
+                ),
+              ],
+              duration: kVerySlowThrottleDuration,
+            );
+      }
 
-        return const Stream<int>.empty();
-      },
-      [
-        conversationState?.conversationId,
-        isGroup,
-      ],
-    );
+      return const Stream<int>.empty();
+    }, [conversationState?.conversationId, isGroup]);
 
     final textStyle = TextStyle(
       color: context.theme.secondaryText,
@@ -246,30 +247,30 @@ class ConversationName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: CustomSelectableArea(
-              child: CustomText(
-                conversationState.name?.overflow ?? '',
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: fontSize,
-                  height: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-              ),
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Flexible(
+        child: CustomSelectableArea(
+          child: CustomText(
+            conversationState.name?.overflow ?? '',
+            style: TextStyle(
+              color: context.theme.text,
+              fontSize: fontSize,
+              height: 1,
+              overflow: TextOverflow.ellipsis,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
           ),
-          BadgesWidget(
-            verified: conversationState.isVerified,
-            isBot: conversationState.isBot,
-            membership: conversationState.membership,
-          ),
-        ],
-      );
+        ),
+      ),
+      BadgesWidget(
+        verified: conversationState.isVerified,
+        isBot: conversationState.isBot,
+        membership: conversationState.membership,
+      ),
+    ],
+  );
 }
 
 class ConversationAvatar extends StatelessWidget {
@@ -284,29 +285,29 @@ class ConversationAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
-        size: Size.square(size),
-        child: Builder(
-          builder: (context) {
-            if (conversationState?.user != null) {
-              return AvatarWidget(
-                size: size,
-                userId: conversationState?.user?.userId,
-                avatarUrl: conversationState?.user?.avatarUrl,
-                name: conversationState?.name,
-              );
-            }
+    size: Size.square(size),
+    child: Builder(
+      builder: (context) {
+        if (conversationState?.user != null) {
+          return AvatarWidget(
+            size: size,
+            userId: conversationState?.user?.userId,
+            avatarUrl: conversationState?.user?.avatarUrl,
+            name: conversationState?.name,
+          );
+        }
 
-            if (conversationState?.conversation != null) {
-              return ConversationAvatarWidget(
-                size: size,
-                conversation: conversationState!.conversation,
-              );
-            }
+        if (conversationState?.conversation != null) {
+          return ConversationAvatarWidget(
+            size: size,
+            conversation: conversationState!.conversation,
+          );
+        }
 
-            return const SizedBox();
-          },
-        ),
-      );
+        return const SizedBox();
+      },
+    ),
+  );
 }
 
 class _BotIcon extends HookConsumerWidget {

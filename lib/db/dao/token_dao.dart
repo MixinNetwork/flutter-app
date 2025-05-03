@@ -23,19 +23,19 @@ class TokenDao extends DatabaseAccessor<MixinDatabase> with _$TokenDaoMixin {
 
 extension TokenConverter on sdk.Token {
   TokensCompanion get asTokensCompanion => TokensCompanion.insert(
-        assetId: assetId,
-        kernelAssetId: asset,
-        symbol: symbol,
-        name: name,
-        iconUrl: iconUrl,
-        priceBtc: priceBtc,
-        priceUsd: priceUsd,
-        chainId: chainId,
-        changeUsd: changeUsd,
-        changeBtc: changeBtc,
-        confirmations: confirmations,
-        assetKey: assetKey,
-        dust: dust,
-        collectionHash: Value(collectionHash),
-      );
+    assetId: assetId,
+    kernelAssetId: asset,
+    symbol: symbol,
+    name: name,
+    iconUrl: iconUrl,
+    priceBtc: priceBtc,
+    priceUsd: priceUsd,
+    chainId: chainId,
+    changeUsd: changeUsd,
+    changeBtc: changeBtc,
+    confirmations: confirmations,
+    assetKey: assetKey,
+    dust: dust,
+    collectionHash: Value(collectionHash),
+  );
 }

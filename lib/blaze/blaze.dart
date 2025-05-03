@@ -57,8 +57,9 @@ class Blaze {
     proxyConfig = database.settingProperties.activatedProxy;
 
     // Initialize event stream handler
-    _eventStreamSubscription =
-        _eventController.stream.listen(_handleConnectionEvent);
+    _eventStreamSubscription = _eventController.stream.listen(
+      _handleConnectionEvent,
+    );
   }
 
   final String userId;
@@ -92,7 +93,9 @@ class Blaze {
 
   set _connectedState(ConnectedState state) {
     if (_connectedStateBehaviorSubject.valueOrNull == state) return;
-    i('[State Transition] ${_connectedStateBehaviorSubject.valueOrNull} -> $state');
+    i(
+      '[State Transition] ${_connectedStateBehaviorSubject.valueOrNull} -> $state',
+    );
     _connectedStateBehaviorSubject.add(state);
 
     if (state == ConnectedState.connected) {
@@ -121,7 +124,9 @@ class Blaze {
   // ==========================================================================
 
   void _handleConnectionEvent(_ConnectionEvent event) {
-    i('[_handleConnectionEvent] Received event: $event, Current state: $_connectedState');
+    i(
+      '[_handleConnectionEvent] Received event: $event, Current state: $_connectedState',
+    );
 
     switch (event) {
       case _ConnectionEvent.connect:
@@ -144,7 +149,9 @@ class Blaze {
         // Handle all error situations (including ping timeout, connection errors, etc.)
         if (_connectedState == ConnectedState.connected ||
             _connectedState == ConnectedState.connecting) {
-          w('Error occurred in state: $_connectedState. Initiating reconnect sequence.');
+          w(
+            'Error occurred in state: $_connectedState. Initiating reconnect sequence.',
+          );
           _disconnect(false);
           _connectedState = ConnectedState.reconnecting;
           _scheduleRetry();
@@ -195,7 +202,14 @@ class Blaze {
     try {
       i('ws connect');
       _token ??= signAuthTokenWithEdDSA(
-          userId, sessionId, Key.fromBase64(privateKey), scp, 'GET', '/', '');
+        userId,
+        sessionId,
+        Key.fromBase64(privateKey),
+        scp,
+        'GET',
+        '/',
+        '',
+      );
       i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
       i('ws _userAgent: $userAgent');
 
@@ -205,62 +219,67 @@ class Blaze {
       channel = IOWebSocketChannel.connect(
         _host,
         protocols: ['Mixin-Blaze-1'],
-        headers: {
-          'User-Agent': userAgent,
-          'Authorization': 'Bearer $_token',
-        },
+        headers: {'User-Agent': userAgent, 'Authorization': 'Bearer $_token'},
         pingInterval: const Duration(seconds: 10),
         customClient: HttpClient()..setProxy(proxyConfig),
       );
 
-      subscription =
-          channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
-        (blazeMessage) async {
-          _connectedState = ConnectedState.connected;
-          d('blazeMessage receive: ${blazeMessage.toJson()}');
+      subscription = channel?.stream
+          .cast<List<int>>()
+          .asyncMap(parseBlazeMessage)
+          .listen(
+            (blazeMessage) async {
+              _connectedState = ConnectedState.connected;
+              d('blazeMessage receive: ${blazeMessage.toJson()}');
 
-          if (blazeMessage.action == kErrorAction &&
-              blazeMessage.error?.code == authentication) {
-            _disconnect();
-            return;
-          }
+              if (blazeMessage.action == kErrorAction &&
+                  blazeMessage.error?.code == authentication) {
+                _disconnect();
+                return;
+              }
 
-          if (blazeMessage.error == null) {
-            final transaction = transactions[blazeMessage.id];
-            if (transaction != null) {
-              d('transaction success id: ${transaction.tid}');
-              transaction.success(blazeMessage);
-              transactions.removeWhere((key, value) => key == blazeMessage.id);
-            }
-          } else {
-            final transaction = transactions[blazeMessage.id];
-            if (transaction != null) {
-              d('transaction error id: ${transaction.tid}');
-              transaction.error(blazeMessage);
-              transactions.removeWhere((key, value) => key == blazeMessage.id);
-            }
-          }
+              if (blazeMessage.error == null) {
+                final transaction = transactions[blazeMessage.id];
+                if (transaction != null) {
+                  d('transaction success id: ${transaction.tid}');
+                  transaction.success(blazeMessage);
+                  transactions.removeWhere(
+                    (key, value) => key == blazeMessage.id,
+                  );
+                }
+              } else {
+                final transaction = transactions[blazeMessage.id];
+                if (transaction != null) {
+                  d('transaction error id: ${transaction.tid}');
+                  transaction.error(blazeMessage);
+                  transactions.removeWhere(
+                    (key, value) => key == blazeMessage.id,
+                  );
+                }
+              }
 
-          if (blazeMessage.data != null &&
-              blazeMessage.isReceiveMessageAction()) {
-            await handleReceiveMessage(blazeMessage);
-          }
-        },
-        onError: (error, s) {
-          i('ws error: $error, s: $s');
-          i('Triggering ERROR event: WebSocket stream error');
-          _eventController.add(_ConnectionEvent.error);
-        },
-        onDone: () {
-          i('web socket done');
-          // Only trigger reconnect if we were in connected state
-          if (_connectedState == ConnectedState.connected) {
-            i('Triggering ERROR event: WebSocket stream unexpectedly closed');
-            _eventController.add(_ConnectionEvent.error);
-          }
-        },
-        cancelOnError: true,
-      );
+              if (blazeMessage.data != null &&
+                  blazeMessage.isReceiveMessageAction()) {
+                await handleReceiveMessage(blazeMessage);
+              }
+            },
+            onError: (error, s) {
+              i('ws error: $error, s: $s');
+              i('Triggering ERROR event: WebSocket stream error');
+              _eventController.add(_ConnectionEvent.error);
+            },
+            onDone: () {
+              i('web socket done');
+              // Only trigger reconnect if we were in connected state
+              if (_connectedState == ConnectedState.connected) {
+                i(
+                  'Triggering ERROR event: WebSocket stream unexpectedly closed',
+                );
+                _eventController.add(_ConnectionEvent.error);
+              }
+            },
+            cancelOnError: true,
+          );
 
       _checkTimeoutTimer = Timer(const Duration(seconds: 10), () {
         i('ws webSocket state: ${channel?.ready}');
@@ -296,8 +315,9 @@ class Blaze {
 
     BlazeMessageData? data;
     try {
-      data =
-          BlazeMessageData.fromJson(blazeMessage.data as Map<String, dynamic>);
+      data = BlazeMessageData.fromJson(
+        blazeMessage.data as Map<String, dynamic>,
+      );
     } catch (e) {
       d('blazeMessage not a BlazeMessageData');
       return;
@@ -319,21 +339,30 @@ class Blaze {
           (data.category == null || data.conversationId.isEmpty)) {
         await makeMessageStatus(data.messageId, data.status);
       } else {
-        await floodJob.add(FloodMessage(
+        await floodJob.add(
+          FloodMessage(
             messageId: data.messageId,
             data: jsonEncode(data),
-            createdAt: data.createdAt));
+            createdAt: data.createdAt,
+          ),
+        );
       }
     } else if (blazeMessage.action == kCreateCall ||
         blazeMessage.action == kCreateKraken) {
       await ackJob.add([
         createAckJob(
-            kAcknowledgeMessageReceipts, data.messageId, MessageStatus.read)
+          kAcknowledgeMessageReceipts,
+          data.messageId,
+          MessageStatus.read,
+        ),
       ]);
     } else {
       await ackJob.add([
-        createAckJob(kAcknowledgeMessageReceipts, data.messageId,
-            MessageStatus.delivered)
+        createAckJob(
+          kAcknowledgeMessageReceipts,
+          data.messageId,
+          MessageStatus.delivered,
+        ),
       ]);
     }
     if (stopwatch != null && stopwatch.elapsedMilliseconds > 5) {
@@ -342,9 +371,10 @@ class Blaze {
   }
 
   Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
-    final currentStatus = await database.messageDao
-        .messageStatusById(messageId)
-        .getSingleOrNull();
+    final currentStatus =
+        await database.messageDao
+            .messageStatusById(messageId)
+            .getSingleOrNull();
     if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
@@ -382,8 +412,9 @@ class Blaze {
           }
         }
 
-        await database.offsetDao.insert(Offset(
-            key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
+        await database.offsetDao.insert(
+          Offset(key: statusOffset, timestamp: m.updatedAt.toIso8601String()),
+        );
       });
       final lastUpdateAt = blazeMessages.last.updatedAt.epochNano;
       if (lastUpdateAt == status) {
@@ -394,8 +425,9 @@ class Blaze {
   }
 
   Future<void> _sendGZip(BlazeMessage msg) async {
-    channel?.sink.add(const GZipEncoder()
-        .encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
+    channel?.sink.add(
+      const GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)),
+    );
   }
 
   void _disconnect([bool resetConnectedState = true]) {
@@ -430,9 +462,13 @@ class Blaze {
     transactions[blazeMessage.id] = transaction;
     d('sendMessage transactions size: ${transactions.length}');
     return transaction.run(
-        () => channel?.sink.add(const GZipEncoder()
-            .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
-        () => null);
+      () => channel?.sink.add(
+        const GZipEncoder().encode(
+          Uint8List.fromList(jsonEncode(blazeMessage).codeUnits),
+        ),
+      ),
+      () => null,
+    );
   }
 
   // ==========================================================================
@@ -514,8 +550,9 @@ BlazeMessage parseBlazeMessage(List<int> list) =>
     _parseBlazeMessageInternal(list);
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
-  final content =
-      String.fromCharCodes(const GZipDecoder().decodeBytes(message));
+  final content = String.fromCharCodes(
+    const GZipDecoder().decodeBytes(message),
+  );
   return BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
 }
 
@@ -528,8 +565,11 @@ class WebSocketTransaction<T> {
   bool _isCompleted = false;
   Timer? _timeoutTimer;
 
-  Future<T?> run(Function() fun, T? Function() onTimeout,
-      [Duration timeoutDuration = const Duration(seconds: 5)]) {
+  Future<T?> run(
+    Function() fun,
+    T? Function() onTimeout, [
+    Duration timeoutDuration = const Duration(seconds: 5),
+  ]) {
     if (_isCompleted) return _completer.future;
 
     try {

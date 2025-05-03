@@ -28,23 +28,23 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     return MoveWindow(
       child: AppBar(
         toolbarHeight: 64,
-        title: title == null
-            ? null
-            : DefaultTextStyle.merge(
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: context.theme.text,
+        title:
+            title == null
+                ? null
+                : DefaultTextStyle.merge(
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: context.theme.text,
+                  ),
+                  child: title!,
                 ),
-                child: title!,
-              ),
         actions: [
-          ...actions.map((e) => MoveWindowBarrier(
-                child: DefaultTextStyle.merge(
-                  style: actionTextStyle,
-                  child: e,
-                ),
-              )),
+          ...actions.map(
+            (e) => MoveWindowBarrier(
+              child: DefaultTextStyle.merge(style: actionTextStyle, child: e),
+            ),
+          ),
           const SizedBox(width: 8),
         ],
         elevation: 0,
@@ -52,11 +52,12 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         backgroundColor: backgroundColor ?? context.theme.primary,
         leading: MoveWindowBarrier(
           child: Builder(
-            builder: (context) =>
-                leading ??
-                (ModalRoute.of(context)?.canPop ?? false
-                    ? const Center(child: MixinBackButton())
-                    : const SizedBox(width: 56)),
+            builder:
+                (context) =>
+                    leading ??
+                    (ModalRoute.of(context)?.canPop ?? false
+                        ? const Center(child: MixinBackButton())
+                        : const SizedBox(width: 56)),
           ),
         ),
       ),

@@ -67,19 +67,19 @@ class TransferDataSnapshot {
   Map<String, dynamic> toJson() => _$TransferDataSnapshotToJson(this);
 
   db.Snapshot toDbSnapshot() => db.Snapshot(
-        snapshotId: snapshotId,
-        type: type,
-        assetId: assetId,
-        amount: amount,
-        createdAt: createdAt,
-        opponentId: opponentId,
-        traceId: traceId,
-        transactionHash: transactionHash,
-        sender: sender,
-        receiver: receiver,
-        memo: memo,
-        confirmations: confirmations,
-      );
+    snapshotId: snapshotId,
+    type: type,
+    assetId: assetId,
+    amount: amount,
+    createdAt: createdAt,
+    opponentId: opponentId,
+    traceId: traceId,
+    transactionHash: transactionHash,
+    sender: sender,
+    receiver: receiver,
+    memo: memo,
+    confirmations: confirmations,
+  );
 
   @override
   String toString() => 'TransferDataSnapshot($snapshotId)';

@@ -10,11 +10,8 @@ import 'package:path/path.dart';
 import '../extension.dart';
 
 extension FileExtension on File {
-  XFile get xFile => XFile(
-        path,
-        mimeType: lookupMimeType(path),
-        name: basename(path),
-      );
+  XFile get xFile =>
+      XFile(path, mimeType: lookupMimeType(path), name: basename(path));
 
   Future<String> encodeBlurHash() async => _encodeBlurHash(path);
 }
@@ -32,12 +29,12 @@ Future<String> _encodeBlurHash(String path) async {
 
 extension XFileExtension on XFile {
   bool get isImage => {
-        'image/jpeg',
-        'image/png',
-        'image/bmp',
-        'image/webp',
-        'image/gif',
-      }.contains(mimeType?.toLowerCase());
+    'image/jpeg',
+    'image/png',
+    'image/bmp',
+    'image/webp',
+    'image/gif',
+  }.contains(mimeType?.toLowerCase());
 
   bool get isGif => mimeType?.toLowerCase() == 'image/gif';
 
@@ -52,17 +49,14 @@ extension XFileExtension on XFile {
           {'mkv', 'avi'}.contains(extensionFromMime(mimeType!)));
 
   bool get isStickerSupport => {
-        'image/gif',
-        'image/png',
-        'image/webp',
-        'image/jpeg',
-      }.contains(mimeType?.toLowerCase());
+    'image/gif',
+    'image/png',
+    'image/webp',
+    'image/jpeg',
+  }.contains(mimeType?.toLowerCase());
 
-  XFile withMineType() => XFile(
-        path,
-        mimeType: mimeType ?? lookupMimeType(path),
-        name: name,
-      );
+  XFile withMineType() =>
+      XFile(path, mimeType: mimeType ?? lookupMimeType(path), name: name);
 }
 
 extension FileRelativePath on File {

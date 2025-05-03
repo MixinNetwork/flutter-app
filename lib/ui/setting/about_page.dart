@@ -52,9 +52,7 @@ class AboutPage extends HookConsumerWidget {
 
     return Scaffold(
       backgroundColor: context.theme.background,
-      appBar: MixinAppBar(
-        title: Text(context.l10n.about),
-      ),
+      appBar: MixinAppBar(title: Text(context.l10n.about)),
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.topCenter,
@@ -76,14 +74,11 @@ class AboutPage extends HookConsumerWidget {
                 child: Animate(
                   effects: [
                     FadeEffect(duration: 1000.ms),
-                    ScaleEffect(duration: 1000.ms)
+                    ScaleEffect(duration: 1000.ms),
                   ],
                   child: Text(
                     context.l10n.mixinMessengerDesktop,
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 18,
-                    ),
+                    style: TextStyle(color: context.theme.text, fontSize: 18),
                   ),
                 ),
               ),
@@ -105,28 +100,37 @@ class AboutPage extends HookConsumerWidget {
                   children: [
                     CellItem(
                       title: Text(context.l10n.followUsOnX),
-                      onTap: () =>
-                          openUri(context, 'https://x.com/MixinMessenger'),
+                      onTap:
+                          () =>
+                              openUri(context, 'https://x.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(context.l10n.followUsOnFacebook),
-                      onTap: () =>
-                          openUri(context, 'https://fb.com/MixinMessenger'),
+                      onTap:
+                          () =>
+                              openUri(context, 'https://fb.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(context.l10n.helpCenter),
-                      onTap: () => openUri(
-                          context, 'https://mixinmessenger.zendesk.com'),
+                      onTap:
+                          () => openUri(
+                            context,
+                            'https://mixinmessenger.zendesk.com',
+                          ),
                     ),
                     CellItem(
                       title: Text(context.l10n.termsOfService),
-                      onTap: () =>
-                          openUri(context, 'https://mixin.one/pages/terms'),
+                      onTap:
+                          () =>
+                              openUri(context, 'https://mixin.one/pages/terms'),
                     ),
                     CellItem(
                       title: Text(context.l10n.privacyPolicy),
-                      onTap: () =>
-                          openUri(context, 'https://mixin.one/pages/privacy'),
+                      onTap:
+                          () => openUri(
+                            context,
+                            'https://mixin.one/pages/privacy',
+                          ),
                     ),
                     if (!Platform.isMacOS)
                       CellItem(
@@ -140,10 +144,9 @@ class AboutPage extends HookConsumerWidget {
                 CellGroup(
                   child: CellItem(
                     title: Text(context.l10n.openLogDirectory),
-                    onTap: () => openUri(
-                      context,
-                      mixinLogDirectory.uri.toString(),
-                    ),
+                    onTap:
+                        () =>
+                            openUri(context, mixinLogDirectory.uri.toString()),
                   ),
                 ),
             ],
@@ -159,10 +162,14 @@ class AboutPage extends HookConsumerWidget {
     } else if (defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.iOS) {
       openUri(
-          context, 'https://apps.apple.com/app/mixin-messenger/id1571128582');
+        context,
+        'https://apps.apple.com/app/mixin-messenger/id1571128582',
+      );
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
-      openUri(context,
-          'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ');
+      openUri(
+        context,
+        'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ',
+      );
     }
   }
 }

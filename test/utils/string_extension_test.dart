@@ -49,10 +49,7 @@ void main() {
         'hello 520 你好'.escapeFts5(tokenize: false),
         '"hello"*"520"*"你 好"*',
       );
-      expect(
-        '北京欢迎你'.escapeFts5(tokenize: false),
-        '"北 京 欢 迎 你"*',
-      );
+      expect('北京欢迎你'.escapeFts5(tokenize: false), '"北 京 欢 迎 你"*');
     });
 
     test('tokenized', () {
@@ -77,12 +74,14 @@ void main() {
       expect(output, equals(input));
     });
 
-    test('should work for input with letters, numbers, and Chinese characters',
-        () {
-      final input = <String>['hello', '123', 'world', '你好', '456', 'Dart'];
-      final output = input.mergeSiblingDigitAlphabetTokens();
-      expect(output, equals(['hello123world', '你好', '456Dart']));
-    });
+    test(
+      'should work for input with letters, numbers, and Chinese characters',
+      () {
+        final input = <String>['hello', '123', 'world', '你好', '456', 'Dart'];
+        final output = input.mergeSiblingDigitAlphabetTokens();
+        expect(output, equals(['hello123world', '你好', '456Dart']));
+      },
+    );
 
     test('should work for empty input', () {
       final input = <String>[];

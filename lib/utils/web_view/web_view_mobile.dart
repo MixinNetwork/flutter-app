@@ -40,12 +40,13 @@ class MobileMixinWebView extends MixinWebView {
   }) async {
     await showGeneralDialog(
       context: context,
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          _FullWindowInAppWebViewPage(
-        initialUrl: url,
-        app: app,
-        appCardData: appCardData,
-      ),
+      pageBuilder:
+          (context, animation, secondaryAnimation) =>
+              _FullWindowInAppWebViewPage(
+                initialUrl: url,
+                app: app,
+                appCardData: appCardData,
+              ),
     );
   }
 
@@ -70,18 +71,19 @@ class _FullWindowInAppWebViewPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final webViewController = useMemoized(() => WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse(initialUrl)));
+    final webViewController = useMemoized(
+      () =>
+          WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..loadRequest(Uri.parse(initialUrl)),
+    );
     return Material(
       color: context.theme.background,
       child: SafeArea(
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Center(
-              child: WebViewWidget(controller: webViewController),
-            ),
+            Center(child: WebViewWidget(controller: webViewController)),
             Positioned(
               top: 8,
               right: 10,
@@ -113,56 +115,44 @@ class _WebControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.theme.background,
-          border: Border.all(color: context.theme.sidebarSelected),
-          borderRadius: const BorderRadius.all(Radius.circular(32)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                child: Icon(
-                  Icons.more_horiz,
-                  size: 24,
-                  color: context.theme.icon,
+    decoration: BoxDecoration(
+      color: context.theme.background,
+      border: Border.all(color: context.theme.sidebarSelected),
+      borderRadius: const BorderRadius.all(Radius.circular(32)),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: InkWell(
+            child: Icon(Icons.more_horiz, size: 24, color: context.theme.icon),
+            onTap: () {
+              final controller = webViewController;
+              if (controller == null) {
+                return;
+              }
+              showMixinDialog(
+                context: context,
+                child: _WebViewActionDialog(
+                  webViewController: controller,
+                  app: app,
+                  appCardData: appCardData,
                 ),
-                onTap: () {
-                  final controller = webViewController;
-                  if (controller == null) {
-                    return;
-                  }
-                  showMixinDialog(
-                    context: context,
-                    child: _WebViewActionDialog(
-                      webViewController: controller,
-                      app: app,
-                      appCardData: appCardData,
-                    ),
-                  );
-                },
-              ),
-            ),
-            Container(
-              width: 1,
-              height: 20,
-              color: context.theme.sidebarSelected,
-            ),
-            Expanded(
-              child: InkWell(
-                child: Icon(
-                  Icons.close,
-                  size: 24,
-                  color: context.theme.icon,
-                ),
-                onTap: () {
-                  Navigator.maybePop(context);
-                },
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
-      );
+        Container(width: 1, height: 20, color: context.theme.sidebarSelected),
+        Expanded(
+          child: InkWell(
+            child: Icon(Icons.close, size: 24, color: context.theme.icon),
+            onTap: () {
+              Navigator.maybePop(context);
+            },
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _WebViewActionDialog extends StatelessWidget {
@@ -180,55 +170,57 @@ class _WebViewActionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 480,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    width: 480,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(width: 16),
-                const Spacer(),
-                ActionButton(
-                  name: Resources.assetsImagesIcCloseSvg,
-                  color: context.theme.icon,
-                  onTap: () => Navigator.pop(context),
-                ),
-                const SizedBox(width: 16),
-              ],
+            const SizedBox(width: 16),
+            const Spacer(),
+            ActionButton(
+              name: Resources.assetsImagesIcCloseSvg,
+              color: context.theme.icon,
+              onTap: () => Navigator.pop(context),
             ),
-            const SizedBox(height: 16),
-            CellGroup(
-              child: Column(
-                children: [
-                  _ShareMenuItem(
-                    appCardData: appCardData,
-                    app: app,
-                    webViewController: webViewController,
-                  ),
-                  CellItem(
-                    title: Text(context.l10n.refresh),
-                    leading: SvgPicture.asset(
-                      Resources.assetsImagesInviteRefreshSvg,
-                      width: 24,
-                      height: 24,
-                      colorFilter:
-                          ColorFilter.mode(context.theme.text, BlendMode.srcIn),
-                    ),
-                    trailing: null,
-                    onTap: () {
-                      webViewController.reload();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(width: 16),
           ],
         ),
-      );
+        const SizedBox(height: 16),
+        CellGroup(
+          child: Column(
+            children: [
+              _ShareMenuItem(
+                appCardData: appCardData,
+                app: app,
+                webViewController: webViewController,
+              ),
+              CellItem(
+                title: Text(context.l10n.refresh),
+                leading: SvgPicture.asset(
+                  Resources.assetsImagesInviteRefreshSvg,
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    context.theme.text,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                trailing: null,
+                onTap: () {
+                  webViewController.reload();
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    ),
+  );
 }
 
 class _ShareMenuItem extends StatelessWidget {
@@ -244,82 +236,80 @@ class _ShareMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CellItem(
-        title: Text(context.l10n.share),
-        leading: SvgPicture.asset(
-          Resources.assetsImagesShareSvg,
-          width: 24,
-          height: 24,
-          colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
-        ),
-        trailing: null,
-        onTap: () async {
-          // can not share app
-          if (appCardData?.shareable == false) {
-            showToastFailed(
-              ToastError(context.l10n.appCardShareDisallow),
-            );
-          } else {
-            var title = await webViewController.getTitle();
-            final url = await webViewController.currentUrl();
+    title: Text(context.l10n.share),
+    leading: SvgPicture.asset(
+      Resources.assetsImagesShareSvg,
+      width: 24,
+      height: 24,
+      colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+    ),
+    trailing: null,
+    onTap: () async {
+      // can not share app
+      if (appCardData?.shareable == false) {
+        showToastFailed(ToastError(context.l10n.appCardShareDisallow));
+      } else {
+        var title = await webViewController.getTitle();
+        final url = await webViewController.currentUrl();
 
-            final selectedConversation = await showConversationSelector(
-              context: context,
-              singleSelect: true,
-              title: context.l10n.forward,
-              onlyContact: false,
-            );
-            if (selectedConversation == null || selectedConversation.isEmpty) {
-              return;
-            }
+        final selectedConversation = await showConversationSelector(
+          context: context,
+          singleSelect: true,
+          title: context.l10n.forward,
+          onlyContact: false,
+        );
+        if (selectedConversation == null || selectedConversation.isEmpty) {
+          return;
+        }
 
-            var app = this.app;
-            if (appCardData?.appId != null) {
-              app = await context.accountServer.getAppAndCheckUser(
-                appCardData!.appId!,
-                DateTime.tryParse(appCardData!.updatedAt ?? ''),
-              );
-            }
+        var app = this.app;
+        if (appCardData?.appId != null) {
+          app = await context.accountServer.getAppAndCheckUser(
+            appCardData!.appId!,
+            DateTime.tryParse(appCardData!.updatedAt ?? ''),
+          );
+        }
 
-            if (app != null && url != null && _matchResourcePattern(url, app)) {
-              if (title?.trim().isNotEmpty != true) {
-                title = app.name;
-              }
-              final appCardData = AppCardData(
-                app.appId,
-                app.iconUrl,
-                app.name,
-                title ?? app.name,
-                url,
-                app.updatedAt?.toIso8601String() ?? '',
-                true,
-                [],
-                '',
-                null,
-              );
-
-              await context.accountServer.sendAppCardMessage(
-                conversationId: selectedConversation.first.conversationId,
-                recipientId: selectedConversation.first.userId,
-                data: appCardData,
-              );
-            } else {
-              final category = selectedConversation.first.encryptCategory;
-              assert(category != null, 'category must not be null');
-              if (category == null) {
-                e('selected conversation encrypt category is null');
-                return;
-              }
-              await context.accountServer.sendTextMessage(
-                url ?? '',
-                category,
-                conversationId: selectedConversation.first.conversationId,
-                recipientId: selectedConversation.first.userId,
-              );
-            }
-            Navigator.pop(context);
+        if (app != null && url != null && _matchResourcePattern(url, app)) {
+          if (title?.trim().isNotEmpty != true) {
+            title = app.name;
           }
-        },
-      );
+          final appCardData = AppCardData(
+            app.appId,
+            app.iconUrl,
+            app.name,
+            title ?? app.name,
+            url,
+            app.updatedAt?.toIso8601String() ?? '',
+            true,
+            [],
+            '',
+            null,
+          );
+
+          await context.accountServer.sendAppCardMessage(
+            conversationId: selectedConversation.first.conversationId,
+            recipientId: selectedConversation.first.userId,
+            data: appCardData,
+          );
+        } else {
+          final category = selectedConversation.first.encryptCategory;
+          assert(category != null, 'category must not be null');
+          if (category == null) {
+            e('selected conversation encrypt category is null');
+            return;
+          }
+          await context.accountServer.sendTextMessage(
+            url ?? '',
+            category,
+            conversationId: selectedConversation.first.conversationId,
+            recipientId: selectedConversation.first.userId,
+          );
+        }
+        Navigator.pop(context);
+      }
+    },
+  );
 }
 
 bool _matchResourcePattern(String url, App app) {

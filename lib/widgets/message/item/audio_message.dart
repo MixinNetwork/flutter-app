@@ -25,24 +25,31 @@ class AudioMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
-    final messageId =
-        useMessageConverter(converter: (state) => state.messageId);
-    final mediaStatus =
-        useMessageConverter(converter: (state) => state.mediaStatus);
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
+    final messageId = useMessageConverter(
+      converter: (state) => state.messageId,
+    );
+    final mediaStatus = useMessageConverter(
+      converter: (state) => state.mediaStatus,
+    );
+    final relationship = useMessageConverter(
+      converter: (state) => state.relationship,
+    );
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
-    final playing =
-        useAudioMessagePlaying(messageId, isMediaList: isTranscriptPage);
-
-    final duration = useMessageConverter(
-      converter: (state) => Duration(
-        milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
-      ),
+    final playing = useAudioMessagePlaying(
+      messageId,
+      isMediaList: isTranscriptPage,
     );
 
-    final isMessageSentOut = (isTranscriptPage &&
+    final duration = useMessageConverter(
+      converter:
+          (state) => Duration(
+            milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
+          ),
+    );
+
+    final isMessageSentOut =
+        (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
 
@@ -62,8 +69,9 @@ class AudioMessage extends HookConsumerWidget {
 
               if (context.audioMessagesPlayAgent != null) {
                 context.audioMessageService.playMessages(
-                  context.audioMessagesPlayAgent!
-                      .getMessages(message.messageId),
+                  context.audioMessagesPlayAgent!.getMessages(
+                    message.messageId,
+                  ),
                   context.audioMessagesPlayAgent!.convertMessageAbsolutePath,
                 );
                 return;
@@ -74,8 +82,9 @@ class AudioMessage extends HookConsumerWidget {
                 if (isTranscriptPage) {
                   final transcriptMessageId =
                       TranscriptPage.of(context)?.messageId;
-                  context.accountServer
-                      .reUploadTranscriptAttachment(transcriptMessageId!);
+                  context.accountServer.reUploadTranscriptAttachment(
+                    transcriptMessageId!,
+                  );
                 } else {
                   context.accountServer.reUploadAttachment(message);
                 }
@@ -83,8 +92,9 @@ class AudioMessage extends HookConsumerWidget {
                 context.accountServer.downloadAttachment(message.messageId);
               }
             case MediaStatus.pending:
-              context.accountServer
-                  .cancelProgressAttachmentJob(message.messageId);
+              context.accountServer.cancelProgressAttachmentJob(
+                message.messageId,
+              );
             case MediaStatus.expired:
             case null:
               break;
@@ -142,23 +152,25 @@ class AudioMessage extends HookConsumerWidget {
 }
 
 class _AnimatedWave extends HookConsumerWidget {
-  const _AnimatedWave({
-    required this.duration,
-  });
+  const _AnimatedWave({required this.duration});
 
   final Duration duration;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaWaveform =
-        useMessageConverter(converter: (state) => state.mediaWaveform ?? '');
-    final mediaStatus =
-        useMessageConverter(converter: (state) => state.mediaStatus);
-    final messageId =
-        useMessageConverter(converter: (state) => state.messageId);
+    final mediaWaveform = useMessageConverter(
+      converter: (state) => state.mediaWaveform ?? '',
+    );
+    final mediaStatus = useMessageConverter(
+      converter: (state) => state.mediaStatus,
+    );
+    final messageId = useMessageConverter(
+      converter: (state) => state.messageId,
+    );
 
-    final waveform =
-        useMemoized(() => base64Decode(mediaWaveform), [mediaWaveform]);
+    final waveform = useMemoized(() => base64Decode(mediaWaveform), [
+      mediaWaveform,
+    ]);
 
     final read = mediaStatus == MediaStatus.read;
     final isTranscriptPage = useIsTranscriptPage();
@@ -168,22 +180,27 @@ class _AnimatedWave extends HookConsumerWidget {
     );
 
     final isMe = useMessageConverter(
-        converter: (state) => state.relationship == UserRelationship.me);
+      converter: (state) => state.relationship == UserRelationship.me,
+    );
 
-    final position =
-        (useAudioPlayerPosition() / duration.inMilliseconds).clamp(0.0, 1.0);
+    final position = (useAudioPlayerPosition() / duration.inMilliseconds).clamp(
+      0.0,
+      1.0,
+    );
 
     return SizedBox(
       height: 12,
       child: WaveformWidget(
         value: playing ? position : 0,
         waveform: waveform,
-        backgroundColor: isMe || read
-            ? context.theme.waveformBackground
-            : context.theme.accent,
-        foregroundColor: isMe || read
-            ? context.theme.waveformForeground
-            : context.theme.accent,
+        backgroundColor:
+            isMe || read
+                ? context.theme.waveformBackground
+                : context.theme.accent,
+        foregroundColor:
+            isMe || read
+                ? context.theme.waveformForeground
+                : context.theme.accent,
       ),
     );
   }

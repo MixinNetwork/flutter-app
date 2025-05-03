@@ -30,19 +30,13 @@ abstract class _MessageEvent extends Equatable {
 class _MessageJumpCurrentEvent extends _MessageEvent {}
 
 class _MessageInitEvent extends _MessageEvent {
-  _MessageInitEvent({
-    this.centerMessageId,
-    this.lastReadMessageId,
-  });
+  _MessageInitEvent({this.centerMessageId, this.lastReadMessageId});
 
   final String? centerMessageId;
   final String? lastReadMessageId;
 
   @override
-  List<Object?> get props => [
-        centerMessageId,
-        lastReadMessageId,
-      ];
+  List<Object?> get props => [centerMessageId, lastReadMessageId];
 
   @override
   final stringify = true;
@@ -116,15 +110,15 @@ class MessageState extends Equatable {
 
   @override
   List<Object?> get props => [
-        conversationId,
-        top,
-        center,
-        bottom,
-        isLatest,
-        isOldest,
-        lastReadMessageId,
-        refreshKey,
-      ];
+    conversationId,
+    top,
+    center,
+    bottom,
+    isLatest,
+    isOldest,
+    lastReadMessageId,
+    refreshKey,
+  ];
 
   MessageItem? get bottomMessage =>
       bottom.lastOrNull ?? center ?? top.lastOrNull;
@@ -135,10 +129,10 @@ class MessageState extends Equatable {
   bool get isEmpty => top.isEmpty && center == null && bottom.isEmpty;
 
   List<MessageItem> get list => [
-        ...top,
-        if (center != null) center!,
-        ...bottom,
-      ];
+    ...top,
+    if (center != null) center!,
+    ...bottom,
+  ];
 
   MessageState copyWith({
     String? conversationId,
@@ -149,26 +143,25 @@ class MessageState extends Equatable {
     bool? isOldest,
     String? lastReadMessageId,
     Object? refreshKey,
-  }) =>
-      MessageState(
-        conversationId: conversationId ?? this.conversationId,
-        top: top ?? this.top,
-        center: center ?? this.center,
-        bottom: bottom ?? this.bottom,
-        isLatest: isLatest ?? this.isLatest,
-        isOldest: isOldest ?? this.isOldest,
-        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
-        refreshKey: refreshKey ?? this.refreshKey,
-      );
+  }) => MessageState(
+    conversationId: conversationId ?? this.conversationId,
+    top: top ?? this.top,
+    center: center ?? this.center,
+    bottom: bottom ?? this.bottom,
+    isLatest: isLatest ?? this.isLatest,
+    isOldest: isOldest ?? this.isOldest,
+    lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
+    refreshKey: refreshKey ?? this.refreshKey,
+  );
 
   MessageState _copyWithJumpCurrentState() => MessageState(
-        top: list.toList(),
-        refreshKey: Object(),
-        conversationId: conversationId,
-        isLatest: isLatest,
-        isOldest: isOldest,
-        lastReadMessageId: lastReadMessageId,
-      );
+    top: list.toList(),
+    refreshKey: Object(),
+    conversationId: conversationId,
+    isLatest: isLatest,
+    isOldest: isOldest,
+    lastReadMessageId: lastReadMessageId,
+  );
 
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
@@ -187,15 +180,11 @@ class MessageState extends Equatable {
     bool exclusive(MessageItem message) => message.messageId != messageId;
 
     if (top.any(include)) {
-      return copyWith(
-        top: top.where(exclusive).toList(),
-      );
+      return copyWith(top: top.where(exclusive).toList());
     }
 
     if (bottom.any(include)) {
-      return copyWith(
-        bottom: bottom.where(exclusive).toList(),
-      );
+      return copyWith(bottom: bottom.where(exclusive).toList());
     }
 
     // ignore: avoid_returning_this
@@ -212,26 +201,27 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.mentionCache,
     required this.accountServer,
   }) : super(MessageState()) {
-    on<_MessageEvent>(
-      (event, emit) async {
-        await _onEvent(event, emit);
-      },
-      transformer: sequential(),
-    );
+    on<_MessageEvent>((event, emit) async {
+      await _onEvent(event, emit);
+    }, transformer: sequential());
 
-    add(_MessageInitEvent(
-      centerMessageId: conversationNotifier.state?.initIndexMessageId,
-      lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
-    ));
+    add(
+      _MessageInitEvent(
+        centerMessageId: conversationNotifier.state?.initIndexMessageId,
+        lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
+      ),
+    );
     addSubscription(
       conversationNotifier.stream
           .where((event) => event?.conversationId != null)
-          .map((event) => (
-                event?.conversationId,
-                event?.initIndexMessageId,
-                event?.lastReadMessageId,
-                event?.refreshKey,
-              ))
+          .map(
+            (event) => (
+              event?.conversationId,
+              event?.initIndexMessageId,
+              event?.lastReadMessageId,
+              event?.refreshKey,
+            ),
+          )
           .distinct()
           .asyncMap(
             (event) async => _MessageInitEvent(
@@ -248,19 +238,21 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .map((event) => event?.conversationId)
           .distinct()
           .switchMap((conversationId) {
-        if (conversationId == null) {
-          return const Stream<List<MessageItem>>.empty();
-        }
-        return messageDao.watchInsertOrReplaceMessageStream(conversationId);
-      }).listen((state) => add(_MessageInsertOrReplaceEvent(state))),
+            if (conversationId == null) {
+              return const Stream<List<MessageItem>>.empty();
+            }
+            return messageDao.watchInsertOrReplaceMessageStream(conversationId);
+          })
+          .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
     );
 
     addSubscription(
-        DataBaseEventBus.instance.deleteMessageIdStream.listen((messageIds) {
-      messageIds.forEach((messageId) {
-        add(_MessageDeleteEvent(messageId));
-      });
-    }));
+      DataBaseEventBus.instance.deleteMessageIdStream.listen((messageIds) {
+        messageIds.forEach((messageId) {
+          add(_MessageDeleteEvent(messageId));
+        });
+      }),
+    );
   }
 
   final ScrollController scrollController = ScrollController();
@@ -275,9 +267,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<void> _preCacheMention(MessageState state) async {
     final set = {...state.top, state.center, ...state.bottom};
     await mentionCache.checkMentionCache(
-      {...set.map((e) => e?.content), ...set.map((e) => e?.quoteContent)}
-          .nonNulls
-          .toSet(),
+      {
+        ...set.map((e) => e?.content),
+        ...set.map((e) => e?.quoteContent),
+      }.nonNulls.toSet(),
     );
   }
 
@@ -299,10 +292,14 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         event.centerMessageId,
       );
       await _preCacheMention(messageState);
-      emit(_pretreatment(messageState.copyWith(
-        refreshKey: Object(),
-        lastReadMessageId: event.lastReadMessageId,
-      )));
+      emit(
+        _pretreatment(
+          messageState.copyWith(
+            refreshKey: Object(),
+            lastReadMessageId: event.lastReadMessageId,
+          ),
+        ),
+      );
     } else if (event is _MessageDeleteEvent) {
       final messageState = state.removeMessage(event.messageId);
       emit(_pretreatment(messageState));
@@ -326,10 +323,12 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           emit(_pretreatment(result));
         }
       } else if (event is _MessageScrollEvent) {
-        add(_MessageInitEvent(
-          centerMessageId: event.messageId,
-          lastReadMessageId: state.lastReadMessageId,
-        ));
+        add(
+          _MessageInitEvent(
+            centerMessageId: event.messageId,
+            lastReadMessageId: state.lastReadMessageId,
+          ),
+        );
       } else if (event is _MessageJumpCurrentEvent) {
         emit(_pretreatment(state._copyWithJumpCurrentState()));
       }
@@ -344,26 +343,32 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final topMessageId = state.topMessage?.messageId;
     assert(topMessageId != null);
     final info = await messageDao.messageOrderInfo(topMessageId!);
-    final list = await messageDao
-        .beforeMessagesByConversationId(info!, conversationId, limit)
-        .get();
+    final list =
+        await messageDao
+            .beforeMessagesByConversationId(info!, conversationId, limit)
+            .get();
 
     final isOldest = list.length < limit;
-    return state
-        .copyWith(top: [...list.reversed, ...state.top], isOldest: isOldest);
+    return state.copyWith(
+      top: [...list.reversed, ...state.top],
+      isOldest: isOldest,
+    );
   }
 
   Future<MessageState> _after(String conversationId) async {
     final bottomMessageId = state.bottomMessage?.messageId;
     assert(bottomMessageId != null);
     final info = await messageDao.messageOrderInfo(bottomMessageId!);
-    final list = await messageDao
-        .afterMessagesByConversationId(info!, conversationId, limit)
-        .get();
+    final list =
+        await messageDao
+            .afterMessagesByConversationId(info!, conversationId, limit)
+            .get();
 
     final isLatest = list.length < limit ? true : null;
-    return state
-        .copyWith(bottom: [...state.bottom, ...list], isLatest: isLatest);
+    return state.copyWith(
+      bottom: [...state.bottom, ...list],
+      isLatest: isLatest,
+    );
   }
 
   Future<MessageState> _resetMessageList(
@@ -372,7 +377,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     String? centerMessageId,
   ]) async {
     final conversation = conversationNotifier.state?.conversation;
-    final _centerMessageId = centerMessageId ??
+    final _centerMessageId =
+        centerMessageId ??
         ((conversation?.unseenMessageCount ?? 0) > 0
             ? conversation?.lastReadMessageId
             : null);
@@ -384,10 +390,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
 
     return state.copyWith(
-        conversationId: conversationId,
-        center: state.center,
-        bottom: state.bottom,
-        top: state.top);
+      conversationId: conversationId,
+      center: state.center,
+      bottom: state.bottom,
+      top: state.top,
+    );
   }
 
   Future<MessageState> _messagesByConversationId(
@@ -396,12 +403,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     String? centerMessageId,
   }) async {
     Future<MessageState> recentMessages() async {
-      final list = await messageDao
-          .messagesByConversationId(
-            conversationId,
-            limit,
-          )
-          .get();
+      final list =
+          await messageDao
+              .messagesByConversationId(conversationId, limit)
+              .get();
 
       return MessageState(
         top: list.reversed.toList(),
@@ -418,21 +423,24 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     }
 
     final _limit = limit ~/ 2;
-    final bottomList = await messageDao
-        .afterMessagesByConversationId(info, conversationId, _limit)
-        .get();
-    var topList = (await messageDao
-            .beforeMessagesByConversationId(info, conversationId, _limit)
-            .get())
-        .reversed
-        .toList();
+    final bottomList =
+        await messageDao
+            .afterMessagesByConversationId(info, conversationId, _limit)
+            .get();
+    var topList =
+        (await messageDao
+                .beforeMessagesByConversationId(info, conversationId, _limit)
+                .get())
+            .reversed
+            .toList();
 
     final isLatest = bottomList.length < _limit;
     final isOldest = topList.length < _limit;
 
-    var center = await messageDao
-        .messageItemByMessageId(centerMessageId)
-        .getSingleOrNull();
+    var center =
+        await messageDao
+            .messageItemByMessageId(centerMessageId)
+            .getSingleOrNull();
 
     if (bottomList.isEmpty && center != null) {
       topList = [...topList, center];
@@ -449,7 +457,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   }
 
   MessageState? _insertOrReplace(
-      String conversationId, List<MessageItem> list) {
+    String conversationId,
+    List<MessageItem> list,
+  ) {
     var top = state.top.toList();
     var center = state.center;
     var bottom = state.bottom.toList();
@@ -463,15 +473,17 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         continue;
       }
 
-      final topIndex =
-          top.indexWhere((element) => element.messageId == item.messageId);
+      final topIndex = top.indexWhere(
+        (element) => element.messageId == item.messageId,
+      );
       if (topIndex > -1) {
         top[topIndex] = item;
         continue;
       }
 
-      final bottomIndex =
-          bottom.indexWhere((element) => element.messageId == item.messageId);
+      final bottomIndex = bottom.indexWhere(
+        (element) => element.messageId == item.messageId,
+      );
       if (bottomIndex > -1) {
         bottom[bottomIndex] = item;
         continue;
@@ -494,7 +506,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         }
         final position = scrollController.position;
-        jumpToBottom = currentUserSent ||
+        jumpToBottom =
+            currentUserSent ||
             (position.hasContentDimensions &&
                 position.pixels == position.maxScrollExtent);
       } else {
@@ -505,11 +518,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       }
     }
 
-    final result = state.copyWith(
-      top: top,
-      center: center,
-      bottom: bottom,
-    );
+    final result = state.copyWith(top: top, center: center, bottom: bottom);
 
     if (scrollController.hasClients && jumpToBottom) {
       return result._copyWithJumpCurrentState();
@@ -557,9 +566,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         ...messageState.top,
       ];
     }
-    final _messageState = messageState.copyWith(
-      top: top,
-    );
+    final _messageState = messageState.copyWith(top: top);
     if (isAppActive) {
       accountServer.markRead(conversationNotifier.state!.conversationId);
     }

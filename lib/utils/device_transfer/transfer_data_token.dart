@@ -24,21 +24,21 @@ class TransferDataToken {
   });
 
   factory TransferDataToken.fromDbToken(db.Token token) => TransferDataToken(
-        assetId: token.assetId,
-        asset: token.kernelAssetId,
-        symbol: token.symbol,
-        name: token.name,
-        iconUrl: token.iconUrl,
-        priceBtc: token.priceBtc,
-        priceUsd: token.priceUsd,
-        chainId: token.chainId,
-        changeUsd: token.changeUsd,
-        changeBtc: token.changeBtc,
-        confirmations: token.confirmations,
-        assetKey: token.assetKey,
-        dust: token.dust,
-        collectionHash: token.collectionHash,
-      );
+    assetId: token.assetId,
+    asset: token.kernelAssetId,
+    symbol: token.symbol,
+    name: token.name,
+    iconUrl: token.iconUrl,
+    priceBtc: token.priceBtc,
+    priceUsd: token.priceUsd,
+    chainId: token.chainId,
+    changeUsd: token.changeUsd,
+    changeBtc: token.changeBtc,
+    confirmations: token.confirmations,
+    assetKey: token.assetKey,
+    dust: token.dust,
+    collectionHash: token.collectionHash,
+  );
 
   factory TransferDataToken.fromJson(Map<String, dynamic> json) =>
       _$TransferDataTokenFromJson(json);
@@ -75,19 +75,19 @@ class TransferDataToken {
   Map<String, dynamic> toJson() => _$TransferDataTokenToJson(this);
 
   db.Token toDbToken() => db.Token(
-        assetId: assetId,
-        kernelAssetId: asset,
-        symbol: symbol,
-        name: name,
-        iconUrl: iconUrl,
-        priceBtc: priceBtc,
-        priceUsd: priceUsd,
-        chainId: chainId,
-        changeUsd: changeUsd,
-        changeBtc: changeBtc,
-        confirmations: confirmations,
-        assetKey: assetKey,
-        dust: dust,
-        collectionHash: collectionHash,
-      );
+    assetId: assetId,
+    kernelAssetId: asset,
+    symbol: symbol,
+    name: name,
+    iconUrl: iconUrl,
+    priceBtc: priceBtc,
+    priceUsd: priceUsd,
+    chainId: chainId,
+    changeUsd: changeUsd,
+    changeBtc: changeBtc,
+    confirmations: confirmations,
+    assetKey: assetKey,
+    dust: dust,
+    collectionHash: collectionHash,
+  );
 }

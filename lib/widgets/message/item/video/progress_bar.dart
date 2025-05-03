@@ -24,41 +24,22 @@ class CupertinoVideoProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => VideoProgressBar(
-        controller,
-        barHeight: 5,
-        handleHeight: 6,
-        drawShadow: true,
-        colors: colors ??
-            ChewieProgressColors(
-              playedColor: const Color.fromARGB(
-                120,
-                255,
-                255,
-                255,
-              ),
-              handleColor: const Color.fromARGB(
-                255,
-                255,
-                255,
-                255,
-              ),
-              bufferedColor: const Color.fromARGB(
-                60,
-                255,
-                255,
-                255,
-              ),
-              backgroundColor: const Color.fromARGB(
-                20,
-                255,
-                255,
-                255,
-              ),
-            ),
-        onDragEnd: onDragEnd,
-        onDragStart: onDragStart,
-        onDragUpdate: onDragUpdate,
-      );
+    controller,
+    barHeight: 5,
+    handleHeight: 6,
+    drawShadow: true,
+    colors:
+        colors ??
+        ChewieProgressColors(
+          playedColor: const Color.fromARGB(120, 255, 255, 255),
+          handleColor: const Color.fromARGB(255, 255, 255, 255),
+          bufferedColor: const Color.fromARGB(60, 255, 255, 255),
+          backgroundColor: const Color.fromARGB(20, 255, 255, 255),
+        ),
+    onDragEnd: onDragEnd,
+    onDragStart: onDragStart,
+    onDragUpdate: onDragUpdate,
+  );
 }
 
 class ChewieProgressColors {
@@ -67,10 +48,10 @@ class ChewieProgressColors {
     Color bufferedColor = const Color.fromRGBO(30, 30, 200, 0.2),
     Color handleColor = const Color.fromRGBO(200, 200, 200, 1),
     Color backgroundColor = const Color.fromRGBO(200, 200, 200, 0.5),
-  })  : playedPaint = Paint()..color = playedColor,
-        bufferedPaint = Paint()..color = bufferedColor,
-        handlePaint = Paint()..color = handleColor,
-        backgroundPaint = Paint()..color = backgroundColor;
+  }) : playedPaint = Paint()..color = playedColor,
+       bufferedPaint = Paint()..color = bufferedColor,
+       handlePaint = Paint()..color = handleColor,
+       backgroundPaint = Paint()..color = backgroundColor;
 
   final Paint playedPaint;
   final Paint bufferedPaint;
@@ -218,19 +199,19 @@ class StaticProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CustomPaint(
-        painter: _ProgressBarPainter(
-          value: value,
-          draggableValue: context.calcRelativePosition(
-            value.duration,
-            latestDraggableOffset,
-          ),
-          colors: colors,
-          barHeight: barHeight,
-          handleHeight: handleHeight,
-          drawShadow: drawShadow,
-        ),
-        child: const SizedBox(height: 20),
-      );
+    painter: _ProgressBarPainter(
+      value: value,
+      draggableValue: context.calcRelativePosition(
+        value.duration,
+        latestDraggableOffset,
+      ),
+      colors: colors,
+      barHeight: barHeight,
+      handleHeight: handleHeight,
+      drawShadow: drawShadow,
+    ),
+    child: const SizedBox(height: 20),
+  );
 }
 
 class _ProgressBarPainter extends CustomPainter {
@@ -271,7 +252,8 @@ class _ProgressBarPainter extends CustomPainter {
     if (!value.isInitialized) {
       return;
     }
-    final playedPartPercent = (draggableValue != Duration.zero
+    final playedPartPercent =
+        (draggableValue != Duration.zero
             ? draggableValue.inMilliseconds
             : value.position.inMilliseconds) /
         value.duration.inMilliseconds;
@@ -303,13 +285,13 @@ class _ProgressBarPainter extends CustomPainter {
     );
 
     if (drawShadow) {
-      final shadowPath = Path()
-        ..addOval(
-          Rect.fromCircle(
-            center: Offset(playedPart, baseOffset + barHeight / 2),
-            radius: handleHeight,
-          ),
-        );
+      final shadowPath =
+          Path()..addOval(
+            Rect.fromCircle(
+              center: Offset(playedPart, baseOffset + barHeight / 2),
+              radius: handleHeight,
+            ),
+          );
 
       canvas.drawShadow(shadowPath, Colors.black, 0.2, false);
     }

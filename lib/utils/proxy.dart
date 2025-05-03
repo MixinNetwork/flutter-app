@@ -13,10 +13,7 @@ import 'extension/extension.dart';
 
 part 'proxy.g.dart';
 
-enum ProxyType {
-  http,
-  socks5,
-}
+enum ProxyType { http, socks5 }
 
 @JsonSerializable()
 class ProxyConfig with EquatableMixin {
@@ -41,9 +38,10 @@ class ProxyConfig with EquatableMixin {
 
   String toUri() {
     final scheme = type == ProxyType.http ? 'http' : 'socks5';
-    final userInfo = !username.isNullOrBlank() && !password.isNullOrBlank()
-        ? '$username:$password@'
-        : '';
+    final userInfo =
+        !username.isNullOrBlank() && !password.isNullOrBlank()
+            ? '$username:$password@'
+            : '';
     return '$scheme://$userInfo$host:$port';
   }
 
@@ -66,12 +64,10 @@ extension HttpClientProxy on HttpClient {
     switch (config) {
       case ProxyConfig(type: ProxyType.http):
         final proxyUrl = config.toUri();
-        findProxy = (uri) => HttpClient.findProxyFromEnvironment(
+        findProxy =
+            (uri) => HttpClient.findProxyFromEnvironment(
               uri,
-              environment: {
-                'https_proxy': proxyUrl,
-                'http_proxy': proxyUrl,
-              },
+              environment: {'https_proxy': proxyUrl, 'http_proxy': proxyUrl},
             );
       case ProxyConfig(type: ProxyType.socks5):
       // not supported yet.
@@ -92,9 +88,10 @@ Future<rhttp.RhttpCompatibleClient> createRHttpClient({
   }
 
   final settings = rhttp.ClientSettings(
-    proxySettings: proxyConfig != null
-        ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
-        : const rhttp.ProxySettings.noProxy(),
+    proxySettings:
+        proxyConfig != null
+            ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
+            : const rhttp.ProxySettings.noProxy(),
   );
   final client = await rhttp.RhttpCompatibleClient.create(settings: settings);
   _cachedClient = client;
@@ -104,7 +101,7 @@ Future<rhttp.RhttpCompatibleClient> createRHttpClient({
 
 class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
   _CustomHttpClientAdapterWrapper(ProxyConfig? proxyConfig)
-      : client = createRHttpClient(proxyConfig: proxyConfig);
+    : client = createRHttpClient(proxyConfig: proxyConfig);
 
   final Future<rhttp.RhttpCompatibleClient> client;
 
@@ -117,8 +114,11 @@ class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
   }
 
   @override
-  Future<ResponseBody> fetch(RequestOptions options,
-      Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
     try {
       final adapter = ConversionLayerAdapter(await client);
       final resp = await adapter.fetch(options, requestStream, cancelFuture);
@@ -126,7 +126,9 @@ class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
     } on rhttp.RhttpWrappedClientException catch (error, stackTrace) {
       // RhttpException.request can not send to other isolate by SendPort
       Error.throwWithStackTrace(
-          http.ClientException(error.message, error.uri), stackTrace);
+        http.ClientException(error.message, error.uri),
+        stackTrace,
+      );
     }
   }
 }

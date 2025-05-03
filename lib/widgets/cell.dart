@@ -24,26 +24,22 @@ class CellGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 600),
-        child: Padding(
-          padding: padding,
-          child: ClipRRect(
-            borderRadius: borderRadius,
-            child: _CellItemStyle(
-              backgroundColor:
-                  cellBackgroundColor ?? context.theme.listSelected,
-              child: child,
-            ),
-          ),
+    constraints: const BoxConstraints(maxWidth: 600),
+    child: Padding(
+      padding: padding,
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: _CellItemStyle(
+          backgroundColor: cellBackgroundColor ?? context.theme.listSelected,
+          child: child,
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _CellItemStyle extends InheritedWidget {
-  const _CellItemStyle({
-    required super.child,
-    required this.backgroundColor,
-  });
+  const _CellItemStyle({required super.child, required this.backgroundColor});
 
   final Color backgroundColor;
 
@@ -93,9 +89,7 @@ class CellItem extends HookConsumerWidget {
       );
     }
     return InteractiveDecoratedBox(
-      decoration: BoxDecoration(
-        color: selectedBackgroundColor,
-      ),
+      decoration: BoxDecoration(color: selectedBackgroundColor),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.only(
@@ -110,10 +104,7 @@ class CellItem extends HookConsumerWidget {
             if (leading != null) const SizedBox(width: 8),
             Expanded(
               child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  fontSize: 16,
-                  color: dynamicColor,
-                ),
+                style: TextStyle(fontSize: 16, color: dynamicColor),
                 child: title,
               ),
             ),
@@ -140,10 +131,9 @@ class Arrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
-        Resources.assetsImagesIcArrowRightSvg,
-        colorFilter:
-            ColorFilter.mode(context.theme.secondaryText, BlendMode.srcIn),
-        width: 30,
-        height: 30,
-      );
+    Resources.assetsImagesIcArrowRightSvg,
+    colorFilter: ColorFilter.mode(context.theme.secondaryText, BlendMode.srcIn),
+    width: 30,
+    height: 30,
+  );
 }

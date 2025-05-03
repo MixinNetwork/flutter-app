@@ -75,22 +75,22 @@ class GiphyImageSet with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        fixedHeight,
-        fixedHeightStill,
-        fixedHeightDownsampled,
-        fixedWidth,
-        fixedWidthStill,
-        fixedWidthDownsampled,
-        fixedHeightSmall,
-        fixedHeightSmallStill,
-        fixedWidthSmall,
-        fixedWidthSmallStill,
-        downsized,
-        downsizedStill,
-        downsizedLarge,
-        original,
-        originalStill,
-      ];
+    fixedHeight,
+    fixedHeightStill,
+    fixedHeightDownsampled,
+    fixedWidth,
+    fixedWidthStill,
+    fixedWidthDownsampled,
+    fixedHeightSmall,
+    fixedHeightSmallStill,
+    fixedWidthSmall,
+    fixedWidthSmallStill,
+    downsized,
+    downsizedStill,
+    downsizedLarge,
+    original,
+    originalStill,
+  ];
 
   Map<String, dynamic> toJson() => _$GiphyImageSetToJson(this);
 }

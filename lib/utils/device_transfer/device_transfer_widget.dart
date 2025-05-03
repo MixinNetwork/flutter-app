@@ -46,10 +46,7 @@ enum DeviceTransferCallbackType {
   onConnectionFailed,
 }
 
-enum ConnectionFailedReason {
-  versionNotMatched,
-  unknown,
-}
+enum ConnectionFailedReason { versionNotMatched, unknown }
 
 class DeviceTransferCallbackEvent {
   DeviceTransferCallbackEvent(this.action, [this.payload]);
@@ -66,9 +63,9 @@ class DeviceTransferEventBus {
   final _eventBus = EventBus.instance;
 
   Stream<DeviceTransferCallbackEvent> on(DeviceTransferCallbackType action) =>
-      _eventBus.on
-          .whereType<DeviceTransferCallbackEvent>()
-          .where((event) => event.action == action);
+      _eventBus.on.whereType<DeviceTransferCallbackEvent>().where(
+        (event) => event.action == action,
+      );
 
   Stream<DeviceTransferCallbackEvent> events() => _eventBus.on.whereType();
 
@@ -77,11 +74,7 @@ class DeviceTransferEventBus {
   }
 }
 
-enum _Status {
-  start,
-  succeed,
-  failed,
-}
+enum _Status { start, succeed, failed }
 
 final _backupBehavior = () {
   final subject = StreamController<_Status>.broadcast();
@@ -206,8 +199,9 @@ void useOnTransferEventType(
   VoidCallback callback,
 ) {
   useEffect(() {
-    final subscription =
-        DeviceTransferEventBus.instance.on(type).listen((event) => callback());
+    final subscription = DeviceTransferEventBus.instance
+        .on(type)
+        .listen((event) => callback());
     return subscription.cancel;
   }, [type]);
 }
@@ -225,10 +219,7 @@ void useOnTransferEventTypePayload<T>(
 }
 
 class DeviceTransferHandlerWidget extends HookConsumerWidget {
-  const DeviceTransferHandlerWidget({
-    required this.child,
-    super.key,
-  });
+  const DeviceTransferHandlerWidget({required this.child, super.key});
 
   final Widget child;
 
@@ -237,22 +228,20 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
     _useTransferStatus(
       () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
-      succeedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.transferCompleted,
-      ),
-      failedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.deviceTransferFailed,
-      ),
+      succeedBuilder:
+          (context) => _ConfirmDialog(message: context.l10n.transferCompleted),
+      failedBuilder:
+          (context) =>
+              _ConfirmDialog(message: context.l10n.deviceTransferFailed),
     );
     _useTransferStatus(
       () => _backupBehavior.stream,
       progressBuilder: (context) => const _BackupProcessingDialog(),
-      succeedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.transferCompleted,
-      ),
-      failedBuilder: (context) => _ConfirmDialog(
-        message: context.l10n.deviceTransferFailed,
-      ),
+      succeedBuilder:
+          (context) => _ConfirmDialog(message: context.l10n.transferCompleted),
+      failedBuilder:
+          (context) =>
+              _ConfirmDialog(message: context.l10n.deviceTransferFailed),
     );
     useOnTransferEventType(
       DeviceTransferCallbackType.onBackupRequestReceived,
@@ -275,9 +264,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
       () async {
         final approved = await showMixinDialog<bool>(
           context: context,
-          child: _ApproveDialog(
-            message: context.l10n.confirmSyncChatsToPhone,
-          ),
+          child: _ApproveDialog(message: context.l10n.confirmSyncChatsToPhone),
         );
         if (approved == true) {
           EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
@@ -309,27 +296,25 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
 }
 
 class _ConfirmDialog extends StatelessWidget {
-  const _ConfirmDialog({
-    required this.message,
-  });
+  const _ConfirmDialog({required this.message});
 
   final String message;
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(message),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(context.l10n.confirm),
-          ),
-        ],
-      );
+    content: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: Text(message),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop(false);
+        },
+        child: Text(context.l10n.confirm),
+      ),
+    ],
+  );
 }
 
 class _ApproveDialog extends StatelessWidget {
@@ -339,30 +324,28 @@ class _ApproveDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AlertDialogLayout(
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Text(message),
+    content: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: Text(message),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop(false);
+        },
+        child: Text(
+          context.l10n.cancel,
+          style: TextStyle(color: context.theme.secondaryText),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(
-              context.l10n.cancel,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-              ),
-            ),
-          ),
-          MixinButton(
-            onTap: () {
-              Navigator.of(context).pop(true);
-            },
-            child: Text(context.l10n.confirm),
-          ),
-        ],
-      );
+      ),
+      MixinButton(
+        onTap: () {
+          Navigator.of(context).pop(true);
+        },
+        child: Text(context.l10n.confirm),
+      ),
+    ],
+  );
 }
 
 class _RestoreProcessingDialog extends StatelessWidget {
@@ -370,14 +353,14 @@ class _RestoreProcessingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _TransferProcessDialog(
-        onCancelTapped: () {
-          EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
-          Navigator.pop(context);
-        },
-        iconAssetName: Resources.assetsImagesTransferFromPhoneSvg,
-        progressBehavior: _restoreProgressBehavior,
-        networkSpeedBehavior: _restoreNetworkSpeedBehavior,
-      );
+    onCancelTapped: () {
+      EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
+      Navigator.pop(context);
+    },
+    iconAssetName: Resources.assetsImagesTransferFromPhoneSvg,
+    progressBehavior: _restoreProgressBehavior,
+    networkSpeedBehavior: _restoreNetworkSpeedBehavior,
+  );
 }
 
 class _BackupProcessingDialog extends StatelessWidget {
@@ -385,14 +368,14 @@ class _BackupProcessingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _TransferProcessDialog(
-        onCancelTapped: () {
-          EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
-          Navigator.pop(context);
-        },
-        iconAssetName: Resources.assetsImagesTransferToPhoneSvg,
-        progressBehavior: _backupProgressBehavior,
-        networkSpeedBehavior: _backupNetworkSpeedBehavior,
-      );
+    onCancelTapped: () {
+      EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
+      Navigator.pop(context);
+    },
+    iconAssetName: Resources.assetsImagesTransferToPhoneSvg,
+    progressBehavior: _backupProgressBehavior,
+    networkSpeedBehavior: _backupNetworkSpeedBehavior,
+  );
 }
 
 class _TransferProcessDialog extends HookConsumerWidget {
@@ -416,8 +399,10 @@ class _TransferProcessDialog extends HookConsumerWidget {
       DesktopKeepScreenOn.setPreventSleep(true);
       return () => DesktopKeepScreenOn.setPreventSleep(false);
     }, []);
-    final networkSpeed =
-        useStream<double>(networkSpeedBehavior, initialData: 0);
+    final networkSpeed = useStream<double>(
+      networkSpeedBehavior,
+      initialData: 0,
+    );
     return SizedBox(
       width: 420,
       child: Padding(
@@ -439,10 +424,7 @@ class _TransferProcessDialog extends HookConsumerWidget {
               ),
               const SizedBox(height: 38),
               DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: context.theme.text, fontSize: 18),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

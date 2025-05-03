@@ -34,9 +34,5 @@ class PinMessageMinimal extends Equatable {
   Map<String, dynamic> toJson() => _$PinMessageMinimalToJson(this);
 
   @override
-  List<Object?> get props => [
-        messageId,
-        type,
-        content,
-      ];
+  List<Object?> get props => [messageId, type, content];
 }

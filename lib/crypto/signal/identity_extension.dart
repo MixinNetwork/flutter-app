@@ -6,6 +6,7 @@ extension IdentityExtension on Identity {
   IdentityKey getIdentityKey() => IdentityKey.fromBytes(publicKey, 0);
 
   IdentityKeyPair getIdentityKeyPair() => IdentityKeyPair(
-      IdentityKey.fromBytes(publicKey, 0),
-      Curve.decodePrivatePoint(privateKey!));
+    IdentityKey.fromBytes(publicKey, 0),
+    Curve.decodePrivatePoint(privateKey!),
+  );
 }

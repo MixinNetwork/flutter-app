@@ -9,8 +9,11 @@ extension OpenUriExtension on BuildContext {
       final content = actionText.substring(6).trim();
       final conversationItem = providerContainer.read(conversationProvider);
       if (content.isNotEmpty && conversationItem != null) {
-        accountServer.sendTextMessage(content, conversationItem.encryptCategory,
-            conversationId: conversationItem.conversationId);
+        accountServer.sendTextMessage(
+          content,
+          conversationItem.encryptCategory,
+          conversationId: conversationItem.conversationId,
+        );
       }
 
       return true;

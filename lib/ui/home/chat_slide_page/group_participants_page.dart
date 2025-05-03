@@ -34,25 +34,28 @@ class GroupParticipantsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conversationId = conversationState.conversationId;
 
-    final participants = useMemoizedStream(() {
+    final participants =
+        useMemoizedStream(() {
           final dao = context.database.participantDao;
           return dao
               .groupParticipantsByConversationId(conversationId)
               .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.watchUpdateParticipantStream(
-                  conversationIds: [conversationId])
-            ],
-            duration: kDefaultThrottleDuration,
-          );
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateParticipantStream(
+                    conversationIds: [conversationId],
+                  ),
+                ],
+                duration: kDefaultThrottleDuration,
+              );
         }, keys: [conversationId]).data ??
         const <ParticipantUser>[];
 
     // Find current user info to check if we have group manage permission.
     // Could be null if has been removed from group.
     final currentUser = useMemoized(
-      () => participants
-          .firstWhereOrNull((e) => e.userId == context.accountServer.userId),
+      () => participants.firstWhereOrNull(
+        (e) => e.userId == context.accountServer.userId,
+      ),
       [participants],
     );
 
@@ -64,7 +67,7 @@ class GroupParticipantsPage extends HookConsumerWidget {
         title: Text(context.l10n.groupParticipants),
         actions: [
           if (currentUser?.role != null)
-            _ActionAddParticipants(participants: participants)
+            _ActionAddParticipants(participants: participants),
         ],
       ),
       body: Column(
@@ -113,21 +116,24 @@ class _ParticipantList extends HookConsumerWidget {
         return participants;
       }
       return participants
-          .where((e) =>
-              (e.fullName?.toLowerCase().contains(keyword.toLowerCase()) ??
-                  false) ||
-              e.identityNumber.contains(keyword))
+          .where(
+            (e) =>
+                (e.fullName?.toLowerCase().contains(keyword.toLowerCase()) ??
+                    false) ||
+                e.identityNumber.contains(keyword),
+          )
           .toList();
     }, [participants, keyword]);
 
     return ListView.builder(
       itemCount: filteredParticipants.length,
       padding: const EdgeInsets.only(top: 8),
-      itemBuilder: (context, index) => _ParticipantTile(
-        participant: filteredParticipants[index],
-        currentUser: currentUser,
-        keyword: keyword,
-      ),
+      itemBuilder:
+          (context, index) => _ParticipantTile(
+            participant: filteredParticipants[index],
+            currentUser: currentUser,
+            keyword: keyword,
+          ),
     );
   }
 }
@@ -147,55 +153,52 @@ class _ParticipantTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) => _ParticipantMenuEntry(
-        participant: participant,
-        currentUser: currentUser,
-        child: Material(
-          color: context.theme.primary,
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            leading: AvatarWidget(
-              size: 50,
-              avatarUrl: participant.avatarUrl,
-              userId: participant.userId,
-              name: participant.fullName,
-            ),
-            title: Row(
-              children: [
-                Flexible(
-                  child: CustomText(
-                    participant.fullName ?? '?',
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textMatchers: [
-                      EmojiTextMatcher(),
-                      KeyWordTextMatcher(
-                        keyword,
-                        style: TextStyle(
-                          color: context.theme.accent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                BadgesWidget(
-                  isBot: participant.appId != null,
-                  verified: participant.isVerified,
-                  membership: participant.membership,
-                ),
-              ],
-            ),
-            onTap: () {
-              showUserDialog(context, participant.userId);
-            },
-            trailing: _RoleWidget(role: participant.role),
-          ),
+    participant: participant,
+    currentUser: currentUser,
+    child: Material(
+      color: context.theme.primary,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 16,
         ),
-      );
+        leading: AvatarWidget(
+          size: 50,
+          avatarUrl: participant.avatarUrl,
+          userId: participant.userId,
+          name: participant.fullName,
+        ),
+        title: Row(
+          children: [
+            Flexible(
+              child: CustomText(
+                participant.fullName ?? '?',
+                style: TextStyle(color: context.theme.text, fontSize: 16),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textMatchers: [
+                  EmojiTextMatcher(),
+                  KeyWordTextMatcher(
+                    keyword,
+                    style: TextStyle(color: context.theme.accent),
+                  ),
+                ],
+              ),
+            ),
+            BadgesWidget(
+              isBot: participant.appId != null,
+              verified: participant.isVerified,
+              membership: participant.membership,
+            ),
+          ],
+        ),
+        onTap: () {
+          showUserDialog(context, participant.userId);
+        },
+        trailing: _RoleWidget(role: participant.role),
+      ),
+    ),
+  );
 }
 
 class _ParticipantMenuEntry extends HookConsumerWidget {
@@ -218,69 +221,89 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
 
     return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-      menuProvider: (request) => MenusWithSeparator(childrens: [
-        [
-          MenuAction(
-            image: MenuImage.icon(IconFonts.chat),
-            title:
-                context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
-            callback: () {
-              ConversationStateNotifier.selectUser(
-                context,
-                participant.userId,
-              );
-            },
+      menuProvider:
+          (request) => MenusWithSeparator(
+            childrens: [
+              [
+                MenuAction(
+                  image: MenuImage.icon(IconFonts.chat),
+                  title: context.l10n.groupPopMenuMessage(
+                    participant.fullName ?? '?',
+                  ),
+                  callback: () {
+                    ConversationStateNotifier.selectUser(
+                      context,
+                      participant.userId,
+                    );
+                  },
+                ),
+              ],
+              if (currentUser?.role == ParticipantRole.owner)
+                [
+                  if (participant.role != ParticipantRole.admin)
+                    MenuAction(
+                      image: MenuImage.icon(IconFonts.manageUser),
+                      title: context.l10n.makeGroupAdmin,
+                      callback: () {
+                        final conversationId = ref.read(
+                          currentConversationIdProvider,
+                        );
+                        if (conversationId == null) return;
+
+                        runFutureWithToast(
+                          context.accountServer.updateParticipantRole(
+                            conversationId,
+                            participant.userId,
+                            ParticipantRole.admin,
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    MenuAction(
+                      image: MenuImage.icon(IconFonts.stop),
+                      title: context.l10n.dismissAsAdmin,
+                      callback: () {
+                        final conversationId = ref.read(
+                          currentConversationIdProvider,
+                        );
+                        if (conversationId == null) return;
+
+                        runFutureWithToast(
+                          context.accountServer.updateParticipantRole(
+                            conversationId,
+                            participant.userId,
+                            null,
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              [
+                if (currentUser?.role != null && participant.role == null ||
+                    currentUser?.role == ParticipantRole.owner)
+                  MenuAction(
+                    image: MenuImage.icon(IconFonts.delete),
+                    title: context.l10n.groupPopMenuRemove(
+                      participant.fullName ?? '?',
+                    ),
+                    callback: () {
+                      final conversationId = ref.read(
+                        currentConversationIdProvider,
+                      );
+                      if (conversationId == null) return;
+
+                      runFutureWithToast(
+                        context.accountServer.removeParticipant(
+                          conversationId,
+                          participant.userId,
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ],
           ),
-        ],
-        if (currentUser?.role == ParticipantRole.owner)
-          [
-            if (participant.role != ParticipantRole.admin)
-              MenuAction(
-                image: MenuImage.icon(IconFonts.manageUser),
-                title: context.l10n.makeGroupAdmin,
-                callback: () {
-                  final conversationId =
-                      ref.read(currentConversationIdProvider);
-                  if (conversationId == null) return;
-
-                  runFutureWithToast(
-                    context.accountServer.updateParticipantRole(conversationId,
-                        participant.userId, ParticipantRole.admin),
-                  );
-                },
-              )
-            else
-              MenuAction(
-                image: MenuImage.icon(IconFonts.stop),
-                title: context.l10n.dismissAsAdmin,
-                callback: () {
-                  final conversationId =
-                      ref.read(currentConversationIdProvider);
-                  if (conversationId == null) return;
-
-                  runFutureWithToast(context.accountServer
-                      .updateParticipantRole(
-                          conversationId, participant.userId, null));
-                },
-              )
-          ],
-        [
-          if (currentUser?.role != null && participant.role == null ||
-              currentUser?.role == ParticipantRole.owner)
-            MenuAction(
-              image: MenuImage.icon(IconFonts.delete),
-              title:
-                  context.l10n.groupPopMenuRemove(participant.fullName ?? '?'),
-              callback: () {
-                final conversationId = ref.read(currentConversationIdProvider);
-                if (conversationId == null) return;
-
-                runFutureWithToast(context.accountServer
-                    .removeParticipant(conversationId, participant.userId));
-              },
-            )
-        ]
-      ]),
       child: child,
     );
   }
@@ -305,37 +328,28 @@ class _RoleWidget extends StatelessWidget {
 }
 
 class _RoleLabel extends StatelessWidget {
-  const _RoleLabel(
-    this.label,
-  );
+  const _RoleLabel(this.label);
 
   final String label;
 
   @override
   Widget build(BuildContext context) => Text(
-        label,
-        style: TextStyle(
-          color: context.theme.secondaryText,
-          fontSize: 14,
-        ),
-      );
+    label,
+    style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
+  );
 }
 
-enum _ActionType {
-  addParticipants,
-  inviteByLink,
-}
+enum _ActionType { addParticipants, inviteByLink }
 
 class _ActionAddParticipants extends HookConsumerWidget {
-  const _ActionAddParticipants({
-    required this.participants,
-  });
+  const _ActionAddParticipants({required this.participants});
 
   final List<ParticipantUser> participants;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => CustomPopupMenuButton(
-        itemBuilder: (context) => [
+    itemBuilder:
+        (context) => [
           CustomPopupMenuItem(
             icon: Resources.assetsImagesContextMenuSearchUserSvg,
             title: context.l10n.addParticipants,
@@ -347,39 +361,41 @@ class _ActionAddParticipants extends HookConsumerWidget {
             value: _ActionType.inviteByLink,
           ),
         ],
-        onSelected: (action) async {
-          switch (action) {
-            case _ActionType.addParticipants:
-              {
-                final result = await showConversationSelector(
-                  context: context,
-                  singleSelect: false,
-                  title: context.l10n.addParticipants,
-                  onlyContact: true,
-                  maxSelect: kMaxGroupParticipants - participants.length,
-                );
-                if (result == null || result.isEmpty) return;
+    onSelected: (action) async {
+      switch (action) {
+        case _ActionType.addParticipants:
+          {
+            final result = await showConversationSelector(
+              context: context,
+              singleSelect: false,
+              title: context.l10n.addParticipants,
+              onlyContact: true,
+              maxSelect: kMaxGroupParticipants - participants.length,
+            );
+            if (result == null || result.isEmpty) return;
 
-                final userIds = result.map((e) => e.userId).nonNulls.toList();
-                final conversationId = ref.read(currentConversationIdProvider);
-                if (conversationId == null) return;
+            final userIds = result.map((e) => e.userId).nonNulls.toList();
+            final conversationId = ref.read(currentConversationIdProvider);
+            if (conversationId == null) return;
 
-                await runFutureWithToast(
-                  context.accountServer.addParticipant(conversationId, userIds),
-                );
-                break;
-              }
-            case _ActionType.inviteByLink:
-              {
-                final conversationId = ref.read(currentConversationIdProvider);
-                if (conversationId == null) return;
-
-                await showGroupInviteByLinkDialog(context,
-                    conversationId: conversationId);
-                break;
-              }
+            await runFutureWithToast(
+              context.accountServer.addParticipant(conversationId, userIds),
+            );
+            break;
           }
-        },
-        icon: Resources.assetsImagesIcAddSvg,
-      );
+        case _ActionType.inviteByLink:
+          {
+            final conversationId = ref.read(currentConversationIdProvider);
+            if (conversationId == null) return;
+
+            await showGroupInviteByLinkDialog(
+              context,
+              conversationId: conversationId,
+            );
+            break;
+          }
+      }
+    },
+    icon: Resources.assetsImagesIcAddSvg,
+  );
 }

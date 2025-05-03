@@ -27,13 +27,13 @@ class PagingState<T> extends Equatable {
 
   @override
   List<Object> get props => [
-        map,
-        count,
-        initialized,
-        index,
-        alignment,
-        hasData,
-      ];
+    map,
+    count,
+    initialized,
+    index,
+    alignment,
+    hasData,
+  ];
 
   PagingState<T> copyWith({
     Map<int, T>? map,
@@ -42,15 +42,14 @@ class PagingState<T> extends Equatable {
     int? index,
     double? alignment,
     bool? hasData,
-  }) =>
-      PagingState(
-        map: map ?? this.map,
-        count: count ?? this.count,
-        initialized: initialized ?? this.initialized,
-        index: index ?? this.index,
-        alignment: alignment ?? this.alignment,
-        hasData: hasData ?? this.hasData,
-      );
+  }) => PagingState(
+    map: map ?? this.map,
+    count: count ?? this.count,
+    initialized: initialized ?? this.initialized,
+    index: index ?? this.index,
+    alignment: alignment ?? this.alignment,
+    hasData: hasData ?? this.hasData,
+  );
 
   @override
   bool get stringify => true;
@@ -59,22 +58,14 @@ class PagingState<T> extends Equatable {
 abstract class PagingEvent extends Equatable {}
 
 class PagingInitEvent extends PagingEvent {
-  PagingInitEvent({
-    this.offset = 0,
-    this.index = 0,
-    this.alignment = 0,
-  });
+  PagingInitEvent({this.offset = 0, this.index = 0, this.alignment = 0});
 
   final int offset;
   final int index;
   final double alignment;
 
   @override
-  List<Object> get props => [
-        offset,
-        index,
-        alignment,
-      ];
+  List<Object> get props => [offset, index, alignment];
 }
 
 class PagingItemPositionEvent extends PagingEvent {
@@ -102,31 +93,18 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     int index = 0,
     double alignment = 0,
   }) : super(initState) {
-    on<PagingUpdateEvent>(
-      (event, emit) async {
-        await _onEvent(event, emit);
-      },
-      transformer: restartable(),
-    );
-    on<PagingItemPositionEvent>(
-      (event, emit) async {
-        await _onEvent(event, emit);
-      },
-      transformer: restartable(),
-    );
-    on<PagingInitEvent>(
-      (event, emit) async {
-        await _onEvent(event, emit);
-      },
-      transformer: restartable(),
-    );
+    on<PagingUpdateEvent>((event, emit) async {
+      await _onEvent(event, emit);
+    }, transformer: restartable());
+    on<PagingItemPositionEvent>((event, emit) async {
+      await _onEvent(event, emit);
+    }, transformer: restartable());
+    on<PagingInitEvent>((event, emit) async {
+      await _onEvent(event, emit);
+    }, transformer: restartable());
 
     itemPositionsListener.itemPositions.addListener(onItemPositions);
-    add(PagingInitEvent(
-      offset: offset,
-      index: index,
-      alignment: alignment,
-    ));
+    add(PagingInitEvent(offset: offset, index: index, alignment: alignment));
   }
 
   final ItemPositionsListener itemPositionsListener;
@@ -149,35 +127,38 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     await super.close();
   }
 
-  Future<void> _onEvent(
-    PagingEvent event,
-    Emitter<PagingState<T>> emit,
-  ) async {
+  Future<void> _onEvent(PagingEvent event, Emitter<PagingState<T>> emit) async {
     final prefetchDistance = limit ~/ 2;
 
     if (event is PagingUpdateEvent) {
       final count = await queryCount();
-      emit(state.copyWith(
-        count: count,
-        hasData: count != 0,
-        map: count == 0 ? {} : state.map,
-      ));
+      emit(
+        state.copyWith(
+          count: count,
+          hasData: count != 0,
+          map: count == 0 ? {} : state.map,
+        ),
+      );
 
       if (count != 0) {
-        emit(state.copyWith(
-          map: await queryMap(
-            max(state.map.length, limit),
-            state.map.isNotEmpty ? state.map.keys.reduce(min) : 0,
+        emit(
+          state.copyWith(
+            map: await queryMap(
+              max(state.map.length, limit),
+              state.map.isNotEmpty ? state.map.keys.reduce(min) : 0,
+            ),
+            initialized: true,
           ),
-          initialized: true,
-        ));
+        );
       }
     } else if (event is PagingItemPositionEvent) {
       lastItemPositions = event.itemPositions;
       if (!state.initialized ||
           state.map.isEmpty ||
-          expectMinListRange(event.itemPositions.first - prefetchDistance,
-              event.itemPositions.last + prefetchDistance)) {
+          expectMinListRange(
+            event.itemPositions.first - prefetchDistance,
+            event.itemPositions.last + prefetchDistance,
+          )) {
         return;
       }
 
@@ -189,8 +170,10 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
       var map = state.map;
       // If the diff range has only one direction and is greater than the limit
       if (result.length > 1 && (result.first.$2 - result.first.$1) > limit) {
-        map = await queryMap(event.itemPositions.length + limit,
-            event.itemPositions.first - prefetchDistance);
+        map = await queryMap(
+          event.itemPositions.length + limit,
+          event.itemPositions.first - prefetchDistance,
+        );
       } else {
         for (final (start, end) in result) {
           map = {...map, ...await queryMap(end - start, start)};
@@ -201,31 +184,25 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
         }
       }
 
-      emit(state.copyWith(
-        map: map,
-        initialized: true,
-      ));
+      emit(state.copyWith(map: map, initialized: true));
     } else if (event is PagingInitEvent) {
-      emit(state.copyWith(
-        hasData: await queryHasData(),
-      ));
+      emit(state.copyWith(hasData: await queryHasData()));
 
       final offset = event.offset;
 
       final count = await queryCount();
 
-      emit(state.copyWith(
-        map: await queryMap(limit, offset),
-        count: count,
-        initialized: true,
-        index: event.index,
-        alignment: event.alignment,
-      ));
-
-      jumpTo?.call(
-        index: event.index,
-        alignment: event.alignment,
+      emit(
+        state.copyWith(
+          map: await queryMap(limit, offset),
+          count: count,
+          initialized: true,
+          index: event.index,
+          alignment: event.alignment,
+        ),
       );
+
+      jumpTo?.call(index: event.index, alignment: event.alignment);
     }
   }
 
@@ -233,8 +210,9 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     final offset = max(_offset, 0);
     final list = await queryRange(limit, max(offset, 0));
     return Map.fromIterables(
-        List.generate(min(limit, list.length), (index) => offset + index),
-        list);
+      List.generate(min(limit, list.length), (index) => offset + index),
+      list,
+    );
   }
 
   bool expectMinListRange(int _start, int _end) {
@@ -259,10 +237,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
       after = (max(loadedIndexes.last, start), end);
     }
 
-    return [
-      if (before != null) before,
-      if (after != null) after,
-    ];
+    return [if (before != null) before, if (after != null) after];
   }
 
   Future<int> queryCount();
@@ -278,11 +253,9 @@ class AnonymousPagingBloc<T> extends PagingBloc<T> {
     required super.initState,
     required Future<int> Function() queryCount,
     required Future<List<T>> Function(int limit, int offset) queryRange,
-  })  : _queryCount = queryCount,
-        _queryRange = queryRange,
-        super(
-          itemPositionsListener: ItemPositionsListener.create(),
-        );
+  }) : _queryCount = queryCount,
+       _queryRange = queryRange,
+       super(itemPositionsListener: ItemPositionsListener.create());
 
   final Future<int> Function() _queryCount;
   final Future<List<T>> Function(int limit, int offset) _queryRange;

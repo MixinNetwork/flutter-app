@@ -72,8 +72,9 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   await Rhttp.init();
   BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
-  final isolateChannel =
-      IsolateChannel<IsolateEvent>.connectSend(params.sendPort);
+  final isolateChannel = IsolateChannel<IsolateEvent>.connectSend(
+    params.sendPort,
+  );
   final runner = _MessageProcessRunner(
     identityNumber: params.identityNumber,
     userId: params.userId,
@@ -156,12 +157,11 @@ class _MessageProcessRunner {
       privateKey: privateKeyStr,
       interceptors: [
         InterceptorsWrapper(
-          onError: (
-            DioException e,
-            ErrorInterceptorHandler handler,
-          ) async {
+          onError: (DioException e, ErrorInterceptorHandler handler) async {
             _sendEventToMainIsolate(
-                WorkerIsolateEventType.onApiRequestedError, e);
+              WorkerIsolateEventType.onApiRequestedError,
+              e,
+            );
             handler.next(e);
           },
         ),
@@ -169,10 +169,7 @@ class _MessageProcessRunner {
       loginByPhoneNumber: initParams.loginByPhoneNumber,
     )..configProxySetting(database.settingProperties);
 
-    _ackJob = AckJob(
-      database: database,
-      client: client,
-    );
+    _ackJob = AckJob(database: database, client: client);
 
     _floodJob = FloodJob(
       database: database,
@@ -192,7 +189,9 @@ class _MessageProcessRunner {
 
     blaze.connectedStateStream.listen((event) {
       _sendEventToMainIsolate(
-          WorkerIsolateEventType.onBlazeConnectStateChanged, event);
+        WorkerIsolateEventType.onBlazeConnectStateChanged,
+        event,
+      );
     });
 
     signalProtocol = SignalProtocol(userId)..init();
@@ -225,8 +224,10 @@ class _MessageProcessRunner {
     _updateTokenJob = UpdateTokenJob(database: database, client: client);
 
     _updateStickerJob = UpdateStickerJob(database: database, client: client);
-    _syncInscriptionMessageJob =
-        SyncInscriptionMessageJob(database: database, client: client);
+    _syncInscriptionMessageJob = SyncInscriptionMessageJob(
+      database: database,
+      client: client,
+    );
 
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
@@ -250,7 +251,9 @@ class _MessageProcessRunner {
         mixinDocumentDirectory: initParams.mixinDocumentDirectory,
       );
     } else {
-      e('device_transfer: primarySessionId is null, device transfer is disabled');
+      e(
+        'device_transfer: primarySessionId is null, device transfer is disabled',
+      );
     }
 
     _decryptMessage = DecryptMessage(
@@ -281,19 +284,25 @@ class _MessageProcessRunner {
     blaze.connect();
 
     jobSubscribers
-      ..add(blaze.connectedStateStream
-          .where((state) => state == ConnectedState.connected)
-          .listen((event) {
-        _floodJob.start();
-      }))
-      ..add(DataBaseEventBus.instance.updateExpiredMessageTableStream
-          .startWith(null)
-          .asyncBufferMap((event) => _scheduleExpiredJob())
-          .listen((_) {}));
+      ..add(
+        blaze.connectedStateStream
+            .where((state) => state == ConnectedState.connected)
+            .listen((event) {
+              _floodJob.start();
+            }),
+      )
+      ..add(
+        DataBaseEventBus.instance.updateExpiredMessageTableStream
+            .startWith(null)
+            .asyncBufferMap((event) => _scheduleExpiredJob())
+            .listen((_) {}),
+      );
   }
 
-  void _sendEventToMainIsolate(WorkerIsolateEventType event,
-      [dynamic argument]) {
+  void _sendEventToMainIsolate(
+    WorkerIsolateEventType event, [
+    dynamic argument,
+  ]) {
     eventSink.add(event.toEvent(argument));
   }
 
@@ -305,15 +314,18 @@ class _MessageProcessRunner {
 
     for (final em in messages) {
       // cancel attachment download.
-      final message =
-          await database.messageDao.findMessageByMessageId(em.messageId);
+      final message = await database.messageDao.findMessageByMessageId(
+        em.messageId,
+      );
       if (message == null) {
         e('message is null, messageId: ${em.messageId} ${em.expireAt}');
         await database.expiredMessageDao.deleteByMessageId(em.messageId);
         continue;
       }
-      await database.messageDao
-          .deleteMessage(message.conversationId, em.messageId);
+      await database.messageDao.deleteMessage(
+        message.conversationId,
+        em.messageId,
+      );
       unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
       if (message.category.isAttachment || message.category.isTranscript) {
         _sendEventToMainIsolate(
@@ -323,9 +335,10 @@ class _MessageProcessRunner {
       }
     }
 
-    final firstExpiredMessage = await database.expiredMessageDao
-        .getFirstExpiredMessage()
-        .getSingleOrNull();
+    final firstExpiredMessage =
+        await database.expiredMessageDao
+            .getFirstExpiredMessage()
+            .getSingleOrNull();
     if (firstExpiredMessage == null) {
       _nextExpiredMessageRunner?.cancel();
       _nextExpiredMessageRunner = null;
@@ -334,8 +347,10 @@ class _MessageProcessRunner {
     _nextExpiredMessageRunner?.cancel();
     _nextExpiredMessageRunner = Timer(
       Duration(
-          seconds: firstExpiredMessage.expireAt! -
-              DateTime.now().millisecondsSinceEpoch ~/ 1000),
+        seconds:
+            firstExpiredMessage.expireAt! -
+            DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      ),
       _scheduleExpiredJob,
     );
   }

@@ -36,16 +36,13 @@ class TransferDataCommand with EquatableMixin {
   factory TransferDataCommand.simple({
     required String deviceId,
     required String action,
-  }) =>
-      TransferDataCommand(
-        deviceId: deviceId,
-        action: action,
-        version: kDeviceTransferProtocolVersion,
-      );
+  }) => TransferDataCommand(
+    deviceId: deviceId,
+    action: action,
+    version: kDeviceTransferProtocolVersion,
+  );
 
-  factory TransferDataCommand.pull({
-    required String deviceId,
-  }) =>
+  factory TransferDataCommand.pull({required String deviceId}) =>
       TransferDataCommand.simple(
         deviceId: deviceId,
         action: kTransferCommandActionPull,
@@ -57,55 +54,49 @@ class TransferDataCommand with EquatableMixin {
     required String deviceId,
     required int code,
     required String secretKey,
-  }) =>
-      TransferDataCommand(
-        deviceId: deviceId,
-        action: kTransferCommandActionPush,
-        version: kDeviceTransferProtocolVersion,
-        ip: ip,
-        port: port,
-        code: code,
-        secretKey: secretKey,
-      );
+  }) => TransferDataCommand(
+    deviceId: deviceId,
+    action: kTransferCommandActionPush,
+    version: kDeviceTransferProtocolVersion,
+    ip: ip,
+    port: port,
+    code: code,
+    secretKey: secretKey,
+  );
 
   factory TransferDataCommand.connect({
     required String deviceId,
     required int code,
     required String userId,
-  }) =>
-      TransferDataCommand(
-        deviceId: deviceId,
-        action: kTransferCommandActionConnect,
-        version: kDeviceTransferProtocolVersion,
-        code: code,
-        userId: userId,
-      );
+  }) => TransferDataCommand(
+    deviceId: deviceId,
+    action: kTransferCommandActionConnect,
+    version: kDeviceTransferProtocolVersion,
+    code: code,
+    userId: userId,
+  );
 
   factory TransferDataCommand.start({
     required String deviceId,
     required int total,
-  }) =>
-      TransferDataCommand(
-        deviceId: deviceId,
-        action: kTransferCommandActionStart,
-        version: kDeviceTransferProtocolVersion,
-        total: total,
-      );
+  }) => TransferDataCommand(
+    deviceId: deviceId,
+    action: kTransferCommandActionStart,
+    version: kDeviceTransferProtocolVersion,
+    total: total,
+  );
 
   factory TransferDataCommand.progress({
     required String deviceId,
     required double progress,
-  }) =>
-      TransferDataCommand(
-        deviceId: deviceId,
-        action: kTransferCommandActionProgress,
-        version: kDeviceTransferProtocolVersion,
-        progress: progress,
-      );
+  }) => TransferDataCommand(
+    deviceId: deviceId,
+    action: kTransferCommandActionProgress,
+    version: kDeviceTransferProtocolVersion,
+    progress: progress,
+  );
 
-  factory TransferDataCommand.cancel({
-    required String deviceId,
-  }) =>
+  factory TransferDataCommand.cancel({required String deviceId}) =>
       TransferDataCommand(
         deviceId: deviceId,
         action: kTransferCommandActionCancel,
@@ -141,16 +132,16 @@ class TransferDataCommand with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        deviceId,
-        action,
-        version,
-        ip,
-        port,
-        secretKey,
-        code,
-        platform,
-        total,
-        userId,
-        progress,
-      ];
+    deviceId,
+    action,
+    version,
+    ip,
+    port,
+    secretKey,
+    code,
+    platform,
+    total,
+    userId,
+    progress,
+  ];
 }

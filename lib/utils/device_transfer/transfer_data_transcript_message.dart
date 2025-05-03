@@ -49,40 +49,40 @@ class TransferDataTranscriptMessage {
       _$TransferDataTranscriptMessageFromJson(json);
 
   factory TransferDataTranscriptMessage.fromDbTranscriptMessage(
-          db.TranscriptMessage data) =>
-      TransferDataTranscriptMessage(
-        transcriptId: data.transcriptId,
-        messageId: data.messageId,
-        userId: data.userId,
-        userFullName: data.userFullName,
-        category: data.category,
-        createdAt: data.createdAt,
-        content: data.content,
-        mediaUrl: data.mediaUrl,
-        mediaName: data.mediaName,
-        mediaSize: data.mediaSize,
-        mediaWidth: data.mediaWidth,
-        mediaHeight: data.mediaHeight,
-        mediaMimeType: data.mediaMimeType,
-        mediaDuration: data.mediaDuration == null
-            ? null
-            : int.tryParse(data.mediaDuration!),
-        mediaStatus: data.mediaStatus == MediaStatus.pending
+    db.TranscriptMessage data,
+  ) => TransferDataTranscriptMessage(
+    transcriptId: data.transcriptId,
+    messageId: data.messageId,
+    userId: data.userId,
+    userFullName: data.userFullName,
+    category: data.category,
+    createdAt: data.createdAt,
+    content: data.content,
+    mediaUrl: data.mediaUrl,
+    mediaName: data.mediaName,
+    mediaSize: data.mediaSize,
+    mediaWidth: data.mediaWidth,
+    mediaHeight: data.mediaHeight,
+    mediaMimeType: data.mediaMimeType,
+    mediaDuration:
+        data.mediaDuration == null ? null : int.tryParse(data.mediaDuration!),
+    mediaStatus:
+        data.mediaStatus == MediaStatus.pending
             ? MediaStatus.canceled
             : data.mediaStatus,
-        mediaWaveform: data.mediaWaveform,
-        thumbImage: data.thumbImage,
-        thumbUrl: data.thumbUrl,
-        mediaKey: data.mediaKey,
-        mediaDigest: data.mediaDigest,
-        mediaCreatedAt: data.mediaCreatedAt,
-        stickerId: data.stickerId,
-        sharedUserId: data.sharedUserId,
-        mentions: data.mentions,
-        quoteId: data.quoteId,
-        quoteContent: data.quoteContent,
-        caption: data.caption,
-      );
+    mediaWaveform: data.mediaWaveform,
+    thumbImage: data.thumbImage,
+    thumbUrl: data.thumbUrl,
+    mediaKey: data.mediaKey,
+    mediaDigest: data.mediaDigest,
+    mediaCreatedAt: data.mediaCreatedAt,
+    stickerId: data.stickerId,
+    sharedUserId: data.sharedUserId,
+    mentions: data.mentions,
+    quoteId: data.quoteId,
+    quoteContent: data.quoteContent,
+    caption: data.caption,
+  );
 
   @JsonKey(name: 'transcript_id')
   final String transcriptId;
@@ -168,36 +168,35 @@ class TransferDataTranscriptMessage {
   Map<String, dynamic> toJson() => _$TransferDataTranscriptMessageToJson(this);
 
   db.TranscriptMessage toDbTranscriptMessage() => db.TranscriptMessage(
-        transcriptId: transcriptId,
-        messageId: messageId,
-        userId: userId,
-        userFullName: userFullName,
-        category: category,
-        createdAt: createdAt,
-        content: content,
-        mediaUrl: mediaUrl,
-        mediaName: mediaName,
-        mediaSize: mediaSize,
-        mediaWidth: mediaWidth,
-        mediaHeight: mediaHeight,
-        mediaMimeType: mediaMimeType,
-        mediaDuration: mediaDuration?.toString(),
-        mediaStatus: mediaStatus == MediaStatus.pending
-            ? MediaStatus.canceled
-            : mediaStatus,
-        mediaWaveform: mediaWaveform,
-        thumbImage: thumbImage,
-        thumbUrl: thumbUrl,
-        mediaKey: mediaKey,
-        mediaDigest: mediaDigest,
-        mediaCreatedAt: mediaCreatedAt,
-        stickerId: stickerId,
-        sharedUserId: sharedUserId,
-        mentions: mentions,
-        quoteId: quoteId,
-        quoteContent: quoteContent,
-        caption: caption,
-      );
+    transcriptId: transcriptId,
+    messageId: messageId,
+    userId: userId,
+    userFullName: userFullName,
+    category: category,
+    createdAt: createdAt,
+    content: content,
+    mediaUrl: mediaUrl,
+    mediaName: mediaName,
+    mediaSize: mediaSize,
+    mediaWidth: mediaWidth,
+    mediaHeight: mediaHeight,
+    mediaMimeType: mediaMimeType,
+    mediaDuration: mediaDuration?.toString(),
+    mediaStatus:
+        mediaStatus == MediaStatus.pending ? MediaStatus.canceled : mediaStatus,
+    mediaWaveform: mediaWaveform,
+    thumbImage: thumbImage,
+    thumbUrl: thumbUrl,
+    mediaKey: mediaKey,
+    mediaDigest: mediaDigest,
+    mediaCreatedAt: mediaCreatedAt,
+    stickerId: stickerId,
+    sharedUserId: sharedUserId,
+    mentions: mentions,
+    quoteId: quoteId,
+    quoteContent: quoteContent,
+    caption: caption,
+  );
 
   @override
   String toString() => '$TransferDataTranscriptMessage($transcriptId)';

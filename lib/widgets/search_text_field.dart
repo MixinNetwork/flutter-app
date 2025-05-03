@@ -62,7 +62,8 @@ class SearchTextField extends HookConsumerWidget {
     }, [controller, onChanged]);
 
     final textStream = useValueNotifierConvertSteam(controller);
-    final hasText = useMemoizedStream(
+    final hasText =
+        useMemoizedStream(
           () => textStream.map((event) => event.text.isNotEmpty).distinct(),
         ).data ??
         controller.text.isNotEmpty;
@@ -115,9 +116,10 @@ class SearchTextField extends HookConsumerWidget {
                           kDefaultTextInputLimit,
                         ),
                       ],
-                      contextMenuBuilder: (context, state) =>
-                          MixinAdaptiveSelectionToolbar(
-                              editableTextState: state),
+                      contextMenuBuilder:
+                          (context, state) => MixinAdaptiveSelectionToolbar(
+                            editableTextState: state,
+                          ),
                     ),
                   ),
                   if (hintText != null && !hasText)
@@ -139,10 +141,12 @@ class SearchTextField extends HookConsumerWidget {
               ),
             ),
             if (showClear || hasText)
-              _SearchClearIcon(onTap: () {
-                controller.text = '';
-                onTapClear?.call();
-              })
+              _SearchClearIcon(
+                onTap: () {
+                  controller.text = '';
+                  onTapClear?.call();
+                },
+              )
             else
               const SizedBox(width: 40),
           ],
@@ -159,15 +163,11 @@ class _SearchClearIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => InteractiveDecoratedBox(
-        cursor: SystemMouseCursors.basic,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 16, left: 8),
-          child: Icon(
-            Icons.close,
-            color: context.theme.secondaryText,
-            size: 16,
-          ),
-        ),
-      );
+    cursor: SystemMouseCursors.basic,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 16, left: 8),
+      child: Icon(Icons.close, color: context.theme.secondaryText, size: 16),
+    ),
+  );
 }
