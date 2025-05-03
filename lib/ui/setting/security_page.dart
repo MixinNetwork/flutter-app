@@ -20,22 +20,15 @@ class SecurityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.security),
-        ),
-        body: ConstrainedBox(
-          constraints: const BoxConstraints.expand(),
-          child: const SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 40),
-                _Passcode(),
-              ],
-            ),
-          ),
-        ),
-      );
+    backgroundColor: context.theme.background,
+    appBar: MixinAppBar(title: Text(context.l10n.security)),
+    body: ConstrainedBox(
+      constraints: const BoxConstraints.expand(),
+      child: const SingleChildScrollView(
+        child: Column(children: [SizedBox(height: 40), _Passcode()]),
+      ),
+    ),
+  );
 }
 
 class _Passcode extends HookConsumerWidget {
@@ -43,20 +36,25 @@ class _Passcode extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final globalKey =
-        useMemoized(GlobalKey<PopupMenuButtonState<Duration>>.new, []);
+    final globalKey = useMemoized(
+      GlobalKey<PopupMenuButtonState<Duration>>.new,
+      [],
+    );
 
     final hasPasscode =
         useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
-            SecurityKeyValue.instance.hasPasscode;
+        SecurityKeyValue.instance.hasPasscode;
 
     final enableBiometric =
         useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
-            SecurityKeyValue.instance.biometric;
+        SecurityKeyValue.instance.biometric;
 
-    final minutes = useStream(SecurityKeyValue.instance
-        .watchLockDuration()
-        .map((event) => event.inMinutes)).data;
+    final minutes =
+        useStream(
+          SecurityKeyValue.instance.watchLockDuration().map(
+            (event) => event.inMinutes,
+          ),
+        ).data;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -91,47 +89,54 @@ class _Passcode extends HookConsumerWidget {
                   description: PopupMenuButton(
                     key: globalKey,
                     color: Color.alphaBlend(
-                        context.theme.listSelected, context.theme.background),
-                    itemBuilder: (BuildContext context) => [
-                      PopupMenuItem(
-                        value: Duration.zero,
-                        child: Text(context.l10n.disabled),
-                      ),
-                      PopupMenuItem(
-                        value: const Duration(minutes: 1),
-                        child: Text(context.l10n.minute(1, 1)),
-                      ),
-                      PopupMenuItem(
-                        value: const Duration(minutes: 5),
-                        child: Text(context.l10n.minute(5, 5)),
-                      ),
-                      PopupMenuItem(
-                        value: const Duration(hours: 1),
-                        child: Text(context.l10n.hour(1, 1)),
-                      ),
-                      PopupMenuItem(
-                        value: const Duration(hours: 5),
-                        child: Text(context.l10n.hour(5, 5)),
-                      ),
-                    ]
-                        .map(
-                          (e) => PopupMenuItem(
-                            value: e.value,
-                            child: DefaultTextStyle.merge(
-                              child: e.child ?? const SizedBox(),
-                              style: TextStyle(color: context.theme.text),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onSelected: (value) =>
-                        SecurityKeyValue.instance.lockDuration = value,
+                      context.theme.listSelected,
+                      context.theme.background,
+                    ),
+                    itemBuilder:
+                        (BuildContext context) =>
+                            [
+                                  PopupMenuItem(
+                                    value: Duration.zero,
+                                    child: Text(context.l10n.disabled),
+                                  ),
+                                  PopupMenuItem(
+                                    value: const Duration(minutes: 1),
+                                    child: Text(context.l10n.minute(1, 1)),
+                                  ),
+                                  PopupMenuItem(
+                                    value: const Duration(minutes: 5),
+                                    child: Text(context.l10n.minute(5, 5)),
+                                  ),
+                                  PopupMenuItem(
+                                    value: const Duration(hours: 1),
+                                    child: Text(context.l10n.hour(1, 1)),
+                                  ),
+                                  PopupMenuItem(
+                                    value: const Duration(hours: 5),
+                                    child: Text(context.l10n.hour(5, 5)),
+                                  ),
+                                ]
+                                .map(
+                                  (e) => PopupMenuItem(
+                                    value: e.value,
+                                    child: DefaultTextStyle.merge(
+                                      child: e.child ?? const SizedBox(),
+                                      style: TextStyle(
+                                        color: context.theme.text,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                    onSelected:
+                        (value) =>
+                            SecurityKeyValue.instance.lockDuration = value,
                     child: Text(
                       (minutes == null || minutes == 0)
                           ? context.l10n.disabled
                           : minutes < 60
-                              ? context.l10n.minute(minutes, minutes)
-                              : context.l10n.hour(minutes ~/ 60, minutes ~/ 60),
+                          ? context.l10n.minute(minutes, minutes)
+                          : context.l10n.hour(minutes ~/ 60, minutes ~/ 60),
                     ),
                   ),
                   title: Text(context.l10n.autoLock),
@@ -252,10 +257,7 @@ class _InputPasscode extends HookConsumerWidget {
                 fieldWidth: 15,
                 borderWidth: 2,
               ),
-              textStyle: TextStyle(
-                fontSize: 18,
-                color: context.theme.text,
-              ),
+              textStyle: TextStyle(fontSize: 18, color: context.theme.text),
               autoDisposeControllers: false,
               focusNode: focusNode,
               controller: textEditingController,

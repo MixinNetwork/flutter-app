@@ -18,8 +18,5 @@ class OneTimePreKey with EquatableMixin {
   Map<String, dynamic> toJson() => _$OneTimePreKeyToJson(this);
 
   @override
-  List<Object?> get props => [
-        keyId,
-        pubKey,
-      ];
+  List<Object?> get props => [keyId, pubKey];
 }

@@ -14,11 +14,7 @@ import 'util/util.dart';
 
 part 'fts_database.g.dart';
 
-@DriftDatabase(
-  include: {
-    'moor/fts.drift',
-  },
-)
+@DriftDatabase(include: {'moor/fts.drift'})
 class FtsDatabase extends _$FtsDatabase {
   FtsDatabase(super.e);
 
@@ -39,17 +35,17 @@ class FtsDatabase extends _$FtsDatabase {
   @override
   int get schemaVersion => 1;
 
-  Future<List<String>> getAllMessageIds() => (select(messagesMetas)
-        ..orderBy([
-          (t) => OrderingTerm(expression: t.messageId, mode: OrderingMode.desc),
-        ]))
-      .map((e) => e.messageId)
-      .get();
+  Future<List<String>> getAllMessageIds() =>
+      (select(messagesMetas)..orderBy([
+        (t) => OrderingTerm(expression: t.messageId, mode: OrderingMode.desc),
+      ])).map((e) => e.messageId).get();
 
   /// Insert a message fts content into the database.
   /// return the row id of the inserted message. null if the message is not inserted.
-  Future<int?> insertFtsOnly(Message message,
-      [String? generatedContent]) async {
+  Future<int?> insertFtsOnly(
+    Message message, [
+    String? generatedContent,
+  ]) async {
     if (message.status == MessageStatus.unknown ||
         message.status == MessageStatus.failed) {
       e('Message ${message.messageId} status is ${message.status}');
@@ -67,7 +63,8 @@ class FtsDatabase extends _$FtsDatabase {
       content = message.name;
     } else if (message.category == MessageCategory.appCard) {
       final appCard = AppCardData.fromJson(
-          jsonDecode(message.content!) as Map<String, dynamic>);
+        jsonDecode(message.content!) as Map<String, dynamic>,
+      );
       content = '${appCard.title} ${appCard.description}';
     }
 
@@ -104,15 +101,13 @@ class FtsDatabase extends _$FtsDatabase {
   Future<void> deleteByMessageId(String messageId) async {
     await _deleteFtsByMessageId(messageId);
     await (delete(messagesMetas)
-          ..where((tbl) => tbl.messageId.equals(messageId)))
-        .go();
+      ..where((tbl) => tbl.messageId.equals(messageId))).go();
   }
 
   Future<void> deleteByConversationId(String conversationId) async {
     await _deleteFtsByConversationId(conversationId);
     await (delete(messagesMetas)
-          ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .go();
+      ..where((tbl) => tbl.conversationId.equals(conversationId))).go();
   }
 
   /// query the fts table.

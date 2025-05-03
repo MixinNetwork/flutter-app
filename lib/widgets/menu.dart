@@ -35,12 +35,13 @@ class MenusWithSeparator extends Menu {
     super.title,
     super.image,
   }) : super(
-          children: childrens
-              .where((element) => element.isNotEmpty)
-              .joinList([MenuSeparator()])
-              .expand((element) => element.toList())
-              .toList(),
-        );
+         children:
+             childrens
+                 .where((element) => element.isNotEmpty)
+                 .joinList([MenuSeparator()])
+                 .expand((element) => element.toList())
+                 .toList(),
+       );
 }
 
 class _OffsetCubit extends SimpleCubit<Offset?> {
@@ -53,8 +54,8 @@ extension ContextMenuPortalEntrySender on BuildContext {
   void closeMenu() => read<_OffsetCubit?>()?.emit(null);
 }
 
-typedef CustomPopupMenuItemBuilder<T> = List<CustomPopupMenuItem<T>> Function(
-    BuildContext context);
+typedef CustomPopupMenuItemBuilder<T> =
+    List<CustomPopupMenuItem<T>> Function(BuildContext context);
 
 class CustomPopupMenuButton<T> extends HookConsumerWidget {
   const CustomPopupMenuButton({
@@ -76,40 +77,43 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
-        interactive: false,
-        buildMenus: () => itemBuilder(context)
-            .map(
-              (e) => ContextMenu(
-                title: e.title,
-                onTap: () => onSelected?.call(e.value),
-                isDestructiveAction: e.isDestructiveAction,
-                icon: e.icon,
-              ),
-            )
-            .toList(),
-        child: Builder(
-            builder: (context) => ActionButton(
-                  name: icon,
-                  color: color ?? context.theme.icon,
-                  onTapUp: (details) {
-                    d('onTapUp: $alignment');
-                    if (alignment == null) {
-                      context.sendMenuPosition(details.globalPosition);
-                      return;
-                    }
-                    final renderBox = context.findRenderObject() as RenderBox?;
-                    if (renderBox != null) {
-                      var position =
-                          alignment!.withinRect(renderBox.paintBounds);
-                      position = renderBox.localToGlobal(position);
-                      context.sendMenuPosition(position);
-                    } else {
-                      context.sendMenuPosition(details.globalPosition);
-                    }
-                  },
-                  child: child,
-                )),
-      );
+    interactive: false,
+    buildMenus:
+        () =>
+            itemBuilder(context)
+                .map(
+                  (e) => ContextMenu(
+                    title: e.title,
+                    onTap: () => onSelected?.call(e.value),
+                    isDestructiveAction: e.isDestructiveAction,
+                    icon: e.icon,
+                  ),
+                )
+                .toList(),
+    child: Builder(
+      builder:
+          (context) => ActionButton(
+            name: icon,
+            color: color ?? context.theme.icon,
+            onTapUp: (details) {
+              d('onTapUp: $alignment');
+              if (alignment == null) {
+                context.sendMenuPosition(details.globalPosition);
+                return;
+              }
+              final renderBox = context.findRenderObject() as RenderBox?;
+              if (renderBox != null) {
+                var position = alignment!.withinRect(renderBox.paintBounds);
+                position = renderBox.localToGlobal(position);
+                context.sendMenuPosition(position);
+              } else {
+                context.sendMenuPosition(details.globalPosition);
+              }
+            },
+            child: child,
+          ),
+    ),
+  );
 }
 
 class CustomPopupMenuItem<T> {
@@ -178,16 +182,18 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
         onClose: () => offsetCubit.emit(null),
         child: PortalTarget(
           visible: visible,
-          portalFollower: Builder(builder: (context) {
-            final show = offset != null && visible;
-            if (show) {
-              return CustomSingleChildLayout(
-                delegate: PositionedLayoutDelegate(position: offset),
-                child: ContextMenuPage(menus: buildMenus()),
-              );
-            }
-            return const SizedBox();
-          }),
+          portalFollower: Builder(
+            builder: (context) {
+              final show = offset != null && visible;
+              if (show) {
+                return CustomSingleChildLayout(
+                  delegate: PositionedLayoutDelegate(position: offset),
+                  child: ContextMenuPage(menus: buildMenus()),
+                );
+              }
+              return const SizedBox();
+            },
+          ),
           child: InteractiveDecoratedBox(
             onRightClick: (event) {
               if (!interactive) {
@@ -238,15 +244,14 @@ class Barrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PortalTarget(
-        visible: visible,
-        closeDuration: duration,
-        portalFollower: GestureDetector(
-          behavior:
-              visible ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
-          onTap: onClose,
-        ),
-        child: child,
-      );
+    visible: visible,
+    closeDuration: duration,
+    portalFollower: GestureDetector(
+      behavior: visible ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
+      onTap: onClose,
+    ),
+    child: child,
+  );
 }
 
 class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
@@ -282,21 +287,18 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
 }
 
 class ContextMenuPage extends StatelessWidget {
-  const ContextMenuPage({
-    required this.menus,
-    super.key,
-  });
+  const ContextMenuPage({required this.menus, super.key});
 
   final List<Widget> menus;
 
   @override
   Widget build(BuildContext context) => _ContextMenuContainerLayout(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: menus,
-        ),
-      );
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: menus,
+    ),
+  );
 }
 
 class _ContextMenuContainerLayout extends StatelessWidget {
@@ -311,11 +313,12 @@ class _ContextMenuContainerLayout extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(11)),
         border: Border.all(
-          color: Color.lerp(
-            Colors.transparent,
-            const Color.fromRGBO(255, 255, 255, 0.08),
-            brightnessData,
-          )!,
+          color:
+              Color.lerp(
+                Colors.transparent,
+                const Color.fromRGBO(255, 255, 255, 0.08),
+                brightnessData,
+              )!,
         ),
         boxShadow: [
           BoxShadow(
@@ -358,8 +361,8 @@ class ContextMenu extends StatelessWidget {
     required this.title,
     this.isDestructiveAction = false,
     this.icon,
-  })  : _subMenuMode = true,
-        onTap = null;
+  }) : _subMenuMode = true,
+       onTap = null;
 
   final String? icon;
   final String title;
@@ -373,18 +376,17 @@ class ContextMenu extends StatelessWidget {
       const Color.fromRGBO(255, 255, 255, 1),
       darkColor: const Color.fromRGBO(62, 65, 72, 1),
     );
-    final color = isDestructiveAction
-        ? context.theme.red
-        : context.dynamicColor(
-            const Color.fromRGBO(0, 0, 0, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-          );
+    final color =
+        isDestructiveAction
+            ? context.theme.red
+            : context.dynamicColor(
+              const Color.fromRGBO(0, 0, 0, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+            );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
       child: InteractiveDecoratedBox.color(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-        ),
+        decoration: BoxDecoration(color: backgroundColor),
         tapDowningColor: Color.alphaBlend(
           context.theme.listSelected,
           backgroundColor,
@@ -415,10 +417,7 @@ class ContextMenu extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: color,
-                  ),
+                  style: TextStyle(fontSize: 14, color: color),
                 ),
               ),
               if (_subMenuMode)
@@ -455,21 +454,21 @@ class SubContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => HoverOverlay(
-        closeDuration: Duration.zero,
-        duration: Duration.zero,
-        portalCandidateLabels: const [secondPortal],
-        anchor: const Aligned(
-          follower: Alignment.centerLeft,
-          target: Alignment.centerRight,
-          offset: Offset(-8, 0),
-        ),
-        portal: ContextMenuPage(menus: menus),
-        child: ContextMenu._sub(
-          icon: icon,
-          title: title,
-          isDestructiveAction: isDestructiveAction,
-        ),
-      );
+    closeDuration: Duration.zero,
+    duration: Duration.zero,
+    portalCandidateLabels: const [secondPortal],
+    anchor: const Aligned(
+      follower: Alignment.centerLeft,
+      target: Alignment.centerRight,
+      offset: Offset(-8, 0),
+    ),
+    portal: ContextMenuPage(menus: menus),
+    child: ContextMenu._sub(
+      icon: icon,
+      title: title,
+      isDestructiveAction: isDestructiveAction,
+    ),
+  );
 }
 
 class SubMenuClickedByTouchNotification extends Notification {
@@ -484,12 +483,16 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
 
   @override
   Widget buildMenuContainer(
-      BuildContext context, DesktopMenuInfo menuInfo, Widget child) {
+    BuildContext context,
+    DesktopMenuInfo menuInfo,
+    Widget child,
+  ) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
     final theme = _themeForContext(context);
     return Container(
       decoration: theme.decorationOuter.copyWith(
-          borderRadius: BorderRadius.circular(6.0 + 1.0 / pixelRatio)),
+        borderRadius: BorderRadius.circular(6.0 + 1.0 / pixelRatio),
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Padding(
@@ -579,11 +582,7 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
         element is MenuAction ? _stateToIcon(element.state) : null;
     final Widget? prefix;
     if (stateIcon != null) {
-      prefix = Icon(
-        stateIcon,
-        size: 16,
-        color: iconTheme.color,
-      );
+      prefix = Icon(stateIcon, size: 16, color: iconTheme.color);
     } else if (menuInfo.hasAnyCheckedItems) {
       prefix = const SizedBox(width: 16);
     } else {
@@ -615,24 +614,25 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
       suffix = null;
     }
 
-    final child = element is DeferredMenuElement
-        ? const Align(
-            alignment: Alignment.centerLeft,
-            child: SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.grey,
+    final child =
+        element is DeferredMenuElement
+            ? const Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                height: 16,
+                width: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.grey,
+                ),
               ),
-            ),
-          )
-        : Text(
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            element.title ?? '',
-            style: textStyle,
-          );
+            )
+            : Text(
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              element.title ?? '',
+              style: textStyle,
+            );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -669,19 +669,19 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
 }
 
 extension on DesktopMenuInfo {
-  bool get hasAnyCheckedItems => resolvedChildren.any((element) =>
-      element is MenuAction && element.state != MenuActionState.none);
+  bool get hasAnyCheckedItems => resolvedChildren.any(
+    (element) => element is MenuAction && element.state != MenuActionState.none,
+  );
 }
 
 extension on SingleActivator {
   String stringRepresentation() => [
-        if (control) 'Ctrl',
-        if (alt) 'Alt',
-        if (meta)
-          defaultTargetPlatform == TargetPlatform.macOS ? 'Cmd' : 'Meta',
-        if (shift) 'Shift',
-        trigger.keyLabel,
-      ].join('+');
+    if (control) 'Ctrl',
+    if (alt) 'Alt',
+    if (meta) defaultTargetPlatform == TargetPlatform.macOS ? 'Cmd' : 'Meta',
+    if (shift) 'Shift',
+    trigger.keyLabel,
+  ].join('+');
 }
 
 class CustomContextMenuWidget extends StatelessWidget {
@@ -697,17 +697,23 @@ class CustomContextMenuWidget extends StatelessWidget {
     this.contextMenuIsAllowed = _defaultContextMenuIsAllowed,
     MobileMenuWidgetBuilder? mobileMenuWidgetBuilder,
     DesktopMenuWidgetBuilder? desktopMenuWidgetBuilder,
-  })  : assert(previewBuilder == null || deferredPreviewBuilder == null,
-            'Cannot use both previewBuilder and deferredPreviewBuilder'),
-        mobileMenuWidgetBuilder =
-            mobileMenuWidgetBuilder ?? DefaultMobileMenuWidgetBuilder(),
-        desktopMenuWidgetBuilder =
-            desktopMenuWidgetBuilder ?? DefaultDesktopMenuWidgetBuilder();
+  }) : assert(
+         previewBuilder == null || deferredPreviewBuilder == null,
+         'Cannot use both previewBuilder and deferredPreviewBuilder',
+       ),
+       mobileMenuWidgetBuilder =
+           mobileMenuWidgetBuilder ?? DefaultMobileMenuWidgetBuilder(),
+       desktopMenuWidgetBuilder =
+           desktopMenuWidgetBuilder ?? DefaultDesktopMenuWidgetBuilder();
 
   final Widget Function(BuildContext context, Widget child)? liftBuilder;
   final Widget Function(BuildContext context, Widget child)? previewBuilder;
-  final DeferredMenuPreview Function(BuildContext context, Widget child,
-      CancellationToken cancellationToken)? deferredPreviewBuilder;
+  final DeferredMenuPreview Function(
+    BuildContext context,
+    Widget child,
+    CancellationToken cancellationToken,
+  )?
+  deferredPreviewBuilder;
 
   final HitTestBehavior hitTestBehavior;
   final MenuProvider menuProvider;

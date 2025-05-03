@@ -47,7 +47,7 @@ abstract class HMacCalculator {
 
 class _HMacCalculatorPointyCastleImpl implements HMacCalculator {
   _HMacCalculatorPointyCastleImpl(this._hMacKey)
-      : _hmac = HMac(SHA256Digest(), 64) {
+    : _hmac = HMac(SHA256Digest(), 64) {
     _hmac.init(KeyParameter(_hMacKey));
   }
 
@@ -98,13 +98,15 @@ class _HMacCalculatorWebCrypto implements HMacCalculator {
     _ctx = ssl.HMAC_CTX_new();
     final keyPtr = key.toNative();
     try {
-      checkOpIsOne(ssl.HMAC_Init_ex(
-        _ctx,
-        keyPtr.cast(),
-        key.length,
-        ssl.EVP_sha256(),
-        nullptr,
-      ));
+      checkOpIsOne(
+        ssl.HMAC_Init_ex(
+          _ctx,
+          keyPtr.cast(),
+          key.length,
+          ssl.EVP_sha256(),
+          nullptr,
+        ),
+      );
     } finally {
       malloc.free(keyPtr);
     }

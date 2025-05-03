@@ -27,10 +27,12 @@ class ImageMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaWidth =
-        useMessageConverter(converter: (state) => state.mediaWidth);
-    final mediaHeight =
-        useMessageConverter(converter: (state) => state.mediaHeight);
+    final mediaWidth = useMessageConverter(
+      converter: (state) => state.mediaWidth,
+    );
+    final mediaHeight = useMessageConverter(
+      converter: (state) => state.mediaHeight,
+    );
     final caption = useMessageConverter(converter: (state) => state.caption);
 
     if (mediaWidth == null || mediaHeight == null) {
@@ -41,35 +43,32 @@ class ImageMessageWidget extends HookConsumerWidget {
     return ImageMessageLayout(
       imageWidthInPixel: mediaWidth,
       imageHeightInPixel: mediaHeight,
-      builder: (context, width, height) => MessageBubble(
-        showBubble: hasCaption,
-        padding: EdgeInsets.zero,
-        includeNip: !hasCaption,
-        clip: true,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: width),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              MessageImage(
-                size: Size(width, height),
-                showStatus: !hasCaption,
+      builder:
+          (context, width, height) => MessageBubble(
+            showBubble: hasCaption,
+            padding: EdgeInsets.zero,
+            includeNip: !hasCaption,
+            clip: true,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: width),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  MessageImage(
+                    size: Size(width, height),
+                    showStatus: !hasCaption,
+                  ),
+                  if (hasCaption) ImageCaption(caption: caption),
+                ],
               ),
-              if (hasCaption) ImageCaption(caption: caption),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 }
 
 class MessageImage extends HookConsumerWidget {
-  const MessageImage({
-    required this.showStatus,
-    super.key,
-    this.size,
-  });
+  const MessageImage({required this.showStatus, super.key, this.size});
 
   final Size? size;
   final bool showStatus;
@@ -78,17 +77,20 @@ class MessageImage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
     final type = useMessageConverter(converter: (state) => state.type);
-    final conversationId =
-        useMessageConverter(converter: (state) => state.conversationId);
+    final conversationId = useMessageConverter(
+      converter: (state) => state.conversationId,
+    );
     final isCurrentUser = useIsCurrentUser();
-    final thumbImage =
-        useMessageConverter(converter: (state) => state.thumbImage ?? '');
+    final thumbImage = useMessageConverter(
+      converter: (state) => state.thumbImage ?? '',
+    );
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
     final isUnDownloadGiphyGif = useMessageConverter(
-      converter: (message) =>
-          message.mediaMimeType == 'image/gif' &&
-          (message.mediaSize == null || message.mediaSize == 0),
+      converter:
+          (message) =>
+              message.mediaMimeType == 'image/gif' &&
+              (message.mediaSize == null || message.mediaSize == 0),
     );
 
     final Widget thumbWidget;
@@ -102,15 +104,18 @@ class MessageImage extends HookConsumerWidget {
       thumbWidget = ImageByBlurHashOrBase64(imageData: thumbImage);
     }
 
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
+    final relationship = useMessageConverter(
+      converter: (state) => state.relationship,
+    );
 
-    final isMessageSentOut = (isTranscriptPage &&
+    final isMessageSentOut =
+        (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
 
     final mediaSize = useMessageConverter(
-        converter: (state) => (state.mediaWidth, state.mediaHeight));
+      converter: (state) => (state.mediaWidth, state.mediaHeight),
+    );
     final needShowExtendIcon = useMemoized(() {
       if (size == null) {
         return false;
@@ -145,7 +150,9 @@ class MessageImage extends HookConsumerWidget {
                 final transcriptMessageId =
                     TranscriptPage.of(context)?.messageId;
                 assert(
-                    transcriptMessageId != null, 'transcriptMessageId is null');
+                  transcriptMessageId != null,
+                  'transcriptMessageId is null',
+                );
                 if (transcriptMessageId != null) {
                   context.accountServer.reUploadTranscriptAttachment(
                     transcriptMessageId,
@@ -160,8 +167,9 @@ class MessageImage extends HookConsumerWidget {
               context.accountServer.downloadAttachment(message.messageId);
             }
           case MediaStatus.pending:
-            context.accountServer
-                .cancelProgressAttachmentJob(message.messageId);
+            context.accountServer.cancelProgressAttachmentJob(
+              message.messageId,
+            );
           case null:
           case MediaStatus.expired:
           case MediaStatus.read:
@@ -174,15 +182,22 @@ class MessageImage extends HookConsumerWidget {
           fit: StackFit.expand,
           children: [
             MixinImage.file(
-              File(context.accountServer.convertAbsolutePath(
-                  type, conversationId, mediaUrl, isTranscriptPage)),
+              File(
+                context.accountServer.convertAbsolutePath(
+                  type,
+                  conversationId,
+                  mediaUrl,
+                  isTranscriptPage,
+                ),
+              ),
               errorBuilder: (_, __, ___) => thumbWidget,
             ),
             Center(
               child: HookBuilder(
                 builder: (BuildContext context) {
                   final mediaStatus = useMessageConverter(
-                      converter: (state) => state.mediaStatus);
+                    converter: (state) => state.mediaStatus,
+                  );
 
                   switch (mediaStatus) {
                     case MediaStatus.canceled:
@@ -211,13 +226,8 @@ class MessageImage extends HookConsumerWidget {
                     shape: StadiumBorder(),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 3,
-                      horizontal: 5,
-                    ),
-                    child: MessageDatetimeAndStatus(
-                      color: Colors.white,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 5),
+                    child: MessageDatetimeAndStatus(color: Colors.white),
                   ),
                 ),
               ),
@@ -235,8 +245,8 @@ class MessageImage extends HookConsumerWidget {
 }
 
 /// The signature of the [ImageMessageLayout] builder function.
-typedef ImageLayoutBuilder = Widget Function(
-    BuildContext context, double width, double height);
+typedef ImageLayoutBuilder =
+    Widget Function(BuildContext context, double width, double height);
 
 /// Measure layout constraints and image actual size.
 /// calculate a suitable size to layout image.
@@ -250,8 +260,8 @@ class ImageMessageLayout extends StatelessWidget {
     required this.imageWidthInPixel,
     required this.imageHeightInPixel,
     super.key,
-  })  : assert(imageHeightInPixel > 0),
-        assert(imageWidthInPixel > 0);
+  }) : assert(imageHeightInPixel > 0),
+       assert(imageWidthInPixel > 0);
 
   final ImageLayoutBuilder builder;
 
@@ -259,22 +269,26 @@ class ImageMessageLayout extends StatelessWidget {
   final int imageHeightInPixel;
 
   @override
-  Widget build(BuildContext context) =>
-      LayoutBuilder(builder: (context, boxConstraints) {
-        final maxWidth = min(boxConstraints.maxWidth * 0.6, 300);
-        final minWidth = max(boxConstraints.maxWidth * 0.2, 200);
-        final width = max(
-                min(imageWidthInPixel / MediaQuery.devicePixelRatioOf(context),
-                    maxWidth),
-                minWidth)
-            .toDouble();
-        final aspectRatio = imageWidthInPixel / imageHeightInPixel;
-        final height = min(
-          width / aspectRatio,
-          MediaQuery.sizeOf(context).height * 2 / 3,
-        );
-        return builder(context, width, height);
-      });
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, boxConstraints) {
+      final maxWidth = min(boxConstraints.maxWidth * 0.6, 300);
+      final minWidth = max(boxConstraints.maxWidth * 0.2, 200);
+      final width =
+          max(
+            min(
+              imageWidthInPixel / MediaQuery.devicePixelRatioOf(context),
+              maxWidth,
+            ),
+            minWidth,
+          ).toDouble();
+      final aspectRatio = imageWidthInPixel / imageHeightInPixel;
+      final height = min(
+        width / aspectRatio,
+        MediaQuery.sizeOf(context).height * 2 / 3,
+      );
+      return builder(context, width, height);
+    },
+  );
 }
 
 class ImageCaption extends StatelessWidget {
@@ -284,11 +298,11 @@ class ImageCaption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: MessageTextWidget(
-          color: context.theme.text,
-          fontSize: context.messageStyle.primaryFontSize,
-          content: caption,
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    child: MessageTextWidget(
+      color: context.theme.text,
+      fontSize: context.messageStyle.primaryFontSize,
+      content: caption,
+    ),
+  );
 }

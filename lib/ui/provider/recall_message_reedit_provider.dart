@@ -17,10 +17,7 @@ class RecallMessageNotifier extends DistinctStateNotifier<Map<String, String>> {
     if (content == null) {
       state = {...state}..remove(messageId);
     } else {
-      state = {
-        ...state,
-        messageId: content,
-      };
+      state = {...state, messageId: content};
     }
   }
 
@@ -45,18 +42,21 @@ class RecallMessageNotifier extends DistinctStateNotifier<Map<String, String>> {
   }
 }
 
-final _onReEditStreamControllerProvider =
-    Provider((ref) => StreamController<String>.broadcast());
-
-final onReEditStreamProvider = _onReEditStreamControllerProvider
-    .select((value) => value.stream.where((event) => event.isNotEmpty));
-
-final _recallMessageProvider =
-    StateNotifierProvider<RecallMessageNotifier, Map<String, String>>(
-  (ref) => RecallMessageNotifier(ref.watch(_onReEditStreamControllerProvider)),
+final _onReEditStreamControllerProvider = Provider(
+  (ref) => StreamController<String>.broadcast(),
 );
 
+final onReEditStreamProvider = _onReEditStreamControllerProvider.select(
+  (value) => value.stream.where((event) => event.isNotEmpty),
+);
+
+final _recallMessageProvider = StateNotifierProvider<
+  RecallMessageNotifier,
+  Map<String, String>
+>((ref) => RecallMessageNotifier(ref.watch(_onReEditStreamControllerProvider)));
+
 final recalledTextProvider = Provider.family<String?, String>(
-    (ref, messageId) => ref.watch(_recallMessageProvider)[messageId]);
+  (ref, messageId) => ref.watch(_recallMessageProvider)[messageId],
+);
 
 final recallMessageNotifierProvider = _recallMessageProvider.notifier;

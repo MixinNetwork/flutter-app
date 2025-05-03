@@ -29,16 +29,25 @@ Future<void> setSystemUiWithAppBrightness(Brightness brightness) async {
       // Update windows caption to dark mode when app brightness become dark.
       // Only available on Windows 10 and later.
       if (isWindows10OrGreater()) {
-        final isDarkMode = malloc<BOOL>()
-          ..value = brightness == Brightness.dark ? 1 : 0;
-        DwmSetWindowAttribute(windowHandle, DWMWA_USE_IMMERSIVE_DARK_MODE,
-            isDarkMode, sizeOf<BOOL>());
+        final isDarkMode =
+            malloc<BOOL>()..value = brightness == Brightness.dark ? 1 : 0;
+        DwmSetWindowAttribute(
+          windowHandle,
+          DWMWA_USE_IMMERSIVE_DARK_MODE,
+          isDarkMode,
+          sizeOf<BOOL>(),
+        );
         malloc.free(isDarkMode);
 
-        final captionColor = malloc<COLORREF>()
-          ..value = brightness == Brightness.dark ? 0x2C3136 : 0xFFFFFF;
-        DwmSetWindowAttribute(windowHandle, DWMWA_CAPTION_COLOR, captionColor,
-            sizeOf<COLORREF>());
+        final captionColor =
+            malloc<COLORREF>()
+              ..value = brightness == Brightness.dark ? 0x2C3136 : 0xFFFFFF;
+        DwmSetWindowAttribute(
+          windowHandle,
+          DWMWA_CAPTION_COLOR,
+          captionColor,
+          sizeOf<COLORREF>(),
+        );
         malloc.free(captionColor);
       }
     } catch (error, stacktrace) {

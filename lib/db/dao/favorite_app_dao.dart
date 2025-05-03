@@ -12,17 +12,23 @@ class FavoriteAppDao extends DatabaseAccessor<MixinDatabase>
   FavoriteAppDao(super.db);
 
   Future<void> insertFavoriteApps(
-      String userId, List<sdk.FavoriteApp> apps) async {
+    String userId,
+    List<sdk.FavoriteApp> apps,
+  ) async {
     await _deleteFavoriteAppByUserId(userId);
-    final list = apps
-        .map((app) => FavoriteAppsCompanion.insert(
-              appId: app.appId,
-              userId: app.userId,
-              createdAt: app.createdAt,
-            ))
-        .toList();
+    final list =
+        apps
+            .map(
+              (app) => FavoriteAppsCompanion.insert(
+                appId: app.appId,
+                userId: app.userId,
+                createdAt: app.createdAt,
+              ),
+            )
+            .toList();
     await batch(
-        (batch) => batch.insertAllOnConflictUpdate(db.favoriteApps, list));
+      (batch) => batch.insertAllOnConflictUpdate(db.favoriteApps, list),
+    );
 
     DataBaseEventBus.instance.updateFavoriteApp(apps.map((e) => e.appId));
   }

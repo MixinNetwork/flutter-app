@@ -15,10 +15,9 @@ class FiatDao extends DatabaseAccessor<MixinDatabase> with _$FiatDaoMixin {
       batch.insertAllOnConflictUpdate(
         db.fiats,
         fiats
-            .map((fiat) => FiatsCompanion.insert(
-                  code: fiat.code,
-                  rate: fiat.rate,
-                ))
+            .map(
+              (fiat) => FiatsCompanion.insert(code: fiat.code, rate: fiat.rate),
+            )
             .toList(),
       );
     });

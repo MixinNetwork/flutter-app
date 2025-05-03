@@ -16,12 +16,12 @@ class TransferDataExpiredMessage {
       _$TransferDataExpiredMessageFromJson(json);
 
   factory TransferDataExpiredMessage.fromDbExpiredMessage(
-          db.ExpiredMessage expiredMessage) =>
-      TransferDataExpiredMessage(
-        messageId: expiredMessage.messageId,
-        expireIn: expiredMessage.expireIn,
-        expireAt: expiredMessage.expireAt,
-      );
+    db.ExpiredMessage expiredMessage,
+  ) => TransferDataExpiredMessage(
+    messageId: expiredMessage.messageId,
+    expireIn: expiredMessage.expireIn,
+    expireAt: expiredMessage.expireAt,
+  );
 
   @JsonKey(name: 'message_id')
   final String messageId;
@@ -33,10 +33,10 @@ class TransferDataExpiredMessage {
   final int? expireAt;
 
   db.ExpiredMessage toDbExpiredMessage() => db.ExpiredMessage(
-        messageId: messageId,
-        expireIn: expireIn,
-        expireAt: expireAt,
-      );
+    messageId: messageId,
+    expireIn: expireIn,
+    expireAt: expireAt,
+  );
 
   Map<String, dynamic> toJson() => _$TransferDataExpiredMessageToJson(this);
 }

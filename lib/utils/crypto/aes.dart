@@ -37,25 +37,20 @@ abstract class AesCipher {
     required bool encrypt,
   }) {
     final cipher = AesCipher(key: key, iv: iv, encrypt: encrypt);
-    return Uint8List.fromList([
-      ...cipher.update(data),
-      ...cipher.finish(),
-    ]);
+    return Uint8List.fromList([...cipher.update(data), ...cipher.finish()]);
   }
 
   static Uint8List encrypt({
     required Uint8List key,
     required Uint8List iv,
     required Uint8List data,
-  }) =>
-      _crypt(key: key, iv: iv, data: data, encrypt: true);
+  }) => _crypt(key: key, iv: iv, data: data, encrypt: true);
 
   static Uint8List decrypt({
     required Uint8List key,
     required Uint8List iv,
     required Uint8List data,
-  }) =>
-      _crypt(key: key, iv: iv, data: data, encrypt: false);
+  }) => _crypt(key: key, iv: iv, data: data, encrypt: false);
 
   Uint8List update(Uint8List data);
 
@@ -107,14 +102,13 @@ class AesCipherPointyCastleImpl implements AesCipher {
     required bool encrypt,
   }) {
     final cbcCipher = CBCBlockCipher(AESEngine());
-    return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
-      ..init(
-        encrypt,
-        PaddedBlockCipherParameters(
-          ParametersWithIV(KeyParameter(aesKey), iv),
-          null,
-        ),
-      );
+    return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)..init(
+      encrypt,
+      PaddedBlockCipherParameters(
+        ParametersWithIV(KeyParameter(aesKey), iv),
+        null,
+      ),
+    );
   }
 
   final PaddedBlockCipherImpl _cipher;
@@ -191,14 +185,16 @@ class AesCipherWebCryptoImpl implements AesCipher {
     final nativeKey = key.toNative();
     final nativeIv = iv.toNative();
     try {
-      checkOpIsOne(ssl.EVP_CipherInit_ex(
-        ctx,
-        cipher,
-        nullptr,
-        nativeKey,
-        nativeIv,
-        encrypt ? 1 : 0,
-      ));
+      checkOpIsOne(
+        ssl.EVP_CipherInit_ex(
+          ctx,
+          cipher,
+          nullptr,
+          nativeKey,
+          nativeIv,
+          encrypt ? 1 : 0,
+        ),
+      );
     } finally {
       malloc
         ..free(nativeKey)
@@ -218,7 +214,8 @@ class AesCipherWebCryptoImpl implements AesCipher {
     final outLen = malloc<Int>();
     try {
       checkOpIsOne(
-          ssl.EVP_CipherUpdate(_ctx, outBuf, outLen, inBuf, data.length));
+        ssl.EVP_CipherUpdate(_ctx, outBuf, outLen, inBuf, data.length),
+      );
       return outBuf.asTypedList(outLen.value, finalizer: malloc.nativeFree);
     } finally {
       malloc

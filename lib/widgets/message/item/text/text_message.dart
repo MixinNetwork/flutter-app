@@ -22,8 +22,9 @@ class TextMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final content =
-        useMessageConverter(converter: (state) => state.content ?? '');
+    final content = useMessageConverter(
+      converter: (state) => state.content ?? '',
+    );
     return MessageBubble(
       child: MessageTextWidget(
         fontSize: context.messageStyle.primaryFontSize,
@@ -52,8 +53,11 @@ class MessageTextWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userId = useMessageConverter(converter: (state) => state.userId);
 
-    var keyword = useBlocStateConverter<SearchConversationKeywordCubit,
-        (String?, String), String>(
+    var keyword = useBlocStateConverter<
+      SearchConversationKeywordCubit,
+      (String?, String),
+      String
+    >(
       converter: (state) {
         if (state.$1 == null || state.$1 == userId) return state.$2;
         return '';
@@ -62,8 +66,9 @@ class MessageTextWidget extends HookConsumerWidget {
     );
 
     final globalKeyword = ref.watch(trimmedKeywordProvider);
-    final conversationKeyword =
-        ref.watch(conversationProvider.select((value) => value?.keyword));
+    final conversationKeyword = ref.watch(
+      conversationProvider.select((value) => value?.keyword),
+    );
 
     if (globalKeyword.isNotEmpty) {
       keyword = globalKeyword;
@@ -73,11 +78,12 @@ class MessageTextWidget extends HookConsumerWidget {
 
     final mentionCache = ref.read(mentionCacheProvider);
 
-    final mentionMap = useMemoizedFuture(
-      () => mentionCache.checkMentionCache({content}),
-      mentionCache.mentionCache(content),
-      keys: [content],
-    ).requireData;
+    final mentionMap =
+        useMemoizedFuture(
+          () => mentionCache.checkMentionCache({content}),
+          mentionCache.mentionCache(content),
+          keys: [content],
+        ).requireData;
 
     final focusNode = useFocusNode(debugLabel: 'text selection focus');
 
@@ -85,10 +91,7 @@ class MessageTextWidget extends HookConsumerWidget {
       spacing: 6,
       content: CustomText(
         content,
-        style: TextStyle(
-          fontSize: fontSize,
-          color: color,
-        ),
+        style: TextStyle(fontSize: fontSize, color: color),
         textMatchers: [
           UrlTextMatcher(context),
           MailTextMatcher(context),
@@ -108,21 +111,14 @@ class MessageTextWidget extends HookConsumerWidget {
     );
 
     if (enableSelection) {
-      child = MessageSelectionArea(
-        focusNode: focusNode,
-        child: child,
-      );
+      child = MessageSelectionArea(focusNode: focusNode, child: child);
     }
     return child;
   }
 }
 
 class MessageSelectionArea extends HookWidget {
-  const MessageSelectionArea({
-    required this.child,
-    this.focusNode,
-    super.key,
-  });
+  const MessageSelectionArea({required this.child, this.focusNode, super.key});
 
   final Widget child;
   final FocusNode? focusNode;

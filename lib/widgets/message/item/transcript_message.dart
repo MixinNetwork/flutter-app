@@ -41,14 +41,17 @@ class TranscriptMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final content =
-        useMessageConverter(converter: (state) => state.content ?? '');
+    final content = useMessageConverter(
+      converter: (state) => state.content ?? '',
+    );
     final transcriptMinimals = useMemoized<List<TranscriptMinimal>?>(() {
       try {
         final json = jsonDecode(content);
         return (json as List<dynamic>)
-            .map((json) =>
-                TranscriptMinimal.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) =>
+                  TranscriptMinimal.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
       } catch (error) {
         e('TranscriptMessageWidget.build $error');
@@ -64,146 +67,154 @@ class TranscriptMessageWidget extends HookConsumerWidget {
       return const UnknownMessage();
     }
 
-    return HookBuilder(builder: (context) {
-      final previews = useMemoized(
-          () => transcriptMinimals
-              .map((transcriptMinimal) =>
-                  messagePreviewOptimize(
-                    null,
-                    transcriptMinimal.category,
-                    transcriptMinimal.content,
-                  ) ??
-                  '')
-              .toList(),
-          [transcriptMinimals]);
+    return HookBuilder(
+      builder: (context) {
+        final previews = useMemoized(
+          () =>
+              transcriptMinimals
+                  .map(
+                    (transcriptMinimal) =>
+                        messagePreviewOptimize(
+                          null,
+                          transcriptMinimal.category,
+                          transcriptMinimal.content,
+                        ) ??
+                        '',
+                  )
+                  .toList(),
+          [transcriptMinimals],
+        );
 
-      assert(previews.isEmpty || previews.length == transcriptMinimals.length);
+        assert(
+          previews.isEmpty || previews.length == transcriptMinimals.length,
+        );
 
-      final transcriptTexts = useMemoized(
+        final transcriptTexts = useMemoized(
           () => List.generate(
-              math.min(transcriptMinimals.length, 4),
-              (index) =>
-                  index).map((i) =>
-              '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
-                  .overflow),
-          [
-            transcriptMinimals,
-            previews,
-          ]);
+            math.min(transcriptMinimals.length, 4),
+            (index) => index,
+          ).map(
+            (i) =>
+                '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
+                    .overflow,
+          ),
+          [transcriptMinimals, previews],
+        );
 
-      return MessageBubble(
-        padding: const EdgeInsets.only(
-          top: 4,
-          bottom: 2,
-          right: 2,
-          left: 2,
-        ),
-        child: InteractiveDecoratedBox(
-          onTap: () async {
-            final message = context.message;
-            await showMixinDialog(
+        return MessageBubble(
+          padding: const EdgeInsets.only(top: 4, bottom: 2, right: 2, left: 2),
+          child: InteractiveDecoratedBox(
+            onTap: () async {
+              final message = context.message;
+              await showMixinDialog(
                 context: context,
                 padding: const EdgeInsets.symmetric(vertical: 80),
                 backgroundColor: context.theme.chatBackground,
                 child: TranscriptPage(
                   transcriptMessage: message,
                   vlcService: context.audioMessageService,
-                ));
-
-            if (context.audioMessageService.playing) {
-              context.audioMessageService.stop();
-            }
-          },
-          child: SizedBox(
-            width: 260,
-            child: Stack(
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, bottom: 4),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 4),
-                          Text(
-                            context.l10n.transcript,
-                            style: TextStyle(
-                              color: context.theme.text,
-                              fontSize: context.messageStyle.primaryFontSize,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
-                              color: Color.fromRGBO(0, 0, 0, 0.2),
-                            ),
-                            alignment: Alignment.center,
-                            child: SvgPicture.asset(
-                              Resources.assetsImagesPostDetailSvg,
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      decoration: const BoxDecoration(
-                        color: Color.fromRGBO(0, 0, 0, 0.04),
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
-                      ),
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 4),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: transcriptTexts
-                            .map(
-                              (text) => Text(
-                                text,
-                                style: TextStyle(
-                                  color: context.theme.secondaryText,
-                                  fontSize:
-                                      context.messageStyle.tertiaryFontSize,
-                                ),
-                                maxLines: 1,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  ],
                 ),
-                Positioned(
-                  bottom: 2,
-                  right: isCurrentUser ? 1 : 2,
-                  child: const DecoratedBox(
-                    decoration: ShapeDecoration(
-                      color: Color.fromRGBO(0, 0, 0, 0.3),
-                      shape: StadiumBorder(),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 3,
-                        horizontal: 5,
+              );
+
+              if (context.audioMessageService.playing) {
+                context.audioMessageService.stop();
+              }
+            },
+            child: SizedBox(
+              width: 260,
+              child: Stack(
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4, bottom: 4),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 4),
+                            Text(
+                              context.l10n.transcript,
+                              style: TextStyle(
+                                color: context.theme.text,
+                                fontSize: context.messageStyle.primaryFontSize,
+                              ),
+                            ),
+                            const Spacer(),
+                            Container(
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8),
+                                ),
+                                color: Color.fromRGBO(0, 0, 0, 0.2),
+                              ),
+                              alignment: Alignment.center,
+                              child: SvgPicture.asset(
+                                Resources.assetsImagesPostDetailSvg,
+                                width: 20,
+                                height: 20,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: MessageDatetimeAndStatus(
-                        color: Colors.white,
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Color.fromRGBO(0, 0, 0, 0.04),
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                        ),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 4,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:
+                              transcriptTexts
+                                  .map(
+                                    (text) => Text(
+                                      text,
+                                      style: TextStyle(
+                                        color: context.theme.secondaryText,
+                                        fontSize:
+                                            context
+                                                .messageStyle
+                                                .tertiaryFontSize,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 2,
+                    right: isCurrentUser ? 1 : 2,
+                    child: const DecoratedBox(
+                      decoration: ShapeDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 0.3),
+                        shape: StadiumBorder(),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 3,
+                          horizontal: 5,
+                        ),
+                        child: MessageDatetimeAndStatus(color: Colors.white),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }
 
@@ -217,27 +228,36 @@ class TranscriptPage extends HookConsumerWidget {
   final AudioMessagePlayService vlcService;
   final MessageItem transcriptMessage;
 
-  static MessageItem? of(BuildContext context) => context
-      .findAncestorWidgetOfExactType<TranscriptPage>()
-      ?.transcriptMessage;
+  static MessageItem? of(BuildContext context) =>
+      context
+          .findAncestorWidgetOfExactType<TranscriptPage>()
+          ?.transcriptMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Stream<List<MessageItem>> watchMessages() =>
-        context.database.transcriptMessageDao
-            .transactionMessageItem(transcriptMessage.messageId)
-            .watchWithStream(
+    Stream<List<MessageItem>> watchMessages() => context
+        .database
+        .transcriptMessageDao
+        .transactionMessageItem(transcriptMessage.messageId)
+        .watchWithStream(
           eventStreams: [
             DataBaseEventBus.instance.watchUpdateTranscriptMessageStream(
-                transcriptIds: [transcriptMessage.messageId]),
+              transcriptIds: [transcriptMessage.messageId],
+            ),
             DataBaseEventBus.instance.updateAssetStream,
             DataBaseEventBus.instance.updateStickerStream,
           ],
           duration: kDefaultThrottleDuration,
-        ).map((list) => list
-                .map((transcriptMessageItem) =>
-                    transcriptMessageItem.messageItem)
-                .toList());
+        )
+        .map(
+          (list) =>
+              list
+                  .map(
+                    (transcriptMessageItem) =>
+                        transcriptMessageItem.messageItem,
+                  )
+                  .toList(),
+        );
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
@@ -255,8 +275,9 @@ class TranscriptPage extends HookConsumerWidget {
     );
 
     final scrollController = useMemoized(ScrollController.new);
-    final listKey =
-        useMemoized(() => GlobalKey(debugLabel: 'transcript_list_key'));
+    final listKey = useMemoized(
+      () => GlobalKey(debugLabel: 'transcript_list_key'),
+    );
 
     return ConstrainedBox(
       constraints: const BoxConstraints(
@@ -270,10 +291,12 @@ class TranscriptPage extends HookConsumerWidget {
           BlocProvider.value(value: blinkCubit),
           Provider.value(value: vlcService),
           Provider(
-            create: (_) => AudioMessagesPlayAgent(
-                list,
-                (m) =>
-                    context.accountServer.convertMessageAbsolutePath(m, true)),
+            create:
+                (_) => AudioMessagesPlayAgent(
+                  list,
+                  (m) =>
+                      context.accountServer.convertMessageAbsolutePath(m, true),
+                ),
           ),
           Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
         ],
@@ -317,13 +340,13 @@ class TranscriptPage extends HookConsumerWidget {
                   controller: scrollController,
                   key: listKey,
                   padding: const EdgeInsets.only(bottom: 16),
-                  itemBuilder: (BuildContext context, int index) =>
-                      MessageItemWidget(
-                    prev: list.getOrNull(index - 1),
-                    message: list[index],
-                    next: list.getOrNull(index + 1),
-                    isTranscriptPage: true,
-                  ),
+                  itemBuilder:
+                      (BuildContext context, int index) => MessageItemWidget(
+                        prev: list.getOrNull(index - 1),
+                        message: list[index],
+                        next: list.getOrNull(index + 1),
+                        isTranscriptPage: true,
+                      ),
                   itemCount: list.length,
                 ),
               ),

@@ -35,10 +35,7 @@ String _getConversationName(dynamic item) {
 String _getConversationId(dynamic item, BuildContext context) {
   if (item is ConversationItem) return item.conversationId;
   if (item is User) {
-    return generateConversationId(
-      item.userId,
-      context.accountServer.userId,
-    );
+    return generateConversationId(item.userId, context.accountServer.userId);
   }
   throw ArgumentError('must be ConversationItem or User');
 }
@@ -80,18 +77,16 @@ Widget _getAvatarWidget(dynamic item) {
 
 extension _AvatarUser on User {
   Widget get avatarWidget => AvatarWidget(
-        size: 50,
-        avatarUrl: avatarUrl,
-        name: fullName,
-        userId: userId,
-      );
+    size: 50,
+    avatarUrl: avatarUrl,
+    name: fullName,
+    userId: userId,
+  );
 }
 
 extension _AvatarConversationItem on ConversationItem {
-  Widget get avatarWidget => ConversationAvatarWidget(
-        size: 50,
-        conversation: this,
-      );
+  Widget get avatarWidget =>
+      ConversationAvatarWidget(size: 50, conversation: this);
 }
 
 Future<List<ConversationSelector>?> showConversationSelector({
@@ -105,21 +100,20 @@ Future<List<ConversationSelector>?> showConversationSelector({
   String? confirmedText,
   Widget? action,
   int? maxSelect,
-}) =>
-    showMixinDialog<List<ConversationSelector>?>(
-      context: context,
-      child: _ConversationSelector(
-        title: title,
-        singleSelect: singleSelect,
-        onlyContact: onlyContact,
-        initSelected: initSelected,
-        filteredIds: filteredIds,
-        allowEmpty: allowEmpty,
-        confirmedText: confirmedText,
-        action: action,
-        maxSelect: maxSelect,
-      ),
-    );
+}) => showMixinDialog<List<ConversationSelector>?>(
+  context: context,
+  child: _ConversationSelector(
+    title: title,
+    singleSelect: singleSelect,
+    onlyContact: onlyContact,
+    initSelected: initSelected,
+    filteredIds: filteredIds,
+    allowEmpty: allowEmpty,
+    confirmedText: confirmedText,
+    action: action,
+    maxSelect: maxSelect,
+  ),
+);
 
 class ConversationSelector with EquatableMixin {
   const ConversationSelector({
@@ -133,19 +127,17 @@ class ConversationSelector with EquatableMixin {
   final EncryptCategory? encryptCategory;
 
   @override
-  List<Object?> get props => [
-        conversationId,
-        userId,
-        encryptCategory,
-      ];
+  List<Object?> get props => [conversationId, userId, encryptCategory];
 
   static ConversationSelector init(
-          dynamic item, BuildContext context, Map<String, App> map) =>
-      ConversationSelector(
-        conversationId: _getConversationId(item, context),
-        userId: _getUserId(item),
-        encryptCategory: _getEncryptedCategory(item, map),
-      );
+    dynamic item,
+    BuildContext context,
+    Map<String, App> map,
+  ) => ConversationSelector(
+    conversationId: _getConversationId(item, context),
+    userId: _getUserId(item),
+    encryptCategory: _getEncryptedCategory(item, map),
+  );
 }
 
 class _ConversationSelector extends HookConsumerWidget {
@@ -219,32 +211,37 @@ class _ConversationSelector extends HookConsumerWidget {
 
     final conversationFilterState =
         useBlocState<ConversationFilterCubit, ConversationFilterState>(
-      bloc: conversationFilterCubit,
-    );
+          bloc: conversationFilterCubit,
+        );
 
-    final appMap = useMemoizedFuture(
-      () async {
-        final list = await context.database.appDao
-            .appInIds(conversationFilterState.appIds)
-            .get();
-        return {for (final e in list) e.appId: e};
-      },
-      <String, App>{},
-      keys: [conversationFilterState],
-    ).requireData;
+    final appMap =
+        useMemoizedFuture(
+          () async {
+            final list =
+                await context.database.appDao
+                    .appInIds(conversationFilterState.appIds)
+                    .get();
+            return {for (final e in list) e.appId: e};
+          },
+          <String, App>{},
+          keys: [conversationFilterState],
+        ).requireData;
 
     useEffect(
-      () => selector.stream.listen((event) {
-        if (event.isNotEmpty && singleSelect) {
-          final item = event.first;
-          Navigator.pop(
-              context, [ConversationSelector.init(item, context, appMap)]);
-        }
-      }).cancel,
+      () =>
+          selector.stream.listen((event) {
+            if (event.isNotEmpty && singleSelect) {
+              final item = event.first;
+              Navigator.pop(context, [
+                ConversationSelector.init(item, context, appMap),
+              ]);
+            }
+          }).cancel,
       [selector.stream],
     );
-    final selected =
-        useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(bloc: selector);
+    final selected = useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(
+      bloc: selector,
+    );
 
     const boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -300,27 +297,27 @@ class _ConversationSelector extends HookConsumerWidget {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: action ??
+                      child:
+                          action ??
                           (!singleSelect && (allowEmpty || selected.isNotEmpty)
                               ? MixinButton(
-                                  backgroundTransparent: true,
-                                  padding: const EdgeInsets.all(8),
-                                  onTap: () => Navigator.pop(
-                                    context,
-                                    selected
-                                        .map(
-                                          (item) => ConversationSelector.init(
-                                            item,
-                                            context,
-                                            appMap,
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                  child: Text(
-                                    confirmedText ?? context.l10n.next,
-                                  ),
-                                )
+                                backgroundTransparent: true,
+                                padding: const EdgeInsets.all(8),
+                                onTap:
+                                    () => Navigator.pop(
+                                      context,
+                                      selected
+                                          .map(
+                                            (item) => ConversationSelector.init(
+                                              item,
+                                              context,
+                                              appMap,
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                child: Text(confirmedText ?? context.l10n.next),
+                              )
                               : const SizedBox()),
                     ),
                   ),
@@ -331,46 +328,50 @@ class _ConversationSelector extends HookConsumerWidget {
             AnimatedSize(
               alignment: Alignment.topCenter,
               duration: const Duration(milliseconds: 200),
-              child: singleSelect || selected.isEmpty
-                  ? const SizedBox(height: 8)
-                  : SizedBox(
-                      height: 120,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        itemBuilder: (context, index) => SizedBox(
-                          width: 66,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const SizedBox(height: 20),
-                              Stack(
-                                children: [
-                                  _getAvatarWidget(selected[index]),
-                                  _AvatarSmallCloseIcon(
-                                    onTap: () => selectItem(selected[index]),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                _getConversationName(selected[index]),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: context.theme.text,
+              child:
+                  singleSelect || selected.isEmpty
+                      ? const SizedBox(height: 8)
+                      : SizedBox(
+                        height: 120,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          itemBuilder:
+                              (context, index) => SizedBox(
+                                width: 66,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(height: 20),
+                                    Stack(
+                                      children: [
+                                        _getAvatarWidget(selected[index]),
+                                        _AvatarSmallCloseIcon(
+                                          onTap:
+                                              () => selectItem(selected[index]),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      _getConversationName(selected[index]),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: context.theme.text,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                    ),
+                                  ],
                                 ),
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
                               ),
-                            ],
-                          ),
+                          separatorBuilder:
+                              (BuildContext context, int index) =>
+                                  const SizedBox(width: 4),
+                          itemCount: selected.length,
                         ),
-                        separatorBuilder: (BuildContext context, int index) =>
-                            const SizedBox(width: 4),
-                        itemCount: selected.length,
                       ),
-                    ),
             ),
             Expanded(
               child: Padding(
@@ -383,8 +384,9 @@ class _ConversationSelector extends HookConsumerWidget {
                         count:
                             conversationFilterState.recentConversations.length,
                         builder: (BuildContext context, int index) {
-                          final item = conversationFilterState
-                              .recentConversations[index];
+                          final item =
+                              conversationFilterState
+                                  .recentConversations[index];
                           return InteractiveDecoratedBox.color(
                             decoration: boxDecoration,
                             hoveringColor: context.theme.listSelected,
@@ -396,9 +398,11 @@ class _ConversationSelector extends HookConsumerWidget {
                               verified: item.ownerVerified,
                               isBot: item.isBotConversation,
                               membership: item.membership,
-                              selected: selected.any((element) =>
-                                  _getConversationId(element, context) ==
-                                  _getConversationId(item, context)),
+                              selected: selected.any(
+                                (element) =>
+                                    _getConversationId(element, context) ==
+                                    _getConversationId(item, context),
+                              ),
                               showSelector: !singleSelect,
                             ),
                           );
@@ -422,9 +426,11 @@ class _ConversationSelector extends HookConsumerWidget {
                               isBot: item.appId != null,
                               membership: item.membership,
                               showSelector: !singleSelect,
-                              selected: selected.any((element) =>
-                                  _getConversationId(element, context) ==
-                                  _getConversationId(item, context)),
+                              selected: selected.any(
+                                (element) =>
+                                    _getConversationId(element, context) ==
+                                    _getConversationId(item, context),
+                              ),
                             ),
                           );
                         },
@@ -447,9 +453,11 @@ class _ConversationSelector extends HookConsumerWidget {
                               isBot: item.appId != null,
                               membership: item.membership,
                               showSelector: !singleSelect,
-                              selected: selected.any((element) =>
-                                  _getConversationId(element, context) ==
-                                  _getConversationId(item, context)),
+                              selected: selected.any(
+                                (element) =>
+                                    _getConversationId(element, context) ==
+                                    _getConversationId(item, context),
+                              ),
                             ),
                           );
                         },
@@ -466,18 +474,18 @@ class _ConversationSelector extends HookConsumerWidget {
 }
 
 class _FilterTextField extends HookConsumerWidget {
-  const _FilterTextField({
-    required this.conversationFilterCubit,
-  });
+  const _FilterTextField({required this.conversationFilterCubit});
 
   final ConversationFilterCubit conversationFilterCubit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isTextEmpty = useMemoizedStream(
-          () => conversationFilterCubit.stream
-              .map((event) => event.keyword?.isEmpty ?? true)
-              .distinct(),
+    final isTextEmpty =
+        useMemoizedStream(
+          () =>
+              conversationFilterCubit.stream
+                  .map((event) => event.keyword?.isEmpty ?? true)
+                  .distinct(),
           keys: [conversationFilterCubit],
         ).data ??
         conversationFilterCubit.state.keyword?.isEmpty ??
@@ -495,10 +503,7 @@ class _FilterTextField extends HookConsumerWidget {
         children: [
           TextField(
             onChanged: (string) => conversationFilterCubit.keyword = string,
-            style: TextStyle(
-              color: context.theme.text,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: context.theme.text, fontSize: 14),
             inputFormatters: [
               LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
             ],
@@ -523,8 +528,9 @@ class _FilterTextField extends HookConsumerWidget {
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
             ),
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
+            contextMenuBuilder:
+                (context, state) =>
+                    MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
           if (isTextEmpty)
             IgnorePointer(
@@ -548,50 +554,48 @@ class _FilterTextField extends HookConsumerWidget {
 }
 
 class _AvatarSmallCloseIcon extends StatelessWidget {
-  const _AvatarSmallCloseIcon({
-    required this.onTap,
-  });
+  const _AvatarSmallCloseIcon({required this.onTap});
 
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => Positioned(
-        top: 0,
-        right: 0,
-        child: GestureDetector(
-          onTap: onTap,
+    top: 0,
+    right: 0,
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          color: context.theme.popUp,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
           child: Container(
-            width: 22,
-            height: 22,
+            height: 16,
+            width: 16,
             decoration: BoxDecoration(
-              color: context.theme.popUp,
+              color: context.dynamicColor(
+                darkBrightnessThemeData.divider,
+                darkColor: const Color.fromRGBO(142, 141, 143, 1),
+              ),
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Container(
-                height: 16,
-                width: 16,
-                decoration: BoxDecoration(
-                  color: context.dynamicColor(
-                    darkBrightnessThemeData.divider,
-                    darkColor: const Color.fromRGBO(142, 141, 143, 1),
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesSmallCloseSvg,
-                    colorFilter: ColorFilter.mode(
-                      Colors.white.withValues(alpha: 0.9),
-                      BlendMode.srcIn,
-                    ),
-                  ),
+              child: SvgPicture.asset(
+                Resources.assetsImagesSmallCloseSvg,
+                colorFilter: ColorFilter.mode(
+                  Colors.white.withValues(alpha: 0.9),
+                  BlendMode.srcIn,
                 ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _Section extends StatelessWidget {
@@ -607,32 +611,26 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiSliver(
-        pushPinnedChildren: true,
-        children: [
-          SliverPinnedHeader(
-            child: Container(
-              color: context.dynamicColor(
-                const Color.fromRGBO(255, 255, 255, 1),
-                darkColor: const Color.fromRGBO(62, 65, 72, 1),
-              ),
-              padding: const EdgeInsets.only(top: 10, bottom: 10, left: 14),
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: context.theme.text,
-                ),
-              ),
-            ),
+    pushPinnedChildren: true,
+    children: [
+      SliverPinnedHeader(
+        child: Container(
+          color: context.dynamicColor(
+            const Color.fromRGBO(255, 255, 255, 1),
+            darkColor: const Color.fromRGBO(62, 65, 72, 1),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              builder,
-              childCount: count,
-            ),
+          padding: const EdgeInsets.only(top: 10, bottom: 10, left: 14),
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 16, color: context.theme.text),
           ),
-        ],
-      );
+        ),
+      ),
+      SliverList(
+        delegate: SliverChildBuilderDelegate(builder, childCount: count),
+      ),
+    ],
+  );
 }
 
 class _BaseItem extends StatelessWidget {
@@ -659,63 +657,58 @@ class _BaseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 70,
-        padding:
-            const EdgeInsets.only(top: 10, bottom: 10, left: 14, right: 10),
-        child: Row(
-          children: [
-            if (showSelector)
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: ClipOval(
-                  child: Container(
-                    height: 16,
-                    width: 16,
-                    decoration: BoxDecoration(
-                      color: selected
+    height: 70,
+    padding: const EdgeInsets.only(top: 10, bottom: 10, left: 14, right: 10),
+    child: Row(
+      children: [
+        if (showSelector)
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: ClipOval(
+              child: Container(
+                height: 16,
+                width: 16,
+                decoration: BoxDecoration(
+                  color:
+                      selected
                           ? context.theme.accent
                           : context.theme.secondaryText,
-                    ),
-                    alignment: Alignment.center,
-                    child: SvgPicture.asset(Resources.assetsImagesSelectedSvg),
-                  ),
                 ),
-              ),
-            avatar,
-            const SizedBox(width: 16),
-            Expanded(
-              child: Row(
-                children: [
-                  Flexible(
-                    child: CustomText(
-                      title.overflow,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textMatchers: [
-                        EmojiTextMatcher(),
-                        if (keyword != null)
-                          KeyWordTextMatcher(
-                            keyword!.overflow,
-                            style: TextStyle(
-                              color: context.theme.accent,
-                            ),
-                          ),
-                      ],
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: context.theme.text,
-                      ),
-                    ),
-                  ),
-                  BadgesWidget(
-                    verified: verified,
-                    isBot: isBot,
-                    membership: membership,
-                  ),
-                ],
+                alignment: Alignment.center,
+                child: SvgPicture.asset(Resources.assetsImagesSelectedSvg),
               ),
             ),
-          ],
+          ),
+        avatar,
+        const SizedBox(width: 16),
+        Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                child: CustomText(
+                  title.overflow,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textMatchers: [
+                    EmojiTextMatcher(),
+                    if (keyword != null)
+                      KeyWordTextMatcher(
+                        keyword!.overflow,
+                        style: TextStyle(color: context.theme.accent),
+                      ),
+                  ],
+                  style: TextStyle(fontSize: 16, color: context.theme.text),
+                ),
+              ),
+              BadgesWidget(
+                verified: verified,
+                isBot: isBot,
+                membership: membership,
+              ),
+            ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }

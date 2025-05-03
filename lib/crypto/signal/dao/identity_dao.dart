@@ -10,16 +10,17 @@ class IdentityDao extends DatabaseAccessor<SignalDatabase>
   IdentityDao(super.db);
 
   Future<Identity?> getIdentityByAddress(String address) async =>
-      (select(db.identities)..where((tbl) => tbl.address.equals(address)))
-          .getSingleOrNull();
+      (select(db.identities)
+        ..where((tbl) => tbl.address.equals(address))).getSingleOrNull();
 
-  Future insert(IdentitiesCompanion identitiesCompanion) => into(db.identities)
-      .insert(identitiesCompanion, mode: InsertMode.insertOrReplace);
+  Future insert(IdentitiesCompanion identitiesCompanion) => into(
+    db.identities,
+  ).insert(identitiesCompanion, mode: InsertMode.insertOrReplace);
 
   Future<int> deleteByAddress(String address) =>
       (delete(db.identities)..where((tbl) => tbl.address.equals(address))).go();
 
   Future<Identity?> getLocalIdentity() async =>
-      (select(db.identities)..where((tbl) => tbl.address.equals('-1')))
-          .getSingleOrNull();
+      (select(db.identities)
+        ..where((tbl) => tbl.address.equals('-1'))).getSingleOrNull();
 }

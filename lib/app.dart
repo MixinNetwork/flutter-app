@@ -50,7 +50,9 @@ class App extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     precacheImage(
-        const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+      const AssetImage(Resources.assetsImagesChatBackgroundPng),
+      context,
+    );
 
     final authState = ref.watch(authProvider);
 
@@ -92,20 +94,16 @@ class _LoginApp extends HookConsumerWidget {
         error = error.remoteCause;
       }
       if (error is SqliteException) {
-        return _App(
-          home: DatabaseOpenFailedPage(error: error),
-        );
+        return _App(home: DatabaseOpenFailedPage(error: error));
       } else {
         return _App(
           home: LandingFailedPage(
-              title: context.l10n.unknowError,
-              message: error.toString(),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {},
-                  child: Text(context.l10n.exit),
-                )
-              ]),
+            title: context.l10n.unknowError,
+            message: error.toString(),
+            actions: [
+              ElevatedButton(onPressed: () {}, child: Text(context.l10n.exit)),
+            ],
+          ),
         );
       }
     }
@@ -115,9 +113,7 @@ class _LoginApp extends HookConsumerWidget {
 }
 
 class _Providers extends HookConsumerWidget {
-  const _Providers({
-    required this.app,
-  });
+  const _Providers({required this.app});
 
   final Widget app;
 
@@ -130,11 +126,12 @@ class _Providers extends HookConsumerWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (BuildContext context) => ConversationListBloc(
-            ref.read(slideCategoryStateProvider.notifier),
-            accountServer.database,
-            ref.read(mentionCacheProvider),
-          ),
+          create:
+              (BuildContext context) => ConversationListBloc(
+                ref.read(slideCategoryStateProvider.notifier),
+                accountServer.database,
+                ref.read(mentionCacheProvider),
+              ),
         ),
       ],
       child: Provider<NotificationService>(
@@ -154,68 +151,67 @@ class _App extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => WindowShortcuts(
-        child: GlobalMoveWindow(
-          child: MaterialApp(
-            title: 'Mixin',
-            navigatorObservers: [rootRouteObserver],
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              Localization.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: [
-              ...Localization.delegate.supportedLocales,
-            ],
-            theme: ThemeData(
-              colorScheme:
-                  ColorScheme.light(primary: lightBrightnessThemeData.text),
+    child: GlobalMoveWindow(
+      child: MaterialApp(
+        title: 'Mixin',
+        navigatorObservers: [rootRouteObserver],
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          Localization.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [...Localization.delegate.supportedLocales],
+        theme:
+            ThemeData(
+              colorScheme: ColorScheme.light(
+                primary: lightBrightnessThemeData.text,
+              ),
               textSelectionTheme: TextSelectionThemeData(
                 cursorColor: lightBrightnessThemeData.accent,
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            darkTheme: ThemeData(
-              colorScheme:
-                  ColorScheme.dark(primary: darkBrightnessThemeData.text),
+        darkTheme:
+            ThemeData(
+              colorScheme: ColorScheme.dark(
+                primary: darkBrightnessThemeData.text,
+              ),
               textSelectionTheme: TextSelectionThemeData(
                 cursorColor: darkBrightnessThemeData.accent,
               ),
               useMaterial3: true,
             ).withFallbackFonts(),
-            themeMode: ref.watch(settingProvider).themeMode,
-            builder: (context, child) {
-              try {
-                context.accountServer.language =
-                    Localizations.localeOf(context).languageCode;
-              } catch (_) {}
-              final mediaQueryData = MediaQuery.of(context);
-              return BrightnessObserver(
-                lightThemeData: lightBrightnessThemeData,
-                darkThemeData: darkBrightnessThemeData,
-                forceBrightness: ref.watch(settingProvider).brightness,
-                child: MediaQuery(
-                  data: mediaQueryData.copyWith(
-                    // Different linux distro change the value, e.g. 1.2
-                    textScaler: Platform.isLinux
+        themeMode: ref.watch(settingProvider).themeMode,
+        builder: (context, child) {
+          try {
+            context.accountServer.language =
+                Localizations.localeOf(context).languageCode;
+          } catch (_) {}
+          final mediaQueryData = MediaQuery.of(context);
+          return BrightnessObserver(
+            lightThemeData: lightBrightnessThemeData,
+            darkThemeData: darkBrightnessThemeData,
+            forceBrightness: ref.watch(settingProvider).brightness,
+            child: MediaQuery(
+              data: mediaQueryData.copyWith(
+                // Different linux distro change the value, e.g. 1.2
+                textScaler:
+                    Platform.isLinux
                         ? TextScaler.noScaling
                         : mediaQueryData.textScaler,
-                  ),
-                  child: SystemTrayWidget(
-                    child: TextInputActionHandler(
-                      child: AuthGuard(
-                        child: child!,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-            home: MixinAppActions(child: MacosMenuBar(child: home)),
-          ),
-        ),
-      );
+              ),
+              child: SystemTrayWidget(
+                child: TextInputActionHandler(child: AuthGuard(child: child!)),
+              ),
+            ),
+          );
+        },
+        home: MixinAppActions(child: MacosMenuBar(child: home)),
+      ),
+    ),
+  );
 }
 
 class _Home extends HookConsumerWidget {
@@ -223,8 +219,9 @@ class _Home extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accountServer =
-        ref.watch(accountServerProvider.select((value) => value.valueOrNull));
+    final accountServer = ref.watch(
+      accountServerProvider.select((value) => value.valueOrNull),
+    );
 
     useEffect(() {
       accountServer?.refreshSelf();
@@ -264,7 +261,8 @@ class _Home extends HookConsumerWidget {
 
     if (accountServer != null) {
       BlocProvider.of<ConversationListBloc>(context)
-        ..limit = MediaQuery.sizeOf(context).height ~/
+        ..limit =
+            MediaQuery.sizeOf(context).height ~/
             (ConversationPage.conversationItemHeight / 1.75)
         ..init();
       return const PortalProviders(child: HomePage());

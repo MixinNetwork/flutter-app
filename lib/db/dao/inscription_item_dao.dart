@@ -14,8 +14,7 @@ class InscriptionItemDao extends DatabaseAccessor<MixinDatabase>
 
   Future<InscriptionItem?> findInscriptionByHash(String hash) =>
       (select(inscriptionItems)
-            ..where((tbl) => tbl.inscriptionHash.equals(hash)))
-          .getSingleOrNull();
+        ..where((tbl) => tbl.inscriptionHash.equals(hash))).getSingleOrNull();
 
   Future<InscriptionItem> insertSdkItem(sdk.InscriptionItem inscription) async {
     final dbItem = inscription.asDbItem;
@@ -26,9 +25,9 @@ class InscriptionItemDao extends DatabaseAccessor<MixinDatabase>
   Future<void> insert(
     InscriptionItem inscription, {
     required bool updateIfConflict,
-  }) =>
-      into(db.inscriptionItems)
-          .simpleInsert(inscription, updateIfConflict: updateIfConflict);
+  }) => into(
+    db.inscriptionItems,
+  ).simpleInsert(inscription, updateIfConflict: updateIfConflict);
 
   Future<List<InscriptionItem>> getInscriptionItems({
     required int limit,
@@ -42,14 +41,14 @@ class InscriptionItemDao extends DatabaseAccessor<MixinDatabase>
 
 extension _InscriptionItemExt on sdk.InscriptionItem {
   InscriptionItem get asDbItem => InscriptionItem(
-        inscriptionHash: inscriptionHash,
-        collectionHash: collectionHash,
-        sequence: sequence,
-        contentType: contentType,
-        contentUrl: contentURL,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        occupiedAt: occupiedAt,
-        occupiedBy: occupiedBy,
-      );
+    inscriptionHash: inscriptionHash,
+    collectionHash: collectionHash,
+    sequence: sequence,
+    contentType: contentType,
+    contentUrl: contentURL,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    occupiedAt: occupiedAt,
+    occupiedBy: occupiedBy,
+  );
 }

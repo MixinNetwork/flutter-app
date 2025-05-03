@@ -46,97 +46,92 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT user.* FROM participants AS participant INNER JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          participants,
-          users,
-        }).asyncMap(users.mapFromRow);
+      'SELECT user.* FROM participants AS participant INNER JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
+      variables: [Variable<String>(conversationId)],
+      readsFrom: {participants, users},
+    ).asyncMap(users.mapFromRow);
   }
 
   Selectable<ParticipantUser> groupParticipantsByConversationId(
-      String conversationId) {
+    String conversationId,
+  ) {
     return customSelect(
-        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, COALESCE(u.is_verified, FALSE) AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam, u.membership AS membership FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          participants,
-          users,
-        }).map((QueryRow row) => ParticipantUser(
-          conversationId: row.read<String>('conversationId'),
-          role: Participants.$converterrole
-              .fromSql(row.readNullable<String>('role')),
-          createdAt: Participants.$convertercreatedAt
-              .fromSql(row.read<int>('createdAt')),
-          userId: row.read<String>('userId'),
-          identityNumber: row.read<String>('identityNumber'),
-          relationship: Users.$converterrelationship
-              .fromSql(row.readNullable<String>('relationship')),
-          biography: row.readNullable<String>('biography'),
-          fullName: row.readNullable<String>('fullName'),
-          avatarUrl: row.readNullable<String>('avatarUrl'),
-          phone: row.readNullable<String>('phone'),
-          isVerified: row.read<bool>('isVerified'),
-          userCreatedAt: NullAwareTypeConverter.wrapFromSql(
-              Users.$convertercreatedAt,
-              row.readNullable<int>('userCreatedAt')),
-          muteUntil: NullAwareTypeConverter.wrapFromSql(
-              Users.$convertermuteUntil, row.readNullable<int>('muteUntil')),
-          hasPin: row.readNullable<int>('hasPin'),
-          appId: row.readNullable<String>('appId'),
-          isScam: row.readNullable<int>('isScam'),
-          membership: Users.$convertermembership
-              .fromSql(row.readNullable<String>('membership')),
-        ));
+      'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, COALESCE(u.is_verified, FALSE) AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam, u.membership AS membership FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
+      variables: [Variable<String>(conversationId)],
+      readsFrom: {participants, users},
+    ).map(
+      (QueryRow row) => ParticipantUser(
+        conversationId: row.read<String>('conversationId'),
+        role: Participants.$converterrole.fromSql(
+          row.readNullable<String>('role'),
+        ),
+        createdAt: Participants.$convertercreatedAt.fromSql(
+          row.read<int>('createdAt'),
+        ),
+        userId: row.read<String>('userId'),
+        identityNumber: row.read<String>('identityNumber'),
+        relationship: Users.$converterrelationship.fromSql(
+          row.readNullable<String>('relationship'),
+        ),
+        biography: row.readNullable<String>('biography'),
+        fullName: row.readNullable<String>('fullName'),
+        avatarUrl: row.readNullable<String>('avatarUrl'),
+        phone: row.readNullable<String>('phone'),
+        isVerified: row.read<bool>('isVerified'),
+        userCreatedAt: NullAwareTypeConverter.wrapFromSql(
+          Users.$convertercreatedAt,
+          row.readNullable<int>('userCreatedAt'),
+        ),
+        muteUntil: NullAwareTypeConverter.wrapFromSql(
+          Users.$convertermuteUntil,
+          row.readNullable<int>('muteUntil'),
+        ),
+        hasPin: row.readNullable<int>('hasPin'),
+        appId: row.readNullable<String>('appId'),
+        isScam: row.readNullable<int>('isScam'),
+        membership: Users.$convertermembership.fromSql(
+          row.readNullable<String>('membership'),
+        ),
+      ),
+    );
   }
 
   Selectable<String> userIdByIdentityNumber(
-      String conversationId, String identityNumber) {
+    String conversationId,
+    String identityNumber,
+  ) {
     return customSelect(
-        'SELECT u.user_id FROM users AS u INNER JOIN participants AS p ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND u.identity_number = ?2',
-        variables: [
-          Variable<String>(conversationId),
-          Variable<String>(identityNumber)
-        ],
-        readsFrom: {
-          users,
-          participants,
-        }).map((QueryRow row) => row.read<String>('user_id'));
+      'SELECT u.user_id FROM users AS u INNER JOIN participants AS p ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND u.identity_number = ?2',
+      variables: [
+        Variable<String>(conversationId),
+        Variable<String>(identityNumber),
+      ],
+      readsFrom: {users, participants},
+    ).map((QueryRow row) => row.read<String>('user_id'));
   }
 
   Selectable<int> countParticipants() {
-    return customSelect('SELECT COUNT(1) AS _c0 FROM participants',
-        variables: [],
-        readsFrom: {
-          participants,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect(
+      'SELECT COUNT(1) AS _c0 FROM participants',
+      variables: [],
+      readsFrom: {participants},
+    ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<int> conversationParticipantsCount(String conversationId) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM participants WHERE conversation_id = ?1',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          participants,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+      'SELECT COUNT(1) AS _c0 FROM participants WHERE conversation_id = ?1',
+      variables: [Variable<String>(conversationId)],
+      readsFrom: {participants},
+    ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<String> _joinedConversationId(String userId) {
     return customSelect(
-        'SELECT p.conversation_id FROM participants AS p,conversations AS c WHERE p.user_id = ?1 AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
-        variables: [
-          Variable<String>(userId)
-        ],
-        readsFrom: {
-          participants,
-          conversations,
-        }).map((QueryRow row) => row.read<String>('conversation_id'));
+      'SELECT p.conversation_id FROM participants AS p,conversations AS c WHERE p.user_id = ?1 AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
+      variables: [Variable<String>(userId)],
+      readsFrom: {participants, conversations},
+    ).map((QueryRow row) => row.read<String>('conversation_id'));
   }
 }
 
@@ -179,23 +174,24 @@ class ParticipantUser {
   });
   @override
   int get hashCode => Object.hash(
-      conversationId,
-      role,
-      createdAt,
-      userId,
-      identityNumber,
-      relationship,
-      biography,
-      fullName,
-      avatarUrl,
-      phone,
-      isVerified,
-      userCreatedAt,
-      muteUntil,
-      hasPin,
-      appId,
-      isScam,
-      membership);
+    conversationId,
+    role,
+    createdAt,
+    userId,
+    identityNumber,
+    relationship,
+    biography,
+    fullName,
+    avatarUrl,
+    phone,
+    isVerified,
+    userCreatedAt,
+    muteUntil,
+    hasPin,
+    appId,
+    isScam,
+    membership,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

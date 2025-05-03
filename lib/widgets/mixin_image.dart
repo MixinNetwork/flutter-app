@@ -36,7 +36,8 @@ Future<ui.ImmutableBuffer?> _loadCacheBuffer(
   final md5Key = key != null ? keyToMd5(key) : null;
 
   final _cacheImagesDirectory = Directory(
-      join((await getTemporaryDirectory()).path, cacheImageFolderName));
+    join((await getTemporaryDirectory()).path, cacheImageFolderName),
+  );
   ui.ImmutableBuffer? data;
 
   if (_cacheImagesDirectory.existsSync() && md5Key != null) {
@@ -91,16 +92,13 @@ Future<(ui.ImmutableBuffer?, Uint8List?)> _loadBuffer(
   } else if (provider is MemoryImage) {
     return (
       await ui.ImmutableBuffer.fromUint8List(provider.bytes),
-      provider.bytes
+      provider.bytes,
     );
   }
   return (null, null);
 }
 
-Future<Response> _tryGetResponse(
-  Uri resolved,
-  ProxyConfig? proxy,
-) async {
+Future<Response> _tryGetResponse(Uri resolved, ProxyConfig? proxy) async {
   final client = await createRHttpClient(proxyConfig: proxy);
   final response = await client.get(resolved);
   return response;
@@ -114,7 +112,8 @@ Future<Uint8List?> _loadCacheBytes(
   final md5Key = key != null ? keyToMd5(key) : null;
 
   final _cacheImagesDirectory = Directory(
-      join((await getTemporaryDirectory()).path, cacheImageFolderName));
+    join((await getTemporaryDirectory()).path, cacheImageFolderName),
+  );
   Uint8List? data;
 
   if (_cacheImagesDirectory.existsSync() && md5Key != null) {
@@ -137,10 +136,7 @@ Future<Uint8List?> _loadCacheBytes(
   return data;
 }
 
-Future<Uint8List?> _loadBytes(
-  Object provider,
-  ProxyConfig? proxyConfig,
-) async {
+Future<Uint8List?> _loadBytes(Object provider, ProxyConfig? proxyConfig) async {
   if (provider is NetworkImage) {
     final resolved = Uri.base.resolve(provider.url);
     final response = await _tryGetResponse(resolved, proxyConfig);
@@ -278,21 +274,23 @@ class MixinImage extends HookWidget {
     }
 
     if (controller == null) {
-      return HookBuilder(builder: (context) {
-        final controller = useImagePlaying(context);
+      return HookBuilder(
+        builder: (context) {
+          final controller = useImagePlaying(context);
 
-        return _AnimatedImageWidget(
-          codec: codecAsync.data!,
-          controller: controller,
-          placeholder:
-              placeholder ?? () => SizedBox(width: width, height: height),
-          errorBuilder: errorBuilder,
-          width: width,
-          height: height,
-          fit: fit,
-          isAntiAlias: isAntiAlias,
-        );
-      });
+          return _AnimatedImageWidget(
+            codec: codecAsync.data!,
+            controller: controller,
+            placeholder:
+                placeholder ?? () => SizedBox(width: width, height: height),
+            errorBuilder: errorBuilder,
+            width: width,
+            height: height,
+            fit: fit,
+            isAntiAlias: isAntiAlias,
+          );
+        },
+      );
     }
 
     return _AnimatedImageWidget(

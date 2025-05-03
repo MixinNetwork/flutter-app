@@ -133,14 +133,15 @@ class QuoteMessage extends HookConsumerWidget {
             final rawContent = content ?? '';
             final mentionCache = ref.read(mentionCacheProvider);
 
-            final description = useMemoizedFuture(
-              () async => mentionCache.replaceMention(
-                rawContent,
-                await mentionCache.checkMentionCache({rawContent}),
-              ),
-              rawContent,
-              keys: [rawContent],
-            ).requireData;
+            final description =
+                useMemoizedFuture(
+                  () async => mentionCache.replaceMention(
+                    rawContent,
+                    await mentionCache.checkMentionCache({rawContent}),
+                  ),
+                  rawContent,
+                  keys: [rawContent],
+                ).requireData;
 
             return _QuoteMessageBase(
               messageId: messageId,
@@ -192,9 +193,10 @@ class QuoteMessage extends HookConsumerWidget {
       }
 
       if (type.isLive) {
-        final placeholder = thumbImage != null
-            ? ImageByBlurHashOrBase64(imageData: thumbImage)
-            : const SizedBox();
+        final placeholder =
+            thumbImage != null
+                ? ImageByBlurHashOrBase64(imageData: thumbImage)
+                : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -289,10 +291,7 @@ class QuoteMessage extends HookConsumerWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: StickerItem(
-            assetUrl: assetUrl ?? '',
-            assetType: assetType,
-          ),
+          image: StickerItem(assetUrl: assetUrl ?? '', assetType: assetType),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
@@ -330,10 +329,11 @@ class QuoteMessage extends HookConsumerWidget {
         final json = jsonDecode(content ?? '');
         switch (type) {
           case MessageCategory.appButtonGroup:
-            description = (json as List?)
-                ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
-                .map((e) => '[${e.label}]')
-                .join();
+            description =
+                (json as List?)
+                    ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
+                    .map((e) => '[${e.label}]')
+                    .join();
           case MessageCategory.appCard:
             description =
                 AppCardData.fromJson(json as Map<String, dynamic>).title;
@@ -393,39 +393,39 @@ class _QuoteImage extends HookWidget {
     final thumbImage = quote?.thumbImage as String?;
     final mediaUrl = quote?.mediaUrl as String?;
 
-    useEffect(
-      () {
-        if (messageId == null) {
-          // Quote is display in input container. no need to update quote content
-          return;
-        }
-        if (mediaUrl == null) {
-          scheduleMicrotask(() async {
-            final messageDao = context.database.messageDao;
-            final messageItem =
-                await messageDao.findMessageItemByMessageId(quoteMessageId);
-            if (messageItem == null) {
-              return;
-            }
-            await messageDao.updateMessageQuoteContent(
-              messageId!,
-              messageItem.toJson(),
-            );
-          });
-        }
-      },
-      [mediaUrl, messageId],
-    );
+    useEffect(() {
+      if (messageId == null) {
+        // Quote is display in input container. no need to update quote content
+        return;
+      }
+      if (mediaUrl == null) {
+        scheduleMicrotask(() async {
+          final messageDao = context.database.messageDao;
+          final messageItem = await messageDao.findMessageItemByMessageId(
+            quoteMessageId,
+          );
+          if (messageItem == null) {
+            return;
+          }
+          await messageDao.updateMessageQuoteContent(
+            messageId!,
+            messageItem.toJson(),
+          );
+        });
+      }
+    }, [mediaUrl, messageId]);
 
     return MixinImage.file(
-      File(context.accountServer.convertAbsolutePath(
-        type,
-        quote.conversationId as String,
-        mediaUrl,
-        isTranscriptPage,
-      )),
-      errorBuilder: (_, __, ___) =>
-          ImageByBlurHashOrBase64(imageData: thumbImage!),
+      File(
+        context.accountServer.convertAbsolutePath(
+          type,
+          quote.conversationId as String,
+          mediaUrl,
+          isTranscriptPage,
+        ),
+      ),
+      errorBuilder:
+          (_, __, ___) => ImageByBlurHashOrBase64(imageData: thumbImage!),
     );
   }
 }
@@ -458,16 +458,18 @@ class _QuoteMessageBase extends HookConsumerWidget {
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
-    final color = userId?.isNotEmpty == true
-        ? getNameColorById(userId!)
-        : context.theme.accent;
+    final color =
+        userId?.isNotEmpty == true
+            ? getNameColorById(userId!)
+            : context.theme.accent;
 
     final user = userId != null ? ref.watch(userCacheProvider(userId!)) : null;
 
     return ClipRRect(
-      borderRadius: inputMode
-          ? BorderRadius.zero
-          : const BorderRadius.all(Radius.circular(8)),
+      borderRadius:
+          inputMode
+              ? BorderRadius.zero
+              : const BorderRadius.all(Radius.circular(8)),
       child: GestureDetector(
         onTap: () {
           if (onTap != null) {
@@ -487,7 +489,8 @@ class _QuoteMessageBase extends HookConsumerWidget {
             }
           } catch (_) {}
 
-          context.providerContainer
+          context
+              .providerContainer
               .read(pendingJumpMessageProvider.notifier)
               .state = messageId;
           context.read<MessageBloc>().scrollTo(quoteMessageId);
@@ -504,10 +507,7 @@ class _QuoteMessageBase extends HookConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 6,
-                      color: color,
-                    ),
+                    Container(width: 6, color: color),
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -529,8 +529,10 @@ class _QuoteMessageBase extends HookConsumerWidget {
                                     CustomText(
                                       name!,
                                       style: TextStyle(
-                                        fontSize: context
-                                            .messageStyle.secondaryFontSize,
+                                        fontSize:
+                                            context
+                                                .messageStyle
+                                                .secondaryFontSize,
                                         color: color,
                                         height: 1,
                                       ),
@@ -540,7 +542,7 @@ class _QuoteMessageBase extends HookConsumerWidget {
                                       verified: false,
                                       isBot: false,
                                       membership: user?.membership,
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),

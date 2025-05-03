@@ -11,38 +11,36 @@ import '../../provider/unseen_conversations_provider.dart';
 import '../bloc/conversation_list_bloc.dart';
 
 class ConversationHotKey extends StatelessWidget {
-  const ConversationHotKey({
-    required this.child,
-    super.key,
-  });
+  const ConversationHotKey({required this.child, super.key});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) => FocusableActionDetector(
-        shortcuts: {
-          SingleActivator(
+    shortcuts: {
+      SingleActivator(
             LogicalKeyboardKey.arrowDown,
             meta: kPlatformIsDarwin,
             control: !kPlatformIsDarwin,
-          ): const NextConversationIntent(),
-          SingleActivator(
+          ):
+          const NextConversationIntent(),
+      SingleActivator(
             LogicalKeyboardKey.arrowUp,
             meta: kPlatformIsDarwin,
             control: !kPlatformIsDarwin,
-          ): const PreviousConversationIntent(),
-        },
-        actions: {
-          NextConversationIntent: CallbackAction<NextConversationIntent>(
-            onInvoke: (_) => _navigationConversation(context, forward: true),
-          ),
-          PreviousConversationIntent:
-              CallbackAction<PreviousConversationIntent>(
-            onInvoke: (_) => _navigationConversation(context, forward: false),
-          ),
-        },
-        child: child,
-      );
+          ):
+          const PreviousConversationIntent(),
+    },
+    actions: {
+      NextConversationIntent: CallbackAction<NextConversationIntent>(
+        onInvoke: (_) => _navigationConversation(context, forward: true),
+      ),
+      PreviousConversationIntent: CallbackAction<PreviousConversationIntent>(
+        onInvoke: (_) => _navigationConversation(context, forward: false),
+      ),
+    },
+    child: child,
+  );
 }
 
 class NextConversationIntent extends Intent {
@@ -53,29 +51,30 @@ class PreviousConversationIntent extends Intent {
   const PreviousConversationIntent();
 }
 
-void _navigationConversation(
-  BuildContext context, {
-  required bool forward,
-}) {
+void _navigationConversation(BuildContext context, {required bool forward}) {
   final category = context.providerContainer.read(slideCategoryStateProvider);
   final conversationListBloc = context.read<ConversationListBloc>();
 
   if (category.type == SlideCategoryType.setting) return;
 
-  final currentConversationId =
-      context.providerContainer.read(currentConversationIdProvider);
+  final currentConversationId = context.providerContainer.read(
+    currentConversationIdProvider,
+  );
   if (currentConversationId == null) return;
 
-  final conversationUnseenFilterEnabled =
-      context.providerContainer.read(conversationUnseenFilterEnabledProvider);
+  final conversationUnseenFilterEnabled = context.providerContainer.read(
+    conversationUnseenFilterEnabledProvider,
+  );
 
   String nextConversationId;
   int? nextConversationIndex;
   if (conversationUnseenFilterEnabled) {
-    final unseenConversations =
-        context.providerContainer.read(unseenConversationsProvider);
+    final unseenConversations = context.providerContainer.read(
+      unseenConversationsProvider,
+    );
     final index = unseenConversations?.indexWhere(
-        (element) => element.conversationId == currentConversationId);
+      (element) => element.conversationId == currentConversationId,
+    );
 
     if (index == null || index == -1) return;
 
@@ -103,10 +102,7 @@ void _navigationConversation(
     nextConversationId = nextConversation.conversationId;
   }
 
-  ConversationStateNotifier.selectConversation(
-    context,
-    nextConversationId,
-  );
+  ConversationStateNotifier.selectConversation(context, nextConversationId);
 
   if (nextConversationIndex == null) return;
 
@@ -131,8 +127,9 @@ void _navigationConversation(
       break;
     }
   }
-  final itemScrollController =
-      conversationListBloc.itemScrollController(category);
+  final itemScrollController = conversationListBloc.itemScrollController(
+    category,
+  );
   if (itemScrollController == null) return;
   if (itemScrollController.isAttached) {
     itemScrollController.jumpTo(

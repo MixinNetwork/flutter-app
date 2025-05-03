@@ -21,9 +21,10 @@ const lightOtherBubble = Colors.white;
 const darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
-  Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
-      ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
-      : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
+  Color messageBubbleColor(bool isCurrentUser) =>
+      isCurrentUser
+          ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
+          : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
 }
 
 class MessageBubble extends HookConsumerWidget {
@@ -61,8 +62,9 @@ class MessageBubble extends HookConsumerWidget {
 
     final isTranscriptPage = useIsTranscriptPage();
 
-    final bubbleColor =
-        context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
+    final bubbleColor = context.messageBubbleColor(
+      forceIsCurrentUserColor ?? isCurrentUser,
+    );
 
     final messageType = useMessageConverter(converter: (state) => state.type);
 
@@ -75,10 +77,7 @@ class MessageBubble extends HookConsumerWidget {
       );
     }
 
-    _child = Padding(
-      padding: padding,
-      child: _child,
-    );
+    _child = Padding(padding: padding, child: _child);
 
     if (hasQuoteMessage) {
       final constraintQuoteWidthToMessage =
@@ -94,19 +93,23 @@ class MessageBubble extends HookConsumerWidget {
               width: constraintQuoteWidthToMessage ? 0 : null,
               child: MessageBubbleNipPadding(
                 currentUser: isCurrentUser,
-                child: HookBuilder(builder: (context) {
-                  final quoteContent = useMessageConverter(
-                      converter: (state) => state.quoteContent);
-                  final messageId = useMessageConverter(
-                      converter: (state) => state.messageId);
+                child: HookBuilder(
+                  builder: (context) {
+                    final quoteContent = useMessageConverter(
+                      converter: (state) => state.quoteContent,
+                    );
+                    final messageId = useMessageConverter(
+                      converter: (state) => state.messageId,
+                    );
 
-                  return QuoteMessage(
-                    messageId: messageId,
-                    quoteMessageId: quoteId,
-                    quoteContent: quoteContent,
-                    isTranscriptPage: isTranscriptPage,
-                  );
-                }),
+                    return QuoteMessage(
+                      messageId: messageId,
+                      quoteMessageId: quoteId,
+                      quoteContent: quoteContent,
+                      isTranscriptPage: isTranscriptPage,
+                    );
+                  },
+                ),
               ),
             ),
             _child,
@@ -115,26 +118,17 @@ class MessageBubble extends HookConsumerWidget {
       );
     }
 
-    final clipper = BubbleClipper(
-      currentUser: isCurrentUser,
-      showNip: showNip,
-    );
+    final clipper = BubbleClipper(currentUser: isCurrentUser, showNip: showNip);
 
     if (clip) {
       _child = RepaintBoundary(
-        child: ClipPath(
-          clipper: clipper,
-          child: _child,
-        ),
+        child: ClipPath(clipper: clipper, child: _child),
       );
     }
 
     if (hasQuoteMessage || showBubble) {
       _child = CustomPaint(
-        painter: BubblePainter(
-          color: bubbleColor,
-          clipper: clipper,
-        ),
+        painter: BubblePainter(color: bubbleColor, clipper: clipper),
         child: _child,
       );
     }
@@ -186,12 +180,17 @@ class MessageBubble extends HookConsumerWidget {
           onTap: () async {
             final message = context.message;
             final expireAt = await context
-                .accountServer.database.expiredMessageDao
+                .accountServer
+                .database
+                .expiredMessageDao
                 .getMessageExpireAt([message.messageId]);
-            final time = (expireAt[message.messageId] ?? 0) -
+            final time =
+                (expireAt[message.messageId] ?? 0) -
                 DateTime.now().millisecondsSinceEpoch ~/ 1000;
-            showToast('expire in: ${message.expireIn}. '
-                'will delete after: ${time < 0 ? 0 : time} seconds');
+            showToast(
+              'expire in: ${message.expireIn}. '
+              'will delete after: ${time < 0 ? 0 : time} seconds',
+            );
           },
         );
       }
@@ -215,11 +214,7 @@ class MessageBubble extends HookConsumerWidget {
           _child,
           if (outerTimeAndStatusWidget != null)
             Padding(
-              padding: const EdgeInsets.only(
-                right: 10,
-                left: 10,
-                top: 4,
-              ),
+              padding: const EdgeInsets.only(right: 10, left: 10, top: 4),
               child: outerTimeAndStatusWidget,
             ),
         ],
@@ -240,12 +235,12 @@ class MessageBubbleNipPadding extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: EdgeInsets.only(
-          left: currentUser ? 0 : _nipWidth,
-          right: currentUser ? _nipWidth : 0,
-        ),
-        child: child,
-      );
+    padding: EdgeInsets.only(
+      left: currentUser ? 0 : _nipWidth,
+      right: currentUser ? _nipWidth : 0,
+    ),
+    child: child,
+  );
 }
 
 class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
@@ -263,8 +258,9 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   Path getClip(Size size) {
     final nipWidth = nipPadding ? _nipWidth : 0.0;
 
-    final bubblePath = _bubblePath(Size(size.width - nipWidth, size.height))
-        .shift(Offset(currentUser ? 0 : nipWidth, 0));
+    final bubblePath = _bubblePath(
+      Size(size.width - nipWidth, size.height),
+    ).shift(Offset(currentUser ? 0 : nipWidth, 0));
 
     if (!showNip) return bubblePath;
 
@@ -272,54 +268,143 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) => Path()
-    ..addRRect(
-        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size));
+  Path _bubblePath(Size size) =>
+      Path()..addRRect(
+        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
+      );
 
   Path _leftNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);
-    final path = Path()
-      ..lineTo(size.width * 1.04, size.height)
-      ..cubicTo(size.width * 1.04, size.height, size.width * 1.04, 0,
-          size.width * 1.04, 0)
-      ..cubicTo(size.width * 1.04, 0, size.width * 1.04, size.height * 0.12,
-          size.width, size.height * 0.19)
-      ..cubicTo(size.width * 0.81, size.height * 0.41, size.width / 2,
-          size.height * 0.59, size.width * 0.14, size.height * 0.67)
-      ..cubicTo(size.width * 0.03, size.height * 0.69, size.width * 0.01,
-          size.height * 0.79, size.width * 0.11, size.height * 0.84)
-      ..cubicTo(size.width * 0.12, size.height * 0.84, size.width * 0.13,
-          size.height * 0.85, size.width * 0.13, size.height * 0.85)
-      ..cubicTo(size.width * 0.36, size.height * 0.94, size.width * 0.62,
-          size.height, size.width * 0.91, size.height)
-      ..cubicTo(size.width * 0.95, size.height, size.width * 1.04, size.height,
-          size.width * 1.04, size.height)
-      ..cubicTo(size.width * 1.04, size.height, size.width * 1.04, size.height,
-          size.width * 1.04, size.height);
+    final path =
+        Path()
+          ..lineTo(size.width * 1.04, size.height)
+          ..cubicTo(
+            size.width * 1.04,
+            size.height,
+            size.width * 1.04,
+            0,
+            size.width * 1.04,
+            0,
+          )
+          ..cubicTo(
+            size.width * 1.04,
+            0,
+            size.width * 1.04,
+            size.height * 0.12,
+            size.width,
+            size.height * 0.19,
+          )
+          ..cubicTo(
+            size.width * 0.81,
+            size.height * 0.41,
+            size.width / 2,
+            size.height * 0.59,
+            size.width * 0.14,
+            size.height * 0.67,
+          )
+          ..cubicTo(
+            size.width * 0.03,
+            size.height * 0.69,
+            size.width * 0.01,
+            size.height * 0.79,
+            size.width * 0.11,
+            size.height * 0.84,
+          )
+          ..cubicTo(
+            size.width * 0.12,
+            size.height * 0.84,
+            size.width * 0.13,
+            size.height * 0.85,
+            size.width * 0.13,
+            size.height * 0.85,
+          )
+          ..cubicTo(
+            size.width * 0.36,
+            size.height * 0.94,
+            size.width * 0.62,
+            size.height,
+            size.width * 0.91,
+            size.height,
+          )
+          ..cubicTo(
+            size.width * 0.95,
+            size.height,
+            size.width * 1.04,
+            size.height,
+            size.width * 1.04,
+            size.height,
+          )
+          ..cubicTo(
+            size.width * 1.04,
+            size.height,
+            size.width * 1.04,
+            size.height,
+            size.width * 1.04,
+            size.height,
+          );
 
     return path.shift(Offset(-0.38, bubbleSize.height - 9 - 12));
   }
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);
-    final path = Path()
-      ..lineTo(0, size.height)
-      ..cubicTo(0, size.height, 0, 0, 0, 0)
-      ..cubicTo(
-          0, 0, 0, size.height * 0.12, size.width * 0.05, size.height * 0.19)
-      ..cubicTo(size.width * 0.24, size.height * 0.41, size.width * 0.54,
-          size.height * 0.59, size.width * 0.9, size.height * 0.67)
-      ..cubicTo(size.width * 1.02, size.height * 0.69, size.width * 1.04,
-          size.height * 0.79, size.width * 0.94, size.height * 0.84)
-      ..cubicTo(size.width * 0.92, size.height * 0.84, size.width * 0.91,
-          size.height * 0.85, size.width * 0.91, size.height * 0.85)
-      ..cubicTo(size.width * 0.68, size.height * 0.94, size.width * 0.42,
-          size.height, size.width * 0.13, size.height)
-      ..cubicTo(size.width * 0.09, size.height, 0, size.height, 0, size.height)
-      ..cubicTo(0, size.height, 0, size.height, 0, size.height);
+    final path =
+        Path()
+          ..lineTo(0, size.height)
+          ..cubicTo(0, size.height, 0, 0, 0, 0)
+          ..cubicTo(
+            0,
+            0,
+            0,
+            size.height * 0.12,
+            size.width * 0.05,
+            size.height * 0.19,
+          )
+          ..cubicTo(
+            size.width * 0.24,
+            size.height * 0.41,
+            size.width * 0.54,
+            size.height * 0.59,
+            size.width * 0.9,
+            size.height * 0.67,
+          )
+          ..cubicTo(
+            size.width * 1.02,
+            size.height * 0.69,
+            size.width * 1.04,
+            size.height * 0.79,
+            size.width * 0.94,
+            size.height * 0.84,
+          )
+          ..cubicTo(
+            size.width * 0.92,
+            size.height * 0.84,
+            size.width * 0.91,
+            size.height * 0.85,
+            size.width * 0.91,
+            size.height * 0.85,
+          )
+          ..cubicTo(
+            size.width * 0.68,
+            size.height * 0.94,
+            size.width * 0.42,
+            size.height,
+            size.width * 0.13,
+            size.height,
+          )
+          ..cubicTo(
+            size.width * 0.09,
+            size.height,
+            0,
+            size.height,
+            0,
+            size.height,
+          )
+          ..cubicTo(0, size.height, 0, size.height, 0, size.height);
 
-    return path
-        .shift(Offset(bubbleSize.width - 9 - 0.05, bubbleSize.height - 9 - 12));
+    return path.shift(
+      Offset(bubbleSize.width - 9 - 0.05, bubbleSize.height - 9 - 12),
+    );
   }
 
   @override
@@ -335,9 +420,10 @@ class BubblePainter extends CustomPainter with EquatableMixin {
     required Color color,
     this.elevation = 0.6,
     this.shadowColor = Colors.black,
-  }) : _fillPaint = Paint()
-          ..color = color
-          ..style = PaintingStyle.fill;
+  }) : _fillPaint =
+           Paint()
+             ..color = color
+             ..style = PaintingStyle.fill;
 
   final CustomClipper<Path> clipper;
   final double elevation;
@@ -361,10 +447,5 @@ class BubblePainter extends CustomPainter with EquatableMixin {
       this != oldDelegate;
 
   @override
-  List<Object?> get props => [
-        clipper,
-        elevation,
-        shadowColor,
-        _fillPaint,
-      ];
+  List<Object?> get props => [clipper, elevation, shadowColor, _fillPaint];
 }

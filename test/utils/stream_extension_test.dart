@@ -20,14 +20,17 @@ void main() {
     });
 
     await Future.delayed(
-        const Duration(milliseconds: count * delayedMilliseconds * 2));
+      const Duration(milliseconds: count * delayedMilliseconds * 2),
+    );
 
     expect(callTimes.length, inInclusiveRange(1, 4));
   });
 
   test('throttle', () async {
-    Stream<int> periodic(int count,
-        [Duration duration = const Duration(milliseconds: 200)]) async* {
+    Stream<int> periodic(
+      int count, [
+      Duration duration = const Duration(milliseconds: 200),
+    ]) async* {
       for (var i = 0; i < count; i++) {
         yield i;
         await Future.delayed(duration);
@@ -35,9 +38,10 @@ void main() {
       await Future.delayed(duration);
     }
 
-    final list = await periodic(6)
-        .throttleTime(const Duration(milliseconds: 450))
-        .toList();
+    final list =
+        await periodic(
+          6,
+        ).throttleTime(const Duration(milliseconds: 450)).toList();
 
     expect(list, [0, 2, 4, 5]);
   });

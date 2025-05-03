@@ -51,7 +51,7 @@ extension ImageTypeExtension on ImageType {
     JpegEncoder(quality: _kQuality).encode(image),
     ImageType.jpeg,
     image.width,
-    image.height
+    image.height,
   );
 }
 

@@ -12,14 +12,11 @@ import '../toast.dart';
 Future<String?> showPinVerificationDialog(
   BuildContext context, {
   required String title,
-}) =>
-    showMixinDialog<String>(
-      context: context,
-      child: _PinVerificationDialog(
-        title: title,
-      ),
-      barrierDismissible: false,
-    );
+}) => showMixinDialog<String>(
+  context: context,
+  child: _PinVerificationDialog(title: title),
+  barrierDismissible: false,
+);
 
 class _PinVerificationDialog extends StatelessWidget {
   const _PinVerificationDialog({required this.title});
@@ -28,41 +25,39 @@ class _PinVerificationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 400,
-        height: 210,
-        child: Stack(
-          fit: StackFit.expand,
+    width: 400,
+    height: 210,
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        Column(
           children: [
-            Column(
-              children: [
-                const SizedBox(height: 40),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                PinInputLayout(
-                  doVerify: (String pin) async {
-                    await context.accountServer.client.accountApi
-                        .verifyPin(encryptPin(pin)!);
-                    Navigator.pop(context, pin);
-                  },
-                ),
-              ],
+            const SizedBox(height: 40),
+            Text(
+              title,
+              style: TextStyle(color: context.theme.text, fontSize: 18),
             ),
-            const Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: EdgeInsets.all(22),
-                child: MixinCloseButton(),
-              ),
+            const SizedBox(height: 20),
+            PinInputLayout(
+              doVerify: (String pin) async {
+                await context.accountServer.client.accountApi.verifyPin(
+                  encryptPin(pin)!,
+                );
+                Navigator.pop(context, pin);
+              },
             ),
           ],
         ),
-      );
+        const Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: EdgeInsets.all(22),
+            child: MixinCloseButton(),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 const _kPinCodeLength = 6;
@@ -147,21 +142,22 @@ class _PinInputLayoutState extends State<PinInputLayout>
 
   void _openInputConnection() {
     if (!_hasInputConnection) {
-      _textInputConnection = TextInput.attach(
-        this,
-        TextInputConfiguration(
-          inputType: TextInputType.number,
-          obscureText: true,
-          autocorrect: false,
-          smartDashesType: SmartDashesType.disabled,
-          enableSuggestions: false,
-          enableInteractiveSelection: false,
-          keyboardAppearance: MediaQuery.platformBrightnessOf(context),
-          enableIMEPersonalizedLearning: false,
-        ),
-      )
-        ..setEditingState(_controller.value)
-        ..show();
+      _textInputConnection =
+          TextInput.attach(
+              this,
+              TextInputConfiguration(
+                inputType: TextInputType.number,
+                obscureText: true,
+                autocorrect: false,
+                smartDashesType: SmartDashesType.disabled,
+                enableSuggestions: false,
+                enableInteractiveSelection: false,
+                keyboardAppearance: MediaQuery.platformBrightnessOf(context),
+                enableIMEPersonalizedLearning: false,
+              ),
+            )
+            ..setEditingState(_controller.value)
+            ..show();
       _lastKnownRemoteTextEditingValue = _controller.value;
     } else {
       _textInputConnection?.show();
@@ -212,9 +208,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
                   height: 10,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: context.theme.secondaryText,
-                    ),
+                    border: Border.all(color: context.theme.secondaryText),
                   ),
                 ),
             ].joinList(const SizedBox(width: 20)),
@@ -287,7 +281,9 @@ class _PinInputLayoutState extends State<PinInputLayout>
 
   @override
   void didChangeInputControl(
-      TextInputControl? oldControl, TextInputControl? newControl) {
+    TextInputControl? oldControl,
+    TextInputControl? newControl,
+  ) {
     // TODO: implement didChangeInputControl
   }
 

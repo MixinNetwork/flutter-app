@@ -45,15 +45,16 @@ class LoginWithMobileWidget extends HookConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     return BlocProvider<LandingMobileCubit>(
-      create: (_) => LandingMobileCubit(context.multiAuthChangeNotifier, locale,
-          userAgent: userAgent, deviceId: deviceId),
+      create:
+          (_) => LandingMobileCubit(
+            context.multiAuthChangeNotifier,
+            locale,
+            userAgent: userAgent,
+            deviceId: deviceId,
+          ),
       child: Navigator(
         onDidRemovePage: (page) {},
-        pages: const [
-          MaterialPage(
-            child: _PhoneNumberInputScene(),
-          ),
-        ],
+        pages: const [MaterialPage(child: _PhoneNumberInputScene())],
       ),
     );
   }
@@ -64,72 +65,72 @@ class _PhoneNumberInputScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          const SizedBox(height: 56),
-          Expanded(
-            child: PhoneNumberInputLayout(onNextStep: (phoneNumber) async {
-              final ret = await showConfirmMixinDialog(
-                context,
-                context.l10n.landingInvitationDialogContent(phoneNumber),
-                maxWidth: 440,
+    children: [
+      const SizedBox(height: 56),
+      Expanded(
+        child: PhoneNumberInputLayout(
+          onNextStep: (phoneNumber) async {
+            final ret = await showConfirmMixinDialog(
+              context,
+              context.l10n.landingInvitationDialogContent(phoneNumber),
+              maxWidth: 440,
+            );
+            if (ret == null) return;
+            showToastLoading();
+            try {
+              final response = await _requestVerificationCode(
+                phone: phoneNumber,
+                context: context,
               );
-              if (ret == null) return;
-              showToastLoading();
-              try {
-                final response = await _requestVerificationCode(
-                  phone: phoneNumber,
-                  context: context,
-                );
-                Toast.dismiss();
-                if (response.deactivationEffectiveAt != null) {
-                  final date = response.deactivationEffectiveAt!.toLocal();
-                  final requestedAt =
-                      response.deactivationRequestedAt!.toLocal();
-                  final continueLogin = await showConfirmMixinDialog(
-                    context,
-                    context.l10n.loginAndAbortAccountDeletion,
-                    description: context.l10n.landingDeleteContent(
-                      DateFormat().format(requestedAt),
-                      DateFormat().format(date),
-                    ),
-                    maxWidth: 440,
-                    positiveText: context.l10n.continueText,
-                    negativeText: context.l10n.cancel,
-                    barrierDismissible: false,
-                  );
-                  if (continueLogin == null) {
-                    i('User canceled login and deactivatedAt is not empty');
-                    return;
-                  }
-                }
-                await Navigator.push(
+              Toast.dismiss();
+              if (response.deactivationEffectiveAt != null) {
+                final date = response.deactivationEffectiveAt!.toLocal();
+                final requestedAt = response.deactivationRequestedAt!.toLocal();
+                final continueLogin = await showConfirmMixinDialog(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => _CodeInputScene(
-                      phoneNumber: phoneNumber,
-                      initialVerificationResponse: response,
-                    ),
+                  context.l10n.loginAndAbortAccountDeletion,
+                  description: context.l10n.landingDeleteContent(
+                    DateFormat().format(requestedAt),
+                    DateFormat().format(date),
                   ),
+                  maxWidth: 440,
+                  positiveText: context.l10n.continueText,
+                  negativeText: context.l10n.cancel,
+                  barrierDismissible: false,
                 );
-              } on MixinApiError catch (error) {
-                e('Error requesting verification code: $error');
-                final mixinError = error.error! as MixinError;
-                showToastFailed(
-                  ToastError(mixinError.toDisplayString(context)),
-                );
-                return;
-              } catch (error) {
-                e('Error requesting verification code: $error');
-                showToastFailed(null);
-                return;
+                if (continueLogin == null) {
+                  i('User canceled login and deactivatedAt is not empty');
+                  return;
+                }
               }
-            }),
-          ),
-          const SizedBox(height: 30),
-          const LandingModeSwitchButton(),
-          const SizedBox(height: 40),
-        ],
-      );
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => _CodeInputScene(
+                        phoneNumber: phoneNumber,
+                        initialVerificationResponse: response,
+                      ),
+                ),
+              );
+            } on MixinApiError catch (error) {
+              e('Error requesting verification code: $error');
+              final mixinError = error.error! as MixinError;
+              showToastFailed(ToastError(mixinError.toDisplayString(context)));
+              return;
+            } catch (error) {
+              e('Error requesting verification code: $error');
+              showToastFailed(null);
+              return;
+            }
+          },
+        ),
+      ),
+      const SizedBox(height: 30),
+      const LandingModeSwitchButton(),
+      const SizedBox(height: 40),
+    ],
+  );
 }
 
 class _CodeInputScene extends HookConsumerWidget {
@@ -145,8 +146,9 @@ class _CodeInputScene extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final codeInputController = useTextEditingController();
 
-    final verification =
-        useRef<VerificationResponse>(initialVerificationResponse);
+    final verification = useRef<VerificationResponse>(
+      initialVerificationResponse,
+    );
 
     Future<void> performLogin(String code) async {
       assert(code.length == 4, 'Invalid code length: $code');
@@ -183,20 +185,18 @@ class _CodeInputScene extends HookConsumerWidget {
         CryptoKeyValue.instance.localRegistrationId = registrationId;
 
         await SessionKeyValue.instance.init(identityNumber);
-        SessionKeyValue.instance.pinToken = base64Encode(decryptPinToken(
-          response.data.pinToken,
-          sessionKey.privateKey,
-        ));
-        context.multiAuthChangeNotifier
-            .signIn(AuthState(account: response.data, privateKey: privateKey));
+        SessionKeyValue.instance.pinToken = base64Encode(
+          decryptPinToken(response.data.pinToken, sessionKey.privateKey),
+        );
+        context.multiAuthChangeNotifier.signIn(
+          AuthState(account: response.data, privateKey: privateKey),
+        );
         Toast.dismiss();
       } catch (error) {
         e('login account error: $error');
         if (error is MixinApiError) {
           final mixinError = error.error! as MixinError;
-          showToastFailed(
-            ToastError(mixinError.toDisplayString(context)),
-          );
+          showToastFailed(ToastError(mixinError.toDisplayString(context)));
         } else {
           showToastFailed(null);
         }
@@ -244,9 +244,7 @@ class _CodeInputScene extends HookConsumerWidget {
               autoDisposeControllers: false,
               controller: codeInputController,
               appContext: context,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               keyboardType: TextInputType.number,
               onCompleted: performLogin,
               useHapticFeedback: true,
@@ -256,10 +254,7 @@ class _CodeInputScene extends HookConsumerWidget {
                 fieldWidth: 15,
                 borderWidth: 2,
               ),
-              textStyle: TextStyle(
-                fontSize: 18,
-                color: context.theme.text,
-              ),
+              textStyle: TextStyle(fontSize: 18, color: context.theme.text),
               onChanged: (String value) {},
             ),
           ),
@@ -292,10 +287,7 @@ class _CodeInputScene extends HookConsumerWidget {
           const Spacer(),
           MixinButton(
             disable: codeInputController.text.length < 4,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 60,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
             onTap: () => performLogin(codeInputController.text),
             child: Text(context.l10n.signIn),
           ),

@@ -132,8 +132,10 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
       e('resume failed, player is null.');
       return;
     }
-    assert(_playbackState.value == PlaybackState.paused,
-        'resume failed, player is not paused.');
+    assert(
+      _playbackState.value == PlaybackState.paused,
+      'resume failed, player is not paused.',
+    );
     _player?.play();
     _playbackState.value = PlaybackState.playing;
   }

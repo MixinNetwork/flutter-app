@@ -24,15 +24,19 @@ class ActionMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final actionDataList = useMessageConverter(converter: (state) {
-      try {
-        final list = jsonDecode(state.content!) as List<dynamic>;
-        return list.map((e) => ActionData.fromJson(e as Map<String, dynamic>));
-      } catch (error) {
-        e('ActionData decode error: $error');
-        return null;
-      }
-    });
+    final actionDataList = useMessageConverter(
+      converter: (state) {
+        try {
+          final list = jsonDecode(state.content!) as List<dynamic>;
+          return list.map(
+            (e) => ActionData.fromJson(e as Map<String, dynamic>),
+          );
+        } catch (error) {
+          e('ActionData decode error: $error');
+          return null;
+        }
+      },
+    );
 
     if (actionDataList == null) return const UnknownMessage();
 
@@ -42,11 +46,10 @@ class ActionMessage extends HookConsumerWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 240, maxWidth: 340),
         child: ActionButtonLayout(
-          children: actionDataList
-              .map(
-                (e) => ActionMessageButton(action: e),
-              )
-              .toList(),
+          children:
+              actionDataList
+                  .map((e) => ActionMessageButton(action: e))
+                  .toList(),
         ),
       ),
     );
@@ -54,10 +57,7 @@ class ActionMessage extends HookConsumerWidget {
 }
 
 class ActionMessageButton extends ConsumerWidget {
-  const ActionMessageButton({
-    required this.action,
-    super.key,
-  });
+  const ActionMessageButton({required this.action, super.key});
 
   final ActionData action;
 
@@ -89,8 +89,10 @@ class ActionMessageButton extends ConsumerWidget {
             fit: StackFit.passthrough,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 child: Text(
                   action.label,
                   textAlign: TextAlign.center,
@@ -124,7 +126,7 @@ class ActionMessageButton extends ConsumerWidget {
                       height: 6,
                     ),
                   ),
-                )
+                ),
             ],
           ),
         ),
@@ -153,7 +155,9 @@ class ActionButtonLayout extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderActionButtonLayout renderObject) {
+    BuildContext context,
+    RenderActionButtonLayout renderObject,
+  ) {
     renderObject
       ..horizontalSpacing = horizontalSpacing
       ..verticalSpacing = verticalSpacing;
@@ -172,8 +176,8 @@ class RenderActionButtonLayout extends RenderBox
   RenderActionButtonLayout({
     required double horizontalSpacing,
     required double verticalSpacing,
-  })  : _horizontalSpacing = horizontalSpacing,
-        _verticalSpacing = verticalSpacing;
+  }) : _horizontalSpacing = horizontalSpacing,
+       _verticalSpacing = verticalSpacing;
 
   double get horizontalSpacing => _horizontalSpacing;
   double _horizontalSpacing;
@@ -309,12 +313,16 @@ class RenderActionButtonLayout extends RenderBox
       final row = rows[i]!;
       final childWidth =
           (constraints.maxWidth - (row.length - 1) * horizontalSpacing) /
-              row.length;
+          row.length;
 
-      final rowHeight = row.fold<double>(0,
-          (value, b) => math.max(value, (b.parentData! as _ParentData).height));
-      final childConstraints =
-          BoxConstraints.expand(width: childWidth, height: rowHeight);
+      final rowHeight = row.fold<double>(
+        0,
+        (value, b) => math.max(value, (b.parentData! as _ParentData).height),
+      );
+      final childConstraints = BoxConstraints.expand(
+        width: childWidth,
+        height: rowHeight,
+      );
       var offsetX = 0.0;
       for (final item in row) {
         item.layout(childConstraints);

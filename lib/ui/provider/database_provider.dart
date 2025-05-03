@@ -10,16 +10,17 @@ import 'multi_auth_provider.dart';
 import 'slide_category_provider.dart';
 
 final databaseProvider =
-    StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>(
-  (ref) {
-    final identityNumber =
-        ref.watch(authAccountProvider.select((value) => value?.identityNumber));
+    StateNotifierProvider.autoDispose<DatabaseOpener, AsyncValue<Database>>((
+      ref,
+    ) {
+      final identityNumber = ref.watch(
+        authAccountProvider.select((value) => value?.identityNumber),
+      );
 
-    if (identityNumber == null) return DatabaseOpener();
+      if (identityNumber == null) return DatabaseOpener();
 
-    return DatabaseOpener.open(identityNumber);
-  },
-);
+      return DatabaseOpener.open(identityNumber);
+    });
 
 extension _DatabaseExt on MixinDatabase {
   Future<void> doInitVerify() =>
@@ -38,26 +39,28 @@ class DatabaseOpener extends DistinctStateNotifier<AsyncValue<Database>> {
   final Lock _lock = Lock();
 
   Future<void> open() => _lock.synchronized(() async {
-        i('connect to database: $identityNumber');
-        if (state.hasValue) {
-          e('database already opened');
-          return;
-        }
-        try {
-          final mixinDatabase =
-              await connectToDatabase(identityNumber, fromMainIsolate: true);
-          final db = Database(
-            mixinDatabase,
-            await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
-          );
-          // Do a database query, to ensure database has properly initialized.
-          await mixinDatabase.doInitVerify();
-          state = AsyncValue.data(db);
-        } catch (error, stacktrace) {
-          e('failed to open database: $error, $stacktrace');
-          state = AsyncValue.error(error, stacktrace);
-        }
-      });
+    i('connect to database: $identityNumber');
+    if (state.hasValue) {
+      e('database already opened');
+      return;
+    }
+    try {
+      final mixinDatabase = await connectToDatabase(
+        identityNumber,
+        fromMainIsolate: true,
+      );
+      final db = Database(
+        mixinDatabase,
+        await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
+      );
+      // Do a database query, to ensure database has properly initialized.
+      await mixinDatabase.doInitVerify();
+      state = AsyncValue.data(db);
+    } catch (error, stacktrace) {
+      e('failed to open database: $error, $stacktrace');
+      state = AsyncValue.error(error, stacktrace);
+    }
+  });
 
   @override
   Future<void> dispose() async {

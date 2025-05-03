@@ -62,15 +62,16 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
     });
 
     isolate = await Isolate.spawn(
-        _download,
-        _AttachmentDownloadJobOption(
-          path: path,
-          url: url,
-          keys: keys,
-          digest: digest,
-          sendPort: _receivePort.sendPort,
-          proxy: proxy,
-        ));
+      _download,
+      _AttachmentDownloadJobOption(
+        path: path,
+        url: url,
+        keys: keys,
+        digest: digest,
+        sendPort: _receivePort.sendPort,
+        proxy: proxy,
+      ),
+    );
 
     return completer.future;
   }
@@ -99,23 +100,23 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
       options.url,
       options.path,
       options: Options(
-        headers: {
-          HttpHeaders.contentTypeHeader: 'application/octet-stream',
-        },
+        headers: {HttpHeaders.contentTypeHeader: 'application/octet-stream'},
       ),
       transformStream: (Stream<Uint8List> stream, int total) {
         var _stream = stream.cast<List<int>>();
         if (options.keys != null && options.digest != null) {
           _stream = _stream.decrypt(options.keys!, options.digest!, total);
         }
-        return _stream.handleError((error, stacktrace) {
-          e('download error: $error, stack: $stacktrace');
-          throw Exception(error);
-        }).map((event) {
-          received += event.length;
-          options.sendPort.send((received, total));
-          return event;
-        });
+        return _stream
+            .handleError((error, stacktrace) {
+              e('download error: $error, stack: $stacktrace');
+              throw Exception(error);
+            })
+            .map((event) {
+              received += event.length;
+              options.sendPort.send((received, total));
+              return event;
+            });
       },
       cancelToken: cancelToken,
     );
@@ -136,7 +137,7 @@ extension _AttachmentDownloadExtension on Dio {
     String urlPath,
     String savePath, {
     required Stream<List<int>> Function(Stream<Uint8List> stream, int total)
-        transformStream,
+    transformStream,
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
     bool deleteOnError = true,
@@ -189,14 +190,16 @@ extension _AttachmentDownloadExtension on Dio {
 
     var compressed = false;
     var total = 0;
-    final contentEncoding =
-        response.headers.value(Headers.contentEncodingHeader);
+    final contentEncoding = response.headers.value(
+      Headers.contentEncodingHeader,
+    );
     if (contentEncoding != null) {
       compressed = ['gzip', 'deflate', 'compress'].contains(contentEncoding);
     }
-    total = lengthHeader == Headers.contentLengthHeader && compressed
-        ? -1
-        : int.parse(response.headers.value(lengthHeader) ?? '-1');
+    total =
+        lengthHeader == Headers.contentLengthHeader && compressed
+            ? -1
+            : int.parse(response.headers.value(lengthHeader) ?? '-1');
 
     // Stream<Uint8List>
     final stream = transformStream(response.data!.stream, total);
@@ -217,20 +220,24 @@ extension _AttachmentDownloadExtension on Dio {
       (data) {
         subscription.pause();
         // Write file asynchronously
-        asyncWrite = raf.writeFrom(data).then((_raf) {
-          raf = _raf;
-          if (cancelToken == null || !cancelToken.isCancelled) {
-            subscription.resume();
-          }
-        }).catchError((Object err, StackTrace? stackTrace) async {
-          try {
-            await subscription.cancel();
-          } finally {
-            completer.completeError(
-                // ignore: invalid_use_of_internal_member
-                DioMixin.assureDioException(err, response.requestOptions));
-          }
-        });
+        asyncWrite = raf
+            .writeFrom(data)
+            .then((_raf) {
+              raf = _raf;
+              if (cancelToken == null || !cancelToken.isCancelled) {
+                subscription.resume();
+              }
+            })
+            .catchError((Object err, StackTrace? stackTrace) async {
+              try {
+                await subscription.cancel();
+              } finally {
+                completer.completeError(
+                  // ignore: invalid_use_of_internal_member
+                  DioMixin.assureDioException(err, response.requestOptions),
+                );
+              }
+            });
       },
       onDone: () async {
         try {
@@ -239,11 +246,10 @@ extension _AttachmentDownloadExtension on Dio {
           await raf.close();
           completer.complete(response);
         } catch (e) {
-          // ignore: invalid_use_of_internal_member
-          completer.completeError(DioMixin.assureDioException(
-            e,
-            response.requestOptions,
-          ));
+          completer.completeError(
+            // ignore: invalid_use_of_internal_member
+            DioMixin.assureDioException(e, response.requestOptions),
+          );
         }
       },
       onError: (Object e, stack) async {
@@ -251,8 +257,9 @@ extension _AttachmentDownloadExtension on Dio {
           await _closeAndDelete();
         } finally {
           completer.completeError(
-              // ignore: invalid_use_of_internal_member
-              DioMixin.assureDioException(e, response.requestOptions));
+            // ignore: invalid_use_of_internal_member
+            DioMixin.assureDioException(e, response.requestOptions),
+          );
         }
       },
       cancelOnError: true,
@@ -267,25 +274,23 @@ extension _AttachmentDownloadExtension on Dio {
         response.requestOptions.receiveTimeout?.inMilliseconds;
     if (receiveTimeout != null && receiveTimeout > 0) {
       future = future
-          .timeout(Duration(
-        milliseconds: receiveTimeout,
-      ))
+          .timeout(Duration(milliseconds: receiveTimeout))
           .catchError((err, s) async {
-        await subscription.cancel();
-        await _closeAndDelete();
-        if (err is TimeoutException) {
-          // ignore: only_throw_errors
-          throw DioException(
-            requestOptions: response.requestOptions,
-            error: 'Receiving data timeout[${receiveTimeout}ms]',
-            type: DioExceptionType.receiveTimeout,
-          );
-        } else {
-          w('download error: $err, stack: $s');
-          // ignore: throw_of_invalid_type
-          throw err;
-        }
-      });
+            await subscription.cancel();
+            await _closeAndDelete();
+            if (err is TimeoutException) {
+              // ignore: only_throw_errors
+              throw DioException(
+                requestOptions: response.requestOptions,
+                error: 'Receiving data timeout[${receiveTimeout}ms]',
+                type: DioExceptionType.receiveTimeout,
+              );
+            } else {
+              w('download error: $err, stack: $s');
+              // ignore: throw_of_invalid_type
+              throw err;
+            }
+          });
     }
     // ignore: invalid_use_of_internal_member
     return DioMixin.listenCancelForAsyncTask(cancelToken, future);

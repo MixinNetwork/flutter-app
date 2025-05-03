@@ -9,17 +9,19 @@ class WindowShortcuts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FocusableActionDetector(
-        shortcuts: const {
-          SingleActivator(LogicalKeyboardKey.keyW, meta: true):
-              _CloseWindowIntent()
+    shortcuts: const {
+      SingleActivator(LogicalKeyboardKey.keyW, meta: true):
+          _CloseWindowIntent(),
+    },
+    actions: {
+      _CloseWindowIntent: CallbackAction(
+        onInvoke: (intent) {
+          windowManager.hide();
         },
-        actions: {
-          _CloseWindowIntent: CallbackAction(onInvoke: (intent) {
-            windowManager.hide();
-          })
-        },
-        child: child,
-      );
+      ),
+    },
+    child: child,
+  );
 }
 
 class _CloseWindowIntent extends Intent {

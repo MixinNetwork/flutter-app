@@ -25,17 +25,18 @@ class StickerAlbumPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final album = useMemoizedStream(
+    final album =
+        useMemoizedStream(
           () => context.database.stickerAlbumDao
               .album(albumId)
               .watchSingleWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.watchUpdateStickerStream(
-                albumIds: [albumId],
-              )
-            ],
-            duration: kVerySlowThrottleDuration,
-          ),
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateStickerStream(
+                    albumIds: [albumId],
+                  ),
+                ],
+                duration: kVerySlowThrottleDuration,
+              ),
           keys: [albumId],
         ).data ??
         this.album;
@@ -52,12 +53,7 @@ class StickerAlbumPage extends HookConsumerWidget {
     return Column(
       children: [
         _StickerAlbumHeader(album: album),
-        Expanded(
-          child: _StickerAlbumDetail(
-            album: album,
-            stickers: stickers,
-          ),
-        ),
+        Expanded(child: _StickerAlbumDetail(album: album, stickers: stickers)),
       ],
     );
   }
@@ -70,38 +66,39 @@ class _StickerAlbumHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MixinAppBar(
-        backgroundColor: Colors.transparent,
-        title: Text(album == null
-            ? context.l10n.stickerAlbumDetail
-            : (album?.name ?? '')),
-        leading: navigatorKey.currentState?.canPop() == true
-            ? null
-            : const SizedBox(),
-        actions: [
-          MixinCloseButton(
-            onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
-          ),
-        ],
-      );
+    backgroundColor: Colors.transparent,
+    title: Text(
+      album == null ? context.l10n.stickerAlbumDetail : (album?.name ?? ''),
+    ),
+    leading:
+        navigatorKey.currentState?.canPop() == true ? null : const SizedBox(),
+    actions: [
+      MixinCloseButton(
+        onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+      ),
+    ],
+  );
 }
 
 class _StickerAlbumDetail extends HookConsumerWidget {
-  const _StickerAlbumDetail({
-    required this.album,
-    this.stickers,
-  });
+  const _StickerAlbumDetail({required this.album, this.stickers});
 
   final StickerAlbum album;
   final List<Sticker>? stickers;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stickers = useMemoizedFuture(() async {
-          if (this.stickers != null) return this.stickers;
-          return context.database.stickerDao
-              .stickerByAlbumId(album.albumId)
-              .get();
-        }, <Sticker>[], keys: [album.albumId]).data ??
+    final stickers =
+        useMemoizedFuture(
+          () async {
+            if (this.stickers != null) return this.stickers;
+            return context.database.stickerDao
+                .stickerByAlbumId(album.albumId)
+                .get();
+          },
+          <Sticker>[],
+          keys: [album.albumId],
+        ).data ??
         [];
     return Stack(
       fit: StackFit.expand,
@@ -133,16 +130,20 @@ class _StickerAlbumDetail extends HookConsumerWidget {
               children: [
                 const Spacer(),
                 MixinButton(
-                  backgroundColor: album.added == true
-                      ? context.theme.red
-                      : context.theme.accent,
+                  backgroundColor:
+                      album.added == true
+                          ? context.theme.red
+                          : context.theme.accent,
                   child: Text(
                     album.added == true
                         ? context.l10n.removeStickers
                         : context.l10n.addStickers,
                   ),
-                  onTap: () => context.database.stickerAlbumDao
-                      .updateAdded(album.albumId, !(album.added == true)),
+                  onTap:
+                      () => context.database.stickerAlbumDao.updateAdded(
+                        album.albumId,
+                        !(album.added == true),
+                      ),
                 ),
                 const SizedBox(height: 40),
               ],
@@ -155,28 +156,26 @@ class _StickerAlbumDetail extends HookConsumerWidget {
 }
 
 class _StickerAlbumDetailBody extends StatelessWidget {
-  const _StickerAlbumDetailBody({
-    required this.stickers,
-  });
+  const _StickerAlbumDetailBody({required this.stickers});
 
   final List<Sticker> stickers;
 
   @override
   Widget build(BuildContext context) => SliverPadding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 8,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => StickerItem(
-              assetType: stickers[index].assetType,
-              assetUrl: stickers[index].assetUrl,
-            ),
-            childCount: stickers.length,
-          ),
+    padding: const EdgeInsets.symmetric(horizontal: 24),
+    sliver: SliverGrid(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 8,
+      ),
+      delegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) => StickerItem(
+          assetType: stickers[index].assetType,
+          assetUrl: stickers[index].assetUrl,
         ),
-      );
+        childCount: stickers.length,
+      ),
+    ),
+  );
 }

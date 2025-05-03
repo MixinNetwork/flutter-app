@@ -16,51 +16,55 @@ import 'action_card_data.dart';
 
 class ActionsCardMessage extends StatelessWidget {
   ActionsCardMessage({required this.data, super.key})
-      : assert(data.isActionsCard);
+    : assert(data.isActionsCard);
 
   final AppCardData data;
 
   @override
-  Widget build(BuildContext context) =>
-      LayoutBuilder(builder: (context, constraints) {
-        final width = (constraints.maxWidth * 0.5).clamp(320.0, 375.0);
-        return MessageBubble(
-          showBubble: false,
-          padding: EdgeInsets.zero,
-          includeNip: true,
-          child: Column(
-            children: [
-              _Bubble(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: width, minWidth: width),
-                  child: MessageSelectionArea(
-                    child: ActionsCardBody(
-                      data: data,
-                      description: MessageTextWidget(
-                        enableSelection: false,
-                        color: context.theme.text,
-                        fontSize: context.messageStyle.primaryFontSize,
-                        content: data.description,
-                      ),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final width = (constraints.maxWidth * 0.5).clamp(320.0, 375.0);
+      return MessageBubble(
+        showBubble: false,
+        padding: EdgeInsets.zero,
+        includeNip: true,
+        child: Column(
+          children: [
+            _Bubble(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: width, minWidth: width),
+                child: MessageSelectionArea(
+                  child: ActionsCardBody(
+                    data: data,
+                    description: MessageTextWidget(
+                      enableSelection: false,
+                      color: context.theme.text,
+                      fontSize: context.messageStyle.primaryFontSize,
+                      content: data.description,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              HookBuilder(
-                builder: (context) => MessageBubbleNipPadding(
-                  currentUser: useIsCurrentUser(),
-                  child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxWidth: width, minWidth: width),
-                    child: _Actions(actions: data.actions),
+            ),
+            const SizedBox(height: 8),
+            HookBuilder(
+              builder:
+                  (context) => MessageBubbleNipPadding(
+                    currentUser: useIsCurrentUser(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: width,
+                        minWidth: width,
+                      ),
+                      child: _Actions(actions: data.actions),
+                    ),
                   ),
-                ),
-              )
-            ],
-          ),
-        );
-      });
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _Bubble extends HookWidget {
@@ -71,16 +75,10 @@ class _Bubble extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final isCurrentUser = useIsCurrentUser();
-    final clipper = BubbleClipper(
-      currentUser: isCurrentUser,
-      showNip: true,
-    );
+    final clipper = BubbleClipper(currentUser: isCurrentUser, showNip: true);
     final bubbleColor = context.messageBubbleColor(isCurrentUser);
     return CustomPaint(
-      painter: BubblePainter(
-        color: bubbleColor,
-        clipper: clipper,
-      ),
+      painter: BubblePainter(color: bubbleColor, clipper: clipper),
       child: ClipPath(
         clipper: clipper,
         child: MessageBubbleNipPadding(
@@ -104,35 +102,32 @@ class ActionsCardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (data.coverUrl.isNotEmpty)
-            AspectRatio(
-              aspectRatio: 1,
-              child: MixinImage.network(data.coverUrl),
-            )
-          else if (data.cover != null)
-            _CoverWidget(cover: data.cover!),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: CustomText(
-              data.title,
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: context.messageStyle.primaryFontSize,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (data.coverUrl.isNotEmpty)
+        AspectRatio(aspectRatio: 1, child: MixinImage.network(data.coverUrl))
+      else if (data.cover != null)
+        _CoverWidget(cover: data.cover!),
+      const SizedBox(height: 10),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: CustomText(
+          data.title,
+          style: TextStyle(
+            color: context.theme.text,
+            fontSize: context.messageStyle.primaryFontSize,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: description,
-          ),
-          const SizedBox(height: 10),
-        ],
-      );
+        ),
+      ),
+      const SizedBox(height: 8),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: description,
+      ),
+      const SizedBox(height: 10),
+    ],
+  );
 }
 
 class _CoverWidget extends StatelessWidget {
@@ -162,6 +157,6 @@ class _Actions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ActionButtonLayout(
-        children: actions.map((e) => ActionMessageButton(action: e)).toList(),
-      );
+    children: actions.map((e) => ActionMessageButton(action: e)).toList(),
+  );
 }

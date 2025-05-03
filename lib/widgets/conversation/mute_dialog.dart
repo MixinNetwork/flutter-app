@@ -17,28 +17,30 @@ class MuteDialog extends HookConsumerWidget {
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            (context.l10n.oneHour, 1 * 60 * 60),
-            (context.l10n.hour(8, 8), 8 * 60 * 60),
-            (context.l10n.oneWeek, 7 * 24 * 60 * 60),
-            (context.l10n.oneYear, 365 * 24 * 60 * 60),
-          ]
-              .map(
-                (e) => RadioItem<int>(
-                  title: Text(e.$1),
-                  groupValue: result.value,
-                  value: e.$2,
-                  onChanged: (int? value) => result.value = value,
-                ),
-              )
-              .toList(),
+          children:
+              [
+                    (context.l10n.oneHour, 1 * 60 * 60),
+                    (context.l10n.hour(8, 8), 8 * 60 * 60),
+                    (context.l10n.oneWeek, 7 * 24 * 60 * 60),
+                    (context.l10n.oneYear, 365 * 24 * 60 * 60),
+                  ]
+                  .map(
+                    (e) => RadioItem<int>(
+                      title: Text(e.$1),
+                      groupValue: result.value,
+                      value: e.$2,
+                      onChanged: (int? value) => result.value = value,
+                    ),
+                  )
+                  .toList(),
         ),
       ),
       actions: [
         MixinButton(
-            backgroundTransparent: true,
-            onTap: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel)),
+          backgroundTransparent: true,
+          onTap: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
         MixinButton(
           onTap: () => Navigator.pop(context, result.value),
           child: Text(context.l10n.confirm),

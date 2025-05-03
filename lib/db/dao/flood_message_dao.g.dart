@@ -46,11 +46,13 @@ mixin _$FloodMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<DateTime> _getLastBlazeMessageCreatedAt() {
     return customSelect(
-        'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
-        variables: [],
-        readsFrom: {
-          floodMessages,
-        }).map((QueryRow row) =>
-        FloodMessages.$convertercreatedAt.fromSql(row.read<int>('created_at')));
+      'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
+      variables: [],
+      readsFrom: {floodMessages},
+    ).map(
+      (QueryRow row) => FloodMessages.$convertercreatedAt.fromSql(
+        row.read<int>('created_at'),
+      ),
+    );
   }
 }

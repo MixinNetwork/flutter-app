@@ -21,10 +21,10 @@ class PropertyStorage extends ChangeNotifier {
         .where((event) => event is _PropertyChangedEvent)
         .cast<_PropertyChangedEvent>()
         .listen((event) {
-      if (event.group == group) {
-        _loadProperties();
-      }
-    });
+          if (event.group == group) {
+            _loadProperties();
+          }
+        });
   }
 
   Future<void> _loadProperties() async {

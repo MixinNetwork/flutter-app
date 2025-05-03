@@ -75,7 +75,7 @@ class DecryptMessage extends Injector {
   }
 
   final void Function(WorkerIsolateEventType event, [dynamic argument])
-      _isolateEventSender;
+  _isolateEventSender;
 
   String? _conversationId;
   late final SignalProtocol _signalProtocol;
@@ -106,26 +106,33 @@ class DecryptMessage extends Injector {
     if (id != null) {
       return true;
     }
-    final messageHistory =
-        await database.messageHistoryDao.findMessageHistoryById(messageId);
+    final messageHistory = await database.messageHistoryDao
+        .findMessageHistoryById(messageId);
     return messageHistory != null;
   }
 
   Future<void> _insertMessage(Message message, BlazeMessageData data) async {
-    await database.messageDao.insert(message, accountId,
-        silent: data.silent, expireIn: data.expireIn);
+    await database.messageDao.insert(
+      message,
+      accountId,
+      silent: data.silent,
+      expireIn: data.expireIn,
+    );
     unawaited(database.ftsDatabase.insertFts(message));
     if (data.expireIn > 0 && message.userId == accountId) {
       final expiredAt =
           data.createdAt.millisecondsSinceEpoch ~/ 1000 + data.expireIn;
-      await database.expiredMessageDao
-          .updateMessageExpireAt(expiredAt, message.messageId);
+      await database.expiredMessageDao.updateMessageExpireAt(
+        expiredAt,
+        message.messageId,
+      );
     }
   }
 
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
-        jsonDecode(floodMessage.data) as Map<String, dynamic>);
+      jsonDecode(floodMessage.data) as Map<String, dynamic>,
+    );
     d('DecryptMessage process data: ${data.toJson()}');
     if (await isExistMessage(data.messageId)) {
       await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
@@ -152,8 +159,9 @@ class DecryptMessage extends Injector {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
-          await database.messageHistoryDao
-              .insert(MessagesHistoryData(messageId: data.messageId));
+          await database.messageHistoryDao.insert(
+            MessagesHistoryData(messageId: data.messageId),
+          );
         }
         await _processSignalMessage(data);
       } else if (category.isPlain) {
@@ -194,10 +202,7 @@ class DecryptMessage extends Injector {
       _remoteStatus = pendingMessageStatus;
     }
 
-    await _updateRemoteMessageStatus(
-      messageId,
-      _remoteStatus,
-    );
+    await _updateRemoteMessageStatus(messageId, _remoteStatus);
 
     await database.floodMessageDao.deleteFloodMessage(floodMessage);
   }
@@ -207,54 +212,72 @@ class DecryptMessage extends Injector {
     try {
       final composeMessageData = _signalProtocol.decodeMessageData(data.data);
       await _signalProtocol.decrypt(
-          data.conversationId,
-          data.senderId,
-          composeMessageData.keyType,
-          composeMessageData.cipher,
-          data.category?.toString() ?? '',
-          data.sessionId, (plaintext) async {
-        if (data.category != MessageCategory.signalKey) {
-          final plain = utf8.decode(plaintext, allowMalformed: true);
-          if (composeMessageData.resendMessageId != null) {
-            await _processReDecryptMessage(
-                data, composeMessageData.resendMessageId!, plain);
-            await database.messageHistoryDao
-                .insert(MessagesHistoryData(messageId: data.messageId));
-          } else {
-            try {
-              await _processDecryptSuccess(data, plain);
-            } on Exception catch (e) {
-              w('_processDecryptSuccess ${data.messageId}, $e');
-              await _insertInvalidMessage(data);
+        data.conversationId,
+        data.senderId,
+        composeMessageData.keyType,
+        composeMessageData.cipher,
+        data.category?.toString() ?? '',
+        data.sessionId,
+        (plaintext) async {
+          if (data.category != MessageCategory.signalKey) {
+            final plain = utf8.decode(plaintext, allowMalformed: true);
+            if (composeMessageData.resendMessageId != null) {
+              await _processReDecryptMessage(
+                data,
+                composeMessageData.resendMessageId!,
+                plain,
+              );
+              await database.messageHistoryDao.insert(
+                MessagesHistoryData(messageId: data.messageId),
+              );
+            } else {
+              try {
+                await _processDecryptSuccess(data, plain);
+              } on Exception catch (e) {
+                w('_processDecryptSuccess ${data.messageId}, $e');
+                await _insertInvalidMessage(data);
+              }
             }
           }
-        }
 
-        final address = SignalProtocolAddress(data.senderId, deviceId);
-        final status = (await SignalDatabase.get.ratchetSenderKeyDao
-                .getRatchetSenderKey(data.conversationId, address.toString()))
-            ?.status;
-        if (status == RatchetStatus.requesting.name) {
-          await _requestResendMessage(
-              data.conversationId, data.senderId, data.sessionId);
-        }
-      });
+          final address = SignalProtocolAddress(data.senderId, deviceId);
+          final status =
+              (await SignalDatabase.get.ratchetSenderKeyDao.getRatchetSenderKey(
+                data.conversationId,
+                address.toString(),
+              ))?.status;
+          if (status == RatchetStatus.requesting.name) {
+            await _requestResendMessage(
+              data.conversationId,
+              data.senderId,
+              data.sessionId,
+            );
+          }
+        },
+      );
     } on Exception catch (e) {
       i('decrypt failed ${data.messageId}, $e');
       await _refreshSignalKeys(data.conversationId);
       if (data.category == MessageCategory.signalKey) {
         await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
-            data.conversationId,
-            SignalProtocolAddress(data.senderId, deviceId).toString());
+          data.conversationId,
+          SignalProtocolAddress(data.senderId, deviceId).toString(),
+        );
       } else {
         await _insertFailedMessage(data);
         final address = SignalProtocolAddress(data.senderId, deviceId);
-        final status = (await SignalDatabase.get.ratchetSenderKeyDao
-                .getRatchetSenderKey(data.conversationId, address.toString()))
-            ?.status;
+        final status =
+            (await SignalDatabase.get.ratchetSenderKeyDao.getRatchetSenderKey(
+              data.conversationId,
+              address.toString(),
+            ))?.status;
         if (status == null) {
-          await _requestResendKey(data.conversationId, data.senderId,
-              data.messageId, data.sessionId);
+          await _requestResendKey(
+            data.conversationId,
+            data.senderId,
+            data.messageId,
+            data.sessionId,
+          );
         }
       }
     }
@@ -263,7 +286,8 @@ class DecryptMessage extends Injector {
   Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
       final plainJsonMessage = PlainJsonMessage.fromJson(
-          _jsonDecode(data.data) as Map<String, dynamic>);
+        _jsonDecode(data.data) as Map<String, dynamic>,
+      );
       if (plainJsonMessage.action == kAcknowledgeMessageReceipts) {
         if (plainJsonMessage.ackMessages?.isNotEmpty != true) {
           return;
@@ -273,8 +297,12 @@ class DecryptMessage extends Injector {
         await _processResendMessage(data, plainJsonMessage);
       } else if (plainJsonMessage.action == kResendKey) {
         if (await _signalProtocol.containsUserSession(data.userId)) {
-          unawaited(_sender.sendProcessSignalKey(
-              data, ProcessSignalKeyAction.resendKey));
+          unawaited(
+            _sender.sendProcessSignalKey(
+              data,
+              ProcessSignalKeyAction.resendKey,
+            ),
+          );
         }
       } else if (plainJsonMessage.action == kDeviceTransfer) {
         final json =
@@ -286,8 +314,9 @@ class DecryptMessage extends Injector {
         i('on device transfer command: $command');
         _deviceTransfer?.handleRemoteCommand(command);
       }
-      await database.messageHistoryDao
-          .insert(MessagesHistoryData(messageId: data.messageId));
+      await database.messageHistoryDao.insert(
+        MessagesHistoryData(messageId: data.messageId),
+      );
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
         data.category == MessageCategory.plainVideo ||
@@ -306,7 +335,10 @@ class DecryptMessage extends Injector {
   Future<void> _processEncryptedMessage(BlazeMessageData data) async {
     try {
       final decryptedContent = _encryptedProtocol.decryptMessage(
-          _privateKey, Uuid.parse(_sessionId), base64Decode(data.data));
+        _privateKey,
+        Uuid.parse(_sessionId),
+        base64Decode(data.data),
+      );
       if (decryptedContent == null) {
         await _insertInvalidMessage(data);
       } else {
@@ -324,14 +356,17 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processResendMessage(
-      BlazeMessageData data, PlainJsonMessage plainData) async {
+    BlazeMessageData data,
+    PlainJsonMessage plainData,
+  ) async {
     final messages = plainData.messages;
     if (messages == null) {
       return;
     }
-    final p = await database.participantDao
-        .participantById(data.conversationId, data.userId)
-        .getSingleOrNull();
+    final p =
+        await database.participantDao
+            .participantById(data.conversationId, data.userId)
+            .getSingleOrNull();
     if (p == null) {
       return;
     }
@@ -345,12 +380,15 @@ class DecryptMessage extends Injector {
           .findMessageByMessageIdAndUserId(id, accountId);
       if (needResendMessage == null ||
           needResendMessage.category == MessageCategory.messageRecall) {
-        await database.resendSessionMessageDao.insert(ResendSessionMessage(
+        await database.resendSessionMessageDao.insert(
+          ResendSessionMessage(
             messageId: id,
             userId: data.userId,
             sessionId: data.sessionId,
             status: 0,
-            createdAt: DateTime.now()));
+            createdAt: DateTime.now(),
+          ),
+        );
         continue;
       }
       if (!needResendMessage.category.isSignal) {
@@ -359,60 +397,72 @@ class DecryptMessage extends Injector {
       if (p.createdAt.isAfter(needResendMessage.createdAt)) {
         continue;
       }
-      await database.resendSessionMessageDao.insert(ResendSessionMessage(
+      await database.resendSessionMessageDao.insert(
+        ResendSessionMessage(
           messageId: id,
           userId: data.userId,
           sessionId: data.sessionId,
           status: 1,
-          createdAt: DateTime.now()));
-      await _sendingJob.add(await database.jobDao.createSendingJob(
-        id,
-        data.conversationId,
-        expireIn: data.expireIn,
-      ));
+          createdAt: DateTime.now(),
+        ),
+      );
+      await _sendingJob.add(
+        await database.jobDao.createSendingJob(
+          id,
+          data.conversationId,
+          expireIn: data.expireIn,
+        ),
+      );
     }
   }
 
   Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
-          _jsonDecode(data.data) as Map<String, dynamic>);
+        _jsonDecode(data.data) as Map<String, dynamic>,
+      );
       await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
       final systemMessage = SystemUserMessage.fromJson(
-          _jsonDecode(data.data) as Map<String, dynamic>);
+        _jsonDecode(data.data) as Map<String, dynamic>,
+      );
       await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
       final systemMessage = SystemCircleMessage.fromJson(
-          _jsonDecode(data.data) as Map<String, dynamic>);
+        _jsonDecode(data.data) as Map<String, dynamic>,
+      );
       await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
-          _jsonDecode(data.data) as Map<String, dynamic>);
+        _jsonDecode(data.data) as Map<String, dynamic>,
+      );
       await _processSystemSnapshotMessage(data, systemSnapshot);
     } else if (data.category == MessageCategory.systemSafeSnapshot) {
       final json = _jsonDecode(data.data) as Map<String, dynamic>;
 
       final systemSnapshot = db.SafeSnapshot.fromJson(json);
       String? depositHash;
-      if (json
-          case {
-            'deposit_hash': final String hash,
-          }) {
+      if (json case {'deposit_hash': final String hash}) {
         depositHash = hash;
       }
       await _processSystemSafeSnapshotMessage(
-          data, systemSnapshot, depositHash);
+        data,
+        systemSnapshot,
+        depositHash,
+      );
     } else if (data.category == MessageCategory.systemSafeInscription) {
       final json = _jsonDecode(data.data);
-      final inscription =
-          db.SafeSnapshot.fromJson(json as Map<String, dynamic>);
+      final inscription = db.SafeSnapshot.fromJson(
+        json as Map<String, dynamic>,
+      );
       await _processSystemSafeInscriptionMessage(data, inscription);
     }
   }
 
   Future<void> _processApp(BlazeMessageData data) async {
-    d('data.conversationId: ${data.conversationId}, _conversationId: $_conversationId');
+    d(
+      'data.conversationId: ${data.conversationId}, _conversationId: $_conversationId',
+    );
     if (data.category == MessageCategory.appButtonGroup) {
       await _processAppButton(data);
     } else if (data.category == MessageCategory.appCard) {
@@ -442,8 +492,9 @@ class DecryptMessage extends Injector {
   Future<void> _processAppCard(BlazeMessageData data) async {
     await refreshUsers(<String>[data.userId]);
     final content = _decode(data.data);
-    final appCard =
-        AppCard.fromJson(jsonDecode(content) as Map<String, dynamic>);
+    final appCard = AppCard.fromJson(
+      jsonDecode(content) as Map<String, dynamic>,
+    );
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
@@ -463,24 +514,30 @@ class DecryptMessage extends Injector {
 
   Future<void> _processPinMessage(BlazeMessageData data) async {
     final pinMessage = PinMessagePayload.fromJson(
-        _jsonDecode(data.data) as Map<String, dynamic>);
+      _jsonDecode(data.data) as Map<String, dynamic>,
+    );
 
     if (pinMessage.action == PinMessagePayloadAction.pin) {
-      await futureForEachIndexed(pinMessage.messageIds,
-          (index, messageId) async {
-        final message =
-            await database.messageDao.findMessageByMessageId(messageId);
+      await futureForEachIndexed(pinMessage.messageIds, (
+        index,
+        messageId,
+      ) async {
+        final message = await database.messageDao.findMessageByMessageId(
+          messageId,
+        );
         if (message == null) return;
         final pinMessageMinimal = PinMessageMinimal(
           type: message.category,
           messageId: message.messageId,
           content: message.category.isText ? message.content : null,
         );
-        await database.pinMessageDao.insert(PinMessage(
-          messageId: messageId,
-          conversationId: message.conversationId,
-          createdAt: data.createdAt,
-        ));
+        await database.pinMessageDao.insert(
+          PinMessage(
+            messageId: messageId,
+            conversationId: message.conversationId,
+            createdAt: data.createdAt,
+          ),
+        );
         await database.messageDao.insert(
           Message(
             messageId: index == 0 ? data.messageId : const Uuid().v4(),
@@ -503,18 +560,23 @@ class DecryptMessage extends Injector {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
     }
 
-    await database.messageHistoryDao
-        .insert(MessagesHistoryData(messageId: data.messageId));
+    await database.messageHistoryDao.insert(
+      MessagesHistoryData(messageId: data.messageId),
+    );
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
-    final recallMessage =
-        RecallMessage.fromJson(_jsonDecode(data.data) as Map<String, dynamic>);
-    final message = await database.messageDao
-        .findMessageByMessageId(recallMessage.messageId);
+    final recallMessage = RecallMessage.fromJson(
+      _jsonDecode(data.data) as Map<String, dynamic>,
+    );
+    final message = await database.messageDao.findMessageByMessageId(
+      recallMessage.messageId,
+    );
 
-    await database.messageDao
-        .recallMessage(data.conversationId, recallMessage.messageId);
+    await database.messageDao.recallMessage(
+      data.conversationId,
+      recallMessage.messageId,
+    );
 
     unawaited(database.ftsDatabase.deleteByMessageId(recallMessage.messageId));
 
@@ -523,9 +585,7 @@ class DecryptMessage extends Injector {
         if (message != null && message.category.isAttachment) {
           _isolateEventSender(
             WorkerIsolateEventType.requestDownloadAttachment,
-            AttachmentCancelRequest(
-              messageId: message.messageId,
-            ),
+            AttachmentCancelRequest(messageId: message.messageId),
           );
           if (message.mediaUrl?.isNotEmpty ?? false) {
             final file = File(message.mediaUrl!);
@@ -537,32 +597,42 @@ class DecryptMessage extends Injector {
         }
       })(),
       (() async {
-        final quoteMessage = await database.messageDao
-            .findMessageItemById(data.conversationId, recallMessage.messageId);
+        final quoteMessage = await database.messageDao.findMessageItemById(
+          data.conversationId,
+          recallMessage.messageId,
+        );
         if (quoteMessage != null) {
           await database.messageDao.updateQuoteContentByQuoteId(
-              data.conversationId,
-              recallMessage.messageId,
-              quoteMessage.toJson());
+            data.conversationId,
+            recallMessage.messageId,
+            quoteMessage.toJson(),
+          );
         }
       })(),
-      database.messageMentionDao.deleteMessageMention(MessageMention(
-        messageId: recallMessage.messageId,
-        conversationId: data.conversationId,
-      )),
-      database.messageHistoryDao
-          .insert(MessagesHistoryData(messageId: data.messageId)),
+      database.messageMentionDao.deleteMessageMention(
+        MessageMention(
+          messageId: recallMessage.messageId,
+          conversationId: data.conversationId,
+        ),
+      ),
+      database.messageHistoryDao.insert(
+        MessagesHistoryData(messageId: data.messageId),
+      ),
     ]);
   }
 
   Future<Message> _generateMessage(
-      BlazeMessageData data, MessageGenerator generator) async {
+    BlazeMessageData data,
+    MessageGenerator generator,
+  ) async {
     if (data.quoteMessageId == null || (data.quoteMessageId?.isEmpty ?? true)) {
       return generator(null);
     }
 
-    final quoteMessage = await database.messageDao
-        .findMessageItemById(data.conversationId, data.quoteMessageId!);
+    final quoteMessage = await database.messageDao.findMessageItemById(
+      data.conversationId,
+      data.quoteMessageId!,
+    );
 
     return quoteMessage != null ? generator(quoteMessage) : generator(null);
   }
@@ -574,13 +644,15 @@ class DecryptMessage extends Injector {
     await refreshUsers(<String>[data.senderId]);
 
     if (data.category.isText) {
-      final plain = data.category == MessageCategory.signalText ||
-              data.category == MessageCategory.encryptedText
-          ? plainText
-          : _decode(plainText);
+      final plain =
+          data.category == MessageCategory.signalText ||
+                  data.category == MessageCategory.encryptedText
+              ? plainText
+              : _decode(plainText);
       QuoteMessageItem? _quoteContent;
-      final message =
-          await _generateMessage(data, (QuoteMessageItem? quoteContent) {
+      final message = await _generateMessage(data, (
+        QuoteMessageItem? quoteContent,
+      ) {
         _quoteContent = quoteContent;
         return Message(
           messageId: data.messageId,
@@ -607,181 +679,217 @@ class DecryptMessage extends Injector {
     } else if (data.category.isImage) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecode(plain) as Map<String, dynamic>);
-      final content = await jsonEncodeWithIsolate(AttachmentExtra(
-              attachmentId: attachment.attachmentId,
-              messageId: data.messageId,
-              shareable: attachment.shareable)
-          .toJson());
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
+      final content = await jsonEncodeWithIsolate(
+        AttachmentExtra(
+          attachmentId: attachment.attachmentId,
+          messageId: data.messageId,
+          shareable: attachment.shareable,
+        ).toJson(),
+      );
       final message = await _generateMessage(
-          data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: content,
-              mediaMimeType: attachment.mimeType,
-              mediaSize: attachment.size,
-              mediaWidth: attachment.width,
-              mediaHeight: attachment.height,
-              thumbImage: attachment.thumbnail,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.canceled,
-              caption: attachment.caption,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+        data,
+        (QuoteMessageItem? quoteContent) => Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.senderId,
+          category: data.category!,
+          content: content,
+          mediaMimeType: attachment.mimeType,
+          mediaSize: attachment.size,
+          mediaWidth: attachment.width,
+          mediaHeight: attachment.height,
+          thumbImage: attachment.thumbnail,
+          mediaKey: attachment.key as String?,
+          mediaDigest: attachment.digest as String?,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.canceled,
+          caption: attachment.caption,
+          quoteMessageId: data.quoteMessageId,
+          quoteContent: quoteContent?.toJson(),
+        ),
+      );
       await _insertMessage(message, data);
-      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDownloadRequest(message));
+      _isolateEventSender(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentDownloadRequest(message),
+      );
     } else if (data.category.isVideo) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecode(plain) as Map<String, dynamic>);
-      final content = await jsonEncodeWithIsolate(AttachmentExtra(
-              attachmentId: attachment.attachmentId,
-              messageId: data.messageId,
-              shareable: attachment.shareable)
-          .toJson());
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
+      final content = await jsonEncodeWithIsolate(
+        AttachmentExtra(
+          attachmentId: attachment.attachmentId,
+          messageId: data.messageId,
+          shareable: attachment.shareable,
+        ).toJson(),
+      );
       final message = await _generateMessage(
-          data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: content,
-              name: attachment.name,
-              mediaMimeType: attachment.mimeType,
-              mediaDuration: attachment.duration.toString(),
-              mediaSize: attachment.size,
-              mediaWidth: attachment.width,
-              mediaHeight: attachment.height,
-              thumbImage: attachment.thumbnail,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.canceled,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+        data,
+        (QuoteMessageItem? quoteContent) => Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.senderId,
+          category: data.category!,
+          content: content,
+          name: attachment.name,
+          mediaMimeType: attachment.mimeType,
+          mediaDuration: attachment.duration.toString(),
+          mediaSize: attachment.size,
+          mediaWidth: attachment.width,
+          mediaHeight: attachment.height,
+          thumbImage: attachment.thumbnail,
+          mediaKey: attachment.key as String?,
+          mediaDigest: attachment.digest as String?,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.canceled,
+          quoteMessageId: data.quoteMessageId,
+          quoteContent: quoteContent?.toJson(),
+        ),
+      );
       await _insertMessage(message, data);
-      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDownloadRequest(message));
+      _isolateEventSender(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentDownloadRequest(message),
+      );
     } else if (data.category.isData) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecode(plain) as Map<String, dynamic>);
-      final content = await jsonEncodeWithIsolate(AttachmentExtra(
-              attachmentId: attachment.attachmentId,
-              messageId: data.messageId,
-              shareable: attachment.shareable)
-          .toJson());
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
+      final content = await jsonEncodeWithIsolate(
+        AttachmentExtra(
+          attachmentId: attachment.attachmentId,
+          messageId: data.messageId,
+          shareable: attachment.shareable,
+        ).toJson(),
+      );
       final message = await _generateMessage(
-          data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: content,
-              name: attachment.name,
-              mediaMimeType: attachment.mimeType,
-              mediaSize: attachment.size,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.canceled,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+        data,
+        (QuoteMessageItem? quoteContent) => Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.senderId,
+          category: data.category!,
+          content: content,
+          name: attachment.name,
+          mediaMimeType: attachment.mimeType,
+          mediaSize: attachment.size,
+          mediaKey: attachment.key as String?,
+          mediaDigest: attachment.digest as String?,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.canceled,
+          quoteMessageId: data.quoteMessageId,
+          quoteContent: quoteContent?.toJson(),
+        ),
+      );
       await _insertMessage(message, data);
-      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDownloadRequest(message));
+      _isolateEventSender(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentDownloadRequest(message),
+      );
     } else if (data.category.isAudio) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecode(plain) as Map<String, dynamic>);
-      final content = await jsonEncodeWithIsolate(AttachmentExtra(
-              attachmentId: attachment.attachmentId,
-              messageId: data.messageId,
-              shareable: attachment.shareable)
-          .toJson());
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
+      final content = await jsonEncodeWithIsolate(
+        AttachmentExtra(
+          attachmentId: attachment.attachmentId,
+          messageId: data.messageId,
+          shareable: attachment.shareable,
+        ).toJson(),
+      );
       final message = await _generateMessage(
-          data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: content,
-              name: attachment.name,
-              mediaMimeType: attachment.mimeType,
-              mediaSize: attachment.size,
-              mediaDuration: '${attachment.duration ?? 0}',
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              mediaWaveform: attachment.waveform as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.pending,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+        data,
+        (QuoteMessageItem? quoteContent) => Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.senderId,
+          category: data.category!,
+          content: content,
+          name: attachment.name,
+          mediaMimeType: attachment.mimeType,
+          mediaSize: attachment.size,
+          mediaDuration: '${attachment.duration ?? 0}',
+          mediaKey: attachment.key as String?,
+          mediaDigest: attachment.digest as String?,
+          mediaWaveform: attachment.waveform as String?,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.pending,
+          quoteMessageId: data.quoteMessageId,
+          quoteContent: quoteContent?.toJson(),
+        ),
+      );
       await _insertMessage(message, data);
-      _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDownloadRequest(message));
+      _isolateEventSender(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentDownloadRequest(message),
+      );
     } else if (data.category.isSticker) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
       final stickerMessage = StickerMessage.fromJson(
-          await jsonDecode(plain) as Map<String, dynamic>);
-      final sticker = await database.stickerDao
-          .sticker(stickerMessage.stickerId)
-          .getSingleOrNull();
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
+      final sticker =
+          await database.stickerDao
+              .sticker(stickerMessage.stickerId)
+              .getSingleOrNull();
       if (sticker == null ||
           (stickerMessage.albumId != null &&
               (sticker.albumId?.isEmpty ?? true))) {
-        await _updateStickerJob
-            .add(createUpdateStickerJob(stickerMessage.stickerId));
+        await _updateStickerJob.add(
+          createUpdateStickerJob(stickerMessage.stickerId),
+        );
       }
       final message = Message(
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.senderId,
+        category: data.category!,
+        content: plainText,
+        name: stickerMessage.name,
+        stickerId: stickerMessage.stickerId,
+        albumId: stickerMessage.albumId,
+        status: data.status,
+        createdAt: data.createdAt,
+      );
+      await _insertMessage(message, data);
+    } else if (data.category.isContact) {
+      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
+      final contactMessage = ContactMessage.fromJson(
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
+      final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
+      final message = await _generateMessage(
+        data,
+        (QuoteMessageItem? quoteContent) => Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
           userId: data.senderId,
           category: data.category!,
           content: plainText,
-          name: stickerMessage.name,
-          stickerId: stickerMessage.stickerId,
-          albumId: stickerMessage.albumId,
+          name: user?.fullName,
+          sharedUserId: contactMessage.userId,
           status: data.status,
-          createdAt: data.createdAt);
-      await _insertMessage(message, data);
-    } else if (data.category.isContact) {
-      final plain = data.category.isEncrypted ? plainText : _decode(plainText);
-      final contactMessage = ContactMessage.fromJson(
-          await jsonDecode(plain) as Map<String, dynamic>);
-      final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
-      final message = await _generateMessage(
-          data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: plainText,
-              name: user?.fullName,
-              sharedUserId: contactMessage.userId,
-              status: data.status,
-              createdAt: data.createdAt,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+          createdAt: data.createdAt,
+          quoteMessageId: data.quoteMessageId,
+          quoteContent: quoteContent?.toJson(),
+        ),
+      );
       await _insertMessage(message, data);
     } else if (data.category.isLive) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
-      final liveMessage =
-          LiveMessage.fromJson(await jsonDecode(plain) as Map<String, dynamic>);
+      final liveMessage = LiveMessage.fromJson(
+        await jsonDecode(plain) as Map<String, dynamic>,
+      );
       final message = Message(
         messageId: data.messageId,
         conversationId: data.conversationId,
@@ -797,10 +905,11 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
     } else if (data.category.isLocation) {
-      final plain = data.category == MessageCategory.signalLocation ||
-              data.category == MessageCategory.encryptedLocation
-          ? plainText
-          : _decode(plainText);
+      final plain =
+          data.category == MessageCategory.signalLocation ||
+                  data.category == MessageCategory.encryptedLocation
+              ? plainText
+              : _decode(plainText);
       // ignore: unused_local_variable todo check location
       LocationMessage? locationMessage;
       try {
@@ -817,19 +926,21 @@ class DecryptMessage extends Injector {
         return;
       }
       final message = Message(
-          messageId: data.messageId,
-          conversationId: data.conversationId,
-          userId: data.senderId,
-          category: data.category!,
-          content: plain,
-          status: data.status,
-          createdAt: data.createdAt);
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.senderId,
+        category: data.category!,
+        content: plain,
+        status: data.status,
+        createdAt: data.createdAt,
+      );
       await _insertMessage(message, data);
     } else if (data.category.isPost) {
-      final plain = data.category == MessageCategory.signalPost ||
-              data.category == MessageCategory.encryptedPost
-          ? plainText
-          : _decode(plainText);
+      final plain =
+          data.category == MessageCategory.signalPost ||
+                  data.category == MessageCategory.encryptedPost
+              ? plainText
+              : _decode(plainText);
       final message = Message(
         messageId: data.messageId,
         conversationId: data.conversationId,
@@ -841,10 +952,11 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
     } else if (data.category.isTranscript) {
-      final plain = data.category == MessageCategory.signalTranscript ||
-              data.category == MessageCategory.encryptedTranscript
-          ? plainText
-          : _decode(plainText);
+      final plain =
+          data.category == MessageCategory.signalTranscript ||
+                  data.category == MessageCategory.encryptedTranscript
+              ? plainText
+              : _decode(plainText);
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
       if (message != null) {
@@ -854,42 +966,53 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processSystemConversationMessage(
-      BlazeMessageData data, SystemConversationMessage systemMessage) async {
+    BlazeMessageData data,
+    SystemConversationMessage systemMessage,
+  ) async {
     if (systemMessage.action != MessageAction.update) {
       await syncConversion(data.conversationId);
     }
     final userId = systemMessage.userId ?? data.senderId;
     if (userId == systemUser &&
         (await database.userDao.userById(userId).getSingleOrNull()) == null) {
-      await database.userDao.insert(const db.User(
-        userId: systemUser,
-        identityNumber: '0',
-      ));
+      await database.userDao.insert(
+        const db.User(userId: systemUser, identityNumber: '0'),
+      );
     }
     var message = db.Message(
-        messageId: data.messageId,
-        userId: userId,
-        conversationId: data.conversationId,
-        category: data.category!,
-        content: '',
-        createdAt: data.createdAt,
-        status: data.status,
-        action: systemMessage.action,
-        participantId: systemMessage.participantId);
+      messageId: data.messageId,
+      userId: userId,
+      conversationId: data.conversationId,
+      category: data.category!,
+      content: '',
+      createdAt: data.createdAt,
+      status: data.status,
+      action: systemMessage.action,
+      participantId: systemMessage.participantId,
+    );
     if (systemMessage.action == MessageAction.add ||
         systemMessage.action == MessageAction.join) {
-      await database.participantDao.insert(db.Participant(
+      await database.participantDao.insert(
+        db.Participant(
           conversationId: data.conversationId,
           userId: systemMessage.participantId!,
-          createdAt: data.createdAt));
+          createdAt: data.createdAt,
+        ),
+      );
       if (systemMessage.participantId == accountId) {
         await syncConversion(data.conversationId, force: true, unWait: true);
       } else if (systemMessage.participantId != accountId &&
           await _signalProtocol.isExistSenderKey(
-              data.conversationId, accountId)) {
-        unawaited(_sender.sendProcessSignalKey(
-            data, ProcessSignalKeyAction.addParticipant,
-            participantId: systemMessage.participantId));
+            data.conversationId,
+            accountId,
+          )) {
+        unawaited(
+          _sender.sendProcessSignalKey(
+            data,
+            ProcessSignalKeyAction.addParticipant,
+            participantId: systemMessage.participantId,
+          ),
+        );
         await refreshUsers(<String>[systemMessage.participantId!]);
       } else {
         final userIds = <String>[systemMessage.participantId!];
@@ -899,18 +1022,27 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == MessageAction.remove ||
         systemMessage.action == MessageAction.exit) {
       if (systemMessage.participantId == accountId) {
-        unawaited(database.conversationDao.updateConversationStatusById(
-            data.conversationId, ConversationStatus.quit));
+        unawaited(
+          database.conversationDao.updateConversationStatusById(
+            data.conversationId,
+            ConversationStatus.quit,
+          ),
+        );
       }
       await refreshUsers(<String>[systemMessage.participantId!]);
-      unawaited(_sender.sendProcessSignalKey(
-          data, ProcessSignalKeyAction.removeParticipant,
-          participantId: systemMessage.participantId));
+      unawaited(
+        _sender.sendProcessSignalKey(
+          data,
+          ProcessSignalKeyAction.removeParticipant,
+          participantId: systemMessage.participantId,
+        ),
+      );
     } else if (systemMessage.action == MessageAction.update) {
       final participantId = systemMessage.participantId;
       if (participantId != null && participantId.isNotEmpty) {
         unawaited(
-            refreshUsers(<String>[systemMessage.participantId!], force: true));
+          refreshUsers(<String>[systemMessage.participantId!], force: true),
+        );
       } else {
         await syncConversion(data.conversationId, force: true, unWait: true);
       }
@@ -939,20 +1071,24 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processSystemUserMessage(
-      SystemUserMessage systemMessage) async {
+    SystemUserMessage systemMessage,
+  ) async {
     if (systemMessage.action == SystemUserAction.update) {
       unawaited(refreshUsers(<String>[systemMessage.userId], force: true));
     }
   }
 
   Future<void> _processSystemCircleMessage(
-      BlazeMessageData data, SystemCircleMessage systemMessage) async {
+    BlazeMessageData data,
+    SystemCircleMessage systemMessage,
+  ) async {
     if (systemMessage.action == SystemCircleAction.create ||
         systemMessage.action == SystemCircleAction.update) {
       unawaited(refreshCircle(circleId: systemMessage.circleId));
     } else if (systemMessage.action == SystemCircleAction.add) {
-      final circle =
-          await database.circleDao.findCircleById(systemMessage.circleId);
+      final circle = await database.circleDao.findCircleById(
+        systemMessage.circleId,
+      );
       if (circle == null) {
         unawaited(refreshCircle(circleId: systemMessage.circleId));
       }
@@ -960,36 +1096,43 @@ class DecryptMessage extends Injector {
       if (systemMessage.userId != null) {
         await refreshUsers(<String>[systemMessage.userId!]);
       }
-      await database.circleConversationDao.insert(db.CircleConversation(
-        conversationId: conversationId ??
-            generateConversationId(accountId, systemMessage.userId!),
-        circleId: systemMessage.circleId,
-        userId: systemMessage.userId,
-        createdAt: data.createdAt,
-      ));
+      await database.circleConversationDao.insert(
+        db.CircleConversation(
+          conversationId:
+              conversationId ??
+              generateConversationId(accountId, systemMessage.userId!),
+          circleId: systemMessage.circleId,
+          userId: systemMessage.userId,
+          createdAt: data.createdAt,
+        ),
+      );
     } else if (systemMessage.action == SystemCircleAction.remove) {
-      final conversationId = systemMessage.conversationId ??
+      final conversationId =
+          systemMessage.conversationId ??
           generateConversationId(accountId, systemMessage.userId!);
-      await database.circleConversationDao
-          .deleteById(conversationId, systemMessage.circleId);
+      await database.circleConversationDao.deleteById(
+        conversationId,
+        systemMessage.circleId,
+      );
     } else if (systemMessage.action == SystemCircleAction.delete) {
       await database.circleDao.deleteCircleById(systemMessage.circleId);
-      await database.circleConversationDao
-          .deleteByCircleId(systemMessage.circleId);
+      await database.circleConversationDao.deleteByCircleId(
+        systemMessage.circleId,
+      );
     }
   }
 
   Future<void> _processSystemSnapshotMessage(
-      BlazeMessageData data, SnapshotMessage snapshotMessage) async {
+    BlazeMessageData data,
+    SnapshotMessage snapshotMessage,
+  ) async {
     final snapshot = db.Snapshot(
       snapshotId: snapshotMessage.snapshotId,
       type: snapshotMessage.type,
       assetId: snapshotMessage.assetId,
       opponentId: snapshotMessage.opponentId,
       amount: snapshotMessage.amount,
-      createdAt: DateTime.parse(
-        snapshotMessage.createdAt,
-      ),
+      createdAt: DateTime.parse(snapshotMessage.createdAt),
       snapshotHash: snapshotMessage.snapshotHash,
       openingBalance: snapshotMessage.openingBalance,
       closingBalance: snapshotMessage.closingBalance,
@@ -1001,27 +1144,30 @@ class DecryptMessage extends Injector {
       status = MessageStatus.read;
     }
     final message = Message(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.senderId,
-        category: data.category!,
-        content: '',
-        snapshotId: snapshot.snapshotId,
-        status: status,
-        createdAt: data.createdAt);
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      category: data.category!,
+      content: '',
+      snapshotId: snapshot.snapshotId,
+      status: status,
+      createdAt: data.createdAt,
+    );
     await _insertMessage(message, data);
   }
 
-  Future<void> _processSystemSafeSnapshotMessage(BlazeMessageData data,
-      db.SafeSnapshot snapshot, String? depositHash) async {
+  Future<void> _processSystemSafeSnapshotMessage(
+    BlazeMessageData data,
+    db.SafeSnapshot snapshot,
+    String? depositHash,
+  ) async {
     if (depositHash != null && depositHash.isNotEmpty) {
       await database.safeSnapshotDao.deletePendingSnapshotByHash(depositHash);
-      await database.safeSnapshotDao.insert(snapshot.copyWith(
-        deposit: Value(SafeDeposit(
-          depositHash: depositHash,
-          sender: '',
-        )),
-      ));
+      await database.safeSnapshotDao.insert(
+        snapshot.copyWith(
+          deposit: Value(SafeDeposit(depositHash: depositHash, sender: '')),
+        ),
+      );
     } else {
       await database.safeSnapshotDao.insert(snapshot);
     }
@@ -1042,7 +1188,9 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processSystemSafeInscriptionMessage(
-      BlazeMessageData data, db.SafeSnapshot snapshot) async {
+    BlazeMessageData data,
+    db.SafeSnapshot snapshot,
+  ) async {
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
@@ -1056,17 +1204,21 @@ class DecryptMessage extends Injector {
     );
     await database.safeSnapshotDao.insert(snapshot);
     await _insertMessage(message, data);
-    await _syncInscriptionJob
-        .add(createSyncInscriptionMessageJob(data.messageId));
+    await _syncInscriptionJob.add(
+      createSyncInscriptionMessageJob(data.messageId),
+    );
   }
 
   Future<void> _updateRemoteMessageStatus(
-      String messageId, MessageStatus status) async {
+    String messageId,
+    MessageStatus status,
+  ) async {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
-    await _ackJob
-        .add([createAckJob(kAcknowledgeMessageReceipts, messageId, status)]);
+    await _ackJob.add([
+      createAckJob(kAcknowledgeMessageReceipts, messageId, status),
+    ]);
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
@@ -1075,12 +1227,12 @@ class DecryptMessage extends Injector {
     messages
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
         .forEach((m) async {
-      if (m.status == 'MENTION_READ') {
-        await database.messageMentionDao.markMentionRead(m.messageId);
-      } else if (m.status == 'READ') {
-        messagesWithExpiredAt.add((m.messageId, m.expireAt));
-      }
-    });
+          if (m.status == 'MENTION_READ') {
+            await database.messageMentionDao.markMentionRead(m.messageId);
+          } else if (m.status == 'READ') {
+            messagesWithExpiredAt.add((m.messageId, m.expireAt));
+          }
+        });
 
     if (messagesWithExpiredAt.isNotEmpty) {
       final messageIds = messagesWithExpiredAt.map((e) => e.$1).toList();
@@ -1090,12 +1242,15 @@ class DecryptMessage extends Injector {
       for (final item in messagesWithExpiredAt) {
         final (messageId, expireAt) = item;
         if (expireAt != null && expireAt > 0) {
-          await database.expiredMessageDao
-              .updateMessageExpireAt(expireAt, messageId);
+          await database.expiredMessageDao.updateMessageExpireAt(
+            expireAt,
+            messageId,
+          );
         } else {
-          final expiredMessage = await database.expiredMessageDao
-              .getExpiredMessageById(messageId)
-              .getSingleOrNull();
+          final expiredMessage =
+              await database.expiredMessageDao
+                  .getExpiredMessageById(messageId)
+                  .getSingleOrNull();
           if (expiredMessage != null) {
             w('expireAt is null or 0. messageId: $messageId');
             await database.expiredMessageDao.onMessageRead([messageId]);
@@ -1149,7 +1304,10 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processReDecryptMessage(
-      BlazeMessageData data, String messageId, String plaintext) async {
+    BlazeMessageData data,
+    String messageId,
+    String plaintext,
+  ) async {
     if (data.category == MessageCategory.signalText) {
       await database.messageMentionDao.parseMentionData(
         plaintext,
@@ -1160,144 +1318,218 @@ class DecryptMessage extends Injector {
         accountId,
         identityNumber,
       );
-      await database.messageDao
-          .updateMessageContentAndStatus(messageId, plaintext, data.status);
+      await database.messageDao.updateMessageContentAndStatus(
+        messageId,
+        plaintext,
+        data.status,
+      );
     } else if (data.category == MessageCategory.signalPost) {
-      await database.messageDao
-          .updateMessageContentAndStatus(messageId, plaintext, data.status);
+      await database.messageDao.updateMessageContentAndStatus(
+        messageId,
+        plaintext,
+        data.status,
+      );
     } else if (data.category == MessageCategory.signalLocation) {
-      await database.messageDao
-          .updateMessageContentAndStatus(messageId, plaintext, data.status);
+      await database.messageDao.updateMessageContentAndStatus(
+        messageId,
+        plaintext,
+        data.status,
+      );
     } else if (data.category == MessageCategory.signalImage ||
         data.category == MessageCategory.signalVideo ||
         data.category == MessageCategory.signalData ||
         data.category == MessageCategory.signalAudio) {
       final attachment = AttachmentMessage.fromJson(
-          _jsonDecode(plaintext) as Map<String, dynamic>);
-      final content = await jsonEncodeWithIsolate(AttachmentExtra(
-              attachmentId: attachment.attachmentId,
-              messageId: data.messageId,
-              shareable: attachment.shareable)
-          .toJson());
+        _jsonDecode(plaintext) as Map<String, dynamic>,
+      );
+      final content = await jsonEncodeWithIsolate(
+        AttachmentExtra(
+          attachmentId: attachment.attachmentId,
+          messageId: data.messageId,
+          shareable: attachment.shareable,
+        ).toJson(),
+      );
       final messagesCompanion = MessagesCompanion(
-          status: Value(data.status),
-          content: Value(content),
-          mediaMimeType: Value(attachment.mimeType),
-          mediaSize: Value(attachment.size),
-          mediaStatus: const Value(MediaStatus.canceled),
-          mediaWidth: Value(attachment.width),
-          mediaHeight: Value(attachment.height),
-          mediaDigest: Value(attachment.digest as String?),
-          mediaKey: Value(attachment.key as String?),
-          mediaWaveform: Value(attachment.waveform as String?),
-          caption: Value(attachment.caption),
-          name: Value(attachment.name),
-          thumbImage: Value(attachment.thumbnail),
-          mediaDuration: Value(attachment.duration.toString()));
-      await database.messageDao
-          .updateAttachmentMessage(messageId, messagesCompanion);
+        status: Value(data.status),
+        content: Value(content),
+        mediaMimeType: Value(attachment.mimeType),
+        mediaSize: Value(attachment.size),
+        mediaStatus: const Value(MediaStatus.canceled),
+        mediaWidth: Value(attachment.width),
+        mediaHeight: Value(attachment.height),
+        mediaDigest: Value(attachment.digest as String?),
+        mediaKey: Value(attachment.key as String?),
+        mediaWaveform: Value(attachment.waveform as String?),
+        caption: Value(attachment.caption),
+        name: Value(attachment.name),
+        thumbImage: Value(attachment.thumbnail),
+        mediaDuration: Value(attachment.duration.toString()),
+      );
+      await database.messageDao.updateAttachmentMessage(
+        messageId,
+        messagesCompanion,
+      );
 
-      final message =
-          await database.messageDao.findMessageByMessageId(messageId);
+      final message = await database.messageDao.findMessageByMessageId(
+        messageId,
+      );
 
       if (message != null) {
-        _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
-            AttachmentDownloadRequest(message));
+        _isolateEventSender(
+          WorkerIsolateEventType.requestDownloadAttachment,
+          AttachmentDownloadRequest(message),
+        );
       }
     } else if (data.category == MessageCategory.signalSticker) {
       final plain = _decode(plaintext);
       final stickerMessage = StickerMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
-      final sticker = await database.stickerDao
-          .sticker(stickerMessage.stickerId)
-          .getSingleOrNull();
+      final sticker =
+          await database.stickerDao
+              .sticker(stickerMessage.stickerId)
+              .getSingleOrNull();
       if (sticker == null ||
           (stickerMessage.albumId != null &&
               (sticker.albumId?.isEmpty ?? true))) {
-        await _updateStickerJob
-            .add(createUpdateStickerJob(stickerMessage.stickerId));
+        await _updateStickerJob.add(
+          createUpdateStickerJob(stickerMessage.stickerId),
+        );
       }
       await database.messageDao.updateStickerMessage(
-          messageId, data.status, stickerMessage.stickerId);
+        messageId,
+        data.status,
+        stickerMessage.stickerId,
+      );
     } else if (data.category == MessageCategory.signalContact) {
       final plain = _decode(plaintext);
       final contactMessage = ContactMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
-      await database.messageDao
-          .updateContactMessage(messageId, data.status, contactMessage.userId);
+      await database.messageDao.updateContactMessage(
+        messageId,
+        data.status,
+        contactMessage.userId,
+      );
     } else if (data.category == MessageCategory.signalLive) {
       final plain = _decode(plaintext);
       final liveMessage = LiveMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
       await database.messageDao.updateLiveMessage(
-          messageId,
-          liveMessage.width,
-          liveMessage.height,
-          liveMessage.url,
-          liveMessage.thumbUrl,
-          data.status);
+        messageId,
+        liveMessage.width,
+        liveMessage.height,
+        liveMessage.url,
+        liveMessage.thumbUrl,
+        data.status,
+      );
     } else if (data.category == MessageCategory.signalTranscript) {
       final plain = _decode(plaintext);
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
       if (message != null) {
-        await database.messageDao.updateTranscriptMessage(message.content,
-            message.mediaSize, message.mediaStatus, message.status, messageId);
+        await database.messageDao.updateTranscriptMessage(
+          message.content,
+          message.mediaSize,
+          message.mediaStatus,
+          message.status,
+          messageId,
+        );
       }
     }
-    if (await database.messageDao
-            .countMessageByQuoteId(data.conversationId, messageId) >
+    if (await database.messageDao.countMessageByQuoteId(
+          data.conversationId,
+          messageId,
+        ) >
         0) {
-      final messageItem = await database.messageDao
-          .findMessageItemById(data.conversationId, messageId);
+      final messageItem = await database.messageDao.findMessageItemById(
+        data.conversationId,
+        messageId,
+      );
       if (messageItem != null) {
         await database.messageDao.updateQuoteContentByQuoteId(
-            data.conversationId, messageId, messageItem.toJson());
+          data.conversationId,
+          messageId,
+          messageItem.toJson(),
+        );
       }
     }
   }
 
-  Future<void> _requestResendKey(String conversationId, String recipientId,
-      String messageId, String? sessionId) async {
-    final plainJsonMessage =
-        PlainJsonMessage(kResendKey, null, null, messageId, null, null);
+  Future<void> _requestResendKey(
+    String conversationId,
+    String recipientId,
+    String messageId,
+    String? sessionId,
+  ) async {
+    final plainJsonMessage = PlainJsonMessage(
+      kResendKey,
+      null,
+      null,
+      messageId,
+      null,
+      null,
+    );
     final encoded = _jsonEncode(plainJsonMessage);
-    final bm = createParamBlazeMessage(createPlainJsonParam(
-        conversationId, recipientId, encoded,
-        sessionId: sessionId));
+    final bm = createParamBlazeMessage(
+      createPlainJsonParam(
+        conversationId,
+        recipientId,
+        encoded,
+        sessionId: sessionId,
+      ),
+    );
     final result = await _sender.deliver(bm);
     if (result.success) {
-      final address =
-          SignalProtocolAddress(recipientId, sessionId.getDeviceId());
+      final address = SignalProtocolAddress(
+        recipientId,
+        sessionId.getDeviceId(),
+      );
       final ratchet = RatchetSenderKeysCompanion.insert(
-          groupId: conversationId,
-          senderId: address.toString(),
-          status: RatchetStatus.requesting.name,
-          createdAt: DateTime.now().millisecondsSinceEpoch.toString());
+        groupId: conversationId,
+        senderId: address.toString(),
+        status: RatchetStatus.requesting.name,
+        createdAt: DateTime.now().millisecondsSinceEpoch.toString(),
+      );
       await SignalDatabase.get.ratchetSenderKeyDao.insertSenderKey(ratchet);
     }
   }
 
   Future<void> _requestResendMessage(
-      String conversationId, String userId, String? sessionId) async {
-    final messages =
-        await database.messageDao.findFailedMessages(conversationId, userId);
+    String conversationId,
+    String userId,
+    String? sessionId,
+  ) async {
+    final messages = await database.messageDao.findFailedMessages(
+      conversationId,
+      userId,
+    );
     if (messages.isEmpty) {
       return;
     }
     final plainJsonMessage = PlainJsonMessage(
-        kResendMessages, messages.reversed.toList(), null, null, null, null);
+      kResendMessages,
+      messages.reversed.toList(),
+      null,
+      null,
+      null,
+      null,
+    );
     final encoded = _jsonEncode(plainJsonMessage);
-    final bm = createParamBlazeMessage(createPlainJsonParam(
-        conversationId, userId, encoded,
-        sessionId: sessionId));
+    final bm = createParamBlazeMessage(
+      createPlainJsonParam(
+        conversationId,
+        userId,
+        encoded,
+        sessionId: sessionId,
+      ),
+    );
     unawaited(_sender.deliver(bm));
     await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
-        conversationId,
-        SignalProtocolAddress(userId, sessionId.getDeviceId()).toString());
+      conversationId,
+      SignalProtocolAddress(userId, sessionId.getDeviceId()).toString(),
+    );
   }
 
   Future<void> _refreshSignalKeys(String conversationId) async {
@@ -1316,8 +1548,9 @@ class DecryptMessage extends Injector {
     if (count.preKeyCount >= preKeyMinNum) {
       return;
     }
-    final bm =
-        createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
+    final bm = createSyncSignalKeys(
+      createSyncSignalKeysParam(await generateKeys()),
+    );
     final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
       i('Registering new pre keys...');
@@ -1325,66 +1558,82 @@ class DecryptMessage extends Injector {
   }
 
   Future<Message?>? processTranscriptMessage(
-      BlazeMessageData data, List<dynamic> list) async {
-    final transcripts = list
-        .map((e) {
-          final json = e as Map<String, dynamic>;
+    BlazeMessageData data,
+    List<dynamic> list,
+  ) async {
+    final transcripts =
+        list
+            .map((e) {
+              final json = e as Map<String, dynamic>;
 
-          json['created_at'] =
-              DateTime.tryParse(json['created_at'] as String? ?? '')
-                  ?.millisecondsSinceEpoch;
-          json['media_created_at'] =
-              DateTime.tryParse(json['media_created_at'] as String? ?? '')
-                  ?.millisecondsSinceEpoch;
-          final mediaDuration = json['media_duration'];
-          json['media_duration'] =
-              mediaDuration != null ? '$mediaDuration' : null;
-          json.remove('media_status');
+              json['created_at'] =
+                  DateTime.tryParse(
+                    json['created_at'] as String? ?? '',
+                  )?.millisecondsSinceEpoch;
+              json['media_created_at'] =
+                  DateTime.tryParse(
+                    json['media_created_at'] as String? ?? '',
+                  )?.millisecondsSinceEpoch;
+              final mediaDuration = json['media_duration'];
+              json['media_duration'] =
+                  mediaDuration != null ? '$mediaDuration' : null;
+              json.remove('media_status');
 
-          return TranscriptMessage.fromJson(json);
-        })
-        .where((transcript) => transcript.transcriptId == data.messageId)
-        .nonNulls
-        .toList();
+              return TranscriptMessage.fromJson(json);
+            })
+            .where((transcript) => transcript.transcriptId == data.messageId)
+            .nonNulls
+            .toList();
 
     if (transcripts.isEmpty) {
       await _insertInvalidMessage(data);
       return null;
     }
 
-    Future _refreshSticker() => Future.wait(transcripts
-            .where((transcript) =>
+    Future _refreshSticker() => Future.wait(
+      transcripts
+          .where(
+            (transcript) =>
                 transcript.category.isSticker &&
-                (transcript.stickerId?.isNotEmpty ?? false))
-            .map((transcript) async {
-          final hasSticker =
-              await database.stickerDao.hasSticker(transcript.stickerId!);
-          if (hasSticker) return;
-          await _updateStickerJob
-              .add(createUpdateStickerJob(transcript.stickerId!));
-        }));
+                (transcript.stickerId?.isNotEmpty ?? false),
+          )
+          .map((transcript) async {
+            final hasSticker = await database.stickerDao.hasSticker(
+              transcript.stickerId!,
+            );
+            if (hasSticker) return;
+            await _updateStickerJob.add(
+              createUpdateStickerJob(transcript.stickerId!),
+            );
+          }),
+    );
 
     Future _refreshUser() => refreshUsers([
-          ...transcripts.map((e) => e.userId).nonNulls,
-          ...transcripts
-              .where((transcript) =>
-                  transcript.category.isContact &&
-                  (transcript.sharedUserId?.isNotEmpty ?? false))
-              .map((transcript) => transcript.sharedUserId!),
-        ]);
+      ...transcripts.map((e) => e.userId).nonNulls,
+      ...transcripts
+          .where(
+            (transcript) =>
+                transcript.category.isContact &&
+                (transcript.sharedUserId?.isNotEmpty ?? false),
+          )
+          .map((transcript) => transcript.sharedUserId!),
+    ]);
 
-    final attachmentTranscript =
-        transcripts.where((transcript) => transcript.category.isAttachment);
+    final attachmentTranscript = transcripts.where(
+      (transcript) => transcript.category.isAttachment,
+    );
 
-    final insertAllTranscriptMessageFuture =
-        database.transcriptMessageDao.insertAll(transcripts.map((transcript) {
-      if (transcript.category.isAttachment) {
-        return transcript.copyWith(
-          mediaStatus: const Value(MediaStatus.canceled),
+    final insertAllTranscriptMessageFuture = database.transcriptMessageDao
+        .insertAll(
+          transcripts.map((transcript) {
+            if (transcript.category.isAttachment) {
+              return transcript.copyWith(
+                mediaStatus: const Value(MediaStatus.canceled),
+              );
+            }
+            return transcript;
+          }).toList(),
         );
-      }
-      return transcript;
-    }).toList());
 
     await Future.wait([
       _refreshSticker(),
@@ -1394,11 +1643,13 @@ class DecryptMessage extends Injector {
 
     final transcriptMinimalList =
         (transcripts..sort((a, b) => a.createdAt.compareTo(b.createdAt)))
-            .map((transcript) => TranscriptMinimal(
-                  name: transcript.userFullName ?? '',
-                  category: transcript.category,
-                  content: transcript.content,
-                ))
+            .map(
+              (transcript) => TranscriptMinimal(
+                name: transcript.userFullName ?? '',
+                category: transcript.category,
+                content: transcript.content,
+              ),
+            )
             .toList();
 
     final totalMediaSize = attachmentTranscript
@@ -1408,14 +1659,17 @@ class DecryptMessage extends Injector {
 
     final needDownload = transcripts.any((e) => e.category.isAttachment);
 
-    final mediaStatus = (totalMediaSize == 0 || !needDownload)
-        ? MediaStatus.done
-        : MediaStatus.canceled;
+    final mediaStatus =
+        (totalMediaSize == 0 || !needDownload)
+            ? MediaStatus.done
+            : MediaStatus.canceled;
 
     transcripts.forEach((message) {
       if (message.category.isAttachment && message.content != null) {
-        _isolateEventSender(WorkerIsolateEventType.requestDownloadAttachment,
-            TranscriptAttachmentDownloadRequest(message));
+        _isolateEventSender(
+          WorkerIsolateEventType.requestDownloadAttachment,
+          TranscriptAttachmentDownloadRequest(message),
+        );
       }
     });
 
@@ -1431,11 +1685,13 @@ class DecryptMessage extends Injector {
       mediaStatus: mediaStatus,
     );
 
-    unawaited(Future.sync(() async {
-      final content = await database.transcriptMessageDao
-          .generateTranscriptMessageFts5Content(transcripts);
-      await database.ftsDatabase.insertFts(message, content);
-    }));
+    unawaited(
+      Future.sync(() async {
+        final content = await database.transcriptMessageDao
+            .generateTranscriptMessageFts5Content(transcripts);
+        await database.ftsDatabase.insertFts(message, content);
+      }),
+    );
 
     return message;
   }

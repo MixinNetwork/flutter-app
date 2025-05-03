@@ -25,9 +25,9 @@ class FileMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => const MessageBubble(
-        outerTimeAndStatusWidget: MessageDatetimeAndStatus(),
-        child: MessageFile(),
-      );
+    outerTimeAndStatusWidget: MessageDatetimeAndStatus(),
+    child: MessageFile(),
+  );
 }
 
 class MessageFile extends HookConsumerWidget {
@@ -36,29 +36,38 @@ class MessageFile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
-    final mediaStatus =
-        useMessageConverter(converter: (state) => state.mediaStatus);
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
+    final mediaStatus = useMessageConverter(
+      converter: (state) => state.mediaStatus,
+    );
+    final relationship = useMessageConverter(
+      converter: (state) => state.relationship,
+    );
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
-    final mediaName =
-        useMessageConverter(converter: (state) => state.mediaName ?? '');
-    final extension = useMessageConverter(converter: (state) {
-      var extension = '';
-      if (state.mediaName != null) {
-        final mimeType = lookupMimeType(state.mediaName!);
-        // Only show the extension which is valid.
-        if (mimeType != null) {
-          extension =
-              p.extension(state.mediaName!).trim().replaceFirst('.', '');
+    final mediaName = useMessageConverter(
+      converter: (state) => state.mediaName ?? '',
+    );
+    final extension = useMessageConverter(
+      converter: (state) {
+        var extension = '';
+        if (state.mediaName != null) {
+          final mimeType = lookupMimeType(state.mediaName!);
+          // Only show the extension which is valid.
+          if (mimeType != null) {
+            extension = p
+                .extension(state.mediaName!)
+                .trim()
+                .replaceFirst('.', '');
+          }
         }
-      }
-      return extension.isEmpty ? 'FILE' : extension.toUpperCase();
-    });
-    final mediaSizeText =
-        useMessageConverter(converter: (state) => filesize(state.mediaSize));
+        return extension.isEmpty ? 'FILE' : extension.toUpperCase();
+      },
+    );
+    final mediaSizeText = useMessageConverter(
+      converter: (state) => filesize(state.mediaSize),
+    );
 
-    final isMessageSentOut = (isTranscriptPage &&
+    final isMessageSentOut =
+        (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
 
@@ -69,8 +78,9 @@ class MessageFile extends HookConsumerWidget {
           if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
             if (isTranscriptPage) {
               final transcriptMessageId = TranscriptPage.of(context)?.messageId;
-              await context.accountServer
-                  .reUploadTranscriptAttachment(transcriptMessageId!);
+              await context.accountServer.reUploadTranscriptAttachment(
+                transcriptMessageId!,
+              );
             } else {
               await context.accountServer.reUploadAttachment(message);
             }
@@ -81,59 +91,71 @@ class MessageFile extends HookConsumerWidget {
             message.mediaUrl != null) {
           if (message.mediaUrl?.isEmpty ?? true) return;
           if (_shouldOpenDirectly(mediaName)) {
-            final path = context.accountServer
-                .convertMessageAbsolutePath(message, isTranscriptPage);
+            final path = context.accountServer.convertMessageAbsolutePath(
+              message,
+              isTranscriptPage,
+            );
             final openResult = await OpenFile.open(path);
             if (openResult.type != ResultType.done) {
-              i('open file result: $mediaName ${openResult.type} ${openResult.message}');
+              i(
+                'open file result: $mediaName ${openResult.type} ${openResult.message}',
+              );
               showToastFailed(
-                  ToastError(context.l10n.unableToOpenFile(mediaName)));
+                ToastError(context.l10n.unableToOpenFile(mediaName)),
+              );
             }
           } else {
             await saveAs(
-                context, context.accountServer, message, isTranscriptPage);
+              context,
+              context.accountServer,
+              message,
+              isTranscriptPage,
+            );
           }
         } else if (message.mediaStatus == MediaStatus.pending) {
-          await context.accountServer
-              .cancelProgressAttachmentJob(message.messageId);
+          await context.accountServer.cancelProgressAttachmentJob(
+            message.messageId,
+          );
         }
       },
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Builder(builder: (context) {
-            switch (mediaStatus) {
-              case MediaStatus.canceled:
-                return isMessageSentOut && mediaUrl?.isNotEmpty == true
-                    ? const StatusUpload()
-                    : const StatusDownload();
-              case MediaStatus.pending:
-                return const StatusPending();
-              case MediaStatus.expired:
-                return const StatusWarning();
-              case null:
-              case MediaStatus.done:
-              case MediaStatus.read:
-                break;
-            }
+          Builder(
+            builder: (context) {
+              switch (mediaStatus) {
+                case MediaStatus.canceled:
+                  return isMessageSentOut && mediaUrl?.isNotEmpty == true
+                      ? const StatusUpload()
+                      : const StatusDownload();
+                case MediaStatus.pending:
+                  return const StatusPending();
+                case MediaStatus.expired:
+                  return const StatusWarning();
+                case null:
+                case MediaStatus.done:
+                case MediaStatus.read:
+                  break;
+              }
 
-            return Container(
-              height: 38,
-              width: 38,
-              decoration: BoxDecoration(
-                color: context.theme.statusBackground,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                extension,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: lightBrightnessThemeData.secondaryText,
+              return Container(
+                height: 38,
+                width: 38,
+                decoration: BoxDecoration(
+                  color: context.theme.statusBackground,
+                  shape: BoxShape.circle,
                 ),
-              ),
-            );
-          }),
+                alignment: Alignment.center,
+                child: Text(
+                  extension,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: lightBrightnessThemeData.secondaryText,
+                  ),
+                ),
+              );
+            },
+          ),
           const SizedBox(width: 8),
           Flexible(
             child: Column(

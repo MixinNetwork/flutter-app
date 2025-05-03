@@ -113,9 +113,10 @@ class ResponsiveNavigatorStateNotifier
         );
       case appearancePage:
         return const MaterialPage(
-            key: ValueKey(appearancePage),
-            name: appearancePage,
-            child: AppearancePage(key: ValueKey(appearancePage)));
+          key: ValueKey(appearancePage),
+          name: appearancePage,
+          child: AppearancePage(key: ValueKey(appearancePage)),
+        );
       case accountPage:
         return const MaterialPage(
           key: ValueKey(accountPage),
@@ -147,8 +148,10 @@ class ResponsiveNavigatorStateNotifier
 }
 
 final responsiveNavigatorProvider = StateNotifierProvider.autoDispose<
-    ResponsiveNavigatorStateNotifier,
-    ResponsiveNavigatorState>((ref) => ResponsiveNavigatorStateNotifier());
+  ResponsiveNavigatorStateNotifier,
+  ResponsiveNavigatorState
+>((ref) => ResponsiveNavigatorStateNotifier());
 
-final navigatorRouteModeProvider =
-    responsiveNavigatorProvider.select((value) => value.routeMode);
+final navigatorRouteModeProvider = responsiveNavigatorProvider.select(
+  (value) => value.routeMode,
+);

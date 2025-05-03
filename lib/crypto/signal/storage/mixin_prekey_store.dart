@@ -38,8 +38,9 @@ class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
 
   @override
   Future<void> storePreKey(int preKeyId, PreKeyRecord record) async {
-    await preKeyDao
-        .insert(Prekey(id: 0, prekeyId: preKeyId, record: record.serialize()));
+    await preKeyDao.insert(
+      Prekey(id: 0, prekeyId: preKeyId, record: record.serialize()),
+    );
   }
 
   @override
@@ -76,11 +77,16 @@ class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
 
   @override
   Future storeSignedPreKey(
-      int signedPreKeyId, SignedPreKeyRecord record) async {
-    await signedPreKeyDao.insert(SignedPrekeysCompanion.insert(
+    int signedPreKeyId,
+    SignedPreKeyRecord record,
+  ) async {
+    await signedPreKeyDao.insert(
+      SignedPrekeysCompanion.insert(
         prekeyId: signedPreKeyId,
         record: record.serialize(),
-        timestamp: DateTime.now().millisecondsSinceEpoch));
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 
   Future storePreKeyList(List<PrekeysCompanion> list) async {

@@ -35,21 +35,19 @@ class GiphyPage extends HookConsumerWidget {
       };
     }, [textEditingController]);
 
-    final keyword = useMemoizedStream(
-      () => searchKeywordController.stream.debounceTime(
-        const Duration(seconds: 1),
-      ),
-    ).data;
+    final keyword =
+        useMemoizedStream(
+          () => searchKeywordController.stream.debounceTime(
+            const Duration(seconds: 1),
+          ),
+        ).data;
 
     return Column(
       children: [
         _SearchBar(controller: textEditingController),
-        Divider(
-          color: context.theme.divider,
-          height: 1,
-        ),
+        Divider(color: context.theme.divider, height: 1),
         const SizedBox(height: 12),
-        Expanded(child: _GiphyGifsLoader(query: keyword ?? ''))
+        Expanded(child: _GiphyGifsLoader(query: keyword ?? '')),
       ],
     );
   }
@@ -62,15 +60,15 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: 48,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: SearchTextField(
-            controller: controller,
-            hintText: context.l10n.search,
-          ),
-        ),
-      );
+    height: 48,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: SearchTextField(
+        controller: controller,
+        hintText: context.l10n.search,
+      ),
+    ),
+  );
 }
 
 class _GiphyGifsLoader extends HookConsumerWidget {
@@ -80,20 +78,20 @@ class _GiphyGifsLoader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => _GifGridView(
-        loadGifs: (limit, offset) {
-          d('loadGifs($query): $limit, $offset');
-          if (query == null || query!.isEmpty) {
-            return GiphyApi.instance
-                .trendingGifs(limit, offset)
-                .then((value) => value.data);
-          } else {
-            return GiphyApi.instance
-                .search(query!, limit, offset)
-                .then((value) => value.data);
-          }
-        },
-        key: ValueKey(query),
-      );
+    loadGifs: (limit, offset) {
+      d('loadGifs($query): $limit, $offset');
+      if (query == null || query!.isEmpty) {
+        return GiphyApi.instance
+            .trendingGifs(limit, offset)
+            .then((value) => value.data);
+      } else {
+        return GiphyApi.instance
+            .search(query!, limit, offset)
+            .then((value) => value.data);
+      }
+    },
+    key: ValueKey(query),
+  );
 }
 
 const _limit = 51;

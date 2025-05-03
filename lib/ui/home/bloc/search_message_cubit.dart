@@ -9,10 +9,7 @@ import '../../../utils/logger.dart';
 import '../../provider/slide_category_provider.dart';
 
 class SearchMessageState with EquatableMixin {
-  const SearchMessageState(
-    this.items,
-    this.loading,
-  );
+  const SearchMessageState(this.items, this.loading);
 
   final List<SearchMessageDetailItem> items;
   final bool loading;
@@ -40,28 +37,26 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
     required String? userId,
     required List<String>? categories,
     required int limit,
-  }) =>
-      _ConversationSearchMessageCubit(
-        database: database,
-        keyword: keyword,
-        conversationId: conversationId,
-        userId: userId,
-        categories: categories,
-        limit: limit,
-      );
+  }) => _ConversationSearchMessageCubit(
+    database: database,
+    keyword: keyword,
+    conversationId: conversationId,
+    userId: userId,
+    categories: categories,
+    limit: limit,
+  );
 
   factory SearchMessageCubit.slideCategory({
     required Database database,
     required String keyword,
     required SlideCategoryState category,
     required int limit,
-  }) =>
-      _SlideCategorySearchMessageCubit(
-        database: database,
-        keyword: keyword,
-        category: category,
-        limit: limit,
-      );
+  }) => _SlideCategorySearchMessageCubit(
+    database: database,
+    keyword: keyword,
+    category: category,
+    limit: limit,
+  );
 
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
@@ -99,10 +94,7 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
         d('search message cubit: no more data $lastMessageId');
         _hasMore = false;
       }
-      emit(SearchMessageState([
-        ...state.items,
-        ...items,
-      ], false));
+      emit(SearchMessageState([...state.items, ...items], false));
     } catch (error, stacktrace) {
       e('search message cubit: load error', error, stacktrace);
       emit(SearchMessageState(state.items, false));
@@ -190,11 +182,10 @@ class _SlideCategorySearchMessageCubit extends SearchMessageCubit {
   @override
   Future<List<SearchMessageDetailItem>> _doFuzzySearch(
     String? anchorMessageId,
-  ) =>
-      database.fuzzySearchMessageByCategory(
-        keyword,
-        category: category,
-        limit: limit,
-        anchorMessageId: anchorMessageId,
-      );
+  ) => database.fuzzySearchMessageByCategory(
+    keyword,
+    category: category,
+    limit: limit,
+    anchorMessageId: anchorMessageId,
+  );
 }

@@ -6,10 +6,7 @@ import '../utils/app_lifecycle.dart';
 import '../utils/logger.dart';
 
 class FocusHelper extends HookConsumerWidget {
-  const FocusHelper({
-    required this.child,
-    super.key,
-  });
+  const FocusHelper({required this.child, super.key});
 
   final Widget child;
 

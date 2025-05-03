@@ -88,34 +88,39 @@ class _Args extends Equatable {
 
   @override
   List<Object?> get props => [
-        database,
-        userId,
-        sessionId,
-        identityNumber,
-        privateKey,
-        multiAuthChangeNotifier,
-        settingChangeNotifier,
-        currentConversationId,
-      ];
+    database,
+    userId,
+    sessionId,
+    identityNumber,
+    privateKey,
+    multiAuthChangeNotifier,
+    settingChangeNotifier,
+    currentConversationId,
+  ];
 }
 
 final Provider<GetCurrentConversationId> _currentConversationIdProvider =
     Provider<GetCurrentConversationId>(
-  (ref) => () => ref.read(currentConversationIdProvider),
-);
+      (ref) => () => ref.read(currentConversationIdProvider),
+    );
 
 final _argsProvider = Provider.autoDispose((ref) {
-  final database =
-      ref.watch(databaseProvider.select((value) => value.valueOrNull));
-  final (userId, sessionId, identityNumber, privateKey) =
-      ref.watch(authProvider.select((value) => (
-            value?.account.userId,
-            value?.account.sessionId,
-            value?.account.identityNumber,
-            value?.privateKey,
-          )));
-  final multiAuthChangeNotifier =
-      ref.watch(multiAuthStateNotifierProvider.notifier);
+  final database = ref.watch(
+    databaseProvider.select((value) => value.valueOrNull),
+  );
+  final (userId, sessionId, identityNumber, privateKey) = ref.watch(
+    authProvider.select(
+      (value) => (
+        value?.account.userId,
+        value?.account.sessionId,
+        value?.account.identityNumber,
+        value?.privateKey,
+      ),
+    ),
+  );
+  final multiAuthChangeNotifier = ref.watch(
+    multiAuthStateNotifierProvider.notifier,
+  );
   final settingChangeNotifier = ref.watch(settingProvider);
   final currentConversationId = ref.read(_currentConversationIdProvider);
 
@@ -132,7 +137,9 @@ final _argsProvider = Provider.autoDispose((ref) {
 });
 
 final accountServerProvider = StateNotifierProvider.autoDispose<
-    AccountServerOpener, AsyncValue<AccountServer>>((ref) {
+  AccountServerOpener,
+  AsyncValue<AccountServer>
+>((ref) {
   final args = ref.watch(_argsProvider);
 
   if (args.database == null) return AccountServerOpener();

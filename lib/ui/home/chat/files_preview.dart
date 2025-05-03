@@ -48,28 +48,23 @@ import 'image_caption_input.dart';
 import 'image_editor.dart';
 
 Future<void> showFilesPreviewDialog(
-    BuildContext context, List<XFile> files) async {
+  BuildContext context,
+  List<XFile> files,
+) async {
   await showMixinDialog(
     context: context,
-    child: _FilesPreviewDialog(
-      initialFiles: files.map(_File.auto).toList(),
-    ),
+    child: _FilesPreviewDialog(initialFiles: files.map(_File.auto).toList()),
   );
 }
 
 /// We need this view object to keep the value of file#length.
 sealed class _File {
-  const _File({
-    required this.file,
-  });
+  const _File({required this.file});
 
   factory _File.normal(String path) => _NormalFile._(file: File(path).xFile);
 
   factory _File.image(File file, [ImageEditorSnapshot? snapshot]) =>
-      _ImageFile._(
-        file: file.xFile,
-        imageEditorSnapshot: snapshot,
-      );
+      _ImageFile._(file: file.xFile, imageEditorSnapshot: snapshot);
 
   factory _File.auto(XFile file) {
     if (file.mimeType == null) {
@@ -129,17 +124,14 @@ class _VideoFile extends _File {
   }
 
   static Future<String?> _videoBlurHash(
-      (RootIsolateToken token, String videoPath) params) async {
+    (RootIsolateToken token, String videoPath) params,
+  ) async {
     final (token, videoPath) = params;
     BackgroundIsolateBinaryMessenger.ensureInitialized(token);
     final bytes = await customVideoCompress.getByteThumbnail(videoPath);
     final decodedImage = image.decodeImage(bytes!)!;
     return BlurHash.encode(
-      image.copyResize(
-        decodedImage,
-        width: 100,
-        maintainAspect: true,
-      ),
+      image.copyResize(decodedImage, width: 100, maintainAspect: true),
     ).hash;
   }
 
@@ -165,8 +157,10 @@ class _VideoFile extends _File {
 
     final stopwatch = Stopwatch()..start();
     try {
-      final hash = await compute(
-          _videoBlurHash, (ServicesBinding.rootIsolateToken!, file.path));
+      final hash = await compute(_videoBlurHash, (
+        ServicesBinding.rootIsolateToken!,
+        file.path,
+      ));
       _blurHashCompleter.complete(hash);
     } catch (error, stackTrace) {
       e('failed to load video thumbnail', error, stackTrace);
@@ -187,9 +181,7 @@ const _kDefaultArchiveName = 'Archive.zip';
 enum _TabType { image, files, zip }
 
 class _FilesPreviewDialog extends HookConsumerWidget {
-  const _FilesPreviewDialog({
-    required this.initialFiles,
-  });
+  const _FilesPreviewDialog({required this.initialFiles});
 
   final List<_File> initialFiles;
 
@@ -251,15 +243,17 @@ class _FilesPreviewDialog extends HookConsumerWidget {
     Future<void> send(bool silent) async {
       if (currentTab.value != _TabType.zip) {
         for (final file in files.value) {
-          unawaited(_sendFile(
-            context,
-            file,
-            quoteMessageCubit.state?.messageId,
-            silent: silent,
-            compress: currentTab.value == _TabType.image,
-            imageCaption:
-                isOneImage ? imageCaptionController.text.trim() : null,
-          ));
+          unawaited(
+            _sendFile(
+              context,
+              file,
+              quoteMessageCubit.state?.messageId,
+              silent: silent,
+              compress: currentTab.value == _TabType.image,
+              imageCaption:
+                  isOneImage ? imageCaptionController.text.trim() : null,
+            ),
+          );
         }
         quoteMessageCubit.state = null;
         Navigator.pop(context);
@@ -269,13 +263,15 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           zipPasswordController.text.trim(),
           files.value.map((e) => e.path).toList(),
         ));
-        unawaited(_sendFile(
-          context,
-          _File.normal(zipFilePath),
-          quoteMessageCubit.state?.messageId,
-          silent: silent,
-          compress: false,
-        ));
+        unawaited(
+          _sendFile(
+            context,
+            _File.normal(zipFilePath),
+            quoteMessageCubit.state?.messageId,
+            silent: silent,
+            compress: false,
+          ),
+        );
         quoteMessageCubit.state = null;
         Navigator.pop(context);
       }
@@ -290,106 +286,109 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       }
     }
 
-    final canSendStream = useValueNotifierConvertSteam(imageCaptionController)
-        .map((event) =>
-            !isOneImage || imageCaptionController.value.composing.composed);
+    final canSendStream = useValueNotifierConvertSteam(
+      imageCaptionController,
+    ).map(
+      (event) => !isOneImage || imageCaptionController.value.composing.composed,
+    );
 
     return _Actions(
       onSend: () => send(false),
       onFileAdded: addFile,
       canSendStream: canSendStream,
       child: SizedBox(
-          width: 480,
-          height: 600,
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+        width: 480,
+        height: 600,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Tab(
+                        assetName: Resources.assetsImagesFilePreviewImagesSvg,
+                        tooltip: context.l10n.sendQuickly,
+                        onTap: () => currentTab.value = _TabType.image,
+                        selected: currentTab.value == _TabType.image,
+                        show: hasMedia,
+                      ),
+                      _Tab(
+                        assetName: Resources.assetsImagesFilePreviewFilesSvg,
+                        tooltip: context.l10n.sendWithoutCompression,
+                        onTap: () => currentTab.value = _TabType.files,
+                        selected: currentTab.value == _TabType.files,
+                      ),
+                      _Tab(
+                        assetName: Resources.assetsImagesFilePreviewZipSvg,
+                        tooltip: context.l10n.sendArchived,
+                        onTap: () => currentTab.value = _TabType.zip,
+                        selected: currentTab.value == _TabType.zip,
+                        show: showZipTab,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: _FileListViewportProvider(
+                    child: IndexedStack(
+                      sizing: StackFit.expand,
+                      index: currentTab.value == _TabType.zip ? 1 : 0,
                       children: [
-                        _Tab(
-                          assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                          tooltip: context.l10n.sendQuickly,
-                          onTap: () => currentTab.value = _TabType.image,
-                          selected: currentTab.value == _TabType.image,
-                          show: hasMedia,
+                        _FileInputOverlay(
+                          onFileAdded: addFile,
+                          child: _AnimatedListBuilder(
+                            files: files.value,
+                            onFileAdded: onFileAddedStream.stream,
+                            onFileDeleted: onFileRemovedStream.stream,
+                            builder:
+                                (context, file, animation) => _AnimatedFileTile(
+                                  key: ValueKey(file),
+                                  file: file,
+                                  animation: animation,
+                                  onDelete: removeFile,
+                                  showBigImage: showAsBigImage,
+                                  onImageEdited: (file, image) async {
+                                    final index = files.value.indexOf(file);
+                                    if (index == -1) {
+                                      e('failed to found file');
+                                      return;
+                                    }
+                                    final list = files.value.toList();
+                                    final newFile = File(image.imagePath);
+                                    list[index] = _File.image(newFile, image);
+                                    files.value = list;
+                                  },
+                                ),
+                          ),
                         ),
-                        _Tab(
-                          assetName: Resources.assetsImagesFilePreviewFilesSvg,
-                          tooltip: context.l10n.sendWithoutCompression,
-                          onTap: () => currentTab.value = _TabType.files,
-                          selected: currentTab.value == _TabType.files,
-                        ),
-                        _Tab(
-                          assetName: Resources.assetsImagesFilePreviewZipSvg,
-                          tooltip: context.l10n.sendArchived,
-                          onTap: () => currentTab.value = _TabType.zip,
-                          selected: currentTab.value == _TabType.zip,
-                          show: showZipTab,
-                        ),
+                        _PageZip(zipPasswordController),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Expanded(
-                    child: _FileListViewportProvider(
-                      child: IndexedStack(
-                        sizing: StackFit.expand,
-                        index: currentTab.value == _TabType.zip ? 1 : 0,
-                        children: [
-                          _FileInputOverlay(
-                            onFileAdded: addFile,
-                            child: _AnimatedListBuilder(
-                                files: files.value,
-                                onFileAdded: onFileAddedStream.stream,
-                                onFileDeleted: onFileRemovedStream.stream,
-                                builder: (context, file, animation) =>
-                                    _AnimatedFileTile(
-                                      key: ValueKey(file),
-                                      file: file,
-                                      animation: animation,
-                                      onDelete: removeFile,
-                                      showBigImage: showAsBigImage,
-                                      onImageEdited: (file, image) async {
-                                        final index = files.value.indexOf(file);
-                                        if (index == -1) {
-                                          e('failed to found file');
-                                          return;
-                                        }
-                                        final list = files.value.toList();
-                                        final newFile = File(image.imagePath);
-                                        list[index] =
-                                            _File.image(newFile, image);
-                                        files.value = list;
-                                      },
-                                    )),
-                          ),
-                          _PageZip(zipPasswordController),
-                        ],
-                      ),
-                    ),
-                  ),
-                  _BottomActionWidget(
-                    send: send,
-                    imageCaptionController: imageCaptionController,
-                    showImageCaption: isOneImage,
-                  ),
-                ],
-              ),
-              const Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Padding(
-                  padding: EdgeInsets.all(22),
-                  child: MixinCloseButton(),
                 ),
-              )
-            ],
-          )),
+                _BottomActionWidget(
+                  send: send,
+                  imageCaptionController: imageCaptionController,
+                  showImageCaption: isOneImage,
+                ),
+              ],
+            ),
+            const Align(
+              alignment: AlignmentDirectional.topEnd,
+              child: Padding(
+                padding: EdgeInsets.all(22),
+                child: MixinCloseButton(),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -407,49 +406,56 @@ class _BottomActionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: double.infinity),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            if (showImageCaption)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: ImageCaptionInputWidget(
-                  textEditingController: imageCaptionController,
-                ),
-              ),
-            const SizedBox(height: 16),
-            CustomContextMenuWidget(
-              desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-              menuProvider: (_) => Menu(children: [
-                MenuAction(
-                  image: MenuImage.icon(IconFonts.mute),
-                  title: context.l10n.sendWithoutSound,
-                  callback: () => send(true),
-                )
-              ]),
-              child: ElevatedButton(
-                onPressed: () => send(false),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.only(
-                      left: 32, top: 18, bottom: 18, right: 32),
-                  backgroundColor: context.theme.accent,
-                ),
-                child: Text(
-                  context.l10n.send.toUpperCase(),
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
+    constraints: const BoxConstraints(minWidth: double.infinity),
+    child: Column(
+      children: [
+        const SizedBox(height: 16),
+        if (showImageCaption)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30),
+            child: ImageCaptionInputWidget(
+              textEditingController: imageCaptionController,
             ),
-            const SizedBox(height: 24),
-            Text(
-              context.l10n.enterToSend,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        const SizedBox(height: 16),
+        CustomContextMenuWidget(
+          desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+          menuProvider:
+              (_) => Menu(
+                children: [
+                  MenuAction(
+                    image: MenuImage.icon(IconFonts.mute),
+                    title: context.l10n.sendWithoutSound,
+                    callback: () => send(true),
+                  ),
+                ],
+              ),
+          child: ElevatedButton(
+            onPressed: () => send(false),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.only(
+                left: 32,
+                top: 18,
+                bottom: 18,
+                right: 32,
+              ),
+              backgroundColor: context.theme.accent,
             ),
-            const SizedBox(height: 24),
-          ],
+            child: Text(
+              context.l10n.send.toUpperCase(),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
         ),
-      );
+        const SizedBox(height: 24),
+        Text(
+          context.l10n.enterToSend,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        const SizedBox(height: 24),
+      ],
+    ),
+  );
 }
 
 class _FileListViewportProvider extends StatelessWidget {
@@ -459,11 +465,10 @@ class _FileListViewportProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => _FileListViewport(
-          height: constraints.maxHeight,
-          child: child,
-        ),
-      );
+    builder:
+        (context, constraints) =>
+            _FileListViewport(height: constraints.maxHeight, child: child),
+  );
 }
 
 class _FileListViewport extends StatelessWidget {
@@ -477,11 +482,14 @@ class _FileListViewport extends StatelessWidget {
 }
 
 Future<String> _archiveFiles(
-    (String zipFileFolder, String password, List<String> files) params) async {
+  (String zipFileFolder, String password, List<String> files) params,
+) async {
   final (zipFileFolder, password, files) = params;
   assert(files.isNotEmpty, 'files should not be empty');
-  final outPath = path.join(zipFileFolder,
-      'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
+  final outPath = path.join(
+    zipFileFolder,
+    'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip',
+  );
   final encoder = ZipFileEncoder(password: password.isEmpty ? null : password)
     ..create(outPath);
   for (final filePath in files) {
@@ -584,32 +592,32 @@ class _AnimatedFileTile extends HookConsumerWidget {
 
     final Widget child = switch (file) {
       _ImageFile() => AnimatedCrossFade(
-          firstChild: _TileBigImage(
-            file: file as _ImageFile,
-            onDelete: () => onDelete?.call(file),
-            onEdited: (file, snapshot) => onImageEdited?.call(file, snapshot),
-          ),
-          secondChild: normalItem,
-          crossFadeState:
-              big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-          firstCurve: Curves.easeInOut,
-          secondCurve: Curves.easeInOut,
-          sizeCurve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 300),
+        firstChild: _TileBigImage(
+          file: file as _ImageFile,
+          onDelete: () => onDelete?.call(file),
+          onEdited: (file, snapshot) => onImageEdited?.call(file, snapshot),
         ),
+        secondChild: normalItem,
+        crossFadeState:
+            big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        firstCurve: Curves.easeInOut,
+        secondCurve: Curves.easeInOut,
+        sizeCurve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 300),
+      ),
       _VideoFile() => AnimatedCrossFade(
-          firstChild: _TileBigVideo(
-            file: file as _VideoFile,
-            onDelete: () => onDelete?.call(file),
-          ),
-          secondChild: normalItem,
-          crossFadeState:
-              big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-          firstCurve: Curves.easeInOut,
-          secondCurve: Curves.easeInOut,
-          sizeCurve: Curves.easeInOut,
-          duration: const Duration(milliseconds: 300),
+        firstChild: _TileBigVideo(
+          file: file as _VideoFile,
+          onDelete: () => onDelete?.call(file),
         ),
+        secondChild: normalItem,
+        crossFadeState:
+            big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        firstCurve: Curves.easeInOut,
+        secondCurve: Curves.easeInOut,
+        sizeCurve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 300),
+      ),
       _NormalFile() => normalItem,
     };
     return SizeTransition(
@@ -646,31 +654,31 @@ class _Tab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedSize(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child: show
+    duration: const Duration(milliseconds: 300),
+    curve: Curves.easeInOut,
+    child:
+        show
             ? GestureDetector(
-                onTap: onTap,
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Tooltip(
-                      message: tooltip,
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                      ),
-                      child: SvgPicture.asset(
-                        assetName,
-                        colorFilter: ColorFilter.mode(
-                          selected ? context.theme.accent : context.theme.icon,
-                          BlendMode.srcIn,
-                        ),
-                        width: 24,
-                        height: 24,
-                      )),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Tooltip(
+                  message: tooltip,
+                  textStyle: const TextStyle(color: Colors.white),
+                  child: SvgPicture.asset(
+                    assetName,
+                    colorFilter: ColorFilter.mode(
+                      selected ? context.theme.accent : context.theme.icon,
+                      BlendMode.srcIn,
+                    ),
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
-              )
+              ),
+            )
             : const SizedBox(),
-      );
+  );
 }
 
 class _PageZip extends StatelessWidget {
@@ -680,53 +688,51 @@ class _PageZip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
+    children: [
+      Row(
         children: [
-          Row(
-            children: [
-              const SizedBox(width: 30),
-              const _FileIcon(extension: 'ZIP'),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _kDefaultArchiveName,
-                      style: TextStyle(
-                        color: context.theme.text,
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      context.l10n.archivedFolder,
-                      style: TextStyle(
-                        color: context.theme.secondaryText,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+          const SizedBox(width: 30),
+          const _FileIcon(extension: 'ZIP'),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _kDefaultArchiveName,
+                  style: TextStyle(
+                    color: context.theme.text,
+                    fontSize: 16,
+                    height: 1.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 30),
-            ],
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: SizedBox(
-              width: 300,
-              child: _ZipPasswordInputEditText(
-                controller: zipPasswordController,
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.archivedFolder,
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: 30),
         ],
-      );
+      ),
+      const Spacer(),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: SizedBox(
+          width: 300,
+          child: _ZipPasswordInputEditText(controller: zipPasswordController),
+        ),
+      ),
+    ],
+  );
 }
 
 class _ZipPasswordInputEditText extends HookWidget {
@@ -773,10 +779,7 @@ class _ZipPasswordInputEditText extends HookWidget {
                   focusNode: focusNode,
                   autofocus: true,
                   controller: controller,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: context.theme.text, fontSize: 14),
                   obscureText: obscureText.value,
                   scrollPadding: EdgeInsets.zero,
                   decoration: InputDecoration(
@@ -794,12 +797,12 @@ class _ZipPasswordInputEditText extends HookWidget {
                     ),
                   ),
                   inputFormatters: [
-                    LengthLimitingTextInputFormatter(
-                      kDefaultTextInputLimit,
-                    ),
+                    LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
                   ],
-                  contextMenuBuilder: (context, state) =>
-                      MixinAdaptiveSelectionToolbar(editableTextState: state),
+                  contextMenuBuilder:
+                      (context, state) => MixinAdaptiveSelectionToolbar(
+                        editableTextState: state,
+                      ),
                 ),
               ),
               MouseRegion(
@@ -813,12 +816,13 @@ class _ZipPasswordInputEditText extends HookWidget {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 20,
-                    color: hasText
-                        ? context.theme.text
-                        : context.theme.secondaryText,
+                    color:
+                        hasText
+                            ? context.theme.text
+                            : context.theme.secondaryText,
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -843,9 +847,9 @@ class _AnimatedListBuilder extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final animatedListKey = useMemoized(() => GlobalKey<AnimatedListState>(
-          debugLabel: 'file_preview_dialog',
-        ));
+    final animatedListKey = useMemoized(
+      () => GlobalKey<AnimatedListState>(debugLabel: 'file_preview_dialog'),
+    );
     final controller = useScrollController();
     useEffect(() {
       final subscription = onFileAdded.listen((event) {
@@ -875,38 +879,36 @@ class _AnimatedListBuilder extends HookConsumerWidget {
       controller: controller,
       initialItemCount: files.length,
       key: animatedListKey,
-      itemBuilder: (context, index, animation) =>
-          builder(context, files[index], animation),
+      itemBuilder:
+          (context, index, animation) =>
+              builder(context, files[index], animation),
     );
   }
 }
 
 final _videoControllerProvider = ChangeNotifierProvider.autoDispose
     .family<VideoPlayerController, _VideoFile>(
-  (ref, file) => VideoPlayerController.file(File(file.path))
-    ..initialize()
-    ..setVolume(0)
-    ..setLooping(true),
-);
+      (ref, file) =>
+          VideoPlayerController.file(File(file.path))
+            ..initialize()
+            ..setVolume(0)
+            ..setLooping(true),
+    );
 
-final _videoBlurHashProvider =
-    FutureProvider.autoDispose.family<String?, _VideoFile>(
-  (ref, file) => file._blurHashCompleter.future,
-);
+final _videoBlurHashProvider = FutureProvider.autoDispose
+    .family<String?, _VideoFile>((ref, file) => file._blurHashCompleter.future);
 
 class _TileBigVideo extends HookConsumerWidget {
-  const _TileBigVideo({
-    required this.onDelete,
-    required this.file,
-  });
+  const _TileBigVideo({required this.onDelete, required this.file});
 
   final VoidCallback onDelete;
   final _VideoFile file;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller =
-        ref.watch(_videoControllerProvider(file).select((value) => value));
+    final controller = ref.watch(
+      _videoControllerProvider(file).select((value) => value),
+    );
     final blurHash = ref.watch(_videoBlurHashProvider(file)).valueOrNull;
     useEffect(() {
       Future(controller.play);
@@ -921,8 +923,9 @@ class _TileBigVideo extends HookConsumerWidget {
       }
     });
 
-    final aspectRatio = ref.watch(_videoControllerProvider(file)
-        .select((value) => value.value.aspectRatio));
+    final aspectRatio = ref.watch(
+      _videoControllerProvider(file).select((value) => value.value.aspectRatio),
+    );
     return SizedBox(
       height: 200,
       child: Padding(
@@ -932,10 +935,7 @@ class _TileBigVideo extends HookConsumerWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const ColoredBox(
-                color: Colors.black,
-                child: SizedBox.expand(),
-              ),
+              const ColoredBox(color: Colors.black, child: SizedBox.expand()),
               if (blurHash != null)
                 ImageByBlurHashOrBase64(imageData: blurHash),
               Center(
@@ -954,14 +954,15 @@ class _TileBigVideo extends HookConsumerWidget {
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.28),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.28),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
                   child: Row(
                     children: [
                       const Spacer(),
@@ -990,12 +991,12 @@ class _VideoPositionText extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final duration = ref.watch(_videoControllerProvider(file).select(
-      (value) => value.value.duration,
-    ));
-    final position = ref.watch(_videoControllerProvider(file).select(
-      (value) => value.value.position,
-    ));
+    final duration = ref.watch(
+      _videoControllerProvider(file).select((value) => value.value.duration),
+    );
+    final position = ref.watch(
+      _videoControllerProvider(file).select((value) => value.value.position),
+    );
     final left = duration - position;
     return DecoratedBox(
       decoration: const BoxDecoration(
@@ -1006,10 +1007,7 @@ class _VideoPositionText extends ConsumerWidget {
         padding: const EdgeInsets.all(4),
         child: Text(
           left.asMinutesSeconds,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.white),
         ),
       ),
     );
@@ -1055,14 +1053,15 @@ class _TileBigImage extends HookConsumerWidget {
             Container(
               height: 50,
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.28),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              )),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.28),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
               child: Row(
                 children: [
                   const Spacer(),
@@ -1071,11 +1070,14 @@ class _TileBigImage extends HookConsumerWidget {
                     name: Resources.assetsImagesEditImageSvg,
                     padding: const EdgeInsets.all(10),
                     onTap: () async {
-                      final snapshot = file.imageEditorSnapshot != null
-                          ? await showImageEditor(context,
-                              path: file.imageEditorSnapshot!.rawImagePath,
-                              snapshot: file.imageEditorSnapshot)
-                          : await showImageEditor(context, path: file.path);
+                      final snapshot =
+                          file.imageEditorSnapshot != null
+                              ? await showImageEditor(
+                                context,
+                                path: file.imageEditorSnapshot!.rawImagePath,
+                                snapshot: file.imageEditorSnapshot,
+                              )
+                              : await showImageEditor(context, path: file.path);
                       if (snapshot == null) {
                         return;
                       }
@@ -1105,23 +1107,23 @@ class _FileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 50,
-        width: 50,
-        decoration: BoxDecoration(
-          color: context.theme.statusBackground,
-          shape: BoxShape.circle,
+    height: 50,
+    width: 50,
+    decoration: BoxDecoration(
+      color: context.theme.statusBackground,
+      shape: BoxShape.circle,
+    ),
+    child: Center(
+      child: Text(
+        extension,
+        style: TextStyle(
+          fontSize: 16,
+          // force light style
+          color: lightBrightnessThemeData.secondaryText,
         ),
-        child: Center(
-          child: Text(
-            extension,
-            style: TextStyle(
-              fontSize: 16,
-              // force light style
-              color: lightBrightnessThemeData.secondaryText,
-            ),
-          ),
-        ),
-      );
+      ),
+    ),
+  );
 }
 
 final _fileSizeProvider = FutureProvider.autoDispose.family<int, XFile>(
@@ -1129,10 +1131,7 @@ final _fileSizeProvider = FutureProvider.autoDispose.family<int, XFile>(
 );
 
 class _TileNormalFile extends HookConsumerWidget {
-  const _TileNormalFile({
-    required this.file,
-    required this.onDelete,
-  });
+  const _TileNormalFile({required this.file, required this.onDelete});
 
   final _File file;
 
@@ -1150,47 +1149,48 @@ class _TileNormalFile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Row(
-        children: [
-          const SizedBox(width: 30),
-          _FileIcon(extension: _getFileExtension(file)),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  path.basename(file.path).overflow,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  filesize(
-                      ref.watch(_fileSizeProvider(file.file)).valueOrNull ?? 0,
-                      0),
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+    children: [
+      const SizedBox(width: 30),
+      _FileIcon(extension: _getFileExtension(file)),
+      const SizedBox(width: 16),
+      Expanded(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              path.basename(file.path).overflow,
+              style: TextStyle(
+                color: context.theme.text,
+                fontSize: 16,
+                height: 1.5,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          ActionButton(
-            color: context.theme.secondaryText,
-            name: Resources.assetsImagesDeleteSvg,
-            padding: const EdgeInsets.all(10),
-            onTap: onDelete,
-          ),
-          const SizedBox(width: 10),
-        ],
-      );
+            const SizedBox(height: 4),
+            Text(
+              filesize(
+                ref.watch(_fileSizeProvider(file.file)).valueOrNull ?? 0,
+                0,
+              ),
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+      ActionButton(
+        color: context.theme.secondaryText,
+        name: Resources.assetsImagesDeleteSvg,
+        padding: const EdgeInsets.all(10),
+        onTap: onDelete,
+      ),
+      const SizedBox(width: 10),
+    ],
+  );
 }
 
 class _Actions extends HookWidget {
@@ -1227,9 +1227,11 @@ class _Actions extends HookWidget {
           (files) =>
               onFileAdded(files.map((file) => _File.auto(file.xFile)).toList()),
         ),
-        _SendFilesIntent: CallbackAction<_SendFilesIntent>(onInvoke: (_) {
-          onSend();
-        }),
+        _SendFilesIntent: CallbackAction<_SendFilesIntent>(
+          onInvoke: (_) {
+            onSend();
+          },
+        ),
       },
       child: child,
     );
@@ -1237,10 +1239,7 @@ class _Actions extends HookWidget {
 }
 
 class _FileInputOverlay extends HookConsumerWidget {
-  const _FileInputOverlay({
-    required this.child,
-    required this.onFileAdded,
-  });
+  const _FileInputOverlay({required this.child, required this.onFileAdded});
 
   final Widget child;
 
@@ -1264,10 +1263,7 @@ class _FileInputOverlay extends HookConsumerWidget {
           onFileAdded(files.map(_File.auto).toList());
         },
         child: Stack(
-          children: [
-            child,
-            if (dragging.value) const _ChatDragIndicator(),
-          ],
+          children: [child, if (dragging.value) const _ChatDragIndicator()],
         ),
       ),
     );
@@ -1283,29 +1279,25 @@ class _ChatDragIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(color: context.theme.popUp),
-        child: Container(
-          margin: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-              color: context.theme.listSelected,
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              border: DashPathBorder.all(
-                borderSide: BorderSide(
-                  color: context.theme.accent,
-                ),
-                dashArray: CircularIntervalList([4, 4]),
-              )),
-          child: Center(
-            child: Text(
-              context.l10n.addFile,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.text,
-              ),
-            ),
-          ),
+    decoration: BoxDecoration(color: context.theme.popUp),
+    child: Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.theme.listSelected,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        border: DashPathBorder.all(
+          borderSide: BorderSide(color: context.theme.accent),
+          dashArray: CircularIntervalList([4, 4]),
         ),
-      );
+      ),
+      child: Center(
+        child: Text(
+          context.l10n.addFile,
+          style: TextStyle(fontSize: 14, color: context.theme.text),
+        ),
+      ),
+    ),
+  );
 }
 
 class _PasteContextAction extends Action<PasteTextIntent> {

@@ -19,16 +19,20 @@ class Injector {
 
   final refreshUserIdSet = <String>{};
 
-  Future<void> syncConversion(String? conversationId,
-      {bool force = false, bool unWait = false}) async {
+  Future<void> syncConversion(
+    String? conversationId, {
+    bool force = false,
+    bool unWait = false,
+  }) async {
     if (conversationId == null ||
         conversationId == systemUser ||
         conversationId == accountId) {
       return;
     }
-    final conversation = await database.conversationDao
-        .conversationById(conversationId)
-        .getSingleOrNull();
+    final conversation =
+        await database.conversationDao
+            .conversationById(conversationId)
+            .getSingleOrNull();
     if (conversation == null || force) {
       if (unWait) {
         unawaited(refreshConversation(conversationId));
@@ -43,12 +47,14 @@ class Injector {
     bool checkCurrentUserExist = false,
   }) async {
     try {
-      final response =
-          await client.conversationApi.getConversation(conversationId);
+      final response = await client.conversationApi.getConversation(
+        conversationId,
+      );
       var ownerId = response.data.creatorId;
       if (response.data.category == ConversationCategory.contact) {
-        final legal =
-            response.data.participants.any((item) => item.userId == accountId);
+        final legal = response.data.participants.any(
+          (item) => item.userId == accountId,
+        );
         if (!legal) throw Exception('Conversation is not legal');
 
         response.data.participants.forEach((item) {
@@ -58,19 +64,22 @@ class Injector {
         });
       } else if (response.data.category == ConversationCategory.group) {
         if (checkCurrentUserExist) {
-          final existed = response.data.participants
-              .any((item) => item.userId == accountId);
+          final existed = response.data.participants.any(
+            (item) => item.userId == accountId,
+          );
           if (!existed) {
             throw Exception('The group is not include current user');
           }
         }
         await refreshUsers(<String>[ownerId]);
       }
-      final status = response.data.participants
-                  .firstWhereOrNull((element) => element.userId == accountId) !=
-              null
-          ? ConversationStatus.success
-          : ConversationStatus.quit;
+      final status =
+          response.data.participants.firstWhereOrNull(
+                    (element) => element.userId == accountId,
+                  ) !=
+                  null
+              ? ConversationStatus.success
+              : ConversationStatus.quit;
 
       await database.conversationDao.insert(
         db.Conversation(
@@ -90,11 +99,14 @@ class Injector {
       final remote = <db.Participant>[];
       final conversationUserIds = <String>[];
       response.data.participants.forEach((item) {
-        remote.add(db.Participant(
+        remote.add(
+          db.Participant(
             conversationId: conversationId,
             userId: item.userId,
             role: item.role,
-            createdAt: item.createdAt ?? DateTime.now()));
+            createdAt: item.createdAt ?? DateTime.now(),
+          ),
+        );
         conversationUserIds.add(item.userId);
       });
       unawaited(refreshUsers(conversationUserIds));
@@ -109,19 +121,27 @@ class Injector {
     }
   }
 
-  Future<void> refreshParticipants(String conversationId,
-      List<db.Participant> remote, List<UserSession>? userSessions) async {
+  Future<void> refreshParticipants(
+    String conversationId,
+    List<db.Participant> remote,
+    List<UserSession>? userSessions,
+  ) async {
     await database.participantDao.replaceAll(conversationId, remote);
     final participantSessions = <db.ParticipantSessionData>[];
     userSessions?.forEach((u) {
-      participantSessions.add(db.ParticipantSessionData(
+      participantSessions.add(
+        db.ParticipantSessionData(
           conversationId: conversationId,
           userId: u.userId,
           sessionId: u.sessionId,
-          publicKey: u.publicKey));
+          publicKey: u.publicKey,
+        ),
+      );
     });
-    await database.participantSessionDao
-        .replaceAll(conversationId, participantSessions);
+    await database.participantSessionDao.replaceAll(
+      conversationId,
+      participantSessions,
+    );
   }
 
   Future<List<db.User>?> refreshUsers(
@@ -148,10 +168,7 @@ class Injector {
     final queryUsers = ids.where((id) => !existsUsersIds.contains(id)).toList();
     if (queryUsers.isEmpty) return existsUsers;
 
-    return [
-      ...existsUsers,
-      ...?await _fetchUsers(queryUsers),
-    ];
+    return [...existsUsers, ...?await _fetchUsers(queryUsers)];
   }
 
   Future<List<db.User>?> _fetchUsers(List<String> ids) async {
@@ -204,18 +221,24 @@ class Injector {
     if (circleId == null) {
       final res = await client.circleApi.getCircles();
       res.data.forEach((circle) async {
-        await database.circleDao.insertUpdate(db.Circle(
+        await database.circleDao.insertUpdate(
+          db.Circle(
             circleId: circle.circleId,
             name: circle.name,
-            createdAt: circle.createdAt));
+            createdAt: circle.createdAt,
+          ),
+        );
         await _handleCircle(circle);
       });
     } else {
       final circle = (await client.circleApi.getCircle(circleId)).data;
-      await database.circleDao.insertUpdate(db.Circle(
+      await database.circleDao.insertUpdate(
+        db.Circle(
           circleId: circle.circleId,
           name: circle.name,
-          createdAt: circle.createdAt));
+          createdAt: circle.createdAt,
+        ),
+      );
       await _handleCircle(circle);
     }
 
@@ -229,11 +252,13 @@ class Injector {
     final ccList =
         (await client.circleApi.getCircleConversations(circle.circleId)).data;
     for (final cc in ccList) {
-      await database.circleConversationDao.insert(db.CircleConversation(
-        conversationId: cc.conversationId,
-        circleId: cc.circleId,
-        createdAt: cc.createdAt,
-      ));
+      await database.circleConversationDao.insert(
+        db.CircleConversation(
+          conversationId: cc.conversationId,
+          circleId: cc.circleId,
+          createdAt: cc.createdAt,
+        ),
+      );
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
         if (u == null) {
@@ -247,10 +272,12 @@ class Injector {
   }
 
   Future<List<db.User>?> updateUserByIdentityNumber(
-      String identityNumber) async {
+    String identityNumber,
+  ) async {
     try {
-      return await insertUpdateUsers(
-          [(await client.userApi.search(identityNumber)).data]);
+      return await insertUpdateUsers([
+        (await client.userApi.search(identityNumber)).data,
+      ]);
     } catch (e, s) {
       w('updateUserByIdentityNumber error $e, stack: $s');
     }

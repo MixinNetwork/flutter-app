@@ -42,31 +42,32 @@ class ImagePreviewPage extends HookConsumerWidget {
     required String conversationId,
     required String messageId,
     bool isTranscriptPage = false,
-  }) =>
-      showGeneralDialog(
-        context: context,
-        barrierColor: Colors.transparent,
-        barrierDismissible: true,
-        barrierLabel:
-            MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        pageBuilder: (BuildContext buildContext, Animation<double> animation,
-            Animation<double> secondaryAnimation) {
-          final child = ImagePreviewPage(
-            conversationId: conversationId,
-            messageId: messageId,
-            isTranscriptPage: isTranscriptPage,
-          );
-
-          try {
-            return Provider.value(
-              value: context.read<TranscriptMessagesWatcher>(),
-              child: child,
-            );
-          } catch (_) {}
-
-          return child;
-        },
+  }) => showGeneralDialog(
+    context: context,
+    barrierColor: Colors.transparent,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    pageBuilder: (
+      BuildContext buildContext,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) {
+      final child = ImagePreviewPage(
+        conversationId: conversationId,
+        messageId: messageId,
+        isTranscriptPage: isTranscriptPage,
       );
+
+      try {
+        return Provider.value(
+          value: context.read<TranscriptMessagesWatcher>(),
+          child: child,
+        );
+      } catch (_) {}
+
+      return child;
+    },
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,10 +76,9 @@ class ImagePreviewPage extends HookConsumerWidget {
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
 
-    final controller = useMemoized(
-      TransformImageController.new,
-      [current.value?.messageId],
-    );
+    final controller = useMemoized(TransformImageController.new, [
+      current.value?.messageId,
+    ]);
 
     final transcriptMessagesWatcher = useMemoized(() {
       try {
@@ -119,7 +119,7 @@ class ImagePreviewPage extends HookConsumerWidget {
           messageDao
               .mediaMessagesAfter(info, conversationId, 1)
               .getSingleOrNull()
-              .then((value) => next.value = value)
+              .then((value) => next.value = value),
         ]);
       }();
     }, [_messageId.value]);
@@ -129,49 +129,59 @@ class ImagePreviewPage extends HookConsumerWidget {
 
       final listen = transcriptMessagesWatcher
           .watchMessages()
-          .map((event) =>
-              event.where((element) => element.type.isImage).toList())
+          .map(
+            (event) => event.where((element) => element.type.isImage).toList(),
+          )
           .listen((messages) {
-        final index = messages
-            .indexWhere((element) => element.messageId == _messageId.value);
+            final index = messages.indexWhere(
+              (element) => element.messageId == _messageId.value,
+            );
 
-        current.value = messages.getOrNull(index);
-        prev.value = messages.getOrNull(index - 1);
-        next.value = messages.getOrNull(index + 1);
-      });
+            current.value = messages.getOrNull(index);
+            prev.value = messages.getOrNull(index - 1);
+            next.value = messages.getOrNull(index + 1);
+          });
       return listen.cancel;
     }, [_messageId.value]);
 
     useEffect(
-      () => context.database.messageDao
-          .watchInsertOrReplaceMessageStream(conversationId)
-          .switchMap<MessageItem>((value) async* {
-            for (final item in value) {
-              yield item;
-            }
-          })
-          .where((event) => [
-                MessageCategory.plainImage,
-                MessageCategory.signalImage,
-              ].contains(event.type))
-          .listen((event) {
-            if (event.messageId == current.value?.messageId) {
-              current.value = event;
-            }
-            if (event.messageId == prev.value?.messageId) prev.value = event;
-            if (next.value?.messageId == _messageId.value) next.value = event;
-          })
-          .cancel,
+      () =>
+          context.database.messageDao
+              .watchInsertOrReplaceMessageStream(conversationId)
+              .switchMap<MessageItem>((value) async* {
+                for (final item in value) {
+                  yield item;
+                }
+              })
+              .where(
+                (event) => [
+                  MessageCategory.plainImage,
+                  MessageCategory.signalImage,
+                ].contains(event.type),
+              )
+              .listen((event) {
+                if (event.messageId == current.value?.messageId) {
+                  current.value = event;
+                }
+                if (event.messageId == prev.value?.messageId) {
+                  prev.value = event;
+                }
+                if (next.value?.messageId == _messageId.value) {
+                  next.value = event;
+                }
+              })
+              .cancel,
       [conversationId],
     );
 
     return FocusableActionDetector(
       shortcuts: {
         SingleActivator(
-          LogicalKeyboardKey.keyC,
-          meta: kPlatformIsDarwin,
-          control: !kPlatformIsDarwin,
-        ): const _CopyIntent(),
+              LogicalKeyboardKey.keyC,
+              meta: kPlatformIsDarwin,
+              control: !kPlatformIsDarwin,
+            ):
+            const _CopyIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowLeft):
             const _PreviousImageIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowRight):
@@ -179,27 +189,35 @@ class ImagePreviewPage extends HookConsumerWidget {
         const SingleActivator(LogicalKeyboardKey.zoomIn):
             const _ImageZoomInIntent(),
         SingleActivator(
-          LogicalKeyboardKey.equal,
-          meta: kPlatformIsDarwin,
-          control: !kPlatformIsDarwin,
-        ): const _ImageZoomInIntent(),
+              LogicalKeyboardKey.equal,
+              meta: kPlatformIsDarwin,
+              control: !kPlatformIsDarwin,
+            ):
+            const _ImageZoomInIntent(),
         SingleActivator(
-          LogicalKeyboardKey.minus,
-          meta: kPlatformIsDarwin,
-          control: !kPlatformIsDarwin,
-        ): const _ImageZoomOutIntent(),
+              LogicalKeyboardKey.minus,
+              meta: kPlatformIsDarwin,
+              control: !kPlatformIsDarwin,
+            ):
+            const _ImageZoomOutIntent(),
         const SingleActivator(LogicalKeyboardKey.zoomOut):
             const _ImageZoomOutIntent(),
         SingleActivator(
-          LogicalKeyboardKey.keyR,
-          meta: kPlatformIsDarwin,
-          control: !kPlatformIsDarwin,
-        ): const _ImageRotateIntent(),
+              LogicalKeyboardKey.keyR,
+              meta: kPlatformIsDarwin,
+              control: !kPlatformIsDarwin,
+            ):
+            const _ImageRotateIntent(),
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => copyFile(context.accountServer
-              .convertMessageAbsolutePath(current.value, isTranscriptPage)),
+          onInvoke:
+              (Intent intent) => copyFile(
+                context.accountServer.convertMessageAbsolutePath(
+                  current.value,
+                  isTranscriptPage,
+                ),
+              ),
         ),
         _PreviousImageIntent: CallbackAction<Intent>(
           onInvoke: (intent) {
@@ -237,9 +255,7 @@ class ImagePreviewPage extends HookConsumerWidget {
             children: [
               Container(
                 height: 70,
-                decoration: BoxDecoration(
-                  color: context.theme.primary,
-                ),
+                decoration: BoxDecoration(color: context.theme.primary),
                 child: Builder(
                   builder: (context) {
                     if (current.value == null) return const SizedBox();
@@ -266,12 +282,13 @@ class ImagePreviewPage extends HookConsumerWidget {
                       fit: StackFit.expand,
                       children: [
                         LayoutBuilder(
-                          builder: (context, constraints) => _Item(
-                            message: current.value!,
-                            controller: controller,
-                            isTranscriptPage: isTranscriptPage,
-                            constraints: constraints,
-                          ),
+                          builder:
+                              (context, constraints) => _Item(
+                                message: current.value!,
+                                controller: controller,
+                                isTranscriptPage: isTranscriptPage,
+                                constraints: constraints,
+                              ),
                         ),
                         Center(
                           child: Padding(
@@ -280,8 +297,10 @@ class ImagePreviewPage extends HookConsumerWidget {
                               children: [
                                 if (prev.value != null)
                                   InteractiveDecoratedBox(
-                                    onTap: () => _messageId.value =
-                                        prev.value!.messageId,
+                                    onTap:
+                                        () =>
+                                            _messageId.value =
+                                                prev.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesNextSvg,
                                     ),
@@ -289,8 +308,10 @@ class ImagePreviewPage extends HookConsumerWidget {
                                 const Spacer(),
                                 if (next.value != null)
                                   InteractiveDecoratedBox(
-                                    onTap: () => _messageId.value =
-                                        next.value!.messageId,
+                                    onTap:
+                                        () =>
+                                            _messageId.value =
+                                                next.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesPrevSvg,
                                     ),
@@ -325,43 +346,43 @@ class _Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
+    children: [
+      AvatarWidget(
+        name: message.userFullName,
+        size: 36,
+        avatarUrl: message.avatarUrl,
+        userId: message.userId,
+      ),
+      const SizedBox(width: 10),
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AvatarWidget(
-            name: message.userFullName,
-            size: 36,
-            avatarUrl: message.avatarUrl,
-            userId: message.userId,
+          Text(
+            message.userFullName!,
+            style: TextStyle(
+              fontSize: MessageItemWidget.primaryFontSize,
+              color: context.theme.text,
+            ),
           ),
-          const SizedBox(width: 10),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                message.userFullName!,
-                style: TextStyle(
-                  fontSize: MessageItemWidget.primaryFontSize,
-                  color: context.theme.text,
-                ),
-              ),
-              Text(
-                message.userIdentityNumber,
-                style: TextStyle(
-                  fontSize: MessageItemWidget.secondaryFontSize,
-                  color: context.theme.secondaryText,
-                ),
-              ),
-            ],
+          Text(
+            message.userIdentityNumber,
+            style: TextStyle(
+              fontSize: MessageItemWidget.secondaryFontSize,
+              color: context.theme.secondaryText,
+            ),
           ),
-          const SizedBox(width: 14),
-          _Action(
-            controller: controller,
-            isTranscriptPage: isTranscriptPage,
-            message: message,
-          ),
-          const SizedBox(width: 24),
         ],
-      );
+      ),
+      const SizedBox(width: 14),
+      _Action(
+        controller: controller,
+        isTranscriptPage: isTranscriptPage,
+        message: message,
+      ),
+      const SizedBox(width: 24),
+    ],
+  );
 }
 
 enum _ActionType { share, copy, download }
@@ -400,8 +421,12 @@ class _Action extends StatelessWidget {
       );
     }
 
-    Future<void> copy() => copyFile(context.accountServer
-        .convertMessageAbsolutePath(message, isTranscriptPage));
+    Future<void> copy() => copyFile(
+      context.accountServer.convertMessageAbsolutePath(
+        message,
+        isTranscriptPage,
+      ),
+    );
 
     Future<void> download() async {
       if (message.mediaUrl?.isEmpty ?? true) return;
@@ -427,7 +452,7 @@ class _Action extends StatelessWidget {
         color: context.theme.icon,
         size: 20,
         onTap: download,
-      )
+      ),
     ];
 
     final close = ActionButton(
@@ -459,23 +484,24 @@ class _Action extends StatelessWidget {
     ];
 
     final menu = CustomPopupMenuButton(
-      itemBuilder: (context) => [
-        CustomPopupMenuItem(
-          icon: Resources.assetsImagesShareSvg,
-          title: context.l10n.forward,
-          value: _ActionType.share,
-        ),
-        CustomPopupMenuItem(
-          icon: Resources.assetsImagesCopySvg,
-          title: context.l10n.copy,
-          value: _ActionType.copy,
-        ),
-        CustomPopupMenuItem(
-          icon: Resources.assetsImagesAttachmentDownloadSvg,
-          title: context.l10n.download,
-          value: _ActionType.download,
-        ),
-      ],
+      itemBuilder:
+          (context) => [
+            CustomPopupMenuItem(
+              icon: Resources.assetsImagesShareSvg,
+              title: context.l10n.forward,
+              value: _ActionType.share,
+            ),
+            CustomPopupMenuItem(
+              icon: Resources.assetsImagesCopySvg,
+              title: context.l10n.copy,
+              value: _ActionType.copy,
+            ),
+            CustomPopupMenuItem(
+              icon: Resources.assetsImagesAttachmentDownloadSvg,
+              title: context.l10n.download,
+              value: _ActionType.download,
+            ),
+          ],
       onSelected: (type) {
         switch (type) {
           case _ActionType.share:
@@ -490,22 +516,25 @@ class _Action extends StatelessWidget {
     );
 
     return Expanded(
-      child: LayoutBuilder(builder: (context, constraints) {
-        final count = common.length + collapsible.length + 1;
-        final collapsed = (count * _width + (count - 1) * _dividerWidth) >=
-            constraints.maxWidth;
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final count = common.length + collapsible.length + 1;
+          final collapsed =
+              (count * _width + (count - 1) * _dividerWidth) >=
+              constraints.maxWidth;
 
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            ...common,
-            if (!collapsed) ...collapsible,
-            close,
-            if (collapsed) menu,
-          ].joinList(_divider),
-        );
-      }),
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              ...common,
+              if (!collapsed) ...collapsible,
+              close,
+              if (collapsed) menu,
+            ].joinList(_divider),
+          );
+        },
+      ),
     );
   }
 }
@@ -539,8 +568,10 @@ class _Item extends HookConsumerWidget {
       }
       final layoutSize = constraints.biggest;
 
-      final scale = math.min(layoutSize.width / imageSize.width,
-          layoutSize.height / imageSize.height);
+      final scale = math.min(
+        layoutSize.width / imageSize.width,
+        layoutSize.height / imageSize.height,
+      );
       return math.min<double>(scale, 1);
     }, [message.messageId]);
 
@@ -549,9 +580,7 @@ class _Item extends HookConsumerWidget {
         controller.animatedToScale(initialScale);
       },
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: Color.fromRGBO(62, 65, 72, 0.9),
-        ),
+        decoration: const BoxDecoration(color: Color.fromRGBO(62, 65, 72, 0.9)),
         child: ClipRect(
           child: ImagPreviewWidget(
             scale: initialScale,
@@ -562,13 +591,18 @@ class _Item extends HookConsumerWidget {
               Navigator.maybePop(context);
             },
             image: Image.file(
-              File(context.accountServer
-                  .convertMessageAbsolutePath(message, isTranscriptPage)),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
-                imageData: message.thumbImage ?? '',
-                fit: BoxFit.contain,
+              File(
+                context.accountServer.convertMessageAbsolutePath(
+                  message,
+                  isTranscriptPage,
+                ),
               ),
+              fit: BoxFit.contain,
+              errorBuilder:
+                  (context, error, s) => ImageByBlurHashOrBase64(
+                    imageData: message.thumbImage ?? '',
+                    fit: BoxFit.contain,
+                  ),
             ),
           ),
         ),

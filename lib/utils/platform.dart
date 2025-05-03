@@ -19,7 +19,8 @@ bool kPlatformIsMobile = Platform.isAndroid || Platform.isIOS;
 
 bool kPlatformIsPad = Platform.isIOS && !kPlatformIsIphone;
 
-bool kPlatformIsIphone = Platform.isIOS &&
+bool kPlatformIsIphone =
+    Platform.isIOS &&
     ui_device.current.userInterfaceIdiom ==
         ui_device.UIUserInterfaceIdiom.UIUserInterfaceIdiomPhone;
 
@@ -76,10 +77,7 @@ Future<String> getDeviceId() async {
 
 // https://man7.org/linux/man-pages/man5/machine-id.5.html
 Future<String?> _getLinuxDeviceId() async {
-  final process = await Process.run(
-    'cat',
-    ['/etc/machine-id'],
-  );
+  final process = await Process.run('cat', ['/etc/machine-id']);
 
   if (process.stdout == null) {
     e('failed to get linux device id. ${process.stderr}');
@@ -99,11 +97,11 @@ Future<String?> _getLinuxDeviceId() async {
 
 // ref: https://github.com/BestBurning/platform_device_id/issues/15#issuecomment-1064081170
 Future<String?> _getWindowsDeviceId() async {
-  final process = await Process.start(
-    'wmic',
-    ['csproduct', 'get', 'UUID'],
-    mode: ProcessStartMode.detachedWithStdio,
-  );
+  final process = await Process.start('wmic', [
+    'csproduct',
+    'get',
+    'UUID',
+  ], mode: ProcessStartMode.detachedWithStdio);
   final result = await process.stdout.transform(utf8.decoder).toList();
   String? deviceID;
   for (final element in result) {
@@ -119,18 +117,20 @@ Future<String?> _getWindowsDeviceId() async {
 // since platform_device_id_macos would block UI thread,
 // so replace with dart implementation.
 Future<String?> _getMacOSDeviceId() async {
-  final process = await Process.run(
-    'ioreg',
-    ['-rd1', '-c', 'IOPlatformExpertDevice'],
-  );
+  final process = await Process.run('ioreg', [
+    '-rd1',
+    '-c',
+    'IOPlatformExpertDevice',
+  ]);
   if (process.stdout == null) {
     return null;
   }
   final result = process.stdout.toString();
 
   //    "IOPlatformUUID" = "U-U-I-D"
-  final matches =
-      RegExp(r'(?<=IOPlatformUUID"\s=\s").*(?=")').firstMatch(result);
+  final matches = RegExp(
+    r'(?<=IOPlatformUUID"\s=\s").*(?=")',
+  ).firstMatch(result);
   if (matches == null) {
     e('failed to get macos device id. $result');
     return null;

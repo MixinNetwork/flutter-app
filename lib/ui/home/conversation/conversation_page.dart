@@ -40,14 +40,10 @@ class ConversationPage extends HookConsumerWidget {
           const SearchBar(),
           if (!filterUnseen && !hasKeyword)
             Expanded(
-              child: ConversationList(
-                key: PageStorageKey(slideCategoryState),
-              ),
+              child: ConversationList(key: PageStorageKey(slideCategoryState)),
             ),
           if (filterUnseen || hasKeyword)
-            Expanded(
-              child: SearchList(filterUnseen: filterUnseen),
-            ),
+            Expanded(child: SearchList(filterUnseen: filterUnseen)),
         ],
       ),
     );

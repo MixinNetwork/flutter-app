@@ -30,8 +30,11 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
       .then((value) => value!.registrationId!);
 
   @override
-  Future<bool> isTrustedIdentity(SignalProtocolAddress address,
-      IdentityKey? identityKey, Direction direction) async {
+  Future<bool> isTrustedIdentity(
+    SignalProtocolAddress address,
+    IdentityKey? identityKey,
+    Direction direction,
+  ) async {
     final ourNumber = _accountId;
     if (ourNumber == null) {
       return false;
@@ -46,7 +49,9 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
     switch (direction) {
       case Direction.sending:
         return isTrustedForSending(
-            identityKey!, await identityDao.getIdentityByAddress(theirAddress));
+          identityKey!,
+          await identityDao.getIdentityByAddress(theirAddress),
+        );
       case Direction.receiving:
         return true;
     }
@@ -54,23 +59,31 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
 
   @override
   Future<bool> saveIdentity(
-      SignalProtocolAddress address, IdentityKey? identityKey) async {
+    SignalProtocolAddress address,
+    IdentityKey? identityKey,
+  ) async {
     final signalAddress = address.getName();
     final identity = await identityDao.getIdentityByAddress(signalAddress);
     if (identity == null) {
       i('Saving new identity...$address');
-      await identityDao.insert(IdentitiesCompanion.insert(
+      await identityDao.insert(
+        IdentitiesCompanion.insert(
           address: signalAddress,
           publicKey: identityKey!.serialize(),
-          timestamp: DateTime.now().millisecondsSinceEpoch));
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
       return true;
     }
     if (identity.getIdentityKey() != identityKey) {
       i('Replacing existing identity...$address');
-      await identityDao.insert(IdentitiesCompanion.insert(
+      await identityDao.insert(
+        IdentitiesCompanion.insert(
           address: signalAddress,
           publicKey: identityKey!.serialize(),
-          timestamp: DateTime.now().millisecondsSinceEpoch));
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
       return true;
     }
     return false;

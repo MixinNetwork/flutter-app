@@ -86,7 +86,10 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       data: data,
     );
     final blazeMessage = BlazeMessage(
-        id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
+      id: const Uuid().v4(),
+      action: kCreateMessage,
+      params: blazeParam,
+    );
     try {
       final result = await sender.deliver(blazeMessage);
       if (result.success || result.errorCode == badData) {
@@ -108,7 +111,10 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       data: data,
     );
     final blazeMessage = BlazeMessage(
-        id: const Uuid().v4(), action: kCreateMessage, params: blazeParam);
+      id: const Uuid().v4(),
+      action: kCreateMessage,
+      params: blazeParam,
+    );
     try {
       final result = await sender.deliver(blazeMessage);
       if (result.success || result.errorCode == badData) {
@@ -143,29 +149,32 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     }
 
     if (message.category.isTranscript) {
-      final list = await database.transcriptMessageDao
-          .transcriptMessageByTranscriptId(messageId)
-          .get();
-      final json = list.map((e) {
-        if (e.category.isAppCard) {
-          try {
-            final json = jsonDecode(e.content!) as Map<String, dynamic>;
-            final card = AppCardData.fromJson(json);
-            if (card.isActionsCard && !card.canShareActions) {
-              json.remove('actions');
-              e = e.copyWith(content: Value(jsonEncode(json)));
+      final list =
+          await database.transcriptMessageDao
+              .transcriptMessageByTranscriptId(messageId)
+              .get();
+      final json =
+          list.map((e) {
+            if (e.category.isAppCard) {
+              try {
+                final json = jsonDecode(e.content!) as Map<String, dynamic>;
+                final card = AppCardData.fromJson(json);
+                if (card.isActionsCard && !card.canShareActions) {
+                  json.remove('actions');
+                  e = e.copyWith(content: Value(jsonEncode(json)));
+                }
+              } catch (error, stacktrace) {
+                w('AppCardData.fromJson error: $error, stack: $stacktrace');
+              }
             }
-          } catch (error, stacktrace) {
-            w('AppCardData.fromJson error: $error, stack: $stacktrace');
-          }
-        }
 
-        final map = e.toJson(serializer: const UtcValueSerializer());
-        map['media_duration'] =
-            int.tryParse(map['media_duration'] as String? ?? '');
-        map.remove('media_status');
-        return map;
-      }).toList();
+            final map = e.toJson(serializer: const UtcValueSerializer());
+            map['media_duration'] = int.tryParse(
+              map['media_duration'] as String? ?? '',
+            );
+            map.remove('media_status');
+            return map;
+          }).toList();
       message = message.copyWith(content: await jsonEncodeWithIsolate(json));
     }
 
@@ -179,8 +188,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     } else if (message.category.isAttachment && content != null) {
       try {
         final attachment = AttachmentMessage.fromJson(
-            (await jsonBase64DecodeWithIsolate(content))
-                as Map<String, dynamic>);
+          (await jsonBase64DecodeWithIsolate(content)) as Map<String, dynamic>,
+        );
         final attachmentExtra = AttachmentExtra(
           attachmentId: attachment.attachmentId,
           messageId: messageId,
@@ -193,9 +202,10 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       }
     }
 
-    final conversation = await database.conversationDao
-        .conversationById(message.conversationId)
-        .getSingleOrNull();
+    final conversation =
+        await database.conversationDao
+            .conversationById(message.conversationId)
+            .getSingleOrNull();
     if (conversation == null) {
       e('Conversation not found');
       return;
@@ -235,10 +245,13 @@ class SendingJob extends JobQueue<Job, List<Job>> {
         e('No participant session key: $error');
         // send plain directly if no participant session key.
         message = message.copyWith(
-            category: message.category.replaceAll('ENCRYPTED_', 'PLAIN_'));
+          category: message.category.replaceAll('ENCRYPTED_', 'PLAIN_'),
+        );
         d('category: ${message.category}');
-        await database.messageDao
-            .updateCategoryById(messageId, message.category);
+        await database.messageDao.updateCategoryById(
+          messageId,
+          message.category,
+        );
         result = await _sendPlainMessage(
           message,
           recipientId: recipientId,
@@ -268,7 +281,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
         await database.expiredMessageDao.insert(
           messageId: messageId,
           expireIn: conversation.expireIn!,
-          expireAt: DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+          expireAt:
+              DateTime.now().millisecondsSinceEpoch ~/ 1000 +
               conversation.expireIn!,
         );
       }
@@ -303,16 +317,19 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   Future<List<String>?> getMentionData(String messageId) async {
     final messages = database.mixinDatabase.messages;
 
-    final content = await (database.mixinDatabase.selectOnly(messages)
-          ..addColumns([messages.content])
-          ..where(messages.messageId.equals(messageId) &
-              messages.category.isIn([
-                MessageCategory.plainText,
-                MessageCategory.encryptedText,
-                MessageCategory.signalText
-              ])))
-        .map((row) => row.read(messages.content))
-        .getSingleOrNull();
+    final content =
+        await (database.mixinDatabase.selectOnly(messages)
+              ..addColumns([messages.content])
+              ..where(
+                messages.messageId.equals(messageId) &
+                    messages.category.isIn([
+                      MessageCategory.plainText,
+                      MessageCategory.encryptedText,
+                      MessageCategory.signalText,
+                    ]),
+              ))
+            .map((row) => row.read(messages.content))
+            .getSingleOrNull();
 
     if (content?.isEmpty ?? true) return null;
     final ids = mentionNumberRegExp.allMatches(content!).map((e) => e[1]!);
@@ -369,16 +386,18 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     required int expireIn,
     bool silent = false,
   }) async {
-    var participantSessionKey = await database.participantSessionDao
-        .participantSessionKeyWithoutSelf(message.conversationId, userId)
-        .getSingleOrNull();
+    var participantSessionKey =
+        await database.participantSessionDao
+            .participantSessionKeyWithoutSelf(message.conversationId, userId)
+            .getSingleOrNull();
 
     if (participantSessionKey == null ||
         participantSessionKey.publicKey.isNullOrBlank()) {
       await sender.syncConversation(message.conversationId);
-      participantSessionKey = await database.participantSessionDao
-          .participantSessionKeyWithoutSelf(message.conversationId, userId)
-          .getSingleOrNull();
+      participantSessionKey =
+          await database.participantSessionDao
+              .participantSessionKeyWithoutSelf(message.conversationId, userId)
+              .getSingleOrNull();
     }
 
     // Workaround no session key, can't encrypt message
@@ -387,16 +406,22 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       throw _NoParticipantSessionKeyException(message.conversationId, userId);
     }
 
-    final otherSessionKey = await database.participantSessionDao
-        .otherParticipantSessionKey(message.conversationId, userId, sessionId)
-        .getSingleOrNull();
+    final otherSessionKey =
+        await database.participantSessionDao
+            .otherParticipantSessionKey(
+              message.conversationId,
+              userId,
+              sessionId,
+            )
+            .getSingleOrNull();
 
-    final plaintext = message.category.isAttachment ||
-            message.category.isSticker ||
-            message.category.isContact ||
-            message.category.isLive
-        ? base64Decode(message.content!)
-        : await utf8EncodeWithIsolate(message.content!);
+    final plaintext =
+        message.category.isAttachment ||
+                message.category.isSticker ||
+                message.category.isContact ||
+                message.category.isLive
+            ? base64Decode(message.content!)
+            : await utf8EncodeWithIsolate(message.content!);
 
     final content = _encryptedProtocol.encryptMessage(
       privateKey,
@@ -427,7 +452,9 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     if (message.resendStatus != null) {
       if (message.resendStatus == 1) {
         final check = await sender.checkSignalSession(
-            message.resendUserId!, message.resendSessionId!);
+          message.resendUserId!,
+          message.resendSessionId!,
+        );
         if (check) {
           final encrypted = await signalProtocol.encryptSessionMessage(
             message,
@@ -448,31 +475,24 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       return result;
     }
     if (!await signalProtocol.isExistSenderKey(
-        message.conversationId, message.userId)) {
+      message.conversationId,
+      message.userId,
+    )) {
       await sender.checkConversation(message.conversationId);
     }
     await sender.checkSessionSenderKey(message.conversationId);
-    result = await sender.deliver(await encryptNormalMessage(
-      message,
-      silent: silent,
-      expireIn: expireIn,
-    ));
+    result = await sender.deliver(
+      await encryptNormalMessage(message, silent: silent, expireIn: expireIn),
+    );
     if (!result.success && result.retry) {
-      return _sendSignalMessage(
-        message,
-        silent: silent,
-        expireIn: expireIn,
-      );
+      return _sendSignalMessage(message, silent: silent, expireIn: expireIn);
     }
     return result;
   }
 }
 
 class _NoParticipantSessionKeyException implements Exception {
-  _NoParticipantSessionKeyException(
-    this.conversationId,
-    this.userId,
-  );
+  _NoParticipantSessionKeyException(this.conversationId, this.userId);
 
   final String conversationId;
   final String userId;

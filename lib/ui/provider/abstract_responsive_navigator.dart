@@ -16,23 +16,17 @@ class ResponsiveNavigatorState extends Equatable {
 
   @override
   List<Object?> get props => [
-        routeMode,
-        ...pages.map((e) => (
-              e.key,
-              e.name,
-              e.arguments,
-              e.child.key,
-            ))
-      ];
+    routeMode,
+    ...pages.map((e) => (e.key, e.name, e.arguments, e.child.key)),
+  ];
 
   ResponsiveNavigatorState copyWith({
     List<MaterialPage>? pages,
     bool? routeMode,
-  }) =>
-      ResponsiveNavigatorState(
-        pages: pages ?? this.pages,
-        routeMode: routeMode ?? this.routeMode,
-      );
+  }) => ResponsiveNavigatorState(
+    pages: pages ?? this.pages,
+    routeMode: routeMode ?? this.routeMode,
+  );
 }
 
 abstract class AbstractResponsiveNavigatorStateNotifier
@@ -68,18 +62,19 @@ abstract class AbstractResponsiveNavigatorStateNotifier
     if (index == -1) return;
 
     List<MaterialPage>? list;
-    list = index == 0 ? [] : state.pages.toList()
-      ..sublist(0, index);
+    list =
+        index == 0 ? [] : state.pages.toList()
+          ..sublist(0, index);
     state = state.copyWith(pages: list);
   }
 
   void popWhere(bool Function(MaterialPage page) test) =>
-      state = state.copyWith(
-        pages: state.pages.toList()..removeWhere(test),
-      );
+      state = state.copyWith(pages: state.pages.toList()..removeWhere(test));
 
-  void pop() => state = state.copyWith(
-      pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList());
+  void pop() =>
+      state = state.copyWith(
+        pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList(),
+      );
 
   Future<void> replace(String name, {Object? arguments}) async {
     popWhere((page) => page.name == name);

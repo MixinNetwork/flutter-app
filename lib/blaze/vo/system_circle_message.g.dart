@@ -15,13 +15,13 @@ SystemCircleMessage _$SystemCircleMessageFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$SystemCircleMessageToJson(
-        SystemCircleMessage instance) =>
-    <String, dynamic>{
-      'action': _$SystemCircleActionEnumMap[instance.action]!,
-      'circle_id': instance.circleId,
-      'conversation_id': instance.conversationId,
-      'user_id': instance.userId,
-    };
+  SystemCircleMessage instance,
+) => <String, dynamic>{
+  'action': _$SystemCircleActionEnumMap[instance.action]!,
+  'circle_id': instance.circleId,
+  'conversation_id': instance.conversationId,
+  'user_id': instance.userId,
+};
 
 const _$SystemCircleActionEnumMap = {
   SystemCircleAction.create: 'CREATE',

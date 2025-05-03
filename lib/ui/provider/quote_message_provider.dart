@@ -15,8 +15,9 @@ final quoteMessageProvider = StateProvider.autoDispose<MessageItem?>((ref) {
   return null;
 });
 
-final quoteMessageIdProvider =
-    quoteMessageProvider.select((message) => message?.messageId);
+final quoteMessageIdProvider = quoteMessageProvider.select(
+  (message) => message?.messageId,
+);
 
 class LastQuoteMessageStateNotifier
     extends DistinctStateNotifier<MessageItem?> {
@@ -26,9 +27,12 @@ class LastQuoteMessageStateNotifier
 }
 
 final lastQuoteMessageProvider = StateNotifierProvider.autoDispose<
-    LastQuoteMessageStateNotifier, MessageItem?>((ref) {
-  final lastQuoteMessageStateNotifier =
-      LastQuoteMessageStateNotifier(ref.read(quoteMessageProvider));
+  LastQuoteMessageStateNotifier,
+  MessageItem?
+>((ref) {
+  final lastQuoteMessageStateNotifier = LastQuoteMessageStateNotifier(
+    ref.read(quoteMessageProvider),
+  );
 
   ref.listen(quoteMessageProvider, (previous, next) {
     if (next == null) return;

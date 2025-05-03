@@ -45,19 +45,19 @@ Future<bool> saveFileToSystem(
   final mineType = lookupMimeType(file);
   final extension = p.extension(targetName);
 
-  var path = (await file_selector.getSaveLocation(
-    confirmButtonText: context.l10n.save,
-    suggestedName: targetName,
-    acceptedTypeGroups: [
-      if (Platform.isWindows)
-        file_selector.XTypeGroup(
-          label: mineType,
-          extensions: [extension],
-          mimeTypes: [if (mineType != null) mineType],
-        ),
-    ],
-  ))
-      ?.path;
+  var path =
+      (await file_selector.getSaveLocation(
+        confirmButtonText: context.l10n.save,
+        suggestedName: targetName,
+        acceptedTypeGroups: [
+          if (Platform.isWindows)
+            file_selector.XTypeGroup(
+              label: mineType,
+              extensions: [extension],
+              mimeTypes: [if (mineType != null) mineType],
+            ),
+        ],
+      ))?.path;
   if (path == null || path.isEmpty) {
     return false;
   }
@@ -91,10 +91,8 @@ Future<int> getTotalSizeOfFile(String path) async {
 
 late Directory mixinDocumentsDirectory;
 
-Directory get mixinLogDirectory => Directory(p.join(
-      mixinDocumentsDirectory.path,
-      'log',
-    ));
+Directory get mixinLogDirectory =>
+    Directory(p.join(mixinDocumentsDirectory.path, 'log'));
 
 Future<void> initMixinDocumentsDirectory() async {
   if (Platform.isLinux) {
@@ -106,7 +104,8 @@ Future<void> initMixinDocumentsDirectory() async {
   }
   if (Platform.isWindows) {
     mixinDocumentsDirectory = Directory(
-        p.join((await getApplicationDocumentsDirectory()).path, 'Mixin'));
+      p.join((await getApplicationDocumentsDirectory()).path, 'Mixin'),
+    );
     return;
   }
   mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
@@ -134,10 +133,7 @@ Future<String> generateTempFilePath(TempFileType type) async {
   );
 }
 
-Future<File?> saveBytesToTempFile(
-  Uint8List bytes,
-  TempFileType type,
-) async {
+Future<File?> saveBytesToTempFile(Uint8List bytes, TempFileType type) async {
   try {
     final file = File(await generateTempFilePath(type));
     if (file.existsSync()) {

@@ -5,12 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
-enum _ImageRotate {
-  rotate0,
-  rotate90,
-  rotate180,
-  rotate270,
-}
+enum _ImageRotate { rotate0, rotate90, rotate180, rotate270 }
 
 extension _ImageRotateExt on _ImageRotate {
   Size applyToSize(Size size) {
@@ -106,9 +101,9 @@ class ImagPreviewWidget extends StatefulWidget {
     this.minScale = 0.5,
     this.controller,
     this.onEmptyAreaTapped,
-  })  : assert(maxScale > scale),
-        assert(minScale < scale),
-        assert(maxScale > minScale);
+  }) : assert(maxScale > scale),
+       assert(minScale < scale),
+       assert(maxScale > minScale);
 
   final Widget image;
 
@@ -126,11 +121,7 @@ class ImagPreviewWidget extends StatefulWidget {
 
 // A classification of relevant user gestures. Each contiguous user gesture is
 // represented by exactly one _GestureType.
-enum _GestureType {
-  pan,
-  scale,
-  rotate,
-}
+enum _GestureType { pan, scale, rotate }
 
 const _rotateEnabled = false;
 const _scaleEnabled = true;
@@ -212,10 +203,10 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   }
 
   Rect get _transformedChildRect => _calculateTransformedChildRect(
-        childRect: _childRect,
-        translate: _transformationController.translate,
-        scale: _transformationController.scale,
-      );
+    childRect: _childRect,
+    translate: _transformationController.translate,
+    scale: _transformationController.scale,
+  );
 
   // the rect of child which fit the viewport.
   Rect get _bestFitInRect {
@@ -238,12 +229,17 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   }) {
     final size = childRect.size * scale;
     return Rect.fromCenter(
-            center: _viewport.center, width: size.width, height: size.height)
-        .shift(translate);
+      center: _viewport.center,
+      width: size.width,
+      height: size.height,
+    ).shift(translate);
   }
 
   Offset _calculateToScene(
-      Offset viewportPoint, Offset translate, double scale) {
+    Offset viewportPoint,
+    Offset translate,
+    double scale,
+  ) {
     final scaledPoint = (viewportPoint - _viewport.center - translate) / scale;
     return scaledPoint + _childRect.center;
   }
@@ -284,8 +280,10 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         final offset = focalPoint - _focalPoint!;
         _focalPoint = focalPoint;
 
-        final computedOffset =
-            _transformedChildRect.ensureEdgeNotInViewport(_viewport, offset);
+        final computedOffset = _transformedChildRect.ensureEdgeNotInViewport(
+          _viewport,
+          offset,
+        );
         _transformationController.translate += computedOffset;
       case _GestureType.scale:
         assert(_scaleStart != null);
@@ -315,9 +313,15 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
 
     final translation = _transformationController.translate;
     final fmx = FrictionSimulation(
-        _kDrag, translation.dx, details.velocity.pixelsPerSecond.dx);
+      _kDrag,
+      translation.dx,
+      details.velocity.pixelsPerSecond.dx,
+    );
     final fmy = FrictionSimulation(
-        _kDrag, translation.dy, details.velocity.pixelsPerSecond.dy);
+      _kDrag,
+      translation.dy,
+      details.velocity.pixelsPerSecond.dy,
+    );
 
     final toFinal = _getFinalTime(
       details.velocity.pixelsPerSecond.distance,
@@ -327,7 +331,9 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     var deltaTranslation =
         Offset(fmx.finalX, fmy.finalX) - _transformationController.translate;
     deltaTranslation = _transformedChildRect.ensureEdgeNotInViewport(
-        _viewport, deltaTranslation);
+      _viewport,
+      deltaTranslation,
+    );
     if (deltaTranslation.distanceSquared == 0) {
       // no translation.
       return;
@@ -335,10 +341,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     _animation = Tween<Offset>(
       begin: translation,
       end: _transformationController.translate + deltaTranslation,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.decelerate,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.decelerate));
     _controller.duration = Duration(milliseconds: (toFinal * 1000).round());
     _animation!.addListener(_onTranslationAnimated);
     _controller.forward();
@@ -398,8 +401,10 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   void _applyScale(double scaleChange, Offset point) {
     final childRect = _childRect;
 
-    final targetScale = (_transformationController.scale * scaleChange)
-        .clamp(widget.minScale, widget.maxScale);
+    final targetScale = (_transformationController.scale * scaleChange).clamp(
+      widget.minScale,
+      widget.maxScale,
+    );
 
     // Zoom out, but has translation. we need check if scaled child rect should
     // be centering in the viewport.
@@ -466,8 +471,10 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   void _animateScale(double scaleChange) {
     assert(scaleChange > 0);
 
-    final targetScale = (_transformationController.scale * scaleChange)
-        .clamp(widget.minScale, widget.maxScale);
+    final targetScale = (_transformationController.scale * scaleChange).clamp(
+      widget.minScale,
+      widget.maxScale,
+    );
 
     _scaleAnimation?.removeListener(_onScaleAnimated);
     _scaleAnimationController.reset();
@@ -475,10 +482,12 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     _scaleAnimation = Tween<double>(
       begin: _transformationController.scale,
       end: targetScale,
-    ).animate(CurvedAnimation(
-      parent: _scaleAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _scaleAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
     _scaleAnimation!.addListener(_onScaleAnimated);
     _scaleAnimationController.forward();
   }
@@ -494,13 +503,14 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
 
   @override
   Widget build(BuildContext context) {
-    final matrix = Matrix4.identity()
-      ..leftTranslate(
-        _transformationController.translate.dx,
-        _transformationController.translate.dy,
-      )
-      ..rotateZ(_transformationController.rotateRadius)
-      ..scale(_transformationController.scale);
+    final matrix =
+        Matrix4.identity()
+          ..leftTranslate(
+            _transformationController.translate.dx,
+            _transformationController.translate.dy,
+          )
+          ..rotateZ(_transformationController.rotateRadius)
+          ..scale(_transformationController.scale);
 
     return RepaintBoundary(
       child: Listener(
@@ -519,10 +529,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
               minHeight: 0,
               maxWidth: double.infinity,
               maxHeight: double.infinity,
-              child: KeyedSubtree(
-                key: _childKey,
-                child: widget.image,
-              ),
+              child: KeyedSubtree(key: _childKey, child: widget.image),
             ),
           ),
         ),

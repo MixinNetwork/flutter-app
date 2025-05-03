@@ -37,20 +37,24 @@ class ConversationMenuWrapper extends HookConsumerWidget {
     final ownerId = conversation?.ownerId ?? searchConversation!.ownerId;
     final pinTime = conversation?.pinTime ?? searchConversation?.pinTime;
     final isMute = conversation?.isMute ?? searchConversation!.isMute;
-    final isGroupConversation = conversation?.isGroupConversation ??
+    final isGroupConversation =
+        conversation?.isGroupConversation ??
         searchConversation!.isGroupConversation;
 
     return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
       menuProvider: (MenuRequest request) async {
-        final circleId = ref.read(slideCategoryStateProvider.select((value) {
-          if (value.type != SlideCategoryType.circle) return null;
-          return value.id;
-        }));
+        final circleId = ref.read(
+          slideCategoryStateProvider.select((value) {
+            if (value.type != SlideCategoryType.circle) return null;
+            return value.id;
+          }),
+        );
 
-        final circles = await context.database.circleDao
-            .otherCircleByConversationId(conversationId)
-            .get();
+        final circles =
+            await context.database.circleDao
+                .otherCircleByConversationId(conversationId)
+                .get();
 
         return MenusWithSeparator(
           childrens: [
@@ -59,29 +63,32 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 MenuAction(
                   image: MenuImage.icon(IconFonts.unPin),
                   title: context.l10n.unpin,
-                  callback: () => runFutureWithToast(
-                    context.accountServer.unpin(conversationId),
-                  ),
+                  callback:
+                      () => runFutureWithToast(
+                        context.accountServer.unpin(conversationId),
+                      ),
                 )
               else
                 MenuAction(
                   image: MenuImage.icon(IconFonts.pin),
                   title: context.l10n.pinTitle,
-                  callback: () => runFutureWithToast(
-                    context.accountServer.pin(conversationId),
-                  ),
+                  callback:
+                      () => runFutureWithToast(
+                        context.accountServer.pin(conversationId),
+                      ),
                 ),
               if (isMute)
                 MenuAction(
                   image: MenuImage.icon(IconFonts.unMute),
                   title: context.l10n.unmute,
-                  callback: () => runFutureWithToast(
-                    context.accountServer.unMuteConversation(
-                      conversationId:
-                          isGroupConversation ? conversationId : null,
-                      userId: isGroupConversation ? null : ownerId,
-                    ),
-                  ),
+                  callback:
+                      () => runFutureWithToast(
+                        context.accountServer.unMuteConversation(
+                          conversationId:
+                              isGroupConversation ? conversationId : null,
+                          userId: isGroupConversation ? null : ownerId,
+                        ),
+                      ),
                 )
               else
                 MenuAction(
@@ -89,7 +96,9 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                   title: context.l10n.mute,
                   callback: () async {
                     final result = await showMixinDialog<int?>(
-                        context: context, child: const MuteDialog());
+                      context: context,
+                      child: const MuteDialog(),
+                    );
                     if (result == null) return;
                     await runFutureWithToast(
                       context.accountServer.muteConversation(
@@ -106,32 +115,32 @@ class ConversationMenuWrapper extends HookConsumerWidget {
             [
               if (circles.isNotEmpty)
                 Menu(
-                    image: MenuImage.icon(IconFonts.circle),
-                    title: context.l10n.addToCircle,
-                    children: circles
-                        .map((e) => MenuAction(
+                  image: MenuImage.icon(IconFonts.circle),
+                  title: context.l10n.addToCircle,
+                  children:
+                      circles
+                          .map(
+                            (e) => MenuAction(
                               title: e.name,
                               callback: () async {
-                                await runFutureWithToast(
-                                  () async {
-                                    await context.accountServer
-                                        .editCircleConversation(
-                                      e.circleId,
-                                      [
+                                await runFutureWithToast(() async {
+                                  await context.accountServer
+                                      .editCircleConversation(e.circleId, [
                                         CircleConversationRequest(
                                           action: CircleConversationAction.add,
                                           conversationId: conversationId,
-                                          userId: isGroupConversation
-                                              ? null
-                                              : ownerId,
+                                          userId:
+                                              isGroupConversation
+                                                  ? null
+                                                  : ownerId,
                                         ),
-                                      ],
-                                    );
-                                  }(),
-                                );
+                                      ]);
+                                }());
                               },
-                            ))
-                        .toList()),
+                            ),
+                          )
+                          .toList(),
+                ),
             ],
             [
               MenuAction(
@@ -146,10 +155,12 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                     description: context.l10n.deleteChatDescription,
                   );
                   if (ret == null) return;
-                  await context.accountServer
-                      .deleteMessagesByConversationId(conversationId);
-                  await context.database.conversationDao
-                      .deleteConversation(conversationId);
+                  await context.accountServer.deleteMessagesByConversationId(
+                    conversationId,
+                  );
+                  await context.database.conversationDao.deleteConversation(
+                    conversationId,
+                  );
                   if (ref.read(conversationProvider)?.conversationId ==
                       conversationId) {
                     ref.read(conversationProvider.notifier).unselected();
@@ -162,18 +173,16 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                 MenuAction(
                   image: MenuImage.icon(IconFonts.delete),
                   title: context.l10n.removeChatFromCircle,
-                  callback: () => runFutureWithToast(
-                    context.accountServer.editCircleConversation(
-                      circleId,
-                      [
-                        CircleConversationRequest(
-                          action: CircleConversationAction.remove,
-                          conversationId: conversationId,
-                          userId: isGroupConversation ? null : ownerId,
-                        )
-                      ],
-                    ),
-                  ),
+                  callback:
+                      () => runFutureWithToast(
+                        context.accountServer.editCircleConversation(circleId, [
+                          CircleConversationRequest(
+                            action: CircleConversationAction.remove,
+                            conversationId: conversationId,
+                            userId: isGroupConversation ? null : ownerId,
+                          ),
+                        ]),
+                      ),
                 ),
             ],
           ],

@@ -20,8 +20,9 @@ class SelectionBottomBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canForward =
-        ref.watch(messageSelectionProvider.select((value) => value.canForward));
+    final canForward = ref.watch(
+      messageSelectionProvider.select((value) => value.canForward),
+    );
 
     return SizedBox(
       height: 80,
@@ -85,32 +86,45 @@ class SelectionBottomBar extends HookConsumerWidget {
             },
           ),
           _Button(
-              label: context.l10n.copy,
-              iconAssetName: Resources.assetsImagesCopySvg,
-              onTap: () async => runFutureWithToast((() async {
-                    final messageSelectionNotifier =
-                        ref.read(messageSelectionProvider);
+            label: context.l10n.copy,
+            iconAssetName: Resources.assetsImagesCopySvg,
+            onTap:
+                () async => runFutureWithToast(
+                  (() async {
+                    final messageSelectionNotifier = ref.read(
+                      messageSelectionProvider,
+                    );
 
                     final selectedMessageIds =
                         messageSelectionNotifier.selectedMessageIds;
-                    final messages = await context.database.messageDao
-                        .messageItemByMessageIds(selectedMessageIds.toList())
-                        .get();
+                    final messages =
+                        await context.database.messageDao
+                            .messageItemByMessageIds(
+                              selectedMessageIds.toList(),
+                            )
+                            .get();
 
                     final dateFormat = DateFormat.yMd().add_Hms();
-                    final text = messages.map((e) {
-                      var content = e.content;
-                      if (!e.type.isText) {
-                        content =
-                            messagePreviewOptimize(e.status, e.type, e.content);
-                      }
-                      return '${e.userFullName}, (${dateFormat.format(e.createdAt.toLocal())}):\n$content';
-                    }).join('\n\n');
+                    final text = messages
+                        .map((e) {
+                          var content = e.content;
+                          if (!e.type.isText) {
+                            content = messagePreviewOptimize(
+                              e.status,
+                              e.type,
+                              e.content,
+                            );
+                          }
+                          return '${e.userFullName}, (${dateFormat.format(e.createdAt.toLocal())}):\n$content';
+                        })
+                        .join('\n\n');
 
                     await Clipboard.setData(ClipboardData(text: text));
 
                     messageSelectionNotifier.clearSelection();
-                  })())),
+                  })(),
+                ),
+          ),
           _Button(
             label: context.l10n.delete,
             iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
@@ -123,7 +137,9 @@ class SelectionBottomBar extends HookConsumerWidget {
               final confirm = await showConfirmMixinDialog(
                 context,
                 context.l10n.chatDeleteMessage(
-                    messagesToDelete.length, messagesToDelete.length),
+                  messagesToDelete.length,
+                  messagesToDelete.length,
+                ),
                 positiveText: context.l10n.delete,
                 neutralText: canRecall ? context.l10n.deleteForEveryone : null,
               );
@@ -178,19 +194,18 @@ class _Button extends StatelessWidget {
               iconAssetName,
               width: 24,
               height: 24,
-              colorFilter:
-                  ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(
+                context.theme.icon,
+                BlendMode.srcIn,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: context.theme.text, fontSize: 14),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            )
+            ),
           ],
         ),
       ),
@@ -206,10 +221,7 @@ class _Button extends StatelessWidget {
         child: child,
       );
     } else {
-      child = Opacity(
-        opacity: 0.5,
-        child: child,
-      );
+      child = Opacity(opacity: 0.5, child: child);
     }
     return Expanded(child: child);
   }

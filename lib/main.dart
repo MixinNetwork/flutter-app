@@ -139,8 +139,10 @@ Future<void> _runApp(List<String> args) async {
 
     final windowOptions = WindowOptions(
       titleBarStyle: Platform.isMacOS ? TitleBarStyle.hidden : null,
-      minimumSize:
-          const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480),
+      minimumSize: const Size(
+        kSlidePageMinWidth + kResponsiveNavigationMinWidth,
+        480,
+      ),
       size: windowSize,
       center: Platform.isWindows ? true : null,
     );

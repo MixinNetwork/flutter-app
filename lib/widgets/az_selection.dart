@@ -14,13 +14,16 @@ class AZSelection extends SingleChildRenderObjectWidget {
   final TextStyle? textStyle;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => AZRender()
-    ..onSelection = onSelection
-    ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
+  RenderObject createRenderObject(BuildContext context) =>
+      AZRender()
+        ..onSelection = onSelection
+        ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant AZRender renderObject) {
+    BuildContext context,
+    covariant AZRender renderObject,
+  ) {
     renderObject
       ..onSelection = onSelection
       ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
@@ -64,8 +67,10 @@ class AZRender extends RenderBox {
         textAlign: TextAlign.center,
         text: TextSpan(text: item, style: _textStyle),
       )..layout(minWidth: width);
-      _offsets[painter] =
-          Offset(constraints.maxWidth - painter.width, lineHeight * i);
+      _offsets[painter] = Offset(
+        constraints.maxWidth - painter.width,
+        lineHeight * i,
+      );
     }
   }
 
@@ -105,7 +110,11 @@ class AZRender extends RenderBox {
       return false;
     }
     final rect = Rect.fromLTWH(
-        constraints.maxWidth - width, 0, width, constraints.maxHeight);
+      constraints.maxWidth - width,
+      0,
+      width,
+      constraints.maxHeight,
+    );
     if (rect.contains(position)) {
       result.add(BoxHitTestEntry(this, position));
       return true;

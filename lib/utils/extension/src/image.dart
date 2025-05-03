@@ -20,6 +20,5 @@ extension ImageProviderExtension<T extends Object> on ImageProvider<T> {
 extension ImageExtension on ui.Image {
   Future<Uint8List?> toBytes({
     ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
-  }) async =>
-      (await toByteData(format: format))?.buffer.asUint8List();
+  }) async => (await toByteData(format: format))?.buffer.asUint8List();
 }

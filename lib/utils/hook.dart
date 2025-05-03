@@ -15,30 +15,28 @@ AsyncSnapshot<T> useMemoizedFuture<T>(
   Future<T> Function() futureBuilder,
   T initialData, {
   List<Object?> keys = const <Object>[],
-}) =>
-    _logSnapshotError(useFuture(
-      useMemoized(
-        futureBuilder,
-        keys,
-      ),
-      initialData: initialData,
-    ));
+}) => _logSnapshotError(
+  useFuture(useMemoized(futureBuilder, keys), initialData: initialData),
+);
 
 AsyncSnapshot<T> useMemoizedStream<T>(
   Stream<T> Function() valueBuilder, {
   T? initialData,
   List<Object?> keys = const <Object>[],
-}) =>
-    _logSnapshotError(useStream<T>(
-      useMemoized<Stream<T>>(valueBuilder, keys),
-      initialData: initialData,
-    ));
+}) => _logSnapshotError(
+  useStream<T>(
+    useMemoized<Stream<T>>(valueBuilder, keys),
+    initialData: initialData,
+  ),
+);
 
 AsyncSnapshot<T> _logSnapshotError<T>(AsyncSnapshot<T> snapshot) {
   useEffect(() {
     if (snapshot.hasError) {
-      e('error: ${snapshot.error} ${snapshot.stackTrace}'
-          '\n call stack: \n ${StackTrace.current}');
+      e(
+        'error: ${snapshot.error} ${snapshot.stackTrace}'
+        '\n call stack: \n ${StackTrace.current}',
+      );
     }
   }, [snapshot]);
   return snapshot;
@@ -59,20 +57,18 @@ S useBlocState<B extends BlocBase<S>, S>({
   bool preserveState = false,
   bool Function(S state)? when,
 }) {
-  final (stream, initialData) = useMemoized(
-    () {
-      final b = bloc ?? useContext().read<B>();
-      var stream = b.stream;
-      if (when != null) stream = stream.where(when);
-      return (stream.distinct(), b.state);
-    },
-    [bloc ?? useContext().read<B>(), ...keys],
-  );
+  final (stream, initialData) = useMemoized(() {
+    final b = bloc ?? useContext().read<B>();
+    var stream = b.stream;
+    if (when != null) stream = stream.where(when);
+    return (stream.distinct(), b.state);
+  }, [bloc ?? useContext().read<B>(), ...keys]);
   return useStream(
-    stream,
-    initialData: initialData,
-    preserveState: preserveState,
-  ).data as S;
+        stream,
+        initialData: initialData,
+        preserveState: preserveState,
+      ).data
+      as S;
 }
 
 T useBlocStateConverter<B extends BlocBase<S>, S, T>({
@@ -82,20 +78,18 @@ T useBlocStateConverter<B extends BlocBase<S>, S, T>({
   bool preserveState = false,
   bool Function(T)? when,
 }) {
-  final (stream, initialData) = useMemoized(
-    () {
-      final b = bloc ?? useContext().read<B>();
-      var stream = b.stream.map(converter);
-      if (when != null) stream = stream.where(when);
-      return (stream.distinct(), converter(b.state));
-    },
-    [bloc ?? useContext().read<B>(), ...keys],
-  );
+  final (stream, initialData) = useMemoized(() {
+    final b = bloc ?? useContext().read<B>();
+    var stream = b.stream.map(converter);
+    if (when != null) stream = stream.where(when);
+    return (stream.distinct(), converter(b.state));
+  }, [bloc ?? useContext().read<B>(), ...keys]);
   return useStream(
-    stream,
-    initialData: initialData,
-    preserveState: preserveState,
-  ).data as T;
+        stream,
+        initialData: initialData,
+        preserveState: preserveState,
+      ).data
+      as T;
 }
 
 Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
@@ -110,8 +104,9 @@ Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
   }, [valueNotifier]);
 
   return useMemoized(
-      () => streamController.stream.startWith(valueNotifier.value),
-      [valueNotifier]);
+    () => streamController.stream.startWith(valueNotifier.value),
+    [valueNotifier],
+  );
 }
 
 AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
@@ -119,28 +114,23 @@ AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
   required T Function(L) converter,
   List<Object?> keys = const <Object>[],
 }) {
-  final streamController = useStreamController<T>(
-    keys: [listenable, ...keys],
-  );
+  final streamController = useStreamController<T>(keys: [listenable, ...keys]);
 
   final initialData = useMemoized(() => converter(listenable));
 
-  useEffect(
-    () {
-      void onListen() => streamController.add(converter(listenable));
+  useEffect(() {
+    void onListen() => streamController.add(converter(listenable));
 
-      listenable.addListener(onListen);
-      return () {
-        listenable.removeListener(onListen);
-      };
-    },
-    [listenable, ...keys],
-  );
+    listenable.addListener(onListen);
+    return () {
+      listenable.removeListener(onListen);
+    };
+  }, [listenable, ...keys]);
 
-  final stream = useMemoized(
-    () => streamController.stream.distinct(),
-    [listenable, ...keys],
-  );
+  final stream = useMemoized(() => streamController.stream.distinct(), [
+    listenable,
+    ...keys,
+  ]);
   return useStream(stream, initialData: initialData);
 }
 
@@ -204,21 +194,22 @@ void useRouteObserver(
   }, [route, routeObserver, ...keys]);
 }
 
-BuildContext? useSecondNavigatorContext(BuildContext context) =>
-    useMemoized(() {
-      final rootNavigatorState =
-          Navigator.maybeOf(context, rootNavigator: true);
-      if (rootNavigatorState == null) return null;
+BuildContext? useSecondNavigatorContext(BuildContext context) => useMemoized(
+  () {
+    final rootNavigatorState = Navigator.maybeOf(context, rootNavigator: true);
+    if (rootNavigatorState == null) return null;
 
-      BuildContext? findSecondContext(BuildContext context) {
-        final state = context.findAncestorStateOfType<NavigatorState>();
-        if (state == null) return null;
-        if (state == rootNavigatorState) return context;
-        return findSecondContext(state.context);
-      }
+    BuildContext? findSecondContext(BuildContext context) {
+      final state = context.findAncestorStateOfType<NavigatorState>();
+      if (state == null) return null;
+      if (state == rootNavigatorState) return context;
+      return findSecondContext(state.context);
+    }
 
-      return findSecondContext(context);
-    }, []);
+    return findSecondContext(context);
+  },
+  [],
+);
 
 class _ProtocolListener with ProtocolListener {
   _ProtocolListener(this.callback);

@@ -6,10 +6,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../logger.dart';
 
 // auto added by .github/workflows/manual-build.yml
-const _kAppVersion =
-    String.fromEnvironment('APP_VERSION', defaultValue: '1.15.0');
-const _kAppBuildNumber =
-    String.fromEnvironment('APP_BUILD_NUMBER', defaultValue: '0');
+const _kAppVersion = String.fromEnvironment(
+  'APP_VERSION',
+  defaultValue: '1.15.0',
+);
+const _kAppBuildNumber = String.fromEnvironment(
+  'APP_BUILD_NUMBER',
+  defaultValue: '0',
+);
 
 final _packageInfo = PackageInfo(
   appName: 'mixin',
@@ -49,11 +53,13 @@ Future<String> _generateUserAgent(PackageInfo packageInfo) async {
       final result = await Process.run('sw_vers', []);
       if (result.stdout != null) {
         final stdout = result.stdout as String;
-        final map = Map.fromEntries(const LineSplitter()
-            .convert(stdout)
-            .map((e) => e.split(':'))
-            .where((element) => element.length >= 2)
-            .map((e) => MapEntry(e.first.trim(), e[1].trim())));
+        final map = Map.fromEntries(
+          const LineSplitter()
+              .convert(stdout)
+              .map((e) => e.split(':'))
+              .where((element) => element.length >= 2)
+              .map((e) => MapEntry(e.first.trim(), e[1].trim())),
+        );
         // example
         // ProductName: macOS
         // ProductVersion: 12.0.1

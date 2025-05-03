@@ -4,10 +4,7 @@ import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
 class FloodJob extends JobQueue<FloodMessage, List<FloodMessage>> {
-  FloodJob({
-    required super.database,
-    required this.getProcessFloodJob,
-  });
+  FloodJob({required super.database, required this.getProcessFloodJob});
 
   Function(FloodMessage floodMessage)? Function() getProcessFloodJob;
 

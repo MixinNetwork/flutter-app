@@ -13,10 +13,7 @@ import '../../utils/logger.dart';
 import '../dialog.dart';
 import '../toast.dart';
 
-enum CaptchaType {
-  gCaptcha,
-  hCaptcha,
-}
+enum CaptchaType { gCaptcha, hCaptcha }
 
 /// return:
 /// list[0] : CaptchaType
@@ -43,8 +40,8 @@ class CaptchaWebViewDialog extends HookConsumerWidget {
     );
 
     final controller = useMemoized(() {
-      final controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted);
+      final controller =
+          WebViewController()..setJavaScriptMode(JavaScriptMode.unrestricted);
 
       void loadFallback() {
         if (captcha.value == CaptchaType.gCaptcha) {
@@ -52,23 +49,23 @@ class CaptchaWebViewDialog extends HookConsumerWidget {
           _loadCaptcha(controller, CaptchaType.hCaptcha);
         } else {
           controller.loadRequest(Uri.parse('about:blank'));
-          showToastFailed(
-            ToastError(context.l10n.recaptchaTimeout),
-          );
+          showToastFailed(ToastError(context.l10n.recaptchaTimeout));
           Navigator.pop(context);
         }
       }
 
       controller
-        ..setNavigationDelegate(NavigationDelegate(
-          onPageStarted: (url) {
-            timer.value = Timer(const Duration(seconds: 15), loadFallback);
-          },
-          onPageFinished: (url) {
-            timer.value?.cancel();
-            timer.value = null;
-          },
-        ))
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageStarted: (url) {
+              timer.value = Timer(const Duration(seconds: 15), loadFallback);
+            },
+            onPageFinished: (url) {
+              timer.value?.cancel();
+              timer.value = null;
+            },
+          ),
+        )
         ..addJavaScriptChannel(
           'MixinContextTokenCallback',
           onMessageReceived: (message) {
@@ -110,15 +107,18 @@ Future<void> _loadCaptcha(
   switch (type) {
     case CaptchaType.gCaptcha:
       apiKey = kRecaptchaKey;
-      src = 'https://www.recaptcha.net/recaptcha/api.js'
+      src =
+          'https://www.recaptcha.net/recaptcha/api.js'
           '?onload=onGCaptchaLoad&render=explicit';
     case CaptchaType.hCaptcha:
       apiKey = hCaptchaKey;
-      src = 'https://hcaptcha.com/1/api.js'
+      src =
+          'https://hcaptcha.com/1/api.js'
           '?onload=onHCaptchaLoad&render=explicit';
   }
-  final htmlWithCaptcha =
-      html.replaceAll('#src', src).replaceAll('#apiKey', apiKey);
+  final htmlWithCaptcha = html
+      .replaceAll('#src', src)
+      .replaceAll('#apiKey', apiKey);
 
   await controller.clearCache();
   await controller.loadHtmlString(

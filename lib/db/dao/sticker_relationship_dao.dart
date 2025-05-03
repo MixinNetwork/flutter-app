@@ -11,24 +11,25 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerRelationshipDaoMixin {
   StickerRelationshipDao(super.db);
 
-  Future<int> insert(StickerRelationship stickerRelationship) =>
-      into(db.stickerRelationships)
-          .insertOnConflictUpdate(stickerRelationship)
-          .then((value) {
-        DataBaseEventBus.instance.updateSticker([
-          MiniSticker(
-              stickerId: stickerRelationship.stickerId,
-              albumId: stickerRelationship.albumId)
-        ]);
-        return value;
-      });
+  Future<int> insert(StickerRelationship stickerRelationship) => into(
+    db.stickerRelationships,
+  ).insertOnConflictUpdate(stickerRelationship).then((value) {
+    DataBaseEventBus.instance.updateSticker([
+      MiniSticker(
+        stickerId: stickerRelationship.stickerId,
+        albumId: stickerRelationship.albumId,
+      ),
+    ]);
+    return value;
+  });
 
   Future deleteStickerRelationship(StickerRelationship stickerRelationship) =>
       delete(db.stickerRelationships).delete(stickerRelationship).then((value) {
         DataBaseEventBus.instance.updateSticker([
           MiniSticker(
-              stickerId: stickerRelationship.stickerId,
-              albumId: stickerRelationship.albumId)
+            stickerId: stickerRelationship.stickerId,
+            albumId: stickerRelationship.albumId,
+          ),
         ]);
         return value;
       });
@@ -36,12 +37,18 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
   Future<void> insertAll(List<StickerRelationship> stickerRelationships) =>
       batch((batch) {
         batch.insertAllOnConflictUpdate(
-            db.stickerRelationships, stickerRelationships);
+          db.stickerRelationships,
+          stickerRelationships,
+        );
       }).then((value) {
-        DataBaseEventBus.instance.updateSticker(stickerRelationships.map(
+        DataBaseEventBus.instance.updateSticker(
+          stickerRelationships.map(
             (stickerRelationship) => MiniSticker(
-                stickerId: stickerRelationship.stickerId,
-                albumId: stickerRelationship.albumId)));
+              stickerId: stickerRelationship.stickerId,
+              albumId: stickerRelationship.albumId,
+            ),
+          ),
+        );
         return value;
       });
 }

@@ -40,11 +40,7 @@ class SearchBar extends HookConsumerWidget {
     if (hasDrawer.value) {
       leading = ActionButton(
         onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        child: Icon(
-          Icons.menu,
-          size: 20,
-          color: context.theme.icon,
-        ),
+        child: Icon(Icons.menu, size: 20, color: context.theme.icon),
       );
     }
 
@@ -75,55 +71,66 @@ class SearchBar extends HookConsumerWidget {
                         context.read<TextEditingController>().text = '';
                         context.read<FocusNode>().unfocus();
                       },
-                    )
+                    ),
                   },
                   child: Builder(
-                      builder: (context) => SearchTextField(
-                            focusNode: context.read<FocusNode>(),
-                            controller: context.read<TextEditingController>(),
-                            onChanged: (keyword) => ref
-                                .read(keywordProvider.notifier)
-                                .state = keyword,
-                            hintText: filterUnseen
-                                ? context.l10n.searchUnread
-                                // ignore: avoid-non-ascii-symbols
-                                : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl '}K)',
-                          )),
+                    builder:
+                        (context) => SearchTextField(
+                          focusNode: context.read<FocusNode>(),
+                          controller: context.read<TextEditingController>(),
+                          onChanged:
+                              (keyword) =>
+                                  ref.read(keywordProvider.notifier).state =
+                                      keyword,
+                          hintText:
+                              filterUnseen
+                                  ? context.l10n.searchUnread
+                                  // ignore: avoid-non-ascii-symbols
+                                  : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl '}K)',
+                        ),
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 8),
             ActionButton(
               name: Resources.assetsImagesFilterUnseenSvg,
-              onTap: () => ref
-                  .read(conversationUnseenFilterEnabledProvider.notifier)
-                  .toggle(),
+              onTap:
+                  () =>
+                      ref
+                          .read(
+                            conversationUnseenFilterEnabledProvider.notifier,
+                          )
+                          .toggle(),
               color: filterUnseen ? context.theme.accent : context.theme.icon,
             ),
             const SizedBox(width: 4),
             CustomPopupMenuButton(
-              itemBuilder: (context) => [
-                CustomPopupMenuItem(
-                  icon: Resources.assetsImagesContextMenuSearchUserSvg,
-                  title: context.l10n.searchContact,
-                  value: _ActionType.searchContact,
-                ),
-                CustomPopupMenuItem(
-                  icon: Resources.assetsImagesContextMenuCreateConversationSvg,
-                  title: context.l10n.createConversation,
-                  value: _ActionType.createConversation,
-                ),
-                CustomPopupMenuItem(
-                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
-                  title: context.l10n.createGroup,
-                  value: _ActionType.createGroup,
-                ),
-                CustomPopupMenuItem(
-                  icon: Resources.assetsImagesCircleSvg,
-                  title: context.l10n.createCircle,
-                  value: _ActionType.createCircle,
-                ),
-              ],
+              itemBuilder:
+                  (context) => [
+                    CustomPopupMenuItem(
+                      icon: Resources.assetsImagesContextMenuSearchUserSvg,
+                      title: context.l10n.searchContact,
+                      value: _ActionType.searchContact,
+                    ),
+                    CustomPopupMenuItem(
+                      icon:
+                          Resources
+                              .assetsImagesContextMenuCreateConversationSvg,
+                      title: context.l10n.createConversation,
+                      value: _ActionType.createConversation,
+                    ),
+                    CustomPopupMenuItem(
+                      icon: Resources.assetsImagesContextMenuCreateGroupSvg,
+                      title: context.l10n.createGroup,
+                      value: _ActionType.createGroup,
+                    ),
+                    CustomPopupMenuItem(
+                      icon: Resources.assetsImagesCircleSvg,
+                      title: context.l10n.createCircle,
+                      value: _ActionType.createCircle,
+                    ),
+                  ],
               onSelected: (type) {
                 switch (type) {
                   case _ActionType.searchContact:
@@ -142,10 +149,7 @@ class SearchBar extends HookConsumerWidget {
                       const CreateGroupConversationIntent(),
                     );
                   case _ActionType.createCircle:
-                    Actions.maybeInvoke(
-                      context,
-                      const CreateCircleIntent(),
-                    );
+                    Actions.maybeInvoke(context, const CreateCircleIntent());
                 }
               },
               icon: Resources.assetsImagesIcAddSvg,
@@ -170,12 +174,15 @@ class _SearchUserDialog extends HookConsumerWidget {
     final currentIdentityNumber = context.account?.identityNumber;
 
     final textEditingController = useTextEditingController();
-    final textEditingValueStream =
-        useValueNotifierConvertSteam(textEditingController);
-    final searchable = useMemoizedStream(() => textEditingValueStream.map(
-                (event) =>
-                    event.text.trim().length > 3 && event.composing.composed))
-            .data ??
+    final textEditingValueStream = useValueNotifierConvertSteam(
+      textEditingController,
+    );
+    final searchable =
+        useMemoizedStream(
+          () => textEditingValueStream.map(
+            (event) => event.text.trim().length > 3 && event.composing.composed,
+          ),
+        ).data ??
         false;
 
     final loading = useState(false);
@@ -186,8 +193,9 @@ class _SearchUserDialog extends HookConsumerWidget {
 
       loading.value = true;
       try {
-        final mixinResponse = await context.accountServer.client.userApi
-            .search(textEditingController.text);
+        final mixinResponse = await context.accountServer.client.userApi.search(
+          textEditingController.text,
+        );
         await context.database.userDao.insertSdkUser(mixinResponse.data);
         resultUserId.value = mixinResponse.data.userId;
       } catch (e) {
@@ -202,9 +210,7 @@ class _SearchUserDialog extends HookConsumerWidget {
       child: Builder(
         builder: (BuildContext context) {
           if (resultUserId.value?.isNotEmpty ?? false) {
-            return UserDialog(
-              userId: resultUserId.value!,
-            );
+            return UserDialog(userId: resultUserId.value!);
           }
 
           return Stack(
@@ -257,9 +263,10 @@ class _SearchUserDialog extends HookConsumerWidget {
                   ),
                   actions: [
                     MixinButton(
-                        backgroundTransparent: true,
-                        onTap: () => Navigator.pop(context),
-                        child: Text(context.l10n.cancel)),
+                      backgroundTransparent: true,
+                      onTap: () => Navigator.pop(context),
+                      child: Text(context.l10n.cancel),
+                    ),
                     MixinButton(
                       disable: !searchable,
                       onTap: search,
@@ -275,8 +282,9 @@ class _SearchUserDialog extends HookConsumerWidget {
                   top: 0,
                   bottom: 0,
                   child: Align(
-                    child:
-                        CircularProgressIndicator(color: context.theme.accent),
+                    child: CircularProgressIndicator(
+                      color: context.theme.accent,
+                    ),
                   ),
                 ),
             ],

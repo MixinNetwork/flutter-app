@@ -26,15 +26,10 @@ class AppearancePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.appearance),
-        ),
-        body: const Align(
-          alignment: Alignment.topCenter,
-          child: _Body(),
-        ),
-      );
+    backgroundColor: context.theme.background,
+    appBar: MixinAppBar(title: Text(context.l10n.appearance)),
+    body: const Align(alignment: Alignment.topCenter, child: _Body()),
+  );
 }
 
 class _Body extends HookConsumerWidget {
@@ -42,65 +37,68 @@ class _Body extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.only(top: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, bottom: 14),
-                child: Text(
-                  context.l10n.theme,
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 14,
-                  ),
-                ),
+    child: Container(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, bottom: 14),
+            child: Text(
+              context.l10n.theme,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 14,
               ),
-              CellGroup(
-                cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CellItem(
-                      title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.followSystem),
-                        groupValue: ref.watch(settingProvider).brightness,
-                        onChanged: (value) =>
-                            context.settingChangeNotifier.brightness = value,
-                        value: null,
-                      ),
-                      trailing: null,
-                    ),
-                    CellItem(
-                      title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.light),
-                        groupValue: ref.watch(settingProvider).brightness,
-                        onChanged: (value) =>
-                            context.settingChangeNotifier.brightness = value,
-                        value: Brightness.light,
-                      ),
-                      trailing: null,
-                    ),
-                    CellItem(
-                      title: RadioItem<Brightness?>(
-                        title: Text(context.l10n.dark),
-                        groupValue: ref.watch(settingProvider).brightness,
-                        onChanged: (value) =>
-                            context.settingChangeNotifier.brightness = value,
-                        value: Brightness.dark,
-                      ),
-                      trailing: null,
-                    ),
-                  ],
-                ),
-              ),
-              const _MessageAvatarSetting(),
-              const _ChatTextSizeSetting(),
-            ],
+            ),
           ),
-        ),
-      );
+          CellGroup(
+            cellBackgroundColor: context.theme.settingCellBackgroundColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CellItem(
+                  title: RadioItem<Brightness?>(
+                    title: Text(context.l10n.followSystem),
+                    groupValue: ref.watch(settingProvider).brightness,
+                    onChanged:
+                        (value) =>
+                            context.settingChangeNotifier.brightness = value,
+                    value: null,
+                  ),
+                  trailing: null,
+                ),
+                CellItem(
+                  title: RadioItem<Brightness?>(
+                    title: Text(context.l10n.light),
+                    groupValue: ref.watch(settingProvider).brightness,
+                    onChanged:
+                        (value) =>
+                            context.settingChangeNotifier.brightness = value,
+                    value: Brightness.light,
+                  ),
+                  trailing: null,
+                ),
+                CellItem(
+                  title: RadioItem<Brightness?>(
+                    title: Text(context.l10n.dark),
+                    groupValue: ref.watch(settingProvider).brightness,
+                    onChanged:
+                        (value) =>
+                            context.settingChangeNotifier.brightness = value,
+                    value: Brightness.dark,
+                  ),
+                  trailing: null,
+                ),
+              ],
+            ),
+          ),
+          const _MessageAvatarSetting(),
+          const _ChatTextSizeSetting(),
+        ],
+      ),
+    ),
+  );
 }
 
 class _MessageAvatarSetting extends HookConsumerWidget {
@@ -108,8 +106,9 @@ class _MessageAvatarSetting extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showAvatar =
-        ref.watch(settingProvider.select((value) => value.messageShowAvatar));
+    final showAvatar = ref.watch(
+      settingProvider.select((value) => value.messageShowAvatar),
+    );
     final showIdentityNumber = ref.watch(
       settingProvider.select((value) => value.messageShowIdentityNumber),
     );
@@ -121,10 +120,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
           padding: const EdgeInsets.only(left: 10, bottom: 14, top: 22),
           child: Text(
             context.l10n.chat,
-            style: TextStyle(
-              color: context.theme.secondaryText,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
           ),
         ),
         CellGroup(
@@ -138,8 +134,10 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: showAvatar,
-                    onChanged: (bool value) =>
-                        context.settingChangeNotifier.messageShowAvatar = value,
+                    onChanged:
+                        (bool value) =>
+                            context.settingChangeNotifier.messageShowAvatar =
+                                value,
                   ),
                 ),
               ),
@@ -150,11 +148,14 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: showIdentityNumber,
-                    onChanged: (bool value) => context.settingChangeNotifier
-                        .messageShowIdentityNumber = value,
+                    onChanged:
+                        (bool value) =>
+                            context
+                                .settingChangeNotifier
+                                .messageShowIdentityNumber = value,
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -168,8 +169,9 @@ class _ChatTextSizeSetting extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fontSize =
-        ref.watch(settingProvider.select((value) => value.chatFontSizeDelta));
+    final fontSize = ref.watch(
+      settingProvider.select((value) => value.chatFontSizeDelta),
+    );
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 600),
@@ -194,10 +196,7 @@ class _ChatTextSizeSetting extends HookConsumerWidget {
               const SizedBox(width: 10),
               Text(
                 'A',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.theme.text,
-                ),
+                style: TextStyle(fontSize: 12, color: context.theme.text),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -205,9 +204,7 @@ class _ChatTextSizeSetting extends HookConsumerWidget {
                   data: const SliderThemeData(
                     trackHeight: 4,
                     trackShape: RoundedRectSliderTrackShape(),
-                    overlayShape: RoundSliderOverlayShape(
-                      overlayRadius: 10,
-                    ),
+                    overlayShape: RoundSliderOverlayShape(overlayRadius: 10),
                   ),
                   child: Slider(
                     value: fontSize,
@@ -224,10 +221,7 @@ class _ChatTextSizeSetting extends HookConsumerWidget {
               const SizedBox(width: 10),
               Text(
                 'A',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: context.theme.text,
-                ),
+                style: TextStyle(fontSize: 24, color: context.theme.text),
               ),
               const SizedBox(width: 10),
             ],
@@ -262,19 +256,23 @@ class _ChatTextSizePreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tickerProvider = useSingleTickerProvider();
-    final blinkCubit = useMemoized(() => BlinkCubit(
-          tickerProvider,
-          context.theme.accent.withValues(alpha: 0.5),
-        ));
+    final blinkCubit = useMemoized(
+      () => BlinkCubit(
+        tickerProvider,
+        context.theme.accent.withValues(alpha: 0.5),
+      ),
+    );
     final chatSideCubit = useBloc(ChatSideCubit.new);
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
 
-    final messageHi =
-        useMemoized(() => _buildFakeTextMessage(context.l10n.sayHi));
-    final messageAnswer =
-        useMemoized(() => _buildFakeTextMessage(context.l10n.iAmGood));
+    final messageHi = useMemoized(
+      () => _buildFakeTextMessage(context.l10n.sayHi),
+    );
+    final messageAnswer = useMemoized(
+      () => _buildFakeTextMessage(context.l10n.iAmGood),
+    );
 
     return MultiProvider(
       providers: [
@@ -285,8 +283,12 @@ class _ChatTextSizePreview extends HookConsumerWidget {
       child: IgnorePointer(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 10),
-          padding:
-              const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 10,
+            bottom: 20,
+          ),
           decoration: BoxDecoration(
             color: context.theme.chatBackground,
             borderRadius: const BorderRadius.all(Radius.circular(8)),

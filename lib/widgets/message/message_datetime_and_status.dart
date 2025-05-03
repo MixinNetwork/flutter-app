@@ -24,8 +24,11 @@ bool _isRepresentative(
     (message.userId != userId);
 
 class MessageDatetimeAndStatus extends HookConsumerWidget {
-  const MessageDatetimeAndStatus(
-      {super.key, this.color, this.hideStatus = false});
+  const MessageDatetimeAndStatus({
+    super.key,
+    this.color,
+    this.hideStatus = false,
+  });
 
   final Color? color;
   final bool hideStatus;
@@ -38,13 +41,16 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
     final pinned = useMessageConverter(converter: (state) => state.pinned);
     final isSecret = useMessageConverter(converter: (state) => state.isSecret);
     final isRepresentative = useMessageConverter(
-        converter: (state) => _isRepresentative(
-              state,
-              ref.read(conversationProvider),
-              context.accountServer.userId,
-            ));
-    final createdAt =
-        useMessageConverter(converter: (state) => state.createdAt);
+      converter:
+          (state) => _isRepresentative(
+            state,
+            ref.read(conversationProvider),
+            context.accountServer.userId,
+          ),
+    );
+    final createdAt = useMessageConverter(
+      converter: (state) => state.createdAt,
+    );
 
     return SelectionContainer.disabled(
       child: SizedBox(
@@ -76,25 +82,22 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
                   assetName: Resources.assetsImagesMessageRepresentativeSvg,
                 ),
               ),
-            _MessageDatetime(
-              dateTime: createdAt,
-              color: color,
-            ),
+            _MessageDatetime(dateTime: createdAt, color: color),
             if (isCurrentUser &&
                 !isTranscriptPage &&
                 !isPinnedPage &&
                 !hideStatus)
-              HookBuilder(builder: (context) {
-                final status =
-                    useMessageConverter(converter: (state) => state.status);
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: MessageStatusIcon(
-                    status: status,
-                    color: color,
-                  ),
-                );
-              }),
+              HookBuilder(
+                builder: (context) {
+                  final status = useMessageConverter(
+                    converter: (state) => state.status,
+                  );
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: MessageStatusIcon(status: status, color: color),
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -103,49 +106,45 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
 }
 
 class _ChatIcon extends StatelessWidget {
-  const _ChatIcon({
-    required this.assetName,
-    this.color,
-  });
+  const _ChatIcon({required this.assetName, this.color});
 
   final Color? color;
   final String assetName;
 
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
-        assetName,
-        width: 8,
-        height: 8,
-        colorFilter: ColorFilter.mode(
-          color ??
-              context.dynamicColor(
-                const Color.fromRGBO(131, 145, 158, 1),
-                darkColor: const Color.fromRGBO(128, 131, 134, 1),
-              ),
-          BlendMode.srcIn,
-        ),
-      );
+    assetName,
+    width: 8,
+    height: 8,
+    colorFilter: ColorFilter.mode(
+      color ??
+          context.dynamicColor(
+            const Color.fromRGBO(131, 145, 158, 1),
+            darkColor: const Color.fromRGBO(128, 131, 134, 1),
+          ),
+      BlendMode.srcIn,
+    ),
+  );
 }
 
 class _MessageDatetime extends HookConsumerWidget {
-  const _MessageDatetime({
-    required this.dateTime,
-    this.color,
-  });
+  const _MessageDatetime({required this.dateTime, this.color});
 
   final DateTime dateTime;
   final Color? color;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = useMemoized(
-        () => DateFormat.Hm().format(dateTime.toLocal()), [dateTime]);
+    final text = useMemoized(() => DateFormat.Hm().format(dateTime.toLocal()), [
+      dateTime,
+    ]);
 
     return Text(
       text,
       style: TextStyle(
         fontSize: context.messageStyle.statusFontSize,
-        color: color ??
+        color:
+            color ??
             context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),

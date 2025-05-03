@@ -10,8 +10,8 @@ final _kInfo = Uint8List.fromList(utf8.encode('Mixin Device Transfer'));
 
 class TransferSecretKey {
   TransferSecretKey(this.secretKey)
-      : aesKey = Uint8List.sublistView(secretKey, 0, 32),
-        hMacKey = Uint8List.sublistView(secretKey, 32, 64);
+    : aesKey = Uint8List.sublistView(secretKey, 0, 32),
+      hMacKey = Uint8List.sublistView(secretKey, 32, 64);
 
   final Uint8List secretKey;
 

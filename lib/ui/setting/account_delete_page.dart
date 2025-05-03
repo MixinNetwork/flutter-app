@@ -25,113 +25,111 @@ class AccountDeletePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: context.theme.background,
-        appBar: MixinAppBar(
-          title: Text(context.l10n.deleteMyAccount),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            alignment: Alignment.topCenter,
-            padding: const EdgeInsets.only(top: 50),
-            child: Column(
-              children: [
-                const _DeleteWarningWidget(),
-                const SizedBox(height: 30),
-                CellGroup(
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: CellItem(
-                    title: Text(context.l10n.deleteMyAccount),
-                    color: context.theme.red,
-                    onTap: () async {
-                      if (!SessionKeyValue.instance.checkPinToken()) {
-                        showToastFailed(
-                          ToastError(context.l10n.errorNoPinToken),
-                        );
-                        return;
-                      }
+    backgroundColor: context.theme.background,
+    appBar: MixinAppBar(title: Text(context.l10n.deleteMyAccount)),
+    body: SingleChildScrollView(
+      child: Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.only(top: 50),
+        child: Column(
+          children: [
+            const _DeleteWarningWidget(),
+            const SizedBox(height: 30),
+            CellGroup(
+              cellBackgroundColor: context.theme.settingCellBackgroundColor,
+              child: CellItem(
+                title: Text(context.l10n.deleteMyAccount),
+                color: context.theme.red,
+                onTap: () async {
+                  if (!SessionKeyValue.instance.checkPinToken()) {
+                    showToastFailed(ToastError(context.l10n.errorNoPinToken));
+                    return;
+                  }
 
-                      final user = context.account;
-                      assert(user != null, 'user is null');
-                      if (user == null) {
-                        return;
-                      }
-                      if (user.hasPin) {
-                        final pin = await showPinVerificationDialog(
-                          context,
-                          title: context.l10n.enterYourPinToContinue,
-                        );
-                        if (pin == null) {
-                          return;
-                        }
-                        final confirmed = await showConfirmMixinDialog(
-                          context,
-                          context.l10n
-                              .landingInvitationDialogContent(user.phone),
-                          maxWidth: 440,
-                          positiveText: context.l10n.continueText,
-                        );
-                        if (confirmed == null) return;
-                        showToastLoading();
-                        VerificationResponse? verificationResponse;
+                  final user = context.account;
+                  assert(user != null, 'user is null');
+                  if (user == null) {
+                    return;
+                  }
+                  if (user.hasPin) {
+                    final pin = await showPinVerificationDialog(
+                      context,
+                      title: context.l10n.enterYourPinToContinue,
+                    );
+                    if (pin == null) {
+                      return;
+                    }
+                    final confirmed = await showConfirmMixinDialog(
+                      context,
+                      context.l10n.landingInvitationDialogContent(user.phone),
+                      maxWidth: 440,
+                      positiveText: context.l10n.continueText,
+                    );
+                    if (confirmed == null) return;
+                    showToastLoading();
+                    VerificationResponse? verificationResponse;
 
-                        try {
-                          verificationResponse = await requestVerificationCode(
-                            phone: user.phone,
-                            context: context,
-                            purpose: VerificationPurpose.deactivated,
-                          );
-                          Toast.dismiss();
-                        } catch (error, stacktrace) {
-                          e('_requestVerificationCode $error, $stacktrace');
-                          showToastFailed(error);
-                          return;
-                        }
-                        final verificationId = await showVerificationDialog(
-                          context,
-                          phoneNumber: user.phone,
-                          verificationResponse: verificationResponse,
-                          reRequestVerification: () => requestVerificationCode(
+                    try {
+                      verificationResponse = await requestVerificationCode(
+                        phone: user.phone,
+                        context: context,
+                        purpose: VerificationPurpose.deactivated,
+                      );
+                      Toast.dismiss();
+                    } catch (error, stacktrace) {
+                      e('_requestVerificationCode $error, $stacktrace');
+                      showToastFailed(error);
+                      return;
+                    }
+                    final verificationId = await showVerificationDialog(
+                      context,
+                      phoneNumber: user.phone,
+                      verificationResponse: verificationResponse,
+                      reRequestVerification:
+                          () => requestVerificationCode(
                             phone: user.phone,
                             context: context,
                             purpose: VerificationPurpose.deactivated,
                           ),
-                          onVerification: (code, response) async {
-                            final result = await context
-                                .accountServer.client.accountApi
-                                .deactivateVerification(response.id, code);
-                            return result.data.id;
-                          },
-                        );
-                        if (verificationId == null || verificationId.isEmpty) {
-                          return;
-                        }
-                        final deleted = await _showDeleteAccountPinDialog(
-                          context,
-                          verificationId: verificationId,
-                        );
-                        if (deleted) {
-                          w('account deleted');
-                          await context.accountServer.signOutAndClear();
-                          context.multiAuthChangeNotifier.signOut();
-                        }
-                      } else {
-                        e('delete account no pin');
-                      }
-                    },
-                  ),
-                ),
-                CellGroup(
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: CellItem(
-                    title: Text(context.l10n.changeNumberInstead),
-                    onTap: () => showChangeNumberDialog(context),
-                  ),
-                ),
-              ],
+                      onVerification: (code, response) async {
+                        final result = await context
+                            .accountServer
+                            .client
+                            .accountApi
+                            .deactivateVerification(response.id, code);
+                        return result.data.id;
+                      },
+                    );
+                    if (verificationId == null || verificationId.isEmpty) {
+                      return;
+                    }
+                    final deleted = await _showDeleteAccountPinDialog(
+                      context,
+                      verificationId: verificationId,
+                    );
+                    if (deleted) {
+                      w('account deleted');
+                      await context.accountServer.signOutAndClear();
+                      context.multiAuthChangeNotifier.signOut();
+                    }
+                  } else {
+                    e('delete account no pin');
+                  }
+                },
+              ),
             ),
-          ),
+            CellGroup(
+              cellBackgroundColor: context.theme.settingCellBackgroundColor,
+              child: CellItem(
+                title: Text(context.l10n.changeNumberInstead),
+                onTap: () => showChangeNumberDialog(context),
+              ),
+            ),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _DeleteWarningWidget extends StatelessWidget {
@@ -139,26 +137,26 @@ class _DeleteWarningWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          SvgPicture.asset(
-            Resources.assetsImagesDeleteAccountSvg,
-            width: 70,
-            height: 72,
-          ),
-          const SizedBox(height: 20),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 380),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _WarningItem(title: context.l10n.deleteAccountHint),
-                _WarningItem(title: context.l10n.deleteAccountDetailHint),
-                _WarningItem(title: context.l10n.transactionsCannotBeDeleted),
-              ],
-            ),
-          ),
-        ],
-      );
+    children: [
+      SvgPicture.asset(
+        Resources.assetsImagesDeleteAccountSvg,
+        width: 70,
+        height: 72,
+      ),
+      const SizedBox(height: 20),
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 380),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _WarningItem(title: context.l10n.deleteAccountHint),
+            _WarningItem(title: context.l10n.deleteAccountDetailHint),
+            _WarningItem(title: context.l10n.transactionsCannotBeDeleted),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _WarningItem extends StatelessWidget {
@@ -178,19 +176,10 @@ class _WarningItem extends StatelessWidget {
             width: 4,
             height: 4,
             margin: const EdgeInsets.only(top: 7, right: 6),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: color,
-                fontSize: 14,
-              ),
-            ),
+            child: Text(title, style: TextStyle(color: color, fontSize: 14)),
           ),
         ],
       ),
@@ -230,15 +219,18 @@ class _DeleteAccountPinDialog extends StatelessWidget {
         children: [
           TextSpan(
             text: context.l10n.learnMore,
-            style: TextStyle(
-              color: context.theme.accent,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap =
-                  () => openUri(context, context.l10n.settingDeleteAccountUrl),
+            style: TextStyle(color: context.theme.accent),
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap =
+                      () => openUri(
+                        context,
+                        context.l10n.settingDeleteAccountUrl,
+                      ),
           ),
           TextSpan(
-              text: content.substring(index + context.l10n.learnMore.length)),
+            text: content.substring(index + context.l10n.learnMore.length),
+          ),
         ],
       );
     }, []);
@@ -255,10 +247,7 @@ class _DeleteAccountPinDialog extends StatelessWidget {
                 const SizedBox(height: 40),
                 Text(
                   context.l10n.enterPinToDeleteAccount,
-                  style: TextStyle(
-                    color: context.theme.red,
-                    fontSize: 18,
-                  ),
+                  style: TextStyle(color: context.theme.red, fontSize: 18),
                 ),
                 const SizedBox(height: 29),
                 PinInputLayout(

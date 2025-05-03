@@ -29,107 +29,110 @@ import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 
 class SlidePage extends StatelessWidget {
-  const SlidePage({
-    required this.showCollapse,
-    super.key,
-  });
+  const SlidePage({required this.showCollapse, super.key});
 
   final bool showCollapse;
 
   @override
   Widget build(BuildContext context) => SafeArea(
-        child: RepaintBoundary(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: context.brightnessValue == 1.0
+    child: RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color:
+              context.brightnessValue == 1.0
                   ? Colors.black.withValues(alpha: 0.03)
                   : Colors.white.withValues(alpha: 0.01),
-              border: Border(
-                right: BorderSide(
-                  color: context.theme.divider,
+          border: Border(right: BorderSide(color: context.theme.divider)),
+        ),
+        child: MoveWindow(
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height:
+                      (defaultTargetPlatform == TargetPlatform.macOS)
+                          ? 64.0
+                          : 16.0,
                 ),
-              ),
-            ),
-            child: MoveWindow(
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const _CurrentUser(),
+                const SizedBox(height: 24),
+                _Item(
+                  asset: Resources.assetsImagesChatSvg,
+                  title: context.l10n.allChats,
+                  type: SlideCategoryType.chats,
+                ),
+                const SizedBox(height: 12),
+                const _Divider(),
+                const SizedBox(height: 12),
+                _CategoryList(
                   children: [
-                    SizedBox(
-                        height: (defaultTargetPlatform == TargetPlatform.macOS)
-                            ? 64.0
-                            : 16.0),
-                    const _CurrentUser(),
-                    const SizedBox(height: 24),
                     _Item(
-                      asset: Resources.assetsImagesChatSvg,
-                      title: context.l10n.allChats,
-                      type: SlideCategoryType.chats,
+                      asset: Resources.assetsImagesSlideContactsSvg,
+                      title: context.l10n.contactTitle,
+                      type: SlideCategoryType.contacts,
                     ),
-                    const SizedBox(height: 12),
-                    const _Divider(),
-                    const SizedBox(height: 12),
-                    _CategoryList(
-                      children: [
-                        _Item(
-                          asset: Resources.assetsImagesSlideContactsSvg,
-                          title: context.l10n.contactTitle,
-                          type: SlideCategoryType.contacts,
-                        ),
-                        _Item(
-                          asset: Resources.assetsImagesGroupSvg,
-                          title: context.l10n.groups,
-                          type: SlideCategoryType.groups,
-                        ),
-                        _Item(
-                          asset: Resources.assetsImagesBotSvg,
-                          title: Localization.current.botsTitle,
-                          type: SlideCategoryType.bots,
-                        ),
-                        _Item(
-                          asset: Resources.assetsImagesStrangersSvg,
-                          title: context.l10n.strangers,
-                          type: SlideCategoryType.strangers,
-                        ),
-                      ],
+                    _Item(
+                      asset: Resources.assetsImagesGroupSvg,
+                      title: context.l10n.groups,
+                      type: SlideCategoryType.groups,
                     ),
-                    const SizedBox(height: 16),
-                    const Expanded(child: _CircleList()),
-                    AnimatedVisibility(
-                      alignment: Alignment.bottomCenter,
-                      visible: showCollapse,
-                      child: Consumer(builder: (context, ref, child) {
-                        final collapse = ref.watch(settingProvider
-                            .select((value) => value.collapsedSidebar));
-
-                        return SelectItem(
-                          icon: SvgPicture.asset(
-                            collapse
-                                ? Resources.assetsImagesExpandedSvg
-                                : Resources.assetsImagesCollapseSvg,
-                            width: 24,
-                            height: 24,
-                            colorFilter: ColorFilter.mode(
-                              context.theme.text,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          title: Text(context.l10n.collapse),
-                          onTap: () => context.settingChangeNotifier
-                              .collapsedSidebar = !collapse,
-                        );
-                      }),
+                    _Item(
+                      asset: Resources.assetsImagesBotSvg,
+                      title: Localization.current.botsTitle,
+                      type: SlideCategoryType.bots,
                     ),
-                    const SizedBox(height: 4),
+                    _Item(
+                      asset: Resources.assetsImagesStrangersSvg,
+                      title: context.l10n.strangers,
+                      type: SlideCategoryType.strangers,
+                    ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 16),
+                const Expanded(child: _CircleList()),
+                AnimatedVisibility(
+                  alignment: Alignment.bottomCenter,
+                  visible: showCollapse,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final collapse = ref.watch(
+                        settingProvider.select(
+                          (value) => value.collapsedSidebar,
+                        ),
+                      );
+
+                      return SelectItem(
+                        icon: SvgPicture.asset(
+                          collapse
+                              ? Resources.assetsImagesExpandedSvg
+                              : Resources.assetsImagesCollapseSvg,
+                          width: 24,
+                          height: 24,
+                          colorFilter: ColorFilter.mode(
+                            context.theme.text,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        title: Text(context.l10n.collapse),
+                        onTap:
+                            () =>
+                                context.settingChangeNotifier.collapsedSidebar =
+                                    !collapse,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _CurrentUser extends HookConsumerWidget {
@@ -138,8 +141,11 @@ class _CurrentUser extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(authAccountProvider);
-    final selected = ref.watch(slideCategoryStateProvider
-        .select((value) => value.type == SlideCategoryType.setting));
+    final selected = ref.watch(
+      slideCategoryStateProvider.select(
+        (value) => value.type == SlideCategoryType.setting,
+      ),
+    );
 
     return MoveWindowBarrier(
       child: SelectItem(
@@ -156,16 +162,15 @@ class _CurrentUser extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              account?.fullName ?? '',
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(account?.fullName ?? '', style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 2),
             Text(
               '${account?.identityNumber}',
-              style:
-                  TextStyle(color: context.theme.secondaryText, fontSize: 12),
-            )
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
         selected: selected,
@@ -230,12 +235,13 @@ class _CircleList extends HookConsumerWidget {
               return Consumer(
                 key: Key(circle.circleId),
                 builder: (BuildContext context, ref, __) {
-                  final selected =
-                      ref.watch(slideCategoryStateProvider.select((value) {
-                    final conversationCircleItem = list.value[index];
-                    return value.type == SlideCategoryType.circle &&
-                        value.id == conversationCircleItem.circleId;
-                  }));
+                  final selected = ref.watch(
+                    slideCategoryStateProvider.select((value) {
+                      final conversationCircleItem = list.value[index];
+                      return value.type == SlideCategoryType.circle &&
+                          value.id == conversationCircleItem.circleId;
+                    }),
+                  );
 
                   return MoveWindowBarrier(
                     child: Listener(
@@ -248,125 +254,158 @@ class _CircleList extends HookConsumerWidget {
                           index: index,
                           event: event,
                           recognizer: ImmediateMultiDragGestureRecognizer(
-                              supportedDevices: {
-                                PointerDeviceKind.touch,
-                                PointerDeviceKind.mouse,
-                              }),
+                            supportedDevices: {
+                              PointerDeviceKind.touch,
+                              PointerDeviceKind.mouse,
+                            },
+                          ),
                         );
                       },
                       child: CustomContextMenuWidget(
                         desktopMenuWidgetBuilder:
                             CustomDesktopMenuWidgetBuilder(),
-                        menuProvider: (request) =>
-                            MenusWithSeparator(childrens: [
-                          [
-                            MenuAction(
-                                image: MenuImage.icon(IconFonts.edit),
-                                title: context.l10n.editCircleName,
-                                callback: () async {
-                                  final name = await showMixinDialog<String>(
-                                    context: context,
-                                    child: EditDialog(
-                                      editText: circle.name,
-                                      title: Text(context.l10n.circles),
-                                      hintText: context.l10n.editCircleName,
-                                      positiveAction: context.l10n.edit,
-                                      maxLength: 64,
+                        menuProvider:
+                            (request) => MenusWithSeparator(
+                              childrens: [
+                                [
+                                  MenuAction(
+                                    image: MenuImage.icon(IconFonts.edit),
+                                    title: context.l10n.editCircleName,
+                                    callback: () async {
+                                      final name =
+                                          await showMixinDialog<String>(
+                                            context: context,
+                                            child: EditDialog(
+                                              editText: circle.name,
+                                              title: Text(context.l10n.circles),
+                                              hintText:
+                                                  context.l10n.editCircleName,
+                                              positiveAction: context.l10n.edit,
+                                              maxLength: 64,
+                                            ),
+                                          );
+                                      if (name?.isEmpty ?? true) return;
+
+                                      await runFutureWithToast(
+                                        context.accountServer.updateCircle(
+                                          circle.circleId,
+                                          name!,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  MenuAction(
+                                    image: MenuImage.icon(
+                                      IconFonts.manageCircle,
                                     ),
-                                  );
-                                  if (name?.isEmpty ?? true) return;
+                                    title: context.l10n.editConversations,
+                                    callback: () async {
+                                      final initSelected =
+                                          (await context
+                                                  .database
+                                                  .circleConversationDao
+                                                  .allCircleConversations(
+                                                    circle.circleId,
+                                                  )
+                                                  .get())
+                                              .map(
+                                                (e) => ConversationSelector(
+                                                  conversationId:
+                                                      e.conversationId,
+                                                  userId: e.userId,
+                                                ),
+                                              )
+                                              .toList();
 
-                                  await runFutureWithToast(
-                                    context.accountServer
-                                        .updateCircle(circle.circleId, name!),
-                                  );
-                                }),
-                            MenuAction(
-                              image: MenuImage.icon(IconFonts.manageCircle),
-                              title: context.l10n.editConversations,
-                              callback: () async {
-                                final initSelected = (await context
-                                        .database.circleConversationDao
-                                        .allCircleConversations(circle.circleId)
-                                        .get())
-                                    .map((e) => ConversationSelector(
-                                          conversationId: e.conversationId,
-                                          userId: e.userId,
-                                        ))
-                                    .toList();
+                                      final result =
+                                          await showConversationSelector(
+                                            context: context,
+                                            singleSelect: false,
+                                            title: circle.name,
+                                            onlyContact: false,
+                                            initSelected: initSelected,
+                                            allowEmpty: true,
+                                            confirmedText: context.l10n.done,
+                                          );
 
-                                final result = await showConversationSelector(
-                                  context: context,
-                                  singleSelect: false,
-                                  title: circle.name,
-                                  onlyContact: false,
-                                  initSelected: initSelected,
-                                  allowEmpty: true,
-                                  confirmedText: context.l10n.done,
-                                );
+                                      if (result == null || result.isEmpty) {
+                                        return;
+                                      }
 
-                                if (result == null || result.isEmpty) return;
+                                      await runFutureWithToast(() async {
+                                        final add = result.where(
+                                          (element) =>
+                                              !initSelected
+                                                  .map((e) => e.conversationId)
+                                                  .contains(
+                                                    element.conversationId,
+                                                  ),
+                                        );
+                                        final remove = initSelected.where(
+                                          (element) =>
+                                              !result
+                                                  .map((e) => e.conversationId)
+                                                  .contains(
+                                                    element.conversationId,
+                                                  ),
+                                        );
 
-                                await runFutureWithToast(
-                                  () async {
-                                    final add = result.where((element) =>
-                                        !initSelected
-                                            .map((e) => e.conversationId)
-                                            .contains(element.conversationId));
-                                    final remove = initSelected.where(
-                                        (element) => !result
-                                            .map((e) => e.conversationId)
-                                            .contains(element.conversationId));
-
-                                    final requests = [
-                                      ...add.map((e) =>
-                                          CircleConversationRequest(
-                                            action:
-                                                CircleConversationAction.add,
-                                            conversationId: e.conversationId,
-                                            userId: e.userId,
-                                          )),
-                                      ...remove.map((e) =>
-                                          CircleConversationRequest(
-                                            action:
-                                                CircleConversationAction.remove,
-                                            conversationId: e.conversationId,
-                                            userId: e.userId,
-                                          ))
-                                    ];
-                                    await context.accountServer
-                                        .editCircleConversation(
-                                      circle.circleId,
-                                      requests,
-                                    );
-                                  }(),
-                                );
-                              },
+                                        final requests = [
+                                          ...add.map(
+                                            (e) => CircleConversationRequest(
+                                              action:
+                                                  CircleConversationAction.add,
+                                              conversationId: e.conversationId,
+                                              userId: e.userId,
+                                            ),
+                                          ),
+                                          ...remove.map(
+                                            (e) => CircleConversationRequest(
+                                              action:
+                                                  CircleConversationAction
+                                                      .remove,
+                                              conversationId: e.conversationId,
+                                              userId: e.userId,
+                                            ),
+                                          ),
+                                        ];
+                                        await context.accountServer
+                                            .editCircleConversation(
+                                              circle.circleId,
+                                              requests,
+                                            );
+                                      }());
+                                    },
+                                  ),
+                                ],
+                                [
+                                  MenuAction(
+                                    image: MenuImage.icon(IconFonts.delete),
+                                    title: context.l10n.deleteCircle,
+                                    callback: () async {
+                                      final result =
+                                          await showConfirmMixinDialog(
+                                            context,
+                                            context.l10n.deleteTheCircle(
+                                              circle.name,
+                                            ),
+                                          );
+                                      if (result == null) return;
+                                      await runFutureWithToast(() async {
+                                        await context.accountServer
+                                            .deleteCircle(circle.circleId);
+                                        ref
+                                            .read(
+                                              slideCategoryStateProvider
+                                                  .notifier,
+                                            )
+                                            .select(SlideCategoryType.chats);
+                                      }());
+                                    },
+                                  ),
+                                ],
+                              ],
                             ),
-                          ],
-                          [
-                            MenuAction(
-                              image: MenuImage.icon(IconFonts.delete),
-                              title: context.l10n.deleteCircle,
-                              callback: () async {
-                                final result = await showConfirmMixinDialog(
-                                    context,
-                                    context.l10n.deleteTheCircle(circle.name));
-                                if (result == null) return;
-                                await runFutureWithToast(
-                                  () async {
-                                    await context.accountServer
-                                        .deleteCircle(circle.circleId);
-                                    ref
-                                        .read(
-                                            slideCategoryStateProvider.notifier)
-                                        .select(SlideCategoryType.chats);
-                                  }(),
-                                );
-                              },
-                            ),
-                          ],
-                        ]),
                         child: Material(
                           color: context.theme.primary,
                           child: Padding(
@@ -385,8 +424,10 @@ class _CircleList extends HookConsumerWidget {
                               onTap: () {
                                 ref
                                     .read(slideCategoryStateProvider.notifier)
-                                    .select(SlideCategoryType.circle,
-                                        circle.circleId);
+                                    .select(
+                                      SlideCategoryType.circle,
+                                      circle.circleId,
+                                    );
 
                                 if (ModalRoute.of(context)?.canPop == true) {
                                   Navigator.pop(context);
@@ -412,9 +453,7 @@ class _CircleList extends HookConsumerWidget {
 }
 
 class _CategoryList extends HookConsumerWidget {
-  const _CategoryList({
-    required this.children,
-  });
+  const _CategoryList({required this.children});
 
   final List<Widget> children;
 
@@ -426,19 +465,15 @@ class _CategoryList extends HookConsumerWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (BuildContext context, int index) => children[index],
-      separatorBuilder: (BuildContext context, int index) =>
-          const SizedBox(height: 8),
+      separatorBuilder:
+          (BuildContext context, int index) => const SizedBox(height: 8),
       itemCount: children.length,
     );
   }
 }
 
 class _Item extends HookConsumerWidget {
-  const _Item({
-    required this.type,
-    required this.title,
-    required this.asset,
-  });
+  const _Item({required this.type, required this.title, required this.asset});
 
   final SlideCategoryType type;
   final String title;
@@ -447,32 +482,31 @@ class _Item extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(
-        slideCategoryStateProvider.select((value) => value.type == type));
+      slideCategoryStateProvider.select((value) => value.type == type),
+    );
 
-    final result = useMemoizedStream<BaseUnseenConversationCountResult>(
-      () {
-        final dao = context.database.conversationDao;
-        switch (type) {
-          case SlideCategoryType.contacts:
-          case SlideCategoryType.groups:
-          case SlideCategoryType.bots:
-          case SlideCategoryType.strangers:
-            return dao
-                .unseenConversationCountByCategory(type)
-                .watchSingleWithStream(
-              eventStreams: [
-                DataBaseEventBus.instance.updateConversationIdStream
-              ],
-              duration: kDefaultThrottleDuration,
-            );
-          case SlideCategoryType.chats:
-          case SlideCategoryType.circle:
-          case SlideCategoryType.setting:
-            return const Stream.empty();
-        }
-      },
-      keys: [type],
-    ).data;
+    final result =
+        useMemoizedStream<BaseUnseenConversationCountResult>(() {
+          final dao = context.database.conversationDao;
+          switch (type) {
+            case SlideCategoryType.contacts:
+            case SlideCategoryType.groups:
+            case SlideCategoryType.bots:
+            case SlideCategoryType.strangers:
+              return dao
+                  .unseenConversationCountByCategory(type)
+                  .watchSingleWithStream(
+                    eventStreams: [
+                      DataBaseEventBus.instance.updateConversationIdStream,
+                    ],
+                    duration: kDefaultThrottleDuration,
+                  );
+            case SlideCategoryType.chats:
+            case SlideCategoryType.circle:
+            case SlideCategoryType.setting:
+              return const Stream.empty();
+          }
+        }, keys: [type]).data;
 
     return MoveWindowBarrier(
       child: SelectItem(
@@ -503,12 +537,12 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 1.5,
-        // width: 32,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: ShapeDecoration(
-          color: context.theme.listSelected,
-          shape: const StadiumBorder(),
-        ),
-      );
+    height: 1.5,
+    // width: 32,
+    margin: const EdgeInsets.symmetric(horizontal: 8),
+    decoration: ShapeDecoration(
+      color: context.theme.listSelected,
+      shape: const StadiumBorder(),
+    ),
+  );
 }

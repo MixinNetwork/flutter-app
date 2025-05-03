@@ -24,7 +24,9 @@ Future<List<PreKeyRecord>> generatePreKeys() async {
 }
 
 Future<SignedPreKeyRecord> generateSignedPreKey(
-    IdentityKeyPair identityKeyPair, bool active) async {
+  IdentityKeyPair identityKeyPair,
+  bool active,
+) async {
   final signedPreKeyStore = MixinPreKeyStore(SignalDatabase.get);
   final signedPreKeyId = CryptoKeyValue.instance.nextSignedPreKeyId;
   final record = helper.generateSignedPreKey(identityKeyPair, signedPreKeyId);

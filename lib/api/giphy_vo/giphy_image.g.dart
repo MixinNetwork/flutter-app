@@ -7,15 +7,15 @@ part of 'giphy_image.dart';
 // **************************************************************************
 
 GiphyImage _$GiphyImageFromJson(Map<String, dynamic> json) => GiphyImage(
-      url: json['url'] as String? ?? '',
-      width: json['width'] as String? ?? '0',
-      height: json['height'] as String? ?? '0',
-      size: json['size'] as String?,
-      mp4: json['mp4'] as String?,
-      mp4Size: json['mp4_size'] as String?,
-      webp: json['webp'] as String?,
-      webpSize: json['webp_size'] as String?,
-    );
+  url: json['url'] as String? ?? '',
+  width: json['width'] as String? ?? '0',
+  height: json['height'] as String? ?? '0',
+  size: json['size'] as String?,
+  mp4: json['mp4'] as String?,
+  mp4Size: json['mp4_size'] as String?,
+  webp: json['webp'] as String?,
+  webpSize: json['webp_size'] as String?,
+);
 
 Map<String, dynamic> _$GiphyImageToJson(GiphyImage instance) =>
     <String, dynamic>{

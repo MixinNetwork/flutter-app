@@ -32,17 +32,20 @@ class VideoMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaWidth =
-        useMessageConverter(converter: (state) => state.mediaWidth);
-    final mediaHeight =
-        useMessageConverter(converter: (state) => state.mediaHeight);
+    final mediaWidth = useMessageConverter(
+      converter: (state) => state.mediaWidth,
+    );
+    final mediaHeight = useMessageConverter(
+      converter: (state) => state.mediaHeight,
+    );
 
     return LayoutBuilder(
       builder: (context, boxConstraints) {
         final maxWidth = min(boxConstraints.maxWidth * 0.6, 200);
         final width =
             min(mediaWidth ?? _kDefaultVideoSize, maxWidth).toDouble();
-        final scale = (mediaWidth ?? _kDefaultVideoSize) /
+        final scale =
+            (mediaWidth ?? _kDefaultVideoSize) /
             (mediaHeight ?? _kDefaultVideoSize);
         final height = width / scale;
 
@@ -62,10 +65,7 @@ class VideoMessageWidget extends HookConsumerWidget {
 }
 
 class MessageVideo extends HookConsumerWidget {
-  const MessageVideo({
-    super.key,
-    this.overlay,
-  });
+  const MessageVideo({super.key, this.overlay});
 
   final Widget? overlay;
 
@@ -74,14 +74,17 @@ class MessageVideo extends HookConsumerWidget {
     final isCurrentUser = useIsCurrentUser();
     final isTranscriptPage = useIsTranscriptPage();
 
-    final thumbImage =
-        useMessageConverter(converter: (state) => state.thumbImage);
+    final thumbImage = useMessageConverter(
+      converter: (state) => state.thumbImage,
+    );
     final thumbUrl = useMessageConverter(converter: (state) => state.thumbUrl);
 
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
+    final relationship = useMessageConverter(
+      converter: (state) => state.relationship,
+    );
 
-    final isMessageSentOut = (isTranscriptPage &&
+    final isMessageSentOut =
+        (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
 
@@ -92,8 +95,9 @@ class MessageVideo extends HookConsumerWidget {
           if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
             if (isTranscriptPage) {
               final transcriptMessageId = TranscriptPage.of(context)!.messageId;
-              context.accountServer
-                  .reUploadTranscriptAttachment(transcriptMessageId);
+              context.accountServer.reUploadTranscriptAttachment(
+                transcriptMessageId,
+              );
             } else {
               context.accountServer.reUploadAttachment(message);
             }
@@ -102,8 +106,10 @@ class MessageVideo extends HookConsumerWidget {
           }
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
-          final path = context.accountServer
-              .convertMessageAbsolutePath(message, isTranscriptPage);
+          final path = context.accountServer.convertMessageAbsolutePath(
+            message,
+            isTranscriptPage,
+          );
           if (kPlatformIsDarwin) {
             showVideoPreviewPage(
               context,
@@ -139,23 +145,23 @@ class MessageVideo extends HookConsumerWidget {
 }
 
 class VideoMessageMediaStatusWidget extends HookConsumerWidget {
-  const VideoMessageMediaStatusWidget({
-    super.key,
-    this.done,
-  });
+  const VideoMessageMediaStatusWidget({super.key, this.done});
 
   final Widget? done;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaStatus =
-        useMessageConverter(converter: (state) => state.mediaStatus);
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
+    final mediaStatus = useMessageConverter(
+      converter: (state) => state.mediaStatus,
+    );
+    final relationship = useMessageConverter(
+      converter: (state) => state.relationship,
+    );
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
     final isTranscriptPage = useIsTranscriptPage();
-    final isMessageSentOut = (isTranscriptPage &&
+    final isMessageSentOut =
+        (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
 
@@ -182,51 +188,52 @@ class VideoMessageMediaStatusWidget extends HookConsumerWidget {
 }
 
 class _VideoMessageOverlayInfo extends HookConsumerWidget {
-  const _VideoMessageOverlayInfo({
-    required this.isCurrentUser,
-  });
+  const _VideoMessageOverlayInfo({required this.isCurrentUser});
 
   final bool isCurrentUser;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isVideo =
-        useMessageConverter(converter: (state) => state.type.isVideo);
+    final isVideo = useMessageConverter(
+      converter: (state) => state.type.isVideo,
+    );
     return Stack(
       fit: StackFit.expand,
       children: [
-        const Center(
-          child: VideoMessageMediaStatusWidget(),
-        ),
+        const Center(child: VideoMessageMediaStatusWidget()),
         if (isVideo)
-          HookBuilder(builder: (context) {
-            final durationText = useMessageConverter(
-              converter: (state) => Duration(
-                      milliseconds:
-                          int.tryParse(state.mediaDuration ?? '') ?? 0)
-                  .asMinutesSeconds,
-            );
-            return Positioned(
-              top: 6,
-              left: isCurrentUser ? 6 : 14,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: Color.fromRGBO(0, 0, 0, 0.3),
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Text(
-                    durationText,
-                    style: TextStyle(
-                      fontSize: context.messageStyle.tertiaryFontSize,
-                      color: Colors.white,
+          HookBuilder(
+            builder: (context) {
+              final durationText = useMessageConverter(
+                converter:
+                    (state) =>
+                        Duration(
+                          milliseconds:
+                              int.tryParse(state.mediaDuration ?? '') ?? 0,
+                        ).asMinutesSeconds,
+              );
+              return Positioned(
+                top: 6,
+                left: isCurrentUser ? 6 : 14,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(0, 0, 0, 0.3),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Text(
+                      durationText,
+                      style: TextStyle(
+                        fontSize: context.messageStyle.tertiaryFontSize,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            },
+          ),
         Positioned(
           bottom: 4,
           right: isCurrentUser ? 12 : 4,
@@ -236,13 +243,8 @@ class _VideoMessageOverlayInfo extends HookConsumerWidget {
               shape: StadiumBorder(),
             ),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 3,
-                horizontal: 5,
-              ),
-              child: MessageDatetimeAndStatus(
-                color: Colors.white,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 5),
+              child: MessageDatetimeAndStatus(color: Colors.white),
             ),
           ),
         ),

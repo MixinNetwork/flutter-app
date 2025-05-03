@@ -32,13 +32,15 @@ class InscriptionMessage extends HookWidget {
       }
       try {
         return Inscription.fromJson(
-            jsonDecode(content) as Map<String, dynamic>);
+          jsonDecode(content) as Map<String, dynamic>,
+        );
       } catch (error) {
         e('InscriptionMessage: errored to parse content: $content', error);
         try {
           hex.decode(content);
-          context.accountServer
-              .addSyncInscriptionMessageJob(context.message.messageId);
+          context.accountServer.addSyncInscriptionMessageJob(
+            context.message.messageId,
+          );
         } catch (_) {}
         return null;
       }
@@ -49,8 +51,9 @@ class InscriptionMessage extends HookWidget {
       padding: EdgeInsets.zero,
       clip: true,
       includeNip: true,
-      outerTimeAndStatusWidget:
-          const MessageDatetimeAndStatus(hideStatus: true),
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(
+        hideStatus: true,
+      ),
       child: InteractiveDecoratedBox(
         onTap: () {
           if (inscription == null) {
@@ -72,15 +75,18 @@ class _InscriptionLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultCollectionImage =
-        SvgPicture.asset(Resources.assetsImagesCollectionPlaceholderSvg);
+    final defaultCollectionImage = SvgPicture.asset(
+      Resources.assetsImagesCollectionPlaceholderSvg,
+    );
     return SizedBox(
       width: 260,
       height: 112,
       child: Row(
         children: [
           InscriptionContent(
-              inscription: inscription, mode: InscriptionContentMode.small),
+            inscription: inscription,
+            mode: InscriptionContentMode.small,
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(10),
@@ -115,8 +121,8 @@ class _InscriptionLayout extends StatelessWidget {
                           dimension: 22,
                           child: MixinImage.network(
                             inscription?.iconUrl ?? '',
-                            errorBuilder: (_, __, ___) =>
-                                defaultCollectionImage,
+                            errorBuilder:
+                                (_, __, ___) => defaultCollectionImage,
                             placeholder: () => defaultCollectionImage,
                           ),
                         ),

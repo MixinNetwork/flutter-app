@@ -13,8 +13,8 @@ class BlocConverter<C extends BlocBase<S>, S, T> extends StatefulWidget {
     this.child,
     this.listener,
     this.immediatelyCallListener = false,
-  })  : assert(builder != null || child != null),
-        assert(!(builder != null && child != null));
+  }) : assert(builder != null || child != null),
+       assert(!(builder != null && child != null));
 
   final C? cubit;
   final BlocBuilderCondition<T?>? when;

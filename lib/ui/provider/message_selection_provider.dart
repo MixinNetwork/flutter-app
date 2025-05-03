@@ -67,5 +67,6 @@ final messageSelectionProvider = ChangeNotifierProvider.autoDispose((ref) {
   return MessageSelectionNotifier();
 });
 
-final hasSelectedMessageProvider =
-    messageSelectionProvider.select((value) => value.hasSelectedMessage);
+final hasSelectedMessageProvider = messageSelectionProvider.select(
+  (value) => value.hasSelectedMessage,
+);

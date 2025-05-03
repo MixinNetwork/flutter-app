@@ -18,28 +18,32 @@ class ContactMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sharedUserId =
-        useMessageConverter(converter: (state) => state.sharedUserId);
-    final sharedUserAvatarUrl =
-        useMessageConverter(converter: (state) => state.sharedUserAvatarUrl);
-    final sharedUserFullName =
-        useMessageConverter(converter: (state) => state.sharedUserFullName);
-    final sharedUserIsVerified =
-        useMessageConverter(converter: (state) => state.sharedUserIsVerified);
-    final sharedUserAppId =
-        useMessageConverter(converter: (state) => state.sharedUserAppId);
+    final sharedUserId = useMessageConverter(
+      converter: (state) => state.sharedUserId,
+    );
+    final sharedUserAvatarUrl = useMessageConverter(
+      converter: (state) => state.sharedUserAvatarUrl,
+    );
+    final sharedUserFullName = useMessageConverter(
+      converter: (state) => state.sharedUserFullName,
+    );
+    final sharedUserIsVerified = useMessageConverter(
+      converter: (state) => state.sharedUserIsVerified,
+    );
+    final sharedUserAppId = useMessageConverter(
+      converter: (state) => state.sharedUserAppId,
+    );
     final sharedUserIdentityNumber = useMessageConverter(
-        converter: (state) => state.sharedUserIdentityNumber ?? '');
-    final shareUserMembership =
-        useMessageConverter(converter: (state) => state.sharedUserMembership);
+      converter: (state) => state.sharedUserIdentityNumber ?? '',
+    );
+    final shareUserMembership = useMessageConverter(
+      converter: (state) => state.sharedUserMembership,
+    );
 
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: InteractiveDecoratedBox(
-        onTap: () => showUserDialog(
-          context,
-          sharedUserId,
-        ),
+        onTap: () => showUserDialog(context, sharedUserId),
         child: ContactItem(
           avatarUrl: sharedUserAvatarUrl,
           userId: sharedUserId,
@@ -76,51 +80,51 @@ class ContactItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AvatarWidget(
-            size: 40,
-            avatarUrl: avatarUrl,
-            userId: userId,
-            name: fullName,
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      AvatarWidget(
+        size: 40,
+        avatarUrl: avatarUrl,
+        userId: userId,
+        name: fullName,
+      ),
+      const SizedBox(width: 8),
+      Flexible(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        fullName?.overflow ?? '',
-                        style: TextStyle(
-                          color: context.theme.text,
-                          fontSize: context.messageStyle.primaryFontSize,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                Flexible(
+                  child: Text(
+                    fullName?.overflow ?? '',
+                    style: TextStyle(
+                      color: context.theme.text,
+                      fontSize: context.messageStyle.primaryFontSize,
                     ),
-                    BadgesWidget(
-                      verified: isVerified,
-                      isBot: appId != null,
-                      membership: membership,
-                    ),
-                  ],
-                ),
-                Text(
-                  identityNumber,
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: context.messageStyle.secondaryFontSize,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                BadgesWidget(
+                  verified: isVerified,
+                  isBot: appId != null,
+                  membership: membership,
                 ),
               ],
             ),
-          ),
-        ],
-      );
+            Text(
+              identityNumber,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: context.messageStyle.secondaryFontSize,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }

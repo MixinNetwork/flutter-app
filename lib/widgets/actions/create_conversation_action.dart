@@ -23,9 +23,6 @@ class CreateConversationAction extends Action<CreateConversationIntent> {
     }
     final userId = list.first.userId!;
 
-    await ConversationStateNotifier.selectUser(
-      context,
-      userId,
-    );
+    await ConversationStateNotifier.selectUser(context, userId);
   }
 }

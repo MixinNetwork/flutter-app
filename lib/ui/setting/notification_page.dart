@@ -20,19 +20,21 @@ class NotificationPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentMessagePreview =
-        ref.watch(settingProvider.select((value) => value.messagePreview));
+    final currentMessagePreview = ref.watch(
+      settingProvider.select((value) => value.messagePreview),
+    );
 
     final appActive = useValueListenable(appActiveListener);
-    final hasNotificationPermission = useMemoizedFuture(
-        requestNotificationPermission, null,
-        keys: [appActive]).data;
+    final hasNotificationPermission =
+        useMemoizedFuture(
+          requestNotificationPermission,
+          null,
+          keys: [appActive],
+        ).data;
 
     return Scaffold(
       backgroundColor: context.theme.background,
-      appBar: MixinAppBar(
-        title: Text(context.l10n.notifications),
-      ),
+      appBar: MixinAppBar(title: Text(context.l10n.notifications)),
       body: Container(
         alignment: Alignment.topCenter,
         padding: const EdgeInsets.only(top: 40),
@@ -49,8 +51,10 @@ class NotificationPage extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: currentMessagePreview,
-                    onChanged: (bool value) =>
-                        context.settingChangeNotifier.messagePreview = value,
+                    onChanged:
+                        (bool value) =>
+                            context.settingChangeNotifier.messagePreview =
+                                value,
                   ),
                 ),
               ),
@@ -78,13 +82,19 @@ class NotificationPage extends HookConsumerWidget {
                           context.theme.settingCellBackgroundColor,
                       child: CellItem(
                         title: Text(context.l10n.enablePushNotification),
-                        onTap: () => openUri(context,
-                            'x-apple.systempreferences:com.apple.preference.notifications'),
+                        onTap:
+                            () => openUri(
+                              context,
+                              'x-apple.systempreferences:com.apple.preference.notifications',
+                            ),
                       ),
                     ),
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 20, bottom: 14, top: 10),
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        bottom: 14,
+                        top: 10,
+                      ),
                       child: Text(
                         context.l10n.notificationContent,
                         style: TextStyle(

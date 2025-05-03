@@ -6,11 +6,7 @@ import '../../utils/logger.dart';
 import '../../utils/platform.dart';
 
 class MoveWindowBarrier extends StatelessWidget {
-  const MoveWindowBarrier({
-    required this.child,
-    super.key,
-    this.enable = true,
-  });
+  const MoveWindowBarrier({required this.child, super.key, this.enable = true});
 
   final Widget child;
 
@@ -18,12 +14,14 @@ class MoveWindowBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-      onPanStart: enable
-          ? (details) {
+    onPanStart:
+        enable
+            ? (details) {
               // do nothing, but we already intercept the events.
             }
-          : null,
-      child: child);
+            : null,
+    child: child,
+  );
 }
 
 /// Widget to detect mouse drag, and start move window.
@@ -44,44 +42,51 @@ class MoveWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        behavior: behavior,
-        onDoubleTap: clickToFullScreen
+    behavior: behavior,
+    onDoubleTap:
+        clickToFullScreen
             ? () async {
-                if (!kPlatformIsDarwin) {
-                  // Only enable for macOS.
-                  // Windows and Linux already has a title bar.
-                  return;
-                }
-                if (await windowManager.isMaximized()) {
-                  d('window is maximized, restore');
-                  await windowManager.unmaximize();
-                  if (await windowManager.isMaximized()) {
-                    d('window is still maximized, set to default size');
-                    const windowSize = Size(960, 720);
-                    final position =
-                        await calcWindowPosition(windowSize, Alignment.center);
-                    await windowManager.setBounds(null,
-                        position: position, size: windowSize, animate: true);
-                  }
-                } else {
-                  d('window is not maximized, maximize');
-                  await windowManager.maximize();
-                }
+              if (!kPlatformIsDarwin) {
+                // Only enable for macOS.
+                // Windows and Linux already has a title bar.
+                return;
               }
+              if (await windowManager.isMaximized()) {
+                d('window is maximized, restore');
+                await windowManager.unmaximize();
+                if (await windowManager.isMaximized()) {
+                  d('window is still maximized, set to default size');
+                  const windowSize = Size(960, 720);
+                  final position = await calcWindowPosition(
+                    windowSize,
+                    Alignment.center,
+                  );
+                  await windowManager.setBounds(
+                    null,
+                    position: position,
+                    size: windowSize,
+                    animate: true,
+                  );
+                }
+              } else {
+                d('window is not maximized, maximize');
+                await windowManager.maximize();
+              }
+            }
             : null,
-        onPanStart: (details) {
-          if (defaultTargetPlatform == TargetPlatform.windows) {
-            // Disable MoveWindow for windows.
-            // Windows already has a title bar.
-            return;
-          }
-          if (!kPlatformIsDesktop) {
-            return;
-          }
-          windowManager.startDragging();
-        },
-        child: child,
-      );
+    onPanStart: (details) {
+      if (defaultTargetPlatform == TargetPlatform.windows) {
+        // Disable MoveWindow for windows.
+        // Windows already has a title bar.
+        return;
+      }
+      if (!kPlatformIsDesktop) {
+        return;
+      }
+      windowManager.startDragging();
+    },
+    child: child,
+  );
 }
 
 /// Global default window move action detector.
@@ -92,17 +97,14 @@ class GlobalMoveWindow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-        fit: StackFit.expand,
-        textDirection: TextDirection.ltr,
-        children: [
-          child,
-          const Align(
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              height: 28,
-              child: MoveWindow(clickToFullScreen: true),
-            ),
-          ),
-        ],
-      );
+    fit: StackFit.expand,
+    textDirection: TextDirection.ltr,
+    children: [
+      child,
+      const Align(
+        alignment: Alignment.topCenter,
+        child: SizedBox(height: 28, child: MoveWindow(clickToFullScreen: true)),
+      ),
+    ],
+  );
 }

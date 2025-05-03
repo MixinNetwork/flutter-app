@@ -20,15 +20,12 @@ enum JsonTransferDataType {
   app,
   inscriptionItem,
   inscriptionCollection,
-  unknown;
+  unknown,
 }
 
 @JsonSerializable()
 class JsonTransferData {
-  JsonTransferData({
-    required this.data,
-    required this.type,
-  });
+  JsonTransferData({required this.data, required this.type});
 
   factory JsonTransferData.fromJson(Map<String, dynamic> json) =>
       _$JsonTransferDataFromJson(json);

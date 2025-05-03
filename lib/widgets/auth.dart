@@ -24,17 +24,15 @@ const _lockDuration = Duration(minutes: 1);
 enum LockEvent { lock, unlock }
 
 class AuthGuard extends HookConsumerWidget {
-  const AuthGuard({
-    required this.child,
-    super.key,
-  });
+  const AuthGuard({required this.child, super.key});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final signed =
-        ref.watch(accountServerProvider.select((value) => value.hasValue));
+    final signed = ref.watch(
+      accountServerProvider.select((value) => value.hasValue),
+    );
 
     if (signed) return _AuthGuard(child: child);
 
@@ -54,18 +52,19 @@ class _AuthGuard extends HookConsumerWidget {
 
     final hasPasscode =
         useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
-            SecurityKeyValue.instance.hasPasscode;
+        SecurityKeyValue.instance.hasPasscode;
 
     final enableBiometric =
         useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
-            SecurityKeyValue.instance.biometric;
+        SecurityKeyValue.instance.biometric;
 
     final hasError = useState(false);
     final lock = useState(SecurityKeyValue.instance.hasPasscode);
 
     useEffect(() {
-      final listen =
-          EventBus.instance.on.whereType<LockEvent>().listen((event) {
+      final listen = EventBus.instance.on.whereType<LockEvent>().listen((
+        event,
+      ) {
         lock.value = event == LockEvent.lock;
       });
 
@@ -141,10 +140,7 @@ class _AuthGuard extends HookConsumerWidget {
             onTap: focusNode.requestFocus,
             behavior: HitTestBehavior.translucent,
             child: BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: 20,
-                sigmaY: 20,
-              ),
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: MaterialApp(
                 color: Colors.transparent,
                 home: Material(
@@ -158,7 +154,9 @@ class _AuthGuard extends HookConsumerWidget {
                           width: 68,
                           height: 68,
                           colorFilter: ColorFilter.mode(
-                              context.theme.icon, BlendMode.srcIn),
+                            context.theme.icon,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         Text(
@@ -179,7 +177,7 @@ class _AuthGuard extends HookConsumerWidget {
                             length: 6,
                             controller: textEditingController,
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
+                              FilteringTextInputFormatter.digitsOnly,
                             ],
                             pinTheme: PinTheme(
                               activeColor: context.theme.text,
@@ -192,10 +190,11 @@ class _AuthGuard extends HookConsumerWidget {
                             obscureText: true,
                             autoDisposeControllers: false,
                             obscuringWidget: Container(
-                                decoration: BoxDecoration(
-                              color: context.theme.text,
-                              shape: BoxShape.circle,
-                            )),
+                              decoration: BoxDecoration(
+                                color: context.theme.text,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
                             autoFocus: true,
                             focusNode: focusNode,
                             showCursor: false,
@@ -252,7 +251,7 @@ class _AuthGuard extends HookConsumerWidget {
                 ),
               ),
             ),
-          )
+          ),
       ],
     );
   }

@@ -72,18 +72,22 @@ class BrightnessObserver extends HookConsumerWidget {
       curve: curve,
       onEnd: onEnd,
       tween: Tween<double>(
-        end: const {
-          Brightness.light: 0.0,
-          Brightness.dark: 1.0,
-        }[currentBrightness],
+        end:
+            const {
+              Brightness.light: 0.0,
+              Brightness.dark: 1.0,
+            }[currentBrightness],
       ),
-      builder: (BuildContext context, double value, Widget? child) =>
-          BrightnessData(
-        value: value,
-        brightnessThemeData:
-            BrightnessThemeData.lerp(lightThemeData, darkThemeData, value),
-        child: child!,
-      ),
+      builder:
+          (BuildContext context, double value, Widget? child) => BrightnessData(
+            value: value,
+            brightnessThemeData: BrightnessThemeData.lerp(
+              lightThemeData,
+              darkThemeData,
+              value,
+            ),
+            child: child!,
+          ),
       child: child,
     );
   }
@@ -108,9 +112,10 @@ class BrightnessData extends InheritedWidget {
   static double of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<BrightnessData>()!.value;
 
-  static BrightnessThemeData themeOf(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<BrightnessData>()!
-      .brightnessThemeData;
+  static BrightnessThemeData themeOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<BrightnessData>()!
+          .brightnessThemeData;
 
   static Color dynamicColor(
     BuildContext context,
@@ -173,38 +178,46 @@ class BrightnessThemeData {
   final Color settingCellBackgroundColor;
 
   static BrightnessThemeData lerp(
-          BrightnessThemeData begin, BrightnessThemeData end, double t) =>
-      BrightnessThemeData(
-        primary: Color.lerp(begin.primary, end.primary, t)!,
-        accent: Color.lerp(begin.accent, end.accent, t)!,
-        text: Color.lerp(begin.text, end.text, t)!,
-        icon: Color.lerp(begin.icon, end.icon, t)!,
-        secondaryText: Color.lerp(begin.secondaryText, end.secondaryText, t)!,
-        sidebarSelected:
-            Color.lerp(begin.sidebarSelected, end.sidebarSelected, t)!,
-        listSelected: Color.lerp(begin.listSelected, end.listSelected, t)!,
-        chatBackground:
-            Color.lerp(begin.chatBackground, end.chatBackground, t)!,
-        background: Color.lerp(begin.background, end.background, t)!,
-        divider: Color.lerp(begin.divider, end.divider, t)!,
-        red: Color.lerp(begin.red, end.red, t)!,
-        green: Color.lerp(begin.green, end.green, t)!,
-        warning: Color.lerp(begin.warning, end.warning, t)!,
-        highlight: Color.lerp(begin.highlight, end.highlight, t)!,
-        dateTime: Color.lerp(begin.dateTime, end.dateTime, t)!,
-        encrypt: Color.lerp(begin.encrypt, end.encrypt, t)!,
-        popUp: Color.lerp(begin.popUp, end.popUp, t)!,
-        statusBackground:
-            Color.lerp(begin.statusBackground, end.statusBackground, t)!,
-        stickerPlaceholderColor: Color.lerp(
-            begin.stickerPlaceholderColor, end.stickerPlaceholderColor, t)!,
-        waveformBackground:
-            Color.lerp(begin.waveformBackground, end.waveformBackground, t)!,
-        waveformForeground:
-            Color.lerp(begin.waveformForeground, end.waveformForeground, t)!,
-        settingCellBackgroundColor: Color.lerp(begin.settingCellBackgroundColor,
-            end.settingCellBackgroundColor, t)!,
-      );
+    BrightnessThemeData begin,
+    BrightnessThemeData end,
+    double t,
+  ) => BrightnessThemeData(
+    primary: Color.lerp(begin.primary, end.primary, t)!,
+    accent: Color.lerp(begin.accent, end.accent, t)!,
+    text: Color.lerp(begin.text, end.text, t)!,
+    icon: Color.lerp(begin.icon, end.icon, t)!,
+    secondaryText: Color.lerp(begin.secondaryText, end.secondaryText, t)!,
+    sidebarSelected: Color.lerp(begin.sidebarSelected, end.sidebarSelected, t)!,
+    listSelected: Color.lerp(begin.listSelected, end.listSelected, t)!,
+    chatBackground: Color.lerp(begin.chatBackground, end.chatBackground, t)!,
+    background: Color.lerp(begin.background, end.background, t)!,
+    divider: Color.lerp(begin.divider, end.divider, t)!,
+    red: Color.lerp(begin.red, end.red, t)!,
+    green: Color.lerp(begin.green, end.green, t)!,
+    warning: Color.lerp(begin.warning, end.warning, t)!,
+    highlight: Color.lerp(begin.highlight, end.highlight, t)!,
+    dateTime: Color.lerp(begin.dateTime, end.dateTime, t)!,
+    encrypt: Color.lerp(begin.encrypt, end.encrypt, t)!,
+    popUp: Color.lerp(begin.popUp, end.popUp, t)!,
+    statusBackground:
+        Color.lerp(begin.statusBackground, end.statusBackground, t)!,
+    stickerPlaceholderColor:
+        Color.lerp(
+          begin.stickerPlaceholderColor,
+          end.stickerPlaceholderColor,
+          t,
+        )!,
+    waveformBackground:
+        Color.lerp(begin.waveformBackground, end.waveformBackground, t)!,
+    waveformForeground:
+        Color.lerp(begin.waveformForeground, end.waveformForeground, t)!,
+    settingCellBackgroundColor:
+        Color.lerp(
+          begin.settingCellBackgroundColor,
+          end.settingCellBackgroundColor,
+          t,
+        )!,
+  );
 
   @override
   bool operator ==(Object other) =>

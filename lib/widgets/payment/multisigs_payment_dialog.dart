@@ -54,10 +54,7 @@ Future<void> showMultisigsPaymentDialog(
   BuildContext context, {
   required MultisigsPaymentItem item,
 }) async {
-  await showMixinDialog(
-    context: context,
-    child: _PaymentDialog(item: item),
-  );
+  await showMixinDialog(context: context, child: _PaymentDialog(item: item));
 }
 
 extension _PaymentCodeResponseExt on MultisigsPaymentItem {
@@ -71,34 +68,32 @@ class _PaymentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 340,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(
+        width: 340,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Row(
               children: [
-                const Row(
-                  children: [
-                    Spacer(),
-                    Padding(
-                      padding: EdgeInsets.only(right: 12, top: 12),
-                      child: MixinCloseButton(),
-                    ),
-                  ],
+                Spacer(),
+                Padding(
+                  padding: EdgeInsets.only(right: 12, top: 12),
+                  child: MixinCloseButton(),
                 ),
-                _MultisigsPaymentBody(item: item),
               ],
             ),
-          ),
-        ],
-      );
+            _MultisigsPaymentBody(item: item),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _MultisigsPaymentBody extends HookConsumerWidget {
-  const _MultisigsPaymentBody({
-    required this.item,
-  });
+  const _MultisigsPaymentBody({required this.item});
 
   final MultisigsPaymentItem item;
 
@@ -113,16 +108,10 @@ class _MultisigsPaymentBody extends HookConsumerWidget {
                   (item as Multi2MultiItem).action == 'unlock')
               ? context.l10n.revokeMultisigTransaction
               : context.l10n.multisigTransaction,
-          style: TextStyle(
-            fontSize: 18,
-            color: context.theme.text,
-          ),
+          style: TextStyle(fontSize: 18, color: context.theme.text),
         ),
         const SizedBox(height: 24),
-        _UsersLayout(
-          senders: item.senders,
-          receivers: item.receivers,
-        ),
+        _UsersLayout(senders: item.senders, receivers: item.receivers),
         const SizedBox(height: 24),
         SymbolIconWithBorder(
           size: 48,
@@ -133,10 +122,7 @@ class _MultisigsPaymentBody extends HookConsumerWidget {
         const SizedBox(height: 10),
         Text(
           '${item.amount.numberFormat()} ${asset.symbol}',
-          style: TextStyle(
-            fontSize: 16,
-            color: context.theme.text,
-          ),
+          style: TextStyle(fontSize: 16, color: context.theme.text),
         ),
         const SizedBox(height: 8),
         if (item.isDone) const _DoneLayout() else _QrCodeLayout(uri: item.uri),
@@ -147,48 +133,43 @@ class _MultisigsPaymentBody extends HookConsumerWidget {
 }
 
 class _UsersLayout extends StatelessWidget {
-  const _UsersLayout({
-    required this.senders,
-    required this.receivers,
-  });
+  const _UsersLayout({required this.senders, required this.receivers});
 
   final List<String> senders;
   final List<String> receivers;
 
   @override
   Widget build(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      _OverlappedUserAvatars(
         children: [
-          _OverlappedUserAvatars(
-            children: [
-              if (senders.length <= 3)
-                for (final sender in senders) _UserIcon(userId: sender),
-              if (senders.length > 3)
-                for (final sender in senders.take(2)) _UserIcon(userId: sender),
-              if (senders.length > 3) _UserCountIcon(count: senders.length - 2),
-            ],
-          ),
-          SizedBox.square(
-            dimension: 24,
-            child: SvgPicture.asset(
-              Resources.assetsImagesIcArrowRightSvg,
-              colorFilter:
-                  ColorFilter.mode(context.theme.green, BlendMode.srcIn),
-            ),
-          ),
-          _OverlappedUserAvatars(
-            children: [
-              if (receivers.length <= 3)
-                for (final receiver in receivers) _UserIcon(userId: receiver),
-              if (receivers.length > 3)
-                for (final receiver in receivers.take(2))
-                  _UserIcon(userId: receiver),
-              if (receivers.length > 3)
-                _UserCountIcon(count: receivers.length - 2),
-            ],
-          ),
+          if (senders.length <= 3)
+            for (final sender in senders) _UserIcon(userId: sender),
+          if (senders.length > 3)
+            for (final sender in senders.take(2)) _UserIcon(userId: sender),
+          if (senders.length > 3) _UserCountIcon(count: senders.length - 2),
         ],
-      );
+      ),
+      SizedBox.square(
+        dimension: 24,
+        child: SvgPicture.asset(
+          Resources.assetsImagesIcArrowRightSvg,
+          colorFilter: ColorFilter.mode(context.theme.green, BlendMode.srcIn),
+        ),
+      ),
+      _OverlappedUserAvatars(
+        children: [
+          if (receivers.length <= 3)
+            for (final receiver in receivers) _UserIcon(userId: receiver),
+          if (receivers.length > 3)
+            for (final receiver in receivers.take(2))
+              _UserIcon(userId: receiver),
+          if (receivers.length > 3) _UserCountIcon(count: receivers.length - 2),
+        ],
+      ),
+    ],
+  );
 }
 
 class _UserCountIcon extends StatelessWidget {
@@ -198,22 +179,19 @@ class _UserCountIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        decoration: BoxDecoration(
-          color: context.theme.listSelected,
-          shape: BoxShape.circle,
-        ),
-        width: 24,
-        height: 24,
-        child: Center(
-          child: Text(
-            '+$count',
-            style: TextStyle(
-              fontSize: 12,
-              color: context.theme.secondaryText,
-            ),
-          ),
-        ),
-      );
+    decoration: BoxDecoration(
+      color: context.theme.listSelected,
+      shape: BoxShape.circle,
+    ),
+    width: 24,
+    height: 24,
+    child: Center(
+      child: Text(
+        '+$count',
+        style: TextStyle(fontSize: 12, color: context.theme.secondaryText),
+      ),
+    ),
+  );
 }
 
 class _OverlappedUserAvatars extends StatelessWidget {
@@ -223,7 +201,8 @@ class _OverlappedUserAvatars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
+    children:
+        [
           for (var index = 0; index < children.length; index++)
             Padding(
               padding: EdgeInsets.fromLTRB(index.toDouble() * 20, 0, 0, 0),
@@ -236,7 +215,7 @@ class _OverlappedUserAvatars extends StatelessWidget {
               ),
             ),
         ].reversed.toList(),
-      );
+  );
 }
 
 class _UserIcon extends HookConsumerWidget {
@@ -246,14 +225,17 @@ class _UserIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = useMemoizedStream(() => context.accountServer.database.userDao
-            .userById(userId)
-            .watchSingleOrNullWithStream(
-          eventStreams: [
-            DataBaseEventBus.instance.watchUpdateUserStream([userId])
-          ],
-          duration: kDefaultThrottleDuration,
-        )).data;
+    final user =
+        useMemoizedStream(
+          () => context.accountServer.database.userDao
+              .userById(userId)
+              .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+                ],
+                duration: kDefaultThrottleDuration,
+              ),
+        ).data;
 
     final Widget child;
 
@@ -288,18 +270,15 @@ class _QrCodeLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          const SizedBox(height: 32),
-          ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: QrCode(
-              dimension: 180,
-              data: uri.toString(),
-            ),
-          ),
-          const SizedBox(height: 32),
-        ],
-      );
+    children: [
+      const SizedBox(height: 32),
+      ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        child: QrCode(dimension: 180, data: uri.toString()),
+      ),
+      const SizedBox(height: 32),
+    ],
+  );
 }
 
 class _DoneLayout extends StatelessWidget {
@@ -307,35 +286,34 @@ class _DoneLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          const SizedBox(height: 40),
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: context.theme.green.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: SizedBox.square(
-                dimension: 60,
-                child: SvgPicture.asset(
-                  Resources.assetsImagesCheckedSvg,
-                  colorFilter:
-                      ColorFilter.mode(context.theme.green, BlendMode.srcIn),
-                ),
+    children: [
+      const SizedBox(height: 40),
+      Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          color: context.theme.green.withValues(alpha: 0.2),
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: SizedBox.square(
+            dimension: 60,
+            child: SvgPicture.asset(
+              Resources.assetsImagesCheckedSvg,
+              colorFilter: ColorFilter.mode(
+                context.theme.green,
+                BlendMode.srcIn,
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            context.l10n.done,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.theme.secondaryText,
-            ),
-          ),
-          const SizedBox(height: 40),
-        ],
-      );
+        ),
+      ),
+      const SizedBox(height: 10),
+      Text(
+        context.l10n.done,
+        style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
+      ),
+      const SizedBox(height: 40),
+    ],
+  );
 }

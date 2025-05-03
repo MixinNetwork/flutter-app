@@ -17,24 +17,24 @@ class MaoUser with EquatableMixin {
   List<Object?> get props => [user, mao];
 }
 
-final searchMaoUserProvider =
-    FutureProvider.autoDispose.family<MaoUser?, String>((ref, keyword) async {
-  final client = ref.read(accountServerProvider).valueOrNull?.client;
-  if (client == null) {
-    return null;
-  }
-  if (keyword.isEmpty || !keyword.isValidMao()) {
-    return null;
-  }
-  try {
-    final user = (await client.userApi.search(keyword)).data.asDbUser;
-    await ref.read(databaseProvider).valueOrNull?.userDao.insert(user);
-    return MaoUser(user: user, mao: keyword.completeMao());
-  } catch (error, stackTrace) {
-    e('searchMaoUserProvider error: $error, $stackTrace');
-    return null;
-  }
-});
+final searchMaoUserProvider = FutureProvider.autoDispose
+    .family<MaoUser?, String>((ref, keyword) async {
+      final client = ref.read(accountServerProvider).valueOrNull?.client;
+      if (client == null) {
+        return null;
+      }
+      if (keyword.isEmpty || !keyword.isValidMao()) {
+        return null;
+      }
+      try {
+        final user = (await client.userApi.search(keyword)).data.asDbUser;
+        await ref.read(databaseProvider).valueOrNull?.userDao.insert(user);
+        return MaoUser(user: user, mao: keyword.completeMao());
+      } catch (error, stackTrace) {
+        e('searchMaoUserProvider error: $error, $stackTrace');
+        return null;
+      }
+    });
 
 extension StringExtension on String {
   String completeMao() {

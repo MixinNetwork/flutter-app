@@ -13,55 +13,53 @@ class StatusPending extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messageId =
-        useMessageConverter(converter: (state) => state.messageId);
+    final messageId = useMessageConverter(
+      converter: (state) => state.messageId,
+    );
 
-    final value = useListenableConverter(
-      context.accountServer.attachmentUtil,
-      converter: (AttachmentUtil attachmentUtil) =>
-          attachmentUtil.getAttachmentProgress(messageId),
-      keys: [messageId],
-    ).requireData;
+    final value =
+        useListenableConverter(
+          context.accountServer.attachmentUtil,
+          converter:
+              (AttachmentUtil attachmentUtil) =>
+                  attachmentUtil.getAttachmentProgress(messageId),
+          keys: [messageId],
+        ).requireData;
 
     return _StatusPending(value: value);
   }
 }
 
 class _StatusPending extends StatelessWidget {
-  const _StatusPending({
-    required this.value,
-  });
+  const _StatusPending({required this.value});
 
   final double value;
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Center(
-              child: SizedBox.fromSize(
-                size: const Size.square(10),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.theme.accent,
-                  ),
-                ),
-              ),
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        Center(
+          child: SizedBox.fromSize(
+            size: const Size.square(10),
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: context.theme.accent),
             ),
-            TweenAnimationBuilder<double>(
-              tween: Tween<double>(end: value),
-              duration: const Duration(milliseconds: 100),
-              builder: (context, value, _) => CircularProgressIndicator(
-                value: value,
-                valueColor: AlwaysStoppedAnimation(
-                  context.theme.accent,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      );
+        TweenAnimationBuilder<double>(
+          tween: Tween<double>(end: value),
+          duration: const Duration(milliseconds: 100),
+          builder:
+              (context, value, _) => CircularProgressIndicator(
+                value: value,
+                valueColor: AlwaysStoppedAnimation(context.theme.accent),
+              ),
+        ),
+      ],
+    ),
+  );
 }
 
 class StatusWarning extends StatelessWidget {
@@ -69,13 +67,13 @@ class StatusWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-        child: Center(
-          child: SvgPicture.asset(
-            Resources.assetsImagesWarningSvg,
-            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
-          ),
-        ),
-      );
+    child: Center(
+      child: SvgPicture.asset(
+        Resources.assetsImagesWarningSvg,
+        colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+      ),
+    ),
+  );
 }
 
 class StatusDownload extends StatelessWidget {
@@ -83,14 +81,13 @@ class StatusDownload extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-        child: Center(
-          child: SvgPicture.asset(
-            Resources.assetsImagesDownloadSvg,
-            colorFilter:
-                ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
-          ),
-        ),
-      );
+    child: Center(
+      child: SvgPicture.asset(
+        Resources.assetsImagesDownloadSvg,
+        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+      ),
+    ),
+  );
 }
 
 class StatusUpload extends StatelessWidget {
@@ -98,14 +95,13 @@ class StatusUpload extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-        child: Center(
-          child: SvgPicture.asset(
-            Resources.assetsImagesUploadSvg,
-            colorFilter:
-                ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
-          ),
-        ),
-      );
+    child: Center(
+      child: SvgPicture.asset(
+        Resources.assetsImagesUploadSvg,
+        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+      ),
+    ),
+  );
 }
 
 class StatusAudioPlay extends StatelessWidget {
@@ -113,12 +109,13 @@ class StatusAudioPlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-        child: Center(
-          child: SvgPicture.asset(Resources.assetsImagesAudioPlaySvg,
-              colorFilter:
-                  ColorFilter.mode(context.theme.accent, BlendMode.srcIn)),
-        ),
-      );
+    child: Center(
+      child: SvgPicture.asset(
+        Resources.assetsImagesAudioPlaySvg,
+        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+      ),
+    ),
+  );
 }
 
 class StatusAudioStop extends StatelessWidget {
@@ -126,31 +123,28 @@ class StatusAudioStop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-        child: Center(
-          child: SvgPicture.asset(
-            Resources.assetsImagesAudioStopSvg,
-            colorFilter:
-                ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
-          ),
-        ),
-      );
+    child: Center(
+      child: SvgPicture.asset(
+        Resources.assetsImagesAudioStopSvg,
+        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+      ),
+    ),
+  );
 }
 
 class _StatusLayout extends StatelessWidget {
-  const _StatusLayout({
-    required this.child,
-  });
+  const _StatusLayout({required this.child});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 38,
-        width: 38,
-        decoration: BoxDecoration(
-          color: context.theme.statusBackground,
-          shape: BoxShape.circle,
-        ),
-        child: child,
-      );
+    height: 38,
+    width: 38,
+    decoration: BoxDecoration(
+      color: context.theme.statusBackground,
+      shape: BoxShape.circle,
+    ),
+    child: child,
+  );
 }

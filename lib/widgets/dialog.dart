@@ -18,50 +18,51 @@ Future<T?> _showDialog<T>({
   Color barrierColor = const Color(0x80000000),
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
-}) =>
-    showGeneralDialog<T>(
-      context: context,
-      pageBuilder: (BuildContext buildContext, Animation<double> animation,
-              Animation<double> secondaryAnimation) =>
-          InheritedTheme.capture(
-                  from: context,
-                  to: Navigator.of(context, rootNavigator: useRootNavigator)
-                      .context)
-              .wrap(
+}) => showGeneralDialog<T>(
+  context: context,
+  pageBuilder:
+      (
+        BuildContext buildContext,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => InheritedTheme.capture(
+        from: context,
+        to: Navigator.of(context, rootNavigator: useRootNavigator).context,
+      ).wrap(
         Builder(
-          builder: (context) =>
-              pageBuilder(context, animation, secondaryAnimation),
+          builder:
+              (context) => pageBuilder(context, animation, secondaryAnimation),
         ),
       ),
-      barrierDismissible: barrierDismissible,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      barrierColor: barrierColor,
-      transitionDuration: const Duration(milliseconds: 80),
-      useRootNavigator: useRootNavigator,
-      routeSettings: routeSettings,
-    );
+  barrierDismissible: barrierDismissible,
+  barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+  barrierColor: barrierColor,
+  transitionDuration: const Duration(milliseconds: 80),
+  useRootNavigator: useRootNavigator,
+  routeSettings: routeSettings,
+);
 
 Future<T?> showMixinDialog<T>({
   required BuildContext context,
   required Widget child,
   RouteSettings? routeSettings,
   EdgeInsets? padding = const EdgeInsets.all(32),
-  BoxConstraints? constraints = const BoxConstraints(
-    maxWidth: 600,
-  ),
+  BoxConstraints? constraints = const BoxConstraints(maxWidth: 600),
   Color? backgroundColor,
   bool barrierDismissible = true,
-}) =>
-    _showDialog<T>(
-      barrierDismissible: barrierDismissible,
-      context: context,
-      routeSettings: routeSettings,
-      pageBuilder: (BuildContext buildContext, Animation<double> animation,
-              Animation<double> secondaryAnimation) =>
-          InheritedTheme.capture(
-                  from: context,
-                  to: Navigator.of(context, rootNavigator: true).context)
-              .wrap(
+}) => _showDialog<T>(
+  barrierDismissible: barrierDismissible,
+  context: context,
+  routeSettings: routeSettings,
+  pageBuilder:
+      (
+        BuildContext buildContext,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => InheritedTheme.capture(
+        from: context,
+        to: Navigator.of(context, rootNavigator: true).context,
+      ).wrap(
         Center(
           child: _DialogPage(
             padding: padding,
@@ -71,7 +72,7 @@ Future<T?> showMixinDialog<T>({
           ),
         ),
       ),
-    );
+);
 
 class AlertDialogLayout extends StatelessWidget {
   const AlertDialogLayout({
@@ -97,49 +98,46 @@ class AlertDialogLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: Colors.transparent,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: minWidth,
-            minHeight: minHeight,
-            maxWidth: maxWidth ?? double.infinity,
-          ),
-          child: Padding(
-            padding: padding,
-            child: IntrinsicWidth(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (title != null)
-                    DefaultTextStyle.merge(
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: context.theme.text,
-                      ),
-                      child: title!,
-                    ),
-                  if (title != null) SizedBox(height: titleMarginBottom),
-                  DefaultTextStyle.merge(
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: context.theme.text,
-                    ),
-                    child: content,
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: actions.joinList(const SizedBox(width: 4)),
-                  ),
-                ],
+    color: Colors.transparent,
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: minWidth,
+        minHeight: minHeight,
+        maxWidth: maxWidth ?? double.infinity,
+      ),
+      child: Padding(
+        padding: padding,
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (title != null)
+                DefaultTextStyle.merge(
+                  style: TextStyle(fontSize: 16, color: context.theme.text),
+                  child: title!,
+                ),
+              if (title != null) SizedBox(height: titleMarginBottom),
+              DefaultTextStyle.merge(
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: context.theme.text,
+                ),
+                child: content,
               ),
-            ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: actions.joinList(const SizedBox(width: 4)),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _DialogPage extends StatelessWidget {
@@ -195,10 +193,7 @@ class _DialogPage extends StatelessWidget {
 
 /// default onTap is Navigator.pop
 abstract class DialogInteracterEntry<T> extends StatelessWidget {
-  const DialogInteracterEntry({
-    super.key,
-    this.value,
-  });
+  const DialogInteracterEntry({super.key, this.value});
 
   final T? value;
 
@@ -213,10 +208,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
     super.value,
     this.backgroundTransparent = false,
     this.onTap,
-    this.padding = const EdgeInsets.symmetric(
-      vertical: 8,
-      horizontal: 16,
-    ),
+    this.padding = const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
     this.disable = false,
     this.backgroundColor,
   });
@@ -230,17 +222,17 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
 
   @override
   Widget build(BuildContext context) {
-    final boxDecoration = backgroundTransparent
-        ? const BoxDecoration()
-        : BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-            color: backgroundColor ?? context.theme.accent,
-          );
-    final textColor = backgroundTransparent
-        ? context.theme.accent
-        : context.dynamicColor(
-            const Color.fromRGBO(255, 255, 255, 1),
-          );
+    final boxDecoration =
+        backgroundTransparent
+            ? const BoxDecoration()
+            : BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+              color: backgroundColor ?? context.theme.accent,
+            );
+    final textColor =
+        backgroundTransparent
+            ? context.theme.accent
+            : context.dynamicColor(const Color.fromRGBO(255, 255, 255, 1));
     return Disable(
       disable: disable,
       child: InteractiveDecoratedBox.color(
@@ -252,10 +244,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
             fontSize: 16,
             color: textColor,
           ),
-          child: Padding(
-            padding: padding,
-            child: child,
-          ),
+          child: Padding(padding: padding, child: child),
         ),
       ),
     );
@@ -282,7 +271,8 @@ class DialogTextField extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textStream = useValueNotifierConvertSteam(textEditingController);
-    final hasText = useMemoizedStream(
+    final hasText =
+        useMemoizedStream(
           () => textStream.map((event) => event.text.isNotEmpty).distinct(),
         ).data ??
         textEditingController.text.isNotEmpty;
@@ -299,9 +289,7 @@ class DialogTextField extends HookConsumerWidget {
           TextField(
             autofocus: true,
             controller: textEditingController,
-            style: TextStyle(
-              color: context.theme.text,
-            ),
+            style: TextStyle(color: context.theme.text),
             maxLines: maxLines ?? 1,
             minLines: 1,
             maxLength: maxLength,
@@ -318,8 +306,9 @@ class DialogTextField extends HookConsumerWidget {
             ),
             inputFormatters: inputFormatters,
             selectionHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
+            contextMenuBuilder:
+                (context, state) =>
+                    MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
           if (hintText.isNotEmpty && !hasText)
             IgnorePointer(
@@ -339,10 +328,7 @@ class DialogTextField extends HookConsumerWidget {
   }
 }
 
-enum DialogEvent {
-  positive,
-  neutral,
-}
+enum DialogEvent { positive, neutral }
 
 Future<DialogEvent?> showConfirmMixinDialog(
   BuildContext context,
@@ -353,12 +339,12 @@ Future<DialogEvent?> showConfirmMixinDialog(
   String? positiveText,
   String? negativeText,
   String? neutralText,
-}) =>
-    showMixinDialog<DialogEvent>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      child: Builder(
-        builder: (context) => AlertDialogLayout(
+}) => showMixinDialog<DialogEvent>(
+  context: context,
+  barrierDismissible: barrierDismissible,
+  child: Builder(
+    builder:
+        (context) => AlertDialogLayout(
           maxWidth: maxWidth,
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -398,8 +384,8 @@ Future<DialogEvent?> showConfirmMixinDialog(
             ),
           ],
         ),
-      ),
-    );
+  ),
+);
 
 class EditDialog extends HookConsumerWidget {
   const EditDialog({
@@ -439,9 +425,10 @@ class EditDialog extends HookConsumerWidget {
       ),
       actions: [
         MixinButton(
-            backgroundTransparent: true,
-            onTap: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel)),
+          backgroundTransparent: true,
+          onTap: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
@@ -464,17 +451,17 @@ class DialogAddOrJoinButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: context.theme.statusBackground,
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(15)),
-          ),
-        ),
-        onPressed: onTap,
-        child: DefaultTextStyle.merge(
-          style: TextStyle(fontSize: 12, color: context.theme.accent),
-          child: title,
-        ),
-      );
+    style: TextButton.styleFrom(
+      backgroundColor: context.theme.statusBackground,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+      ),
+    ),
+    onPressed: onTap,
+    child: DefaultTextStyle.merge(
+      style: TextStyle(fontSize: 12, color: context.theme.accent),
+      child: title,
+    ),
+  );
 }

@@ -18,9 +18,7 @@ abstract class MixinWebView {
 
   Future<bool> isWebViewRuntimeAvailable();
 
-  Future<void> showWebViewUnavailableDialog({
-    required BuildContext context,
-  });
+  Future<void> showWebViewUnavailableDialog({required BuildContext context});
 
   void clearWebViewCacheAndCookies();
 

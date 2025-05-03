@@ -31,8 +31,9 @@ class SessionKeyValue extends HiveKeyValue {
 
 List<int> decryptPinToken(String serverPublicKey, ed.PrivateKey privateKey) {
   final bytes = base64Decode(serverPublicKey);
-  final private =
-      sdk.privateKeyToCurve25519(Uint8List.fromList(privateKey.bytes));
+  final private = sdk.privateKeyToCurve25519(
+    Uint8List.fromList(privateKey.bytes),
+  );
   return calculateAgreement(bytes, private);
 }
 

@@ -17,7 +17,7 @@ void main() {
       '😙',
       '😇',
       '😙',
-      '😚'
+      '😚',
     ]);
     final result2 = extractEmoji('👮👮‍♀️👮‍♂️');
     expect(result2, ['👮', '👮‍♀️', '👮‍♂️']);
@@ -27,10 +27,7 @@ void main() {
     const text = '🧐t😉his is😒 a😛😝 st😒ring🤩. 🙂😙😇😙😚';
     final emojis = <String>[];
     final texts = <String>[];
-    text.splitEmoji(
-      onEmoji: emojis.add,
-      onText: texts.add,
-    );
+    text.splitEmoji(onEmoji: emojis.add, onText: texts.add);
     expect(emojis, [
       '🧐',
       '😉',
@@ -43,7 +40,7 @@ void main() {
       '😙',
       '😇',
       '😙',
-      '😚'
+      '😚',
     ]);
     expect(texts, ['t', 'his is', ' a', ' st', 'ring', '. ']);
   });

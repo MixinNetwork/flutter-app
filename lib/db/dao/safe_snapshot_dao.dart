@@ -35,9 +35,11 @@ class SafeSnapshotDao extends DatabaseAccessor<MixinDatabase>
   SafeSnapshotDao(super.db);
 
   Future<int> insert(SafeSnapshot snapshot, {bool updateIfConflict = true}) =>
-      into(db.safeSnapshots)
-          .simpleInsert(snapshot, updateIfConflict: updateIfConflict)
-          .then((value) async {
+      into(
+        db.safeSnapshots,
+      ).simpleInsert(snapshot, updateIfConflict: updateIfConflict).then((
+        value,
+      ) async {
         if (value > 0) {
           DataBaseEventBus.instance.updateSafeSnapshot([snapshot.snapshotId]);
         }
@@ -45,20 +47,20 @@ class SafeSnapshotDao extends DatabaseAccessor<MixinDatabase>
       });
 
   Future<List<SafeSnapshot>> snapshotItem(String assetId) =>
-      (select(db.safeSnapshots)..where((tbl) => tbl.assetId.equals(assetId)))
-          .get();
+      (select(db.safeSnapshots)
+        ..where((tbl) => tbl.assetId.equals(assetId))).get();
 
   Selectable<SafeSnapshot> safeSnapshotById(String snapshotId) =>
       select(safeSnapshots)..where((tbl) => tbl.snapshotId.equals(snapshotId));
 
-  Future<int> insertSdkSnapshot(sdk.SafeSnapshot data) => into(safeSnapshots)
-          .insertOnConflictUpdate(data.asDbSafeSnapshotObject)
-          .then((value) {
-        if (value > 0) {
-          DataBaseEventBus.instance.updateSafeSnapshot([data.snapshotId]);
-        }
-        return value;
-      });
+  Future<int> insertSdkSnapshot(sdk.SafeSnapshot data) => into(
+    safeSnapshots,
+  ).insertOnConflictUpdate(data.asDbSafeSnapshotObject).then((value) {
+    if (value > 0) {
+      DataBaseEventBus.instance.updateSafeSnapshot([data.snapshotId]);
+    }
+    return value;
+  });
 
   Future<List<SafeSnapshot>> getSnapshots({
     required int limit,

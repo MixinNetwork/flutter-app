@@ -20,37 +20,35 @@ class RadioItem<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onChanged(value),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            children: [
-              ClipOval(
-                child: Container(
-                  color: groupValue == value
+    behavior: HitTestBehavior.opaque,
+    onTap: () => onChanged(value),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          ClipOval(
+            child: Container(
+              color:
+                  groupValue == value
                       ? context.theme.accent
                       : context.theme.secondaryText,
-                  height: 16,
-                  width: 16,
-                  alignment: const Alignment(0, -0.2),
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesSelectedSvg,
-                    height: 10,
-                    width: 10,
-                  ),
-                ),
+              height: 16,
+              width: 16,
+              alignment: const Alignment(0, -0.2),
+              child: SvgPicture.asset(
+                Resources.assetsImagesSelectedSvg,
+                height: 10,
+                width: 10,
               ),
-              const SizedBox(width: 30),
-              DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 16,
-                ),
-                child: title,
-              ),
-            ],
+            ),
           ),
-        ),
-      );
+          const SizedBox(width: 30),
+          DefaultTextStyle.merge(
+            style: TextStyle(color: context.theme.text, fontSize: 16),
+            child: title,
+          ),
+        ],
+      ),
+    ),
+  );
 }

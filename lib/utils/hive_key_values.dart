@@ -16,26 +16,26 @@ import 'attachment/download_key_value.dart';
 import 'file.dart';
 
 Future<void> initKeyValues(String identityNumber) => Future.wait([
-      PrivacyKeyValue.instance.init(identityNumber),
-      CryptoKeyValue.instance.init(identityNumber),
-      AccountKeyValue.instance.init(identityNumber),
-      ShowPinMessageKeyValue.instance.init(identityNumber),
-      ScamWarningKeyValue.instance.init(identityNumber),
-      DownloadKeyValue.instance.init(identityNumber),
-      SessionKeyValue.instance.init(identityNumber),
-      SecurityKeyValue.instance.init(identityNumber),
-    ]);
+  PrivacyKeyValue.instance.init(identityNumber),
+  CryptoKeyValue.instance.init(identityNumber),
+  AccountKeyValue.instance.init(identityNumber),
+  ShowPinMessageKeyValue.instance.init(identityNumber),
+  ScamWarningKeyValue.instance.init(identityNumber),
+  DownloadKeyValue.instance.init(identityNumber),
+  SessionKeyValue.instance.init(identityNumber),
+  SecurityKeyValue.instance.init(identityNumber),
+]);
 
 Future<void> clearKeyValues() => Future.wait([
-      PrivacyKeyValue.instance.delete(),
-      CryptoKeyValue.instance.delete(),
-      AccountKeyValue.instance.delete(),
-      ShowPinMessageKeyValue.instance.delete(),
-      ScamWarningKeyValue.instance.delete(),
-      DownloadKeyValue.instance.delete(),
-      SessionKeyValue.instance.delete(),
-      SecurityKeyValue.instance.delete(),
-    ]);
+  PrivacyKeyValue.instance.delete(),
+  CryptoKeyValue.instance.delete(),
+  AccountKeyValue.instance.delete(),
+  ShowPinMessageKeyValue.instance.delete(),
+  ScamWarningKeyValue.instance.delete(),
+  DownloadKeyValue.instance.delete(),
+  SessionKeyValue.instance.delete(),
+  SecurityKeyValue.instance.delete(),
+]);
 
 abstract class HiveKeyValue<E> {
   HiveKeyValue(this._boxName);
@@ -51,8 +51,9 @@ abstract class HiveKeyValue<E> {
     final dbFolder = mixinDocumentsDirectory;
 
     final legacyBoxDirectory = Directory(p.join(dbFolder.path, _boxName));
-    final directory =
-        Directory(p.join(dbFolder.path, identityNumber, _boxName));
+    final directory = Directory(
+      p.join(dbFolder.path, identityNumber, _boxName),
+    );
 
     if (legacyBoxDirectory.existsSync()) {
       // copy legacy file to new file

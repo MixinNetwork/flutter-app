@@ -12,4 +12,5 @@ class ConversationUnseenFilterEnabledNotifier
 
 final conversationUnseenFilterEnabledProvider =
     StateNotifierProvider<ConversationUnseenFilterEnabledNotifier, bool>(
-        (ref) => ConversationUnseenFilterEnabledNotifier());
+      (ref) => ConversationUnseenFilterEnabledNotifier(),
+    );

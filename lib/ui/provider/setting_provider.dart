@@ -21,27 +21,27 @@ class _SettingState extends Equatable {
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
     bool? messageShowIdentityNumber,
-  })  : _brightness = brightness,
-        _messageShowAvatar = messageShowAvatar,
-        _messagePreview = messagePreview,
-        _photoAutoDownload = photoAutoDownload,
-        _videoAutoDownload = videoAutoDownload,
-        _fileAutoDownload = fileAutoDownload,
-        _collapsedSidebar = collapsedSidebar,
-        _chatFontSizeDelta = chatFontSizeDelta,
-        _messageShowIdentityNumber = messageShowIdentityNumber;
+  }) : _brightness = brightness,
+       _messageShowAvatar = messageShowAvatar,
+       _messagePreview = messagePreview,
+       _photoAutoDownload = photoAutoDownload,
+       _videoAutoDownload = videoAutoDownload,
+       _fileAutoDownload = fileAutoDownload,
+       _collapsedSidebar = collapsedSidebar,
+       _chatFontSizeDelta = chatFontSizeDelta,
+       _messageShowIdentityNumber = messageShowIdentityNumber;
 
   factory _SettingState.fromMap(Map<String, dynamic> map) => _SettingState(
-        brightness: map['brightness'] as int?,
-        messageShowAvatar: map['messageShowAvatar'] as bool?,
-        messagePreview: map['messagePreview'] as bool?,
-        photoAutoDownload: map['photoAutoDownload'] as bool?,
-        videoAutoDownload: map['videoAutoDownload'] as bool?,
-        fileAutoDownload: map['fileAutoDownload'] as bool?,
-        collapsedSidebar: map['collapsedSidebar'] as bool?,
-        chatFontSizeDelta: map['chatFontSizeDelta'] as double?,
-        messageShowIdentityNumber: map['messageShowIdentityNumber'] as bool?,
-      );
+    brightness: map['brightness'] as int?,
+    messageShowAvatar: map['messageShowAvatar'] as bool?,
+    messagePreview: map['messagePreview'] as bool?,
+    photoAutoDownload: map['photoAutoDownload'] as bool?,
+    videoAutoDownload: map['videoAutoDownload'] as bool?,
+    fileAutoDownload: map['fileAutoDownload'] as bool?,
+    collapsedSidebar: map['collapsedSidebar'] as bool?,
+    chatFontSizeDelta: map['chatFontSizeDelta'] as double?,
+    messageShowIdentityNumber: map['messageShowIdentityNumber'] as bool?,
+  );
 
   final int? _brightness;
   final bool? _messageShowAvatar;
@@ -73,28 +73,28 @@ class _SettingState extends Equatable {
 
   @override
   List<Object?> get props => [
-        _brightness,
-        _messageShowAvatar,
-        _messagePreview,
-        _photoAutoDownload,
-        _videoAutoDownload,
-        _fileAutoDownload,
-        _collapsedSidebar,
-        _chatFontSizeDelta,
-        _messageShowIdentityNumber,
-      ];
+    _brightness,
+    _messageShowAvatar,
+    _messagePreview,
+    _photoAutoDownload,
+    _videoAutoDownload,
+    _fileAutoDownload,
+    _collapsedSidebar,
+    _chatFontSizeDelta,
+    _messageShowIdentityNumber,
+  ];
 
   Map<String, dynamic> toMap() => {
-        'brightness': _brightness,
-        'messageShowAvatar': _messageShowAvatar,
-        'messagePreview': _messagePreview,
-        'photoAutoDownload': _photoAutoDownload,
-        'videoAutoDownload': _videoAutoDownload,
-        'fileAutoDownload': _fileAutoDownload,
-        'collapsedSidebar': _collapsedSidebar,
-        'chatFontSizeDelta': _chatFontSizeDelta,
-        'messageShowIdentityNumber': _messageShowIdentityNumber,
-      };
+    'brightness': _brightness,
+    'messageShowAvatar': _messageShowAvatar,
+    'messagePreview': _messagePreview,
+    'photoAutoDownload': _photoAutoDownload,
+    'videoAutoDownload': _videoAutoDownload,
+    'fileAutoDownload': _fileAutoDownload,
+    'collapsedSidebar': _collapsedSidebar,
+    'chatFontSizeDelta': _chatFontSizeDelta,
+    'messageShowIdentityNumber': _messageShowIdentityNumber,
+  };
 
   _SettingState copyWith({
     int? brightness,
@@ -106,19 +106,18 @@ class _SettingState extends Equatable {
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
     bool? messageShowIdentityNumber,
-  }) =>
-      _SettingState(
-        brightness: brightness ?? _brightness,
-        messageShowAvatar: messageShowAvatar ?? _messageShowAvatar,
-        messagePreview: messagePreview ?? _messagePreview,
-        photoAutoDownload: photoAutoDownload ?? _photoAutoDownload,
-        videoAutoDownload: videoAutoDownload ?? _videoAutoDownload,
-        fileAutoDownload: fileAutoDownload ?? _fileAutoDownload,
-        collapsedSidebar: collapsedSidebar ?? _collapsedSidebar,
-        chatFontSizeDelta: chatFontSizeDelta ?? _chatFontSizeDelta,
-        messageShowIdentityNumber:
-            messageShowIdentityNumber ?? _messageShowIdentityNumber,
-      );
+  }) => _SettingState(
+    brightness: brightness ?? _brightness,
+    messageShowAvatar: messageShowAvatar ?? _messageShowAvatar,
+    messagePreview: messagePreview ?? _messagePreview,
+    photoAutoDownload: photoAutoDownload ?? _photoAutoDownload,
+    videoAutoDownload: videoAutoDownload ?? _videoAutoDownload,
+    fileAutoDownload: fileAutoDownload ?? _fileAutoDownload,
+    collapsedSidebar: collapsedSidebar ?? _collapsedSidebar,
+    chatFontSizeDelta: chatFontSizeDelta ?? _chatFontSizeDelta,
+    messageShowIdentityNumber:
+        messageShowIdentityNumber ?? _messageShowIdentityNumber,
+  );
 }
 
 class SettingChangeNotifier extends ChangeNotifier {
@@ -132,15 +131,15 @@ class SettingChangeNotifier extends ChangeNotifier {
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
     bool? messageShowIdentityNumber,
-  })  : _brightness = brightness,
-        _messageShowAvatar = messageShowAvatar,
-        _messagePreview = messagePreview,
-        _photoAutoDownload = photoAutoDownload,
-        _videoAutoDownload = videoAutoDownload,
-        _fileAutoDownload = fileAutoDownload,
-        _collapsedSidebar = collapsedSidebar,
-        _chatFontSizeDelta = chatFontSizeDelta,
-        _messageShowIdentityNumber = messageShowIdentityNumber;
+  }) : _brightness = brightness,
+       _messageShowAvatar = messageShowAvatar,
+       _messagePreview = messagePreview,
+       _photoAutoDownload = photoAutoDownload,
+       _videoAutoDownload = videoAutoDownload,
+       _fileAutoDownload = fileAutoDownload,
+       _collapsedSidebar = collapsedSidebar,
+       _chatFontSizeDelta = chatFontSizeDelta,
+       _messageShowIdentityNumber = messageShowIdentityNumber;
 
   /// The brightness of theme.
   /// 0 : follow system
@@ -276,18 +275,19 @@ class SettingChangeNotifier extends ChangeNotifier {
   @override
   void notifyListeners() {
     HydratedBloc.storage.write(
-        _kSettingCubitKey,
-        _SettingState(
-          brightness: _brightness,
-          messageShowAvatar: _messageShowAvatar,
-          messagePreview: _messagePreview,
-          photoAutoDownload: _photoAutoDownload,
-          videoAutoDownload: _videoAutoDownload,
-          fileAutoDownload: _fileAutoDownload,
-          collapsedSidebar: _collapsedSidebar,
-          chatFontSizeDelta: _chatFontSizeDelta,
-          messageShowIdentityNumber: _messageShowIdentityNumber,
-        ).toMap());
+      _kSettingCubitKey,
+      _SettingState(
+        brightness: _brightness,
+        messageShowAvatar: _messageShowAvatar,
+        messagePreview: _messagePreview,
+        photoAutoDownload: _photoAutoDownload,
+        videoAutoDownload: _videoAutoDownload,
+        fileAutoDownload: _fileAutoDownload,
+        collapsedSidebar: _collapsedSidebar,
+        chatFontSizeDelta: _chatFontSizeDelta,
+        messageShowIdentityNumber: _messageShowIdentityNumber,
+      ).toMap(),
+    );
     super.notifyListeners();
   }
 }
@@ -297,25 +297,25 @@ const _kSettingCubitKey = 'SettingCubit';
 
 final settingProvider =
     ChangeNotifierProvider.autoDispose<SettingChangeNotifier>((ref) {
-  ref.keepAlive();
+      ref.keepAlive();
 
-  //migrate
-  final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
-  if (oldJson != null) {
-    final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
-    if (settingState == null) return SettingChangeNotifier();
-    return SettingChangeNotifier(
-      brightness: settingState.brightness,
-      messageShowAvatar: settingState.messageShowAvatar,
-      messagePreview: settingState.messagePreview,
-      photoAutoDownload: settingState.photoAutoDownload,
-      videoAutoDownload: settingState.videoAutoDownload,
-      fileAutoDownload: settingState.fileAutoDownload,
-      collapsedSidebar: settingState.collapsedSidebar,
-      chatFontSizeDelta: settingState.chatFontSizeDelta,
-      messageShowIdentityNumber: settingState.messageShowIdentityNumber,
-    );
-  }
+      //migrate
+      final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
+      if (oldJson != null) {
+        final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
+        if (settingState == null) return SettingChangeNotifier();
+        return SettingChangeNotifier(
+          brightness: settingState.brightness,
+          messageShowAvatar: settingState.messageShowAvatar,
+          messagePreview: settingState.messagePreview,
+          photoAutoDownload: settingState.photoAutoDownload,
+          videoAutoDownload: settingState.videoAutoDownload,
+          fileAutoDownload: settingState.fileAutoDownload,
+          collapsedSidebar: settingState.collapsedSidebar,
+          chatFontSizeDelta: settingState.chatFontSizeDelta,
+          messageShowIdentityNumber: settingState.messageShowIdentityNumber,
+        );
+      }
 
-  return SettingChangeNotifier();
-});
+      return SettingChangeNotifier();
+    });

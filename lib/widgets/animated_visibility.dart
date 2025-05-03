@@ -18,27 +18,24 @@ class AnimatedVisibility extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder(
-        tween: Tween<double>(end: visible ? 1 : 0),
-        duration: duration,
-        builder: (BuildContext context, double value, Widget? child) {
-          Widget result = IgnorePointer(
-            ignoring: value == 0,
-            child: Opacity(
-              opacity: value,
-              child: child,
-            ),
-          );
-          if (!maintainSize) {
-            result = ClipRect(
-              child: Align(
-                alignment: alignment,
-                heightFactor: value,
-                child: result,
-              ),
-            );
-          }
-          return result;
-        },
-        child: child,
+    tween: Tween<double>(end: visible ? 1 : 0),
+    duration: duration,
+    builder: (BuildContext context, double value, Widget? child) {
+      Widget result = IgnorePointer(
+        ignoring: value == 0,
+        child: Opacity(opacity: value, child: child),
       );
+      if (!maintainSize) {
+        result = ClipRect(
+          child: Align(
+            alignment: alignment,
+            heightFactor: value,
+            child: result,
+          ),
+        );
+      }
+      return result;
+    },
+    child: child,
+  );
 }

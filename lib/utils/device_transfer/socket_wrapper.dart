@@ -30,8 +30,7 @@ abstract class TransferSocket {
     Socket socket,
     TransferSecretKey secretKey, {
     ValueChanged<int>? onWriteBytes,
-  }) =>
-      _TransferSocket(socket, secretKey, onWriteBytes: onWriteBytes);
+  }) => _TransferSocket(socket, secretKey, onWriteBytes: onWriteBytes);
 
   TransferSocket.create(this.secretKey, {this.onWriteBytes});
 
@@ -142,7 +141,8 @@ abstract class TransferSocket {
   }
 
   Future<void> addTranscriptMessage(
-      TransferDataTranscriptMessage transcriptMessage) {
+    TransferDataTranscriptMessage transcriptMessage,
+  ) {
     final wrapper = JsonTransferData(
       data: transcriptMessage.toJson(),
       type: JsonTransferDataType.transcriptMessage,
@@ -202,7 +202,7 @@ abstract class TransferSocket {
 
 class _TransferSocket extends TransferSocket {
   _TransferSocket(this.socket, super.secretKey, {super.onWriteBytes})
-      : super.create();
+    : super.create();
 
   final Socket socket;
   final Lock _lock = Lock();

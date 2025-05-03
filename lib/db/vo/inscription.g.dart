@@ -7,14 +7,14 @@ part of 'inscription.dart';
 // **************************************************************************
 
 Inscription _$InscriptionFromJson(Map<String, dynamic> json) => Inscription(
-      collectionHash: json['collection_hash'] as String,
-      inscriptionHash: json['inscription_hash'] as String,
-      sequence: (json['sequence'] as num).toInt(),
-      contentType: json['content_type'] as String,
-      contentUrl: json['content_url'] as String,
-      name: json['name'] as String?,
-      iconUrl: json['icon_url'] as String?,
-    );
+  collectionHash: json['collection_hash'] as String,
+  inscriptionHash: json['inscription_hash'] as String,
+  sequence: (json['sequence'] as num).toInt(),
+  contentType: json['content_type'] as String,
+  contentUrl: json['content_url'] as String,
+  name: json['name'] as String?,
+  iconUrl: json['icon_url'] as String?,
+);
 
 Map<String, dynamic> _$InscriptionToJson(Inscription instance) =>
     <String, dynamic>{

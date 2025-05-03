@@ -7,10 +7,7 @@ import '../../utils/rivepod.dart';
 
 class MinuteTimerNotifier extends DistinctStateNotifier<DateTime> {
   MinuteTimerNotifier() : super(DateTime.now()) {
-    timer = Timer.periodic(
-      const Duration(minutes: 1),
-      (_) => handleTimeout(),
-    );
+    timer = Timer.periodic(const Duration(minutes: 1), (_) => handleTimeout());
   }
 
   late Timer timer;
@@ -26,10 +23,13 @@ class MinuteTimerNotifier extends DistinctStateNotifier<DateTime> {
 
 final minuteTimerProvider =
     StateNotifierProvider<MinuteTimerNotifier, DateTime>(
-        (ref) => MinuteTimerNotifier());
+      (ref) => MinuteTimerNotifier(),
+    );
 
-final formattedDateTimeProvider =
-    Provider.family<String, DateTime>((ref, dateTime) {
+final formattedDateTimeProvider = Provider.family<String, DateTime>((
+  ref,
+  dateTime,
+) {
   // for update this provider
   ref.watch(minuteTimerProvider);
   return dateTime.format;

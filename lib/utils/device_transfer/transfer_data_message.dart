@@ -56,9 +56,10 @@ class TransferDataMessage {
       try {
         final map = jsonDecode(quoteContent) as Map<String, dynamic>;
         final createdAtJson = map['created_at'] ?? map['createdAt'];
-        final createdAt = createdAtJson is String
-            ? DateTime.parse(createdAtJson)
-            : const MillisDateConverter().fromSql(createdAtJson as int);
+        final createdAt =
+            createdAtJson is String
+                ? DateTime.parse(createdAtJson)
+                : const MillisDateConverter().fromSql(createdAtJson as int);
         map['created_at'] = createdAt.toIso8601String();
         map['createdAt'] = createdAt.toIso8601String();
         quoteContent = jsonEncode(map);
@@ -84,9 +85,10 @@ class TransferDataMessage {
       thumbImage: data.thumbImage,
       mediaKey: data.mediaKey,
       mediaDigest: data.mediaDigest,
-      mediaStatus: data.mediaStatus == MediaStatus.pending
-          ? MediaStatus.canceled
-          : data.mediaStatus,
+      mediaStatus:
+          data.mediaStatus == MediaStatus.pending
+              ? MediaStatus.canceled
+              : data.mediaStatus,
       action: data.action,
       participantId: data.participantId,
       snapshotId: data.snapshotId,
@@ -169,40 +171,39 @@ class TransferDataMessage {
   Map<String, dynamic> toJson() => _$TransferDataMessageToJson(this);
 
   db.Message toDbMessage() => db.Message(
-        messageId: messageId,
-        conversationId: conversationId,
-        userId: userId,
-        category: category,
-        content: content,
-        mediaUrl: mediaUrl,
-        mediaMimeType: mediaMimeType,
-        mediaSize: mediaSize,
-        mediaDuration: mediaDuration,
-        mediaWidth: mediaWidth,
-        mediaHeight: mediaHeight,
-        mediaHash: mediaHash,
-        thumbImage: thumbImage,
-        mediaKey: mediaKey,
-        mediaDigest: mediaDigest,
-        mediaStatus: mediaStatus == MediaStatus.pending
-            ? MediaStatus.canceled
-            : mediaStatus,
-        status: status,
-        createdAt: createdAt,
-        action: action,
-        participantId: participantId,
-        snapshotId: snapshotId,
-        hyperlink: hyperlink,
-        name: name,
-        albumId: albumId,
-        stickerId: stickerId,
-        sharedUserId: sharedUserId,
-        mediaWaveform: mediaWaveform,
-        quoteMessageId: quoteMessageId,
-        quoteContent: quoteContent,
-        thumbUrl: thumbUrl,
-        caption: caption,
-      );
+    messageId: messageId,
+    conversationId: conversationId,
+    userId: userId,
+    category: category,
+    content: content,
+    mediaUrl: mediaUrl,
+    mediaMimeType: mediaMimeType,
+    mediaSize: mediaSize,
+    mediaDuration: mediaDuration,
+    mediaWidth: mediaWidth,
+    mediaHeight: mediaHeight,
+    mediaHash: mediaHash,
+    thumbImage: thumbImage,
+    mediaKey: mediaKey,
+    mediaDigest: mediaDigest,
+    mediaStatus:
+        mediaStatus == MediaStatus.pending ? MediaStatus.canceled : mediaStatus,
+    status: status,
+    createdAt: createdAt,
+    action: action,
+    participantId: participantId,
+    snapshotId: snapshotId,
+    hyperlink: hyperlink,
+    name: name,
+    albumId: albumId,
+    stickerId: stickerId,
+    sharedUserId: sharedUserId,
+    mediaWaveform: mediaWaveform,
+    quoteMessageId: quoteMessageId,
+    quoteContent: quoteContent,
+    thumbUrl: thumbUrl,
+    caption: caption,
+  );
 
   @override
   String toString() => 'TransferMessageData: $messageId';

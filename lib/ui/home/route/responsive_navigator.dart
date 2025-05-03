@@ -18,9 +18,7 @@ abstract class AbstractResponsiveNavigatorCubit
   void onPopPage() {
     final bool = state.pages.isNotEmpty;
     if (bool) {
-      emit(state.copyWith(
-        pages: state.pages.toList()..removeLast(),
-      ));
+      emit(state.copyWith(pages: state.pages.toList()..removeLast()));
     }
   }
 
@@ -35,9 +33,7 @@ abstract class AbstractResponsiveNavigatorCubit
     );
     if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
     if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
-    emit(state.copyWith(
-      pages: state.pages.toList()..add(page),
-    ));
+    emit(state.copyWith(pages: state.pages.toList()..add(page)));
   }
 
   void popUntil(bool Function(MaterialPage page) test) {
@@ -45,19 +41,20 @@ abstract class AbstractResponsiveNavigatorCubit
     if (index == -1) return;
 
     List<MaterialPage>? list;
-    list = index == 0 ? [] : state.pages.toList()
-      ..sublist(0, index);
-    emit(state.copyWith(
-      pages: list,
-    ));
+    list =
+        index == 0 ? [] : state.pages.toList()
+          ..sublist(0, index);
+    emit(state.copyWith(pages: list));
   }
 
-  void popWhere(bool Function(MaterialPage page) test) => emit(state.copyWith(
-        pages: state.pages.toList()..removeWhere(test),
-      ));
+  void popWhere(bool Function(MaterialPage page) test) =>
+      emit(state.copyWith(pages: state.pages.toList()..removeWhere(test)));
 
-  void pop() => emit(state.copyWith(
-      pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList()));
+  void pop() => emit(
+    state.copyWith(
+      pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList(),
+    ),
+  );
 
   Future<void> replace(String name, {Object? arguments}) async {
     popWhere((page) => page.name == name);
@@ -82,56 +79,56 @@ class ResponsiveNavigator extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final responsiveNavigatorNotifier =
-        ref.watch(responsiveNavigatorProvider.notifier);
+    final responsiveNavigatorNotifier = ref.watch(
+      responsiveNavigatorProvider.notifier,
+    );
     final responsiveNavigatorState = ref.watch(responsiveNavigatorProvider);
 
-    return LayoutBuilder(builder: (context, boxConstraints) {
-      final routeMode = boxConstraints.maxWidth < switchWidth;
-      responsiveNavigatorNotifier.updateRouteMode(routeMode);
-      return Row(
-        children: [
-          if (!routeMode) leftPage.child,
-          Expanded(
-            child: ClipRect(
-              child: Navigator(
-                transitionDelegate: WithoutAnimationDelegate(
-                  routeWithoutAnimation: {
-                    leftPage.name,
-                    rightEmptyPage.name,
-                  },
+    return LayoutBuilder(
+      builder: (context, boxConstraints) {
+        final routeMode = boxConstraints.maxWidth < switchWidth;
+        responsiveNavigatorNotifier.updateRouteMode(routeMode);
+        return Row(
+          children: [
+            if (!routeMode) leftPage.child,
+            Expanded(
+              child: ClipRect(
+                child: Navigator(
+                  transitionDelegate: WithoutAnimationDelegate(
+                    routeWithoutAnimation: {leftPage.name, rightEmptyPage.name},
+                  ),
+                  onDidRemovePage: (Page<dynamic> page) {},
+                  pages: [
+                    if (routeMode) leftPage,
+                    if (!routeMode && responsiveNavigatorState.pages.isEmpty)
+                      rightEmptyPage,
+                    ...responsiveNavigatorState.pages,
+                  ],
                 ),
-                onDidRemovePage: (Page<dynamic> page) {},
-                pages: [
-                  if (routeMode) leftPage,
-                  if (!routeMode && responsiveNavigatorState.pages.isEmpty)
-                    rightEmptyPage,
-                  ...responsiveNavigatorState.pages,
-                ],
               ),
             ),
-          ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
   }
 }
 
 class WithoutAnimationDelegate<T> extends TransitionDelegate<T> {
   /// Creates a default transition delegate.
-  const WithoutAnimationDelegate({
-    required this.routeWithoutAnimation,
-  }) : super();
+  const WithoutAnimationDelegate({required this.routeWithoutAnimation})
+    : super();
 
   final Set<String?> routeWithoutAnimation;
 
   @override
-  Iterable<RouteTransitionRecord> resolve(
-      {required List<RouteTransitionRecord> newPageRouteHistory,
-      required Map<RouteTransitionRecord?, RouteTransitionRecord>
-          locationToExitingPageRoute,
-      required Map<RouteTransitionRecord?, List<RouteTransitionRecord>>
-          pageRouteToPagelessRoutes}) {
+  Iterable<RouteTransitionRecord> resolve({
+    required List<RouteTransitionRecord> newPageRouteHistory,
+    required Map<RouteTransitionRecord?, RouteTransitionRecord>
+    locationToExitingPageRoute,
+    required Map<RouteTransitionRecord?, List<RouteTransitionRecord>>
+    pageRouteToPagelessRoutes,
+  }) {
     final results = <RouteTransitionRecord>[];
     // This method will handle the exiting route and its corresponding pageless
     // route at this location. It will also recursively check if there is any
@@ -140,15 +137,17 @@ class WithoutAnimationDelegate<T> extends TransitionDelegate<T> {
       final exitingPageRoute = locationToExitingPageRoute[location];
       if (exitingPageRoute == null) return;
       if (exitingPageRoute.isWaitingForExitingDecision) {
-        final hasPagelessRoute =
-            pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
+        final hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(
+          exitingPageRoute,
+        );
         final isLastExitingPageRoute =
             isLast && !locationToExitingPageRoute.containsKey(exitingPageRoute);
         if (isLastExitingPageRoute && !hasPagelessRoute) {
           exitingPageRoute.markForPop(exitingPageRoute.route.currentResult);
         } else {
-          exitingPageRoute
-              .markForComplete(exitingPageRoute.route.currentResult);
+          exitingPageRoute.markForComplete(
+            exitingPageRoute.route.currentResult,
+          );
         }
         if (hasPagelessRoute) {
           final pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
@@ -161,8 +160,9 @@ class WithoutAnimationDelegate<T> extends TransitionDelegate<T> {
                   pagelessRoute == pagelessRoutes.last) {
                 pagelessRoute.markForPop(pagelessRoute.route.currentResult);
               } else {
-                pagelessRoute
-                    .markForComplete(pagelessRoute.route.currentResult);
+                pagelessRoute.markForComplete(
+                  pagelessRoute.route.currentResult,
+                );
               }
             }
           }
@@ -195,17 +195,19 @@ class WithoutAnimationDelegate<T> extends TransitionDelegate<T> {
   }
 
   bool showAnimation(
-      RouteTransitionRecord pageRoute,
-      Map<RouteTransitionRecord?, RouteTransitionRecord>
-          locationToExitingPageRoute) {
-    final routes = {
-      pageRoute,
-      ...locationToExitingPageRoute.keys,
-      ...locationToExitingPageRoute.values
-    }
-        .map((e) => e?.route.settings.name)
-        .where((element) => element != null)
-        .toSet();
+    RouteTransitionRecord pageRoute,
+    Map<RouteTransitionRecord?, RouteTransitionRecord>
+    locationToExitingPageRoute,
+  ) {
+    final routes =
+        {
+              pageRoute,
+              ...locationToExitingPageRoute.keys,
+              ...locationToExitingPageRoute.values,
+            }
+            .map((e) => e?.route.settings.name)
+            .where((element) => element != null)
+            .toSet();
     return !setEquals(routeWithoutAnimation, routes);
   }
 }

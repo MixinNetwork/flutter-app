@@ -27,8 +27,13 @@ class _HoverOverlayForceHiddenTool {
   }
 }
 
-typedef PortalBuilder<T> = Widget Function(BuildContext context, T value,
-    Widget Function(Widget child) portalHoverWrapper, Widget? child);
+typedef PortalBuilder<T> =
+    Widget Function(
+      BuildContext context,
+      T value,
+      Widget Function(Widget child) portalHoverWrapper,
+      Widget? child,
+    );
 
 class HoverOverlay extends HookConsumerWidget {
   const HoverOverlay({
@@ -72,29 +77,36 @@ class HoverOverlay extends HookConsumerWidget {
     final portalHovering = useState(false);
     final tapped = useState(false);
 
-    final visible = useMemoized(() {
-      if (forceHidden.value) {
-        return false;
-      }
+    final visible = useMemoized(
+      () {
+        if (forceHidden.value) {
+          return false;
+        }
 
-      return (!tapped.value && (childHovering.value || portalHovering.value)) ||
-          tapped.value;
-    }, [
-      tapped.value,
-      childHovering.value,
-      portalHovering.value,
-      forceHidden.value
-    ]);
+        return (!tapped.value &&
+                (childHovering.value || portalHovering.value)) ||
+            tapped.value;
+      },
+      [
+        tapped.value,
+        childHovering.value,
+        portalHovering.value,
+        forceHidden.value,
+      ],
+    );
 
     final wait = closeWaitDuration.inMicroseconds;
     final totalClose = wait + closeDuration.inMicroseconds;
 
     final forceHiddenTool = useMemoized(
-        () => _HoverOverlayForceHiddenTool(
-              [forceHidden, childHovering, portalHovering, tapped],
-              Duration(microseconds: totalClose),
-            ),
-        [forceHidden, totalClose]);
+      () => _HoverOverlayForceHiddenTool([
+        forceHidden,
+        childHovering,
+        portalHovering,
+        tapped,
+      ], Duration(microseconds: totalClose)),
+      [forceHidden, totalClose],
+    );
 
     Future<void> onChildHovering(_) async {
       if (cancelableRef.value != null &&
@@ -118,22 +130,22 @@ class HoverOverlay extends HookConsumerWidget {
     }
 
     Widget portalHoverWrapper(Widget child) => MouseRegionIgnoreTouch(
-          onEnter: onChildHovering,
-          onHover: onChildHovering,
-          onExit: (_) async {
-            await cancelableRef.value?.cancel();
-            childHovering.value = false;
-          },
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapUp: (detail) {
-              if (detail.kind == PointerDeviceKind.touch) {
-                tapped.value = true;
-              }
-            },
-            child: child,
-          ),
-        );
+      onEnter: onChildHovering,
+      onHover: onChildHovering,
+      onExit: (_) async {
+        await cancelableRef.value?.cancel();
+        childHovering.value = false;
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapUp: (detail) {
+          if (detail.kind == PointerDeviceKind.touch) {
+            tapped.value = true;
+          }
+        },
+        child: child,
+      ),
+    );
 
     return Provider.value(
       value: forceHiddenTool,
@@ -153,10 +165,15 @@ class HoverOverlay extends HookConsumerWidget {
               curve: visible ? inCurve : outCurve,
             ),
             duration: visible ? duration : Duration(microseconds: totalClose),
-            builder: (context, progress, child) =>
-                portalBuilder?.call(
-                    context, progress, portalHoverWrapper, child) ??
-                child!,
+            builder:
+                (context, progress, child) =>
+                    portalBuilder?.call(
+                      context,
+                      progress,
+                      portalHoverWrapper,
+                      child,
+                    ) ??
+                    child!,
             child: MouseRegionIgnoreTouch(
               onEnter: (_) => portalHovering.value = true,
               onHover: (_) => portalHovering.value = true,

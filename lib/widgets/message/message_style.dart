@@ -28,9 +28,9 @@ class MessageStyle {
   final double statusFontSize;
 
   MessageStyle operator +(double delta) => MessageStyle(
-        primaryFontSize: primaryFontSize + delta,
-        secondaryFontSize: secondaryFontSize + delta,
-        tertiaryFontSize: tertiaryFontSize + delta,
-        statusFontSize: statusFontSize,
-      );
+    primaryFontSize: primaryFontSize + delta,
+    secondaryFontSize: secondaryFontSize + delta,
+    tertiaryFontSize: tertiaryFontSize + delta,
+    statusFontSize: statusFontSize,
+  );
 }

@@ -17,10 +17,12 @@ class WaitingMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
-    final userFullName =
-        useMessageConverter(converter: (state) => state.userFullName);
+    final relationship = useMessageConverter(
+      converter: (state) => state.relationship,
+    );
+    final userFullName = useMessageConverter(
+      converter: (state) => state.userFullName,
+    );
 
     final content = RichText(
       text: TextSpan(
@@ -41,8 +43,10 @@ class WaitingMessage extends HookConsumerWidget {
               fontSize: context.messageStyle.primaryFontSize,
               color: context.theme.accent,
             ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () => openUri(context, context.l10n.chatNotSupportUrl),
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap =
+                      () => openUri(context, context.l10n.chatNotSupportUrl),
           ),
         ],
       ),

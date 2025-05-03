@@ -31,16 +31,19 @@ extension MessageItemExtension on MessageItem {
       (mediaStatus == MediaStatus.done || mediaStatus == MediaStatus.read);
 
   bool get canForward {
-    if (!const [MessageStatus.delivered, MessageStatus.read, MessageStatus.sent]
-        .contains(status)) {
+    if (!const [
+      MessageStatus.delivered,
+      MessageStatus.read,
+      MessageStatus.sent,
+    ].contains(status)) {
       return false;
     }
 
     if (type == MessageCategory.appCard) {
       try {
         return AppCardData.fromJson(
-                jsonDecode(content!) as Map<String, dynamic>)
-            .shareable;
+          jsonDecode(content!) as Map<String, dynamic>,
+        ).shareable;
       } catch (e) {
         w('AppCardData.fromJson error: $e');
       }
@@ -49,8 +52,8 @@ extension MessageItemExtension on MessageItem {
     if (type.isAudio && mediaStatus == MediaStatus.done) {
       try {
         return AttachmentExtra.fromJson(
-                    jsonDecode(content!) as Map<String, dynamic>)
-                .shareable ??
+              jsonDecode(content!) as Map<String, dynamic>,
+            ).shareable ??
             true;
       } catch (e) {
         d('AttachmentExtra.fromJson error: $e');
@@ -80,47 +83,48 @@ extension MessageItemExtension on MessageItem {
 
 extension QuoteMessageItemExtension on QuoteMessageItem {
   String toJson() => jsonEncode(<String, dynamic>{
-        'message_id': messageId,
-        'conversation_id': conversationId,
-        'user_id': userId,
-        'user_full_name': userFullName,
-        'user_identity_number': userIdentityNumber,
-        'app_id': appId,
-        'type': type,
-        'content': content,
-        'createdAt': const MillisDateConverter().toSql(createdAt),
-        'status': const MessageStatusTypeConverter().toSql(status),
-        'media_status': const MediaStatusTypeConverter().toSql(mediaStatus),
-        'media_waveform': mediaWaveform,
-        'media_name': mediaName,
-        'media_mime_type': mediaMimeType,
-        'media_size': mediaSize,
-        'media_width': mediaWidth,
-        'media_height': mediaHeight,
-        'thumb_image': thumbImage,
-        'thumb_url': thumbUrl,
-        'media_url': mediaUrl,
-        'media_duration': mediaDuration,
-        'asset_url': assetUrl,
-        'asset_width': assetWidth,
-        'asset_height': assetHeight,
-        'sticker_id': stickerId,
-        'asset_name': assetName,
-        'asset_type': assetType,
-        'shared_user_id': sharedUserId,
-        'shared_user_full_name': sharedUserFullName,
-        'shared_user_identity_number': sharedUserIdentityNumber,
-        'shared_user_avatar_url': sharedUserAvatarUrl,
-        'shared_user_is_verified': sharedUserIsVerified,
-        'shared_user_app_id': sharedUserAppId,
-      });
+    'message_id': messageId,
+    'conversation_id': conversationId,
+    'user_id': userId,
+    'user_full_name': userFullName,
+    'user_identity_number': userIdentityNumber,
+    'app_id': appId,
+    'type': type,
+    'content': content,
+    'createdAt': const MillisDateConverter().toSql(createdAt),
+    'status': const MessageStatusTypeConverter().toSql(status),
+    'media_status': const MediaStatusTypeConverter().toSql(mediaStatus),
+    'media_waveform': mediaWaveform,
+    'media_name': mediaName,
+    'media_mime_type': mediaMimeType,
+    'media_size': mediaSize,
+    'media_width': mediaWidth,
+    'media_height': mediaHeight,
+    'thumb_image': thumbImage,
+    'thumb_url': thumbUrl,
+    'media_url': mediaUrl,
+    'media_duration': mediaDuration,
+    'asset_url': assetUrl,
+    'asset_width': assetWidth,
+    'asset_height': assetHeight,
+    'sticker_id': stickerId,
+    'asset_name': assetName,
+    'asset_type': assetType,
+    'shared_user_id': sharedUserId,
+    'shared_user_full_name': sharedUserFullName,
+    'shared_user_identity_number': sharedUserIdentityNumber,
+    'shared_user_avatar_url': sharedUserAvatarUrl,
+    'shared_user_is_verified': sharedUserIsVerified,
+    'shared_user_app_id': sharedUserAppId,
+  });
 }
 
 QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
   final createdAtJson = map['created_at'] ?? map['createdAt'];
-  final createdAt = createdAtJson is String
-      ? DateTime.parse(createdAtJson)
-      : const MillisDateConverter().fromSql(createdAtJson as int);
+  final createdAt =
+      createdAtJson is String
+          ? DateTime.parse(createdAtJson)
+          : const MillisDateConverter().fromSql(createdAtJson as int);
   return QuoteMessageItem(
     userId: map['user_id'] as String,
     status: const MessageStatusTypeConverter().fromSql(map['status'] as String),
@@ -133,8 +137,9 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
     userFullName: map['user_full_name'] as String?,
     appId: map['app_id'] as String?,
     content: map['content'] as String?,
-    mediaStatus: const MediaStatusTypeConverter()
-        .fromSql(map['media_status'] as String?),
+    mediaStatus: const MediaStatusTypeConverter().fromSql(
+      map['media_status'] as String?,
+    ),
     mediaWaveform: map['media_waveform'] as String?,
     mediaName: map['media_name'] as String?,
     mediaMimeType: map['media_mime_type'] as String?,
@@ -194,40 +199,39 @@ extension SendingMessageCopy on SendingMessage {
     String? resendUserId,
     String? resendSessionId,
     String? caption,
-  }) =>
-      SendingMessage(
-        messageId: messageId ?? this.messageId,
-        conversationId: conversationId ?? this.conversationId,
-        userId: userId ?? this.userId,
-        category: category ?? this.category,
-        content: content ?? this.content,
-        mediaUrl: mediaUrl ?? this.mediaUrl,
-        mediaMimeType: mediaMimeType ?? this.mediaMimeType,
-        mediaSize: mediaSize ?? this.mediaSize,
-        mediaDuration: mediaDuration ?? this.mediaDuration,
-        mediaWidth: mediaWidth ?? this.mediaWidth,
-        mediaHeight: mediaHeight ?? this.mediaHeight,
-        mediaHash: mediaHash ?? this.mediaHash,
-        thumbImage: thumbImage ?? this.thumbImage,
-        mediaKey: mediaKey ?? this.mediaKey,
-        mediaDigest: mediaDigest ?? this.mediaDigest,
-        mediaStatus: mediaStatus ?? this.mediaStatus,
-        status: status ?? this.status,
-        createdAt: createdAt ?? this.createdAt,
-        action: action ?? this.action,
-        participantId: participantId ?? this.participantId,
-        snapshotId: snapshotId ?? this.snapshotId,
-        hyperlink: hyperlink ?? this.hyperlink,
-        name: name ?? this.name,
-        albumId: albumId ?? this.albumId,
-        stickerId: stickerId ?? this.stickerId,
-        sharedUserId: sharedUserId ?? this.sharedUserId,
-        mediaWaveform: mediaWaveform ?? this.mediaWaveform,
-        quoteMessageId: quoteMessageId ?? this.quoteMessageId,
-        quoteContent: quoteContent ?? this.quoteContent,
-        resendStatus: resendStatus ?? this.resendStatus,
-        resendUserId: resendUserId ?? this.resendUserId,
-        resendSessionId: resendSessionId ?? this.resendSessionId,
-        caption: caption ?? this.caption,
-      );
+  }) => SendingMessage(
+    messageId: messageId ?? this.messageId,
+    conversationId: conversationId ?? this.conversationId,
+    userId: userId ?? this.userId,
+    category: category ?? this.category,
+    content: content ?? this.content,
+    mediaUrl: mediaUrl ?? this.mediaUrl,
+    mediaMimeType: mediaMimeType ?? this.mediaMimeType,
+    mediaSize: mediaSize ?? this.mediaSize,
+    mediaDuration: mediaDuration ?? this.mediaDuration,
+    mediaWidth: mediaWidth ?? this.mediaWidth,
+    mediaHeight: mediaHeight ?? this.mediaHeight,
+    mediaHash: mediaHash ?? this.mediaHash,
+    thumbImage: thumbImage ?? this.thumbImage,
+    mediaKey: mediaKey ?? this.mediaKey,
+    mediaDigest: mediaDigest ?? this.mediaDigest,
+    mediaStatus: mediaStatus ?? this.mediaStatus,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    action: action ?? this.action,
+    participantId: participantId ?? this.participantId,
+    snapshotId: snapshotId ?? this.snapshotId,
+    hyperlink: hyperlink ?? this.hyperlink,
+    name: name ?? this.name,
+    albumId: albumId ?? this.albumId,
+    stickerId: stickerId ?? this.stickerId,
+    sharedUserId: sharedUserId ?? this.sharedUserId,
+    mediaWaveform: mediaWaveform ?? this.mediaWaveform,
+    quoteMessageId: quoteMessageId ?? this.quoteMessageId,
+    quoteContent: quoteContent ?? this.quoteContent,
+    resendStatus: resendStatus ?? this.resendStatus,
+    resendUserId: resendUserId ?? this.resendUserId,
+    resendSessionId: resendSessionId ?? this.resendSessionId,
+    caption: caption ?? this.caption,
+  );
 }

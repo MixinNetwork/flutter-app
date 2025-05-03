@@ -6,7 +6,11 @@ part 'blaze_signal_key_message.g.dart';
 @JsonSerializable()
 class BlazeSignalKeyMessage {
   BlazeSignalKeyMessage(
-      this.messageId, this.recipientId, this.data, this.sessionId);
+    this.messageId,
+    this.recipientId,
+    this.data,
+    this.sessionId,
+  );
 
   factory BlazeSignalKeyMessage.fromJson(Map<String, dynamic> json) =>
       _$BlazeSignalKeyMessageFromJson(json);
@@ -24,6 +28,7 @@ class BlazeSignalKeyMessage {
 }
 
 BlazeSignalKeyMessage createBlazeSignalKeyMessage(
-        String recipientId, String data,
-        {String? sessionId}) =>
-    BlazeSignalKeyMessage(const Uuid().v4(), recipientId, data, sessionId);
+  String recipientId,
+  String data, {
+  String? sessionId,
+}) => BlazeSignalKeyMessage(const Uuid().v4(), recipientId, data, sessionId);

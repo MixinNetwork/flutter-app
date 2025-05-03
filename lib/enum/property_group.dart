@@ -1,3 +1,1 @@
-enum PropertyGroup {
-  setting,
-}
+enum PropertyGroup { setting }

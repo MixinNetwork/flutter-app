@@ -61,16 +61,15 @@ class SearchList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final keyword = useMemoizedStream(
-          () {
-            final keywordCubit = ref.watch(keywordProvider.notifier);
-            return keywordCubit.stream
-                .startWith(keywordCubit.state)
-                .map((event) => event.trim())
-                .distinct()
-                .debounceTime(const Duration(milliseconds: 150));
-          },
-        ).data ??
+    final keyword =
+        useMemoizedStream(() {
+          final keywordCubit = ref.watch(keywordProvider.notifier);
+          return keywordCubit.stream
+              .startWith(keywordCubit.state)
+              .map((event) => event.trim())
+              .distinct()
+              .debounceTime(const Duration(milliseconds: 150));
+        }).data ??
         '';
 
     final accountServer = context.accountServer;
@@ -79,64 +78,70 @@ class SearchList extends HookConsumerWidget {
 
     final maoUser = ref.watch(searchMaoUserProvider(keyword)).valueOrNull;
 
-    final users = useMemoizedStream(() {
+    final users =
+        useMemoizedStream(() {
           if (keyword.trim().isEmpty || filterUnseen) {
             return Stream.value(<User>[]);
           }
           return accountServer.database.userDao
               .fuzzySearchUser(
-            id: accountServer.userId,
-            username: keyword,
-            identityNumber: keyword,
-            category: slideCategoryState,
-            isIncludeConversation: true,
-          )
+                id: accountServer.userId,
+                username: keyword,
+                identityNumber: keyword,
+                category: slideCategoryState,
+                isIncludeConversation: true,
+              )
               .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.updateConversationIdStream,
-              DataBaseEventBus.instance.updateUserIdsStream,
-            ],
-            duration: kSlowThrottleDuration,
-          );
+                eventStreams: [
+                  DataBaseEventBus.instance.updateConversationIdStream,
+                  DataBaseEventBus.instance.updateUserIdsStream,
+                ],
+                duration: kSlowThrottleDuration,
+              );
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
-    final conversations = useMemoizedStream(() {
+    final conversations =
+        useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
             return Stream.value(<SearchConversationItem>[]);
           }
           return accountServer.database.conversationDao
               .fuzzySearchConversation(
-            keyword,
-            32,
-            filterUnseen: filterUnseen,
-            category: slideCategoryState,
-          )
+                keyword,
+                32,
+                filterUnseen: filterUnseen,
+                category: slideCategoryState,
+              )
               .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance.updateConversationIdStream,
-              DataBaseEventBus.instance.updateUserIdsStream,
-            ],
-            duration: kSlowThrottleDuration,
-          );
+                eventStreams: [
+                  DataBaseEventBus.instance.updateConversationIdStream,
+                  DataBaseEventBus.instance.updateUserIdsStream,
+                ],
+                duration: kSlowThrottleDuration,
+              );
         }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
         [];
 
-    final messages = useMemoizedFuture<List<SearchMessageDetailItem>>(
-            () => keyword.isEmpty
-                ? Future.value(<SearchMessageDetailItem>[])
-                : accountServer.database.fuzzySearchMessageByCategory(
+    final messages =
+        useMemoizedFuture<List<SearchMessageDetailItem>>(
+          () =>
+              keyword.isEmpty
+                  ? Future.value(<SearchMessageDetailItem>[])
+                  : accountServer.database.fuzzySearchMessageByCategory(
                     keyword,
                     limit: 4,
                     unseenConversationOnly: filterUnseen,
                     category: slideCategoryState,
                   ),
-            [],
-            keys: [keyword, filterUnseen, slideCategoryState]).data ??
+          [],
+          keys: [keyword, filterUnseen, slideCategoryState],
+        ).data ??
         [];
 
-    final isMixinNumber =
-        useMemoized(() => numberRegExp.hasMatch(keyword), [keyword]);
+    final isMixinNumber = useMemoized(() => numberRegExp.hasMatch(keyword), [
+      keyword,
+    ]);
     final isUrl = useMemoized(() {
       final uri = Uri.tryParse(keyword);
       return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
@@ -144,7 +149,8 @@ class SearchList extends HookConsumerWidget {
 
     final type = useState<_ShowMoreType?>(null);
 
-    final resultIsEmpty = maoUser == null &&
+    final resultIsEmpty =
+        maoUser == null &&
         users.isEmpty &&
         conversations.isEmpty &&
         messages.isEmpty;
@@ -169,10 +175,7 @@ class SearchList extends HookConsumerWidget {
       slivers: [
         if (maoUser != null)
           SliverToBoxAdapter(
-            child: _SearchMaoUserWidget(
-              maoUser: maoUser,
-              keyword: keyword,
-            ),
+            child: _SearchMaoUserWidget(maoUser: maoUser, keyword: keyword),
           ),
         if (users.isEmpty && isUrl)
           SliverToBoxAdapter(
@@ -196,10 +199,13 @@ class SearchList extends HookConsumerWidget {
 
                 try {
                   final mixinResponse = await context
-                      .accountServer.client.userApi
+                      .accountServer
+                      .client
+                      .userApi
                       .search(keyword);
-                  await context.database.userDao
-                      .insertSdkUser(mixinResponse.data);
+                  await context.database.userDao.insertSdkUser(
+                    mixinResponse.data,
+                  );
                   userId = mixinResponse.data.userId;
                 } catch (error) {
                   showToastFailed(ToastError(context.l10n.userNotFound));
@@ -218,9 +224,10 @@ class SearchList extends HookConsumerWidget {
               showMore: users.length > _defaultLimit,
               more: type.value != _ShowMoreType.contact,
               onTap: () {
-                type.value = type.value != _ShowMoreType.contact
-                    ? _ShowMoreType.contact
-                    : null;
+                type.value =
+                    type.value != _ShowMoreType.contact
+                        ? _ShowMoreType.contact
+                        : null;
               },
             ),
           ),
@@ -254,9 +261,10 @@ class SearchList extends HookConsumerWidget {
                   },
                 );
               },
-              childCount: type.value == _ShowMoreType.contact
-                  ? users.length
-                  : min(users.length, _defaultLimit),
+              childCount:
+                  type.value == _ShowMoreType.contact
+                      ? users.length
+                      : min(users.length, _defaultLimit),
             ),
           ),
         if (users.isNotEmpty)
@@ -268,9 +276,10 @@ class SearchList extends HookConsumerWidget {
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
-                type.value = type.value != _ShowMoreType.conversation
-                    ? _ShowMoreType.conversation
-                    : null;
+                type.value =
+                    type.value != _ShowMoreType.conversation
+                        ? _ShowMoreType.conversation
+                        : null;
               },
             ),
           ),
@@ -279,99 +288,118 @@ class SearchList extends HookConsumerWidget {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final conversation = conversations[index];
-                return HookConsumer(builder: (context, ref, _) {
-                  final description = useMemoizedFuture(() async {
-                    final mentionCache = ref.read(mentionCacheProvider);
+                return HookConsumer(
+                  builder: (context, ref, _) {
+                    final description =
+                        useMemoizedFuture(
+                          () async {
+                            final mentionCache = ref.read(mentionCacheProvider);
 
-                    if (conversation.contentType ==
-                        MessageCategory.systemConversation) {
-                      return generateSystemText(
-                        actionName: conversation.actionName,
-                        participantUserId: conversation.participantUserId,
-                        senderId: conversation.senderId,
-                        currentUserId: context.accountServer.userId,
-                        participantFullName: conversation.participantFullName,
-                        senderFullName: conversation.senderFullName,
-                        expireIn: int.tryParse(conversation.content ?? '0'),
-                      );
-                    }
+                            if (conversation.contentType ==
+                                MessageCategory.systemConversation) {
+                              return generateSystemText(
+                                actionName: conversation.actionName,
+                                participantUserId:
+                                    conversation.participantUserId,
+                                senderId: conversation.senderId,
+                                currentUserId: context.accountServer.userId,
+                                participantFullName:
+                                    conversation.participantFullName,
+                                senderFullName: conversation.senderFullName,
+                                expireIn: int.tryParse(
+                                  conversation.content ?? '0',
+                                ),
+                              );
+                            }
 
-                    if (conversation.contentType.isPin) {
-                      final pinMessageMinimal =
-                          PinMessageMinimal.fromJsonString(
-                              conversation.content ?? '');
-                      if (pinMessageMinimal == null) {
-                        return context.l10n.chatPinMessage(
-                            conversation.senderFullName ?? '',
-                            context.l10n.aMessage);
-                      }
-                      final preview = await generatePinPreviewText(
-                        pinMessageMinimal: pinMessageMinimal,
-                        mentionCache: ref.read(mentionCacheProvider),
-                      );
-                      return context.l10n.chatPinMessage(
-                          conversation.senderFullName ?? '', preview);
-                    }
+                            if (conversation.contentType.isPin) {
+                              final pinMessageMinimal =
+                                  PinMessageMinimal.fromJsonString(
+                                    conversation.content ?? '',
+                                  );
+                              if (pinMessageMinimal == null) {
+                                return context.l10n.chatPinMessage(
+                                  conversation.senderFullName ?? '',
+                                  context.l10n.aMessage,
+                                );
+                              }
+                              final preview = await generatePinPreviewText(
+                                pinMessageMinimal: pinMessageMinimal,
+                                mentionCache: ref.read(mentionCacheProvider),
+                              );
+                              return context.l10n.chatPinMessage(
+                                conversation.senderFullName ?? '',
+                                preview,
+                              );
+                            }
 
-                    return messagePreviewOptimize(
-                        conversation.messageStatus,
-                        conversation.contentType,
-                        mentionCache.replaceMention(
-                          conversation.content,
-                          await mentionCache
-                              .checkMentionCache({conversation.content}),
+                            return messagePreviewOptimize(
+                              conversation.messageStatus,
+                              conversation.contentType,
+                              mentionCache.replaceMention(
+                                conversation.content,
+                                await mentionCache.checkMentionCache({
+                                  conversation.content,
+                                }),
+                              ),
+                              conversation.senderId ==
+                                  context.accountServer.userId,
+                              conversation.isGroupConversation,
+                              conversation.senderFullName,
+                            );
+                          },
+                          null,
+                          keys: [
+                            conversation.actionName,
+                            conversation.participantUserId,
+                            context.accountServer.userId,
+                            conversation.participantFullName,
+                            conversation.messageStatus,
+                            conversation.contentType,
+                            conversation.content,
+                            conversation.senderId,
+                            conversation.isGroupConversation,
+                            conversation.senderFullName,
+                          ],
+                        ).data;
+
+                    return ConversationMenuWrapper(
+                      searchConversation: conversation,
+                      child: SearchItemWidget(
+                        avatar: ConversationAvatarWidget(
+                          conversationId: conversation.conversationId,
+                          fullName: conversation.validName,
+                          groupIconUrl: conversation.groupIconUrl,
+                          avatarUrl: conversation.avatarUrl,
+                          category: conversation.category,
+                          size: ConversationPage.conversationItemAvatarSize,
+                          userId: conversation.ownerId,
                         ),
-                        conversation.senderId == context.accountServer.userId,
-                        conversation.isGroupConversation,
-                        conversation.senderFullName);
-                  }, null, keys: [
-                    conversation.actionName,
-                    conversation.participantUserId,
-                    context.accountServer.userId,
-                    conversation.participantFullName,
-                    conversation.messageStatus,
-                    conversation.contentType,
-                    conversation.content,
-                    conversation.senderId,
-                    conversation.isGroupConversation,
-                    conversation.senderFullName
-                  ]).data;
+                        name: conversation.validName,
+                        description: description,
+                        trailing: BadgesWidget(
+                          verified: conversation.isVerified,
+                          isBot: conversation.appId != null,
+                          membership: conversation.membership,
+                        ),
+                        keyword: keyword,
+                        onTap: () async {
+                          await ConversationStateNotifier.selectConversation(
+                            context,
+                            conversation.conversationId,
+                          );
 
-                  return ConversationMenuWrapper(
-                    searchConversation: conversation,
-                    child: SearchItemWidget(
-                      avatar: ConversationAvatarWidget(
-                        conversationId: conversation.conversationId,
-                        fullName: conversation.validName,
-                        groupIconUrl: conversation.groupIconUrl,
-                        avatarUrl: conversation.avatarUrl,
-                        category: conversation.category,
-                        size: ConversationPage.conversationItemAvatarSize,
-                        userId: conversation.ownerId,
+                          _clear(context);
+                        },
                       ),
-                      name: conversation.validName,
-                      description: description,
-                      trailing: BadgesWidget(
-                        verified: conversation.isVerified,
-                        isBot: conversation.appId != null,
-                        membership: conversation.membership,
-                      ),
-                      keyword: keyword,
-                      onTap: () async {
-                        await ConversationStateNotifier.selectConversation(
-                          context,
-                          conversation.conversationId,
-                        );
-
-                        _clear(context);
-                      },
-                    ),
-                  );
-                });
+                    );
+                  },
+                );
               },
-              childCount: type.value == _ShowMoreType.conversation
-                  ? conversations.length
-                  : min(conversations.length, _defaultLimit),
+              childCount:
+                  type.value == _ShowMoreType.conversation
+                      ? conversations.length
+                      : min(conversations.length, _defaultLimit),
             ),
           ),
         if (conversations.isNotEmpty)
@@ -383,9 +411,10 @@ class SearchList extends HookConsumerWidget {
               showMore: messages.length > _defaultLimit,
               more: type.value != _ShowMoreType.message,
               onTap: () {
-                type.value = type.value != _ShowMoreType.message
-                    ? _ShowMoreType.message
-                    : null;
+                type.value =
+                    type.value != _ShowMoreType.message
+                        ? _ShowMoreType.message
+                        : null;
               },
             ),
           ),
@@ -400,13 +429,14 @@ class SearchList extends HookConsumerWidget {
                   onTap: _searchMessageItemOnTap(context, message),
                 );
               },
-              childCount: type.value == _ShowMoreType.message
-                  ? messages.length
-                  : min(messages.length, _defaultLimit),
+              childCount:
+                  type.value == _ShowMoreType.message
+                      ? messages.length
+                      : min(messages.length, _defaultLimit),
             ),
           ),
         if (messages.isNotEmpty)
-          const SliverToBoxAdapter(child: SizedBox(height: 10))
+          const SliverToBoxAdapter(child: SizedBox(height: 10)),
       ],
     );
   }
@@ -416,10 +446,7 @@ const _maoIcon =
     'https://kernel.mixin.dev/objects/fe75a8e48aeffb486df622c91bebfe4056ada7009f3151fb49e2a18340bbd615/icon';
 
 class _SearchMaoUserWidget extends StatelessWidget {
-  const _SearchMaoUserWidget({
-    required this.maoUser,
-    required this.keyword,
-  });
+  const _SearchMaoUserWidget({required this.maoUser, required this.keyword});
 
   final MaoUser maoUser;
   final String keyword;
@@ -442,8 +469,9 @@ class _SearchMaoUserWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
         onPressed: () async {
-          final app =
-              await context.accountServer.findOrSyncApp(maoUser.user.appId!);
+          final app = await context.accountServer.findOrSyncApp(
+            maoUser.user.appId!,
+          );
           if (app == null) {
             e('app not found: ${maoUser.user.appId}');
             showToastFailed(null);
@@ -514,10 +542,7 @@ class SearchItemWidget extends StatelessWidget {
     this.selected,
     this.maxLines = false,
     this.margin = const EdgeInsets.symmetric(horizontal: 6),
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: 6,
-      vertical: 12,
-    ),
+    this.padding = const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
     this.nameFontSize = 16,
     this.descriptionIconWidget,
     this.contentTrailing,
@@ -603,13 +628,14 @@ class SearchItemWidget extends StatelessWidget {
                         ),
                         if (date != null)
                           Consumer(
-                            builder: (context, ref, _) => Text(
-                              ref.watch(formattedDateTimeProvider(date!)),
-                              style: TextStyle(
-                                color: context.theme.secondaryText,
-                                fontSize: 12,
-                              ),
-                            ),
+                            builder:
+                                (context, ref, _) => Text(
+                                  ref.watch(formattedDateTimeProvider(date!)),
+                                  style: TextStyle(
+                                    color: context.theme.secondaryText,
+                                    fontSize: 12,
+                                  ),
+                                ),
                           ),
                       ],
                     ),
@@ -645,9 +671,7 @@ class SearchItemWidget extends StatelessWidget {
                                 EmojiTextMatcher(),
                                 KeyWordTextMatcher(
                                   keyword,
-                                  style: TextStyle(
-                                    color: context.theme.accent,
-                                  ),
+                                  style: TextStyle(color: context.theme.accent),
                                 ),
                               ],
                             ),
@@ -696,28 +720,31 @@ class _SearchMessageList extends HookConsumerWidget {
     );
 
     final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-        bloc: searchMessageCubit);
+      bloc: searchMessageCubit,
+    );
 
-    final child = pageState.initializing
-        ? Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(context.theme.accent),
-            ),
-          )
-        : pageState.items.isEmpty
+    final child =
+        pageState.initializing
+            ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(context.theme.accent),
+              ),
+            )
+            : pageState.items.isEmpty
             ? const SearchEmptyWidget()
             : ScrollablePositionedList.builder(
-                itemPositionsListener: searchMessageCubit.itemPositionsListener,
-                itemCount: pageState.items.length,
-                itemBuilder: (context, index) {
-                  final message = pageState.items[index];
-                  return SearchMessageItem(
-                    message: message,
-                    keyword: keyword,
-                    onTap: _searchMessageItemOnTap(context, message),
-                  );
-                });
+              itemPositionsListener: searchMessageCubit.itemPositionsListener,
+              itemCount: pageState.items.length,
+              itemBuilder: (context, index) {
+                final message = pageState.items[index];
+                return SearchMessageItem(
+                  message: message,
+                  keyword: keyword,
+                  onTap: _searchMessageItemOnTap(context, message),
+                );
+              },
+            );
 
     return Column(
       children: [
@@ -748,56 +775,39 @@ class _SearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.only(
-          top: 16,
-          bottom: 10,
-          right: 20,
-          left: 12,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.text,
-              ),
+    padding: const EdgeInsets.only(top: 16, bottom: 10, right: 20, left: 12),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(title, style: TextStyle(fontSize: 14, color: context.theme.text)),
+        if (showMore)
+          GestureDetector(
+            onTap: onTap,
+            child: Text(
+              more ? context.l10n.more : context.l10n.less,
+              style: TextStyle(fontSize: 14, color: context.theme.accent),
             ),
-            if (showMore)
-              GestureDetector(
-                onTap: onTap,
-                child: Text(
-                  more ? context.l10n.more : context.l10n.less,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: context.theme.accent,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
+          ),
+      ],
+    ),
+  );
 }
 
-enum _ShowMoreType {
-  contact,
-  conversation,
-  message,
-}
+enum _ShowMoreType { contact, conversation, message }
 
 Future Function() _searchMessageItemOnTap(
-        BuildContext context, SearchMessageDetailItem message) =>
-    () async {
-      await ConversationStateNotifier.selectConversation(
-        context,
-        message.conversationId,
-        initIndexMessageId: message.messageId,
-        keyword: context.providerContainer.read(trimmedKeywordProvider),
-      );
+  BuildContext context,
+  SearchMessageDetailItem message,
+) => () async {
+  await ConversationStateNotifier.selectConversation(
+    context,
+    message.conversationId,
+    initIndexMessageId: message.messageId,
+    keyword: context.providerContainer.read(trimmedKeywordProvider),
+  );
 
-      _clear(context);
-    };
+  _clear(context);
+};
 
 class SearchMessageItem extends HookConsumerWidget {
   const SearchMessageItem({
@@ -816,77 +826,79 @@ class SearchMessageItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isGroup = useMemoized(
-        () =>
-            message.category == ConversationCategory.group ||
-            message.senderId != message.ownerId,
-        [message.category, message.senderId, message.ownerId]);
+      () =>
+          message.category == ConversationCategory.group ||
+          message.senderId != message.ownerId,
+      [message.category, message.senderId, message.ownerId],
+    );
 
     final icon = useMemoized(
-        () => messagePreviewIcon(
+      () => messagePreviewIcon(message.status, message.type),
+      [message.status, message.type],
+    );
+
+    final description =
+        useMemoizedFuture(
+          () async {
+            final mentionCache = ref.read(mentionCacheProvider);
+
+            return messagePreviewOptimize(
               message.status,
               message.type,
-            ),
-        [
-          message.status,
-          message.type,
-        ]);
-
-    final description = useMemoizedFuture(() async {
-      final mentionCache = ref.read(mentionCacheProvider);
-
-      return messagePreviewOptimize(
-          message.status,
-          message.type,
-          mentionCache.replaceMention(
+              mentionCache.replaceMention(
+                message.content,
+                await mentionCache.checkMentionCache({message.content}),
+              ),
+              message.senderId == context.accountServer.userId,
+              isGroup,
+              message.senderFullName,
+            );
+          },
+          null,
+          keys: [
+            message.status,
+            message.type,
             message.content,
-            await mentionCache.checkMentionCache({message.content}),
-          ),
-          message.senderId == context.accountServer.userId,
-          isGroup,
-          message.senderFullName);
-    }, null, keys: [
-      message.status,
-      message.type,
-      message.content,
-      isGroup,
-      message.senderId,
-      message.senderFullName
-    ]).data;
+            isGroup,
+            message.senderId,
+            message.senderFullName,
+          ],
+        ).data;
 
-    final avatar = showSender
-        ? AvatarWidget(
-            userId: message.senderId,
-            avatarUrl: message.senderAvatarUrl,
-            size: ConversationPage.conversationItemAvatarSize,
-            name: message.senderFullName,
-          )
-        : ConversationAvatarWidget(
-            conversationId: message.conversationId,
-            fullName: conversationValidName(
-              message.groupName,
-              message.ownerFullName,
-            ),
-            groupIconUrl: message.groupIconUrl,
-            avatarUrl: message.ownerAvatarUrl,
-            category: message.category,
-            size: ConversationPage.conversationItemAvatarSize,
-            userId: message.ownerId,
-          );
+    final avatar =
+        showSender
+            ? AvatarWidget(
+              userId: message.senderId,
+              avatarUrl: message.senderAvatarUrl,
+              size: ConversationPage.conversationItemAvatarSize,
+              name: message.senderFullName,
+            )
+            : ConversationAvatarWidget(
+              conversationId: message.conversationId,
+              fullName: conversationValidName(
+                message.groupName,
+                message.ownerFullName,
+              ),
+              groupIconUrl: message.groupIconUrl,
+              avatarUrl: message.ownerAvatarUrl,
+              category: message.category,
+              size: ConversationPage.conversationItemAvatarSize,
+              userId: message.ownerId,
+            );
     return SearchItemWidget(
       avatar: avatar,
-      name: showSender
-          ? message.senderFullName ?? ''
-          : conversationValidName(
-              message.groupName,
-              message.ownerFullName,
-            ),
-      trailing: showSender || message.category == ConversationCategory.contact
-          ? BadgesWidget(
-              verified: message.verified,
-              isBot: message.appId != null,
-              membership: message.membership,
-            )
-          : null,
+      name:
+          showSender
+              ? message.senderFullName ?? ''
+              : conversationValidName(message.groupName, message.ownerFullName),
+      trailing:
+          showSender || message.category == ConversationCategory.contact
+              ? BadgesWidget(
+                verified: message.verified,
+                isBot: message.appId != null,
+                membership: message.membership,
+              )
+              : null,
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,
@@ -902,38 +914,27 @@ class SearchEmptyWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 43,
-          vertical: 86,
+    padding: const EdgeInsets.symmetric(horizontal: 43, vertical: 86),
+    width: double.infinity,
+    alignment: Alignment.topCenter,
+    child: Column(
+      children: [
+        Text(
+          context.l10n.searchEmpty,
+          style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
         ),
-        width: double.infinity,
-        alignment: Alignment.topCenter,
-        child: Column(
-          children: [
-            Text(
-              context.l10n.searchEmpty,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.theme.secondaryText,
-              ),
-            ),
-            const SizedBox(height: 4),
-            TextButton(
-              child: Text(
-                context.l10n.clearFilter,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.theme.accent,
-                ),
-              ),
-              onPressed: () {
-                _clear(context);
-                ref
-                    .read(conversationUnseenFilterEnabledProvider.notifier)
-                    .reset();
-              },
-            ),
-          ],
+        const SizedBox(height: 4),
+        TextButton(
+          child: Text(
+            context.l10n.clearFilter,
+            style: TextStyle(fontSize: 14, color: context.theme.accent),
+          ),
+          onPressed: () {
+            _clear(context);
+            ref.read(conversationUnseenFilterEnabledProvider.notifier).reset();
+          },
         ),
-      );
+      ],
+    ),
+  );
 }

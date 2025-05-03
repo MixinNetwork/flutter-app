@@ -13,8 +13,14 @@ part 'signal_key.g.dart';
 
 @JsonSerializable()
 class SignalKey {
-  SignalKey(this.identityKey, this.signedPreKey, this.preKey,
-      this.registrationId, this.userId, this.sessionId);
+  SignalKey(
+    this.identityKey,
+    this.signedPreKey,
+    this.preKey,
+    this.registrationId,
+    this.userId,
+    this.sessionId,
+  );
 
   factory SignalKey.fromJson(Map<String, dynamic> json) =>
       _$SignalKeyFromJson(json);
@@ -35,14 +41,15 @@ class SignalKey {
   Map<String, dynamic> toJson() => _$SignalKeyToJson(this);
 
   PreKeyBundle createPreKeyBundle() => PreKeyBundle(
-      registrationId,
-      sessionId.getDeviceId(),
-      preKey.keyId,
-      getPreKeyPublic(),
-      signedPreKey.keyId,
-      getSignedPreKeyPublic(),
-      getSignedSignature(),
-      getIdentity());
+    registrationId,
+    sessionId.getDeviceId(),
+    preKey.keyId,
+    getPreKeyPublic(),
+    signedPreKey.keyId,
+    getSignedPreKeyPublic(),
+    getSignedSignature(),
+    getIdentity(),
+  );
 
   ECPublicKey? getPreKeyPublic() => getPublicKey(preKey.pubKey);
 

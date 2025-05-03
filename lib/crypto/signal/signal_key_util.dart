@@ -31,6 +31,8 @@ Future<SignalKeyRequest> generateKeys() async {
   final oneTimePreKeys = await generatePreKeys();
   final signedPreKeyRecord = await generateSignedPreKey(identityKeyPair, false);
   return SignalKeyRequest.from(
-      identityKeyPair.getPublicKey(), signedPreKeyRecord,
-      preKeyRecords: oneTimePreKeys);
+    identityKeyPair.getPublicKey(),
+    signedPreKeyRecord,
+    preKeyRecords: oneTimePreKeys,
+  );
 }

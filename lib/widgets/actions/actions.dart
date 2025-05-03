@@ -26,21 +26,18 @@ class ToggleCommandPaletteIntent extends Intent {
 }
 
 class MixinAppActions extends StatelessWidget {
-  const MixinAppActions({
-    required this.child,
-    super.key,
-  });
+  const MixinAppActions({required this.child, super.key});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) => Actions(
-        actions: {
-          CreateConversationIntent: CreateConversationAction(context),
-          CreateGroupConversationIntent: CreateGroupConversationAction(context),
-          CreateCircleIntent: CreateCircleAction(context),
-          ToggleCommandPaletteIntent: CommandPaletteAction(context),
-        },
-        child: child,
-      );
+    actions: {
+      CreateConversationIntent: CreateConversationAction(context),
+      CreateGroupConversationIntent: CreateGroupConversationAction(context),
+      CreateCircleIntent: CreateCircleAction(context),
+      ToggleCommandPaletteIntent: CommandPaletteAction(context),
+    },
+    child: child,
+  );
 }

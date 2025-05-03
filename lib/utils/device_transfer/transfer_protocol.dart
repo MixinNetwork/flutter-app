@@ -52,13 +52,15 @@ Future<void> _writeDataToSink({
 
   final bodyLength = iv.length + encryptedData.length;
 
-  final header = ByteData(5)
-    ..setInt8(0, type)
-    ..setInt32(1, bodyLength);
+  final header =
+      ByteData(5)
+        ..setInt8(0, type)
+        ..setInt32(1, bodyLength);
 
-  final hMacCalculator = HMacCalculator(key.hMacKey)
-    ..addBytes(iv)
-    ..addBytes(encryptedData);
+  final hMacCalculator =
+      HMacCalculator(key.hMacKey)
+        ..addBytes(iv)
+        ..addBytes(encryptedData);
   sink
     ..add(header.buffer.asUint8List())
     ..add(iv)
@@ -87,12 +89,7 @@ class TransferDataPacket extends TransferPacket {
       return;
     }
 
-    await _writeDataToSink(
-      sink: sink,
-      key: key,
-      type: kTypeJson,
-      data: data,
-    );
+    await _writeDataToSink(sink: sink, key: key, type: kTypeJson, data: data);
   }
 }
 
@@ -117,10 +114,7 @@ class TransferCommandPacket extends TransferPacket {
 const _kUUIDBytesCount = 16;
 
 class TransferAttachmentPacket extends TransferPacket {
-  TransferAttachmentPacket({
-    required this.messageId,
-    required this.path,
-  });
+  TransferAttachmentPacket({required this.messageId, required this.path});
 
   final String messageId;
   final String path;
@@ -129,7 +123,9 @@ class TransferAttachmentPacket extends TransferPacket {
   Future<void> write(TransferSocket sink, TransferSecretKey key) async {
     final file = File(path);
     if (!file.existsSync() || file.lengthSync() == 0) {
-      e('_AttachmentTransferProtocol#writeBody: file not exist or empty. $path');
+      e(
+        '_AttachmentTransferProtocol#writeBody: file not exist or empty. $path',
+      );
       return;
     }
 
@@ -150,9 +146,10 @@ class TransferAttachmentPacket extends TransferPacket {
     final iv = generateTransferIv();
     final aesCipher = AesCipher(key: key.aesKey, iv: iv, encrypt: true);
 
-    final header = ByteData(5)
-      ..setInt8(0, kTypeFile)
-      ..setInt32(1, encryptedDataLength + iv.length + _kUUIDBytesCount);
+    final header =
+        ByteData(5)
+          ..setInt8(0, kTypeFile)
+          ..setInt32(1, encryptedDataLength + iv.length + _kUUIDBytesCount);
 
     sink
       ..add(header.buffer.asUint8List())
@@ -168,8 +165,9 @@ class TransferAttachmentPacket extends TransferPacket {
     final fileStream = file.openRead();
 
     await for (final bytes in fileStream) {
-      final encrypted = aesCipher
-          .update(bytes is Uint8List ? bytes : Uint8List.fromList(bytes));
+      final encrypted = aesCipher.update(
+        bytes is Uint8List ? bytes : Uint8List.fromList(bytes),
+      );
       hMacCalculator.addBytes(encrypted);
       actualEncryptedLength += encrypted.length;
       sink.add(encrypted);
@@ -186,22 +184,23 @@ class TransferAttachmentPacket extends TransferPacket {
     final hMacResult = hMacCalculator.result;
     sink.add(hMacResult);
     if (actualEncryptedLength != encryptedDataLength) {
-      e('actualEncryptedLength != encryptedDataLength, '
-          '$actualEncryptedLength != $encryptedDataLength');
+      e(
+        'actualEncryptedLength != encryptedDataLength, '
+        '$actualEncryptedLength != $encryptedDataLength',
+      );
       throw Exception('write file failed.');
     }
-    assert(actualEncryptedLength == encryptedDataLength,
-        'actualEncryptedLength != encryptedDataLength, $actualEncryptedLength != $encryptedDataLength');
+    assert(
+      actualEncryptedLength == encryptedDataLength,
+      'actualEncryptedLength != encryptedDataLength, $actualEncryptedLength != $encryptedDataLength',
+    );
     await sink.flush();
   }
 }
 
 abstract class _TransferPacketBuilder {
-  _TransferPacketBuilder(
-    this.expectedBodyLength,
-    this.hMacKey,
-    this.aesKey,
-  ) : _hMacCalculator = HMacCalculator(hMacKey);
+  _TransferPacketBuilder(this.expectedBodyLength, this.hMacKey, this.aesKey)
+    : _hMacCalculator = HMacCalculator(hMacKey);
 
   final int expectedBodyLength;
 
@@ -235,7 +234,11 @@ abstract class _TransferPacketBuilder {
 
 class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
   _TransferJsonPacketBuilder(
-      super.expectedBodyLength, super.hMacKey, super.aesKey, this.creator);
+    super.expectedBodyLength,
+    super.hMacKey,
+    super.aesKey,
+    this.creator,
+  );
 
   final _body = <int>[];
   final TransferPacket Function(Uint8List jsonBytes) creator;
@@ -259,7 +262,9 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
     try {
       return creator(jsonData);
     } catch (error, stacktrace) {
-      e('_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: ${utf8.decode(jsonData, allowMalformed: true)}');
+      e(
+        '_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: ${utf8.decode(jsonData, allowMalformed: true)}',
+      );
       rethrow;
     }
   }
@@ -267,7 +272,11 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
 
 class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   _TransferAttachmentPacketBuilder(
-      super.expectedBodyLength, super.hMacKey, super.aesKey, this.folder);
+    super.expectedBodyLength,
+    super.hMacKey,
+    super.aesKey,
+    this.folder,
+  );
 
   final String folder;
 
@@ -279,7 +288,9 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
   bool doWriteBody(Uint8List bytes) {
     if (_file == null) {
       if (bytes.length < _kUUIDBytesCount + _kIVBytesCount) {
-        e('_TransferAttachmentPacketBuilder#doWriteBody: bytes.length is not enough. ${bytes.length}');
+        e(
+          '_TransferAttachmentPacketBuilder#doWriteBody: bytes.length is not enough. ${bytes.length}',
+        );
         return false;
       }
       final messageId = Uuid.unparse(
@@ -302,8 +313,10 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
         file.deleteSync();
       }
 
-      final data =
-          Uint8List.sublistView(bytes, _kUUIDBytesCount + _kIVBytesCount);
+      final data = Uint8List.sublistView(
+        bytes,
+        _kUUIDBytesCount + _kIVBytesCount,
+      );
 
       file.createSync(recursive: true);
       if (data.isNotEmpty) {
@@ -326,17 +339,16 @@ class _TransferAttachmentPacketBuilder extends _TransferPacketBuilder {
     final data = _aesCipher!.finish();
     _file!.writeAsBytesSync(data, mode: FileMode.append, flush: true);
 
-    assert(_writeBodyLength == expectedBodyLength,
-        'writeBodyLength != expectedBodyLength');
+    assert(
+      _writeBodyLength == expectedBodyLength,
+      'writeBodyLength != expectedBodyLength',
+    );
     if (_file == null || _messageId == null) {
       e('_TransferAttachmentPacketBuilder#build: file or messageId is null');
       throw Exception('file or messageId is null');
     }
     d('write $_messageId attachment done, bytes: ${_file!.lengthSync()}');
-    return TransferAttachmentPacket(
-      messageId: _messageId!,
-      path: _file!.path,
-    );
+    return TransferAttachmentPacket(messageId: _messageId!, path: _file!.path);
   }
 }
 
@@ -395,22 +407,30 @@ class TransferProtocolSink implements EventSink<Uint8List> {
               bodyLength,
               hMacKey,
               aesKey,
-              (bytes) => TransferCommandPacket(TransferDataCommand.fromJson(
-                json.decode(utf8.decode(bytes)) as Map<String, dynamic>,
-              )),
+              (bytes) => TransferCommandPacket(
+                TransferDataCommand.fromJson(
+                  json.decode(utf8.decode(bytes)) as Map<String, dynamic>,
+                ),
+              ),
             );
           case kTypeJson:
             _builder = _TransferJsonPacketBuilder(
               bodyLength,
               hMacKey,
               aesKey,
-              (bytes) => TransferDataPacket(JsonTransferData.fromJson(
-                json.decode(utf8.decode(bytes)) as Map<String, dynamic>,
-              )),
+              (bytes) => TransferDataPacket(
+                JsonTransferData.fromJson(
+                  json.decode(utf8.decode(bytes)) as Map<String, dynamic>,
+                ),
+              ),
             );
           case kTypeFile:
             _builder = _TransferAttachmentPacketBuilder(
-                bodyLength, hMacKey, aesKey, folder);
+              bodyLength,
+              hMacKey,
+              aesKey,
+              folder,
+            );
           default:
             _sink.addError('unknown type: $type', StackTrace.current);
             return;
@@ -426,10 +446,13 @@ class TransferProtocolSink implements EventSink<Uint8List> {
           }
           return;
         } else {
-          final write = builder
-              .writeBody(Uint8List.sublistView(data, offset, offset + need));
-          assert(write,
-              'data length larger than expected, this should not be happen.');
+          final write = builder.writeBody(
+            Uint8List.sublistView(data, offset, offset + need),
+          );
+          assert(
+            write,
+            'data length larger than expected, this should not be happen.',
+          );
 
           offset += need;
           // check if left is enough for check hMac
@@ -441,7 +464,9 @@ class TransferProtocolSink implements EventSink<Uint8List> {
           final hMac = Uint8List.sublistView(data, offset, offset + 32);
           final calculatedHMac = builder.hMac;
           if (!hMac.equals(calculatedHMac)) {
-            e('hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(calculatedHMac)}');
+            e(
+              'hMac not match. expected ${base64Encode(hMac)}, actually ${base64Encode(calculatedHMac)}',
+            );
             _sink.addError('hMac check error', StackTrace.current);
             return;
           }

@@ -16,19 +16,11 @@ import '../../../dialog.dart';
 import '../../../high_light_text.dart';
 import '../../../mixin_image.dart';
 
-Future<void> showTransferDialog(
-  BuildContext context,
-  String snapshotId,
-) =>
-    showMixinDialog(
-      context: context,
-      child: _TransferPage(snapshotId),
-    );
+Future<void> showTransferDialog(BuildContext context, String snapshotId) =>
+    showMixinDialog(context: context, child: _TransferPage(snapshotId));
 
 class _TransferPage extends HookConsumerWidget {
-  const _TransferPage(
-    this.snapshotId,
-  );
+  const _TransferPage(this.snapshotId);
 
   final String snapshotId;
 
@@ -38,38 +30,45 @@ class _TransferPage extends HookConsumerWidget {
       context.accountServer.updateFiats();
     }, []);
 
-    final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
-            .snapshotItemById(
-          snapshotId,
-          context.account!.fiatCurrency,
-        )
-            .watchSingleOrNullWithStream(
-          eventStreams: [
-            DataBaseEventBus.instance.updateSnapshotStream.where((event) =>
-                event.any((element) => element.contains(snapshotId))),
-            DataBaseEventBus.instance.updateAssetStream,
-          ],
-          duration: kDefaultThrottleDuration,
-        )).data;
+    final snapshotItem =
+        useMemoizedStream(
+          () => context.database.snapshotDao
+              .snapshotItemById(snapshotId, context.account!.fiatCurrency)
+              .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.updateSnapshotStream.where(
+                    (event) =>
+                        event.any((element) => element.contains(snapshotId)),
+                  ),
+                  DataBaseEventBus.instance.updateAssetStream,
+                ],
+                duration: kDefaultThrottleDuration,
+              ),
+        ).data;
 
-    final opponentFullName = useMemoizedStream<User?>(() {
-      final opponentId = snapshotItem?.opponentId;
-      if (opponentId != null && opponentId.trim().isNotEmpty) {
-        final stream = context.database.userDao
-            .userById(opponentId)
-            .watchSingleOrNullWithStream(
-          eventStreams: [
-            DataBaseEventBus.instance.watchUpdateUserStream([opponentId])
-          ],
-          duration: kSlowThrottleDuration,
-        );
-        return stream.map((event) {
-          if (event == null) context.accountServer.refreshUsers([opponentId]);
-          return event;
-        });
-      }
-      return Stream.value(null);
-    }, keys: [snapshotItem?.opponentId]).data?.fullName;
+    final opponentFullName =
+        useMemoizedStream<User?>(() {
+          final opponentId = snapshotItem?.opponentId;
+          if (opponentId != null && opponentId.trim().isNotEmpty) {
+            final stream = context.database.userDao
+                .userById(opponentId)
+                .watchSingleOrNullWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.watchUpdateUserStream([
+                      opponentId,
+                    ]),
+                  ],
+                  duration: kSlowThrottleDuration,
+                );
+            return stream.map((event) {
+              if (event == null) {
+                context.accountServer.refreshUsers([opponentId]);
+              }
+              return event;
+            });
+          }
+          return Stream.value(null);
+        }, keys: [snapshotItem?.opponentId]).data?.fullName;
 
     useEffect(() {
       context.accountServer.updateSnapshotById(snapshotId: snapshotId);
@@ -122,10 +121,7 @@ class _TransferPage extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Container(
-                    color: context.theme.divider,
-                    height: 10,
-                  ),
+                  Container(color: context.theme.divider, height: 10),
                   TransactionDetailInfo(
                     snapshot: snapshotItem,
                     opponentFullName: opponentFullName,
@@ -160,90 +156,92 @@ class SnapshotDetailHeader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 20),
-          SymbolIconWithBorder(
-            symbolUrl: symbolIconUrl,
-            chainUrl: chainIconUrl,
-            size: 58,
-            chainSize: 16,
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: CustomSelectableText.rich(
-              TextSpan(children: [
-                TextSpan(
-                    text: amount.numberFormat(),
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'MixinCondensed',
-                      color: snapshotType == SnapshotType.pending
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const SizedBox(height: 20),
+      SymbolIconWithBorder(
+        symbolUrl: symbolIconUrl,
+        chainUrl: chainIconUrl,
+        size: 58,
+        chainSize: 16,
+      ),
+      const SizedBox(height: 16),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: CustomSelectableText.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: amount.numberFormat(),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'MixinCondensed',
+                  color:
+                      snapshotType == SnapshotType.pending
                           ? context.theme.text
                           : _isPositive(amount)
-                              ? context.theme.green
-                              : context.theme.red,
-                    )),
-                const TextSpan(text: ' '),
-                TextSpan(
-                    text: symbol.overflow,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.theme.text,
-                    )),
-              ]),
-              textAlign: TextAlign.center,
-            ),
+                          ? context.theme.green
+                          : context.theme.red,
+                ),
+              ),
+              const TextSpan(text: ' '),
+              TextSpan(
+                text: symbol.overflow,
+                style: TextStyle(fontSize: 14, color: context.theme.text),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-        ],
-      );
+          textAlign: TextAlign.center,
+        ),
+      ),
+      const SizedBox(height: 4),
+    ],
+  );
 }
 
 class _ValuesDescription extends HookConsumerWidget {
-  const _ValuesDescription({
-    required this.snapshot,
-  });
+  const _ValuesDescription({required this.snapshot});
 
   final SnapshotItem snapshot;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ticker = useMemoizedFuture(
-      () => context.accountServer.client.snapshotApi.getTicker(
-        snapshot.assetId,
-        offset: snapshot.createdAt.toIso8601String(),
-      ),
-      null,
-      keys: [snapshot.snapshotId],
-    ).data?.data;
+    final ticker =
+        useMemoizedFuture(
+          () => context.accountServer.client.snapshotApi.getTicker(
+            snapshot.assetId,
+            offset: snapshot.createdAt.toIso8601String(),
+          ),
+          null,
+          keys: [snapshot.snapshotId],
+        ).data?.data;
 
     final String? thatTimeValue;
 
     final current = snapshot.amountOfCurrentCurrency().abs();
-    final unitValue = context
-        .currencyFormat((current / snapshot.amount.asDecimal.abs()).toDouble());
+    final unitValue = context.currencyFormat(
+      (current / snapshot.amount.asDecimal.abs()).toDouble(),
+    );
     final symbol = snapshot.symbol?.overflow ?? '';
-    final currentValue = '${context.l10n.valueNow(
-      context.currencyFormat(current),
-    )}($unitValue/$symbol)';
+    final currentValue =
+        '${context.l10n.valueNow(context.currencyFormat(current))}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
       thatTimeValue = context.l10n.valueThen(context.l10n.na);
     } else {
-      final past = (snapshot.amount.asDecimal *
-              ticker.priceUsd.asDecimal *
-              snapshot.fiatRate!.asDecimal)
-          .abs();
-      final unitValue = context
-          .currencyFormat((past / snapshot.amount.asDecimal.abs()).toDouble());
-      thatTimeValue = '${context.l10n.valueThen(
-        context.currencyFormat(past),
-      )}($unitValue/$symbol)';
+      final past =
+          (snapshot.amount.asDecimal *
+                  ticker.priceUsd.asDecimal *
+                  snapshot.fiatRate!.asDecimal)
+              .abs();
+      final unitValue = context.currencyFormat(
+        (past / snapshot.amount.asDecimal.abs()).toDouble(),
+      );
+      thatTimeValue =
+          '${context.l10n.valueThen(context.currencyFormat(past))}($unitValue/$symbol)';
     }
     return DefaultTextStyle.merge(
       style: TextStyle(
@@ -254,10 +252,7 @@ class _ValuesDescription extends HookConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomSelectableText(
-            currentValue,
-            enableInteractiveSelection: false,
-          ),
+          CustomSelectableText(currentValue, enableInteractiveSelection: false),
           if (thatTimeValue != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
@@ -339,17 +334,21 @@ class TransactionDetailInfo extends StatelessWidget {
           ] else if (snapshot.type == SnapshotType.transfer) ...[
             TransactionInfoTile(
               title: Text(context.l10n.from),
-              subtitle: CustomSelectableText((snapshot.isPositive
-                      ? opponentFullName
-                      : context.account?.fullName) ??
-                  ''),
+              subtitle: CustomSelectableText(
+                (snapshot.isPositive
+                        ? opponentFullName
+                        : context.account?.fullName) ??
+                    '',
+              ),
             ),
             TransactionInfoTile(
               title: Text(context.l10n.receiver),
-              subtitle: CustomSelectableText((!snapshot.isPositive
-                      ? opponentFullName
-                      : context.account?.fullName) ??
-                  ''),
+              subtitle: CustomSelectableText(
+                (!snapshot.isPositive
+                        ? opponentFullName
+                        : context.account?.fullName) ??
+                    '',
+              ),
             ),
           ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
             TransactionInfoTile(
@@ -380,20 +379,23 @@ class TransactionDetailInfo extends StatelessWidget {
             TransactionInfoTile(
               title: Text(context.l10n.openingBalance),
               subtitle: CustomSelectableText(
-                  '${snapshot.openingBalance!} ${snapshot.symbol!}'),
+                '${snapshot.openingBalance!} ${snapshot.symbol!}',
+              ),
             ),
           if ((snapshot.closingBalance?.isNotEmpty ?? false) &&
               (snapshot.symbol?.isNotEmpty ?? false))
             TransactionInfoTile(
               title: Text(context.l10n.closingBalance),
               subtitle: CustomSelectableText(
-                  '${snapshot.closingBalance ?? ''} ${snapshot.symbol ?? ''}'),
+                '${snapshot.closingBalance ?? ''} ${snapshot.symbol ?? ''}',
+              ),
             ),
           TransactionInfoTile(
             title: Text(context.l10n.time),
-            subtitle:
-                CustomSelectableText('${DateFormat.yMMMMd().format(createdAt)}'
-                    '${DateFormat.Hms().format(createdAt)}'),
+            subtitle: CustomSelectableText(
+              '${DateFormat.yMMMMd().format(createdAt)}'
+              '${DateFormat.Hms().format(createdAt)}',
+            ),
           ),
           if (snapshot.type == SnapshotType.transfer &&
               snapshot.traceId != null &&
@@ -422,30 +424,30 @@ class TransactionInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 12),
-          DefaultTextStyle.merge(
-            style: TextStyle(
-              fontSize: 16,
-              height: 1,
-              color: context.theme.secondaryText,
-            ),
-            child: title,
-          ),
-          const SizedBox(height: 8),
-          DefaultTextStyle.merge(
-            style: TextStyle(
-              fontSize: 16,
-              height: 1,
-              color: subtitleColor ?? context.theme.text,
-            ),
-            child: subtitle,
-          ),
-          const SizedBox(height: 12),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 12),
+      DefaultTextStyle.merge(
+        style: TextStyle(
+          fontSize: 16,
+          height: 1,
+          color: context.theme.secondaryText,
+        ),
+        child: title,
+      ),
+      const SizedBox(height: 8),
+      DefaultTextStyle.merge(
+        style: TextStyle(
+          fontSize: 16,
+          height: 1,
+          color: subtitleColor ?? context.theme.text,
+        ),
+        child: subtitle,
+      ),
+      const SizedBox(height: 12),
+    ],
+  );
 }
 
 class SymbolIconWithBorder extends StatelessWidget {
@@ -466,32 +468,32 @@ class SymbolIconWithBorder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        height: size,
-        width: size,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ClipPath(
-                clipper: _SymbolCustomClipper(
-                  chainPlaceholderSize: chainSize + chainBorder,
-                ),
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                child: MixinImage.network(symbolUrl),
-              ),
+    height: size,
+    width: size,
+    child: Stack(
+      children: [
+        Positioned.fill(
+          child: ClipPath(
+            clipper: _SymbolCustomClipper(
+              chainPlaceholderSize: chainSize + chainBorder,
             ),
-            if (chainUrl != null)
-              Positioned(
-                right: chainBorder / 2,
-                bottom: chainBorder / 2,
-                child: MixinImage.network(
-                  chainUrl!,
-                  width: chainSize,
-                  height: chainSize,
-                ),
-              ),
-          ],
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: MixinImage.network(symbolUrl),
+          ),
         ),
-      );
+        if (chainUrl != null)
+          Positioned(
+            right: chainBorder / 2,
+            bottom: chainBorder / 2,
+            child: MixinImage.network(
+              chainUrl!,
+              width: chainSize,
+              height: chainSize,
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _SymbolCustomClipper extends CustomClipper<Path> with EquatableMixin {
@@ -504,10 +506,14 @@ class _SymbolCustomClipper extends CustomClipper<Path> with EquatableMixin {
     assert(size.shortestSide > chainPlaceholderSize);
 
     final symbol = Path()..addOval(Offset.zero & size);
-    final chain = Path()
-      ..addOval(Offset(size.width - chainPlaceholderSize,
-              size.height - chainPlaceholderSize) &
-          Size.square(chainPlaceholderSize));
+    final chain =
+        Path()..addOval(
+          Offset(
+                size.width - chainPlaceholderSize,
+                size.height - chainPlaceholderSize,
+              ) &
+              Size.square(chainPlaceholderSize),
+        );
 
     return Path.combine(PathOperation.difference, symbol, chain);
   }

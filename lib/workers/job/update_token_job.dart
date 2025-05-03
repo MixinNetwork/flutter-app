@@ -10,10 +10,7 @@ import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
 class UpdateTokenJob extends JobQueue<Job, List<Job>> {
-  UpdateTokenJob({
-    required super.database,
-    required this.client,
-  });
+  UpdateTokenJob({required super.database, required this.client});
 
   final Client client;
 
@@ -47,26 +44,28 @@ class UpdateTokenJob extends JobQueue<Job, List<Job>> {
 
   @override
   Future<void> run(List<Job> jobs) async {
-    final tokenIds = await Future.wait<String?>(jobs.map((Job job) async {
-      try {
-        final token =
-            (await client.tokenApi.getAssetById(job.blazeMessage!)).data;
+    final tokenIds = await Future.wait<String?>(
+      jobs.map((Job job) async {
+        try {
+          final token =
+              (await client.tokenApi.getAssetById(job.blazeMessage!)).data;
 
-        final chain = (await client.assetApi.getChain(token.chainId)).data;
+          final chain = (await client.assetApi.getChain(token.chainId)).data;
 
-        await Future.wait([
-          database.tokenDao.insertSdkToken(token),
-          database.chainDao.insertSdkChain(chain),
-          database.jobDao.deleteJobById(job.jobId),
-        ]);
-        return token.assetId;
-      } catch (e, s) {
-        w('Update token job error: $e, stack: $s');
-        final retryDelay = _retryDelay[job.jobId] ?? 1;
-        _retryDelay[job.jobId] = math.min(retryDelay * 2, 120);
-        await Future.delayed(Duration(seconds: retryDelay));
-      }
-    }));
+          await Future.wait([
+            database.tokenDao.insertSdkToken(token),
+            database.chainDao.insertSdkChain(chain),
+            database.jobDao.deleteJobById(job.jobId),
+          ]);
+          return token.assetId;
+        } catch (e, s) {
+          w('Update token job error: $e, stack: $s');
+          final retryDelay = _retryDelay[job.jobId] ?? 1;
+          _retryDelay[job.jobId] = math.min(retryDelay * 2, 120);
+          await Future.delayed(Duration(seconds: retryDelay));
+        }
+      }),
+    );
     DataBaseEventBus.instance.updateToken(tokenIds.nonNulls);
   }
 }

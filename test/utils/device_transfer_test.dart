@@ -65,7 +65,7 @@ const List<Asset> assets = [
     changeUsd: '-0.1',
     changeBtc: '-0.000001',
     confirmations: 6,
-  )
+  ),
 ];
 
 final List<Message> messages = [
@@ -252,7 +252,11 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer(
-        'localhost', port, verificationCode, secretKey);
+      'localhost',
+      port,
+      verificationCode,
+      secretKey,
+    );
 
     await senderStartCompleter.future;
     expect(senderStartCount, 1);
@@ -288,7 +292,11 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer(
-        'localhost', port, verificationCode + 1, secretKey);
+      'localhost',
+      port,
+      verificationCode + 1,
+      secretKey,
+    );
 
     await receiverCompleter.future;
 
@@ -310,7 +318,11 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer(
-        'localhost', port, verificationCode, secretKey);
+      'localhost',
+      port,
+      verificationCode,
+      secretKey,
+    );
 
     await receiverStartCompleter.future;
     await senderStartCompleter.future;
@@ -342,7 +354,11 @@ void main() {
     d('startServerSocket: $port');
     expect(senderStartCount, 0);
     await receiver.connectToServer(
-        'localhost', port, verificationCode, secretKey);
+      'localhost',
+      port,
+      verificationCode,
+      secretKey,
+    );
 
     await senderStartCompleter.future;
     expect(senderStartCount, 1);

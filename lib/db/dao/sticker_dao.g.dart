@@ -46,31 +46,25 @@ mixin _$StickerDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
-        'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
-        variables: [],
-        readsFrom: {
-          stickers,
-        }).asyncMap(stickers.mapFromRow);
+      'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
+      variables: [],
+      readsFrom: {stickers},
+    ).asyncMap(stickers.mapFromRow);
   }
 
   Selectable<Sticker> _stickersByCategory(String category) {
     return customSelect(
-        'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = ?1 ORDER BY s.created_at DESC',
-        variables: [
-          Variable<String>(category)
-        ],
-        readsFrom: {
-          stickerAlbums,
-          stickerRelationships,
-          stickers,
-        }).asyncMap(stickers.mapFromRow);
+      'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = ?1 ORDER BY s.created_at DESC',
+      variables: [Variable<String>(category)],
+      readsFrom: {stickerAlbums, stickerRelationships, stickers},
+    ).asyncMap(stickers.mapFromRow);
   }
 
   Selectable<int> countStickers() {
-    return customSelect('SELECT COUNT(1) AS _c0 FROM stickers',
-        variables: [],
-        readsFrom: {
-          stickers,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+    return customSelect(
+      'SELECT COUNT(1) AS _c0 FROM stickers',
+      variables: [],
+      readsFrom: {stickers},
+    ).map((QueryRow row) => row.read<int>('_c0'));
   }
 }

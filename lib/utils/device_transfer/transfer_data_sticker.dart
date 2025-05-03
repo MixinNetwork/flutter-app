@@ -63,16 +63,16 @@ class TransferDataSticker {
   Map<String, dynamic> toJson() => _$TransferDataStickerToJson(this);
 
   db.Sticker toDbSticker() => db.Sticker(
-        stickerId: stickerId,
-        albumId: albumId,
-        name: name,
-        assetUrl: assetUrl,
-        assetType: assetType,
-        assetWidth: assetWidth,
-        assetHeight: assetHeight,
-        createdAt: createdAt,
-        lastUseAt: lastUseAt,
-      );
+    stickerId: stickerId,
+    albumId: albumId,
+    name: name,
+    assetUrl: assetUrl,
+    assetType: assetType,
+    assetWidth: assetWidth,
+    assetHeight: assetHeight,
+    createdAt: createdAt,
+    lastUseAt: lastUseAt,
+  );
 
   @override
   String toString() => 'TransferDataSticker($stickerId)';

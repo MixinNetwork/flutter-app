@@ -127,8 +127,9 @@ class AccountServer {
     if (e is MixinApiError) {
       final mixinError = e.error! as MixinError;
       if (mixinError.code == authentication) {
-        final serverTime =
-            int.tryParse(e.response?.headers.value('x-server-time') ?? '');
+        final serverTime = int.tryParse(
+          e.response?.headers.value('x-server-time') ?? '',
+        );
         if (serverTime != null) {
           final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
           final deviceTime =
@@ -161,10 +162,7 @@ class AccountServer {
       loginByPhoneNumber: _loginByPhoneNumber,
       interceptors: [
         InterceptorsWrapper(
-          onError: (
-            DioException e,
-            ErrorInterceptorHandler handler,
-          ) async {
+          onError: (DioException e, ErrorInterceptorHandler handler) async {
             await _onClientRequestError(e);
             handler.next(e);
           },
@@ -173,8 +171,11 @@ class AccountServer {
     )..configProxySetting(database.settingProperties);
 
     attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
-    _sendMessageHelper =
-        SendMessageHelper(database, attachmentUtil, addSendingJob);
+    _sendMessageHelper = SendMessageHelper(
+      database,
+      attachmentUtil,
+      addSendingJob,
+    );
 
     _injector = Injector(userId, database, client);
   }
@@ -230,24 +231,30 @@ class AccountServer {
       onError: errorReceivePort.sendPort,
     );
     jobSubscribers
-      ..add(exitReceivePort.listen((message) {
-        w('worker isolate service exited. $message');
-        _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
-      }))
-      ..add(errorReceivePort.listen((error) {
-        e('work isolate RemoteError: $error');
-      }))
-      ..add(_isolateChannel!.stream.listen((event) {
-        if (event is! WorkerIsolateEvent) {
-          e('unexpected event from worker isolate: $event');
-          return;
-        }
-        try {
-          _handleWorkIsolateEvent(event);
-        } catch (error, stacktrace) {
-          e('handle worker isolate event failed: $error, $stacktrace');
-        }
-      }));
+      ..add(
+        exitReceivePort.listen((message) {
+          w('worker isolate service exited. $message');
+          _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
+        }),
+      )
+      ..add(
+        errorReceivePort.listen((error) {
+          e('work isolate RemoteError: $error');
+        }),
+      )
+      ..add(
+        _isolateChannel!.stream.listen((event) {
+          if (event is! WorkerIsolateEvent) {
+            e('unexpected event from worker isolate: $event');
+            return;
+          }
+          try {
+            _handleWorkIsolateEvent(event);
+          } catch (error, stacktrace) {
+            e('handle worker isolate event failed: $error, $stacktrace');
+          }
+        }),
+      );
   }
 
   void _handleWorkIsolateEvent(WorkerIsolateEvent event) {
@@ -268,9 +275,7 @@ class AccountServer {
   }
 
   // Call when worker isolate process message need download attachment.
-  Future<void> _onAttachmentDownloadRequest(
-    AttachmentRequest request,
-  ) async {
+  Future<void> _onAttachmentDownloadRequest(AttachmentRequest request) async {
     bool needDownload(String category) {
       if (category.isImage) {
         return settingChangeNotifier.photoAutoDownload;
@@ -286,17 +291,19 @@ class AccountServer {
       d('request cancel download: ${request.messageId}');
       await attachmentUtil.cancelProgressAttachmentJob(request.messageId);
     } else if (request is AttachmentDownloadRequest) {
-      d('request download: ${request.message.messageId} ${request.message.category}');
+      d(
+        'request download: ${request.message.messageId} ${request.message.category}',
+      );
       final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
-        await attachmentUtil.downloadAttachment(
-          messageId: messageId,
-        );
+        await attachmentUtil.downloadAttachment(messageId: messageId);
       } else {
         await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else if (request is TranscriptAttachmentDownloadRequest) {
-      d('request download transcript: ${request.message.messageId} ${request.message.category}');
+      d(
+        'request download transcript: ${request.message.messageId} ${request.message.category}',
+      );
       final messageId = request.message.messageId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
@@ -384,18 +391,20 @@ class AccountServer {
     int? width,
     int? height,
     bool defaultGifMimeType = true,
-  }) async =>
-      _sendMessageHelper.sendImageMessageByUrl(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        encryptCategory.toCategory(MessageCategory.plainImage,
-            MessageCategory.signalImage, MessageCategory.encryptedImage),
-        url,
-        previewUrl,
-        width: width,
-        height: height,
-        defaultGifMimeType: defaultGifMimeType,
-      );
+  }) async => _sendMessageHelper.sendImageMessageByUrl(
+    await _initConversation(conversationId, recipientId),
+    userId,
+    encryptCategory.toCategory(
+      MessageCategory.plainImage,
+      MessageCategory.signalImage,
+      MessageCategory.encryptedImage,
+    ),
+    url,
+    previewUrl,
+    width: width,
+    height: height,
+    defaultGifMimeType: defaultGifMimeType,
+  );
 
   Future<void> sendImageMessage(
     EncryptCategory encryptCategory, {
@@ -407,19 +416,21 @@ class AccountServer {
     bool silent = false,
     bool compress = false,
     String? caption,
-  }) async =>
-      _sendMessageHelper.sendImageMessage(
-        conversationId: await _initConversation(conversationId, recipientId),
-        senderId: userId,
-        file: file,
-        bytes: bytes,
-        category: encryptCategory.toCategory(MessageCategory.plainImage,
-            MessageCategory.signalImage, MessageCategory.encryptedImage),
-        quoteMessageId: quoteMessageId,
-        silent: silent,
-        compress: compress,
-        caption: caption,
-      );
+  }) async => _sendMessageHelper.sendImageMessage(
+    conversationId: await _initConversation(conversationId, recipientId),
+    senderId: userId,
+    file: file,
+    bytes: bytes,
+    category: encryptCategory.toCategory(
+      MessageCategory.plainImage,
+      MessageCategory.signalImage,
+      MessageCategory.encryptedImage,
+    ),
+    quoteMessageId: quoteMessageId,
+    silent: silent,
+    compress: compress,
+    caption: caption,
+  );
 
   Future<void> sendVideoMessage(
     XFile video,
@@ -437,8 +448,11 @@ class AccountServer {
       await _initConversation(conversationId, recipientId),
       userId,
       video,
-      encryptCategory.toCategory(MessageCategory.plainVideo,
-          MessageCategory.signalVideo, MessageCategory.encryptedVideo),
+      encryptCategory.toCategory(
+        MessageCategory.plainVideo,
+        MessageCategory.signalVideo,
+        MessageCategory.encryptedVideo,
+      ),
       quoteMessageId,
       silent: silent,
       mediaDuration: mediaDuration,
@@ -456,17 +470,19 @@ class AccountServer {
     String? conversationId,
     String? recipientId,
     String? quoteMessageId,
-  }) async =>
-      _sendMessageHelper.sendAudioMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        audio,
-        encryptCategory.toCategory(MessageCategory.plainAudio,
-            MessageCategory.signalAudio, MessageCategory.encryptedAudio),
-        quoteMessageId,
-        mediaDuration: duration.inMilliseconds.toString(),
-        mediaWaveform: waveform,
-      );
+  }) async => _sendMessageHelper.sendAudioMessage(
+    await _initConversation(conversationId, recipientId),
+    userId,
+    audio,
+    encryptCategory.toCategory(
+      MessageCategory.plainAudio,
+      MessageCategory.signalAudio,
+      MessageCategory.encryptedAudio,
+    ),
+    quoteMessageId,
+    mediaDuration: duration.inMilliseconds.toString(),
+    mediaWaveform: waveform,
+  );
 
   Future<void> sendDataMessage(
     XFile file,
@@ -475,16 +491,18 @@ class AccountServer {
     String? recipientId,
     String? quoteMessageId,
     bool silent = false,
-  }) async =>
-      _sendMessageHelper.sendDataMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        file,
-        encryptCategory.toCategory(MessageCategory.plainData,
-            MessageCategory.signalData, MessageCategory.encryptedData),
-        quoteMessageId,
-        silent: silent,
-      );
+  }) async => _sendMessageHelper.sendDataMessage(
+    await _initConversation(conversationId, recipientId),
+    userId,
+    file,
+    encryptCategory.toCategory(
+      MessageCategory.plainData,
+      MessageCategory.signalData,
+      MessageCategory.encryptedData,
+    ),
+    quoteMessageId,
+    silent: silent,
+  );
 
   Future<void> sendStickerMessage(
     String stickerId,
@@ -492,13 +510,16 @@ class AccountServer {
     EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
-  }) async =>
-      _sendMessageHelper.sendStickerMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          StickerMessage(stickerId, albumId, null),
-          encryptCategory.toCategory(MessageCategory.plainSticker,
-              MessageCategory.signalSticker, MessageCategory.encryptedSticker));
+  }) async => _sendMessageHelper.sendStickerMessage(
+    await _initConversation(conversationId, recipientId),
+    userId,
+    StickerMessage(stickerId, albumId, null),
+    encryptCategory.toCategory(
+      MessageCategory.plainSticker,
+      MessageCategory.signalSticker,
+      MessageCategory.encryptedSticker,
+    ),
+  );
 
   Future<void> sendContactMessage(
     String shareUserId,
@@ -508,7 +529,8 @@ class AccountServer {
     String? recipientId,
     String? quoteMessageId,
   }) async {
-    final fullName = shareUserFullName ??
+    final fullName =
+        shareUserFullName ??
         (await database.userDao.userById(shareUserId).getSingleOrNull())
             ?.fullName;
     return _sendMessageHelper.sendContactMessage(
@@ -521,24 +543,30 @@ class AccountServer {
     );
   }
 
-  Future<void> sendRecallMessage(List<String> messageIds,
-      {String? conversationId, String? recipientId}) async {
+  Future<void> sendRecallMessage(
+    List<String> messageIds, {
+    String? conversationId,
+    String? recipientId,
+  }) async {
     await Future.forEach(
-        messageIds, (id) => attachmentUtil.cancelProgressAttachmentJob(id));
+      messageIds,
+      (id) => attachmentUtil.cancelProgressAttachmentJob(id),
+    );
     return _sendMessageHelper.sendRecallMessage(
-        await _initConversation(conversationId, recipientId), messageIds);
+      await _initConversation(conversationId, recipientId),
+      messageIds,
+    );
   }
 
   Future<void> sendAppCardMessage({
     required AppCardData data,
     String? conversationId,
     String? recipientId,
-  }) async =>
-      _sendMessageHelper.sendAppCardMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        json.encode(data.toJson()),
-      );
+  }) async => _sendMessageHelper.sendAppCardMessage(
+    await _initConversation(conversationId, recipientId),
+    userId,
+    json.encode(data.toJson()),
+  );
 
   Future<void> sendTranscriptMessage(
     List<String> messageIds,
@@ -583,8 +611,9 @@ class AccountServer {
       return;
     }
 
-    final nonExistent =
-        messages.where((e) => e.type.isAttachment).any((message) {
+    final nonExistent = messages.where((e) => e.type.isAttachment).any((
+      message,
+    ) {
       final path = attachmentUtil.convertAbsolutePath(
         fileName: message.mediaUrl,
         conversationId: message.conversationId,
@@ -602,20 +631,22 @@ class AccountServer {
       return;
     }
 
-    await Future.wait(messages.where((e) => e.type.isAttachment).map((message) {
-      final path = attachmentUtil.convertAbsolutePath(
-        category: message.type,
-        conversationId: message.conversationId,
-        fileName: message.mediaUrl,
-      );
+    await Future.wait(
+      messages.where((e) => e.type.isAttachment).map((message) {
+        final path = attachmentUtil.convertAbsolutePath(
+          category: message.type,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        );
 
-      final transcriptPath = attachmentUtil.convertAbsolutePath(
-        fileName: message.mediaUrl,
-        messageId: message.messageId,
-        isTranscript: true,
-      );
-      return File(path).copy(transcriptPath);
-    }));
+        final transcriptPath = attachmentUtil.convertAbsolutePath(
+          fileName: message.mediaUrl,
+          messageId: message.messageId,
+          isTranscript: true,
+        );
+        return File(path).copy(transcriptPath);
+      }),
+    );
 
     await _sendMessageHelper.sendTranscriptMessage(
       conversationId: await _initConversation(conversationId, recipientId),
@@ -630,13 +661,12 @@ class AccountServer {
     EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
-  }) async =>
-      _sendMessageHelper.forwardMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        forwardMessageId,
-        encryptCategory: encryptCategory,
-      );
+  }) async => _sendMessageHelper.forwardMessage(
+    await _initConversation(conversationId, recipientId),
+    userId,
+    forwardMessageId,
+    encryptCategory: encryptCategory,
+  );
 
   void selectConversation(String? conversationId) {
     _sendEventToWorkerIsolate(
@@ -647,52 +677,36 @@ class AccountServer {
 
   void addAckJob(List<db.Job> jobs) {
     assert(jobs.every((job) => job.action == kAcknowledgeMessageReceipts));
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addAckJobs,
-      jobs,
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.addAckJobs, jobs);
   }
 
   void addSessionAckJob(List<db.Job> jobs) {
     assert(jobs.every((job) => job.action == kCreateMessage));
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addSessionAckJobs,
-      jobs,
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.addSessionAckJobs, jobs);
   }
 
   void addSendingJob(db.Job job) {
-    assert(job.action == kSendingMessage ||
-        job.action == kPinMessage ||
-        job.action == kRecallMessage);
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addSendingJob,
-      job,
+    assert(
+      job.action == kSendingMessage ||
+          job.action == kPinMessage ||
+          job.action == kRecallMessage,
     );
+    _sendEventToWorkerIsolate(MainIsolateEventType.addSendingJob, job);
   }
 
   void addUpdateAssetJob(db.Job job) {
     assert(job.action == kUpdateAsset);
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addUpdateAssetJob,
-      job,
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.addUpdateAssetJob, job);
   }
 
   void addUpdateTokenJob(db.Job job) {
     assert(job.action == kUpdateToken);
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addUpdateTokenJob,
-      job,
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.addUpdateTokenJob, job);
   }
 
   void addUpdateStickerJob(db.Job job) {
     assert(job.action == kUpdateSticker);
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addUpdateStickerJob,
-      job,
-    );
+    _sendEventToWorkerIsolate(MainIsolateEventType.addUpdateStickerJob, job);
   }
 
   void addSyncInscriptionMessageJob(String messageId) {
@@ -703,8 +717,10 @@ class AccountServer {
   }
 
   Future<void> markRead(String conversationId) async {
-    final ids =
-        await database.messageDao.getUnreadMessageIds(conversationId, userId);
+    final ids = await database.messageDao.getUnreadMessageIds(
+      conversationId,
+      userId,
+    );
 
     if (ids.isEmpty) return;
 
@@ -712,14 +728,18 @@ class AccountServer {
 
     for (final ids in chunked) {
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
-      addAckJob(ids
-          .map((id) => createAckJob(
+      addAckJob(
+        ids
+            .map(
+              (id) => createAckJob(
                 kAcknowledgeMessageReceipts,
                 id,
                 MessageStatus.read,
                 expireAt: expireAt[id],
-              ))
-          .toList());
+              ),
+            )
+            .toList(),
+      );
 
       await _createReadSessionMessage(ids, expireAt);
     }
@@ -734,14 +754,18 @@ class AccountServer {
       return;
     }
 
-    addSessionAckJob(messageIds
-        .map((id) => createAckJob(
+    addSessionAckJob(
+      messageIds
+          .map(
+            (id) => createAckJob(
               kCreateMessage,
               id,
               MessageStatus.read,
               expireAt: messageExpireAt[id],
-            ))
-        .toList());
+            ),
+          )
+          .toList(),
+    );
   }
 
   Future<void> stop() async {
@@ -756,22 +780,24 @@ class AccountServer {
 
   Future<void> refreshSelf() async {
     final me = (await client.accountApi.getMe()).data;
-    await database.userDao.insert(db.User(
-      userId: me.userId,
-      identityNumber: me.identityNumber,
-      relationship: me.relationship,
-      fullName: me.fullName,
-      avatarUrl: me.avatarUrl,
-      phone: me.phone,
-      isVerified: me.isVerified,
-      createdAt: me.createdAt,
-      muteUntil: DateTime.tryParse(me.muteUntil),
-      biography: me.biography,
-      isScam: me.isScam ? 1 : 0,
-      codeId: me.codeId,
-      codeUrl: me.codeUrl,
-      membership: me.membership,
-    ));
+    await database.userDao.insert(
+      db.User(
+        userId: me.userId,
+        identityNumber: me.identityNumber,
+        relationship: me.relationship,
+        fullName: me.fullName,
+        avatarUrl: me.avatarUrl,
+        phone: me.phone,
+        isVerified: me.isVerified,
+        createdAt: me.createdAt,
+        muteUntil: DateTime.tryParse(me.muteUntil),
+        biography: me.biography,
+        isScam: me.isScam ? 1 : 0,
+        codeId: me.codeId,
+        codeUrl: me.codeUrl,
+        membership: me.membership,
+      ),
+    );
     multiAuthNotifier.updateAccount(me);
   }
 
@@ -818,14 +844,15 @@ class AccountServer {
       if (localAlbum == null) {
         maxOrder++;
       }
-      await database.stickerAlbumDao.insert(a.asStickerAlbumsCompanion.copyWith(
-        orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
-        added: Value(
-          localAlbum?.added ?? a.banner?.isNotEmpty == true,
+      await database.stickerAlbumDao.insert(
+        a.asStickerAlbumsCompanion.copyWith(
+          orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
+          added: Value(localAlbum?.added ?? a.banner?.isNotEmpty == true),
         ),
-      ));
+      );
 
-      hasNewAlbum = !hasNewAlbum &&
+      hasNewAlbum =
+          !hasNewAlbum &&
           localLatestCreatedAt != null &&
           a.createdAt.difference(localLatestCreatedAt).inSeconds > 1;
 
@@ -850,10 +877,13 @@ class AccountServer {
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
     await Future.forEach<CircleResponse>(res.data, (circle) async {
-      await database.circleDao.insertUpdate(db.Circle(
+      await database.circleDao.insertUpdate(
+        db.Circle(
           circleId: circle.circleId,
           name: circle.name,
-          createdAt: circle.createdAt));
+          createdAt: circle.createdAt,
+        ),
+      );
       await handleCircle(circle);
     });
 
@@ -877,11 +907,13 @@ class AccountServer {
     final ccList =
         (await client.circleApi.getCircleConversations(circle.circleId)).data;
     for (final cc in ccList) {
-      await database.circleConversationDao.insert(db.CircleConversation(
-        conversationId: cc.conversationId,
-        circleId: cc.circleId,
-        createdAt: cc.createdAt,
-      ));
+      await database.circleConversationDao.insert(
+        db.CircleConversation(
+          conversationId: cc.conversationId,
+          circleId: cc.circleId,
+          createdAt: cc.createdAt,
+        ),
+      );
       await _injector.syncConversion(cc.conversationId);
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
@@ -901,11 +933,15 @@ class AccountServer {
       final relationships = <db.StickerRelationship>[];
       final stickers = <db.StickersCompanion>[];
       response.data.forEach((sticker) {
-        relationships.add(db.StickerRelationship(
-            albumId: albumId, stickerId: sticker.stickerId));
-        stickers.add(sticker.asStickersCompanion.copyWith(
-          albumId: Value(albumId),
-        ));
+        relationships.add(
+          db.StickerRelationship(
+            albumId: albumId,
+            stickerId: sticker.stickerId,
+          ),
+        );
+        stickers.add(
+          sticker.asStickersCompanion.copyWith(albumId: Value(albumId)),
+        );
       });
 
       await database.mixinDatabase.transaction(() async {
@@ -922,10 +958,11 @@ class AccountServer {
 
   Future<void> reUploadGiphyGif(db.MessageItem message) {
     assert(
-        message.type.isImage &&
-            message.mediaMimeType == 'image/gif' &&
-            (message.mediaSize == null || message.mediaSize == 0),
-        'Invalid message');
+      message.type.isImage &&
+          message.mediaMimeType == 'image/gif' &&
+          (message.mediaSize == null || message.mediaSize == 0),
+      'Invalid message',
+    );
     return _sendMessageHelper.reUploadGiphyGif(message);
   }
 
@@ -949,21 +986,25 @@ class AccountServer {
   Future<void> reUploadTranscriptAttachment(String messageId) =>
       _sendMessageHelper.reUploadTranscriptAttachment(messageId);
 
-  Future<void> addUser(String userId, String? fullName) =>
-      _relationship(RelationshipRequest(
-        userId: userId,
-        action: RelationshipAction.add,
-        fullName: fullName,
-      ));
+  Future<void> addUser(String userId, String? fullName) => _relationship(
+    RelationshipRequest(
+      userId: userId,
+      action: RelationshipAction.add,
+      fullName: fullName,
+    ),
+  );
 
   Future<void> removeUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.remove));
+    RelationshipRequest(userId: userId, action: RelationshipAction.remove),
+  );
 
   Future<void> blockUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.block));
+    RelationshipRequest(userId: userId, action: RelationshipAction.block),
+  );
 
   Future<void> unblockUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.unblock));
+    RelationshipRequest(userId: userId, action: RelationshipAction.unblock),
+  );
 
   Future<void> _relationship(RelationshipRequest request) async {
     try {
@@ -1021,16 +1062,11 @@ class AccountServer {
     }
   }
 
-  Future<void> removeParticipant(
-    String conversationId,
-    String userId,
-  ) async {
+  Future<void> removeParticipant(String conversationId, String userId) async {
     try {
-      await client.conversationApi.participants(
-        conversationId,
-        'REMOVE',
-        [ParticipantRequest(userId: userId)],
-      );
+      await client.conversationApi.participants(conversationId, 'REMOVE', [
+        ParticipantRequest(userId: userId),
+      ]);
     } catch (e) {
       w('removeParticipant error $e');
       rethrow;
@@ -1038,10 +1074,14 @@ class AccountServer {
   }
 
   Future<void> updateParticipantRole(
-      String conversationId, String userId, ParticipantRole? role) async {
+    String conversationId,
+    String userId,
+    ParticipantRole? role,
+  ) async {
     try {
-      await client.conversationApi.participants(conversationId, 'ROLE',
-          [ParticipantRequest(userId: userId, role: role)]);
+      await client.conversationApi.participants(conversationId, 'ROLE', [
+        ParticipantRequest(userId: userId, role: role),
+      ]);
     } catch (e) {
       w('updateParticipantRole error $e');
       rethrow;
@@ -1049,9 +1089,12 @@ class AccountServer {
   }
 
   Future<void> createCircle(
-      String name, List<CircleConversationRequest> list) async {
-    final response =
-        await client.circleApi.createCircle(CircleName(name: name));
+    String name,
+    List<CircleConversationRequest> list,
+  ) async {
+    final response = await client.circleApi.createCircle(
+      CircleName(name: name),
+    );
 
     await database.circleDao.insertUpdate(
       db.Circle(
@@ -1061,10 +1104,7 @@ class AccountServer {
       ),
     );
 
-    await editCircleConversation(
-      response.data.circleId,
-      list,
-    );
+    await editCircleConversation(response.data.circleId, list);
   }
 
   Future<void> updateCircle(String circleId, String name) async {
@@ -1072,38 +1112,52 @@ class AccountServer {
       circleId,
       CircleName(name: name),
     );
-    await database.circleDao.insertUpdate(db.Circle(
-      circleId: response.data.circleId,
-      name: response.data.name,
-      createdAt: response.data.createdAt,
-    ));
+    await database.circleDao.insertUpdate(
+      db.Circle(
+        circleId: response.data.circleId,
+        name: response.data.name,
+        createdAt: response.data.createdAt,
+      ),
+    );
   }
 
   Future<String> _initConversation(String? cid, String? recipientId) async {
     if (recipientId != null) {
       final conversationId = generateConversationId(recipientId, userId);
       if (cid != null) {
-        assert(cid == conversationId,
-            'cid: $cid != conversationId: $conversationId');
+        assert(
+          cid == conversationId,
+          'cid: $cid != conversationId: $conversationId',
+        );
       }
-      final conversation = await database.conversationDao
-          .conversationById(conversationId)
-          .getSingleOrNull();
+      final conversation =
+          await database.conversationDao
+              .conversationById(conversationId)
+              .getSingleOrNull();
       if (conversation == null) {
-        await database.conversationDao.insert(db.Conversation(
+        await database.conversationDao.insert(
+          db.Conversation(
             conversationId: conversationId,
             category: ConversationCategory.contact,
             createdAt: DateTime.now(),
             ownerId: recipientId,
-            status: ConversationStatus.start));
-        await database.participantDao.insert(db.Participant(
+            status: ConversationStatus.start,
+          ),
+        );
+        await database.participantDao.insert(
+          db.Participant(
             conversationId: conversationId,
             userId: userId,
-            createdAt: DateTime.now()));
-        await database.participantDao.insert(db.Participant(
+            createdAt: DateTime.now(),
+          ),
+        );
+        await database.participantDao.insert(
+          db.Participant(
             conversationId: conversationId,
             userId: recipientId,
-            createdAt: DateTime.now()));
+            createdAt: DateTime.now(),
+          ),
+        );
       }
       return conversationId;
     } else if (cid != null) {
@@ -1113,9 +1167,13 @@ class AccountServer {
     }
   }
 
-  Future<void> editContactName(String userId, String name) =>
-      _relationship(RelationshipRequest(
-          userId: userId, fullName: name, action: RelationshipAction.update));
+  Future<void> editContactName(String userId, String name) => _relationship(
+    RelationshipRequest(
+      userId: userId,
+      fullName: name,
+      action: RelationshipAction.update,
+    ),
+  );
 
   Future<void> circleRemoveConversation(
     String circleId,
@@ -1123,9 +1181,10 @@ class AccountServer {
   ) async {
     await client.circleApi.updateCircleConversations(circleId, [
       CircleConversationRequest(
-          action: CircleConversationAction.remove,
-          conversationId: conversationId,
-          userId: userId)
+        action: CircleConversationAction.remove,
+        conversationId: conversationId,
+        userId: userId,
+      ),
     ]);
     await database.circleConversationDao.deleteById(conversationId, circleId);
   }
@@ -1139,27 +1198,26 @@ class AccountServer {
       circleId,
       list,
     );
-    await database.transaction(() => Future.wait(
-          response.data.map(
-            (cc) async {
-              await database.circleConversationDao.insert(
-                db.CircleConversation(
-                  conversationId: cc.conversationId,
-                  circleId: cc.circleId,
-                  createdAt: cc.createdAt,
-                ),
-              );
-              if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-                final u = await database.userDao
-                    .userById(cc.userId!)
-                    .getSingleOrNull();
-                if (u == null) {
-                  refreshUserIdSet.add(cc.userId);
-                }
-              }
-            },
-          ),
-        ));
+    await database.transaction(
+      () => Future.wait(
+        response.data.map((cc) async {
+          await database.circleConversationDao.insert(
+            db.CircleConversation(
+              conversationId: cc.conversationId,
+              circleId: cc.circleId,
+              createdAt: cc.createdAt,
+            ),
+          );
+          if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+            final u =
+                await database.userDao.userById(cc.userId!).getSingleOrNull();
+            if (u == null) {
+              refreshUserIdSet.add(cc.userId);
+            }
+          }
+        }),
+      ),
+    );
   }
 
   Future<void> deleteCircle(String circleId) async {
@@ -1179,7 +1237,8 @@ class AccountServer {
 
   Future<void> report(String userId) async {
     final response = await client.userApi.report(
-        RelationshipRequest(userId: userId, action: RelationshipAction.block));
+      RelationshipRequest(userId: userId, action: RelationshipAction.block),
+    );
     await database.userDao.insertSdkUser(response.data);
   }
 
@@ -1187,11 +1246,7 @@ class AccountServer {
     String? conversationId,
     String? userId,
   }) async {
-    await _mute(
-      0,
-      conversationId: conversationId,
-      userId: userId,
-    );
+    await _mute(0, conversationId: conversationId, userId: userId);
   }
 
   Future<void> muteConversation(
@@ -1199,11 +1254,7 @@ class AccountServer {
     String? conversationId,
     String? userId,
   }) async {
-    await _mute(
-      duration,
-      conversationId: conversationId,
-      userId: userId,
-    );
+    await _mute(duration, conversationId: conversationId, userId: userId);
   }
 
   Future<void> _mute(
@@ -1242,8 +1293,10 @@ class AccountServer {
       }
     } else {
       if (conversationId != null) {
-        await database.conversationDao
-            .updateMuteUntil(conversationId, cr.muteUntil);
+        await database.conversationDao.updateMuteUntil(
+          conversationId,
+          cr.muteUntil,
+        );
       }
     }
   }
@@ -1267,8 +1320,10 @@ class AccountServer {
 
   Future<void> rotate(String conversationId) async {
     final response = await client.conversationApi.rotate(conversationId);
-    await database.conversationDao
-        .updateCodeUrl(conversationId, response.data.codeUrl);
+    await database.conversationDao.updateCodeUrl(
+      conversationId,
+      response.data.codeUrl,
+    );
   }
 
   Future<void> unpin(String conversationId) =>
@@ -1300,25 +1355,26 @@ class AccountServer {
   Future<void> markMentionRead(String messageId, String conversationId) =>
       Future.wait([
         database.messageMentionDao.markMentionRead(messageId),
-        (() async => addSessionAckJob(
-            [await createMentionReadAckJob(conversationId, messageId)]))()
+        (() async => addSessionAckJob([
+          await createMentionReadAckJob(conversationId, messageId),
+        ]))(),
       ]);
 
   Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>
       _injector.refreshUsers(ids, force: force);
 
-  Future<void> refreshConversation(String conversationId,
-          {bool checkCurrentUserExist = false}) =>
-      _injector.refreshConversation(
-        conversationId,
-        checkCurrentUserExist: checkCurrentUserExist,
-      );
+  Future<void> refreshConversation(
+    String conversationId, {
+    bool checkCurrentUserExist = false,
+  }) => _injector.refreshConversation(
+    conversationId,
+    checkCurrentUserExist: checkCurrentUserExist,
+  );
 
   Future<void> updateAccount({String? fullName, String? biography}) async {
-    final user = await client.accountApi.update(AccountUpdateRequest(
-      fullName: fullName,
-      biography: biography,
-    ));
+    final user = await client.accountApi.update(
+      AccountUpdateRequest(fullName: fullName, biography: biography),
+    );
     multiAuthNotifier.updateAccount(user.data);
   }
 
@@ -1335,16 +1391,18 @@ class AccountServer {
       final file = File(path);
       if (file.existsSync()) await file.delete();
     } else if (message.category.isTranscript) {
-      final iterable = await database.transcriptMessageDao
-          .transcriptMessageByTranscriptId(message.messageId)
-          .get();
+      final iterable =
+          await database.transcriptMessageDao
+              .transcriptMessageByTranscriptId(message.messageId)
+              .get();
 
-      final list = await database.transcriptMessageDao
-          .messageIdsByMessageIds(iterable.map((e) => e.messageId))
-          .get();
-      iterable
-          .where((element) => !list.contains(element.messageId))
-          .forEach((e) {
+      final list =
+          await database.transcriptMessageDao
+              .messageIdsByMessageIds(iterable.map((e) => e.messageId))
+              .get();
+      iterable.where((element) => !list.contains(element.messageId)).forEach((
+        e,
+      ) {
         final path = attachmentUtil.convertAbsolutePath(
           fileName: e.mediaUrl,
           messageId: e.messageId,
@@ -1358,7 +1416,8 @@ class AccountServer {
   }
 
   Future<void> _deleteMessageAttachmentByConversationId(
-      String conversationId) async {
+    String conversationId,
+  ) async {
     final directories = [
       attachmentUtil.getImagesPath(conversationId),
       attachmentUtil.getVideosPath(conversationId),
@@ -1366,11 +1425,13 @@ class AccountServer {
       attachmentUtil.getFilesPath(conversationId),
     ];
 
-    await Future.wait(directories.map((dir) async {
-      final directory = Directory(dir);
-      if (!directory.existsSync()) return;
-      await directory.delete(recursive: true);
-    }));
+    await Future.wait(
+      directories.map((dir) async {
+        final directory = Directory(dir);
+        if (!directory.existsSync()) return;
+        await directory.delete(recursive: true);
+      }),
+    );
   }
 
   Future<void> deleteMessage(String messageId) async {
@@ -1383,37 +1444,49 @@ class AccountServer {
   }
 
   Future<void> deleteMessagesByConversationId(String conversationId) async {
-    final miniMessageIds = await database.messageDao
-        .miniMessageByIds(attachmentUtil.downloadingIds.toList())
-        .get();
+    final miniMessageIds =
+        await database.messageDao
+            .miniMessageByIds(attachmentUtil.downloadingIds.toList())
+            .get();
     await Future.forEach(
-        miniMessageIds
-            .where((message) => message.conversationId == conversationId),
-        (message) =>
-            attachmentUtil.cancelProgressAttachmentJob(message.messageId));
+      miniMessageIds.where(
+        (message) => message.conversationId == conversationId,
+      ),
+      (message) =>
+          attachmentUtil.cancelProgressAttachmentJob(message.messageId),
+    );
 
     await database.messageDao.deleteMessagesByConversationId(conversationId);
-    await database.messageMentionDao
-        .clearMessageMentionByConversationId(conversationId);
+    await database.messageMentionDao.clearMessageMentionByConversationId(
+      conversationId,
+    );
     unawaited(database.ftsDatabase.deleteByConversationId(conversationId));
     unawaited(_deleteMessageAttachmentByConversationId(conversationId));
   }
 
   String convertAbsolutePath(
-          String category, String conversationId, String? fileName,
-          [bool isTranscript = false]) =>
-      attachmentUtil.convertAbsolutePath(
-        category: category,
-        conversationId: conversationId,
-        fileName: fileName,
-        isTranscript: isTranscript,
-      );
+    String category,
+    String conversationId,
+    String? fileName, [
+    bool isTranscript = false,
+  ]) => attachmentUtil.convertAbsolutePath(
+    category: category,
+    conversationId: conversationId,
+    fileName: fileName,
+    isTranscript: isTranscript,
+  );
 
-  String convertMessageAbsolutePath(db.MessageItem? messageItem,
-      [bool isTranscript = false]) {
+  String convertMessageAbsolutePath(
+    db.MessageItem? messageItem, [
+    bool isTranscript = false,
+  ]) {
     if (messageItem == null) return '';
-    return convertAbsolutePath(messageItem.type, messageItem.conversationId,
-        messageItem.mediaUrl, isTranscript);
+    return convertAbsolutePath(
+      messageItem.type,
+      messageItem.conversationId,
+      messageItem.mediaUrl,
+      isTranscript,
+    );
   }
 
   Future<List<db.User>?> updateUserByIdentityNumber(String identityNumber) =>
@@ -1422,24 +1495,22 @@ class AccountServer {
   Future<void> pinMessage({
     required String conversationId,
     required List<PinMessageMinimal> pinMessageMinimals,
-  }) =>
-      _sendMessageHelper.sendPinMessage(
-        conversationId: conversationId,
-        senderId: userId,
-        pinMessageMinimals: pinMessageMinimals,
-        pin: true,
-      );
+  }) => _sendMessageHelper.sendPinMessage(
+    conversationId: conversationId,
+    senderId: userId,
+    pinMessageMinimals: pinMessageMinimals,
+    pin: true,
+  );
 
   Future<void> unpinMessage({
     required String conversationId,
     required List<PinMessageMinimal> pinMessageMinimals,
-  }) =>
-      _sendMessageHelper.sendPinMessage(
-        conversationId: conversationId,
-        senderId: userId,
-        pinMessageMinimals: pinMessageMinimals,
-        pin: false,
-      );
+  }) => _sendMessageHelper.sendPinMessage(
+    conversationId: conversationId,
+    senderId: userId,
+    pinMessageMinimals: pinMessageMinimals,
+    pin: false,
+  );
 
   Future<void> updateSnapshotById({required String snapshotId}) async {
     final data = await client.snapshotApi.getSnapshotById(snapshotId);
@@ -1464,8 +1535,10 @@ class AccountServer {
   void updateTokenById({required String assetId}) =>
       addUpdateTokenJob(createUpdateTokenJob(assetId));
 
-  Future<AssetItem?> checkAsset(
-      {required String assetId, bool force = false}) async {
+  Future<AssetItem?> checkAsset({
+    required String assetId,
+    bool force = false,
+  }) async {
     final asset = await database.assetDao.findAssetById(assetId);
     if (force || asset == null) {
       try {
@@ -1528,7 +1601,8 @@ class AccountServer {
 
     final notExits = <String>[];
     for (final appId in appIds) {
-      final needLoad = await database.appDao.findAppById(appId) == null ||
+      final needLoad =
+          await database.appDao.findAppById(appId) == null ||
           await database.userDao.userById(appId).getSingleOrNull() == null;
       if (needLoad) {
         notExits.add(appId);

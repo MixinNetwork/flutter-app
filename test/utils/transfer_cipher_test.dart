@@ -20,7 +20,9 @@ void main() {
       Uint8List.fromList(utf8.encode(source)),
     );
     expect(
-        base64Encode(result), 'rG0d+pIOti5pPCcTkRsFHmNkD3DJFcGHUqZgOyvIvDc=');
+      base64Encode(result),
+      'rG0d+pIOti5pPCcTkRsFHmNkD3DJFcGHUqZgOyvIvDc=',
+    );
   });
 
   test('calculate random hMac HMacCalculator.commonCrypto', () async {
@@ -44,12 +46,18 @@ void main() {
       () {
         final iv = generateTransferIv();
         return AesCipherPointyCastleImpl(
-            key: key.aesKey, iv: iv, encrypt: true);
+          key: key.aesKey,
+          iv: iv,
+          encrypt: true,
+        );
       },
       () {
         final iv = generateTransferIv();
         return AesCipherCommonCryptoImpl(
-            key: key.aesKey, iv: iv, encrypt: true);
+          key: key.aesKey,
+          iv: iv,
+          encrypt: true,
+        );
       },
       count: 1000,
     );
@@ -61,12 +69,18 @@ void main() {
       () {
         final iv = generateTransferIv();
         return AesCipherPointyCastleImpl(
-            key: key.aesKey, iv: iv, encrypt: true);
+          key: key.aesKey,
+          iv: iv,
+          encrypt: true,
+        );
       },
       () {
         final iv = generateTransferIv();
         return AesCipherCommonCryptoImpl(
-            key: key.aesKey, iv: iv, encrypt: true);
+          key: key.aesKey,
+          iv: iv,
+          encrypt: true,
+        );
       },
       count: 5,
     );
@@ -81,7 +95,10 @@ void main() {
       () {
         final iv = generateTransferIv();
         return AesCipherPointyCastleImpl(
-            key: key.aesKey, iv: iv, encrypt: true);
+          key: key.aesKey,
+          iv: iv,
+          encrypt: true,
+        );
       },
       () {
         final iv = generateTransferIv();
@@ -97,7 +114,10 @@ void main() {
       () {
         final iv = generateTransferIv();
         return AesCipherPointyCastleImpl(
-            key: key.aesKey, iv: iv, encrypt: true);
+          key: key.aesKey,
+          iv: iv,
+          encrypt: true,
+        );
       },
       () {
         final iv = generateTransferIv();
@@ -146,11 +166,14 @@ void _benchMarkAesCipher(
     i('cipher1 vs cipher2 : $temp : ${stopwatch.elapsedMicroseconds}');
   }
 
-  i('cipher1Count: ${cipher1Count / 1000} ms, cipher2Count: ${cipher2Count / 1000} ms');
+  i(
+    'cipher1Count: ${cipher1Count / 1000} ms, cipher2Count: ${cipher2Count / 1000} ms',
+  );
 }
 
 Future<void> _testCalculateRandomHMac(
-    HMacCalculator Function(Uint8List key) creator) async {
+  HMacCalculator Function(Uint8List key) creator,
+) async {
   final key = generateTransferKey();
 
   final calculator1 = creator(key.hMacKey);
@@ -180,8 +203,10 @@ Future<void> _testCalculateRandomHMac(
   final commonCryptoResult = calculator1.result;
   final pointyCastleResult = pointyCastle.result;
 
-  i('commonCryptoResult: ${base64Encode(commonCryptoResult)}, '
-      'pointyCastleResult: ${base64Encode(pointyCastleResult)}');
+  i(
+    'commonCryptoResult: ${base64Encode(commonCryptoResult)}, '
+    'pointyCastleResult: ${base64Encode(pointyCastleResult)}',
+  );
   expect(commonCryptoResult, equals(pointyCastleResult));
 }
 

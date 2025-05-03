@@ -14,10 +14,7 @@ enum SlideCategoryType {
 }
 
 class SlideCategoryState extends Equatable {
-  const SlideCategoryState({
-    required this.type,
-    this.id,
-  });
+  const SlideCategoryState({required this.type, this.id});
 
   final SlideCategoryType type;
 
@@ -31,7 +28,7 @@ class SlideCategoryState extends Equatable {
 class SlideCategoryStateNotifier
     extends DistinctStateNotifier<SlideCategoryState> {
   SlideCategoryStateNotifier()
-      : super(const SlideCategoryState(type: SlideCategoryType.chats));
+    : super(const SlideCategoryState(type: SlideCategoryType.chats));
 
   void select(SlideCategoryType type, [String? id]) =>
       state = SlideCategoryState(type: type, id: id);
@@ -44,4 +41,5 @@ class SlideCategoryStateNotifier
 
 final slideCategoryStateProvider =
     StateNotifierProvider<SlideCategoryStateNotifier, SlideCategoryState>(
-        (ref) => SlideCategoryStateNotifier());
+      (ref) => SlideCategoryStateNotifier(),
+    );

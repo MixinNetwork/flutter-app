@@ -17,16 +17,19 @@ TransferDataApp _$TransferDataAppFromJson(Map<String, dynamic> json) =>
       category: json['category'] as String?,
       description: json['description'] as String,
       appSecret: json['app_secret'] as String,
-      capabilities: (json['capabilities'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      capabilities:
+          (json['capabilities'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList(),
       creatorId: json['creator_id'] as String,
-      resourcePatterns: (json['resource_patterns'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
+      resourcePatterns:
+          (json['resource_patterns'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList(),
+      updatedAt:
+          json['updated_at'] == null
+              ? null
+              : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$TransferDataAppToJson(TransferDataApp instance) =>

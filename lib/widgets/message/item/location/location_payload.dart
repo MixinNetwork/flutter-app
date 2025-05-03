@@ -26,11 +26,5 @@ class LocationPayload with EquatableMixin {
   Map<String, dynamic> toJson() => _$LocationPayloadToJson(this);
 
   @override
-  List<Object?> get props => [
-        latitude,
-        longitude,
-        name,
-        address,
-        venueType,
-      ];
+  List<Object?> get props => [latitude, longitude, name, address, venueType];
 }

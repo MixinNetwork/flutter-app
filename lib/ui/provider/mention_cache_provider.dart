@@ -26,7 +26,8 @@ class MentionCache {
   }
 
   Future<Map<String, MentionUser>> checkMentionCache(
-      Set<String?> _contents) async {
+    Set<String?> _contents,
+  ) async {
     final userDao = _userDao;
     if (userDao == null) return {};
 
@@ -56,7 +57,7 @@ class MentionCache {
     );
 
     var userNumbers = <String>{
-      for (final item in noCacheContentUserIdMap.values) ...item
+      for (final item in noCacheContentUserIdMap.values) ...item,
     };
 
     if (userNumbers.isEmpty) {
@@ -64,16 +65,17 @@ class MentionCache {
         _contentMentionLruCache.set(e.hashCode, {});
       }
     } else {
-      userNumbers = userNumbers
-          .where((element) => _userLruCache.get(element) == null)
-          .toSet();
+      userNumbers =
+          userNumbers
+              .where((element) => _userLruCache.get(element) == null)
+              .toSet();
 
       final list =
           await userDao.userByIdentityNumbers(userNumbers.toList()).get();
 
-      list
-          .where((element) => element.fullName?.isNotEmpty ?? false)
-          .forEach((element) {
+      list.where((element) => element.fullName?.isNotEmpty ?? false).forEach((
+        element,
+      ) {
         _userLruCache.set(element.identityNumber, element);
         map[element.identityNumber] = element;
       });
@@ -89,9 +91,7 @@ class MentionCache {
         _contentMentionLruCache.set(
           element.key.hashCode,
           Map.fromEntries(
-            map.entries.where(
-              (entry) => element.value.contains(entry.key),
-            ),
+            map.entries.where((entry) => element.value.contains(entry.key)),
           ),
         );
       }
@@ -103,39 +103,46 @@ class MentionCache {
   String? replaceMention(String? s, Map<String, MentionUser> _mentionMap) {
     if (s == null || s.isEmpty) return null;
 
-    final mentionMap =
-        _mentionMap.map((key, value) => MapEntry(key.toLowerCase(), value));
+    final mentionMap = _mentionMap.map(
+      (key, value) => MapEntry(key.toLowerCase(), value),
+    );
     final pattern = "(${mentionMap.keys.map(RegExp.escape).join('|')})";
 
     if (pattern == '()') return s;
 
-    return s.replaceAllMapped(RegExp(pattern, caseSensitive: false),
-        (match) => mentionMap[match[0]!]!.fullName!);
+    return s.replaceAllMapped(
+      RegExp(pattern, caseSensitive: false),
+      (match) => mentionMap[match[0]!]!.fullName!,
+    );
   }
 
   MentionUser? identityNumberCache(String identityNumber) =>
       _userLruCache.get(identityNumber);
 
   Future<Map<String, MentionUser>> checkIdentityNumbers(
-      Set<String> identityNumbers) async {
+    Set<String> identityNumbers,
+  ) async {
     final userDao = _userDao;
     if (userDao == null) return {};
 
-    final toChecks = identityNumbers
-        .where((element) => _userLruCache.get(element) == null)
-        .toSet();
+    final toChecks =
+        identityNumbers
+            .where((element) => _userLruCache.get(element) == null)
+            .toSet();
 
     final mentionUsers = identityNumbers.map(_userLruCache.get).nonNulls;
     final map = Map.fromIterables(
-        mentionUsers.map((e) => e.identityNumber), mentionUsers);
+      mentionUsers.map((e) => e.identityNumber),
+      mentionUsers,
+    );
 
     if (toChecks.isEmpty) return map;
 
     final list = await userDao.userByIdentityNumbers(toChecks.toList()).get();
 
-    list
-        .where((element) => element.fullName?.isNotEmpty ?? false)
-        .forEach((element) {
+    list.where((element) => element.fullName?.isNotEmpty ?? false).forEach((
+      element,
+    ) {
       _userLruCache.set(element.identityNumber, element);
       map[element.identityNumber] = element;
     });
@@ -144,5 +151,8 @@ class MentionCache {
   }
 }
 
-final mentionCacheProvider = Provider.autoDispose((ref) => MentionCache(
-    ref.watch(databaseProvider.select((value) => value.valueOrNull?.userDao))));
+final mentionCacheProvider = Provider.autoDispose(
+  (ref) => MentionCache(
+    ref.watch(databaseProvider.select((value) => value.valueOrNull?.userDao)),
+  ),
+);

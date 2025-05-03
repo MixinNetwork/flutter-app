@@ -2,11 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum InteractiveStatus {
-  interactive,
-  hovering,
-  tapDowning,
-}
+enum InteractiveStatus { interactive, hovering, tapDowning }
 
 class InteractiveBuilder extends StatefulWidget {
   const InteractiveBuilder({
@@ -25,8 +21,13 @@ class InteractiveBuilder extends StatefulWidget {
     this.behavior = HitTestBehavior.opaque,
   });
 
-  final Widget Function(BuildContext context, InteractiveStatus status,
-      InteractiveStatus lastStatus, Widget? child) builder;
+  final Widget Function(
+    BuildContext context,
+    InteractiveStatus status,
+    InteractiveStatus lastStatus,
+    Widget? child,
+  )
+  builder;
 
   final Widget? child;
   final VoidCallback? onTap;
@@ -82,12 +83,14 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
       },
       child: GestureDetector(
         behavior: widget.behavior,
-        onTapDown: (_) => setState(() {
-          tapDowning = true;
-        }),
-        onTapCancel: () => setState(() {
-          tapDowning = false;
-        }),
+        onTapDown:
+            (_) => setState(() {
+              tapDowning = true;
+            }),
+        onTapCancel:
+            () => setState(() {
+              tapDowning = false;
+            }),
         onTap: () {
           setState(() {
             tapDowning = false;
@@ -143,13 +146,15 @@ class InteractiveDecoratedBox extends StatelessWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.behavior = HitTestBehavior.opaque,
-  })  : _decoration = decoration ?? const BoxDecoration(),
-        hoveringDecoration = hoveringColor != null
-            ? decoration?.copyWith(color: hoveringColor)
-            : null,
-        tapDowningDecoration = tapDowningColor != null
-            ? decoration?.copyWith(color: tapDowningColor)
-            : null;
+  }) : _decoration = decoration ?? const BoxDecoration(),
+       hoveringDecoration =
+           hoveringColor != null
+               ? decoration?.copyWith(color: hoveringColor)
+               : null,
+       tapDowningDecoration =
+           tapDowningColor != null
+               ? decoration?.copyWith(color: tapDowningColor)
+               : null;
 
   final Decoration? _decoration;
   final Decoration? hoveringDecoration;
@@ -173,21 +178,26 @@ class InteractiveDecoratedBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractiveBuilder(
-        onTap: onTap,
-        onDoubleTap: onDoubleTap,
-        onLongPress: onLongPress,
-        onRightClick: onRightClick,
-        onTapUp: onTapUp,
-        onEnter: onEnter,
-        onExit: onExit,
-        onHover: onHover,
-        cursor: cursor,
-        behavior: behavior,
-        builder: (BuildContext context, InteractiveStatus status,
-                InteractiveStatus lastStatus, Widget? child) =>
-            TweenAnimationBuilder<Decoration>(
+    onTap: onTap,
+    onDoubleTap: onDoubleTap,
+    onLongPress: onLongPress,
+    onRightClick: onRightClick,
+    onTapUp: onTapUp,
+    onEnter: onEnter,
+    onExit: onExit,
+    onHover: onHover,
+    cursor: cursor,
+    behavior: behavior,
+    builder:
+        (
+          BuildContext context,
+          InteractiveStatus status,
+          InteractiveStatus lastStatus,
+          Widget? child,
+        ) => TweenAnimationBuilder<Decoration>(
           tween: DecorationTween(
-            end: {
+            end:
+                {
                   InteractiveStatus.interactive:
                       _decoration ?? const BoxDecoration(),
                   InteractiveStatus.hovering:
@@ -197,21 +207,20 @@ class InteractiveDecoratedBox extends StatelessWidget {
                 }[status] ??
                 const BoxDecoration(),
           ),
-          duration: (lastStatus == InteractiveStatus.interactive &&
+          duration:
+              (lastStatus == InteractiveStatus.interactive &&
                       status != InteractiveStatus.interactive
                   ? inDuration
                   : outDuration) ??
               Duration.zero,
           curve: Curves.decelerate,
-          builder: (BuildContext context, Decoration value, Widget? child) =>
-              DecoratedBox(
-            decoration: value,
-            child: child,
-          ),
+          builder:
+              (BuildContext context, Decoration value, Widget? child) =>
+                  DecoratedBox(decoration: value, child: child),
           child: child,
         ),
-        child: child,
-      );
+    child: child,
+  );
 }
 
 class MouseRegionIgnoreTouch extends StatelessWidget {
@@ -234,26 +243,26 @@ class MouseRegionIgnoreTouch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MouseRegion(
-        onEnter: (event) {
-          if (event.kind == PointerDeviceKind.touch) {
-            return;
-          }
-          onEnter?.call(event);
-        },
-        onExit: (event) {
-          if (event.kind == PointerDeviceKind.touch) {
-            return;
-          }
-          onExit?.call(event);
-        },
-        onHover: (event) {
-          if (event.kind == PointerDeviceKind.touch) {
-            return;
-          }
-          onHover?.call(event);
-        },
-        cursor: cursor,
-        opaque: opaque,
-        child: child,
-      );
+    onEnter: (event) {
+      if (event.kind == PointerDeviceKind.touch) {
+        return;
+      }
+      onEnter?.call(event);
+    },
+    onExit: (event) {
+      if (event.kind == PointerDeviceKind.touch) {
+        return;
+      }
+      onExit?.call(event);
+    },
+    onHover: (event) {
+      if (event.kind == PointerDeviceKind.touch) {
+        return;
+      }
+      onHover?.call(event);
+    },
+    cursor: cursor,
+    opaque: opaque,
+    child: child,
+  );
 }

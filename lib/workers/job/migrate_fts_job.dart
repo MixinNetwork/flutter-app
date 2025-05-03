@@ -16,9 +16,9 @@ import '../job_queue.dart';
 ///
 class MigrateFtsJob extends JobQueue<Job, List<Job>> {
   MigrateFtsJob({required super.database})
-      : messageDao = database.messageDao,
-        ftsDatabase = database.ftsDatabase,
-        transcriptMessageDao = database.transcriptMessageDao;
+    : messageDao = database.messageDao,
+      ftsDatabase = database.ftsDatabase,
+      transcriptMessageDao = database.transcriptMessageDao;
 
   final MessageDao messageDao;
   final FtsDatabase ftsDatabase;
@@ -31,7 +31,9 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
       return jobs;
     }
     if (jobs.length != 1) {
-      e('MigrateFtsJob: ${jobs.length} jobs found, only first job will be executed');
+      e(
+        'MigrateFtsJob: ${jobs.length} jobs found, only first job will be executed',
+      );
     }
     final first = jobs.first;
 
@@ -55,9 +57,13 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
 
     // ensure there is only one job
     if (jobs.length > 1) {
-      e('MigrateFtsJob: ${jobs.length} jobs found, only latest job will be executed');
-      job = jobs.reduce((value, element) =>
-          value.createdAt.isAfter(element.createdAt) ? value : element);
+      e(
+        'MigrateFtsJob: ${jobs.length} jobs found, only latest job will be executed',
+      );
+      job = jobs.reduce(
+        (value, element) =>
+            value.createdAt.isAfter(element.createdAt) ? value : element,
+      );
       // delete invalid jobs
       final invalidJobs =
           jobs.where((e) => e.jobId != job.jobId).map((e) => e.jobId).toList();
@@ -85,22 +91,26 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
         lastMessageRowId = messages.last.$1;
 
         // migration skip the messages already in ftsDatabase.
-        final messagesToMigrate = (await Future.wait(messages.map((e) async {
-          final exist = await ftsDatabase
-              .checkMessageMetaExists(e.$2.messageId)
-              .getSingle();
-          return exist ? null : e.$2;
-        })))
-            .nonNulls;
+        final messagesToMigrate =
+            (await Future.wait(
+              messages.map((e) async {
+                final exist =
+                    await ftsDatabase
+                        .checkMessageMetaExists(e.$2.messageId)
+                        .getSingle();
+                return exist ? null : e.$2;
+              }),
+            )).nonNulls;
 
         final transcriptMessageFtsContent = <String, String>{};
         for (final message in messagesToMigrate) {
           if (!message.category.isTranscript) {
             continue;
           }
-          final transcripts = await transcriptMessageDao
-              .transcriptMessageByTranscriptId(message.messageId)
-              .get();
+          final transcripts =
+              await transcriptMessageDao
+                  .transcriptMessageByTranscriptId(message.messageId)
+                  .get();
           if (transcripts.isEmpty) {
             e('transcriptMessageByMessageId empty ${message.messageId}');
             continue;
@@ -114,7 +124,9 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
         final messageMeta = <int, Message>{};
         for (final message in messagesToMigrate) {
           final rowId = await ftsDatabase.insertFtsOnly(
-              message, transcriptMessageFtsContent[message.messageId]);
+            message,
+            transcriptMessageFtsContent[message.messageId],
+          );
           if (rowId != null) {
             messageMeta[rowId] = message;
           }
@@ -131,7 +143,7 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
                 category: entry.value.category,
                 userId: entry.value.userId,
                 createdAt: entry.value.createdAt,
-              )
+              ),
           ]);
         });
 
@@ -140,7 +152,9 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
           await database.jobDao.insert(createMigrationFtsJob(lastMessageRowId));
         });
 
-        i('migrateFtsDatabase(${messages.length}) elapsed: ${stopwatch.elapsed} lastMessageRowId: $lastMessageRowId');
+        i(
+          'migrateFtsDatabase(${messages.length}) elapsed: ${stopwatch.elapsed} lastMessageRowId: $lastMessageRowId',
+        );
         stopwatch.reset();
       } catch (error, stacktrace) {
         e('migrateFtsDatabase error $error $stacktrace');

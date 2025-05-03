@@ -36,8 +36,11 @@ Future<void> loadFallbackFonts() async {
       e('failed to get best match font family. error: ${matchedResult.stderr}');
       return;
     }
-    final result = Process.runSync('fc-list',
-        ['-f', '%{family}:%{file}\n', matchedResult.stdout as String]);
+    final result = Process.runSync('fc-list', [
+      '-f',
+      '%{family}:%{file}\n',
+      matchedResult.stdout as String,
+    ]);
     final lines = const LineSplitter().convert(result.stdout as String);
     String? fontFamily;
     final fontPaths = <String>[];
@@ -45,15 +48,19 @@ Future<void> loadFallbackFonts() async {
     for (final line in lines) {
       // font config "family:file"
       final fontConfig = line.split(':');
-      assert(fontConfig.length == 2,
-          'font config do not match required format. $fontConfig');
+      assert(
+        fontConfig.length == 2,
+        'font config do not match required format. $fontConfig',
+      );
       if (fontFamily == null) {
         fontFamily = fontConfig.first;
         fontPaths.add(fontConfig[1]);
       } else if (fontFamily == fontConfig.first) {
         fontPaths.add(fontConfig[1]);
       } else {
-        w('font family not match. expect $fontFamily, but ${fontConfig.first}. line: $line');
+        w(
+          'font family not match. expect $fontFamily, but ${fontConfig.first}. line: $line',
+        );
       }
     }
     if (fontPaths.isEmpty || fontFamily == null) {
@@ -82,8 +89,9 @@ extension ApplyFontsExtension on ThemeData {
       if (Platform.isWindows) {
         return copyWith(
           textTheme: textTheme.applyFonts(null, ['Microsoft Yahei']),
-          primaryTextTheme:
-              primaryTextTheme.applyFonts(null, ['Microsoft Yahei']),
+          primaryTextTheme: primaryTextTheme.applyFonts(null, [
+            'Microsoft Yahei',
+          ]),
         );
       }
       return this;
@@ -99,34 +107,64 @@ extension _TextTheme on TextTheme {
   TextTheme applyFonts(String? fontFamily, List<String>? fontFamilyFallback) =>
       copyWith(
         displayLarge: displayLarge?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         displayMedium: displayMedium?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         displaySmall: displaySmall?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         headlineLarge: headlineLarge?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         headlineMedium: headlineMedium?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         headlineSmall: headlineSmall?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         titleLarge: titleLarge?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         titleMedium: titleMedium?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         titleSmall: titleSmall?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         bodyLarge: bodyLarge?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         bodyMedium: bodyMedium?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         bodySmall: bodySmall?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         labelLarge: labelLarge?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         labelMedium: labelMedium?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
         labelSmall: labelSmall?.copyWith(
-            fontFamily: fontFamily, fontFamilyFallback: fontFamilyFallback),
+          fontFamily: fontFamily,
+          fontFamilyFallback: fontFamilyFallback,
+        ),
       );
 }

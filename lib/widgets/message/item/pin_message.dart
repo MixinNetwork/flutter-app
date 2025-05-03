@@ -22,10 +22,12 @@ class PinMessageWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mentionCache = ref.read(mentionCacheProvider);
 
-    final content =
-        useMessageConverter(converter: (state) => state.content ?? '');
-    final userFullName =
-        useMessageConverter(converter: (state) => state.userFullName ?? '');
+    final content = useMessageConverter(
+      converter: (state) => state.content ?? '',
+    );
+    final userFullName = useMessageConverter(
+      converter: (state) => state.userFullName ?? '',
+    );
 
     final pinMessageMinimal = useMemoized(
       () => PinMessageMinimal.fromJsonString(content),
@@ -48,36 +50,34 @@ class PinMessageWidget extends HookConsumerWidget {
       return context.l10n.chatPinMessage(userFullName, singleLinePreview);
     }, [userFullName, content, mentionCache]);
 
-    final text = useMemoizedFuture(
-      () async {
-        if (pinMessageMinimal == null) return cachePreview;
+    final text =
+        useMemoizedFuture(
+          () async {
+            if (pinMessageMinimal == null) return cachePreview;
 
-        final preview = await generatePinPreviewText(
-          pinMessageMinimal: pinMessageMinimal,
-          mentionCache: mentionCache,
-        );
+            final preview = await generatePinPreviewText(
+              pinMessageMinimal: pinMessageMinimal,
+              mentionCache: mentionCache,
+            );
 
-        final lines = const LineSplitter().convert(preview);
-        final singleLinePreview =
-            lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
-        return context.l10n
-            .chatPinMessage(userFullName, singleLinePreview)
-            .overflow;
-      },
-      cachePreview,
-      keys: [userFullName, content, mentionCache],
-    ).requireData;
+            final lines = const LineSplitter().convert(preview);
+            final singleLinePreview =
+                lines.length > 1
+                    ? '${lines.first}...'
+                    : lines.firstOrNull ?? '';
+            return context.l10n
+                .chatPinMessage(userFullName, singleLinePreview)
+                .overflow;
+          },
+          cachePreview,
+          keys: [userFullName, content, mentionCache],
+        ).requireData;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 4,
-          horizontal: 8,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 400,
-          ),
+          constraints: const BoxConstraints(maxWidth: 400),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: context.dynamicColor(
@@ -86,17 +86,12 @@ class PinMessageWidget extends HookConsumerWidget {
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 5,
-                horizontal: 10,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
               child: CustomText(
                 text,
                 style: TextStyle(
                   fontSize: context.messageStyle.secondaryFontSize,
-                  color: context.dynamicColor(
-                    const Color.fromRGBO(0, 0, 0, 1),
-                  ),
+                  color: context.dynamicColor(const Color.fromRGBO(0, 0, 0, 1)),
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -115,12 +110,17 @@ Future<String> generatePinPreviewText({
 }) async =>
     pinMessageMinimal.type.isText
         ? mentionCache.replaceMention(
-                pinMessageMinimal.content,
-                await mentionCache
-                    .checkMentionCache({pinMessageMinimal.content})) ??
+              pinMessageMinimal.content,
+              await mentionCache.checkMentionCache({pinMessageMinimal.content}),
+            ) ??
             ''
-        : messagePreviewOptimize(null, pinMessageMinimal.type,
-                pinMessageMinimal.content, false, true) ??
+        : messagePreviewOptimize(
+              null,
+              pinMessageMinimal.type,
+              pinMessageMinimal.content,
+              false,
+              true,
+            ) ??
             '';
 
 String cachePinPreviewText({
@@ -128,9 +128,16 @@ String cachePinPreviewText({
   required MentionCache mentionCache,
 }) =>
     pinMessageMinimal.type.isText
-        ? mentionCache.replaceMention(pinMessageMinimal.content,
-                mentionCache.mentionCache(pinMessageMinimal.content)) ??
+        ? mentionCache.replaceMention(
+              pinMessageMinimal.content,
+              mentionCache.mentionCache(pinMessageMinimal.content),
+            ) ??
             ''
-        : messagePreviewOptimize(null, pinMessageMinimal.type,
-                pinMessageMinimal.content, false, true) ??
+        : messagePreviewOptimize(
+              null,
+              pinMessageMinimal.type,
+              pinMessageMinimal.content,
+              false,
+              true,
+            ) ??
             '';

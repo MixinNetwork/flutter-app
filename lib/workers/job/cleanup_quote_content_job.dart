@@ -9,7 +9,7 @@ const _kQueryMax = 100;
 
 class CleanupQuoteContentJob extends BaseMigrationJob {
   CleanupQuoteContentJob({required super.database})
-      : super(action: kCleanupQuoteContent);
+    : super(action: kCleanupQuoteContent);
 
   @override
   Future<void> migration(Job job) async {
@@ -20,7 +20,9 @@ class CleanupQuoteContentJob extends BaseMigrationJob {
       for (final message in messages) {
         final quoteMessageId = message.quoteMessageId;
         if (quoteMessageId == null) {
-          e('CleanupQuoteContentJob: quoteMessageId is null, message: ${message.rowid}');
+          e(
+            'CleanupQuoteContentJob: quoteMessageId is null, message: ${message.rowid}',
+          );
           continue;
         }
         final quote = await database.messageDao.findMessageItemById(

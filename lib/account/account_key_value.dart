@@ -43,8 +43,10 @@ class AccountKeyValue extends HiveKeyValue {
 
   List<String>? _recentUsedEmoji;
 
-  List<String> get recentUsedEmoji => _recentUsedEmoji ??=
-      (box.get(_keyRecentUsedEmoji, defaultValue: []) as List).cast<String>();
+  List<String> get recentUsedEmoji =>
+      _recentUsedEmoji ??=
+          (box.get(_keyRecentUsedEmoji, defaultValue: []) as List)
+              .cast<String>();
 
   bool get alreadyCleanupQuoteContent =>
       box.get(_alreadyCleanupQuoteContent, defaultValue: false) as bool;

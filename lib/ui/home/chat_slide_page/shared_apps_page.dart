@@ -19,21 +19,21 @@ class SharedAppsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userId = conversationState.userId;
 
-    final apps = useMemoizedStream(() {
+    final apps =
+        useMemoizedStream(() {
           if (userId == null) return Stream.value(<App>[]);
           return context.database.favoriteAppDao
               .getFavoriteAppsByUserId(userId)
               .watchWithStream(
-                  eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
-                  duration: kVerySlowThrottleDuration);
+                eventStreams: [DataBaseEventBus.instance.updateAppIdStream],
+                duration: kVerySlowThrottleDuration,
+              );
         }, keys: [userId]).data ??
         const [];
 
     return Scaffold(
       backgroundColor: context.theme.primary,
-      appBar: MixinAppBar(
-        title: Text(context.l10n.shareApps),
-      ),
+      appBar: MixinAppBar(title: Text(context.l10n.shareApps)),
       body: Column(
         children: [
           const SizedBox(height: 6),
@@ -51,38 +51,38 @@ class _AppTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InkWell(
-        onTap: () => showUserDialog(context, app.appId),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-          child: Row(
-            children: [
-              _AppIcon(app: app, size: 50),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      app.name,
-                      style: TextStyle(color: context.theme.text, fontSize: 16),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      app.description,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: context.theme.secondaryText,
-                        fontSize: 14,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+    onTap: () => showUserDialog(context, app.appId),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      child: Row(
+        children: [
+          _AppIcon(app: app, size: 50),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  app.name,
+                  style: TextStyle(color: context.theme.text, fontSize: 16),
                 ),
-              ),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  app.description,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class OverlappedAppIcons extends StatelessWidget {
@@ -92,7 +92,8 @@ class OverlappedAppIcons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
+    children:
+        [
           for (var index = 0; index < apps.length; index++)
             Padding(
               padding: EdgeInsets.fromLTRB(index.toDouble() * 14, 0, 0, 0),
@@ -108,7 +109,7 @@ class OverlappedAppIcons extends StatelessWidget {
               ),
             ),
         ].reversed.toList(),
-      );
+  );
 }
 
 class _AppIcon extends StatelessWidget {
@@ -120,14 +121,15 @@ class _AppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipOval(
-        child: MixinImage.network(
-          app.iconUrl,
-          width: size,
-          height: size,
-          placeholder: () => SizedBox.fromSize(
+    child: MixinImage.network(
+      app.iconUrl,
+      width: size,
+      height: size,
+      placeholder:
+          () => SizedBox.fromSize(
             size: Size.square(size),
             child: ColoredBox(color: context.theme.listSelected),
           ),
-        ),
-      );
+    ),
+  );
 }

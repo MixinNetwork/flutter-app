@@ -44,13 +44,16 @@ class SafeTransferMessage extends HookConsumerWidget {
     final assetId = useMessageConverter(converter: (state) => state.assetId);
 
     var assetIcon = useMessageConverter(converter: (state) => state.assetIcon);
-    final snapshotAmount =
-        useMessageConverter(converter: (state) => state.snapshotAmount);
-    var assetSymbol =
-        useMessageConverter(converter: (state) => state.assetSymbol);
+    final snapshotAmount = useMessageConverter(
+      converter: (state) => state.snapshotAmount,
+    );
+    var assetSymbol = useMessageConverter(
+      converter: (state) => state.assetSymbol,
+    );
 
-    final snapshotMemo =
-        useMessageConverter(converter: (state) => state.snapshotMemo);
+    final snapshotMemo = useMessageConverter(
+      converter: (state) => state.snapshotMemo,
+    );
 
     final token = ref.watch(tokenProvider(assetId));
 
@@ -68,54 +71,50 @@ class SafeTransferMessage extends HookConsumerWidget {
       }
     }, [token]);
 
-    final snapshotId =
-        useMessageConverter(converter: (state) => state.snapshotId);
-    useEffect(
-      () {
-        if (snapshotId != null) {
-          return;
-        }
-        // try to parse transfer message content from old version.
-        final content = context.message.content;
-        if (content == null) {
-          return;
-        }
-        final database = context.database;
-        final messageId = context.message.messageId;
-        scheduleMicrotask(() async {
-          try {
-            final snapshot = SafeSnapshot.fromJson(
-              jsonDecode(
-                utf8.decode(
-                  base64Decode(content),
-                  allowMalformed: true,
-                ),
-              ) as Map<String, dynamic>,
-            );
-            context.accountServer.addUpdateTokenJob(
-              createUpdateTokenJob(snapshot.assetId),
-            );
-            await database.safeSnapshotDao.insert(snapshot);
-            await database.messageDao
-                .updateSafeSnapshotMessage(messageId, snapshot.snapshotId);
-          } catch (error, stacktrace) {
-            e('handle old transfer message failed', error, stacktrace);
-          }
-        });
-      },
-      [snapshotId],
+    final snapshotId = useMessageConverter(
+      converter: (state) => state.snapshotId,
     );
-    final memo = useMemoized(
-      () => parseSafeSnapshotMemo(snapshotMemo),
-      [snapshotMemo],
-    );
+    useEffect(() {
+      if (snapshotId != null) {
+        return;
+      }
+      // try to parse transfer message content from old version.
+      final content = context.message.content;
+      if (content == null) {
+        return;
+      }
+      final database = context.database;
+      final messageId = context.message.messageId;
+      scheduleMicrotask(() async {
+        try {
+          final snapshot = SafeSnapshot.fromJson(
+            jsonDecode(utf8.decode(base64Decode(content), allowMalformed: true))
+                as Map<String, dynamic>,
+          );
+          context.accountServer.addUpdateTokenJob(
+            createUpdateTokenJob(snapshot.assetId),
+          );
+          await database.safeSnapshotDao.insert(snapshot);
+          await database.messageDao.updateSafeSnapshotMessage(
+            messageId,
+            snapshot.snapshotId,
+          );
+        } catch (error, stacktrace) {
+          e('handle old transfer message failed', error, stacktrace);
+        }
+      });
+    }, [snapshotId]);
+    final memo = useMemoized(() => parseSafeSnapshotMemo(snapshotMemo), [
+      snapshotMemo,
+    ]);
     if (snapshotId == null) {
       return const UnknownMessage();
     }
     return MessageBubble(
       forceIsCurrentUserColor: false,
-      outerTimeAndStatusWidget:
-          const MessageDatetimeAndStatus(hideStatus: true),
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(
+        hideStatus: true,
+      ),
       child: InteractiveDecoratedBox(
         onTap: () {
           final snapshotId = context.message.snapshotId;
@@ -156,69 +155,66 @@ class _SnapshotLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: SvgPicture.asset(Resources.assetsImagesBgSnapshotSvg),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Align(
+        alignment: Alignment.topRight,
+        child: SvgPicture.asset(Resources.assetsImagesBgSnapshotSvg),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    if (assetIcon == null)
-                      const SizedBox.square(dimension: 16)
-                    else
-                      ClipOval(
-                        child: MixinImage.network(
-                          assetIcon!,
-                          width: 16,
-                          height: 16,
-                        ),
-                      ),
-                    const SizedBox(width: 4),
-                    Text(
-                      assetSymbol,
-                      style: TextStyle(
-                        color: context.theme.text,
-                        fontSize: 13,
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 16),
-                AutoSizeText(
-                  snapshotAmount?.numberFormat() ?? '',
-                  maxFontSize: 36,
-                  minFontSize: 24,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontFamily: 'MixinCondensed',
-                    fontSize: 36,
-                    height: 1,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (memo.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  CustomText(
-                    memo,
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 12,
+                if (assetIcon == null)
+                  const SizedBox.square(dimension: 16)
+                else
+                  ClipOval(
+                    child: MixinImage.network(
+                      assetIcon!,
+                      width: 16,
+                      height: 16,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                ] else
-                  const SizedBox(height: 6),
+                const SizedBox(width: 4),
+                Text(
+                  assetSymbol,
+                  style: TextStyle(color: context.theme.text, fontSize: 13),
+                ),
               ],
             ),
-          ),
-        ],
-      );
+            const SizedBox(height: 16),
+            AutoSizeText(
+              snapshotAmount?.numberFormat() ?? '',
+              maxFontSize: 36,
+              minFontSize: 24,
+              style: TextStyle(
+                color: context.theme.text,
+                fontFamily: 'MixinCondensed',
+                fontSize: 36,
+                height: 1,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (memo.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              CustomText(
+                memo,
+                style: TextStyle(
+                  color: context.theme.secondaryText,
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+            ] else
+              const SizedBox(height: 6),
+          ],
+        ),
+      ),
+    ],
+  );
 }

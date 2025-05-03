@@ -27,20 +27,20 @@ class TransferDataApp {
       _$TransferDataAppFromJson(json);
 
   factory TransferDataApp.fromDbApp(db.App a) => TransferDataApp(
-        appId: a.appId,
-        appNumber: a.appNumber,
-        homeUri: a.homeUri,
-        redirectUri: a.redirectUri,
-        name: a.name,
-        iconUrl: a.iconUrl,
-        category: a.category,
-        description: a.description,
-        appSecret: a.appSecret,
-        capabilities: a.capabilitiesList,
-        creatorId: a.creatorId,
-        resourcePatterns: a.resourcePatternsList,
-        updatedAt: a.updatedAt,
-      );
+    appId: a.appId,
+    appNumber: a.appNumber,
+    homeUri: a.homeUri,
+    redirectUri: a.redirectUri,
+    name: a.name,
+    iconUrl: a.iconUrl,
+    category: a.category,
+    description: a.description,
+    appSecret: a.appSecret,
+    capabilities: a.capabilitiesList,
+    creatorId: a.creatorId,
+    resourcePatterns: a.resourcePatternsList,
+    updatedAt: a.updatedAt,
+  );
 
   @JsonKey(name: 'app_id')
   final String appId;
@@ -69,18 +69,18 @@ class TransferDataApp {
   Map<String, dynamic> toJson() => _$TransferDataAppToJson(this);
 
   db.App toDbApp() => db.App(
-        appId: appId,
-        appNumber: appNumber,
-        homeUri: homeUri,
-        redirectUri: redirectUri,
-        name: name,
-        iconUrl: iconUrl,
-        category: category,
-        description: description,
-        appSecret: appSecret,
-        capabilities: capabilities?.toString(),
-        creatorId: creatorId,
-        resourcePatterns: resourcePatterns?.toString(),
-        updatedAt: updatedAt,
-      );
+    appId: appId,
+    appNumber: appNumber,
+    homeUri: homeUri,
+    redirectUri: redirectUri,
+    name: name,
+    iconUrl: iconUrl,
+    category: category,
+    description: description,
+    appSecret: appSecret,
+    capabilities: capabilities?.toString(),
+    creatorId: creatorId,
+    resourcePatterns: resourcePatterns?.toString(),
+    updatedAt: updatedAt,
+  );
 }

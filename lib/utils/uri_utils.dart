@@ -27,20 +27,23 @@ Future<bool> openUriWithWebView(
   String? title,
   String? conversationId,
   AppCardData? appCardData,
-}) async =>
-    openUri(context, text, fallbackHandler: (uri) async {
-      if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
-        await MixinWebView.instance.openWebViewWindowWithUrl(
-          context,
-          uri.toString(),
-          conversationId: conversationId,
-          title: title,
-          appCardData: appCardData,
-        );
-        return true;
-      }
-      return launchUrl(uri);
-    });
+}) async => openUri(
+  context,
+  text,
+  fallbackHandler: (uri) async {
+    if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
+      await MixinWebView.instance.openWebViewWindowWithUrl(
+        context,
+        uri.toString(),
+        conversationId: conversationId,
+        title: title,
+        appCardData: appCardData,
+      );
+      return true;
+    }
+    return launchUrl(uri);
+  },
+);
 
 Future<bool> openUri(
   BuildContext context,
@@ -73,9 +76,10 @@ Future<bool> openUri(
     if (conversationId != null && conversationId.trim().isNotEmpty) {
       if (startText?.trim().isNotEmpty == true) {
         try {
-          final conversation = await context.database.conversationDao
-              .conversationItem(conversationId)
-              .getSingleOrNull();
+          final conversation =
+              await context.database.conversationDao
+                  .conversationItem(conversationId)
+                  .getSingleOrNull();
 
           if (conversation == null) {
             showToastFailed(null);
@@ -105,8 +109,14 @@ Future<bool> openUri(
     }
 
     if (uri.isSend) {
-      return showSendDialog(context, uri.categoryOfSend,
-          uri.conversationIdOfSend, uri.dataOfSend, app, uri.userOfSend);
+      return showSendDialog(
+        context,
+        uri.categoryOfSend,
+        uri.conversationIdOfSend,
+        uri.dataOfSend,
+        app,
+        uri.userOfSend,
+      );
     }
 
     if (uri.isPay) {
@@ -140,11 +150,7 @@ Future<bool> openUri(
         var homeUri = Uri.tryParse(app?.homeUri ?? '');
 
         if (app == null || homeUri == null) {
-          showToastFailed(
-            ToastError(
-              context.l10n.botNotFound,
-            ),
-          );
+          showToastFailed(ToastError(context.l10n.botNotFound));
           return true;
         }
 
@@ -180,8 +186,9 @@ Future<bool> openUri(
 Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
   showToastLoading();
   try {
-    final mixinResponse =
-        await context.accountServer.client.accountApi.code(code);
+    final mixinResponse = await context.accountServer.client.accountApi.code(
+      code,
+    );
     final data = mixinResponse.data;
     Toast.dismiss();
     if (data is User) {
@@ -191,42 +198,48 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
       await showConversationDialog(context, data, code);
       return true;
     } else if (data is PaymentCodeResponse) {
-      final asset =
-          await context.accountServer.checkAsset(assetId: data.assetId);
+      final asset = await context.accountServer.checkAsset(
+        assetId: data.assetId,
+      );
       if (asset == null) {
         await showUnknownMixinUrlDialog(context, uri);
         return false;
       }
-      await showMultisigsPaymentDialog(context,
-          item: MultisigsPaymentItem(
-            senders: [context.accountServer.userId],
-            receivers: data.receivers,
-            threshold: data.threshold,
-            asset: asset,
-            amount: data.amount,
-            state: data.status,
-            uri: uri,
-          ));
+      await showMultisigsPaymentDialog(
+        context,
+        item: MultisigsPaymentItem(
+          senders: [context.accountServer.userId],
+          receivers: data.receivers,
+          threshold: data.threshold,
+          asset: asset,
+          amount: data.amount,
+          state: data.status,
+          uri: uri,
+        ),
+      );
       return true;
     } else if (data is MultisigsResponse) {
       debugPrint('PaymentCodeResponse: ${data.toJson()}');
-      final asset =
-          await context.accountServer.checkAsset(assetId: data.assetId);
+      final asset = await context.accountServer.checkAsset(
+        assetId: data.assetId,
+      );
       if (asset == null) {
         await showUnknownMixinUrlDialog(context, uri);
         return false;
       }
-      await showMultisigsPaymentDialog(context,
-          item: Multi2MultiItem(
-            senders: data.senders,
-            receivers: data.receivers,
-            threshold: data.threshold,
-            asset: asset,
-            amount: data.amount,
-            state: data.state,
-            action: data.action,
-            uri: uri,
-          ));
+      await showMultisigsPaymentDialog(
+        context,
+        item: Multi2MultiItem(
+          senders: data.senders,
+          receivers: data.receivers,
+          threshold: data.threshold,
+          asset: asset,
+          amount: data.amount,
+          state: data.state,
+          action: data.action,
+          uri: uri,
+        ),
+      );
       return true;
     }
     await showUnknownMixinUrlDialog(context, uri);
@@ -239,13 +252,16 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
 }
 
 Future<bool> _showTransferDialog(
-    BuildContext context, String snapshotTraceId) async {
+  BuildContext context,
+  String snapshotTraceId,
+) async {
   try {
     showToastLoading();
 
-    final snapshotId = await context.database.snapshotDao
-        .snapshotIdByTraceId(snapshotTraceId)
-        .getSingleOrNull();
+    final snapshotId =
+        await context.database.snapshotDao
+            .snapshotIdByTraceId(snapshotTraceId)
+            .getSingleOrNull();
 
     if (snapshotId != null && snapshotId.trim().isNotEmpty) {
       Toast.dismiss();
@@ -253,8 +269,9 @@ Future<bool> _showTransferDialog(
       return true;
     }
 
-    final snapshot = await context.accountServer
-        .updateSnapshotByTraceId(traceId: snapshotTraceId);
+    final snapshot = await context.accountServer.updateSnapshotByTraceId(
+      traceId: snapshotTraceId,
+    );
 
     Toast.dismiss();
     await showTransferDialog(context, snapshot.snapshotId);
@@ -267,7 +284,10 @@ Future<bool> _showTransferDialog(
 }
 
 Future<bool> _selectConversation(
-    Uri uri, BuildContext context, String conversationId) async {
+  Uri uri,
+  BuildContext context,
+  String conversationId,
+) async {
   final userId = uri.queryParameters['user'];
   if (userId != null && userId.trim().isNotEmpty) {
     showToastLoading();

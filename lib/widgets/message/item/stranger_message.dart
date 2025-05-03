@@ -14,8 +14,9 @@ class StrangerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBotConversation =
-        useMessageConverter(converter: (state) => state.appId != null);
+    final isBotConversation = useMessageConverter(
+      converter: (state) => state.appId != null,
+    );
 
     return Column(
       children: [
@@ -39,11 +40,15 @@ class StrangerMessage extends StatelessWidget {
               onTap: () async {
                 final message = context.message;
                 if (isBotConversation) {
-                  final app =
-                      await context.database.appDao.findAppById(message.appId!);
+                  final app = await context.database.appDao.findAppById(
+                    message.appId!,
+                  );
                   if (app == null) return;
-                  await MixinWebView.instance.openBotWebViewWindow(context, app,
-                      conversationId: message.conversationId);
+                  await MixinWebView.instance.openBotWebViewWindow(
+                    context,
+                    app,
+                    conversationId: message.conversationId,
+                  );
                 } else {
                   await runFutureWithToast(
                     context.accountServer.blockUser(message.userId),
@@ -58,11 +63,15 @@ class StrangerMessage extends StatelessWidget {
                 final message = context.message;
                 if (isBotConversation) {
                   context.accountServer.sendTextMessage(
-                      'Hi', EncryptCategory.plain,
-                      conversationId: message.conversationId);
+                    'Hi',
+                    EncryptCategory.plain,
+                    conversationId: message.conversationId,
+                  );
                 } else {
-                  context.accountServer
-                      .addUser(message.userId, message.userFullName);
+                  context.accountServer.addUser(
+                    message.userId,
+                    message.userFullName,
+                  );
                 }
               },
             ),
@@ -74,42 +83,36 @@ class StrangerMessage extends StatelessWidget {
 }
 
 class _StrangerButton extends StatelessWidget {
-  const _StrangerButton(
-    this.text, {
-    this.onTap,
-  });
+  const _StrangerButton(this.text, {this.onTap});
 
   final String text;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox.color(
-        onTap: onTap,
-        decoration: BoxDecoration(
-          color: context.theme.primary,
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: 162,
-            minHeight: 36,
-            maxHeight: 36,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            child: Center(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: context.messageStyle.primaryFontSize,
-                  color: context.theme.accent,
-                ),
-              ),
+    onTap: onTap,
+    decoration: BoxDecoration(
+      color: context.theme.primary,
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+    ),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 162,
+        minHeight: 36,
+        maxHeight: 36,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: context.messageStyle.primaryFontSize,
+              color: context.theme.accent,
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

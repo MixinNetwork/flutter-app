@@ -12,19 +12,19 @@ part 'snapshot_dao.g.dart';
 
 extension SnapshotConverter on sdk.Snapshot {
   SnapshotsCompanion get asDbSnapshotObject => SnapshotsCompanion.insert(
-        snapshotId: snapshotId,
-        traceId: Value(traceId),
-        type: type,
-        assetId: assetId,
-        amount: amount,
-        createdAt: createdAt,
-        opponentId: Value(opponentId),
-        transactionHash: Value(transactionHash),
-        sender: Value(sender),
-        receiver: Value(receiver),
-        memo: Value(memo),
-        confirmations: Value(confirmations),
-      );
+    snapshotId: snapshotId,
+    traceId: Value(traceId),
+    type: type,
+    assetId: assetId,
+    amount: amount,
+    createdAt: createdAt,
+    opponentId: Value(opponentId),
+    transactionHash: Value(transactionHash),
+    sender: Value(sender),
+    receiver: Value(receiver),
+    memo: Value(memo),
+    confirmations: Value(confirmations),
+  );
 }
 
 extension SnapshotItemExtension on SnapshotItem {
@@ -44,20 +44,19 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
   SnapshotDao(super.db);
 
-  Future<int> insert(Snapshot snapshot, {bool updateIfConflict = true}) =>
-      into(db.snapshots)
-          .simpleInsert(snapshot, updateIfConflict: updateIfConflict)
-          .then((value) {
-        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
-        return value;
-      });
+  Future<int> insert(Snapshot snapshot, {bool updateIfConflict = true}) => into(
+    db.snapshots,
+  ).simpleInsert(snapshot, updateIfConflict: updateIfConflict).then((value) {
+    DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+    return value;
+  });
 
-  Future<int> insertSdkSnapshot(sdk.Snapshot snapshot) => into(db.snapshots)
-          .insertOnConflictUpdate(snapshot.asDbSnapshotObject)
-          .then((value) {
-        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
-        return value;
-      });
+  Future<int> insertSdkSnapshot(sdk.Snapshot snapshot) => into(
+    db.snapshots,
+  ).insertOnConflictUpdate(snapshot.asDbSnapshotObject).then((value) {
+    DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+    return value;
+  });
 
   Future deleteSnapshot(Snapshot snapshot) =>
       delete(db.snapshots).delete(snapshot).then((value) {
@@ -66,14 +65,15 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
       });
 
   Selectable<SnapshotItem> snapshotItemById(
-          String snapshotId, String currentFiat) =>
-      snapshotItems(
-        currentFiat,
-        (snapshot, opponent, asset, tempAsset, fiats) =>
-            snapshot.snapshotId.equals(snapshotId),
-        (snapshot, opponent, asset, tempAsset, fiats) => ignoreOrderBy,
-        (snapshot, opponent, asset, tempAsset, fiats) => Limit(1, 0),
-      );
+    String snapshotId,
+    String currentFiat,
+  ) => snapshotItems(
+    currentFiat,
+    (snapshot, opponent, asset, tempAsset, fiats) =>
+        snapshot.snapshotId.equals(snapshotId),
+    (snapshot, opponent, asset, tempAsset, fiats) => ignoreOrderBy,
+    (snapshot, opponent, asset, tempAsset, fiats) => Limit(1, 0),
+  );
 
   Selectable<String?> snapshotIdByTraceId(String traceId) =>
       (selectOnly(db.snapshots)

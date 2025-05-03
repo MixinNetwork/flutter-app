@@ -11,18 +11,23 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
 
   Future<Session?> getSession(String address, int deviceId) =>
       (select(db.sessions)
-            ..where((tbl) =>
-                tbl.address.equals(address) & tbl.device.equals(deviceId))
+            ..where(
+              (tbl) =>
+                  tbl.address.equals(address) & tbl.device.equals(deviceId),
+            )
             ..limit(1))
           .getSingleOrNull();
 
   Future<List<int>> getSubDevice(String address) async {
-    final list = await (selectOnly(db.sessions)
-          ..addColumns([db.sessions.device])
-          ..where(db.sessions.address.equals(address) &
-              db.sessions.device.equals(1).not()))
-        .map((row) => row.read(db.sessions.device))
-        .get();
+    final list =
+        await (selectOnly(db.sessions)
+              ..addColumns([db.sessions.device])
+              ..where(
+                db.sessions.address.equals(address) &
+                    db.sessions.device.equals(1).not(),
+              ))
+            .map((row) => row.read(db.sessions.device))
+            .get();
     return list.nonNulls.toList();
   }
 
@@ -40,6 +45,8 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
   Future insertSession(SessionsCompanion session) async =>
       into(db.sessions).insert(session, mode: InsertMode.insertOrReplace);
 
-  Future insertList(List<SessionsCompanion> list) async => batch((batch) =>
-      batch.insertAll(db.sessions, list, mode: InsertMode.insertOrReplace));
+  Future insertList(List<SessionsCompanion> list) async => batch(
+    (batch) =>
+        batch.insertAll(db.sessions, list, mode: InsertMode.insertOrReplace),
+  );
 }

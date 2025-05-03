@@ -39,16 +39,17 @@ class MediaPage extends HookConsumerWidget {
 
     final mediaCubit = useBloc(
       () => LoadMorePagingBloc<MessageItem>(
-        reloadData: () =>
-            messageDao.mediaMessages(conversationId, size, 0).get(),
+        reloadData:
+            () => messageDao.mediaMessages(conversationId, size, 0).get(),
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
           final info = await messageDao.messageOrderInfo(last.messageId);
           if (info == null) return [];
-          final items = await messageDao
-              .mediaMessagesBefore(info, conversationId, size)
-              .get();
+          final items =
+              await messageDao
+                  .mediaMessagesBefore(info, conversationId, size)
+                  .get();
           return [...list, ...items];
         },
         isSameKey: (a, b) => a.messageId == b.messageId,
@@ -56,33 +57,37 @@ class MediaPage extends HookConsumerWidget {
       keys: [conversationId],
     );
     useEffect(
-      () => messageDao
-          .watchInsertOrReplaceMessageStream(conversationId)
-          .switchMap<MessageItem>((value) async* {
-            for (final item in value) {
-              yield item;
-            }
-          })
-          .where((event) => [
-                MessageCategory.plainImage,
-                MessageCategory.signalImage,
-                MessageCategory.plainVideo,
-                MessageCategory.signalVideo,
-              ].contains(event.type))
-          .listen(mediaCubit.insertOrReplace)
-          .cancel,
+      () =>
+          messageDao
+              .watchInsertOrReplaceMessageStream(conversationId)
+              .switchMap<MessageItem>((value) async* {
+                for (final item in value) {
+                  yield item;
+                }
+              })
+              .where(
+                (event) => [
+                  MessageCategory.plainImage,
+                  MessageCategory.signalImage,
+                  MessageCategory.plainVideo,
+                  MessageCategory.signalVideo,
+                ].contains(event.type),
+              )
+              .listen(mediaCubit.insertOrReplace)
+              .cancel,
       [conversationId],
     );
-    final map = useBlocStateConverter<LoadMorePagingBloc<MessageItem>,
-        LoadMorePagingState<MessageItem>, Map<DateTime, List<MessageItem>>>(
+    final map = useBlocStateConverter<
+      LoadMorePagingBloc<MessageItem>,
+      LoadMorePagingState<MessageItem>,
+      Map<DateTime, List<MessageItem>>
+    >(
       bloc: mediaCubit,
-      converter: (state) => groupBy<MessageItem, DateTime>(
-        state.list,
-        (messageItem) {
-          final local = messageItem.createdAt.toLocal();
-          return DateTime(local.year, local.month, local.day);
-        },
-      ),
+      converter:
+          (state) => groupBy<MessageItem, DateTime>(state.list, (messageItem) {
+            final local = messageItem.createdAt.toLocal();
+            return DateTime(local.year, local.month, local.day);
+          }),
     );
 
     final scrollController = useScrollController();
@@ -129,54 +134,54 @@ class MediaPage extends HookConsumerWidget {
       },
       child: CustomScrollView(
         controller: scrollController,
-        slivers: map.entries
-            .map(
-              (e) => MultiSliver(
-                pushPinnedChildren: true,
-                children: [
-                  SliverPinnedHeader(
-                    child: Container(
-                      color: context.theme.primary,
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        DateFormat.yMMMd().format(e.key.toLocal()),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: context.theme.secondaryText,
+        slivers:
+            map.entries
+                .map(
+                  (e) => MultiSliver(
+                    pushPinnedChildren: true,
+                    children: [
+                      SliverPinnedHeader(
+                        child: Container(
+                          color: context.theme.primary,
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            DateFormat.yMMMd().format(e.key.toLocal()),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: context.theme.secondaryText,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    sliver: SliverGrid(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          final message = e.value[index];
-                          return _Item(message: message);
-                        },
-                        childCount: e.value.length,
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        sliver: SliverGrid(
+                          delegate: SliverChildBuilderDelegate((
+                            BuildContext context,
+                            int index,
+                          ) {
+                            final message = e.value[index];
+                            return _Item(message: message);
+                          }, childCount: e.value.length),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: routeMode ? 4 : 3,
+                                mainAxisSpacing: 5,
+                                crossAxisSpacing: 5,
+                              ),
+                        ),
                       ),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: routeMode ? 4 : 3,
-                        mainAxisSpacing: 5,
-                        crossAxisSpacing: 5,
-                      ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            )
-            .toList(),
+                )
+                .toList(),
       ),
     );
   }
 }
 
 class _Item extends StatelessWidget {
-  const _Item({
-    required this.message,
-  });
+  const _Item({required this.message});
 
   final MessageItem message;
 
@@ -194,10 +199,7 @@ class _Item extends StatelessWidget {
     }
     return ShareMediaItemMenuWrapper(
       messageId: message.messageId,
-      child: MessageContext.fromMessageItem(
-        message: message,
-        child: widget,
-      ),
+      child: MessageContext.fromMessageItem(message: message, child: widget),
     );
   }
 }
@@ -208,9 +210,11 @@ class _ItemVideo extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final durationText = useMessageConverter(
-      converter: (state) =>
-          Duration(milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0)
-              .asMinutesSeconds,
+      converter:
+          (state) =>
+              Duration(
+                milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
+              ).asMinutesSeconds,
     );
     return MessageVideo(
       overlay: Stack(
@@ -250,7 +254,7 @@ class _ItemVideo extends HookConsumerWidget {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

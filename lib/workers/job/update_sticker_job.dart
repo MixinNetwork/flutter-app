@@ -8,10 +8,7 @@ import '../../db/mixin_database.dart';
 import '../job_queue.dart';
 
 class UpdateStickerJob extends JobQueue<Job, List<Job>> {
-  UpdateStickerJob({
-    required super.database,
-    required this.client,
-  });
+  UpdateStickerJob({required super.database, required this.client});
 
   final Client client;
 
@@ -43,33 +40,35 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
 
   @override
   Future<List<Job>?> run(List<Job> jobs) async {
-    final list = await Future.wait(jobs.map((Job job) async {
-      try {
-        final stickerId = job.blazeMessage;
-        if (stickerId != null) {
-          final sticker =
-              (await client.accountApi.getStickerById(stickerId)).data;
-          await database.stickerDao.insert(sticker.asStickersCompanion);
-        }
-        await database.jobDao.deleteJobById(job.jobId);
-      } catch (e, s) {
-        if (e is MixinApiError) {
-          var code = e.response?.statusCode;
-          final error = e.error;
-          if (code != 404 && error != null && error is MixinError) {
-            code = error.code;
+    final list = await Future.wait(
+      jobs.map((Job job) async {
+        try {
+          final stickerId = job.blazeMessage;
+          if (stickerId != null) {
+            final sticker =
+                (await client.accountApi.getStickerById(stickerId)).data;
+            await database.stickerDao.insert(sticker.asStickersCompanion);
           }
-          if (code == 404) {
-            i('Sticker not found: ${job.blazeMessage}');
-            await database.jobDao.deleteJobById(job.jobId);
-            return null;
+          await database.jobDao.deleteJobById(job.jobId);
+        } catch (e, s) {
+          if (e is MixinApiError) {
+            var code = e.response?.statusCode;
+            final error = e.error;
+            if (code != 404 && error != null && error is MixinError) {
+              code = error.code;
+            }
+            if (code == 404) {
+              i('Sticker not found: ${job.blazeMessage}');
+              await database.jobDao.deleteJobById(job.jobId);
+              return null;
+            }
           }
+          w('Update sticker job error: $e, stack: $s');
+          await Future.delayed(const Duration(seconds: 1));
+          return job;
         }
-        w('Update sticker job error: $e, stack: $s');
-        await Future.delayed(const Duration(seconds: 1));
-        return job;
-      }
-    }));
+      }),
+    );
 
     return list.where((element) => element != null).cast<Job>().toList();
   }

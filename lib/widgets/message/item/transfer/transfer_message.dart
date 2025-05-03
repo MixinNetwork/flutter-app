@@ -25,25 +25,29 @@ class TransferMessage extends HookConsumerWidget {
 
     var assetIcon = useMessageConverter(converter: (state) => state.assetIcon);
     var chainIcon = useMessageConverter(converter: (state) => state.chainIcon);
-    final snapshotAmount =
-        useMessageConverter(converter: (state) => state.snapshotAmount);
-    final assetSymbol =
-        useMessageConverter(converter: (state) => state.assetSymbol ?? '');
+    final snapshotAmount = useMessageConverter(
+      converter: (state) => state.snapshotAmount,
+    );
+    final assetSymbol = useMessageConverter(
+      converter: (state) => state.assetSymbol ?? '',
+    );
 
-    final assetItem = useMemoizedStream(() {
-      if (assetId == null || assetIcon != null) {
-        return Stream.value(null);
-      }
-      return context.database.assetDao
-          .assetItem(assetId)
-          .watchSingleOrNullWithStream(
-        eventStreams: [
-          DataBaseEventBus.instance.updateAssetStream
-              .where((event) => event.contains(assetId))
-        ],
-        duration: kDefaultThrottleDuration,
-      );
-    }, keys: [assetId, assetIcon]).data;
+    final assetItem =
+        useMemoizedStream(() {
+          if (assetId == null || assetIcon != null) {
+            return Stream.value(null);
+          }
+          return context.database.assetDao
+              .assetItem(assetId)
+              .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.updateAssetStream.where(
+                    (event) => event.contains(assetId),
+                  ),
+                ],
+                duration: kDefaultThrottleDuration,
+              );
+        }, keys: [assetId, assetIcon]).data;
 
     assetIcon = assetIcon ?? assetItem?.iconUrl;
     chainIcon = chainIcon ?? assetItem?.chainIconUrl;
@@ -58,8 +62,9 @@ class TransferMessage extends HookConsumerWidget {
     }, [chainIcon, assetId]);
 
     return MessageBubble(
-      outerTimeAndStatusWidget:
-          const MessageDatetimeAndStatus(hideStatus: true),
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(
+        hideStatus: true,
+      ),
       child: InteractiveDecoratedBox(
         onTap: () {
           final snapshotId = context.message.snapshotId;
@@ -86,19 +91,21 @@ class TransferMessage extends HookConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
-                      child: Builder(builder: (context) {
-                        if (snapshotAmount?.isEmpty ?? true) {
-                          return const SizedBox();
-                        }
+                      child: Builder(
+                        builder: (context) {
+                          if (snapshotAmount?.isEmpty ?? true) {
+                            return const SizedBox();
+                          }
 
-                        return Text(
-                          snapshotAmount!.numberFormat(),
-                          style: TextStyle(
-                            color: context.theme.text,
-                            fontSize: context.messageStyle.secondaryFontSize,
-                          ),
-                        );
-                      }),
+                          return Text(
+                            snapshotAmount!.numberFormat(),
+                            style: TextStyle(
+                              color: context.theme.text,
+                              fontSize: context.messageStyle.secondaryFontSize,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),

@@ -10,10 +10,7 @@ const _barWidth = 2.0;
 const _barRadius = _barWidth / 2;
 const _barSpacing = 2.0;
 
-enum WaveBarAlignment {
-  center,
-  bottom,
-}
+enum WaveBarAlignment { center, bottom }
 
 class WaveformWidget extends StatelessWidget {
   const WaveformWidget({
@@ -38,43 +35,49 @@ class WaveformWidget extends StatelessWidget {
     assert(value >= 0 && value <= 1);
 
     return LayoutBuilder(
-      builder: (context, BoxConstraints constraints) => HookBuilder(
-        builder: (context) {
-          final maxBarCount =
-              ((constraints.maxWidth + _barSpacing) / (_barWidth + _barSpacing))
-                  .floor();
+      builder:
+          (context, BoxConstraints constraints) => HookBuilder(
+            builder: (context) {
+              final maxBarCount =
+                  ((constraints.maxWidth + _barSpacing) /
+                          (_barWidth + _barSpacing))
+                      .floor();
 
-          final samples = useMemoized(() {
-            final sampleCount =
-                min(this.maxBarCount ?? maxBarCount, maxBarCount);
-            return waveform.asMap().entries.fold<List<int>>(
-                List.filled(sampleCount, 0), (previousValue, element) {
-              final index = element.key;
-              final value = element.value;
+              final samples = useMemoized(() {
+                final sampleCount = min(
+                  this.maxBarCount ?? maxBarCount,
+                  maxBarCount,
+                );
+                return waveform.asMap().entries.fold<List<int>>(
+                  List.filled(sampleCount, 0),
+                  (previousValue, element) {
+                    final index = element.key;
+                    final value = element.value;
 
-              final i = (index * sampleCount / waveform.length).floor();
+                    final i = (index * sampleCount / waveform.length).floor();
 
-              previousValue[i] = max(previousValue[i], value);
-              return previousValue;
-            });
-          }, [waveform, constraints.maxWidth]);
+                    previousValue[i] = max(previousValue[i], value);
+                    return previousValue;
+                  },
+                );
+              }, [waveform, constraints.maxWidth]);
 
-          final width =
-              (samples.length * (_barWidth + _barSpacing)) - _barSpacing;
-          return SizedBox(
-            width: width,
-            child: CustomPaint(
-              painter: _WaveformPainter(
-                waveform: samples,
-                value: value,
-                backgroundColor: backgroundColor,
-                foregroundColor: foregroundColor,
-                alignment: alignment,
-              ),
-            ),
-          );
-        },
-      ),
+              final width =
+                  (samples.length * (_barWidth + _barSpacing)) - _barSpacing;
+              return SizedBox(
+                width: width,
+                child: CustomPaint(
+                  painter: _WaveformPainter(
+                    waveform: samples,
+                    value: value,
+                    backgroundColor: backgroundColor,
+                    foregroundColor: foregroundColor,
+                    alignment: alignment,
+                  ),
+                ),
+              );
+            },
+          ),
     );
   }
 }
@@ -87,12 +90,14 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
     required Color foregroundColor,
     required this.alignment,
   }) {
-    backgroundPainter = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.fill;
-    foregroundPainter = Paint()
-      ..color = foregroundColor
-      ..style = PaintingStyle.fill;
+    backgroundPainter =
+        Paint()
+          ..color = backgroundColor
+          ..style = PaintingStyle.fill;
+    foregroundPainter =
+        Paint()
+          ..color = foregroundColor
+          ..style = PaintingStyle.fill;
   }
 
   final double value;
@@ -155,14 +160,10 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
       final left = index * sampleX;
       final right = left + _barWidth;
       path.addRRect(
-          const BorderRadius.vertical(top: Radius.circular(_barRadius)).toRRect(
-        Rect.fromLTRB(
-          left,
-          top,
-          right,
-          bottom,
-        ),
-      ));
+        const BorderRadius.vertical(
+          top: Radius.circular(_barRadius),
+        ).toRRect(Rect.fromLTRB(left, top, right, bottom)),
+      );
     });
 
     return path;
@@ -174,10 +175,10 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        value,
-        waveform,
-        backgroundPainter.color,
-        foregroundPainter.color,
-        alignment,
-      ];
+    value,
+    waveform,
+    backgroundPainter.color,
+    foregroundPainter.color,
+    alignment,
+  ];
 }

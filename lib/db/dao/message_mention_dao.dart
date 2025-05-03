@@ -17,27 +17,27 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(
     MessageMention messageMention, {
     bool updateIfConflict = true,
-  }) =>
-      into(db.messageMentions)
-          .simpleInsert(messageMention, updateIfConflict: updateIfConflict)
-          .then((value) {
+  }) => into(db.messageMentions)
+      .simpleInsert(messageMention, updateIfConflict: updateIfConflict)
+      .then((value) {
         DataBaseEventBus.instance.updateMessageMention([
           MiniMessageItem(
-              conversationId: messageMention.conversationId,
-              messageId: messageMention.messageId)
+            conversationId: messageMention.conversationId,
+            messageId: messageMention.messageId,
+          ),
         ]);
         return value;
       });
 
   Future deleteMessageMention(MessageMention messageMention) =>
-      (delete(db.messageMentions)
-            ..where((tbl) => tbl.messageId.equals(messageMention.messageId)))
-          .go()
-          .then((value) {
+      (delete(db.messageMentions)..where(
+        (tbl) => tbl.messageId.equals(messageMention.messageId),
+      )).go().then((value) {
         DataBaseEventBus.instance.updateMessageMention([
           MiniMessageItem(
-              conversationId: messageMention.conversationId,
-              messageId: messageMention.messageId)
+            conversationId: messageMention.conversationId,
+            messageId: messageMention.messageId,
+          ),
         ]);
         return value;
       });
@@ -53,9 +53,11 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
   ) async {
     var mentionMe = false;
     if (content?.isNotEmpty == true) {
-      final numbers =
-          mentionNumberRegExp.allMatchesAndSort(content!).map((e) => e[1]!);
-      mentionMe = senderId != currentUserId &&
+      final numbers = mentionNumberRegExp
+          .allMatchesAndSort(content!)
+          .map((e) => e[1]!);
+      mentionMe =
+          senderId != currentUserId &&
           numbers.contains(currentUserIdentityNumber);
     }
 
@@ -68,24 +70,27 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
 
     if (!mentionMe) return;
 
-    await insert(MessageMention(
-      messageId: messageId,
-      conversationId: conversationId,
-      hasRead: false,
-    ));
+    await insert(
+      MessageMention(
+        messageId: messageId,
+        conversationId: conversationId,
+        hasRead: false,
+      ),
+    );
   }
 
   SimpleSelectStatement<MessageMentions, MessageMention>
-      unreadMentionMessageByConversationId(String conversationId) =>
-          (db.select(db.messageMentions)
-            ..where((tbl) =>
-                tbl.conversationId.equals(conversationId) &
-                tbl.hasRead.equals(false)));
+  unreadMentionMessageByConversationId(String conversationId) => (db.select(
+    db.messageMentions,
+  )..where(
+    (tbl) =>
+        tbl.conversationId.equals(conversationId) & tbl.hasRead.equals(false),
+  ));
 
   Future<void> markMentionRead(String messageId) async {
-    final messageMention = await (db.select(db.messageMentions)
-          ..where((tbl) => tbl.messageId.equals(messageId)))
-        .getSingleOrNull();
+    final messageMention =
+        await (db.select(db.messageMentions)
+          ..where((tbl) => tbl.messageId.equals(messageId))).getSingleOrNull();
 
     if (messageMention == null) return;
     if (messageMention.hasRead ?? false) return;
@@ -94,32 +99,34 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(const MessageMentionsCompanion(hasRead: Value(true)))
         .then((value) {
-      DataBaseEventBus.instance.updateMessageMention([
-        MiniMessageItem(
-          conversationId: messageMention.conversationId,
-          messageId: messageId,
-        )
-      ]);
-      return value;
-    });
+          DataBaseEventBus.instance.updateMessageMention([
+            MiniMessageItem(
+              conversationId: messageMention.conversationId,
+              messageId: messageId,
+            ),
+          ]);
+          return value;
+        });
   }
 
   Future<List<MessageMention>> getMessageMentions(
-          int kQueryLimit, int offset) =>
+    int kQueryLimit,
+    int offset,
+  ) =>
       (db.select(db.messageMentions)
             ..orderBy([
-              (t) => OrderingTerm(expression: t.rowId, mode: OrderingMode.desc)
+              (t) => OrderingTerm(expression: t.rowId, mode: OrderingMode.desc),
             ])
             ..limit(kQueryLimit, offset: offset))
           .get();
 
-  Future<int> getMessageMentionsCount() => db
-      .customSelect('SELECT COUNT(1) as _result FROM message_mentions')
-      .map((p0) => p0.read<int>('_result'))
-      .getSingle();
+  Future<int> getMessageMentionsCount() =>
+      db
+          .customSelect('SELECT COUNT(1) as _result FROM message_mentions')
+          .map((p0) => p0.read<int>('_result'))
+          .getSingle();
 
   Future<void> clearMessageMentionByConversationId(String conversationId) =>
       (db.delete(db.messageMentions)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .go();
+        ..where((tbl) => tbl.conversationId.equals(conversationId))).go();
 }

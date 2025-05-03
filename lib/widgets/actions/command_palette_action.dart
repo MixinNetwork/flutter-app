@@ -39,7 +39,8 @@ void _jumpToPosition(ScrollController scrollController, int length, int index) {
   final itemOffset = index * itemExtent;
   final itemEndOffset = itemOffset + itemExtent;
 
-  final isFullyVisible = itemOffset >= currentOffset &&
+  final isFullyVisible =
+      itemOffset >= currentOffset &&
       itemEndOffset <= (currentOffset + viewportDimension);
 
   if (!isFullyVisible) {
@@ -48,9 +49,10 @@ void _jumpToPosition(ScrollController scrollController, int length, int index) {
     final remainingContentHeight = contentHeight - itemEndOffset;
     final halfViewport = (viewportDimension - itemExtent) / 2;
 
-    final targetOffset = remainingContentHeight < halfViewport
-        ? maxScrollExtent
-        : middleOffset.clamp(0.0, maxScrollExtent);
+    final targetOffset =
+        remainingContentHeight < halfViewport
+            ? maxScrollExtent
+            : middleOffset.clamp(0.0, maxScrollExtent);
 
     scrollController.animateTo(
       targetOffset,
@@ -77,22 +79,24 @@ _SearchState _useSearchState({
   required WidgetRef ref,
   required String keyword,
 }) {
-  final users = useMemoizedStream<List<SearchItem>>(() {
+  final users =
+      useMemoizedStream<List<SearchItem>>(() {
         if (keyword.trim().isEmpty) {
           return Stream.value([]);
         }
         return context.database.userDao
             .fuzzySearchUserItem(keyword, context.accountServer.userId)
             .watchWithStream(
-          eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
-          duration: kVerySlowThrottleDuration,
-        );
+              eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
+              duration: kVerySlowThrottleDuration,
+            );
       }, keys: [keyword]).data ??
       [];
 
   final recentConversationIds = ref.watch(recentConversationIDsProvider);
 
-  final conversations = useMemoizedStream<List<SearchItem>>(() {
+  final conversations =
+      useMemoizedStream<List<SearchItem>>(() {
         if (keyword.trim().isEmpty) {
           if (recentConversationIds.isEmpty) {
             return Stream.value([]);
@@ -101,19 +105,22 @@ _SearchState _useSearchState({
           return context.database.conversationDao
               .fuzzySearchConversationItemByIds(recentConversationIds)
               .watchWithStream(
-            eventStreams: [
-              DataBaseEventBus.instance
-                  .watchUpdateConversationStream(recentConversationIds)
-            ],
-            duration: kSlowThrottleDuration,
-          );
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateConversationStream(
+                    recentConversationIds,
+                  ),
+                ],
+                duration: kSlowThrottleDuration,
+              );
         }
         return context.database.conversationDao
             .fuzzySearchConversationItem(keyword)
             .watchWithStream(
-          eventStreams: [DataBaseEventBus.instance.updateConversationIdStream],
-          duration: kSlowThrottleDuration,
-        );
+              eventStreams: [
+                DataBaseEventBus.instance.updateConversationIdStream,
+              ],
+              duration: kSlowThrottleDuration,
+            );
       }, keys: [keyword, recentConversationIds]).data ??
       [];
 
@@ -122,11 +129,7 @@ _SearchState _useSearchState({
     return allItems..sort((a, b) => b.matchScore.compareTo(a.matchScore));
   }, [users, conversations]);
 
-  return _SearchState(
-    users: users,
-    conversations: conversations,
-    items: items,
-  );
+  return _SearchState(users: users, conversations: conversations, items: items);
 }
 
 class _NavigationState {
@@ -221,10 +224,14 @@ class CommandPalettePage extends HookConsumerWidget {
     final scrollController = useScrollController();
     final textEditingController = useTextEditingController();
     final stream = useValueNotifierConvertSteam(textEditingController);
-    final keyword = useMemoizedStream(() => stream
-            .map((event) => event.text)
-            .throttleTime(const Duration(milliseconds: 100))
-            .distinct()).data ??
+    final keyword =
+        useMemoizedStream(
+          () =>
+              stream
+                  .map((event) => event.text)
+                  .throttleTime(const Duration(milliseconds: 100))
+                  .distinct(),
+        ).data ??
         '';
 
     final searchState = _useSearchState(
@@ -250,15 +257,11 @@ class CommandPalettePage extends HookConsumerWidget {
         const SingleActivator(LogicalKeyboardKey.enter):
             const ListSelectionSelectedIntent(),
         if (kPlatformIsDarwin) ...{
-          const SingleActivator(
-            LogicalKeyboardKey.keyN,
-            control: true,
-          ): const ListSelectionNextIntent(),
-          const SingleActivator(
-            LogicalKeyboardKey.keyP,
-            control: true,
-          ): const ListSelectionPrevIntent(),
-        }
+          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
+              const ListSelectionNextIntent(),
+          const SingleActivator(LogicalKeyboardKey.keyP, control: true):
+              const ListSelectionPrevIntent(),
+        },
       },
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
@@ -313,14 +316,14 @@ class CommandPalettePage extends HookConsumerWidget {
                           height: 80,
                           width: 80,
                           colorFilter: ColorFilter.mode(
-                              context.theme.secondaryText, BlendMode.srcIn),
+                            context.theme.secondaryText,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         const SizedBox(height: 20),
                         Text(
                           context.l10n.noResults,
-                          style: TextStyle(
-                            color: context.theme.secondaryText,
-                          ),
+                          style: TextStyle(color: context.theme.secondaryText),
                         ),
                       ],
                     ),
@@ -332,49 +335,50 @@ class CommandPalettePage extends HookConsumerWidget {
                     controller: scrollController,
                     slivers: [
                       SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            final item = searchState.items[index];
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: SearchItemWidget(
-                                selected:
-                                    navigationState.selectedIndex == index,
-                                margin: EdgeInsets.zero,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 14),
-                                avatar: item.type == 'GROUP'
-                                    ? ConversationAvatarWidget(
+                        delegate: SliverChildBuilderDelegate((
+                          BuildContext context,
+                          int index,
+                        ) {
+                          final item = searchState.items[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: SearchItemWidget(
+                              selected: navigationState.selectedIndex == index,
+                              margin: EdgeInsets.zero,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              avatar:
+                                  item.type == 'GROUP'
+                                      ? ConversationAvatarWidget(
                                         conversationId: item.id,
                                         size: 40,
                                         category: ConversationCategory.group,
                                       )
-                                    : AvatarWidget(
+                                      : AvatarWidget(
                                         name: item.name,
                                         userId: item.id,
                                         size: 40,
                                         avatarUrl: item.avatarUrl,
                                       ),
-                                name: item.name ?? '',
-                                trailing: BadgesWidget(
-                                  verified: item.isVerified,
-                                  isBot: item.type == 'BOT',
-                                  membership: item.membership,
-                                ),
-                                keyword: keyword.trim(),
-                                onTap: () => navigationState.select(index),
+                              name: item.name ?? '',
+                              trailing: BadgesWidget(
+                                verified: item.isVerified,
+                                isBot: item.type == 'BOT',
+                                membership: item.membership,
                               ),
-                            );
-                          },
-                          childCount: searchState.items.length,
-                        ),
+                              keyword: keyword.trim(),
+                              onTap: () => navigationState.select(index),
+                            ),
+                          );
+                        }, childCount: searchState.items.length),
                       ),
                       const SliverToBoxAdapter(
-                          child: SizedBox(height: _kBottomPadding)),
+                        child: SizedBox(height: _kBottomPadding),
+                      ),
                     ],
                   ),
-                )
+                ),
             ],
           ),
         ),

@@ -1,11 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum LandingStatus {
-  needReload,
-  provisioning,
-  ready,
-  init,
-}
+enum LandingStatus { needReload, provisioning, ready, init }
 
 class LandingState extends Equatable {
   const LandingState({
@@ -23,15 +18,12 @@ class LandingState extends Equatable {
   List<Object?> get props => [authUrl, status, errorMessage];
 
   LandingState needReload(String errorMessage) => LandingState(
-        status: LandingStatus.needReload,
-        errorMessage: errorMessage,
-        authUrl: authUrl,
-      );
+    status: LandingStatus.needReload,
+    errorMessage: errorMessage,
+    authUrl: authUrl,
+  );
 
-  LandingState copyWith({
-    String? authUrl,
-    LandingStatus? status,
-  }) =>
+  LandingState copyWith({String? authUrl, LandingStatus? status}) =>
       LandingState(
         authUrl: authUrl ?? this.authUrl,
         status: status ?? this.status,

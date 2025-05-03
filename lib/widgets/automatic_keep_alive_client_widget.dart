@@ -1,10 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 class AutomaticKeepAliveClientWidget extends StatefulWidget {
-  const AutomaticKeepAliveClientWidget({
-    required this.child,
-    super.key,
-  });
+  const AutomaticKeepAliveClientWidget({required this.child, super.key});
 
   final Widget child;
 

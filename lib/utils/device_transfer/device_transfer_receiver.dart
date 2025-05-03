@@ -105,7 +105,11 @@ class DeviceTransferReceiver {
   }
 
   Future<void> connectToServer(
-      String ip, int port, int code, TransferSecretKey secretKey) async {
+    String ip,
+    int port,
+    int code,
+    TransferSecretKey secretKey,
+  ) async {
     i('receiver connect to $ip:$port');
     if (_socket != null) {
       w('socket is not null, close it first');
@@ -187,8 +191,12 @@ class DeviceTransferReceiver {
         _finished = true;
         await _notifyProgressComplete();
         assert(_socket != null, 'socket is null');
-        await _socket?.addCommand(TransferDataCommand.simple(
-            deviceId: deviceId, action: kTransferCommandActionFinish));
+        await _socket?.addCommand(
+          TransferDataCommand.simple(
+            deviceId: deviceId,
+            action: kTransferCommandActionFinish,
+          ),
+        );
       case kTransferCommandActionClose:
         i('${command.action} command: close receiver socket');
         close();
@@ -206,15 +214,17 @@ class DeviceTransferReceiver {
         case JsonTransferDataType.conversation:
           final conversation = TransferDataConversation.fromJson(data.data);
           d('client: conversation: $conversation');
-          final local = await database.conversationDao
-              .conversationById(conversation.conversationId)
-              .getSingleOrNull();
+          final local =
+              await database.conversationDao
+                  .conversationById(conversation.conversationId)
+                  .getSingleOrNull();
           if (local != null) {
             i('conversation already exist: ${conversation.conversationId}');
             return;
           }
-          await database.conversationDao
-              .insert(conversation.toDbConversation());
+          await database.conversationDao.insert(
+            conversation.toDbConversation(),
+          );
         case JsonTransferDataType.message:
           final message = TransferDataMessage.fromJson(data.data);
 
@@ -224,14 +234,16 @@ class DeviceTransferReceiver {
           }
 
           d('client: message: $message');
-          final local = await database.messageDao
-              .findMessageByMessageId(message.messageId);
+          final local = await database.messageDao.findMessageByMessageId(
+            message.messageId,
+          );
           if (local != null) {
             d('message already exist: ${message.messageId}');
             return;
           }
-          final dbMessage =
-              message.toDbMessage().copyWith(status: MessageStatus.read);
+          final dbMessage = message.toDbMessage().copyWith(
+            status: MessageStatus.read,
+          );
           await database.messageDao.insert(dbMessage, userId);
           await database.ftsDatabase.insertFts(dbMessage);
         case JsonTransferDataType.asset:
@@ -245,8 +257,10 @@ class DeviceTransferReceiver {
         case JsonTransferDataType.user:
           final user = TransferDataUser.fromJson(data.data);
           d('client: user: $user');
-          await database.userDao
-              .insert(user.toDbUser(), updateIfConflict: false);
+          await database.userDao.insert(
+            user.toDbUser(),
+            updateIfConflict: false,
+          );
         case JsonTransferDataType.sticker:
           final sticker = TransferDataSticker.fromJson(data.data);
           d('client: sticker: $sticker');
@@ -254,13 +268,17 @@ class DeviceTransferReceiver {
         case JsonTransferDataType.snapshot:
           final snapshot = TransferDataSnapshot.fromJson(data.data);
           d('client: snapshot: $snapshot');
-          await database.snapshotDao
-              .insert(snapshot.toDbSnapshot(), updateIfConflict: false);
+          await database.snapshotDao.insert(
+            snapshot.toDbSnapshot(),
+            updateIfConflict: false,
+          );
         case JsonTransferDataType.safeSnapshot:
           final safeSnapshot = TransferDataSafeSnapshot.fromJson(data.data);
           d('client: safeSnapshot: $safeSnapshot');
-          await database.safeSnapshotDao
-              .insert(safeSnapshot.toDbSafeSnapshot(), updateIfConflict: false);
+          await database.safeSnapshotDao.insert(
+            safeSnapshot.toDbSafeSnapshot(),
+            updateIfConflict: false,
+          );
         case JsonTransferDataType.expiredMessage:
           final expiredMessage = TransferDataExpiredMessage.fromJson(data.data);
           d('client: expiredMessage: $expiredMessage');
@@ -271,13 +289,13 @@ class DeviceTransferReceiver {
             updateIfConflict: false,
           );
         case JsonTransferDataType.transcriptMessage:
-          final transcriptMessage =
-              TransferDataTranscriptMessage.fromJson(data.data);
-          d('client: transcriptMessage: $transcriptMessage');
-          await database.transcriptMessageDao.insertAll(
-            [transcriptMessage.toDbTranscriptMessage()],
-            mode: InsertMode.insertOrIgnore,
+          final transcriptMessage = TransferDataTranscriptMessage.fromJson(
+            data.data,
           );
+          d('client: transcriptMessage: $transcriptMessage');
+          await database.transcriptMessageDao.insertAll([
+            transcriptMessage.toDbTranscriptMessage(),
+          ], mode: InsertMode.insertOrIgnore);
         case JsonTransferDataType.participant:
           final participant = TransferDataParticipant.fromJson(data.data);
           d('client: participant: $participant');
@@ -302,20 +320,21 @@ class DeviceTransferReceiver {
         case JsonTransferDataType.app:
           final app = TransferDataApp.fromJson(data.data);
           d('client: app: $app');
-          await database.appDao.insert(
-            app.toDbApp(),
-            updateIfConflict: false,
-          );
+          await database.appDao.insert(app.toDbApp(), updateIfConflict: false);
         case JsonTransferDataType.inscriptionItem:
           final inscription = db.InscriptionItem.fromJson(data.data);
           d('client: inscription: $inscription');
-          await database.inscriptionItemDao
-              .insert(inscription, updateIfConflict: false);
+          await database.inscriptionItemDao.insert(
+            inscription,
+            updateIfConflict: false,
+          );
         case JsonTransferDataType.inscriptionCollection:
           final collection = db.InscriptionCollection.fromJson(data.data);
           d('client: InscriptionCollection: $collection');
-          await database.inscriptionCollectionDao
-              .insert(collection, updateIfConflict: false);
+          await database.inscriptionCollectionDao.insert(
+            collection,
+            updateIfConflict: false,
+          );
         case JsonTransferDataType.unknown:
           i('unknown type: ${data.type}');
       }
@@ -326,7 +345,8 @@ class DeviceTransferReceiver {
   }
 
   Future<void> _processReceivedAttachmentPacket(
-      TransferAttachmentPacket packet) async {
+    TransferAttachmentPacket packet,
+  ) async {
     d('_processReceivedAttachmentPacket: ${packet.messageId} ${packet.path}');
 
     void deletePacketFile() {
@@ -337,9 +357,10 @@ class DeviceTransferReceiver {
       }
     }
 
-    final tm = await database.transcriptMessageDao
-        .transcriptMessageByMessageId(packet.messageId)
-        .getSingleOrNull();
+    final tm =
+        await database.transcriptMessageDao
+            .transcriptMessageByMessageId(packet.messageId)
+            .getSingleOrNull();
     if (tm != null) {
       final path = attachmentUtil.convertAbsolutePath(
         category: tm.category,
@@ -347,8 +368,10 @@ class DeviceTransferReceiver {
         isTranscript: true,
       );
       if (path.isEmpty) {
-        e('_processReceivedAttachmentPacket: transcript attachment path is empty.'
-            ' ${tm.messageId} ${tm.mediaUrl} ${tm.category}');
+        e(
+          '_processReceivedAttachmentPacket: transcript attachment path is empty.'
+          ' ${tm.messageId} ${tm.mediaUrl} ${tm.category}',
+        );
       } else {
         try {
           final target = File(path);
@@ -366,11 +389,14 @@ class DeviceTransferReceiver {
       }
     }
 
-    final message =
-        await database.messageDao.findMessageByMessageId(packet.messageId);
+    final message = await database.messageDao.findMessageByMessageId(
+      packet.messageId,
+    );
 
     if (message == null) {
-      e('_processReceivedAttachmentPacket: message is null ${packet.messageId}');
+      e(
+        '_processReceivedAttachmentPacket: message is null ${packet.messageId}',
+      );
       deletePacketFile();
       return;
     }
@@ -382,7 +408,9 @@ class DeviceTransferReceiver {
     );
 
     if (path.isEmpty) {
-      e('_processReceivedAttachmentPacket: path is empty. ${message.messageId} ${message.category} ${message.mediaUrl}');
+      e(
+        '_processReceivedAttachmentPacket: path is empty. ${message.messageId} ${message.category} ${message.mediaUrl}',
+      );
       deletePacketFile();
       return;
     }
@@ -401,8 +429,11 @@ class DeviceTransferReceiver {
         parent.createSync(recursive: true);
       }
     } catch (error, stacktrace) {
-      e('_processReceivedAttachmentPacket: ${message.messageId} ${message.category} ${message.mediaUrl}',
-          error, stacktrace);
+      e(
+        '_processReceivedAttachmentPacket: ${message.messageId} ${message.category} ${message.mediaUrl}',
+        error,
+        stacktrace,
+      );
       deletePacketFile();
       return;
     }

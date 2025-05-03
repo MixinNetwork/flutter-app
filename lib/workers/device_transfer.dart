@@ -112,18 +112,25 @@ Future<DeviceTransferIsolateController> startTransferIsolate({
     onExit: exitReceivePort.sendPort,
     onError: errorReceivePort.sendPort,
   );
-  final jobSubscribers = <StreamSubscription>{}
-    ..add(exitReceivePort.listen((message) {
-      w('device transfer isolate exit: $message');
-    }))
-    ..add(errorReceivePort.listen((message) {
-      w('device transfer isolate error: $message');
-    }))
-    ..add(isolateChannel.stream.listen((message) {
-      if (message is DeviceTransferIsolateDeliverMessage) {
-        messageDeliver(message.message);
-      }
-    }));
+  final jobSubscribers =
+      <StreamSubscription>{}
+        ..add(
+          exitReceivePort.listen((message) {
+            w('device transfer isolate exit: $message');
+          }),
+        )
+        ..add(
+          errorReceivePort.listen((message) {
+            w('device transfer isolate error: $message');
+          }),
+        )
+        ..add(
+          isolateChannel.stream.listen((message) {
+            if (message is DeviceTransferIsolateDeliverMessage) {
+              messageDeliver(message.message);
+            }
+          }),
+        );
 
   return DeviceTransferIsolateController(
     dispose: () {
@@ -141,7 +148,8 @@ Future<DeviceTransferIsolateController> startTransferIsolate({
 }
 
 Future<void> _deviceTransferIsolateEntryPoint(
-    DeviceTransferStartParams params) async {
+  DeviceTransferStartParams params,
+) async {
   EquatableConfig.stringify = true;
   ansiColorDisabled = Platform.isIOS;
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
@@ -185,39 +193,45 @@ class DeviceTransfer {
     required this.receiver,
     required this.deviceId,
   }) {
-    _subscriptions.add(EventBus.instance.on
-        .whereType<DeviceTransferCommand>()
-        .listen((event) async {
-      switch (event) {
-        case DeviceTransferCommand.pullToRemote:
-          await _sendPullToOtherSession();
-        case DeviceTransferCommand.pushToRemote:
-          await _sendPushToOtherSession();
-        case DeviceTransferCommand.cancelRestore:
-          receiver.close();
-        case DeviceTransferCommand.cancelBackup:
-          await sender.close();
-        case DeviceTransferCommand.confirmRestore:
-          final data = _remotePushData;
-          if (data == null) {
-            e('confirm restore but no data.');
-            return;
-          }
-          _remotePushData = null;
-          await receiver.connectToServer(
-              data.ip, data.port, data.code, data.secretKey);
-        case DeviceTransferCommand.confirmBackup:
-          await _sendPushToOtherSession();
-        case DeviceTransferCommand.cancelBackupRequest:
-          await _sendCommandAsPlainJson(
-            TransferDataCommand.cancel(deviceId: deviceId),
-          );
-        case DeviceTransferCommand.cancelRestoreRequest:
-          await _sendCommandAsPlainJson(
-            TransferDataCommand.cancel(deviceId: deviceId),
-          );
-      }
-    }));
+    _subscriptions.add(
+      EventBus.instance.on.whereType<DeviceTransferCommand>().listen((
+        event,
+      ) async {
+        switch (event) {
+          case DeviceTransferCommand.pullToRemote:
+            await _sendPullToOtherSession();
+          case DeviceTransferCommand.pushToRemote:
+            await _sendPushToOtherSession();
+          case DeviceTransferCommand.cancelRestore:
+            receiver.close();
+          case DeviceTransferCommand.cancelBackup:
+            await sender.close();
+          case DeviceTransferCommand.confirmRestore:
+            final data = _remotePushData;
+            if (data == null) {
+              e('confirm restore but no data.');
+              return;
+            }
+            _remotePushData = null;
+            await receiver.connectToServer(
+              data.ip,
+              data.port,
+              data.code,
+              data.secretKey,
+            );
+          case DeviceTransferCommand.confirmBackup:
+            await _sendPushToOtherSession();
+          case DeviceTransferCommand.cancelBackupRequest:
+            await _sendCommandAsPlainJson(
+              TransferDataCommand.cancel(deviceId: deviceId),
+            );
+          case DeviceTransferCommand.cancelRestoreRequest:
+            await _sendCommandAsPlainJson(
+              TransferDataCommand.cancel(deviceId: deviceId),
+            );
+        }
+      }),
+    );
   }
 
   static Future<DeviceTransfer> create({
@@ -236,16 +250,19 @@ class DeviceTransfer {
       protocolTempFileDir: protocolFileTempDir,
       deviceId: deviceId,
       onSenderStart: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onBackupStart);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onBackupStart,
+        );
       },
       onSenderSucceed: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onBackupSucceed);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onBackupSucceed,
+        );
       },
       onSenderFailed: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onBackupFailed);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onBackupFailed,
+        );
       },
       onSenderProgressUpdate: (progress) {
         DeviceTransferEventBus.instance.fire(
@@ -254,8 +271,9 @@ class DeviceTransfer {
         );
       },
       onSenderServerCreated: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onBackupServerCreated);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onBackupServerCreated,
+        );
       },
       onSenderNetworkSpeedUpdate: (speed) {
         DeviceTransferEventBus.instance.fire(
@@ -271,16 +289,19 @@ class DeviceTransfer {
       protocolTempFileDir: protocolFileTempDir,
       deviceId: deviceId,
       onReceiverStart: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onRestoreStart);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onRestoreStart,
+        );
       },
       onReceiverSucceed: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onRestoreSucceed);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onRestoreSucceed,
+        );
       },
       onReceiverFailed: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onRestoreFailed);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onRestoreFailed,
+        );
       },
       onReceiverProgressUpdate: (progress) {
         DeviceTransferEventBus.instance.fire(
@@ -289,8 +310,9 @@ class DeviceTransfer {
         );
       },
       onConnectedToServer: () {
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onRestoreConnected);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onRestoreConnected,
+        );
       },
       onNetworkSpeedUpdate: (speed) {
         DeviceTransferEventBus.instance.fire(
@@ -331,7 +353,7 @@ class DeviceTransfer {
   Future<void> _sendCommandAsPlainJson(TransferDataCommand command) async {
     final conversationId =
         await database.participantDao.findJoinedConversationId(userId) ??
-            generateConversationId(userId, kTeamMixinUserId);
+        generateConversationId(userId, kTeamMixinUserId);
 
     final content = await jsonEncodeWithIsolate(command.toJson());
     final plainText = PlainJsonMessage.create(
@@ -339,7 +361,8 @@ class DeviceTransfer {
       content: content,
     );
     final encoded = await base64EncodeWithIsolate(
-        await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)));
+      await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)),
+    );
     final param = createPlainJsonParam(
       conversationId,
       userId,
@@ -414,7 +437,9 @@ class DeviceTransfer {
   void handleRemoteCommand(TransferDataCommand command) {
     i('handleRemoteCommand: ${command.action}');
     if (command.version != kDeviceTransferProtocolVersion) {
-      e('command version not matched.${command.version}, $kDeviceTransferProtocolVersion');
+      e(
+        'command version not matched.${command.version}, $kDeviceTransferProtocolVersion',
+      );
       DeviceTransferEventBus.instance.fire(
         DeviceTransferCallbackType.onConnectionFailed,
         ConnectionFailedReason.versionNotMatched,
@@ -425,10 +450,15 @@ class DeviceTransfer {
     switch (command.action) {
       case kTransferCommandActionPush:
         _handleRemotePushCommand(
-            command.ip!, command.port!, command.code!, command.secretKey!);
+          command.ip!,
+          command.port!,
+          command.code!,
+          command.secretKey!,
+        );
       case kTransferCommandActionPull:
-        DeviceTransferEventBus.instance
-            .fire(DeviceTransferCallbackType.onRestoreRequestReceived);
+        DeviceTransferEventBus.instance.fire(
+          DeviceTransferCallbackType.onRestoreRequestReceived,
+        );
       default:
         e('handleRemoteCommand: unknown action ${command.action}');
         return;
@@ -436,7 +466,11 @@ class DeviceTransfer {
   }
 
   Future<void> _handleRemotePushCommand(
-      String ip, int port, int code, String secretKey) async {
+    String ip,
+    int port,
+    int code,
+    String secretKey,
+  ) async {
     d('_handleRemotePushCommand: $ip:$port ($code)');
     final keyBytes = base64Decode(secretKey);
     if (keyBytes.length != 64) {
@@ -453,9 +487,14 @@ class DeviceTransfer {
       await receiver.connectToServer(ip, port, code, transferSecretKey);
     } else {
       _remotePushData = _RemotePushData(
-          ip: ip, port: port, code: code, secretKey: transferSecretKey);
-      DeviceTransferEventBus.instance
-          .fire(DeviceTransferCallbackType.onBackupRequestReceived);
+        ip: ip,
+        port: port,
+        code: code,
+        secretKey: transferSecretKey,
+      );
+      DeviceTransferEventBus.instance.fire(
+        DeviceTransferCallbackType.onBackupRequestReceived,
+      );
     }
   }
 

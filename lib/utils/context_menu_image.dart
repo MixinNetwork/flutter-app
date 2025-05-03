@@ -7,33 +7,30 @@ import 'package:super_native_extensions/raw_menu.dart';
 
 class MenuSvg extends MenuImage {
   MenuSvg(String assetName)
-      : _menuImage = MenuImage.withImage((theme, devicePixelRatio) async {
-          assert(theme.size != null, 'IconThemeData.size must not be null!');
-          assert(theme.color != null, 'IconThemeData.color must not be null!');
+    : _menuImage = MenuImage.withImage((theme, devicePixelRatio) async {
+        assert(theme.size != null, 'IconThemeData.size must not be null!');
+        assert(theme.color != null, 'IconThemeData.color must not be null!');
 
-          final size = theme.size!;
-          final color = theme.color!;
+        final size = theme.size!;
+        final color = theme.color!;
 
-          final pictureInfo = await vg.loadPicture(
-            SvgAssetLoader(
-              assetName,
-              theme: SvgTheme(
-                currentColor: color,
-                fontSize: size,
-              ),
-            ),
-            null,
-          );
+        final pictureInfo = await vg.loadPicture(
+          SvgAssetLoader(
+            assetName,
+            theme: SvgTheme(currentColor: color, fontSize: size),
+          ),
+          null,
+        );
 
-          final image = await pictureInfo.picture.toImage(
-            (size * devicePixelRatio).round(),
-            (size * devicePixelRatio).round(),
-          );
+        final image = await pictureInfo.picture.toImage(
+          (size * devicePixelRatio).round(),
+          (size * devicePixelRatio).round(),
+        );
 
-          image.devicePixelRatio = devicePixelRatio.toDouble();
+        image.devicePixelRatio = devicePixelRatio.toDouble();
 
-          return image;
-        });
+        return image;
+      });
 
   final MenuImage _menuImage;
 

@@ -85,21 +85,21 @@ class TransferDataSafeSnapshot {
   Map<String, dynamic> toJson() => _$TransferDataSafeSnapshotToJson(this);
 
   db.SafeSnapshot toDbSafeSnapshot() => db.SafeSnapshot(
-        snapshotId: snapshotId,
-        type: type,
-        assetId: assetId,
-        amount: amount,
-        userId: userId,
-        opponentId: opponentId,
-        memo: memo,
-        transactionHash: transactionHash,
-        createdAt: createdAt,
-        traceId: traceId,
-        confirmations: confirmations,
-        openingBalance: openingBalance,
-        closingBalance: closingBalance,
-        withdrawal: withdrawal,
-        deposit: deposit,
-        inscriptionHash: inscriptionHash,
-      );
+    snapshotId: snapshotId,
+    type: type,
+    assetId: assetId,
+    amount: amount,
+    userId: userId,
+    opponentId: opponentId,
+    memo: memo,
+    transactionHash: transactionHash,
+    createdAt: createdAt,
+    traceId: traceId,
+    confirmations: confirmations,
+    openingBalance: openingBalance,
+    closingBalance: closingBalance,
+    withdrawal: withdrawal,
+    deposit: deposit,
+    inscriptionHash: inscriptionHash,
+  );
 }
