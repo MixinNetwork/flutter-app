@@ -1853,10 +1853,10 @@ packages:
     dependency: "direct main"
     description:
       name: simple_animations
-      sha256: "6c0f1d53d351a2187da979cc6883322eb9e76f1147c1aecc1937c498eaa9abff"
+      sha256: "2f4817d7e56a8ae34f1666ba9906aed394a48c7e1568d0fcd63efefb95142dd5"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "5.2.0"
   sky_engine:
     dependency: transitive
     description: flutter
