@@ -397,8 +397,7 @@ class _Menus extends HookConsumerWidget {
         menus: [
           PlatformMenuItem(
             label: context.l10n.helpCenter,
-            onSelected:
-                () => openUri(context, 'https://mixinmessenger.zendesk.com'),
+            onSelected: () => openUri(context, 'https://support.mixin.one/'),
           ),
           PlatformMenuItem(
             label: context.l10n.termsOfService,

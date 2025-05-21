@@ -66,7 +66,7 @@ const kMaxTextLength = 64 * 1024;
 const kDefaultTextInputLimit = 200;
 
 const mixinDisappearingMessageHelpUrl =
-    'https://mixinmessenger.zendesk.com/hc/articles/5127869180564';
+    'https://support.mixin.one/en/article/how-to-enable-disappearing-messages-2nzaz8/';
 
 const giphyApiKey = String.fromEnvironment('MIXIN_GIPHY_KEY');
 
