@@ -113,10 +113,7 @@ class AboutPage extends HookConsumerWidget {
                     CellItem(
                       title: Text(context.l10n.helpCenter),
                       onTap:
-                          () => openUri(
-                            context,
-                            'https://mixinmessenger.zendesk.com',
-                          ),
+                          () => openUri(context, 'https://support.mixin.one'),
                     ),
                     CellItem(
                       title: Text(context.l10n.termsOfService),
