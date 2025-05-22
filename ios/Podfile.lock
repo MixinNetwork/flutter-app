@@ -85,17 +85,19 @@ PODS:
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
-  - Sentry/HybridSDK (8.42.0)
-  - sentry_flutter (8.12.0):
+  - Sentry/HybridSDK (8.46.0)
+  - sentry_flutter (8.14.2):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.42.0)
+    - Sentry/HybridSDK (= 8.46.0)
   - sqlite3 (3.49.1):
     - sqlite3/common (= 3.49.1)
   - sqlite3/common (3.49.1)
   - sqlite3/dbstatvtab (3.49.1):
     - sqlite3/common
   - sqlite3/fts5 (3.49.1):
+    - sqlite3/common
+  - sqlite3/math (3.49.1):
     - sqlite3/common
   - sqlite3/perf-threadsafe (3.49.1):
     - sqlite3/common
@@ -104,9 +106,10 @@ PODS:
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
     - FlutterMacOS
-    - sqlite3 (~> 3.49.0)
+    - sqlite3 (~> 3.49.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
+    - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - super_native_extensions (0.0.1):
@@ -226,11 +229,11 @@ SPEC CHECKSUMS:
   device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   DKImagePickerController: a7836546cfdfe014171694f643a7d575bc8ace7f
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: 9b3292d7c8bc68c8a7bf8eb78f730e49c8efc517
+  file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   file_selector_ios: f92e583d43608aebc2e4a18daac30b8902845502
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_app_icon_badge: 44f31cf93bad265c20fe8f13f6e0a1d4e4707fe8
-  flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
+  flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   gal: 44e5b10dbd347c8247a2851acee6c1fbe282c1d3
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
@@ -247,16 +250,16 @@ SPEC CHECKSUMS:
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5
   rhttp: 359daed992674fc912552df3106bfbc746bcc929
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
-  Sentry: 38ed8bf38eab5812787274bf591e528074c19e02
-  sentry_flutter: a72ca0eb6e78335db7c4ddcddd1b9f6c8ed5b764
+  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
+  sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
   sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
-  sqlite3_flutter_libs: 3c323550ef3b928bc0aa9513c841e45a7d242832
+  sqlite3_flutter_libs: f6acaa2172e6bb3e2e70c771661905080e8ebcf2
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_compress: f2133a07762889d67f0711ac831faa26f956980e
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
-  webview_flutter_wkwebview: 44d4dee7d7056d5ad185d25b38404436d56c547c
+  webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
 PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60
 
