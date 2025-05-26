@@ -332,10 +332,10 @@ packages:
     dependency: transitive
     description:
       name: dart_jsonwebtoken
-      sha256: "866787dc17afaef46a9ea7dd33eefe60c6d82084b4a36d70e8e788d091cd04ef"
+      sha256: "21ce9f8a8712f741e8d6876a9c82c0f8a257fe928c4378a91d8527b92a3fd413"
       url: "https://pub.dev"
     source: hosted
-    version: "2.14.2"
+    version: "3.2.0"
   dart_style:
     dependency: transitive
     description:
@@ -1172,10 +1172,10 @@ packages:
     dependency: "direct main"
     description:
       name: libsignal_protocol_dart
-      sha256: "1b691092b24decbd5602a656e42b5a8e61043d2d102ba856a20f96fc04013647"
+      sha256: "385c0d499d70063739ab6963455a4e889aea16d6a4c9e769371d7ed2d1427ef6"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.2"
+    version: "0.7.3"
   lints:
     dependency: transitive
     description:
@@ -1605,10 +1605,10 @@ packages:
     dependency: transitive
     description:
       name: pointycastle
-      sha256: "4be0097fcf3fd3e8449e53730c631200ebc7b88016acecab2b0da2f0149222fe"
+      sha256: "92aa3841d083cc4b0f4709b5c74fd6409a3e6ba833ffc7dc6a8fee096366acf5"
       url: "https://pub.dev"
     source: hosted
-    version: "3.9.1"
+    version: "4.0.0"
   pool:
     dependency: transitive
     description:
@@ -1637,10 +1637,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      sha256: "579fe5557eae58e3adca2e999e38f02441d8aa908703854a9e0a0f47fa857731"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "4.1.0"
   protocol_handler:
     dependency: "direct main"
     description:
