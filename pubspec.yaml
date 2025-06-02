@@ -184,7 +184,7 @@ dev_dependencies:
     git:
       url: https://github.com/riccardo-lomazzi/msix.git
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   very_good_analysis: ^7.0.0
   envied_generator: ^1.1.0
 
