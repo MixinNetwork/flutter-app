@@ -28,10 +28,9 @@ class Localization {
   static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<Localization> load(Locale locale) {
-    final name =
-        (locale.countryCode?.isEmpty ?? false)
-            ? locale.languageCode
-            : locale.toString();
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
     final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
@@ -415,11 +414,6 @@ class Localization {
     );
   }
 
-  /// `Chat`
-  String get chat {
-    return Intl.message('Chat', name: 'chat', desc: '', args: []);
-  }
-
   /// `Chat Backup`
   String get chatBackup {
     return Intl.message('Chat Backup', name: 'chatBackup', desc: '', args: []);
@@ -555,6 +549,11 @@ class Localization {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Chats`
+  String get chats {
+    return Intl.message('Chats', name: 'chats', desc: '', args: []);
   }
 
   /// `Check new version`
@@ -1946,6 +1945,16 @@ class Localization {
   /// `From:`
   String get fromWithColon {
     return Intl.message('From:', name: 'fromWithColon', desc: '', args: []);
+  }
+
+  /// `Generate QR Code`
+  String get generateQrcode {
+    return Intl.message(
+      'Generate QR Code',
+      name: 'generateQrcode',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `You are already in the group.`

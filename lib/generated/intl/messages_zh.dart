@@ -198,7 +198,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeNumber": MessageLookupByLibrary.simpleMessage("修改手机号"),
     "changeNumberInstead": MessageLookupByLibrary.simpleMessage("仅修改手机号码"),
     "changedDisappearingMessageSettings": m0,
-    "chat": MessageLookupByLibrary.simpleMessage("聊天"),
     "chatBackup": MessageLookupByLibrary.simpleMessage("聊天记录备份"),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage("点击按钮使用机器人"),
     "chatDecryptionFailedHint": m1,
@@ -216,6 +215,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "chatPinMessage": m7,
     "chatTextSize": MessageLookupByLibrary.simpleMessage("聊天字体大小"),
+    "chats": MessageLookupByLibrary.simpleMessage("聊天"),
     "checkNewVersion": MessageLookupByLibrary.simpleMessage("检查新版本"),
     "circleSubtitle": m8,
     "circleTitle": m9,
@@ -468,6 +468,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forward": MessageLookupByLibrary.simpleMessage("转发"),
     "from": MessageLookupByLibrary.simpleMessage("来自"),
     "fromWithColon": MessageLookupByLibrary.simpleMessage("来自："),
+    "generateQrcode": MessageLookupByLibrary.simpleMessage("生成二维码"),
     "groupAlreadyIn": MessageLookupByLibrary.simpleMessage("你已经在该群组里"),
     "groupCantSend": MessageLookupByLibrary.simpleMessage(
       "您不能发送消息，因为您已经不再是此群组成员。",
