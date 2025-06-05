@@ -90,7 +90,7 @@ dependencies:
   intl_phone_number_input: ^0.7.4
   isolate: ^2.1.0
   json_annotation: ^4.8.1
-  libsignal_protocol_dart: ^0.7.3
+  libsignal_protocol_dart: ^0.7.4
   local_auth: ^2.3.0
   lottie: ^3.1.2
   map: ^2.0.2
@@ -143,7 +143,7 @@ dependencies:
   webview_flutter: ^4.13.0
   win32: ^5.13.0
   win_toast: ^0.3.1
-  window_manager: ^0.5.0
+  window_manager: 0.4.3
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
@@ -177,8 +177,7 @@ dev_dependencies:
   drift_dev: ^2.19.1
   flutter_test:
     sdk: flutter
-  hive_generator: ^2.0.1
-  intl_utils: ^2.8.7
+  intl_utils: ^2.8.10
   json_serializable: ^6.7.1
   msix:
     git:
@@ -187,10 +186,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   very_good_analysis: ^7.0.0
   envied_generator: ^1.1.0
-
-dependency_overrides:
-  very_good_analysis: ^7.0.0
-  collection: ^1.18.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

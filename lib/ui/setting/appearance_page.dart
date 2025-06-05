@@ -119,7 +119,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(left: 10, bottom: 14, top: 22),
           child: Text(
-            context.l10n.chat,
+            context.l10n.chats,
             style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
           ),
         ),

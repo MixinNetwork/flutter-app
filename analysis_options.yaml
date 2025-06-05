@@ -71,3 +71,4 @@ linter:
 
     avoid_catches_without_on_clauses: false
     document_ignores: false
+    specify_nonobvious_property_types: false

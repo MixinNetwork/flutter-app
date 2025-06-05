@@ -223,7 +223,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Change Number Instead",
     ),
     "changedDisappearingMessageSettings": m0,
-    "chat": MessageLookupByLibrary.simpleMessage("Chat"),
     "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
       "Tap the button to interact with the bot",
@@ -246,6 +245,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "chatPinMessage": m7,
     "chatTextSize": MessageLookupByLibrary.simpleMessage("Chat Text Size"),
+    "chats": MessageLookupByLibrary.simpleMessage("Chats"),
     "checkNewVersion": MessageLookupByLibrary.simpleMessage(
       "Check new version",
     ),
@@ -566,6 +566,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "forward": MessageLookupByLibrary.simpleMessage("Forward"),
     "from": MessageLookupByLibrary.simpleMessage("From"),
     "fromWithColon": MessageLookupByLibrary.simpleMessage("From:"),
+    "generateQrcode": MessageLookupByLibrary.simpleMessage("Generate QR Code"),
     "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
       "You are already in the group.",
     ),

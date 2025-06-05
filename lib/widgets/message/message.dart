@@ -46,6 +46,7 @@ import '../../utils/system/clipboard.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
 import '../menu.dart';
+import '../qr_code.dart';
 import '../sticker_page/add_sticker_dialog.dart';
 import '../toast.dart';
 import '../user/user_dialog.dart';
@@ -511,26 +512,42 @@ class MessageItemWidget extends HookConsumerWidget {
                       }
                     } else if (message.type.isText) {
                       final selectedContent = _findSelectedContent(context);
-                      copyActions.add(
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.copy),
-                          title:
-                              selectedContent == null
-                                  ? context.l10n.copy
-                                  : context.l10n.copySelectedText,
-                          callback: () {
-                            if (selectedContent != null) {
-                              Clipboard.setData(
-                                ClipboardData(text: selectedContent.plainText),
-                              );
-                            } else {
-                              Clipboard.setData(
-                                ClipboardData(text: message.content ?? ''),
-                              );
-                            }
-                          },
-                        ),
-                      );
+                      copyActions
+                        ..add(
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.copy),
+                            title:
+                                selectedContent == null
+                                    ? context.l10n.copy
+                                    : context.l10n.copySelectedText,
+                            callback: () {
+                              if (selectedContent != null) {
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: selectedContent.plainText,
+                                  ),
+                                );
+                              } else {
+                                Clipboard.setData(
+                                  ClipboardData(text: message.content ?? ''),
+                                );
+                              }
+                            },
+                          ),
+                        )
+                        ..add(
+                          MenuAction(
+                            image: MenuImage.icon(Icons.qr_code),
+                            title: context.l10n.generateQrcode,
+                            callback: () {
+                              final content =
+                                  selectedContent?.plainText ??
+                                  message.content ??
+                                  '';
+                              showQrCodeDialog(context, content);
+                            },
+                          ),
+                        );
                     } else if (message.type.isAppCard) {
                       final selectedContent = _findSelectedContent(context);
                       if (selectedContent != null) {
