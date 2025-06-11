@@ -193,6 +193,39 @@ ORDER BY match_score DESC
 
 
 fuzzySearchConversationItem AS SearchItem:
+WITH query_parts AS (
+    SELECT 
+        TRIM(:query) AS full_query,
+        -- Extract up to 3 keywords from the query
+        CASE WHEN INSTR(TRIM(:query), ' ') = 0 THEN TRIM(:query)
+             ELSE TRIM(SUBSTR(TRIM(:query), 1, INSTR(TRIM(:query), ' ') - 1))
+        END AS keyword1,
+        CASE WHEN INSTR(TRIM(:query), ' ') = 0 THEN ''
+             ELSE TRIM(SUBSTR(TRIM(:query), INSTR(TRIM(:query), ' ') + 1))
+        END AS remaining1
+),
+split_query AS (
+    SELECT 
+        full_query,
+        keyword1,
+        CASE WHEN INSTR(remaining1, ' ') = 0 THEN remaining1
+             ELSE TRIM(SUBSTR(remaining1, 1, INSTR(remaining1, ' ') - 1))
+        END AS keyword2,
+        CASE WHEN INSTR(remaining1, ' ') = 0 THEN ''
+             ELSE TRIM(SUBSTR(remaining1, INSTR(remaining1, ' ') + 1))
+        END AS remaining2
+    FROM query_parts
+),
+final_keywords AS (
+    SELECT 
+        full_query,
+        keyword1,
+        keyword2,
+        CASE WHEN INSTR(remaining2, ' ') = 0 THEN remaining2
+             ELSE TRIM(SUBSTR(remaining2, 1, INSTR(remaining2, ' ') - 1))
+        END AS keyword3
+    FROM split_query
+)
 SELECT 
     CASE 
         WHEN conversation.category = 'GROUP' THEN 'GROUP'
@@ -213,15 +246,51 @@ SELECT
         WHEN conversation.category = 'CONTACT' THEN owner.membership
         ELSE NULL
     END AS membership,
+    -- Smart scoring: single keyword vs multi-keyword
     CASE 
-        WHEN LENGTH(:query) = 0 THEN 0.0
-        WHEN name = :query COLLATE NOCASE THEN 1.0 + 1.0/LENGTH(name)
-        WHEN name LIKE :query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.6 + 1.0/LENGTH(name)
-        WHEN name LIKE '%' || :query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.3 + 1.0/LENGTH(name)
+        WHEN LENGTH(kw.full_query) = 0 THEN 0.0
+        -- Single keyword logic
+        WHEN LENGTH(kw.keyword2) = 0 THEN
+            CASE 
+                WHEN name = kw.full_query COLLATE NOCASE THEN 1.0 + 1.0/LENGTH(name)
+                WHEN name LIKE kw.full_query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.6 + 1.0/LENGTH(name)
+                WHEN name LIKE '%' || kw.full_query || '%' ESCAPE '\' COLLATE NOCASE THEN 0.3 + 1.0/LENGTH(name)
+                ELSE 0.0
+            END
+        -- Multi-keyword logic (when keyword2 is not empty)
+        WHEN (
+            (LENGTH(kw.keyword1) > 0 AND name LIKE '%' || kw.keyword1 || '%' ESCAPE '\' COLLATE NOCASE) OR
+            (LENGTH(kw.keyword2) > 0 AND name LIKE '%' || kw.keyword2 || '%' ESCAPE '\' COLLATE NOCASE) OR
+            (LENGTH(kw.keyword3) > 0 AND name LIKE '%' || kw.keyword3 || '%' ESCAPE '\' COLLATE NOCASE)
+        ) THEN 
+            -- Base score: number of matched keywords
+            (CASE WHEN LENGTH(kw.keyword1) > 0 AND name LIKE '%' || kw.keyword1 || '%' ESCAPE '\' COLLATE NOCASE THEN 1 ELSE 0 END +
+             CASE WHEN LENGTH(kw.keyword2) > 0 AND name LIKE '%' || kw.keyword2 || '%' ESCAPE '\' COLLATE NOCASE THEN 1 ELSE 0 END +
+             CASE WHEN LENGTH(kw.keyword3) > 0 AND name LIKE '%' || kw.keyword3 || '%' ESCAPE '\' COLLATE NOCASE THEN 1 ELSE 0 END) * 0.1 + 
+            -- Bonus for sequential matching
+            CASE 
+                WHEN LENGTH(kw.keyword1) > 0 AND LENGTH(kw.keyword2) > 0 AND 
+                     name LIKE '%' || kw.keyword1 || '%' || kw.keyword2 || '%' ESCAPE '\' COLLATE NOCASE THEN 0.2
+                ELSE 0.0
+            END +
+            -- Bonus for exact sequence match (space-separated only)
+            CASE 
+                WHEN LENGTH(kw.keyword1) > 0 AND LENGTH(kw.keyword2) > 0 AND 
+                     name LIKE '%' || kw.keyword1 || ' ' || kw.keyword2 || '%' ESCAPE '\' COLLATE NOCASE THEN 0.15
+                ELSE 0.0
+            END +
+            -- Bonus for prefix matching
+            CASE 
+                WHEN LENGTH(kw.keyword1) > 0 AND name LIKE kw.keyword1 || '%' ESCAPE '\' COLLATE NOCASE THEN 0.1
+                ELSE 0.0
+            END +
+            -- Length penalty factor
+            1.0 / LENGTH(name)
         ELSE 0.0
     END AS match_score
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
+    CROSS JOIN final_keywords kw
 WHERE $where
 ORDER BY match_score DESC, conversation.pin_time DESC
     limit $limit;

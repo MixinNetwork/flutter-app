@@ -28,10 +28,9 @@ class Localization {
   static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<Localization> load(Locale locale) {
-    final name =
-        (locale.countryCode?.isEmpty ?? false)
-            ? locale.languageCode
-            : locale.toString();
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
     final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
@@ -4043,10 +4042,8 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
 
   @override
   bool isSupported(Locale locale) => _isSupported(locale);
-
   @override
   Future<Localization> load(Locale locale) => Localization.load(locale);
-
   @override
   bool shouldReload(AppLocalizationDelegate old) => false;
 
