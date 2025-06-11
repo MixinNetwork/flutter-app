@@ -652,7 +652,7 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
     bool caseSensitive,
   ) {
     if (keywords.isEmpty) {
-      return RegExp(r'(?!)'); // Never match
+      return RegExp('(?!)'); // Never match
     }
 
     final escapedKeywords =
@@ -662,7 +662,7 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
             .toList();
 
     if (escapedKeywords.isEmpty) {
-      return RegExp(r'(?!)'); // Never match
+      return RegExp('(?!)'); // Never match
     }
 
     final pattern = escapedKeywords.join('|');
