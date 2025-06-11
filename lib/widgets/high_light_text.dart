@@ -616,7 +616,7 @@ class KeyWordTextMatcher extends TextMatcher implements EquatableMixin {
   final bool caseSensitive;
 
   @override
-  List<Object?> get props => [keyword, caseSensitive];
+  List<Object?> get props => [keyword, style, caseSensitive];
 
   @override
   bool? get stringify => true;
@@ -670,10 +670,37 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [keywords, caseSensitive];
+  List<Object?> get props => [keywords, style, caseSensitive];
 
   @override
   bool? get stringify => true;
+
+  /// Creates a keyword text matcher based on the input string
+  /// If the keyword contains spaces, it will return a MultiKeyWordTextMatcher
+  /// Otherwise, it will return a KeyWordTextMatcher
+  static TextMatcher createKeywordMatcher({
+    required String keyword,
+    TextStyle? style,
+    bool caseSensitive = true,
+  }) {
+    if (keyword.trim().isEmpty) {
+      throw ArgumentError('Keyword cannot be empty');
+    }
+
+    if (keyword.trim().contains(' ')) {
+      return MultiKeyWordTextMatcher(
+        keyword.trim().split(RegExp(r'\s+')),
+        style: style,
+        caseSensitive: caseSensitive,
+      );
+    } else {
+      return KeyWordTextMatcher(
+        keyword,
+        style: style,
+        caseSensitive: caseSensitive,
+      );
+    }
+  }
 }
 
 class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {

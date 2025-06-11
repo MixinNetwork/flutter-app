@@ -613,26 +613,14 @@ class SearchItemWidget extends StatelessWidget {
                                   textMatchers:
                                       [
                                         EmojiTextMatcher(),
-                                        if (keyword.trim().isEmpty)
-                                          null
-                                        else
-                                          keyword.trim().contains(' ')
-                                              ? MultiKeyWordTextMatcher(
-                                                keyword.trim().split(
-                                                  RegExp(r'\s+'),
-                                                ),
-                                                style: TextStyle(
-                                                  color: context.theme.accent,
-                                                ),
-                                                caseSensitive: false,
-                                              )
-                                              : KeyWordTextMatcher(
-                                                keyword,
-                                                style: TextStyle(
-                                                  color: context.theme.accent,
-                                                ),
-                                                caseSensitive: false,
-                                              ),
+                                        if (keyword.trim().isNotEmpty)
+                                          MultiKeyWordTextMatcher.createKeywordMatcher(
+                                            keyword: keyword,
+                                            style: TextStyle(
+                                              color: context.theme.accent,
+                                            ),
+                                            caseSensitive: false,
+                                          ),
                                       ].whereType<TextMatcher>().toList(),
                                 ),
                               ),
@@ -684,26 +672,14 @@ class SearchItemWidget extends StatelessWidget {
                               textMatchers:
                                   [
                                     EmojiTextMatcher(),
-                                    if (keyword.trim().isEmpty)
-                                      null
-                                    else
-                                      keyword.trim().contains(' ')
-                                          ? MultiKeyWordTextMatcher(
-                                            keyword.trim().split(
-                                              RegExp(r'\s+'),
-                                            ),
-                                            style: TextStyle(
-                                              color: context.theme.accent,
-                                            ),
-                                            caseSensitive: false,
-                                          )
-                                          : KeyWordTextMatcher(
-                                            keyword,
-                                            style: TextStyle(
-                                              color: context.theme.accent,
-                                            ),
-                                            caseSensitive: false,
-                                          ),
+                                    if (keyword.trim().isNotEmpty)
+                                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                                        keyword: keyword,
+                                        style: TextStyle(
+                                          color: context.theme.accent,
+                                        ),
+                                        caseSensitive: false,
+                                      ),
                                   ].whereType<TextMatcher>().toList(),
                             ),
                           ),

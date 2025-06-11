@@ -691,10 +691,11 @@ class _BaseItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   textMatchers: [
                     EmojiTextMatcher(),
-                    if (keyword != null)
-                      KeyWordTextMatcher(
-                        keyword!.overflow,
+                    if (keyword != null && keyword!.trim().isNotEmpty)
+                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                        keyword: keyword!.overflow,
                         style: TextStyle(color: context.theme.accent),
+                        caseSensitive: false,
                       ),
                   ],
                   style: TextStyle(fontSize: 16, color: context.theme.text),

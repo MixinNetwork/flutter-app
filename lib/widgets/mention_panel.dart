@@ -217,10 +217,11 @@ class _MentionItem extends StatelessWidget {
                 ),
                 textMatchers: [
                   EmojiTextMatcher(),
-                  if (keyword != null)
-                    KeyWordTextMatcher(
-                      keyword!,
+                  if (keyword != null && keyword!.trim().isNotEmpty)
+                    MultiKeyWordTextMatcher.createKeywordMatcher(
+                      keyword: keyword!,
                       style: TextStyle(color: context.theme.accent),
+                      caseSensitive: false,
                     ),
                 ],
                 maxLines: 1,
@@ -234,10 +235,11 @@ class _MentionItem extends StatelessWidget {
                 ),
                 textMatchers: [
                   EmojiTextMatcher(),
-                  if (keyword != null)
-                    KeyWordTextMatcher(
-                      keyword!,
+                  if (keyword != null && keyword!.trim().isNotEmpty)
+                    MultiKeyWordTextMatcher.createKeywordMatcher(
+                      keyword: keyword!,
                       style: TextStyle(color: context.theme.accent),
+                      caseSensitive: false,
                     ),
                 ],
                 maxLines: 1,
