@@ -616,10 +616,91 @@ class KeyWordTextMatcher extends TextMatcher implements EquatableMixin {
   final bool caseSensitive;
 
   @override
-  List<Object?> get props => [keyword, caseSensitive];
+  List<Object?> get props => [keyword, style, caseSensitive];
 
   @override
   bool? get stringify => true;
+}
+
+class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
+  MultiKeyWordTextMatcher(
+    this.keywords, {
+    this.style,
+    this.caseSensitive = true,
+  }) : super.regExp(
+         regExp: _createMultiKeywordRegExp(keywords, caseSensitive),
+         matchBuilder:
+             (span, displayString, linkString) => TextSpan(
+               text: displayString,
+               style: style,
+               recognizer: span.recognizer,
+               mouseCursor: span.mouseCursor,
+               onEnter: span.onEnter,
+               onExit: span.onExit,
+               semanticsLabel: span.semanticsLabel,
+               locale: span.locale,
+               spellOut: span.spellOut,
+             ),
+       );
+
+  final List<String> keywords;
+  final TextStyle? style;
+  final bool caseSensitive;
+
+  static RegExp _createMultiKeywordRegExp(
+    List<String> keywords,
+    bool caseSensitive,
+  ) {
+    if (keywords.isEmpty) {
+      return RegExp('(?!)'); // Never match
+    }
+
+    final escapedKeywords =
+        keywords
+            .where((k) => k.trim().isNotEmpty)
+            .map((k) => RegExp.escape(k.trim()))
+            .toList();
+
+    if (escapedKeywords.isEmpty) {
+      return RegExp('(?!)'); // Never match
+    }
+
+    final pattern = escapedKeywords.join('|');
+    return RegExp('($pattern)', caseSensitive: caseSensitive);
+  }
+
+  @override
+  List<Object?> get props => [keywords, style, caseSensitive];
+
+  @override
+  bool? get stringify => true;
+
+  /// Creates a keyword text matcher based on the input string
+  /// If the keyword contains spaces, it will return a MultiKeyWordTextMatcher
+  /// Otherwise, it will return a KeyWordTextMatcher
+  static TextMatcher createKeywordMatcher({
+    required String keyword,
+    TextStyle? style,
+    bool caseSensitive = true,
+  }) {
+    if (keyword.trim().isEmpty) {
+      throw ArgumentError('Keyword cannot be empty');
+    }
+
+    if (keyword.trim().contains(' ')) {
+      return MultiKeyWordTextMatcher(
+        keyword.trim().split(RegExp(r'\s+')),
+        style: style,
+        caseSensitive: caseSensitive,
+      );
+    } else {
+      return KeyWordTextMatcher(
+        keyword,
+        style: style,
+        caseSensitive: caseSensitive,
+      );
+    }
+  }
 }
 
 class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {

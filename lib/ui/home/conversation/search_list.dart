@@ -610,16 +610,18 @@ class SearchItemWidget extends StatelessWidget {
                                     color: context.theme.text,
                                     fontSize: nameFontSize,
                                   ),
-                                  textMatchers: [
-                                    EmojiTextMatcher(),
-                                    KeyWordTextMatcher(
-                                      keyword,
-                                      style: TextStyle(
-                                        color: context.theme.accent,
-                                      ),
-                                      caseSensitive: false,
-                                    ),
-                                  ],
+                                  textMatchers:
+                                      [
+                                        EmojiTextMatcher(),
+                                        if (keyword.trim().isNotEmpty)
+                                          MultiKeyWordTextMatcher.createKeywordMatcher(
+                                            keyword: keyword,
+                                            style: TextStyle(
+                                              color: context.theme.accent,
+                                            ),
+                                            caseSensitive: false,
+                                          ),
+                                      ].whereType<TextMatcher>().toList(),
                                 ),
                               ),
                               if (trailing != null) trailing!,
@@ -667,13 +669,18 @@ class SearchItemWidget extends StatelessWidget {
                                 color: context.theme.secondaryText,
                                 fontSize: 14,
                               ),
-                              textMatchers: [
-                                EmojiTextMatcher(),
-                                KeyWordTextMatcher(
-                                  keyword,
-                                  style: TextStyle(color: context.theme.accent),
-                                ),
-                              ],
+                              textMatchers:
+                                  [
+                                    EmojiTextMatcher(),
+                                    if (keyword.trim().isNotEmpty)
+                                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                                        keyword: keyword,
+                                        style: TextStyle(
+                                          color: context.theme.accent,
+                                        ),
+                                        caseSensitive: false,
+                                      ),
+                                  ].whereType<TextMatcher>().toList(),
                             ),
                           ),
                         ],

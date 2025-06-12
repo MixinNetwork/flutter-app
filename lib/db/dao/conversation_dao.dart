@@ -419,16 +419,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<SearchItem> fuzzySearchConversationItem(String keyword) =>
       db.fuzzySearchConversationItem(
-        keyword,
+        keyword.trim(),
         (conversation, user) =>
-            (conversation.category.equalsValue(ConversationCategory.group) &
-                conversation.name.likeEscape('%$keyword%'))
+            (conversation.category.equalsValue(ConversationCategory.group))
             //
             |
             //
             (conversation.category.equalsValue(ConversationCategory.contact) &
-                user.relationship.equalsValue(UserRelationship.stranger) &
-                user.fullName.likeEscape('%$keyword%')),
+                user.relationship.equalsValue(UserRelationship.stranger)),
         (conversation, user) => maxLimit,
       );
 
