@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 3.0.1+432
+version: 3.0.2+435
 
 environment:
   sdk: "^3.7.0"
@@ -52,7 +52,7 @@ dependencies:
   dio_compatibility_layer: ^0.1.0
   rhttp: ^0.12.0
   flutter_rust_bridge: ^2.6.0
-  drift: ^2.26.1
+  drift: ^2.27.0
   ecache: ^2.0.6
   emojis: ^0.9.9
   equatable: ^2.0.7
@@ -116,16 +116,16 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   simple_animations: ^5.2.0
   sliver_tools: ^0.2.12
-  sqlite3_flutter_libs: ^0.5.33
+  sqlite3_flutter_libs: ^0.5.34
   stream_transform: ^2.1.1
   string_tokenizer:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       path: packages/string_tokenizer
       ref: 66a8ed5f955fa35c9aaac76842b9dab83c51db92
-  super_clipboard: ^0.9.0
-  super_context_menu: ^0.9.0
-  super_native_extensions: ^0.9.0
+  super_clipboard: ^0.9.1
+  super_context_menu: ^0.9.1
+  super_native_extensions: ^0.9.1
   synchronized: ^3.3.1
   system_tray:
     path: third_party/system_tray
@@ -174,7 +174,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.26.1
+  drift_dev: ^2.27.0
   flutter_test:
     sdk: flutter
   intl_utils: ^2.8.10
