@@ -147,7 +147,7 @@ class ChatInfoPage extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: 32),
-            if (isGroupConversation)
+            if (isGroupConversation && !isExited)
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupParticipants),

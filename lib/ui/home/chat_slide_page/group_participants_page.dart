@@ -61,6 +61,7 @@ class GroupParticipantsPage extends HookConsumerWidget {
 
     final controller = useTextEditingController();
 
+    final hasParticipant = ref.watch(currentConversationHasParticipantProvider);
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
@@ -80,13 +81,16 @@ class GroupParticipantsPage extends HookConsumerWidget {
               controller: controller,
             ),
           ),
-          Expanded(
-            child: _ParticipantList(
-              filterKeyword: controller,
-              currentUser: currentUser,
-              participants: participants,
-            ),
-          ),
+          if (hasParticipant)
+            Expanded(
+              child: _ParticipantList(
+                filterKeyword: controller,
+                currentUser: currentUser,
+                participants: participants,
+              ),
+            )
+          else
+            const SizedBox(),
         ],
       ),
     );
@@ -157,45 +161,72 @@ class _ParticipantTile extends HookWidget {
     currentUser: currentUser,
     child: Material(
       color: context.theme.primary,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 16,
-        ),
-        leading: AvatarWidget(
-          size: 50,
-          avatarUrl: participant.avatarUrl,
-          userId: participant.userId,
-          name: participant.fullName,
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: CustomText(
-                participant.fullName ?? '?',
-                style: TextStyle(color: context.theme.text, fontSize: 16),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textMatchers: [
-                  EmojiTextMatcher(),
-                  KeyWordTextMatcher(
-                    keyword,
-                    style: TextStyle(color: context.theme.accent),
-                  ),
-                ],
-              ),
-            ),
-            BadgesWidget(
-              isBot: participant.appId != null,
-              verified: participant.isVerified,
-              membership: participant.membership,
-            ),
-          ],
-        ),
+      child: InkWell(
         onTap: () {
           showUserDialog(context, participant.userId);
         },
-        trailing: _RoleWidget(role: participant.role),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: 16,
+          ),
+          child: Row(
+            children: [
+              AvatarWidget(
+                size: 50,
+                avatarUrl: participant.avatarUrl,
+                userId: participant.userId,
+                name: participant.fullName,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: CustomText(
+                            participant.fullName ?? '?',
+                            style: TextStyle(
+                              color: context.theme.text,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textMatchers: [
+                              EmojiTextMatcher(),
+                              KeyWordTextMatcher(
+                                keyword,
+                                style: TextStyle(color: context.theme.accent),
+                              ),
+                            ],
+                          ),
+                        ),
+                        BadgesWidget(
+                          isBot: participant.appId != null,
+                          verified: participant.isVerified,
+                          membership: participant.membership,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      participant.identityNumber,
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              _RoleWidget(role: participant.role),
+            ],
+          ),
+        ),
       ),
     ),
   );
