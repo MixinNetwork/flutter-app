@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/extension/message.dart';
+import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart';
 import 'conversation_provider.dart';
 
@@ -11,6 +12,7 @@ class MessageSelectionNotifier extends ChangeNotifier {
   final Set<String> _selectedMessageIds = {};
   final Set<String> _messageCannotForward = {};
   final Set<String> _messageCannotRecall = {};
+  final Set<String> _messageCannotCombineForward = {};
 
   bool get hasSelectedMessage => _selectedMessageIds.isNotEmpty;
 
@@ -19,6 +21,11 @@ class MessageSelectionNotifier extends ChangeNotifier {
   bool get canForward =>
       _messageCannotForward.isEmpty && _selectedMessageIds.length < 100;
 
+  bool get canCombineForward =>
+      _messageCannotCombineForward.isEmpty &&
+      _selectedMessageIds.length >= 2 &&
+      _selectedMessageIds.length < 100;
+
   bool get canRecall =>
       _messageCannotRecall.isEmpty && _selectedMessageIds.length < 100;
 
@@ -26,11 +33,14 @@ class MessageSelectionNotifier extends ChangeNotifier {
     _selectedMessageIds.add(message.messageId);
     if (!message.canForward) {
       _messageCannotForward.add(message.messageId);
+      _messageCannotCombineForward.add(message.messageId);
     }
     if (!message.canRecall) {
       _messageCannotRecall.add(message.messageId);
     }
-
+    if (message.type.isTranscript) {
+      _messageCannotCombineForward.add(message.messageId);
+    }
     notifyListeners();
   }
 
@@ -40,10 +50,15 @@ class MessageSelectionNotifier extends ChangeNotifier {
     if (_selectedMessageIds.remove(messageId)) {
       _messageCannotForward.remove(messageId);
       _messageCannotRecall.remove(messageId);
+      _messageCannotCombineForward.remove(messageId);
     } else {
       _selectedMessageIds.add(messageId);
       if (!message.canForward) {
         _messageCannotForward.add(message.messageId);
+        _messageCannotCombineForward.add(messageId);
+      }
+      if (message.type.isTranscript) {
+        _messageCannotCombineForward.add(messageId);
       }
       if (!message.canRecall) {
         _messageCannotRecall.add(message.messageId);
@@ -57,6 +72,7 @@ class MessageSelectionNotifier extends ChangeNotifier {
     _selectedMessageIds.clear();
     _messageCannotForward.clear();
     _messageCannotRecall.clear();
+    _messageCannotCombineForward.clear();
 
     notifyListeners();
   }
