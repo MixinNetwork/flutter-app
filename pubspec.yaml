@@ -38,7 +38,7 @@ dependencies:
       ref: af28658a415cf89383e3c9cf9f8230c79be5566c
       path: packages/common_crypto
   dbus: ^0.7.11
-  decimal: ^3.0.2
+  decimal: ^3.2.4
   desktop_drop:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
