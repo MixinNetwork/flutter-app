@@ -369,10 +369,10 @@ packages:
     dependency: "direct main"
     description:
       name: decimal
-      sha256: "28239b8b929c1bd8618702e6dbc96e2618cf99770bbe9cb040d6cf56a11e4ec3"
+      sha256: fc706a5618b81e5b367b01dd62621def37abc096f2b46a9bd9068b64c1fa36d0
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.4"
   desktop_drop:
     dependency: "direct main"
     description:
