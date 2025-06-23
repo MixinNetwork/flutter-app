@@ -168,7 +168,7 @@ dependencies:
   sentry_flutter: ^8.14.2
 
 dev_dependencies:
-  build_runner: ^2.4.15
+  build_runner: ^2.5.3
   debug_info_collector:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
