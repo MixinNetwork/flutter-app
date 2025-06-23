@@ -24,6 +24,10 @@ class SelectionBottomBar extends HookConsumerWidget {
       messageSelectionProvider.select((value) => value.canForward),
     );
 
+    final canCombineForward = ref.watch(
+      messageSelectionProvider.select((value) => value.canCombineForward),
+    );
+
     return SizedBox(
       height: 80,
       child: Row(
@@ -32,7 +36,7 @@ class SelectionBottomBar extends HookConsumerWidget {
           _Button(
             label: context.l10n.combineAndForward,
             iconAssetName: Resources.assetsImagesMessageTranscriptForwardSvg,
-            enable: canForward,
+            enable: canCombineForward,
             onTap: () async {
               final result = await showConversationSelector(
                 context: context,
