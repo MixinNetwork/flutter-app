@@ -165,7 +165,7 @@ dependencies:
       ref: 08c1ce40eb6abfad6049fb6aad8bd30312ec5319
       path: packages/data_detector
   envied: ^1.1.1
-  sentry_flutter: ^8.14.2
+  sentry_flutter: ^9.0.0
 
 dev_dependencies:
   build_runner: ^2.4.15
