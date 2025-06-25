@@ -360,7 +360,7 @@ class MessageItemWidget extends HookConsumerWidget {
                             message.type.isAudio);
                     final enableRecall = !isTranscriptPage && message.canRecall;
 
-                    final enableDelete = !isTranscriptPage;
+                    final enableDelete = !isTranscriptPage && !isPinnedPage;
 
                     final addStickerMenuAction = [
                       if (message.type.isSticker)
