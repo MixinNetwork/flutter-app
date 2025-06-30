@@ -126,7 +126,7 @@ dependencies:
   super_clipboard: ^0.9.1
   super_context_menu: ^0.9.1
   super_native_extensions: ^0.9.1
-  synchronized: ^3.3.1
+  synchronized: ^3.4.0
   system_tray:
     path: third_party/system_tray
   ui_device:
