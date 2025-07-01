@@ -370,7 +370,7 @@ class Blaze {
     }
   }
 
-  Future<bool> makeMessageStatus(String messageId, MessageStatus status) async {
+  Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao
             .messageStatusById(messageId)
@@ -378,7 +378,7 @@ class Blaze {
 
     if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
-      return true;
+      return;
     }
 
     if (currentStatus == null) {
@@ -386,17 +386,15 @@ class Blaze {
       final messagesHistory = await database.messageHistoryDao
           .findMessageHistoryById(messageId);
       if (messagesHistory != null) {
-        return true; // Skip status update for deleted messages
+        return; // Skip status update for deleted messages
       }
 
       final cachedStatus = pendingMessageStatusMap[messageId];
       if (cachedStatus == null || status.index > cachedStatus.index) {
         pendingMessageStatusMap[messageId] = status;
       }
-      return true;
+      return;
     }
-
-    return true;
   }
 
   Future<void> _sendListPending() async {
