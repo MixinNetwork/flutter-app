@@ -375,10 +375,28 @@ class Blaze {
         await database.messageDao
             .messageStatusById(messageId)
             .getSingleOrNull();
+
     if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
+      return true;
     }
-    return currentStatus != null;
+
+    if (currentStatus == null) {
+      // Check if message is in deleted messages history
+      final messagesHistory = await database.messageHistoryDao
+          .findMessageHistoryById(messageId);
+      if (messagesHistory != null) {
+        return true; // Skip status update for deleted messages
+      }
+
+      final cachedStatus = pendingMessageStatusMap[messageId];
+      if (cachedStatus == null || status.index > cachedStatus.index) {
+        pendingMessageStatusMap[messageId] = status;
+      }
+      return true;
+    }
+
+    return true;
   }
 
   Future<void> _sendListPending() async {
@@ -401,16 +419,8 @@ class Blaze {
         break;
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
-        if (!(await makeMessageStatus(m.messageId, m.status))) {
-          final messagesHistory = await database.messageHistoryDao
-              .findMessageHistoryById(m.messageId);
-          if (messagesHistory != null) return;
-
-          final status = pendingMessageStatusMap[m.messageId];
-          if (status == null || m.status.index > status.index) {
-            pendingMessageStatusMap[m.messageId] = m.status;
-          }
-        }
+        // Use unified status handling logic in makeMessageStatus
+        await makeMessageStatus(m.messageId, m.status);
 
         await database.offsetDao.insert(
           Offset(key: statusOffset, timestamp: m.updatedAt.toIso8601String()),
