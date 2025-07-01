@@ -482,10 +482,10 @@ class Blaze {
   }
 
   // ==========================================================================
-  // 公共 API 方法（觸發事件）
+  // Public API Methods (Event Triggers)
   // ==========================================================================
 
-  /// 公共方法，請求連接或重新連接
+  /// Public method to request connection or reconnection
 
   Future<void> connect() async {
     i('Public connect called. Current state: $_connectedState');
@@ -507,7 +507,7 @@ class Blaze {
     _connectedState = ConnectedState.reconnecting;
 
     try {
-      // 測試 HTTP 連接
+      // Test HTTP connection
       await client.accountApi.getMe();
       i('http ping successful');
 
