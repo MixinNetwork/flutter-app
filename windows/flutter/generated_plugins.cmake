@@ -12,7 +12,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   local_auth_windows
   protocol_handler_windows
   screen_retriever_windows
-  sentry_flutter
   sqlite3_flutter_libs
   super_native_extensions
   system_tray
@@ -25,7 +24,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   breakpad_client
   flutter_local_notifications_windows
-  jni
   mixin_logger
   ogg_opus_player
   rhttp
