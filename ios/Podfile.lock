@@ -85,11 +85,11 @@ PODS:
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
-  - Sentry/HybridSDK (8.46.0)
-  - sentry_flutter (8.14.2):
+  - Sentry/HybridSDK (8.52.1)
+  - sentry_flutter (9.1.0):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.46.0)
+    - Sentry/HybridSDK (= 8.52.1)
   - sqlite3 (3.50.1):
     - sqlite3/common (= 3.50.1)
   - sqlite3/common (3.50.1)
@@ -250,8 +250,8 @@ SPEC CHECKSUMS:
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5
   rhttp: 359daed992674fc912552df3106bfbc746bcc929
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
-  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
-  sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
+  Sentry: 2cbbe3592f30050c60e916c63c7f5a2fa584005e
+  sentry_flutter: 7da4db00cb0e9fe223d9fd9249b7a176ca8097c9
   sqlite3: 1d85290c3321153511f6e900ede7a1608718bbd5
   sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
