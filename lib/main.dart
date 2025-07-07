@@ -14,7 +14,6 @@ import 'package:isolate/isolate.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:rhttp/rhttp.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
@@ -35,16 +34,7 @@ import 'utils/web_view/web_view_desktop.dart';
 import 'widgets/protocol_handler.dart';
 
 Future<void> main(List<String> args) async {
-  if (Env.sentryDsn.isEmpty) {
-    await _runApp(args);
-  } else {
-    await SentryFlutter.init((options) {
-      options
-        ..dsn = Env.sentryDsn
-        ..tracesSampleRate = 1.0
-        ..profilesSampleRate = 1.0;
-    }, appRunner: () => _runApp(args));
-  }
+  await _runApp(args);
 }
 
 Future<void> _runApp(List<String> args) async {
@@ -91,11 +81,9 @@ Future<void> _runApp(List<String> args) async {
 
   FlutterError.onError = (details) {
     e('FlutterError: ${details.exception} ${details.stack}');
-    Sentry.captureException(details.exception, stackTrace: details.stack);
   };
   PlatformDispatcher.instance.onError = (error, stack) {
     e('unhandled error: $error $stack');
-    Sentry.captureException(error, stackTrace: stack);
     return true;
   };
 

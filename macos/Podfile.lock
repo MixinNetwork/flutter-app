@@ -45,11 +45,6 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - Sentry/HybridSDK (8.52.1)
-  - sentry_flutter (9.1.0):
-    - Flutter
-    - FlutterMacOS
-    - Sentry/HybridSDK (= 8.52.1)
   - sqlite3 (3.50.1):
     - sqlite3/common (= 3.50.1)
   - sqlite3/common (3.50.1)
@@ -113,7 +108,6 @@ DEPENDENCIES:
   - protocol_handler_macos (from `Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos`)
   - rhttp (from `Flutter/ephemeral/.symlinks/plugins/rhttp/macos`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
-  - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
@@ -126,7 +120,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - PLCrashReporter
-    - Sentry
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -174,8 +167,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/rhttp/macos
   screen_retriever_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
-  sentry_flutter:
-    :path: Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos
   sqlite3_flutter_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin
   super_native_extensions:
@@ -217,8 +208,6 @@ SPEC CHECKSUMS:
   protocol_handler_macos: f9cd7b13bcaf6b0425f7410cbe52376cb843a936
   rhttp: 08d791d6373089de796318f4cfb172cbcf34e78b
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
-  Sentry: 2cbbe3592f30050c60e916c63c7f5a2fa584005e
-  sentry_flutter: 7da4db00cb0e9fe223d9fd9249b7a176ca8097c9
   sqlite3: 1d85290c3321153511f6e900ede7a1608718bbd5
   sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
   super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
