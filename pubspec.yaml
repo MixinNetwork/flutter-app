@@ -16,6 +16,7 @@ version: 3.1.0+440
 
 environment:
   sdk: "^3.7.0"
+  flutter: 3.29.3
 
 dependencies:
   android_id: ^0.4.0
@@ -86,7 +87,7 @@ dependencies:
   hydrated_bloc: ^10.1.1
   image: ^4.5.4
   image_picker: ^1.0.5
-  intl: ^0.20.2
+  intl: ^0.19.0
   intl_phone_number_input: ^0.7.4
   isolate: ^2.1.0
   json_annotation: ^4.8.1
@@ -126,7 +127,7 @@ dependencies:
   super_clipboard: ^0.9.1
   super_context_menu: ^0.9.1
   super_native_extensions: ^0.9.1
-  synchronized: ^3.4.0
+  synchronized: ^3.3.0
   system_tray:
     path: third_party/system_tray
   ui_device:
@@ -141,7 +142,7 @@ dependencies:
   watcher: ^1.1.2
   web_socket_channel: ^3.0.3
   webview_flutter: ^4.13.0
-  win32: ^5.14.0
+  win32: ^5.13.0
   win_toast: ^0.4.0
   window_manager: 0.5.1
   window_size:
@@ -167,7 +168,7 @@ dependencies:
   envied: ^1.1.1
 
 dev_dependencies:
-  build_runner: ^2.6.0
+  build_runner: ^2.5.4
   debug_info_collector:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
@@ -177,14 +178,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   intl_utils: ^2.8.11
-  json_serializable: ^6.10.0
+  json_serializable: ^6.7.1
   msix:
     git:
       url: https://github.com/riccardo-lomazzi/msix.git
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
-  flutter_lints: ^6.0.0
-  very_good_analysis: ^9.0.0
-  envied_generator: ^1.2.0
+  flutter_lints: ^5.0.0
+  very_good_analysis: ^8.0.0
+  envied_generator: ^1.1.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

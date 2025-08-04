@@ -21,6 +21,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable' # 'master', 'beta', 'dev' or 'stable'
+          flutter-version: '3.29.3'
 
       - uses: actions-rs/toolchain@v1
         with:
