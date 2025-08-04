@@ -142,10 +142,10 @@ packages:
     dependency: transitive
     description:
       name: build
-      sha256: "7d95cbbb1526ab5ae977df9b4cc660963b9b27f6d1075c0b34653868911385e4"
+      sha256: "51dc711996cbf609b90cbe5b335bbce83143875a9d58e4b5c6d3c4f684d3dda7"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "2.5.4"
   build_cli_annotations:
     dependency: transitive
     description:
@@ -174,26 +174,26 @@ packages:
     dependency: transitive
     description:
       name: build_resolvers
-      sha256: "38c9c339333a09b090a638849a4c56e70a404c6bdd3b511493addfbc113b60c2"
+      sha256: ee4257b3f20c0c90e72ed2b57ad637f694ccba48839a821e87db762548c22a62
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "2.5.4"
   build_runner:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: b971d4a1c789eba7be3e6fe6ce5e5b50fd3719e3cb485b3fad6d04358304351d
+      sha256: "382a4d649addbfb7ba71a3631df0ec6a45d5ab9b098638144faf27f02778eb53"
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.0"
+    version: "2.5.4"
   build_runner_core:
     dependency: transitive
     description:
       name: build_runner_core
-      sha256: c04e612ca801cd0928ccdb891c263a2b1391cb27940a5ea5afcf9ba894de5d62
+      sha256: "85fbbb1036d576d966332a3f5ce83f2ce66a40bea1a94ad2d5fc29a19a0d3792"
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.0"
+    version: "9.1.2"
   built_collection:
     dependency: transitive
     description:
@@ -458,10 +458,10 @@ packages:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: "2fc05ad458a7c562755bf0cae11178dfc58387a416829b78d4da5155a61465fd"
+      sha256: "68c138e884527d2bd61df2ade276c3a144df84d1adeb0ab8f3196b5afe021bd4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.28.1"
+    version: "2.28.0"
   ecache:
     dependency: "direct main"
     description:
@@ -514,10 +514,10 @@ packages:
     dependency: "direct dev"
     description:
       name: envied_generator
-      sha256: cd3c9f548e9467b7d77969949f268008c93adb13ed00075854541b36e7fa6b6f
+      sha256: "894f6c5eb624c60a1ce6f642b6fd7ec68bc3440aa6f1881837aa9acbbeade0c8"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.1.1"
   equatable:
     dependency: "direct main"
     description:
@@ -1103,10 +1103,10 @@ packages:
     dependency: "direct dev"
     description:
       name: json_serializable
-      sha256: ce2cf974ccdee13be2a510832d7fba0b94b364e0b0395dee42abaa51b855be27
+      sha256: c50ef5fc083d5b5e12eef489503ba3bf5ccc899e487d691584699b4bdefeea8c
       url: "https://pub.dev"
     source: hosted
-    version: "6.10.0"
+    version: "6.9.5"
   latlng:
     dependency: transitive
     description:
@@ -1845,10 +1845,10 @@ packages:
     dependency: transitive
     description:
       name: source_gen
-      sha256: fc787b1f89ceac9580c3616f899c9a447413cbdac1df071302127764c023a134
+      sha256: "35c8150ece9e8c8d263337a265153c3329667640850b9304861faea59fc98f6b"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "2.0.0"
   source_helper:
     dependency: transitive
     description:
