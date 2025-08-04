@@ -247,8 +247,8 @@ class _PreparedStatementWrapper implements PreparedStatement {
       selectWith(StatementParameters.named(parameters));
 
   @override
-  bool get isExplain => throw UnimplementedError();
+  bool get isExplain => stmt.isExplain;
 
   @override
-  bool get isReadOnly => throw UnimplementedError();
+  bool get isReadOnly => stmt.isReadOnly;
 }

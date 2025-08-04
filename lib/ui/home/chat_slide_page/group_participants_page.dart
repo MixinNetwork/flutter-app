@@ -166,10 +166,7 @@ class _ParticipantTile extends HookWidget {
           showUserDialog(context, participant.userId);
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: 16,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
           child: Row(
             children: [
               AvatarWidget(
