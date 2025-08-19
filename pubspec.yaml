@@ -87,7 +87,7 @@ dependencies:
   hydrated_bloc: ^10.1.1
   image: ^4.5.4
   image_picker: ^1.2.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   intl_phone_number_input: ^0.7.4
   isolate: ^2.1.0
   json_annotation: ^4.8.1
@@ -97,7 +97,7 @@ dependencies:
   map: ^2.0.2
   markdown_widget: ^2.3.2+2
   mime: ^2.0.0
-  mixin_bot_sdk_dart: ^1.4.0
+  mixin_bot_sdk_dart: ^1.4.1
   mixin_logger: ^0.1.2
   network_info_plus: ^6.1.4
   octo_image: ^2.0.0
