@@ -1019,7 +1019,13 @@ class AccountServer {
     String name,
     List<String> userIds,
   ) async {
-    final conversationId = const Uuid().v4();
+    final randomId = const Uuid().v4();
+    final conversationId = groupConversationId(
+      userId,
+      name.trim(),
+      userIds,
+      randomId,
+    );
 
     final response = await client.conversationApi.createConversation(
       ConversationRequest(
@@ -1028,6 +1034,7 @@ class AccountServer {
         name: name.trim(),
         participants:
             userIds.map((e) => ParticipantRequest(userId: e)).toList(),
+        randomId: randomId,
       ),
     );
     await database.conversationDao.updateConversation(response.data, userId);
