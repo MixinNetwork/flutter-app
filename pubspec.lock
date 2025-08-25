@@ -466,10 +466,10 @@ packages:
     dependency: "direct main"
     description:
       name: ecache
-      sha256: "5c78b9a19070a92c2b4bbc4c22075e29361c724867490d4883391a24ddba202b"
+      sha256: c3cb33a82fd9f4e66d89bf463fb4e91cff1d2306d03eb6a210830101a9ff4e85
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.8"
+    version: "2.0.10"
   ed25519_edwards:
     dependency: transitive
     description:
