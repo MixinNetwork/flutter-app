@@ -85,33 +85,31 @@ PODS:
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
-  - Sentry/HybridSDK (8.52.1)
-  - sentry_flutter (9.1.0):
-    - Flutter
-    - FlutterMacOS
-    - Sentry/HybridSDK (= 8.52.1)
-  - sqlite3 (3.50.1):
-    - sqlite3/common (= 3.50.1)
-  - sqlite3/common (3.50.1)
-  - sqlite3/dbstatvtab (3.50.1):
+  - sqlite3 (3.50.4):
+    - sqlite3/common (= 3.50.4)
+  - sqlite3/common (3.50.4)
+  - sqlite3/dbstatvtab (3.50.4):
     - sqlite3/common
-  - sqlite3/fts5 (3.50.1):
+  - sqlite3/fts5 (3.50.4):
     - sqlite3/common
-  - sqlite3/math (3.50.1):
+  - sqlite3/math (3.50.4):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.50.1):
+  - sqlite3/perf-threadsafe (3.50.4):
     - sqlite3/common
-  - sqlite3/rtree (3.50.1):
+  - sqlite3/rtree (3.50.4):
+    - sqlite3/common
+  - sqlite3/session (3.50.4):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
     - FlutterMacOS
-    - sqlite3 (~> 3.50.1)
+    - sqlite3 (~> 3.50.4)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
+    - sqlite3/session
   - super_native_extensions (0.0.1):
     - Flutter
   - SwiftyGif (5.4.5)
@@ -148,7 +146,6 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - protocol_handler_ios (from `.symlinks/plugins/protocol_handler_ios/ios`)
   - rhttp (from `.symlinks/plugins/rhttp/ios`)
-  - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -162,7 +159,6 @@ SPEC REPOS:
     - DKPhotoGallery
     - PhoneNumberKit
     - SDWebImage
-    - Sentry
     - sqlite3
     - SwiftyGif
 
@@ -209,8 +205,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/protocol_handler_ios/ios"
   rhttp:
     :path: ".symlinks/plugins/rhttp/ios"
-  sentry_flutter:
-    :path: ".symlinks/plugins/sentry_flutter/ios"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   super_native_extensions:
@@ -250,10 +244,8 @@ SPEC CHECKSUMS:
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5
   rhttp: 359daed992674fc912552df3106bfbc746bcc929
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
-  Sentry: 2cbbe3592f30050c60e916c63c7f5a2fa584005e
-  sentry_flutter: 7da4db00cb0e9fe223d9fd9249b7a176ca8097c9
-  sqlite3: 1d85290c3321153511f6e900ede7a1608718bbd5
-  sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
+  sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
+  sqlite3_flutter_libs: 83f8e9f5b6554077f1d93119fe20ebaa5f3a9ef1
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
