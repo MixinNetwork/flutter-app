@@ -73,7 +73,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_portal: ^1.1.4
-  flutter_svg: ^2.2.0
+  flutter_svg: ^2.2.1
   gal:
     git:
       url: https://github.com/boyan01/gal.git
