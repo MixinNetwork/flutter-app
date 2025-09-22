@@ -20,6 +20,7 @@ class TransferDataToken {
     required this.confirmations,
     required this.assetKey,
     required this.dust,
+    required this.precision,
     this.collectionHash,
   });
 
@@ -37,6 +38,7 @@ class TransferDataToken {
     confirmations: token.confirmations,
     assetKey: token.assetKey,
     dust: token.dust,
+    precision: token.precision,
     collectionHash: token.collectionHash,
   );
 
@@ -69,6 +71,8 @@ class TransferDataToken {
   final String assetKey;
   @JsonKey(name: 'dust')
   final String dust;
+  @JsonKey(name: 'precision')
+  final int precision;
   @JsonKey(name: 'collection_hash')
   final String? collectionHash;
 
@@ -88,6 +92,7 @@ class TransferDataToken {
     confirmations: confirmations,
     assetKey: assetKey,
     dust: dust,
+    precision: precision,
     collectionHash: collectionHash,
   );
 }

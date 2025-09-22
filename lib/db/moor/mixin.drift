@@ -108,6 +108,7 @@ CREATE TABLE tokens (
     asset_key TEXT NOT NULL,
     dust TEXT NOT NULL,
     collection_hash TEXT,
+    precision INTEGER NOT NULL DEFAULT -1,
     PRIMARY KEY(asset_id)
 );
 

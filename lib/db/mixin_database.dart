@@ -99,7 +99,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 27;
+  int get schemaVersion => 28;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -274,6 +274,9 @@ class MixinDatabase extends _$MixinDatabase {
       }
       if (from <= 26) {
         await _addColumnIfNotExists(m, users, users.membership);
+      }
+      if (from <= 27) {
+        await _addColumnIfNotExists(m, tokens, tokens.precision);
       }
     },
     beforeOpen: (details) async {

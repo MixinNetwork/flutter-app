@@ -12,7 +12,7 @@ const kTransferCommandActionClose = 'close';
 const kTransferCommandActionProgress = 'progress';
 const kTransferCommandActionCancel = 'cancel';
 
-const kDeviceTransferProtocolVersion = 2;
+const kDeviceTransferProtocolVersion = 3;
 
 @JsonSerializable()
 class TransferDataCommand with EquatableMixin {

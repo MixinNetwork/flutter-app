@@ -6701,6 +6701,18 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
+  static const VerificationMeta _precisionMeta = const VerificationMeta(
+    'precision',
+  );
+  late final GeneratedColumn<int> precision = GeneratedColumn<int>(
+    'precision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT (-1)',
+    defaultValue: const CustomExpression('-1'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     assetId,
@@ -6717,6 +6729,7 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
     assetKey,
     dust,
     collectionHash,
+    precision,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6849,6 +6862,12 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
         ),
       );
     }
+    if (data.containsKey('precision')) {
+      context.handle(
+        _precisionMeta,
+        precision.isAcceptableOrUnknown(data['precision']!, _precisionMeta),
+      );
+    }
     return context;
   }
 
@@ -6927,6 +6946,11 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
         DriftSqlType.string,
         data['${effectivePrefix}collection_hash'],
       ),
+      precision:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}precision'],
+          )!,
     );
   }
 
@@ -6956,6 +6980,7 @@ class Token extends DataClass implements Insertable<Token> {
   final String assetKey;
   final String dust;
   final String? collectionHash;
+  final int precision;
   const Token({
     required this.assetId,
     required this.kernelAssetId,
@@ -6971,6 +6996,7 @@ class Token extends DataClass implements Insertable<Token> {
     required this.assetKey,
     required this.dust,
     this.collectionHash,
+    required this.precision,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6991,6 +7017,7 @@ class Token extends DataClass implements Insertable<Token> {
     if (!nullToAbsent || collectionHash != null) {
       map['collection_hash'] = Variable<String>(collectionHash);
     }
+    map['precision'] = Variable<int>(precision);
     return map;
   }
 
@@ -7013,6 +7040,7 @@ class Token extends DataClass implements Insertable<Token> {
           collectionHash == null && nullToAbsent
               ? const Value.absent()
               : Value(collectionHash),
+      precision: Value(precision),
     );
   }
 
@@ -7036,6 +7064,7 @@ class Token extends DataClass implements Insertable<Token> {
       assetKey: serializer.fromJson<String>(json['asset_key']),
       dust: serializer.fromJson<String>(json['dust']),
       collectionHash: serializer.fromJson<String?>(json['collection_hash']),
+      precision: serializer.fromJson<int>(json['precision']),
     );
   }
   @override
@@ -7056,6 +7085,7 @@ class Token extends DataClass implements Insertable<Token> {
       'asset_key': serializer.toJson<String>(assetKey),
       'dust': serializer.toJson<String>(dust),
       'collection_hash': serializer.toJson<String?>(collectionHash),
+      'precision': serializer.toJson<int>(precision),
     };
   }
 
@@ -7074,6 +7104,7 @@ class Token extends DataClass implements Insertable<Token> {
     String? assetKey,
     String? dust,
     Value<String?> collectionHash = const Value.absent(),
+    int? precision,
   }) => Token(
     assetId: assetId ?? this.assetId,
     kernelAssetId: kernelAssetId ?? this.kernelAssetId,
@@ -7090,6 +7121,7 @@ class Token extends DataClass implements Insertable<Token> {
     dust: dust ?? this.dust,
     collectionHash:
         collectionHash.present ? collectionHash.value : this.collectionHash,
+    precision: precision ?? this.precision,
   );
   Token copyWithCompanion(TokensCompanion data) {
     return Token(
@@ -7116,6 +7148,7 @@ class Token extends DataClass implements Insertable<Token> {
           data.collectionHash.present
               ? data.collectionHash.value
               : this.collectionHash,
+      precision: data.precision.present ? data.precision.value : this.precision,
     );
   }
 
@@ -7135,7 +7168,8 @@ class Token extends DataClass implements Insertable<Token> {
           ..write('confirmations: $confirmations, ')
           ..write('assetKey: $assetKey, ')
           ..write('dust: $dust, ')
-          ..write('collectionHash: $collectionHash')
+          ..write('collectionHash: $collectionHash, ')
+          ..write('precision: $precision')
           ..write(')'))
         .toString();
   }
@@ -7156,6 +7190,7 @@ class Token extends DataClass implements Insertable<Token> {
     assetKey,
     dust,
     collectionHash,
+    precision,
   );
   @override
   bool operator ==(Object other) =>
@@ -7174,7 +7209,8 @@ class Token extends DataClass implements Insertable<Token> {
           other.confirmations == this.confirmations &&
           other.assetKey == this.assetKey &&
           other.dust == this.dust &&
-          other.collectionHash == this.collectionHash);
+          other.collectionHash == this.collectionHash &&
+          other.precision == this.precision);
 }
 
 class TokensCompanion extends UpdateCompanion<Token> {
@@ -7192,6 +7228,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
   final Value<String> assetKey;
   final Value<String> dust;
   final Value<String?> collectionHash;
+  final Value<int> precision;
   final Value<int> rowid;
   const TokensCompanion({
     this.assetId = const Value.absent(),
@@ -7208,6 +7245,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     this.assetKey = const Value.absent(),
     this.dust = const Value.absent(),
     this.collectionHash = const Value.absent(),
+    this.precision = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TokensCompanion.insert({
@@ -7225,6 +7263,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     required String assetKey,
     required String dust,
     this.collectionHash = const Value.absent(),
+    this.precision = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : assetId = Value(assetId),
        kernelAssetId = Value(kernelAssetId),
@@ -7254,6 +7293,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     Expression<String>? assetKey,
     Expression<String>? dust,
     Expression<String>? collectionHash,
+    Expression<int>? precision,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -7271,6 +7311,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
       if (assetKey != null) 'asset_key': assetKey,
       if (dust != null) 'dust': dust,
       if (collectionHash != null) 'collection_hash': collectionHash,
+      if (precision != null) 'precision': precision,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -7290,6 +7331,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
     Value<String>? assetKey,
     Value<String>? dust,
     Value<String?>? collectionHash,
+    Value<int>? precision,
     Value<int>? rowid,
   }) {
     return TokensCompanion(
@@ -7307,6 +7349,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
       assetKey: assetKey ?? this.assetKey,
       dust: dust ?? this.dust,
       collectionHash: collectionHash ?? this.collectionHash,
+      precision: precision ?? this.precision,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -7356,6 +7399,9 @@ class TokensCompanion extends UpdateCompanion<Token> {
     if (collectionHash.present) {
       map['collection_hash'] = Variable<String>(collectionHash.value);
     }
+    if (precision.present) {
+      map['precision'] = Variable<int>(precision.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -7379,6 +7425,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
           ..write('assetKey: $assetKey, ')
           ..write('dust: $dust, ')
           ..write('collectionHash: $collectionHash, ')
+          ..write('precision: $precision, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -22536,6 +22583,7 @@ typedef $TokensCreateCompanionBuilder =
       required String assetKey,
       required String dust,
       Value<String?> collectionHash,
+      Value<int> precision,
       Value<int> rowid,
     });
 typedef $TokensUpdateCompanionBuilder =
@@ -22554,6 +22602,7 @@ typedef $TokensUpdateCompanionBuilder =
       Value<String> assetKey,
       Value<String> dust,
       Value<String?> collectionHash,
+      Value<int> precision,
       Value<int> rowid,
     });
 
@@ -22632,6 +22681,11 @@ class $TokensFilterComposer extends Composer<_$MixinDatabase, Tokens> {
 
   ColumnFilters<String> get collectionHash => $composableBuilder(
     column: $table.collectionHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get precision => $composableBuilder(
+    column: $table.precision,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -22713,6 +22767,11 @@ class $TokensOrderingComposer extends Composer<_$MixinDatabase, Tokens> {
     column: $table.collectionHash,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get precision => $composableBuilder(
+    column: $table.precision,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $TokensAnnotationComposer extends Composer<_$MixinDatabase, Tokens> {
@@ -22770,6 +22829,9 @@ class $TokensAnnotationComposer extends Composer<_$MixinDatabase, Tokens> {
     column: $table.collectionHash,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get precision =>
+      $composableBuilder(column: $table.precision, builder: (column) => column);
 }
 
 class $TokensTableManager
@@ -22814,6 +22876,7 @@ class $TokensTableManager
                 Value<String> assetKey = const Value.absent(),
                 Value<String> dust = const Value.absent(),
                 Value<String?> collectionHash = const Value.absent(),
+                Value<int> precision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TokensCompanion(
                 assetId: assetId,
@@ -22830,6 +22893,7 @@ class $TokensTableManager
                 assetKey: assetKey,
                 dust: dust,
                 collectionHash: collectionHash,
+                precision: precision,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -22848,6 +22912,7 @@ class $TokensTableManager
                 required String assetKey,
                 required String dust,
                 Value<String?> collectionHash = const Value.absent(),
+                Value<int> precision = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TokensCompanion.insert(
                 assetId: assetId,
@@ -22864,6 +22929,7 @@ class $TokensTableManager
                 assetKey: assetKey,
                 dust: dust,
                 collectionHash: collectionHash,
+                precision: precision,
                 rowid: rowid,
               ),
           withReferenceMapper:
