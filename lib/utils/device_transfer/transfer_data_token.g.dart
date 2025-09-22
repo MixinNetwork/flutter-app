@@ -21,6 +21,7 @@ TransferDataToken _$TransferDataTokenFromJson(Map<String, dynamic> json) =>
       confirmations: (json['confirmations'] as num).toInt(),
       assetKey: json['asset_key'] as String,
       dust: json['dust'] as String,
+      precision: (json['precision'] as num).toInt(),
       collectionHash: json['collection_hash'] as String?,
     );
 
@@ -39,5 +40,6 @@ Map<String, dynamic> _$TransferDataTokenToJson(TransferDataToken instance) =>
       'confirmations': instance.confirmations,
       'asset_key': instance.assetKey,
       'dust': instance.dust,
+      'precision': instance.precision,
       'collection_hash': instance.collectionHash,
     };
