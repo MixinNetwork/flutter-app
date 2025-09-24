@@ -51,9 +51,6 @@ PODS:
     - Flutter
   - irondash_engine_context (0.0.1):
     - Flutter
-  - libphonenumber_plugin (0.0.1):
-    - Flutter
-    - PhoneNumberKit
   - local_auth_darwin (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -72,12 +69,6 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - PhoneNumberKit (3.7.10):
-    - PhoneNumberKit/PhoneNumberKitCore (= 3.7.10)
-    - PhoneNumberKit/UIKit (= 3.7.10)
-  - PhoneNumberKit/PhoneNumberKitCore (3.7.10)
-  - PhoneNumberKit/UIKit (3.7.10):
-    - PhoneNumberKit/PhoneNumberKitCore
   - protocol_handler_ios (0.0.1):
     - Flutter
   - rhttp (0.0.1):
@@ -135,7 +126,6 @@ DEPENDENCIES:
   - gal (from `.symlinks/plugins/gal/darwin`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
-  - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - mixin_logger (from `.symlinks/plugins/mixin_logger/ios`)
   - network_info_plus (from `.symlinks/plugins/network_info_plus/ios`)
@@ -157,7 +147,6 @@ SPEC REPOS:
   trunk:
     - DKImagePickerController
     - DKPhotoGallery
-    - PhoneNumberKit
     - SDWebImage
     - sqlite3
     - SwiftyGif
@@ -183,8 +172,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   irondash_engine_context:
     :path: ".symlinks/plugins/irondash_engine_context/ios"
-  libphonenumber_plugin:
-    :path: ".symlinks/plugins/libphonenumber_plugin/ios"
   local_auth_darwin:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
   mixin_logger:
@@ -231,7 +218,6 @@ SPEC CHECKSUMS:
   gal: 44e5b10dbd347c8247a2851acee6c1fbe282c1d3
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
-  libphonenumber_plugin: d134f173b22bfa5ede50887071f087f309277f8c
   local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   mixin_logger: c613ba9ee39d409e9de69216b6bee00340bf077c
   network_info_plus: cf61925ab5205dce05a4f0895989afdb6aade5fc
@@ -240,7 +226,6 @@ SPEC CHECKSUMS:
   open_file_ios: 5ff7526df64e4394b4fe207636b67a95e83078bb
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  PhoneNumberKit: 3d9a20cfe8ee68f35c2a3ae9474093133f72a8a1
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5
   rhttp: 359daed992674fc912552df3106bfbc746bcc929
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
