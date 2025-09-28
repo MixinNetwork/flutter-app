@@ -260,6 +260,10 @@ jobs:
           flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
           echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
 
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --version=6.2.2 -y
+
       - name: Build Installer
         run: |
           "%programfiles(x86)%\Inno Setup 6\iscc.exe" "windows_inno_setup.iss"
