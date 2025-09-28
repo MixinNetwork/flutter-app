@@ -263,11 +263,23 @@ jobs:
       - name: Install Inno Setup
         run: |
           choco install innosetup --version=6.2.2 -y
+          # Verify installation
+          if (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe") {
+            Write-Host "Inno Setup 6 installed successfully"
+            & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" | Select-Object -First 3
+          } else {
+            Write-Error "Inno Setup installation failed"
+            exit 1
+          }
 
       - name: Build Installer
         run: |
-          "%programfiles(x86)%\Inno Setup 6\iscc.exe" "windows_inno_setup.iss"
-        shell: cmd
+          if (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe") {
+            & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" "windows_inno_setup.iss"
+          } else {
+            Write-Error "Inno Setup compiler (iscc.exe) not found at expected location"
+            exit 1
+          }
 
       - name: Upload Installer
         uses: actions/upload-artifact@v4
