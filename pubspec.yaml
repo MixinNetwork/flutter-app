@@ -25,7 +25,7 @@ dependencies:
   async: ^2.8.1
   audio_session: ^0.2.2
   auto_size_text: ^3.0.0
-  bloc: ^9.0.0
+  bloc: ^9.0.1
   bloc_concurrency: ^0.3.0
   blurhash_dart: ^1.0.2
   bring_window_to_front:
