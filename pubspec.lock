@@ -1279,10 +1279,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_bot_sdk_dart
-      sha256: de5e087f66e3679eeecfdafb26c5e1dd67e6e400e4167a3ec983a738fa08d3a5
+      sha256: "0ad86e2bb1f4e8ce5e36027e9ae9aed3eb3454630b6c12392f9a51dd61682ea9"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.2"
+    version: "1.4.3"
   mixin_logger:
     dependency: "direct main"
     description:
