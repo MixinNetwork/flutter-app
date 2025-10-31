@@ -1,0 +1,71 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
+version: 1
+script:
+  - rm -rf AppDir || true
+  - cp -r build/linux/arm64/release/bundle AppDir
+  - mkdir -p AppDir/usr/share/icons/hicolor/64x64/apps/
+  - cp ./dist/deb/usr/share/icons/hicolor/128x128/apps/mixin_desktop.png AppDir/usr/share/icons/hicolor/64x64/apps/
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: one.mixin.messenger
+    name: Mixin Messenger
+    icon: mixin_desktop
+    version: latest
+    exec: mixin_desktop
+    exec_args: $@
+  apt:
+    arch: arm64
+    allow_unauthenticated: true
+    sources:
+      - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted universe multiverse
+      - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted universe multiverse
+      - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports main restricted universe multiverse
+      - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted universe multiverse
+    include:
+      - libgtk-3-0
+      - libwebkit2gtk-4.1-0
+      - libsdl2-2.0-0
+      - libopus0
+    exclude:
+      - humanity-icon-theme
+      - hicolor-icon-theme
+      - adwaita-icon-theme
+      - ubuntu-mono
+  files:
+    exclude:
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+  runtime:
+    env:
+      GIO_MODULE_DIR: $APPDIR/usr/lib/aarch64-linux-gnu/gio/modules/
+      # Needed by Wayland
+      GDK_BACKEND: x11
+  test:
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+      use_host_x: true
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+      use_host_x: true
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+      use_host_x: true
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+      use_host_x: true
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+      use_host_x: true
+AppImage:
+  arch: aarch64
+  update-information: guess
+  sign-key: None
