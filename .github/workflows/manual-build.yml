@@ -28,6 +28,8 @@ on:
           - 'windows'
         default: "linux,windows"
   push:
+    branches:
+      - '**'
     tags:
       - 'v*'
 
