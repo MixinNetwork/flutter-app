@@ -35,7 +35,8 @@ on:
 
 env:
   FLUTTER_VERSION: ${{ github.event.inputs.flutter_version || '3.29.3' }}
-  FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
+  # https://github.com/subosito/flutter-action/issues/345#issuecomment-2657332687
+  FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'master' }}
 
 jobs:
   build-linux-amd64:
