@@ -60,7 +60,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
+          # https://github.com/subosito/flutter-action/issues/345#issuecomment-2657332687
+          channel: 'master'
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - uses: actions-rs/toolchain@v1
