@@ -134,6 +134,8 @@ jobs:
   build-linux-arm64:
     runs-on: ubuntu-22.04-arm64
     if: contains(github.event.inputs.platforms, 'linux') || github.event.inputs.platforms == ''
+    permissions:
+      contents: write
     steps:
       - run: g++ --version
       - run: gcc --version
@@ -274,6 +276,8 @@ jobs:
   build-linux-snap-arm64:
     needs: build-linux-arm64
     runs-on: ubuntu-22.04-arm64
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -359,6 +363,8 @@ jobs:
   build-linux-appimage-arm64:
     needs: build-linux-arm64
     runs-on: ubuntu-22.04-arm64
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
