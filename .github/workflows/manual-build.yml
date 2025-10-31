@@ -333,7 +333,7 @@ jobs:
           mkdir -p build/linux/x64/release/bundle
           tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
 
-      - name: Build AppImage unsing appimage-builder
+      - name: Build AppImage using appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1
         with:
           entrypoint: appimage-builder
@@ -373,7 +373,7 @@ jobs:
           mkdir -p build/linux/arm64/release/bundle
           tar -C build/linux/arm64/release/bundle -xvf mixin_desktop_linux_arm64_portable.tar.gz
 
-      - name: Build AppImage unsing appimage-builder
+      - name: Build AppImage using appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1
         with:
           entrypoint: appimage-builder
