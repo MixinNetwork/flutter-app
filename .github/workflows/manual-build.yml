@@ -373,6 +373,8 @@ jobs:
           mkdir -p build/linux/arm64/release/bundle
           tar -C build/linux/arm64/release/bundle -xvf mixin_desktop_linux_arm64_portable.tar.gz
 
+      # Note: The appimage-builder Docker image may require emulation on ARM64.
+      # If build performance is an issue, consider using native ARM64 tools.
       - name: Build AppImage using appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1
         with:
