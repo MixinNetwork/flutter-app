@@ -237,11 +237,25 @@ jobs:
           mkdir -p build/linux/${{ matrix.flutter_arch }}/release/bundle
           tar -C build/linux/${{ matrix.flutter_arch }}/release/bundle -xvf mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz
 
-      - name: Build AppImage using appimage-builder
-        uses: docker://appimagecrafters/appimage-builder:0.9.1
-        with:
-          entrypoint: appimage-builder
-          args: --recipe ${{ matrix.recipe }} --skip-test
+      - name: Install appimage-builder dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace binutils coreutils
+          
+      - name: Download appimagetool
+        run: |
+          if [ "${{ matrix.arch }}" = "amd64" ]; then
+            sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+          else
+            sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage -O /usr/local/bin/appimagetool
+          fi
+          sudo chmod +x /usr/local/bin/appimagetool
+          
+      - name: Install appimage-builder
+        run: sudo pip3 install appimage-builder==1.1.0
+
+      - name: Build AppImage
+        run: appimage-builder --recipe ${{ matrix.recipe }} --skip-test
 
       - run: mv "Mixin Messenger-latest-${{ matrix.appimage_arch }}.AppImage" mixin_desktop_linux_${{ matrix.arch }}.AppImage
       - name: Upload AppImage Artifact
