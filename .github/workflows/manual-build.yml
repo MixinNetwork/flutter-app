@@ -35,110 +35,23 @@ on:
 
 env:
   FLUTTER_VERSION: ${{ github.event.inputs.flutter_version || '3.29.3' }}
-  # https://github.com/subosito/flutter-action/issues/345#issuecomment-2657332687
-  FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'master' }}
+  FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
 
 jobs:
-  build-linux-amd64:
-    runs-on: ubuntu-22.04
-    if: contains(github.event.inputs.platforms, 'linux') || github.event.inputs.platforms == ''
-    steps:
-      - run: g++ --version
-      - run: gcc --version
-      - run: sudo apt-get install libstdc++6
-
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 'stable' # 'stable' or 'nightly'
-          override: true
-          components: rustfmt, clippy
-
-      # flutter build need ninja.
-      # https://github.com/subosito/flutter-action/issues/49
-      - name: Patch for linux build
-        run: |
-          flutter doctor
-          sudo apt-get update -y
-          sudo apt-get install -y ninja-build libgtk-3-dev
-          sudo apt-get install -y libsdl2-dev
-          sudo apt-get install -y libwebkit2gtk-4.1-dev
-          sudo apt-get install -y libopus-dev libogg-dev
-          sudo apt-get install -y libcurl4-openssl-dev
-          flutter doctor
-
-      - run: flutter --version
-
-      - run: flutter config --enable-linux-desktop
-
-      - name: Generator ENV
-        run: |
-          tee .env &>/dev/null << EOF
-          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-          EOF
-
-      - name: Run Build Runner
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      # setup webcrypto for unit test
-      - run: dart run webcrypto:setup
-
-      - name: Run tests
-        run: flutter test
-
-      - name: Build APP
-        run: flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-
-      - name: Compress Flutter build
-        run: tar -C build/linux/x64/release/bundle -cvf mixin_desktop_linux_amd64_portable.tar.gz .
-
-      - name: Upload app archive for next steps
-        uses: actions/upload-artifact@v4
-        with:
-          name: mixin_desktop_linux_amd64_portable
-          path: mixin_desktop_linux_amd64_portable.tar.gz
-
-      - name: Package APP
-        run: ./dist/linux_deb.sh amd64
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mixin_desktop_amd64.deb.zip
-          path: build/mixin_desktop_amd64.deb
-
-      - name: upload linux binary
-        uses: svenstaro/upload-release-action@v2
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin_desktop_linux_amd64_portable.tar.gz
-          asset_name: mixin_desktop_linux_amd64_portable.tar.gz
-          tag: ${{ github.ref }}
-          overwrite: true
-
-      - name: upload linux deb
-        uses: svenstaro/upload-release-action@v2
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/mixin_desktop_amd64.deb
-          asset_name: mixin_desktop_linux_amd64.deb
-          tag: ${{ github.ref }}
-          overwrite: true
-
-  build-linux-arm64:
-    runs-on: ubuntu-22.04-arm
+  build-linux:
+    runs-on: ${{ matrix.runner }}
     if: contains(github.event.inputs.platforms, 'linux') || github.event.inputs.platforms == ''
     permissions:
       contents: write
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-22.04
+            flutter_arch: x64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            flutter_arch: arm64
     steps:
       - run: g++ --version
       - run: gcc --version
@@ -194,30 +107,30 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Compress Flutter build
-        run: tar -C build/linux/arm64/release/bundle -cvf mixin_desktop_linux_arm64_portable.tar.gz .
+        run: tar -C build/linux/${{ matrix.flutter_arch }}/release/bundle -cvf mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz .
 
       - name: Upload app archive for next steps
         uses: actions/upload-artifact@v4
         with:
-          name: mixin_desktop_linux_arm64_portable
-          path: mixin_desktop_linux_arm64_portable.tar.gz
+          name: mixin_desktop_linux_${{ matrix.arch }}_portable
+          path: mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz
 
       - name: Package APP
-        run: ./dist/linux_deb.sh arm64
+        run: ./dist/linux_deb.sh ${{ matrix.arch }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mixin_desktop_arm64.deb.zip
-          path: build/mixin_desktop_arm64.deb
+          name: mixin_desktop_${{ matrix.arch }}.deb.zip
+          path: build/mixin_desktop_${{ matrix.arch }}.deb
 
       - name: upload linux binary
         uses: svenstaro/upload-release-action@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin_desktop_linux_arm64_portable.tar.gz
-          asset_name: mixin_desktop_linux_arm64_portable.tar.gz
+          file: mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz
+          asset_name: mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -226,61 +139,27 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/mixin_desktop_arm64.deb
-          asset_name: mixin_desktop_linux_arm64.deb
+          file: build/mixin_desktop_${{ matrix.arch }}.deb
+          asset_name: mixin_desktop_linux_${{ matrix.arch }}.deb
           tag: ${{ github.ref }}
           overwrite: true
 
   build-linux-snap:
-    needs: build-linux-amd64
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download app archive
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: mixin_desktop_linux_amd64_portable
-
-      - name: uncompress app archive
-        run: |
-          mkdir -p build/linux/x64/release/bundle
-          tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
-
-      - name: Prepare snap build
-        run: ./dist/linux_snap_prepare.sh
-
-      - name: Build .snap
-        uses: snapcore/action-build@v1
-        id: build-snap
-        with:
-          path: dist/snap
-
-      - name: copy snap
-        run: |
-          cp ${{ steps.build-snap.outputs.snap }} mixin_desktop_linux_amd64.snap
-      - name: Upload snap
-        uses: actions/upload-artifact@v4
-        with:
-          name: mixin-desktop-snap
-          path: mixin_desktop_linux_amd64.snap
-
-      - name: Upload linux snap
-        uses: svenstaro/upload-release-action@v2
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.build-snap.outputs.snap }}
-          asset_name: mixin_desktop_linux_amd64.snap
-          tag: ${{ github.ref }}
-          overwrite: true
-
-  build-linux-snap-arm64:
-    needs: build-linux-arm64
-    runs-on: ubuntu-22.04-arm64
+    needs: build-linux
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: write
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-22.04
+            flutter_arch: x64
+            artifact_suffix: ""
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            flutter_arch: arm64
+            artifact_suffix: "-arm64"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -288,15 +167,15 @@ jobs:
       - name: Download app archive
         uses: actions/download-artifact@v4.1.7
         with:
-          name: mixin_desktop_linux_arm64_portable
+          name: mixin_desktop_linux_${{ matrix.arch }}_portable
 
       - name: uncompress app archive
         run: |
-          mkdir -p build/linux/arm64/release/bundle
-          tar -C build/linux/arm64/release/bundle -xvf mixin_desktop_linux_arm64_portable.tar.gz
+          mkdir -p build/linux/${{ matrix.flutter_arch }}/release/bundle
+          tar -C build/linux/${{ matrix.flutter_arch }}/release/bundle -xvf mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz
 
       - name: Prepare snap build
-        run: ./dist/linux_snap_prepare.sh arm64
+        run: ./dist/linux_snap_prepare.sh ${{ matrix.arch == 'amd64' && '' || matrix.arch }}
 
       - name: Build .snap
         uses: snapcore/action-build@v1
@@ -306,12 +185,12 @@ jobs:
 
       - name: copy snap
         run: |
-          cp ${{ steps.build-snap.outputs.snap }} mixin_desktop_linux_arm64.snap
+          cp ${{ steps.build-snap.outputs.snap }} mixin_desktop_linux_${{ matrix.arch }}.snap
       - name: Upload snap
         uses: actions/upload-artifact@v4
         with:
-          name: mixin-desktop-snap-arm64
-          path: mixin_desktop_linux_arm64.snap
+          name: mixin-desktop-snap${{ matrix.artifact_suffix }}
+          path: mixin_desktop_linux_${{ matrix.arch }}.snap
 
       - name: Upload linux snap
         uses: svenstaro/upload-release-action@v2
@@ -319,55 +198,30 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.build-snap.outputs.snap }}
-          asset_name: mixin_desktop_linux_arm64.snap
+          asset_name: mixin_desktop_linux_${{ matrix.arch }}.snap
           tag: ${{ github.ref }}
           overwrite: true
 
   build-linux-appimage:
-    needs: build-linux-amd64
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download app archive
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: mixin_desktop_linux_amd64_portable
-
-      - name: uncompress app archive
-        run: |
-          mkdir -p build/linux/x64/release/bundle
-          tar -C build/linux/x64/release/bundle -xvf mixin_desktop_linux_amd64_portable.tar.gz
-
-      - name: Build AppImage using appimage-builder
-        uses: docker://appimagecrafters/appimage-builder:0.9.1
-        with:
-          entrypoint: appimage-builder
-          args: --recipe ./AppImageBuilder.yml --skip-test
-
-      - run: mv "Mixin Messenger-latest-x86_64.AppImage" mixin_desktop_linux_amd64.AppImage
-      - name: Upload AppImage Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: AppImage
-          path: mixin_desktop_linux_amd64.AppImage
-
-      - name: Upload linux AppImage
-        uses: svenstaro/upload-release-action@v2
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin_desktop_linux_amd64.AppImage
-          asset_name: mixin_desktop_linux_amd64.AppImage
-          tag: ${{ github.ref }}
-          overwrite: true
-
-  build-linux-appimage-arm64:
-    needs: build-linux-arm64
-    runs-on: ubuntu-22.04-arm64
+    needs: build-linux
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: write
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-22.04
+            flutter_arch: x64
+            appimage_arch: x86_64
+            recipe: ./AppImageBuilder.yml
+            artifact_suffix: ""
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            flutter_arch: arm64
+            appimage_arch: aarch64
+            recipe: ./AppImageBuilder-arm64.yml
+            artifact_suffix: "-arm64"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -375,35 +229,33 @@ jobs:
       - name: Download app archive
         uses: actions/download-artifact@v4.1.7
         with:
-          name: mixin_desktop_linux_arm64_portable
+          name: mixin_desktop_linux_${{ matrix.arch }}_portable
 
       - name: uncompress app archive
         run: |
-          mkdir -p build/linux/arm64/release/bundle
-          tar -C build/linux/arm64/release/bundle -xvf mixin_desktop_linux_arm64_portable.tar.gz
+          mkdir -p build/linux/${{ matrix.flutter_arch }}/release/bundle
+          tar -C build/linux/${{ matrix.flutter_arch }}/release/bundle -xvf mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz
 
-      # Note: The appimage-builder Docker image may require emulation on ARM64.
-      # If build performance is an issue, consider using native ARM64 tools.
       - name: Build AppImage using appimage-builder
         uses: docker://appimagecrafters/appimage-builder:0.9.1
         with:
           entrypoint: appimage-builder
-          args: --recipe ./AppImageBuilder-arm64.yml --skip-test
+          args: --recipe ${{ matrix.recipe }} --skip-test
 
-      - run: mv "Mixin Messenger-latest-aarch64.AppImage" mixin_desktop_linux_arm64.AppImage
+      - run: mv "Mixin Messenger-latest-${{ matrix.appimage_arch }}.AppImage" mixin_desktop_linux_${{ matrix.arch }}.AppImage
       - name: Upload AppImage Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AppImage-arm64
-          path: mixin_desktop_linux_arm64.AppImage
+          name: AppImage${{ matrix.artifact_suffix }}
+          path: mixin_desktop_linux_${{ matrix.arch }}.AppImage
 
       - name: Upload linux AppImage
         uses: svenstaro/upload-release-action@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mixin_desktop_linux_arm64.AppImage
-          asset_name: mixin_desktop_linux_arm64.AppImage
+          file: mixin_desktop_linux_${{ matrix.arch }}.AppImage
+          asset_name: mixin_desktop_linux_${{ matrix.arch }}.AppImage
           tag: ${{ github.ref }}
           overwrite: true
 
