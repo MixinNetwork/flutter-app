@@ -514,7 +514,11 @@ class _StickerPage extends HookConsumerWidget {
                 ),
                 if (album != null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.only(
+                      right: 24,
+                      left: 24,
+                      bottom: 8,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -560,6 +564,7 @@ class _StickerPage extends HookConsumerWidget {
                     ),
                     labelPadding: EdgeInsets.zero,
                     indicatorPadding: const EdgeInsets.all(6),
+                    dividerHeight: 0,
                     tabs:
                         stickers
                             .map(
