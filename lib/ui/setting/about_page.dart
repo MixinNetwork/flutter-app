@@ -100,34 +100,30 @@ class AboutPage extends HookConsumerWidget {
                   children: [
                     CellItem(
                       title: Text(context.l10n.followUsOnX),
-                      onTap:
-                          () =>
-                              openUri(context, 'https://x.com/MixinMessenger'),
+                      onTap: () =>
+                          openUri(context, 'https://x.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(context.l10n.followUsOnFacebook),
-                      onTap:
-                          () =>
-                              openUri(context, 'https://fb.com/MixinMessenger'),
+                      onTap: () =>
+                          openUri(context, 'https://fb.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(context.l10n.helpCenter),
-                      onTap:
-                          () => openUri(context, 'https://support.mixin.one'),
+                      onTap: () =>
+                          openUri(context, 'https://support.mixin.one'),
                     ),
                     CellItem(
                       title: Text(context.l10n.termsOfService),
-                      onTap:
-                          () =>
-                              openUri(context, 'https://mixin.one/pages/terms'),
+                      onTap: () =>
+                          openUri(context, 'https://mixin.one/pages/terms'),
                     ),
                     CellItem(
                       title: Text(context.l10n.privacyPolicy),
-                      onTap:
-                          () => openUri(
-                            context,
-                            'https://mixin.one/pages/privacy',
-                          ),
+                      onTap: () => openUri(
+                        context,
+                        'https://mixin.one/pages/privacy',
+                      ),
                     ),
                     if (!Platform.isMacOS)
                       CellItem(
@@ -141,9 +137,8 @@ class AboutPage extends HookConsumerWidget {
                 CellGroup(
                   child: CellItem(
                     title: Text(context.l10n.openLogDirectory),
-                    onTap:
-                        () =>
-                            openUri(context, mixinLogDirectory.uri.toString()),
+                    onTap: () =>
+                        openUri(context, mixinLogDirectory.uri.toString()),
                   ),
                 ),
             ],

@@ -65,13 +65,13 @@ class MentionCache {
         _contentMentionLruCache.set(e.hashCode, {});
       }
     } else {
-      userNumbers =
-          userNumbers
-              .where((element) => _userLruCache.get(element) == null)
-              .toSet();
+      userNumbers = userNumbers
+          .where((element) => _userLruCache.get(element) == null)
+          .toSet();
 
-      final list =
-          await userDao.userByIdentityNumbers(userNumbers.toList()).get();
+      final list = await userDao
+          .userByIdentityNumbers(userNumbers.toList())
+          .get();
 
       list.where((element) => element.fullName?.isNotEmpty ?? false).forEach((
         element,
@@ -125,10 +125,9 @@ class MentionCache {
     final userDao = _userDao;
     if (userDao == null) return {};
 
-    final toChecks =
-        identityNumbers
-            .where((element) => _userLruCache.get(element) == null)
-            .toSet();
+    final toChecks = identityNumbers
+        .where((element) => _userLruCache.get(element) == null)
+        .toSet();
 
     final mentionUsers = identityNumbers.map(_userLruCache.get).nonNulls;
     final map = Map.fromIterables(

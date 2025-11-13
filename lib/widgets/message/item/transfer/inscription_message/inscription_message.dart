@@ -142,7 +142,8 @@ class _InscriptionLayout extends StatelessWidget {
 
 enum InscriptionContentMode {
   small(2, 14),
-  large(5, 24);
+  large(5, 24)
+  ;
 
   final int maxLines;
   final double fontSize;

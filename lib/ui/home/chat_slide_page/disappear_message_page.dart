@@ -76,14 +76,13 @@ class _Options extends StatelessWidget {
       children: [
         CellItem(
           title: Text(context.l10n.close),
-          trailing:
-              expireDuration < const Duration(seconds: 1)
-                  ? SvgPicture.asset(
-                    Resources.assetsImagesCheckedSvg,
-                    width: 24,
-                    height: 24,
-                  )
-                  : null,
+          trailing: expireDuration < const Duration(seconds: 1)
+              ? SvgPicture.asset(
+                  Resources.assetsImagesCheckedSvg,
+                  width: 24,
+                  height: 24,
+                )
+              : null,
           onTap: () {
             if (expireDuration < const Duration(seconds: 1)) return;
 
@@ -126,11 +125,10 @@ class _Options extends StatelessWidget {
         ),
         CellItem(
           title: Text(context.l10n.customTime),
-          onTap:
-              () => showMixinDialog(
-                context: context,
-                child: _CustomExpireTimeDialog(conversationId: conversationId),
-              ),
+          onTap: () => showMixinDialog(
+            context: context,
+            child: _CustomExpireTimeDialog(conversationId: conversationId),
+          ),
         ),
       ],
     ),
@@ -153,14 +151,13 @@ class _DurationOptionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CellItem(
     title: Text(label),
-    trailing:
-        duration == current
-            ? SvgPicture.asset(
-              Resources.assetsImagesCheckedSvg,
-              width: 24,
-              height: 24,
-            )
-            : null,
+    trailing: duration == current
+        ? SvgPicture.asset(
+            Resources.assetsImagesCheckedSvg,
+            width: 24,
+            height: 24,
+          )
+        : null,
     onTap: () {
       if (current == duration) {
         return;
@@ -283,8 +280,8 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 17),
                   ),
-                  contextMenuBuilder:
-                      (context, state) => MixinAdaptiveSelectionToolbar(
+                  contextMenuBuilder: (context, state) =>
+                      MixinAdaptiveSelectionToolbar(
                         editableTextState: state,
                       ),
                 ),
@@ -364,66 +361,64 @@ class _CustomExpireUnitSelection extends StatelessWidget {
         text = context.l10n.unitWeek(1);
     }
     return CustomPopupMenuButton(
-      itemBuilder:
-          (context) => [
-            CustomPopupMenuItem(
-              title: context.l10n.unitSecond(1),
-              value: _CustomExpireTimeUnit.second,
-            ),
-            CustomPopupMenuItem(
-              title: context.l10n.unitMinute(1),
-              value: _CustomExpireTimeUnit.minute,
-            ),
-            CustomPopupMenuItem(
-              title: context.l10n.unitHour(1),
-              value: _CustomExpireTimeUnit.hour,
-            ),
-            CustomPopupMenuItem(
-              title: context.l10n.unitDay(1),
-              value: _CustomExpireTimeUnit.day,
-            ),
-            CustomPopupMenuItem(
-              title: context.l10n.unitWeek(1),
-              value: _CustomExpireTimeUnit.week,
-            ),
-          ],
+      itemBuilder: (context) => [
+        CustomPopupMenuItem(
+          title: context.l10n.unitSecond(1),
+          value: _CustomExpireTimeUnit.second,
+        ),
+        CustomPopupMenuItem(
+          title: context.l10n.unitMinute(1),
+          value: _CustomExpireTimeUnit.minute,
+        ),
+        CustomPopupMenuItem(
+          title: context.l10n.unitHour(1),
+          value: _CustomExpireTimeUnit.hour,
+        ),
+        CustomPopupMenuItem(
+          title: context.l10n.unitDay(1),
+          value: _CustomExpireTimeUnit.day,
+        ),
+        CustomPopupMenuItem(
+          title: context.l10n.unitWeek(1),
+          value: _CustomExpireTimeUnit.week,
+        ),
+      ],
       onSelected: (value) => unit.value = value,
       child: Builder(
-        builder:
-            (context) => Material(
-              color: context.theme.sidebarSelected,
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              child: SizedBox(
-                height: 46,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        text,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: context.theme.text,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+        builder: (context) => Material(
+          color: context.theme.sidebarSelected,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          child: SizedBox(
+            height: 46,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: context.theme.text,
                     ),
-                    RotatedBox(
-                      quarterTurns: 9,
-                      child: SvgPicture.asset(
-                        Resources.assetsImagesIcArrowRightSvg,
-                        width: 30,
-                        height: 30,
-                        colorFilter: ColorFilter.mode(
-                          context.theme.secondaryText,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
+                RotatedBox(
+                  quarterTurns: 9,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesIcArrowRightSvg,
+                    width: 30,
+                    height: 30,
+                    colorFilter: ColorFilter.mode(
+                      context.theme.secondaryText,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
             ),
+          ),
+        ),
       ),
     );
   }

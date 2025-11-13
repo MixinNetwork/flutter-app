@@ -17,14 +17,12 @@ class StatusPending extends HookConsumerWidget {
       converter: (state) => state.messageId,
     );
 
-    final value =
-        useListenableConverter(
-          context.accountServer.attachmentUtil,
-          converter:
-              (AttachmentUtil attachmentUtil) =>
-                  attachmentUtil.getAttachmentProgress(messageId),
-          keys: [messageId],
-        ).requireData;
+    final value = useListenableConverter(
+      context.accountServer.attachmentUtil,
+      converter: (AttachmentUtil attachmentUtil) =>
+          attachmentUtil.getAttachmentProgress(messageId),
+      keys: [messageId],
+    ).requireData;
 
     return _StatusPending(value: value);
   }
@@ -51,11 +49,10 @@ class _StatusPending extends StatelessWidget {
         TweenAnimationBuilder<double>(
           tween: Tween<double>(end: value),
           duration: const Duration(milliseconds: 100),
-          builder:
-              (context, value, _) => CircularProgressIndicator(
-                value: value,
-                valueColor: AlwaysStoppedAnimation(context.theme.accent),
-              ),
+          builder: (context, value, _) => CircularProgressIndicator(
+            value: value,
+            valueColor: AlwaysStoppedAnimation(context.theme.accent),
+          ),
         ),
       ],
     ),

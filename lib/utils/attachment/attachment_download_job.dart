@@ -196,10 +196,9 @@ extension _AttachmentDownloadExtension on Dio {
     if (contentEncoding != null) {
       compressed = ['gzip', 'deflate', 'compress'].contains(contentEncoding);
     }
-    total =
-        lengthHeader == Headers.contentLengthHeader && compressed
-            ? -1
-            : int.parse(response.headers.value(lengthHeader) ?? '-1');
+    total = lengthHeader == Headers.contentLengthHeader && compressed
+        ? -1
+        : int.parse(response.headers.value(lengthHeader) ?? '-1');
 
     // Stream<Uint8List>
     final stream = transformStream(response.data!.stream, total);
@@ -279,7 +278,6 @@ extension _AttachmentDownloadExtension on Dio {
             await subscription.cancel();
             await _closeAndDelete();
             if (err is TimeoutException) {
-              // ignore: only_throw_errors
               throw DioException(
                 requestOptions: response.requestOptions,
                 error: 'Receiving data timeout[${receiveTimeout}ms]',

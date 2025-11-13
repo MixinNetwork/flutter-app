@@ -71,10 +71,9 @@ dynamic _traverseComplexJson(dynamic object) {
     List<dynamic>? list;
     for (var i = 0; i < object.length; i++) {
       final traversed = _traverseWrite(object[i]);
-      list ??=
-          traversed.outcome == _Outcome.atomic
-              ? object.sublist(0)
-              : (<dynamic>[]..length = object.length);
+      list ??= traversed.outcome == _Outcome.atomic
+          ? object.sublist(0)
+          : (<dynamic>[]..length = object.length);
       list[i] = traversed.value;
     }
     return list;

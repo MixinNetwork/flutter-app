@@ -25,15 +25,16 @@ Future<T?> _showDialog<T>({
         BuildContext buildContext,
         Animation<double> animation,
         Animation<double> secondaryAnimation,
-      ) => InheritedTheme.capture(
-        from: context,
-        to: Navigator.of(context, rootNavigator: useRootNavigator).context,
-      ).wrap(
-        Builder(
-          builder:
-              (context) => pageBuilder(context, animation, secondaryAnimation),
-        ),
-      ),
+      ) =>
+          InheritedTheme.capture(
+            from: context,
+            to: Navigator.of(context, rootNavigator: useRootNavigator).context,
+          ).wrap(
+            Builder(
+              builder: (context) =>
+                  pageBuilder(context, animation, secondaryAnimation),
+            ),
+          ),
   barrierDismissible: barrierDismissible,
   barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   barrierColor: barrierColor,
@@ -59,19 +60,20 @@ Future<T?> showMixinDialog<T>({
         BuildContext buildContext,
         Animation<double> animation,
         Animation<double> secondaryAnimation,
-      ) => InheritedTheme.capture(
-        from: context,
-        to: Navigator.of(context, rootNavigator: true).context,
-      ).wrap(
-        Center(
-          child: _DialogPage(
-            padding: padding,
-            constraints: constraints,
-            backgroundColor: backgroundColor,
-            child: child,
+      ) =>
+          InheritedTheme.capture(
+            from: context,
+            to: Navigator.of(context, rootNavigator: true).context,
+          ).wrap(
+            Center(
+              child: _DialogPage(
+                padding: padding,
+                constraints: constraints,
+                backgroundColor: backgroundColor,
+                child: child,
+              ),
+            ),
           ),
-        ),
-      ),
 );
 
 class AlertDialogLayout extends StatelessWidget {
@@ -222,17 +224,15 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
 
   @override
   Widget build(BuildContext context) {
-    final boxDecoration =
-        backgroundTransparent
-            ? const BoxDecoration()
-            : BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(5)),
-              color: backgroundColor ?? context.theme.accent,
-            );
-    final textColor =
-        backgroundTransparent
-            ? context.theme.accent
-            : context.dynamicColor(const Color.fromRGBO(255, 255, 255, 1));
+    final boxDecoration = backgroundTransparent
+        ? const BoxDecoration()
+        : BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            color: backgroundColor ?? context.theme.accent,
+          );
+    final textColor = backgroundTransparent
+        ? context.theme.accent
+        : context.dynamicColor(const Color.fromRGBO(255, 255, 255, 1));
     return Disable(
       disable: disable,
       child: InteractiveDecoratedBox.color(
@@ -306,9 +306,8 @@ class DialogTextField extends HookConsumerWidget {
             ),
             inputFormatters: inputFormatters,
             selectionHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
-            contextMenuBuilder:
-                (context, state) =>
-                    MixinAdaptiveSelectionToolbar(editableTextState: state),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
           if (hintText.isNotEmpty && !hasText)
             IgnorePointer(
@@ -343,47 +342,46 @@ Future<DialogEvent?> showConfirmMixinDialog(
   context: context,
   barrierDismissible: barrierDismissible,
   child: Builder(
-    builder:
-        (context) => AlertDialogLayout(
-          maxWidth: maxWidth,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(content),
-              if (description != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Text(
-                    description,
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
+    builder: (context) => AlertDialogLayout(
+      maxWidth: maxWidth,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(content),
+          if (description != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                description,
+                style: TextStyle(
+                  color: context.theme.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
                 ),
-            ],
-          ),
-          actions: [
-            if (neutralText != null) ...[
-              MixinButton(
-                onTap: () => Navigator.pop(context, DialogEvent.neutral),
-                child: Text(neutralText),
               ),
-              const Spacer(),
-            ],
-            MixinButton(
-              backgroundTransparent: true,
-              onTap: () => Navigator.pop(context),
-              child: Text(negativeText ?? context.l10n.cancel),
             ),
-            MixinButton(
-              onTap: () => Navigator.pop(context, DialogEvent.positive),
-              child: Text(positiveText ?? context.l10n.confirm),
-            ),
-          ],
+        ],
+      ),
+      actions: [
+        if (neutralText != null) ...[
+          MixinButton(
+            onTap: () => Navigator.pop(context, DialogEvent.neutral),
+            child: Text(neutralText),
+          ),
+          const Spacer(),
+        ],
+        MixinButton(
+          backgroundTransparent: true,
+          onTap: () => Navigator.pop(context),
+          child: Text(negativeText ?? context.l10n.cancel),
         ),
+        MixinButton(
+          onTap: () => Navigator.pop(context, DialogEvent.positive),
+          child: Text(positiveText ?? context.l10n.confirm),
+        ),
+      ],
+    ),
   ),
 );
 

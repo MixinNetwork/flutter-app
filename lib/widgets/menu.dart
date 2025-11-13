@@ -35,12 +35,11 @@ class MenusWithSeparator extends Menu {
     super.title,
     super.image,
   }) : super(
-         children:
-             childrens
-                 .where((element) => element.isNotEmpty)
-                 .joinList([MenuSeparator()])
-                 .expand((element) => element.toList())
-                 .toList(),
+         children: childrens
+             .where((element) => element.isNotEmpty)
+             .joinList([MenuSeparator()])
+             .expand((element) => element.toList())
+             .toList(),
        );
 }
 
@@ -78,40 +77,37 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
     interactive: false,
-    buildMenus:
-        () =>
-            itemBuilder(context)
-                .map(
-                  (e) => ContextMenu(
-                    title: e.title,
-                    onTap: () => onSelected?.call(e.value),
-                    isDestructiveAction: e.isDestructiveAction,
-                    icon: e.icon,
-                  ),
-                )
-                .toList(),
-    child: Builder(
-      builder:
-          (context) => ActionButton(
-            name: icon,
-            color: color ?? context.theme.icon,
-            onTapUp: (details) {
-              d('onTapUp: $alignment');
-              if (alignment == null) {
-                context.sendMenuPosition(details.globalPosition);
-                return;
-              }
-              final renderBox = context.findRenderObject() as RenderBox?;
-              if (renderBox != null) {
-                var position = alignment!.withinRect(renderBox.paintBounds);
-                position = renderBox.localToGlobal(position);
-                context.sendMenuPosition(position);
-              } else {
-                context.sendMenuPosition(details.globalPosition);
-              }
-            },
-            child: child,
+    buildMenus: () => itemBuilder(context)
+        .map(
+          (e) => ContextMenu(
+            title: e.title,
+            onTap: () => onSelected?.call(e.value),
+            isDestructiveAction: e.isDestructiveAction,
+            icon: e.icon,
           ),
+        )
+        .toList(),
+    child: Builder(
+      builder: (context) => ActionButton(
+        name: icon,
+        color: color ?? context.theme.icon,
+        onTapUp: (details) {
+          d('onTapUp: $alignment');
+          if (alignment == null) {
+            context.sendMenuPosition(details.globalPosition);
+            return;
+          }
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            var position = alignment!.withinRect(renderBox.paintBounds);
+            position = renderBox.localToGlobal(position);
+            context.sendMenuPosition(position);
+          } else {
+            context.sendMenuPosition(details.globalPosition);
+          }
+        },
+        child: child,
+      ),
     ),
   );
 }
@@ -313,12 +309,11 @@ class _ContextMenuContainerLayout extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(11)),
         border: Border.all(
-          color:
-              Color.lerp(
-                Colors.transparent,
-                const Color.fromRGBO(255, 255, 255, 0.08),
-                brightnessData,
-              )!,
+          color: Color.lerp(
+            Colors.transparent,
+            const Color.fromRGBO(255, 255, 255, 0.08),
+            brightnessData,
+          )!,
         ),
         boxShadow: [
           BoxShadow(
@@ -376,13 +371,12 @@ class ContextMenu extends StatelessWidget {
       const Color.fromRGBO(255, 255, 255, 1),
       darkColor: const Color.fromRGBO(62, 65, 72, 1),
     );
-    final color =
-        isDestructiveAction
-            ? context.theme.red
-            : context.dynamicColor(
-              const Color.fromRGBO(0, 0, 0, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-            );
+    final color = isDestructiveAction
+        ? context.theme.red
+        : context.dynamicColor(
+            const Color.fromRGBO(0, 0, 0, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+          );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
       child: InteractiveDecoratedBox.color(
@@ -506,8 +500,9 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
                 fontSize: 14,
                 decoration: TextDecoration.none,
                 fontWeight: FontWeight.w500,
-                fontFamilyFallback:
-                    Platform.isWindows ? ['Microsoft Yahei'] : null,
+                fontFamilyFallback: Platform.isWindows
+                    ? ['Microsoft Yahei']
+                    : null,
               ),
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: maxWidth),
@@ -578,8 +573,9 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
       size: 16,
       color: textStyle.color,
     );
-    final stateIcon =
-        element is MenuAction ? _stateToIcon(element.state) : null;
+    final stateIcon = element is MenuAction
+        ? _stateToIcon(element.state)
+        : null;
     final Widget? prefix;
     if (stateIcon != null) {
       prefix = Icon(stateIcon, size: 16, color: iconTheme.color);
@@ -614,25 +610,24 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
       suffix = null;
     }
 
-    final child =
-        element is DeferredMenuElement
-            ? const Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.grey,
-                ),
+    final child = element is DeferredMenuElement
+        ? const Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              height: 16,
+              width: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.grey,
               ),
-            )
-            : Text(
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              element.title ?? '',
-              style: textStyle,
-            );
+            ),
+          )
+        : Text(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            element.title ?? '',
+            style: textStyle,
+          );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -642,9 +637,9 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
         decoration: theme.decorationForItem(itemInfo),
         child: Row(
           children: [
-            if (prefix != null) prefix,
+            ?prefix,
             if (prefix != null) const SizedBox(width: 6),
-            if (image != null) image,
+            ?image,
             if (image != null) const SizedBox(width: 4),
             Expanded(
               child: Padding(
@@ -657,7 +652,7 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (suffix != null) const SizedBox(width: 6),
-                  if (suffix != null) suffix,
+                  ?suffix,
                 ],
               ),
             ),

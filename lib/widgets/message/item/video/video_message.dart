@@ -42,8 +42,10 @@ class VideoMessageWidget extends HookConsumerWidget {
     return LayoutBuilder(
       builder: (context, boxConstraints) {
         final maxWidth = min(boxConstraints.maxWidth * 0.6, 200);
-        final width =
-            min(mediaWidth ?? _kDefaultVideoSize, maxWidth).toDouble();
+        final width = min(
+          mediaWidth ?? _kDefaultVideoSize,
+          maxWidth,
+        ).toDouble();
         final scale =
             (mediaWidth ?? _kDefaultVideoSize) /
             (mediaHeight ?? _kDefaultVideoSize);
@@ -205,12 +207,9 @@ class _VideoMessageOverlayInfo extends HookConsumerWidget {
           HookBuilder(
             builder: (context) {
               final durationText = useMessageConverter(
-                converter:
-                    (state) =>
-                        Duration(
-                          milliseconds:
-                              int.tryParse(state.mediaDuration ?? '') ?? 0,
-                        ).asMinutesSeconds,
+                converter: (state) => Duration(
+                  milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
+                ).asMinutesSeconds,
               );
               return Positioned(
                 top: 6,

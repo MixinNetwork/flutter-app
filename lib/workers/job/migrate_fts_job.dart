@@ -65,8 +65,10 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
             value.createdAt.isAfter(element.createdAt) ? value : element,
       );
       // delete invalid jobs
-      final invalidJobs =
-          jobs.where((e) => e.jobId != job.jobId).map((e) => e.jobId).toList();
+      final invalidJobs = jobs
+          .where((e) => e.jobId != job.jobId)
+          .map((e) => e.jobId)
+          .toList();
       await database.jobDao.deleteJobs(invalidJobs);
     } else if (jobs.length == 1) {
       job = jobs.first;
@@ -78,8 +80,9 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
     i('$name startMigrate anchor: ${job.blazeMessage}');
 
     final stopwatch = Stopwatch()..start();
-    var lastMessageRowId =
-        job.blazeMessage == null ? null : int.tryParse(job.blazeMessage!);
+    var lastMessageRowId = job.blazeMessage == null
+        ? null
+        : int.tryParse(job.blazeMessage!);
     while (true) {
       final messages = await messageDao.getMessages(lastMessageRowId, 1000);
       if (messages.isEmpty) {
@@ -91,26 +94,23 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
         lastMessageRowId = messages.last.$1;
 
         // migration skip the messages already in ftsDatabase.
-        final messagesToMigrate =
-            (await Future.wait(
-              messages.map((e) async {
-                final exist =
-                    await ftsDatabase
-                        .checkMessageMetaExists(e.$2.messageId)
-                        .getSingle();
-                return exist ? null : e.$2;
-              }),
-            )).nonNulls;
+        final messagesToMigrate = (await Future.wait(
+          messages.map((e) async {
+            final exist = await ftsDatabase
+                .checkMessageMetaExists(e.$2.messageId)
+                .getSingle();
+            return exist ? null : e.$2;
+          }),
+        )).nonNulls;
 
         final transcriptMessageFtsContent = <String, String>{};
         for (final message in messagesToMigrate) {
           if (!message.category.isTranscript) {
             continue;
           }
-          final transcripts =
-              await transcriptMessageDao
-                  .transcriptMessageByTranscriptId(message.messageId)
-                  .get();
+          final transcripts = await transcriptMessageDao
+              .transcriptMessageByTranscriptId(message.messageId)
+              .get();
           if (transcripts.isEmpty) {
             e('transcriptMessageByMessageId empty ${message.messageId}');
             continue;

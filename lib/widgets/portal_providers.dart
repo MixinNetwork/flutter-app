@@ -9,6 +9,8 @@ class PortalProviders extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) =>
-      Portal(labels: const [secondPortal], child: Portal(child: child));
+  Widget build(BuildContext context) => Portal(
+    labels: const [secondPortal],
+    child: Portal(child: child),
+  );
 }

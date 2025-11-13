@@ -363,10 +363,9 @@ class DecryptMessage extends Injector {
     if (messages == null) {
       return;
     }
-    final p =
-        await database.participantDao
-            .participantById(data.conversationId, data.userId)
-            .getSingleOrNull();
+    final p = await database.participantDao
+        .participantById(data.conversationId, data.userId)
+        .getSingleOrNull();
     if (p == null) {
       return;
     }
@@ -646,9 +645,9 @@ class DecryptMessage extends Injector {
     if (data.category.isText) {
       final plain =
           data.category == MessageCategory.signalText ||
-                  data.category == MessageCategory.encryptedText
-              ? plainText
-              : _decode(plainText);
+              data.category == MessageCategory.encryptedText
+          ? plainText
+          : _decode(plainText);
       QuoteMessageItem? _quoteContent;
       final message = await _generateMessage(data, (
         QuoteMessageItem? quoteContent,
@@ -838,10 +837,9 @@ class DecryptMessage extends Injector {
       final stickerMessage = StickerMessage.fromJson(
         await jsonDecode(plain) as Map<String, dynamic>,
       );
-      final sticker =
-          await database.stickerDao
-              .sticker(stickerMessage.stickerId)
-              .getSingleOrNull();
+      final sticker = await database.stickerDao
+          .sticker(stickerMessage.stickerId)
+          .getSingleOrNull();
       if (sticker == null ||
           (stickerMessage.albumId != null &&
               (sticker.albumId?.isEmpty ?? true))) {
@@ -907,10 +905,9 @@ class DecryptMessage extends Injector {
     } else if (data.category.isLocation) {
       final plain =
           data.category == MessageCategory.signalLocation ||
-                  data.category == MessageCategory.encryptedLocation
-              ? plainText
-              : _decode(plainText);
-      // ignore: unused_local_variable todo check location
+              data.category == MessageCategory.encryptedLocation
+          ? plainText
+          : _decode(plainText);
       LocationMessage? locationMessage;
       try {
         locationMessage = LocationMessage.fromJson(
@@ -938,9 +935,9 @@ class DecryptMessage extends Injector {
     } else if (data.category.isPost) {
       final plain =
           data.category == MessageCategory.signalPost ||
-                  data.category == MessageCategory.encryptedPost
-              ? plainText
-              : _decode(plainText);
+              data.category == MessageCategory.encryptedPost
+          ? plainText
+          : _decode(plainText);
       final message = Message(
         messageId: data.messageId,
         conversationId: data.conversationId,
@@ -954,9 +951,9 @@ class DecryptMessage extends Injector {
     } else if (data.category.isTranscript) {
       final plain =
           data.category == MessageCategory.signalTranscript ||
-                  data.category == MessageCategory.encryptedTranscript
-              ? plainText
-              : _decode(plainText);
+              data.category == MessageCategory.encryptedTranscript
+          ? plainText
+          : _decode(plainText);
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
       if (message != null) {
@@ -1247,10 +1244,9 @@ class DecryptMessage extends Injector {
             messageId,
           );
         } else {
-          final expiredMessage =
-              await database.expiredMessageDao
-                  .getExpiredMessageById(messageId)
-                  .getSingleOrNull();
+          final expiredMessage = await database.expiredMessageDao
+              .getExpiredMessageById(messageId)
+              .getSingleOrNull();
           if (expiredMessage != null) {
             w('expireAt is null or 0. messageId: $messageId');
             await database.expiredMessageDao.onMessageRead([messageId]);
@@ -1385,10 +1381,9 @@ class DecryptMessage extends Injector {
       final stickerMessage = StickerMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
-      final sticker =
-          await database.stickerDao
-              .sticker(stickerMessage.stickerId)
-              .getSingleOrNull();
+      final sticker = await database.stickerDao
+          .sticker(stickerMessage.stickerId)
+          .getSingleOrNull();
       if (sticker == null ||
           (stickerMessage.albumId != null &&
               (sticker.albumId?.isEmpty ?? true))) {
@@ -1561,29 +1556,27 @@ class DecryptMessage extends Injector {
     BlazeMessageData data,
     List<dynamic> list,
   ) async {
-    final transcripts =
-        list
-            .map((e) {
-              final json = e as Map<String, dynamic>;
+    final transcripts = list
+        .map((e) {
+          final json = e as Map<String, dynamic>;
 
-              json['created_at'] =
-                  DateTime.tryParse(
-                    json['created_at'] as String? ?? '',
-                  )?.millisecondsSinceEpoch;
-              json['media_created_at'] =
-                  DateTime.tryParse(
-                    json['media_created_at'] as String? ?? '',
-                  )?.millisecondsSinceEpoch;
-              final mediaDuration = json['media_duration'];
-              json['media_duration'] =
-                  mediaDuration != null ? '$mediaDuration' : null;
-              json.remove('media_status');
+          json['created_at'] = DateTime.tryParse(
+            json['created_at'] as String? ?? '',
+          )?.millisecondsSinceEpoch;
+          json['media_created_at'] = DateTime.tryParse(
+            json['media_created_at'] as String? ?? '',
+          )?.millisecondsSinceEpoch;
+          final mediaDuration = json['media_duration'];
+          json['media_duration'] = mediaDuration != null
+              ? '$mediaDuration'
+              : null;
+          json.remove('media_status');
 
-              return TranscriptMessage.fromJson(json);
-            })
-            .where((transcript) => transcript.transcriptId == data.messageId)
-            .nonNulls
-            .toList();
+          return TranscriptMessage.fromJson(json);
+        })
+        .where((transcript) => transcript.transcriptId == data.messageId)
+        .nonNulls
+        .toList();
 
     if (transcripts.isEmpty) {
       await _insertInvalidMessage(data);
@@ -1659,10 +1652,9 @@ class DecryptMessage extends Injector {
 
     final needDownload = transcripts.any((e) => e.category.isAttachment);
 
-    final mediaStatus =
-        (totalMediaSize == 0 || !needDownload)
-            ? MediaStatus.done
-            : MediaStatus.canceled;
+    final mediaStatus = (totalMediaSize == 0 || !needDownload)
+        ? MediaStatus.done
+        : MediaStatus.canceled;
 
     transcripts.forEach((message) {
       if (message.category.isAttachment && message.content != null) {

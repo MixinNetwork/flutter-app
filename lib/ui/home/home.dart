@@ -53,10 +53,9 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final localTimeError =
         useMemoizedStream(
-          () =>
-              context.accountServer.connectedStateStream
-                  .map((event) => event == ConnectedState.hasLocalTimeError)
-                  .distinct(),
+          () => context.accountServer.connectedStateStream
+              .map((event) => event == ConnectedState.hasLocalTimeError)
+              .distinct(),
           keys: [context.accountServer],
         ).data ??
         false;
@@ -79,9 +78,8 @@ class HomePage extends HookConsumerWidget {
             fit: StackFit.expand,
             children: [
               LayoutBuilder(
-                builder:
-                    (BuildContext context, BoxConstraints constraints) =>
-                        _HomePage(constraints: constraints),
+                builder: (BuildContext context, BoxConstraints constraints) =>
+                    _HomePage(constraints: constraints),
               ),
               if (isEmptyUserName) const _SetupNameWidget(),
               if (localTimeError) const _LocalTimeError(),
@@ -262,24 +260,22 @@ class _HomePage extends HookConsumerWidget {
         ChangeNotifierProvider.value(value: hasDrawerValueNotifier),
         Provider(
           create: (context) => AudioMessagePlayService(context.accountServer),
-          dispose:
-              (BuildContext context, AudioMessagePlayService service) =>
-                  service.dispose(),
+          dispose: (BuildContext context, AudioMessagePlayService service) =>
+              service.dispose(),
         ),
       ],
       child: Scaffold(
         backgroundColor: context.theme.primary,
         drawerEnableOpenDragGesture: false,
-        drawer:
-            hasDrawer.value && targetWidth == 0
-                ? Drawer(
-                  child: Container(
-                    width: kSlidePageMaxWidth,
-                    color: context.theme.primary,
-                    child: const SlidePage(showCollapse: false),
-                  ),
-                )
-                : null,
+        drawer: hasDrawer.value && targetWidth == 0
+            ? Drawer(
+                child: Container(
+                  width: kSlidePageMaxWidth,
+                  color: context.theme.primary,
+                  child: const SlidePage(showCollapse: false),
+                ),
+              )
+            : null,
         body: SafeArea(
           child: AppProtocolHandler(
             child: Row(

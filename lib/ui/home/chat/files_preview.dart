@@ -250,8 +250,9 @@ class _FilesPreviewDialog extends HookConsumerWidget {
               quoteMessageCubit.state?.messageId,
               silent: silent,
               compress: currentTab.value == _TabType.image,
-              imageCaption:
-                  isOneImage ? imageCaptionController.text.trim() : null,
+              imageCaption: isOneImage
+                  ? imageCaptionController.text.trim()
+                  : null,
             ),
           );
         }
@@ -286,11 +287,13 @@ class _FilesPreviewDialog extends HookConsumerWidget {
       }
     }
 
-    final canSendStream = useValueNotifierConvertSteam(
-      imageCaptionController,
-    ).map(
-      (event) => !isOneImage || imageCaptionController.value.composing.composed,
-    );
+    final canSendStream =
+        useValueNotifierConvertSteam(
+          imageCaptionController,
+        ).map(
+          (event) =>
+              !isOneImage || imageCaptionController.value.composing.composed,
+        );
 
     return _Actions(
       onSend: () => send(false),
@@ -346,8 +349,8 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                             files: files.value,
                             onFileAdded: onFileAddedStream.stream,
                             onFileDeleted: onFileRemovedStream.stream,
-                            builder:
-                                (context, file, animation) => _AnimatedFileTile(
+                            builder: (context, file, animation) =>
+                                _AnimatedFileTile(
                                   key: ValueKey(file),
                                   file: file,
                                   animation: animation,
@@ -420,16 +423,15 @@ class _BottomActionWidget extends StatelessWidget {
         const SizedBox(height: 16),
         CustomContextMenuWidget(
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          menuProvider:
-              (_) => Menu(
-                children: [
-                  MenuAction(
-                    image: MenuImage.icon(IconFonts.mute),
-                    title: context.l10n.sendWithoutSound,
-                    callback: () => send(true),
-                  ),
-                ],
+          menuProvider: (_) => Menu(
+            children: [
+              MenuAction(
+                image: MenuImage.icon(IconFonts.mute),
+                title: context.l10n.sendWithoutSound,
+                callback: () => send(true),
               ),
+            ],
+          ),
           child: ElevatedButton(
             onPressed: () => send(false),
             style: ElevatedButton.styleFrom(
@@ -465,9 +467,8 @@ class _FileListViewportProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder:
-        (context, constraints) =>
-            _FileListViewport(height: constraints.maxHeight, child: child),
+    builder: (context, constraints) =>
+        _FileListViewport(height: constraints.maxHeight, child: child),
   );
 }
 
@@ -598,8 +599,9 @@ class _AnimatedFileTile extends HookConsumerWidget {
           onEdited: (file, snapshot) => onImageEdited?.call(file, snapshot),
         ),
         secondChild: normalItem,
-        crossFadeState:
-            big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        crossFadeState: big
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
         firstCurve: Curves.easeInOut,
         secondCurve: Curves.easeInOut,
         sizeCurve: Curves.easeInOut,
@@ -611,8 +613,9 @@ class _AnimatedFileTile extends HookConsumerWidget {
           onDelete: () => onDelete?.call(file),
         ),
         secondChild: normalItem,
-        crossFadeState:
-            big ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        crossFadeState: big
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
         firstCurve: Curves.easeInOut,
         secondCurve: Curves.easeInOut,
         sizeCurve: Curves.easeInOut,
@@ -656,28 +659,27 @@ class _Tab extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedSize(
     duration: const Duration(milliseconds: 300),
     curve: Curves.easeInOut,
-    child:
-        show
-            ? GestureDetector(
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Tooltip(
-                  message: tooltip,
-                  textStyle: const TextStyle(color: Colors.white),
-                  child: SvgPicture.asset(
-                    assetName,
-                    colorFilter: ColorFilter.mode(
-                      selected ? context.theme.accent : context.theme.icon,
-                      BlendMode.srcIn,
-                    ),
-                    width: 24,
-                    height: 24,
+    child: show
+        ? GestureDetector(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Tooltip(
+                message: tooltip,
+                textStyle: const TextStyle(color: Colors.white),
+                child: SvgPicture.asset(
+                  assetName,
+                  colorFilter: ColorFilter.mode(
+                    selected ? context.theme.accent : context.theme.icon,
+                    BlendMode.srcIn,
                   ),
+                  width: 24,
+                  height: 24,
                 ),
               ),
-            )
-            : const SizedBox(),
+            ),
+          )
+        : const SizedBox(),
   );
 }
 
@@ -799,8 +801,8 @@ class _ZipPasswordInputEditText extends HookWidget {
                   inputFormatters: [
                     LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
                   ],
-                  contextMenuBuilder:
-                      (context, state) => MixinAdaptiveSelectionToolbar(
+                  contextMenuBuilder: (context, state) =>
+                      MixinAdaptiveSelectionToolbar(
                         editableTextState: state,
                       ),
                 ),
@@ -816,10 +818,9 @@ class _ZipPasswordInputEditText extends HookWidget {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 20,
-                    color:
-                        hasText
-                            ? context.theme.text
-                            : context.theme.secondaryText,
+                    color: hasText
+                        ? context.theme.text
+                        : context.theme.secondaryText,
                   ),
                 ),
               ),
@@ -879,20 +880,18 @@ class _AnimatedListBuilder extends HookConsumerWidget {
       controller: controller,
       initialItemCount: files.length,
       key: animatedListKey,
-      itemBuilder:
-          (context, index, animation) =>
-              builder(context, files[index], animation),
+      itemBuilder: (context, index, animation) =>
+          builder(context, files[index], animation),
     );
   }
 }
 
 final _videoControllerProvider = ChangeNotifierProvider.autoDispose
     .family<VideoPlayerController, _VideoFile>(
-      (ref, file) =>
-          VideoPlayerController.file(File(file.path))
-            ..initialize()
-            ..setVolume(0)
-            ..setLooping(true),
+      (ref, file) => VideoPlayerController.file(File(file.path))
+        ..initialize()
+        ..setVolume(0)
+        ..setLooping(true),
     );
 
 final _videoBlurHashProvider = FutureProvider.autoDispose
@@ -1070,14 +1069,13 @@ class _TileBigImage extends HookConsumerWidget {
                     name: Resources.assetsImagesEditImageSvg,
                     padding: const EdgeInsets.all(10),
                     onTap: () async {
-                      final snapshot =
-                          file.imageEditorSnapshot != null
-                              ? await showImageEditor(
-                                context,
-                                path: file.imageEditorSnapshot!.rawImagePath,
-                                snapshot: file.imageEditorSnapshot,
-                              )
-                              : await showImageEditor(context, path: file.path);
+                      final snapshot = file.imageEditorSnapshot != null
+                          ? await showImageEditor(
+                              context,
+                              path: file.imageEditorSnapshot!.rawImagePath,
+                              snapshot: file.imageEditorSnapshot,
+                            )
+                          : await showImageEditor(context, path: file.path);
                       if (snapshot == null) {
                         return;
                       }
@@ -1219,7 +1217,9 @@ class _Actions extends HookWidget {
           LogicalKeyboardKey.keyV,
           meta: kPlatformIsDarwin,
           control: !kPlatformIsDarwin,
-        ): const PasteTextIntent(SelectionChangedCause.keyboard),
+        ): const PasteTextIntent(
+          SelectionChangedCause.keyboard,
+        ),
       },
       actions: {
         PasteTextIntent: _PasteContextAction(

@@ -46,12 +46,11 @@ Future<void> showChangeNumberDialog(BuildContext context) async {
     context,
     phoneNumber: phoneNumber,
     verificationResponse: response,
-    reRequestVerification:
-        () => requestVerificationCode(
-          phone: phoneNumber,
-          context: context,
-          purpose: VerificationPurpose.phone,
-        ),
+    reRequestVerification: () => requestVerificationCode(
+      phone: phoneNumber,
+      context: context,
+      purpose: VerificationPurpose.phone,
+    ),
     onVerification: (code, response) async {
       final packageInfo = await getPackageInfo();
       final platformVersion = await getPlatformVersion();
@@ -89,11 +88,10 @@ Future<String?> _showPhoneNumberInputDialog(BuildContext context) =>
             const SizedBox(height: 56),
             Expanded(
               child: Builder(
-                builder:
-                    (context) => PhoneNumberInputLayout(
-                      onNextStep:
-                          (phoneNumber) => Navigator.pop(context, phoneNumber),
-                    ),
+                builder: (context) => PhoneNumberInputLayout(
+                  onNextStep: (phoneNumber) =>
+                      Navigator.pop(context, phoneNumber),
+                ),
               ),
             ),
             const SizedBox(height: 60),

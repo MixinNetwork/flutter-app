@@ -226,10 +226,9 @@ class _SendPage extends HookConsumerWidget {
         encryptCategory = result?.firstOrNull?.encryptCategory;
       }
       if (encryptCategory == null && _conversationId != null) {
-        final conversation =
-            await context.database.conversationDao
-                .conversationItem(_conversationId)
-                .getSingleOrNull();
+        final conversation = await context.database.conversationDao
+            .conversationItem(_conversationId)
+            .getSingleOrNull();
         final ownerId = conversation?.ownerId;
         final isBotConversation = conversation?.isBotConversation;
         if (ownerId == null || isBotConversation == null) return;
@@ -272,10 +271,9 @@ class _SendPage extends HookConsumerWidget {
               borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             alignment: Alignment.center,
-            padding:
-                category == _Category.app_card
-                    ? null
-                    : const EdgeInsets.all(34),
+            padding: category == _Category.app_card
+                ? null
+                : const EdgeInsets.all(34),
             child: child,
           ),
           const SizedBox(height: 54),
@@ -433,27 +431,26 @@ class _Sticker extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sticker =
-        useMemoizedFuture(
-          () async {
-            final sticker =
-                await context.database.stickerDao
-                    .sticker(stickerId)
-                    .getSingleOrNull();
+    final sticker = useMemoizedFuture(
+      () async {
+        final sticker = await context.database.stickerDao
+            .sticker(stickerId)
+            .getSingleOrNull();
 
-            if (sticker != null) return sticker;
+        if (sticker != null) return sticker;
 
-            final s = await context.accountServer.client.accountApi
-                .getStickerById(stickerId);
-            await context.database.stickerDao.insert(
-              s.data.asStickersCompanion,
-            );
+        final s = await context.accountServer.client.accountApi.getStickerById(
+          stickerId,
+        );
+        await context.database.stickerDao.insert(
+          s.data.asStickersCompanion,
+        );
 
-            return context.database.stickerDao.sticker(stickerId).getSingle();
-          },
-          null,
-          keys: [stickerId],
-        ).data;
+        return context.database.stickerDao.sticker(stickerId).getSingle();
+      },
+      null,
+      keys: [stickerId],
+    ).data;
 
     if (sticker == null) return const SizedBox();
 
@@ -474,15 +471,14 @@ class _Contact extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user =
-        useMemoizedFuture(
-          () async {
-            final list = await context.accountServer.refreshUsers([userId]);
-            return (list != null && list.isNotEmpty) ? list.first : null;
-          },
-          null,
-          keys: [userId],
-        ).data;
+    final user = useMemoizedFuture(
+      () async {
+        final list = await context.accountServer.refreshUsers([userId]);
+        return (list != null && list.isNotEmpty) ? list.first : null;
+      },
+      null,
+      keys: [userId],
+    ).data;
 
     if (user == null) return const SizedBox();
 

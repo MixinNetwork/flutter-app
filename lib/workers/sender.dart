@@ -125,10 +125,9 @@ class Sender {
   }
 
   Future checkSessionSenderKey(String conversationId) async {
-    final participants =
-        await database.participantSessionDao
-            .notSendSessionParticipants(conversationId, sessionId)
-            .get();
+    final participants = await database.participantSessionDao
+        .notSendSessionParticipants(conversationId, sessionId)
+        .get();
     if (participants.isEmpty) {
       return;
     }
@@ -208,16 +207,15 @@ class Sender {
 
         final noKeyList = requestSignalKeyUsers.where((e) => !keys.contains(e));
         if (noKeyList.isNotEmpty) {
-          final sentSenderKeys =
-              noKeyList
-                  .map(
-                    (e) => db.ParticipantSessionData(
-                      conversationId: conversationId,
-                      userId: e.userId,
-                      sessionId: e.sessionId,
-                    ),
-                  )
-                  .toList();
+          final sentSenderKeys = noKeyList
+              .map(
+                (e) => db.ParticipantSessionData(
+                  conversationId: conversationId,
+                  userId: e.userId,
+                  sessionId: e.sessionId,
+                ),
+              )
+              .toList();
           await database.participantSessionDao.updateList(sentSenderKeys);
         }
       }
@@ -242,17 +240,16 @@ class Sender {
       );
       await database.messageHistoryDao.insertList(messageIds);
 
-      final sentSenderKeys =
-          signalKeyMessages
-              .map(
-                (e) => db.ParticipantSessionData(
-                  conversationId: conversationId,
-                  userId: e.recipientId,
-                  sessionId: e.sessionId!,
-                  sentToServer: SenderKeyStatus.sent.index,
-                ),
-              )
-              .toList();
+      final sentSenderKeys = signalKeyMessages
+          .map(
+            (e) => db.ParticipantSessionData(
+              conversationId: conversationId,
+              userId: e.recipientId,
+              sessionId: e.sessionId!,
+              sentToServer: SenderKeyStatus.sent.index,
+            ),
+          )
+          .toList();
       await database.participantSessionDao.updateList(sentSenderKeys);
     }
   }
@@ -270,10 +267,9 @@ class Sender {
   }
 
   Future checkConversation(String conversationId) async {
-    final conversation =
-        await database.conversationDao
-            .conversationById(conversationId)
-            .getSingleOrNull();
+    final conversation = await database.conversationDao
+        .conversationById(conversationId)
+        .getSingleOrNull();
     if (conversation == null) {
       return;
     }
@@ -472,15 +468,14 @@ class Sender {
     String conversationId,
     String recipientId,
   ) async {
-    final plainText =
-        PlainJsonMessage(
-          kNoKey,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ).toJson().toString();
+    final plainText = PlainJsonMessage(
+      kNoKey,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ).toJson().toString();
     final encoded = base64Encode(utf8.encode(plainText));
     final blazeParam = BlazeMessageParam(
       conversationId: conversationId,

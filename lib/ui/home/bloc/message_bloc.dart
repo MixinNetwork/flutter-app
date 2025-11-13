@@ -1,5 +1,3 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
@@ -130,7 +128,7 @@ class MessageState extends Equatable {
 
   List<MessageItem> get list => [
     ...top,
-    if (center != null) center!,
+    ?center,
     ...bottom,
   ];
 
@@ -187,7 +185,6 @@ class MessageState extends Equatable {
       return copyWith(bottom: bottom.where(exclusive).toList());
     }
 
-    // ignore: avoid_returning_this
     return this;
   }
 }
@@ -343,10 +340,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final topMessageId = state.topMessage?.messageId;
     assert(topMessageId != null);
     final info = await messageDao.messageOrderInfo(topMessageId!);
-    final list =
-        await messageDao
-            .beforeMessagesByConversationId(info!, conversationId, limit)
-            .get();
+    final list = await messageDao
+        .beforeMessagesByConversationId(info!, conversationId, limit)
+        .get();
 
     final isOldest = list.length < limit;
     return state.copyWith(
@@ -359,10 +355,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final bottomMessageId = state.bottomMessage?.messageId;
     assert(bottomMessageId != null);
     final info = await messageDao.messageOrderInfo(bottomMessageId!);
-    final list =
-        await messageDao
-            .afterMessagesByConversationId(info!, conversationId, limit)
-            .get();
+    final list = await messageDao
+        .afterMessagesByConversationId(info!, conversationId, limit)
+        .get();
 
     final isLatest = list.length < limit ? true : null;
     return state.copyWith(
@@ -403,10 +398,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     String? centerMessageId,
   }) async {
     Future<MessageState> recentMessages() async {
-      final list =
-          await messageDao
-              .messagesByConversationId(conversationId, limit)
-              .get();
+      final list = await messageDao
+          .messagesByConversationId(conversationId, limit)
+          .get();
 
       return MessageState(
         top: list.reversed.toList(),
@@ -423,10 +417,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     }
 
     final _limit = limit ~/ 2;
-    final bottomList =
-        await messageDao
-            .afterMessagesByConversationId(info, conversationId, _limit)
-            .get();
+    final bottomList = await messageDao
+        .afterMessagesByConversationId(info, conversationId, _limit)
+        .get();
     var topList =
         (await messageDao
                 .beforeMessagesByConversationId(info, conversationId, _limit)
@@ -437,10 +430,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final isLatest = bottomList.length < _limit;
     final isOldest = topList.length < _limit;
 
-    var center =
-        await messageDao
-            .messageItemByMessageId(centerMessageId)
-            .getSingleOrNull();
+    var center = await messageDao
+        .messageItemByMessageId(centerMessageId)
+        .getSingleOrNull();
 
     if (bottomList.isEmpty && center != null) {
       topList = [...topList, center];

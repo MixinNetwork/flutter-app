@@ -132,24 +132,27 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
 @Deprecated('Use multiAuthNotifierProvider instead')
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
-final multiAuthStateNotifierProvider = StateNotifierProvider.autoDispose<
-  MultiAuthStateNotifier,
-  MultiAuthState
->((ref) {
-  ref.keepAlive();
+final multiAuthStateNotifierProvider =
+    StateNotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>((
+      ref,
+    ) {
+      ref.keepAlive();
 
-  final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
-  if (oldJson != null) {
-    final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromMap);
-    if (multiAuthState == null) {
+      final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
+      if (oldJson != null) {
+        final multiAuthState = fromHydratedJson(
+          oldJson,
+          MultiAuthState.fromMap,
+        );
+        if (multiAuthState == null) {
+          return MultiAuthStateNotifier(const MultiAuthState());
+        }
+
+        return MultiAuthStateNotifier(multiAuthState);
+      }
+
       return MultiAuthStateNotifier(const MultiAuthState());
-    }
-
-    return MultiAuthStateNotifier(multiAuthState);
-  }
-
-  return MultiAuthStateNotifier(const MultiAuthState());
-});
+    });
 
 final authProvider = multiAuthStateNotifierProvider.select(
   (value) => value.current,

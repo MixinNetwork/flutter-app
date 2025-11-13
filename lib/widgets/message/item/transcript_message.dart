@@ -70,18 +70,17 @@ class TranscriptMessageWidget extends HookConsumerWidget {
     return HookBuilder(
       builder: (context) {
         final previews = useMemoized(
-          () =>
-              transcriptMinimals
-                  .map(
-                    (transcriptMinimal) =>
-                        messagePreviewOptimize(
-                          null,
-                          transcriptMinimal.category,
-                          transcriptMinimal.content,
-                        ) ??
-                        '',
-                  )
-                  .toList(),
+          () => transcriptMinimals
+              .map(
+                (transcriptMinimal) =>
+                    messagePreviewOptimize(
+                      null,
+                      transcriptMinimal.category,
+                      transcriptMinimal.content,
+                    ) ??
+                    '',
+              )
+              .toList(),
           [transcriptMinimals],
         );
 
@@ -90,14 +89,15 @@ class TranscriptMessageWidget extends HookConsumerWidget {
         );
 
         final transcriptTexts = useMemoized(
-          () => List.generate(
-            math.min(transcriptMinimals.length, 4),
-            (index) => index,
-          ).map(
-            (i) =>
-                '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
-                    .overflow,
-          ),
+          () =>
+              List.generate(
+                math.min(transcriptMinimals.length, 4),
+                (index) => index,
+              ).map(
+                (i) =>
+                    '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
+                        .overflow,
+              ),
           [transcriptMinimals, previews],
         );
 
@@ -171,22 +171,19 @@ class TranscriptMessageWidget extends HookConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                              transcriptTexts
-                                  .map(
-                                    (text) => Text(
-                                      text,
-                                      style: TextStyle(
-                                        color: context.theme.secondaryText,
-                                        fontSize:
-                                            context
-                                                .messageStyle
-                                                .tertiaryFontSize,
-                                      ),
-                                      maxLines: 1,
-                                    ),
-                                  )
-                                  .toList(),
+                          children: transcriptTexts
+                              .map(
+                                (text) => Text(
+                                  text,
+                                  style: TextStyle(
+                                    color: context.theme.secondaryText,
+                                    fontSize:
+                                        context.messageStyle.tertiaryFontSize,
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              )
+                              .toList(),
                         ),
                       ),
                     ],
@@ -228,10 +225,9 @@ class TranscriptPage extends HookConsumerWidget {
   final AudioMessagePlayService vlcService;
   final MessageItem transcriptMessage;
 
-  static MessageItem? of(BuildContext context) =>
-      context
-          .findAncestorWidgetOfExactType<TranscriptPage>()
-          ?.transcriptMessage;
+  static MessageItem? of(BuildContext context) => context
+      .findAncestorWidgetOfExactType<TranscriptPage>()
+      ?.transcriptMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -250,13 +246,11 @@ class TranscriptPage extends HookConsumerWidget {
           duration: kDefaultThrottleDuration,
         )
         .map(
-          (list) =>
-              list
-                  .map(
-                    (transcriptMessageItem) =>
-                        transcriptMessageItem.messageItem,
-                  )
-                  .toList(),
+          (list) => list
+              .map(
+                (transcriptMessageItem) => transcriptMessageItem.messageItem,
+              )
+              .toList(),
         );
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
@@ -291,12 +285,10 @@ class TranscriptPage extends HookConsumerWidget {
           BlocProvider.value(value: blinkCubit),
           Provider.value(value: vlcService),
           Provider(
-            create:
-                (_) => AudioMessagesPlayAgent(
-                  list,
-                  (m) =>
-                      context.accountServer.convertMessageAbsolutePath(m, true),
-                ),
+            create: (_) => AudioMessagesPlayAgent(
+              list,
+              (m) => context.accountServer.convertMessageAbsolutePath(m, true),
+            ),
           ),
           Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
         ],
@@ -340,8 +332,8 @@ class TranscriptPage extends HookConsumerWidget {
                   controller: scrollController,
                   key: listKey,
                   padding: const EdgeInsets.only(bottom: 16),
-                  itemBuilder:
-                      (BuildContext context, int index) => MessageItemWidget(
+                  itemBuilder: (BuildContext context, int index) =>
+                      MessageItemWidget(
                         prev: list.getOrNull(index - 1),
                         message: list[index],
                         next: list.getOrNull(index + 1),

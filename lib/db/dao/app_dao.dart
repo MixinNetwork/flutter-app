@@ -18,9 +18,9 @@ class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
 
   Future deleteApp(App app) => delete(db.apps).delete(app);
 
-  Future<App?> findAppById(String appId) async =>
-      (select(db.apps)
-        ..where((tbl) => tbl.appId.equals(appId))).getSingleOrNull();
+  Future<App?> findAppById(String appId) async => (select(
+    db.apps,
+  )..where((tbl) => tbl.appId.equals(appId))).getSingleOrNull();
 
   SimpleSelectStatement<Apps, App> appInIds(Iterable<String> ids) =>
       select(db.apps)..where((tbl) => tbl.appId.isIn(ids));
@@ -33,9 +33,8 @@ class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
             ..limit(limit, offset: offset))
           .get();
 
-  Future<int> getAppsCount() async =>
-      db
-          .customSelect('SELECT COUNT(1) as _result FROM apps')
-          .map((p0) => p0.read<int>('_result'))
-          .getSingle();
+  Future<int> getAppsCount() async => db
+      .customSelect('SELECT COUNT(1) as _result FROM apps')
+      .map((p0) => p0.read<int>('_result'))
+      .getSingle();
 }

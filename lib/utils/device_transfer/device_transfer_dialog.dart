@@ -29,7 +29,8 @@ enum _DeviceTransferPageType {
   restore,
   backup,
   restoreWaitingConnect,
-  backupWaitingConnect;
+  backupWaitingConnect
+  ;
 
   Widget build() {
     switch (this) {
@@ -147,13 +148,13 @@ class _DialogBackButton extends HookConsumerWidget {
     return !canPopup
         ? const SizedBox.shrink()
         : Center(
-          child: MixinBackButton(
-            onTap: () {
-              onTapped?.call();
-              context.read<_NavigatorCubit>().pop();
-            },
-          ),
-        );
+            child: MixinBackButton(
+              onTap: () {
+                onTapped?.call();
+                context.read<_NavigatorCubit>().pop();
+              },
+            ),
+          );
   }
 }
 

@@ -38,17 +38,16 @@ class _ConversationList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conversationList =
-        useMemoizedFuture(
-          () {
-            final selfId = context.accountServer.userId;
-            return context.accountServer.database.conversationDao
-                .findSameConversations(selfId, userId)
-                .get();
-          },
-          <GroupMinimal>[],
-          keys: [userId],
-        ).data;
+    final conversationList = useMemoizedFuture(
+      () {
+        final selfId = context.accountServer.userId;
+        return context.accountServer.database.conversationDao
+            .findSameConversations(selfId, userId)
+            .get();
+      },
+      <GroupMinimal>[],
+      keys: [userId],
+    ).data;
 
     if (conversationList == null) {
       return const Center(

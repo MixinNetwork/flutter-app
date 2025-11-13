@@ -125,15 +125,14 @@ class SearchList extends HookConsumerWidget {
 
     final messages =
         useMemoizedFuture<List<SearchMessageDetailItem>>(
-          () =>
-              keyword.isEmpty
-                  ? Future.value(<SearchMessageDetailItem>[])
-                  : accountServer.database.fuzzySearchMessageByCategory(
-                    keyword,
-                    limit: 4,
-                    unseenConversationOnly: filterUnseen,
-                    category: slideCategoryState,
-                  ),
+          () => keyword.isEmpty
+              ? Future.value(<SearchMessageDetailItem>[])
+              : accountServer.database.fuzzySearchMessageByCategory(
+                  keyword,
+                  limit: 4,
+                  unseenConversationOnly: filterUnseen,
+                  category: slideCategoryState,
+                ),
           [],
           keys: [keyword, filterUnseen, slideCategoryState],
         ).data ??
@@ -224,10 +223,9 @@ class SearchList extends HookConsumerWidget {
               showMore: users.length > _defaultLimit,
               more: type.value != _ShowMoreType.contact,
               onTap: () {
-                type.value =
-                    type.value != _ShowMoreType.contact
-                        ? _ShowMoreType.contact
-                        : null;
+                type.value = type.value != _ShowMoreType.contact
+                    ? _ShowMoreType.contact
+                    : null;
               },
             ),
           ),
@@ -261,10 +259,9 @@ class SearchList extends HookConsumerWidget {
                   },
                 );
               },
-              childCount:
-                  type.value == _ShowMoreType.contact
-                      ? users.length
-                      : min(users.length, _defaultLimit),
+              childCount: type.value == _ShowMoreType.contact
+                  ? users.length
+                  : min(users.length, _defaultLimit),
             ),
           ),
         if (users.isNotEmpty)
@@ -276,10 +273,9 @@ class SearchList extends HookConsumerWidget {
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
-                type.value =
-                    type.value != _ShowMoreType.conversation
-                        ? _ShowMoreType.conversation
-                        : null;
+                type.value = type.value != _ShowMoreType.conversation
+                    ? _ShowMoreType.conversation
+                    : null;
               },
             ),
           ),
@@ -290,78 +286,75 @@ class SearchList extends HookConsumerWidget {
                 final conversation = conversations[index];
                 return HookConsumer(
                   builder: (context, ref, _) {
-                    final description =
-                        useMemoizedFuture(
-                          () async {
-                            final mentionCache = ref.read(mentionCacheProvider);
+                    final description = useMemoizedFuture(
+                      () async {
+                        final mentionCache = ref.read(mentionCacheProvider);
 
-                            if (conversation.contentType ==
-                                MessageCategory.systemConversation) {
-                              return generateSystemText(
-                                actionName: conversation.actionName,
-                                participantUserId:
-                                    conversation.participantUserId,
-                                senderId: conversation.senderId,
-                                currentUserId: context.accountServer.userId,
-                                participantFullName:
-                                    conversation.participantFullName,
-                                senderFullName: conversation.senderFullName,
-                                expireIn: int.tryParse(
-                                  conversation.content ?? '0',
-                                ),
-                              );
-                            }
+                        if (conversation.contentType ==
+                            MessageCategory.systemConversation) {
+                          return generateSystemText(
+                            actionName: conversation.actionName,
+                            participantUserId: conversation.participantUserId,
+                            senderId: conversation.senderId,
+                            currentUserId: context.accountServer.userId,
+                            participantFullName:
+                                conversation.participantFullName,
+                            senderFullName: conversation.senderFullName,
+                            expireIn: int.tryParse(
+                              conversation.content ?? '0',
+                            ),
+                          );
+                        }
 
-                            if (conversation.contentType.isPin) {
-                              final pinMessageMinimal =
-                                  PinMessageMinimal.fromJsonString(
-                                    conversation.content ?? '',
-                                  );
-                              if (pinMessageMinimal == null) {
-                                return context.l10n.chatPinMessage(
-                                  conversation.senderFullName ?? '',
-                                  context.l10n.aMessage,
-                                );
-                              }
-                              final preview = await generatePinPreviewText(
-                                pinMessageMinimal: pinMessageMinimal,
-                                mentionCache: ref.read(mentionCacheProvider),
+                        if (conversation.contentType.isPin) {
+                          final pinMessageMinimal =
+                              PinMessageMinimal.fromJsonString(
+                                conversation.content ?? '',
                               );
-                              return context.l10n.chatPinMessage(
-                                conversation.senderFullName ?? '',
-                                preview,
-                              );
-                            }
-
-                            return messagePreviewOptimize(
-                              conversation.messageStatus,
-                              conversation.contentType,
-                              mentionCache.replaceMention(
-                                conversation.content,
-                                await mentionCache.checkMentionCache({
-                                  conversation.content,
-                                }),
-                              ),
-                              conversation.senderId ==
-                                  context.accountServer.userId,
-                              conversation.isGroupConversation,
-                              conversation.senderFullName,
+                          if (pinMessageMinimal == null) {
+                            return context.l10n.chatPinMessage(
+                              conversation.senderFullName ?? '',
+                              context.l10n.aMessage,
                             );
-                          },
-                          null,
-                          keys: [
-                            conversation.actionName,
-                            conversation.participantUserId,
-                            context.accountServer.userId,
-                            conversation.participantFullName,
-                            conversation.messageStatus,
-                            conversation.contentType,
+                          }
+                          final preview = await generatePinPreviewText(
+                            pinMessageMinimal: pinMessageMinimal,
+                            mentionCache: ref.read(mentionCacheProvider),
+                          );
+                          return context.l10n.chatPinMessage(
+                            conversation.senderFullName ?? '',
+                            preview,
+                          );
+                        }
+
+                        return messagePreviewOptimize(
+                          conversation.messageStatus,
+                          conversation.contentType,
+                          mentionCache.replaceMention(
                             conversation.content,
-                            conversation.senderId,
-                            conversation.isGroupConversation,
-                            conversation.senderFullName,
-                          ],
-                        ).data;
+                            await mentionCache.checkMentionCache({
+                              conversation.content,
+                            }),
+                          ),
+                          conversation.senderId == context.accountServer.userId,
+                          conversation.isGroupConversation,
+                          conversation.senderFullName,
+                        );
+                      },
+                      null,
+                      keys: [
+                        conversation.actionName,
+                        conversation.participantUserId,
+                        context.accountServer.userId,
+                        conversation.participantFullName,
+                        conversation.messageStatus,
+                        conversation.contentType,
+                        conversation.content,
+                        conversation.senderId,
+                        conversation.isGroupConversation,
+                        conversation.senderFullName,
+                      ],
+                    ).data;
 
                     return ConversationMenuWrapper(
                       searchConversation: conversation,
@@ -396,10 +389,9 @@ class SearchList extends HookConsumerWidget {
                   },
                 );
               },
-              childCount:
-                  type.value == _ShowMoreType.conversation
-                      ? conversations.length
-                      : min(conversations.length, _defaultLimit),
+              childCount: type.value == _ShowMoreType.conversation
+                  ? conversations.length
+                  : min(conversations.length, _defaultLimit),
             ),
           ),
         if (conversations.isNotEmpty)
@@ -411,10 +403,9 @@ class SearchList extends HookConsumerWidget {
               showMore: messages.length > _defaultLimit,
               more: type.value != _ShowMoreType.message,
               onTap: () {
-                type.value =
-                    type.value != _ShowMoreType.message
-                        ? _ShowMoreType.message
-                        : null;
+                type.value = type.value != _ShowMoreType.message
+                    ? _ShowMoreType.message
+                    : null;
               },
             ),
           ),
@@ -429,10 +420,9 @@ class SearchList extends HookConsumerWidget {
                   onTap: _searchMessageItemOnTap(context, message),
                 );
               },
-              childCount:
-                  type.value == _ShowMoreType.message
-                      ? messages.length
-                      : min(messages.length, _defaultLimit),
+              childCount: type.value == _ShowMoreType.message
+                  ? messages.length
+                  : min(messages.length, _defaultLimit),
             ),
           ),
         if (messages.isNotEmpty)
@@ -574,8 +564,9 @@ class SearchItemWidget extends StatelessWidget {
     return Padding(
       padding: margin,
       child: InteractiveDecoratedBox(
-        decoration:
-            selected == true ? selectedDecoration : const BoxDecoration(),
+        decoration: selected == true
+            ? selectedDecoration
+            : const BoxDecoration(),
         hoveringDecoration: selectedDecoration,
         onTap: onTap,
         child: Container(
@@ -604,40 +595,39 @@ class SearchItemWidget extends StatelessWidget {
                                 child: CustomText(
                                   name,
                                   maxLines: maxLines ? null : 1,
-                                  overflow:
-                                      maxLines ? null : TextOverflow.ellipsis,
+                                  overflow: maxLines
+                                      ? null
+                                      : TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: context.theme.text,
                                     fontSize: nameFontSize,
                                   ),
-                                  textMatchers:
-                                      [
-                                        EmojiTextMatcher(),
-                                        if (keyword.trim().isNotEmpty)
-                                          MultiKeyWordTextMatcher.createKeywordMatcher(
-                                            keyword: keyword,
-                                            style: TextStyle(
-                                              color: context.theme.accent,
-                                            ),
-                                            caseSensitive: false,
-                                          ),
-                                      ].whereType<TextMatcher>().toList(),
+                                  textMatchers: [
+                                    EmojiTextMatcher(),
+                                    if (keyword.trim().isNotEmpty)
+                                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                                        keyword: keyword,
+                                        style: TextStyle(
+                                          color: context.theme.accent,
+                                        ),
+                                        caseSensitive: false,
+                                      ),
+                                  ].whereType<TextMatcher>().toList(),
                                 ),
                               ),
-                              if (trailing != null) trailing!,
+                              ?trailing,
                             ],
                           ),
                         ),
                         if (date != null)
                           Consumer(
-                            builder:
-                                (context, ref, _) => Text(
-                                  ref.watch(formattedDateTimeProvider(date!)),
-                                  style: TextStyle(
-                                    color: context.theme.secondaryText,
-                                    fontSize: 12,
-                                  ),
-                                ),
+                            builder: (context, ref, _) => Text(
+                              ref.watch(formattedDateTimeProvider(date!)),
+                              style: TextStyle(
+                                color: context.theme.secondaryText,
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -669,18 +659,17 @@ class SearchItemWidget extends StatelessWidget {
                                 color: context.theme.secondaryText,
                                 fontSize: 14,
                               ),
-                              textMatchers:
-                                  [
-                                    EmojiTextMatcher(),
-                                    if (keyword.trim().isNotEmpty)
-                                      MultiKeyWordTextMatcher.createKeywordMatcher(
-                                        keyword: keyword,
-                                        style: TextStyle(
-                                          color: context.theme.accent,
-                                        ),
-                                        caseSensitive: false,
-                                      ),
-                                  ].whereType<TextMatcher>().toList(),
+                              textMatchers: [
+                                EmojiTextMatcher(),
+                                if (keyword.trim().isNotEmpty)
+                                  MultiKeyWordTextMatcher.createKeywordMatcher(
+                                    keyword: keyword,
+                                    style: TextStyle(
+                                      color: context.theme.accent,
+                                    ),
+                                    caseSensitive: false,
+                                  ),
+                              ].whereType<TextMatcher>().toList(),
                             ),
                           ),
                         ],
@@ -730,28 +719,27 @@ class _SearchMessageList extends HookConsumerWidget {
       bloc: searchMessageCubit,
     );
 
-    final child =
-        pageState.initializing
-            ? Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation(context.theme.accent),
-              ),
-            )
-            : pageState.items.isEmpty
-            ? const SearchEmptyWidget()
-            : ScrollablePositionedList.builder(
-              itemPositionsListener: searchMessageCubit.itemPositionsListener,
-              itemCount: pageState.items.length,
-              itemBuilder: (context, index) {
-                final message = pageState.items[index];
-                return SearchMessageItem(
-                  message: message,
-                  keyword: keyword,
-                  onTap: _searchMessageItemOnTap(context, message),
-                );
-              },
-            );
+    final child = pageState.initializing
+        ? Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation(context.theme.accent),
+            ),
+          )
+        : pageState.items.isEmpty
+        ? const SearchEmptyWidget()
+        : ScrollablePositionedList.builder(
+            itemPositionsListener: searchMessageCubit.itemPositionsListener,
+            itemCount: pageState.items.length,
+            itemBuilder: (context, index) {
+              final message = pageState.items[index];
+              return SearchMessageItem(
+                message: message,
+                keyword: keyword,
+                onTap: _searchMessageItemOnTap(context, message),
+              );
+            },
+          );
 
     return Column(
       children: [
@@ -844,68 +832,64 @@ class SearchMessageItem extends HookConsumerWidget {
       [message.status, message.type],
     );
 
-    final description =
-        useMemoizedFuture(
-          () async {
-            final mentionCache = ref.read(mentionCacheProvider);
+    final description = useMemoizedFuture(
+      () async {
+        final mentionCache = ref.read(mentionCacheProvider);
 
-            return messagePreviewOptimize(
-              message.status,
-              message.type,
-              mentionCache.replaceMention(
-                message.content,
-                await mentionCache.checkMentionCache({message.content}),
-              ),
-              message.senderId == context.accountServer.userId,
-              isGroup,
-              message.senderFullName,
-            );
-          },
-          null,
-          keys: [
-            message.status,
-            message.type,
+        return messagePreviewOptimize(
+          message.status,
+          message.type,
+          mentionCache.replaceMention(
             message.content,
-            isGroup,
-            message.senderId,
-            message.senderFullName,
-          ],
-        ).data;
+            await mentionCache.checkMentionCache({message.content}),
+          ),
+          message.senderId == context.accountServer.userId,
+          isGroup,
+          message.senderFullName,
+        );
+      },
+      null,
+      keys: [
+        message.status,
+        message.type,
+        message.content,
+        isGroup,
+        message.senderId,
+        message.senderFullName,
+      ],
+    ).data;
 
-    final avatar =
-        showSender
-            ? AvatarWidget(
-              userId: message.senderId,
-              avatarUrl: message.senderAvatarUrl,
-              size: ConversationPage.conversationItemAvatarSize,
-              name: message.senderFullName,
-            )
-            : ConversationAvatarWidget(
-              conversationId: message.conversationId,
-              fullName: conversationValidName(
-                message.groupName,
-                message.ownerFullName,
-              ),
-              groupIconUrl: message.groupIconUrl,
-              avatarUrl: message.ownerAvatarUrl,
-              category: message.category,
-              size: ConversationPage.conversationItemAvatarSize,
-              userId: message.ownerId,
-            );
+    final avatar = showSender
+        ? AvatarWidget(
+            userId: message.senderId,
+            avatarUrl: message.senderAvatarUrl,
+            size: ConversationPage.conversationItemAvatarSize,
+            name: message.senderFullName,
+          )
+        : ConversationAvatarWidget(
+            conversationId: message.conversationId,
+            fullName: conversationValidName(
+              message.groupName,
+              message.ownerFullName,
+            ),
+            groupIconUrl: message.groupIconUrl,
+            avatarUrl: message.ownerAvatarUrl,
+            category: message.category,
+            size: ConversationPage.conversationItemAvatarSize,
+            userId: message.ownerId,
+          );
     return SearchItemWidget(
       avatar: avatar,
-      name:
-          showSender
-              ? message.senderFullName ?? ''
-              : conversationValidName(message.groupName, message.ownerFullName),
-      trailing:
-          showSender || message.category == ConversationCategory.contact
-              ? BadgesWidget(
-                verified: message.verified,
-                isBot: message.appId != null,
-                membership: message.membership,
-              )
-              : null,
+      name: showSender
+          ? message.senderFullName ?? ''
+          : conversationValidName(message.groupName, message.ownerFullName),
+      trailing: showSender || message.category == ConversationCategory.contact
+          ? BadgesWidget(
+              verified: message.verified,
+              isBot: message.appId != null,
+              membership: message.membership,
+            )
+          : null,
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,

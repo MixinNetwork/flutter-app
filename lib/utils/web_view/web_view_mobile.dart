@@ -40,13 +40,12 @@ class MobileMixinWebView extends MixinWebView {
   }) async {
     await showGeneralDialog(
       context: context,
-      pageBuilder:
-          (context, animation, secondaryAnimation) =>
-              _FullWindowInAppWebViewPage(
-                initialUrl: url,
-                app: app,
-                appCardData: appCardData,
-              ),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          _FullWindowInAppWebViewPage(
+            initialUrl: url,
+            app: app,
+            appCardData: appCardData,
+          ),
     );
   }
 
@@ -72,10 +71,9 @@ class _FullWindowInAppWebViewPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final webViewController = useMemoized(
-      () =>
-          WebViewController()
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..loadRequest(Uri.parse(initialUrl)),
+      () => WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..loadRequest(Uri.parse(initialUrl)),
     );
     return Material(
       color: context.theme.background,

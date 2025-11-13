@@ -30,45 +30,42 @@ class _TransferPage extends HookConsumerWidget {
       context.accountServer.updateFiats();
     }, []);
 
-    final snapshotItem =
-        useMemoizedStream(
-          () => context.database.snapshotDao
-              .snapshotItemById(snapshotId, context.account!.fiatCurrency)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.updateSnapshotStream.where(
-                    (event) =>
-                        event.any((element) => element.contains(snapshotId)),
-                  ),
-                  DataBaseEventBus.instance.updateAssetStream,
-                ],
-                duration: kDefaultThrottleDuration,
+    final snapshotItem = useMemoizedStream(
+      () => context.database.snapshotDao
+          .snapshotItemById(snapshotId, context.account!.fiatCurrency)
+          .watchSingleOrNullWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateSnapshotStream.where(
+                (event) => event.any((element) => element.contains(snapshotId)),
               ),
-        ).data;
+              DataBaseEventBus.instance.updateAssetStream,
+            ],
+            duration: kDefaultThrottleDuration,
+          ),
+    ).data;
 
-    final opponentFullName =
-        useMemoizedStream<User?>(() {
-          final opponentId = snapshotItem?.opponentId;
-          if (opponentId != null && opponentId.trim().isNotEmpty) {
-            final stream = context.database.userDao
-                .userById(opponentId)
-                .watchSingleOrNullWithStream(
-                  eventStreams: [
-                    DataBaseEventBus.instance.watchUpdateUserStream([
-                      opponentId,
-                    ]),
-                  ],
-                  duration: kSlowThrottleDuration,
-                );
-            return stream.map((event) {
-              if (event == null) {
-                context.accountServer.refreshUsers([opponentId]);
-              }
-              return event;
-            });
+    final opponentFullName = useMemoizedStream<User?>(() {
+      final opponentId = snapshotItem?.opponentId;
+      if (opponentId != null && opponentId.trim().isNotEmpty) {
+        final stream = context.database.userDao
+            .userById(opponentId)
+            .watchSingleOrNullWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance.watchUpdateUserStream([
+                  opponentId,
+                ]),
+              ],
+              duration: kSlowThrottleDuration,
+            );
+        return stream.map((event) {
+          if (event == null) {
+            context.accountServer.refreshUsers([opponentId]);
           }
-          return Stream.value(null);
-        }, keys: [snapshotItem?.opponentId]).data?.fullName;
+          return event;
+        });
+      }
+      return Stream.value(null);
+    }, keys: [snapshotItem?.opponentId]).data?.fullName;
 
     useEffect(() {
       context.accountServer.updateSnapshotById(snapshotId: snapshotId);
@@ -177,12 +174,11 @@ class SnapshotDetailHeader extends HookConsumerWidget {
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'MixinCondensed',
-                  color:
-                      snapshotType == SnapshotType.pending
-                          ? context.theme.text
-                          : _isPositive(amount)
-                          ? context.theme.green
-                          : context.theme.red,
+                  color: snapshotType == SnapshotType.pending
+                      ? context.theme.text
+                      : _isPositive(amount)
+                      ? context.theme.green
+                      : context.theme.red,
                 ),
               ),
               const TextSpan(text: ' '),
@@ -207,15 +203,14 @@ class _ValuesDescription extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ticker =
-        useMemoizedFuture(
-          () => context.accountServer.client.snapshotApi.getTicker(
-            snapshot.assetId,
-            offset: snapshot.createdAt.toIso8601String(),
-          ),
-          null,
-          keys: [snapshot.snapshotId],
-        ).data?.data;
+    final ticker = useMemoizedFuture(
+      () => context.accountServer.client.snapshotApi.getTicker(
+        snapshot.assetId,
+        offset: snapshot.createdAt.toIso8601String(),
+      ),
+      null,
+      keys: [snapshot.snapshotId],
+    ).data?.data;
 
     final String? thatTimeValue;
 
@@ -506,14 +501,14 @@ class _SymbolCustomClipper extends CustomClipper<Path> with EquatableMixin {
     assert(size.shortestSide > chainPlaceholderSize);
 
     final symbol = Path()..addOval(Offset.zero & size);
-    final chain =
-        Path()..addOval(
-          Offset(
-                size.width - chainPlaceholderSize,
-                size.height - chainPlaceholderSize,
-              ) &
-              Size.square(chainPlaceholderSize),
-        );
+    final chain = Path()
+      ..addOval(
+        Offset(
+              size.width - chainPlaceholderSize,
+              size.height - chainPlaceholderSize,
+            ) &
+            Size.square(chainPlaceholderSize),
+      );
 
     return Path.combine(PathOperation.difference, symbol, chain);
   }

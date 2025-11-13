@@ -141,14 +141,13 @@ class DatabaseProfiler extends Database {
 
         details = list.map((e) => e['detail']).whereType<String>();
 
-        needPrint =
-            details
-                .where(
-                  (String detail) =>
-                      detail.startsWith('SCAN') ||
-                      detail.startsWith('USE TEMP B-TREE'),
-                )
-                .isNotEmpty;
+        needPrint = details
+            .where(
+              (String detail) =>
+                  detail.startsWith('SCAN') ||
+                  detail.startsWith('USE TEMP B-TREE'),
+            )
+            .isNotEmpty;
       }
 
       w('''

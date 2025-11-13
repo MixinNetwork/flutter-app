@@ -61,9 +61,8 @@ class _Body extends HookConsumerWidget {
                   title: RadioItem<Brightness?>(
                     title: Text(context.l10n.followSystem),
                     groupValue: ref.watch(settingProvider).brightness,
-                    onChanged:
-                        (value) =>
-                            context.settingChangeNotifier.brightness = value,
+                    onChanged: (value) =>
+                        context.settingChangeNotifier.brightness = value,
                     value: null,
                   ),
                   trailing: null,
@@ -72,9 +71,8 @@ class _Body extends HookConsumerWidget {
                   title: RadioItem<Brightness?>(
                     title: Text(context.l10n.light),
                     groupValue: ref.watch(settingProvider).brightness,
-                    onChanged:
-                        (value) =>
-                            context.settingChangeNotifier.brightness = value,
+                    onChanged: (value) =>
+                        context.settingChangeNotifier.brightness = value,
                     value: Brightness.light,
                   ),
                   trailing: null,
@@ -83,9 +81,8 @@ class _Body extends HookConsumerWidget {
                   title: RadioItem<Brightness?>(
                     title: Text(context.l10n.dark),
                     groupValue: ref.watch(settingProvider).brightness,
-                    onChanged:
-                        (value) =>
-                            context.settingChangeNotifier.brightness = value,
+                    onChanged: (value) =>
+                        context.settingChangeNotifier.brightness = value,
                     value: Brightness.dark,
                   ),
                   trailing: null,
@@ -134,10 +131,8 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: showAvatar,
-                    onChanged:
-                        (bool value) =>
-                            context.settingChangeNotifier.messageShowAvatar =
-                                value,
+                    onChanged: (bool value) =>
+                        context.settingChangeNotifier.messageShowAvatar = value,
                   ),
                 ),
               ),
@@ -148,11 +143,11 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: showIdentityNumber,
-                    onChanged:
-                        (bool value) =>
-                            context
+                    onChanged: (bool value) =>
+                        context
                                 .settingChangeNotifier
-                                .messageShowIdentityNumber = value,
+                                .messageShowIdentityNumber =
+                            value,
                   ),
                 ),
               ),

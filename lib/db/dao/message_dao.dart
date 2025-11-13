@@ -30,34 +30,38 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Stream<List<MessageItem>> watchInsertOrReplaceMessageStream(
     String conversationId,
-  ) => Rx.merge([
-        DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-        DataBaseEventBus.instance.updateMessageMentionStream,
-        DataBaseEventBus.instance.updatePinMessageStream,
-      ])
-      .map(
-        (event) =>
-            event.where((element) => element.conversationId == conversationId),
-      )
-      .where((event) => event.isNotEmpty)
-      .asyncBufferMap((event) async {
-        final miniMessageItems =
-            event.reduce((value, element) => [...value, ...element]).toList();
-        final messages = <MessageItem>[];
-        final chunked = miniMessageItems.chunked(kMarkLimit);
-        for (final miniMessageItems in chunked) {
-          messages.addAll(
-            await _baseMessageItems(
-              (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => message
-                  .messageId
-                  .isIn(miniMessageItems.map((e) => e.messageId)),
-              (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
-                  Limit(miniMessageItems.length, 0),
-            ).get(),
-          );
-        }
-        return messages;
-      });
+  ) =>
+      Rx.merge([
+            DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+            DataBaseEventBus.instance.updateMessageMentionStream,
+            DataBaseEventBus.instance.updatePinMessageStream,
+          ])
+          .map(
+            (event) => event.where(
+              (element) => element.conversationId == conversationId,
+            ),
+          )
+          .where((event) => event.isNotEmpty)
+          .asyncBufferMap((event) async {
+            final miniMessageItems = event
+                .reduce((value, element) => [...value, ...element])
+                .toList();
+            final messages = <MessageItem>[];
+            final chunked = miniMessageItems.chunked(kMarkLimit);
+            for (final miniMessageItems in chunked) {
+              messages.addAll(
+                await _baseMessageItems(
+                  (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+                      message.messageId.isIn(
+                        miniMessageItems.map((e) => e.messageId),
+                      ),
+                  (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+                      Limit(miniMessageItems.length, 0),
+                ).get(),
+              );
+            }
+            return messages;
+          });
 
   Selectable<MessageItem> _baseMessageItems(
     Expression<bool> Function(
@@ -187,8 +191,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
 
     Future<void> _update(String conversationId) async {
-      final latest =
-          await messagesByConversationId(conversationId, 1).getSingleOrNull();
+      final latest = await messagesByConversationId(
+        conversationId,
+        1,
+      ).getSingleOrNull();
       if (latest == null) {
         e(
           'failed to update conversation last message, latest message is null $conversationId',
@@ -205,12 +211,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
 
     if (_conversationUnseenTaskRunner[conversationId] != null) {
-      _conversationUnseenTaskRunner[conversationId] =
-          () => _update(conversationId);
+      _conversationUnseenTaskRunner[conversationId] = () =>
+          _update(conversationId);
       return;
     } else {
-      _conversationUnseenTaskRunner[conversationId] =
-          () => _update(conversationId);
+      _conversationUnseenTaskRunner[conversationId] = () =>
+          _update(conversationId);
       Future.delayed(kDefaultThrottleDuration).then((value) {
         final runner = _conversationUnseenTaskRunner.remove(conversationId);
         runner?.call();
@@ -307,10 +313,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     await db.transaction(() async {
       await Future.wait([
-        (delete(db.messages)
-          ..where((tbl) => tbl.messageId.equals(messageId))).go(),
-        (delete(db.transcriptMessages)
-          ..where((tbl) => tbl.transcriptId.equals(messageId))).go(),
+        (delete(
+          db.messages,
+        )..where((tbl) => tbl.messageId.equals(messageId))).go(),
+        (delete(
+          db.transcriptMessages,
+        )..where((tbl) => tbl.transcriptId.equals(messageId))).go(),
         _recallPinMessage(conversationId, messageId),
         db.pinMessageDao.deleteByIds([messageId]),
         db.expiredMessageDao.deleteByMessageId(messageId),
@@ -363,8 +371,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return _sendInsertOrReplaceEventWithFuture(
       [messageId],
       (db.update(db.messages)..where(
-        (tbl) => tbl.messageId.equals(messageId),
-      )).write(MessagesCompanion(status: Value(status))),
+            (tbl) => tbl.messageId.equals(messageId),
+          ))
+          .write(MessagesCompanion(status: Value(status))),
     );
   }
 
@@ -377,16 +386,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) async {
     final [messageResult, transcriptMessageResult] = await db.transaction(
       () => Future.wait([
-        (db.update(db.messages)
-          ..where((tbl) => tbl.messageId.equals(messageId))).write(
+        (db.update(
+          db.messages,
+        )..where((tbl) => tbl.messageId.equals(messageId))).write(
           MessagesCompanion(
             mediaUrl: Value(path.pathBasename),
             mediaSize: Value(mediaSize),
             mediaStatus: Value(mediaStatus),
           ),
         ),
-        (db.update(db.transcriptMessages)
-          ..where((tbl) => tbl.messageId.equals(messageId))).write(
+        (db.update(
+          db.transcriptMessages,
+        )..where((tbl) => tbl.messageId.equals(messageId))).write(
           TranscriptMessagesCompanion(
             mediaUrl: Value(path.pathBasename),
             mediaSize: Value(mediaSize),
@@ -410,11 +421,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final [messageResult, transcriptMessageResult] = await db.transaction(
       () => Future.wait([
         (db.update(db.messages)..where(
-          (tbl) => tbl.messageId.equals(messageId),
-        )).write(MessagesCompanion(mediaStatus: Value(status))),
+              (tbl) => tbl.messageId.equals(messageId),
+            ))
+            .write(MessagesCompanion(mediaStatus: Value(status))),
         (db.update(db.transcriptMessages)..where(
-          (tbl) => tbl.messageId.equals(messageId),
-        )).write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
+              (tbl) => tbl.messageId.equals(messageId),
+            ))
+            .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
       ]),
     );
 
@@ -441,10 +454,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     }
 
     Future<void> notifyEventForTranscriptMessage() async {
-      final list =
-          await db.transcriptMessageDao
-              .transcriptMessageByMessageId(messageId, maxLimit)
-              .get();
+      final list = await db.transcriptMessageDao
+          .transcriptMessageByMessageId(messageId, maxLimit)
+          .get();
       if (list.isEmpty) return;
 
       final miniTranscriptMessages = list.map(
@@ -459,10 +471,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         );
       }
 
-      final miniMessages =
-          await miniMessageByIds(
-            list.map((e) => e.transcriptId).toList(),
-          ).get();
+      final miniMessages = await miniMessageByIds(
+        list.map((e) => e.transcriptId).toList(),
+      ).get();
       if (miniMessages.isEmpty) return;
       DataBaseEventBus.instance.insertOrReplaceMessages(miniMessages);
     }
@@ -480,8 +491,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ]) async {
     final equalsId = db.messages.messageId.equals(messageId);
     final equalsStatus = db.messages.mediaStatus.equalsValue(mediaStatus);
-    final predicate =
-        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    final predicate = not
+        ? equalsId & equalsStatus.not()
+        : equalsId & equalsStatus;
     return db.hasData(db.messages, [], predicate);
   }
 
@@ -494,8 +506,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final equalsStatus = db.transcriptMessages.mediaStatus.equalsValue(
       mediaStatus,
     );
-    final predicate =
-        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    final predicate = not
+        ? equalsId & equalsStatus.not()
+        : equalsId & equalsStatus;
     return db.hasData(db.transcriptMessages, [], predicate);
   }
 
@@ -627,11 +640,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     for (final messageIds in chunked) {
       await (db.update(db.messages)..where(
-        (tbl) =>
-            tbl.messageId.isIn(messageIds) &
-            tbl.status.equalsValue(MessageStatus.failed).not() &
-            tbl.status.equalsValue(MessageStatus.unknown).not(),
-      )).write(const MessagesCompanion(status: Value(MessageStatus.read)));
+            (tbl) =>
+                tbl.messageId.isIn(messageIds) &
+                tbl.status.equalsValue(MessageStatus.failed).not() &
+                tbl.status.equalsValue(MessageStatus.unknown).not(),
+          ))
+          .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     }
 
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessageItems);
@@ -699,15 +713,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<QuoteMessageItem?> findMessageItemById(
     String conversationId,
     String messageId,
-  ) =>
-      _baseQuoteMessageItem(
-        (message, sender, sticker, shareUser, messageMention) =>
-            message.conversationId.equals(conversationId) &
-            message.messageId.equals(messageId) &
-            message.status.equalsValue(MessageStatus.failed).not(),
-        (message, sender, sticker, shareUser, messageMention) => ignoreOrderBy,
-        (message, sender, sticker, shareUser, messageMention) => Limit(1, 0),
-      ).getSingleOrNull();
+  ) => _baseQuoteMessageItem(
+    (message, sender, sticker, shareUser, messageMention) =>
+        message.conversationId.equals(conversationId) &
+        message.messageId.equals(messageId) &
+        message.status.equalsValue(MessageStatus.failed).not(),
+    (message, sender, sticker, shareUser, messageMention) => ignoreOrderBy,
+    (message, sender, sticker, shareUser, messageMention) => Limit(1, 0),
+  ).getSingleOrNull();
 
   Future<QuoteMessageItem?> findMessageItemByMessageId(
     String? messageId,
@@ -728,8 +741,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ) => _sendInsertOrReplaceEventWithFuture(
     [messageId],
     (update(db.messages)..where(
-      (tbl) => tbl.messageId.equals(messageId),
-    )).write(MessagesCompanion(quoteContent: Value(quoteContent))),
+          (tbl) => tbl.messageId.equals(messageId),
+        ))
+        .write(MessagesCompanion(quoteContent: Value(quoteContent))),
   );
 
   Future<Message?> findMessageByMessageId(String messageId) =>
@@ -757,8 +771,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String userId,
   ) =>
       (select(db.messages)..where(
-        (r) => r.messageId.equals(messageId) & r.userId.equals(userId),
-      )).getSingleOrNull();
+            (r) => r.messageId.equals(messageId) & r.userId.equals(userId),
+          ))
+          .getSingleOrNull();
 
   Future<List<String>> findFailedMessages(
     String conversationId,
@@ -820,10 +835,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     await _sendInsertOrReplaceEventWithFuture(
       messageIds,
       (db.update(db.messages)..where(
-        (tbl) =>
-            tbl.conversationId.equals(conversationId) &
-            tbl.quoteMessageId.equals(quoteMessageId),
-      )).write(MessagesCompanion(quoteContent: Value(content))),
+            (tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.quoteMessageId.equals(quoteMessageId),
+          ))
+          .write(MessagesCompanion(quoteContent: Value(content))),
     );
   }
 
@@ -834,8 +850,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String? digest,
   ) => _sendInsertOrReplaceEventWithFuture(
     [messageId],
-    (db.update(db.messages)
-      ..where((tbl) => tbl.messageId.equals(messageId))).write(
+    (db.update(
+      db.messages,
+    )..where((tbl) => tbl.messageId.equals(messageId))).write(
       MessagesCompanion(
         mediaStatus: const Value(MediaStatus.done),
         status: const Value(MessageStatus.sending),
@@ -852,11 +869,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         db.transaction<num>(() async {
           final results = await Future.wait([
             (db.update(db.messages)..where(
-              (tbl) => tbl.messageId.equals(messageId),
-            )).write(MessagesCompanion(content: Value(content))),
+                  (tbl) => tbl.messageId.equals(messageId),
+                ))
+                .write(MessagesCompanion(content: Value(content))),
             (db.update(db.transcriptMessages)..where(
-              (tbl) => tbl.messageId.equals(messageId),
-            )).write(TranscriptMessagesCompanion(content: Value(content))),
+                  (tbl) => tbl.messageId.equals(messageId),
+                ))
+                .write(TranscriptMessagesCompanion(content: Value(content))),
           ]);
           return results.fold<num>(
             0,
@@ -883,15 +902,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return _sendInsertOrReplaceEventWithFuture(
       [messageId],
       (db.update(db.messages)..where(
-        (tbl) =>
-            tbl.messageId.equals(messageId) &
-            tbl.category.equals(MessageCategory.messageRecall).not(),
-      )).write(
-        MessagesCompanion(
-          content: content != null ? Value(content) : const Value.absent(),
-          status: Value(status),
-        ),
-      ),
+            (tbl) =>
+                tbl.messageId.equals(messageId) &
+                tbl.category.equals(MessageCategory.messageRecall).not(),
+          ))
+          .write(
+            MessagesCompanion(
+              content: content != null ? Value(content) : const Value.absent(),
+              status: Value(status),
+            ),
+          ),
     );
   }
 
@@ -900,8 +920,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     MessagesCompanion messagesCompanion,
   ) async => _sendInsertOrReplaceEventWithFuture(
     [messageId],
-    (update(db.messages)
-      ..where((t) => t.messageId.equals(messageId))).write(messagesCompanion),
+    (update(
+      db.messages,
+    )..where((t) => t.messageId.equals(messageId))).write(messagesCompanion),
   );
 
   Future<int> updateStickerMessage(
@@ -911,12 +932,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ) => _sendInsertOrReplaceEventWithFuture(
     [messageId],
     (db.update(db.messages)..where(
-      (tbl) =>
-          tbl.messageId.equals(messageId) &
-          tbl.category.equals(MessageCategory.messageRecall).not(),
-    )).write(
-      MessagesCompanion(stickerId: Value(stickerId), status: Value(status)),
-    ),
+          (tbl) =>
+              tbl.messageId.equals(messageId) &
+              tbl.category.equals(MessageCategory.messageRecall).not(),
+        ))
+        .write(
+          MessagesCompanion(stickerId: Value(stickerId), status: Value(status)),
+        ),
   );
 
   Future<int> updateContactMessage(
@@ -926,15 +948,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ) => _sendInsertOrReplaceEventWithFuture(
     [messageId],
     (db.update(db.messages)..where(
-      (tbl) =>
-          tbl.messageId.equals(messageId) &
-          tbl.category.equals(MessageCategory.messageRecall).not(),
-    )).write(
-      MessagesCompanion(
-        sharedUserId: Value(sharedUserId),
-        status: Value(status),
-      ),
-    ),
+          (tbl) =>
+              tbl.messageId.equals(messageId) &
+              tbl.category.equals(MessageCategory.messageRecall).not(),
+        ))
+        .write(
+          MessagesCompanion(
+            sharedUserId: Value(sharedUserId),
+            status: Value(status),
+          ),
+        ),
   );
 
   Future<int> updateLiveMessage(
@@ -947,28 +970,30 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ) => _sendInsertOrReplaceEventWithFuture(
     [messageId],
     (db.update(db.messages)..where(
-      (tbl) =>
-          tbl.messageId.equals(messageId) &
-          tbl.category.equals(MessageCategory.signalLive).not(),
-    )).write(
-      MessagesCompanion(
-        mediaWidth: Value(width),
-        mediaHeight: Value(height),
-        mediaUrl: Value(url),
-        thumbUrl: Value(thumbUrl),
-        status: Value(status),
-      ),
-    ),
+          (tbl) =>
+              tbl.messageId.equals(messageId) &
+              tbl.category.equals(MessageCategory.signalLive).not(),
+        ))
+        .write(
+          MessagesCompanion(
+            mediaWidth: Value(width),
+            mediaHeight: Value(height),
+            mediaUrl: Value(url),
+            thumbUrl: Value(thumbUrl),
+            status: Value(status),
+          ),
+        ),
   );
 
   Future<int> updateSafeSnapshotMessage(String messageId, String snapshotId) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
         (db.update(db.messages)..where(
-          (tbl) =>
-              tbl.messageId.equals(messageId) &
-              tbl.category.equals(MessageCategory.messageRecall).not(),
-        )).write(MessagesCompanion(snapshotId: Value(snapshotId))),
+              (tbl) =>
+                  tbl.messageId.equals(messageId) &
+                  tbl.category.equals(MessageCategory.messageRecall).not(),
+            ))
+            .write(MessagesCompanion(snapshotId: Value(snapshotId))),
       );
 
   static const _mediaMessageTypes = [
@@ -1003,11 +1028,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId))),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Limit(limit, 0),
-    order:
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
-          OrderingTerm.desc(message.createdAt),
-          OrderingTerm.desc(message.rowId),
-        ]),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+      OrderingTerm.desc(message.createdAt),
+      OrderingTerm.desc(message.rowId),
+    ]),
   );
 
   Selectable<MessageItem> mediaMessagesAfter(
@@ -1022,11 +1046,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isBiggerThanValue(anchor.rowId))),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Limit(limit, 0),
-    order:
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
-          OrderingTerm.asc(message.createdAt),
-          OrderingTerm.asc(message.rowId),
-        ]),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+      OrderingTerm.asc(message.createdAt),
+      OrderingTerm.asc(message.rowId),
+    ]),
   );
 
   Selectable<MessageItem> postMessages(
@@ -1052,11 +1075,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId))),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
-    order:
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
-          OrderingTerm.desc(message.createdAt),
-          OrderingTerm.desc(message.rowId),
-        ]),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+      OrderingTerm.desc(message.createdAt),
+      OrderingTerm.desc(message.rowId),
+    ]),
   );
 
   Selectable<MessageItem> fileMessages(
@@ -1082,11 +1104,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId)),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
-    order:
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
-          OrderingTerm.desc(message.createdAt),
-          OrderingTerm.desc(message.rowId),
-        ]),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+      OrderingTerm.desc(message.createdAt),
+      OrderingTerm.desc(message.rowId),
+    ]),
   );
 
   Selectable<MessageItem> beforeMessagesByConversationId(
@@ -1099,11 +1120,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (message.createdAt.isSmallerThanValue(anchor.createdAt) |
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId))),
-    order:
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
-          OrderingTerm.desc(message.createdAt),
-          OrderingTerm.desc(message.rowId),
-        ]),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+      OrderingTerm.desc(message.createdAt),
+      OrderingTerm.desc(message.rowId),
+    ]),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
   );
 
@@ -1118,11 +1138,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isBiggerThanValue(anchor.rowId))),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
-    order:
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
-          OrderingTerm.asc(message.createdAt),
-          OrderingTerm.asc(message.rowId),
-        ]),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+      OrderingTerm.asc(message.createdAt),
+      OrderingTerm.asc(message.rowId),
+    ]),
   );
 
   Selectable<MessageItem> messageItemByMessageId(String messageId) =>
@@ -1137,9 +1156,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
             message.messageId.isIn(messageIds),
         (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => maxLimit,
-        order:
-            (message, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
-                OrderBy([OrderingTerm.asc(message.createdAt)]),
+        order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+            OrderBy([OrderingTerm.asc(message.createdAt)]),
       );
 
   Future<MessageItem?> findNextAudioMessageItem({
@@ -1163,11 +1181,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               (message.createdAt.equals(info.createdAt) &
                   message.rowId.isBiggerThanValue(info.rowId))),
       (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(1, 0),
-      order:
-          (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
-            OrderingTerm.asc(message.createdAt),
-            OrderingTerm.asc(message.rowId),
-          ]),
+      order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+        OrderingTerm.asc(message.createdAt),
+        OrderingTerm.asc(message.rowId),
+      ]),
     ).getSingleOrNull();
   }
 
@@ -1196,8 +1213,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     for (final ids in chunked) {
       await (db.update(messages)..where(
-        (tbl) => tbl.messageId.isIn(ids),
-      )).write(const MessagesCompanion(content: Value(null)));
+            (tbl) => tbl.messageId.isIn(ids),
+          ))
+          .write(const MessagesCompanion(content: Value(null)));
     }
 
     DataBaseEventBus.instance.insertOrReplaceMessages(
@@ -1208,8 +1226,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<void> recallMessage(String conversationId, String messageId) async {
-    await (db.update(db.messages)
-      ..where((tbl) => tbl.messageId.equals(messageId))).write(
+    await (db.update(
+      db.messages,
+    )..where((tbl) => tbl.messageId.equals(messageId))).write(
       const MessagesCompanion(
         category: Value(MessageCategory.messageRecall),
         content: Value(null),
@@ -1282,18 +1301,19 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ) => _sendInsertOrReplaceEventWithFuture(
     [messageId],
     (db.update(db.messages)..where(
-      (tbl) =>
-          tbl.messageId.equals(messageId) &
-          tbl.category.equals('SIGNAL_TRANSCRIPT').not(),
-    )).write(
-      MessagesCompanion(
-        content: Value(content),
-        mediaSize: Value(mediaSize),
-        mediaStatus: Value(mediaStatus),
-        status: Value(status),
-        messageId: Value(messageId),
-      ),
-    ),
+          (tbl) =>
+              tbl.messageId.equals(messageId) &
+              tbl.category.equals('SIGNAL_TRANSCRIPT').not(),
+        ))
+        .write(
+          MessagesCompanion(
+            content: Value(content),
+            mediaSize: Value(mediaSize),
+            mediaStatus: Value(mediaStatus),
+            status: Value(status),
+            messageId: Value(messageId),
+          ),
+        ),
   );
 
   Future<void> updateGiphyMessage(
@@ -1301,9 +1321,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String mediaUrl,
     int mediaSize,
     String? thumbImage,
-  ) =>
-      (db.update(db.messages)
-        ..where((tbl) => tbl.messageId.equals(messageId))).write(
+  ) => (db.update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+      .write(
         MessagesCompanion(
           mediaUrl: Value(mediaUrl),
           mediaSize: Value(mediaSize),
@@ -1313,8 +1332,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> updateCategoryById(String messageId, String category) =>
       (db.update(db.messages)..where(
-        (tbl) => tbl.messageId.equals(messageId),
-      )).write(MessagesCompanion(category: Value(category)));
+            (tbl) => tbl.messageId.equals(messageId),
+          ))
+          .write(MessagesCompanion(category: Value(category)));
 
   Future<List<(int, Message)>> getMessages(int? rowid, int limit) async {
     final messages =
@@ -1335,16 +1355,17 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int rowid,
     int limit,
   ) async {
-    final messages = customSelect(
-      'SELECT rowid, * FROM messages WHERE rowid > $rowid '
-      "AND status != 'FAILED' AND status != 'UNKNOWN' "
-      'ORDER BY rowid ASC LIMIT $limit',
-      readsFrom: {db.messages},
-    ).asyncMap((row) async {
-      final message = await db.messages.mapFromRow(row);
-      final rowId = row.read<int>('rowid');
-      return (rowId, message);
-    });
+    final messages =
+        customSelect(
+          'SELECT rowid, * FROM messages WHERE rowid > $rowid '
+          "AND status != 'FAILED' AND status != 'UNKNOWN' "
+          'ORDER BY rowid ASC LIMIT $limit',
+          readsFrom: {db.messages},
+        ).asyncMap((row) async {
+          final message = await db.messages.mapFromRow(row);
+          final rowId = row.read<int>('rowid');
+          return (rowId, message);
+        });
     return messages.get();
   }
 

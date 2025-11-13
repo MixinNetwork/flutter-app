@@ -36,14 +36,15 @@ extension UserExtension on sdk.User {
 class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   UserDao(super.db);
 
-  Future<int> insert(User user, {bool updateIfConflict = true}) => into(
-    db.users,
-  ).simpleInsert(user, updateIfConflict: updateIfConflict).then((value) {
-    if (value > 0) {
-      DataBaseEventBus.instance.updateUsers([user.userId]);
-    }
-    return value;
-  });
+  Future<int> insert(User user, {bool updateIfConflict = true}) =>
+      into(
+        db.users,
+      ).simpleInsert(user, updateIfConflict: updateIfConflict).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateUsers([user.userId]);
+        }
+        return value;
+      });
 
   Future<int> insertSdkUser(sdk.User user) =>
       into(db.users).insertOnConflictUpdate(user.asDbUser).then((value) {
@@ -53,22 +54,24 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
         return value;
       });
 
-  Future<void> insertAll(List<User> users) async => batch((batch) {
-    batch.insertAllOnConflictUpdate(db.users, users);
-  }).then((value) {
-    DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
-    return value;
-  });
+  Future<void> insertAll(List<User> users) async =>
+      batch((batch) {
+        batch.insertAllOnConflictUpdate(db.users, users);
+      }).then((value) {
+        DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
+        return value;
+      });
 
-  Future<void> insertAllSdkUser(List<sdk.User> users) async => batch((batch) {
-    batch.insertAllOnConflictUpdate(
-      db.users,
-      users.map((e) => e.asDbUser).toList(),
-    );
-  }).then((value) {
-    DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
-    return value;
-  });
+  Future<void> insertAllSdkUser(List<sdk.User> users) async =>
+      batch((batch) {
+        batch.insertAllOnConflictUpdate(
+          db.users,
+          users.map((e) => e.asDbUser).toList(),
+        );
+      }).then((value) {
+        DataBaseEventBus.instance.updateUsers(users.map((e) => e.userId));
+        return value;
+      });
 
   Future deleteUser(User user) => delete(db.users).delete(user).then((value) {
     if (value > 0) {
@@ -77,10 +80,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     return value;
   });
 
-  SimpleSelectStatement<Users, User> userById(String userId) =>
-      select(db.users)
-        ..where((tbl) => tbl.userId.equals(userId))
-        ..limit(1);
+  SimpleSelectStatement<Users, User> userById(String userId) => select(db.users)
+    ..where((tbl) => tbl.userId.equals(userId))
+    ..limit(1);
 
   Selectable<String?> userFullNameByUserId(String userId) =>
       (selectOnly(db.users)
@@ -101,15 +103,14 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     keyword,
   );
 
-  Selectable<User> friends() =>
-      (select(db.users)
-        ..where(
-          (tbl) => tbl.relationship.equalsValue(sdk.UserRelationship.friend),
-        )
-        ..orderBy([
-          (tbl) => OrderingTerm.asc(tbl.fullName),
-          (tbl) => OrderingTerm.asc(tbl.userId),
-        ]));
+  Selectable<User> friends() => (select(db.users)
+    ..where(
+      (tbl) => tbl.relationship.equalsValue(sdk.UserRelationship.friend),
+    )
+    ..orderBy([
+      (tbl) => OrderingTerm.asc(tbl.fullName),
+      (tbl) => OrderingTerm.asc(tbl.userId),
+    ]));
 
   Selectable<User> fuzzySearchUser({
     required String id,
@@ -183,8 +184,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Future updateMuteUntil(String userId, String muteUntil) async {
     await (update(db.users)..where(
-      (tbl) => tbl.userId.equals(userId),
-    )).write(UsersCompanion(muteUntil: Value(DateTime.tryParse(muteUntil))));
+          (tbl) => tbl.userId.equals(userId),
+        ))
+        .write(UsersCompanion(muteUntil: Value(DateTime.tryParse(muteUntil))));
 
     DataBaseEventBus.instance.updateUsers([userId]);
   }
@@ -193,8 +195,10 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     Iterable<String> identityNumbers,
   ) async =>
       (select(db.users)..where(
-        (tbl) => tbl.identityNumber.isIn(identityNumbers),
-      )).map((row) => row.userId).get();
+            (tbl) => tbl.identityNumber.isIn(identityNumbers),
+          ))
+          .map((row) => row.userId)
+          .get();
 
   Future<bool> hasUser(String userIdOrIdentityNumber) => db.hasData(
     db.users,

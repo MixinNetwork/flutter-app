@@ -59,10 +59,9 @@ class MessagePost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
-    onTap:
-        clickable
-            ? () => PostPreview.push(context, message: context.message)
-            : null,
+    onTap: clickable
+        ? () => PostPreview.push(context, message: context.message)
+        : null,
     behavior: HitTestBehavior.deferToChild,
     child: Container(
       padding: padding,

@@ -21,10 +21,9 @@ const lightOtherBubble = Colors.white;
 const darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
-  Color messageBubbleColor(bool isCurrentUser) =>
-      isCurrentUser
-          ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
-          : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
+  Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
+      ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
+      : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
 }
 
 class MessageBubble extends HookConsumerWidget {
@@ -268,139 +267,137 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) =>
-      Path()..addRRect(
-        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
-      );
+  Path _bubblePath(Size size) => Path()
+    ..addRRect(
+      const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
+    );
 
   Path _leftNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);
-    final path =
-        Path()
-          ..lineTo(size.width * 1.04, size.height)
-          ..cubicTo(
-            size.width * 1.04,
-            size.height,
-            size.width * 1.04,
-            0,
-            size.width * 1.04,
-            0,
-          )
-          ..cubicTo(
-            size.width * 1.04,
-            0,
-            size.width * 1.04,
-            size.height * 0.12,
-            size.width,
-            size.height * 0.19,
-          )
-          ..cubicTo(
-            size.width * 0.81,
-            size.height * 0.41,
-            size.width / 2,
-            size.height * 0.59,
-            size.width * 0.14,
-            size.height * 0.67,
-          )
-          ..cubicTo(
-            size.width * 0.03,
-            size.height * 0.69,
-            size.width * 0.01,
-            size.height * 0.79,
-            size.width * 0.11,
-            size.height * 0.84,
-          )
-          ..cubicTo(
-            size.width * 0.12,
-            size.height * 0.84,
-            size.width * 0.13,
-            size.height * 0.85,
-            size.width * 0.13,
-            size.height * 0.85,
-          )
-          ..cubicTo(
-            size.width * 0.36,
-            size.height * 0.94,
-            size.width * 0.62,
-            size.height,
-            size.width * 0.91,
-            size.height,
-          )
-          ..cubicTo(
-            size.width * 0.95,
-            size.height,
-            size.width * 1.04,
-            size.height,
-            size.width * 1.04,
-            size.height,
-          )
-          ..cubicTo(
-            size.width * 1.04,
-            size.height,
-            size.width * 1.04,
-            size.height,
-            size.width * 1.04,
-            size.height,
-          );
+    final path = Path()
+      ..lineTo(size.width * 1.04, size.height)
+      ..cubicTo(
+        size.width * 1.04,
+        size.height,
+        size.width * 1.04,
+        0,
+        size.width * 1.04,
+        0,
+      )
+      ..cubicTo(
+        size.width * 1.04,
+        0,
+        size.width * 1.04,
+        size.height * 0.12,
+        size.width,
+        size.height * 0.19,
+      )
+      ..cubicTo(
+        size.width * 0.81,
+        size.height * 0.41,
+        size.width / 2,
+        size.height * 0.59,
+        size.width * 0.14,
+        size.height * 0.67,
+      )
+      ..cubicTo(
+        size.width * 0.03,
+        size.height * 0.69,
+        size.width * 0.01,
+        size.height * 0.79,
+        size.width * 0.11,
+        size.height * 0.84,
+      )
+      ..cubicTo(
+        size.width * 0.12,
+        size.height * 0.84,
+        size.width * 0.13,
+        size.height * 0.85,
+        size.width * 0.13,
+        size.height * 0.85,
+      )
+      ..cubicTo(
+        size.width * 0.36,
+        size.height * 0.94,
+        size.width * 0.62,
+        size.height,
+        size.width * 0.91,
+        size.height,
+      )
+      ..cubicTo(
+        size.width * 0.95,
+        size.height,
+        size.width * 1.04,
+        size.height,
+        size.width * 1.04,
+        size.height,
+      )
+      ..cubicTo(
+        size.width * 1.04,
+        size.height,
+        size.width * 1.04,
+        size.height,
+        size.width * 1.04,
+        size.height,
+      );
 
     return path.shift(Offset(-0.38, bubbleSize.height - 9 - 12));
   }
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);
-    final path =
-        Path()
-          ..lineTo(0, size.height)
-          ..cubicTo(0, size.height, 0, 0, 0, 0)
-          ..cubicTo(
-            0,
-            0,
-            0,
-            size.height * 0.12,
-            size.width * 0.05,
-            size.height * 0.19,
-          )
-          ..cubicTo(
-            size.width * 0.24,
-            size.height * 0.41,
-            size.width * 0.54,
-            size.height * 0.59,
-            size.width * 0.9,
-            size.height * 0.67,
-          )
-          ..cubicTo(
-            size.width * 1.02,
-            size.height * 0.69,
-            size.width * 1.04,
-            size.height * 0.79,
-            size.width * 0.94,
-            size.height * 0.84,
-          )
-          ..cubicTo(
-            size.width * 0.92,
-            size.height * 0.84,
-            size.width * 0.91,
-            size.height * 0.85,
-            size.width * 0.91,
-            size.height * 0.85,
-          )
-          ..cubicTo(
-            size.width * 0.68,
-            size.height * 0.94,
-            size.width * 0.42,
-            size.height,
-            size.width * 0.13,
-            size.height,
-          )
-          ..cubicTo(
-            size.width * 0.09,
-            size.height,
-            0,
-            size.height,
-            0,
-            size.height,
-          )
-          ..cubicTo(0, size.height, 0, size.height, 0, size.height);
+    final path = Path()
+      ..lineTo(0, size.height)
+      ..cubicTo(0, size.height, 0, 0, 0, 0)
+      ..cubicTo(
+        0,
+        0,
+        0,
+        size.height * 0.12,
+        size.width * 0.05,
+        size.height * 0.19,
+      )
+      ..cubicTo(
+        size.width * 0.24,
+        size.height * 0.41,
+        size.width * 0.54,
+        size.height * 0.59,
+        size.width * 0.9,
+        size.height * 0.67,
+      )
+      ..cubicTo(
+        size.width * 1.02,
+        size.height * 0.69,
+        size.width * 1.04,
+        size.height * 0.79,
+        size.width * 0.94,
+        size.height * 0.84,
+      )
+      ..cubicTo(
+        size.width * 0.92,
+        size.height * 0.84,
+        size.width * 0.91,
+        size.height * 0.85,
+        size.width * 0.91,
+        size.height * 0.85,
+      )
+      ..cubicTo(
+        size.width * 0.68,
+        size.height * 0.94,
+        size.width * 0.42,
+        size.height,
+        size.width * 0.13,
+        size.height,
+      )
+      ..cubicTo(
+        size.width * 0.09,
+        size.height,
+        0,
+        size.height,
+        0,
+        size.height,
+      )
+      ..cubicTo(0, size.height, 0, size.height, 0, size.height);
 
     return path.shift(
       Offset(bubbleSize.width - 9 - 0.05, bubbleSize.height - 9 - 12),
@@ -420,10 +417,9 @@ class BubblePainter extends CustomPainter with EquatableMixin {
     required Color color,
     this.elevation = 0.6,
     this.shadowColor = Colors.black,
-  }) : _fillPaint =
-           Paint()
-             ..color = color
-             ..style = PaintingStyle.fill;
+  }) : _fillPaint = Paint()
+         ..color = color
+         ..style = PaintingStyle.fill;
 
   final CustomClipper<Path> clipper;
   final double elevation;

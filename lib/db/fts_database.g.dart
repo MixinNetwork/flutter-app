@@ -53,11 +53,10 @@ class MessagesFts extends Table
   MessagesFt map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MessagesFt(
-      content:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}content'],
-          )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
     );
   }
 
@@ -312,31 +311,26 @@ class MessagesMetas extends Table with TableInfo<MessagesMetas, MessagesMeta> {
   MessagesMeta map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MessagesMeta(
-      docId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}doc_id'],
-          )!,
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
-      category:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}category'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
+      docId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}doc_id'],
+      )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
       createdAt: MessagesMetas.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -447,10 +441,9 @@ class MessagesMeta extends DataClass implements Insertable<MessagesMeta> {
     return MessagesMeta(
       docId: data.docId.present ? data.docId.value : this.docId,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       category: data.category.present ? data.category.value : this.category,
       userId: data.userId.present ? data.userId.value : this.userId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -778,12 +771,12 @@ class $MessagesFtsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $MessagesFtsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $MessagesFtsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $MessagesFtsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $MessagesFtsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessagesFtsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessagesFtsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> content = const Value.absent(),
@@ -794,16 +787,9 @@ class $MessagesFtsTableManager
                 required String content,
                 Value<int> rowid = const Value.absent(),
               }) => MessagesFtsCompanion.insert(content: content, rowid: rowid),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -978,12 +964,12 @@ class $MessagesMetasTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $MessagesMetasFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $MessagesMetasOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $MessagesMetasAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $MessagesMetasFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessagesMetasOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessagesMetasAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> docId = const Value.absent(),
@@ -1020,16 +1006,9 @@ class $MessagesMetasTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

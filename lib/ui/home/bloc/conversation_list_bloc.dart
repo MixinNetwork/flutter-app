@@ -72,23 +72,21 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   void init() => _switchBloc(slideCategoryStateNotifier.state, _limit);
 
-  late Stream<void> updateEvent =
-      Rx.merge([
-        DataBaseEventBus.instance.updateConversationIdStream,
-        DataBaseEventBus.instance.updateUserIdsStream,
-        DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-        DataBaseEventBus.instance.updateMessageMentionStream,
-      ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
+  late Stream<void> updateEvent = Rx.merge([
+    DataBaseEventBus.instance.updateConversationIdStream,
+    DataBaseEventBus.instance.updateUserIdsStream,
+    DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+    DataBaseEventBus.instance.updateMessageMentionStream,
+  ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
 
-  late Stream<void> circleUpdateEvent =
-      Rx.merge([
-        DataBaseEventBus.instance.updateConversationIdStream,
-        DataBaseEventBus.instance.updateUserIdsStream,
-        DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-        DataBaseEventBus.instance.updateMessageMentionStream,
-        DataBaseEventBus.instance.updateCircleStream,
-        DataBaseEventBus.instance.updateCircleConversationStream,
-      ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
+  late Stream<void> circleUpdateEvent = Rx.merge([
+    DataBaseEventBus.instance.updateConversationIdStream,
+    DataBaseEventBus.instance.updateUserIdsStream,
+    DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+    DataBaseEventBus.instance.updateMessageMentionStream,
+    DataBaseEventBus.instance.updateCircleStream,
+    DataBaseEventBus.instance.updateCircleConversationStream,
+  ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
 
   void _switchBloc(SlideCategoryState state, int? limit) {
     final dao = database.conversationDao;
@@ -111,14 +109,12 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.circle:
         _map[state] ??= _ConversationListBloc(
           limit ?? kDefaultLimit,
-          () =>
-              database.conversationDao
-                  .conversationsCountByCircleId(state.id!)
-                  .getSingle(),
-          (limit, offset) =>
-              database.conversationDao
-                  .conversationsByCircleId(state.id!, limit, offset)
-                  .get(),
+          () => database.conversationDao
+              .conversationsCountByCircleId(state.id!)
+              .getSingle(),
+          (limit, offset) => database.conversationDao
+              .conversationsByCircleId(state.id!, limit, offset)
+              .get(),
           circleUpdateEvent,
           mentionCache,
           () =>
@@ -152,10 +148,9 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       await FlutterAppIconBadge.updateBadge(count);
     }
 
-    final count =
-        await database.conversationDao
-            .allUnseenIgnoreMuteMessageCount()
-            .getSingle();
+    final count = await database.conversationDao
+        .allUnseenIgnoreMuteMessageCount()
+        .getSingle();
     await updateBadge(count);
     addSubscription(
       database.conversationDao.allUnseenIgnoreMuteMessageCountEvent

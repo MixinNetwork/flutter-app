@@ -13,15 +13,16 @@ class PropertyDao extends DatabaseAccessor<MixinDatabase>
   Future<String?> getProperty(PropertyGroup group, String key) async {
     final result =
         await (select(properties)..where(
-          (tbl) => tbl.group.equalsValue(group) & tbl.key.equals(key),
-        )).getSingleOrNull();
+              (tbl) => tbl.group.equalsValue(group) & tbl.key.equals(key),
+            ))
+            .getSingleOrNull();
     return result?.value;
   }
 
   Future<Map<String, String>> getProperties(PropertyGroup group) async {
-    final result =
-        await (select(properties)
-          ..where((tbl) => tbl.group.equalsValue(group))).get();
+    final result = await (select(
+      properties,
+    )..where((tbl) => tbl.group.equalsValue(group))).get();
     return Map.fromEntries(result.map((e) => MapEntry(e.key, e.value)));
   }
 

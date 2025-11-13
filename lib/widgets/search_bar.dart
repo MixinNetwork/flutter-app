@@ -74,20 +74,16 @@ class SearchBar extends HookConsumerWidget {
                     ),
                   },
                   child: Builder(
-                    builder:
-                        (context) => SearchTextField(
-                          focusNode: context.read<FocusNode>(),
-                          controller: context.read<TextEditingController>(),
-                          onChanged:
-                              (keyword) =>
-                                  ref.read(keywordProvider.notifier).state =
-                                      keyword,
-                          hintText:
-                              filterUnseen
-                                  ? context.l10n.searchUnread
-                                  // ignore: avoid-non-ascii-symbols
-                                  : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl '}K)',
-                        ),
+                    builder: (context) => SearchTextField(
+                      focusNode: context.read<FocusNode>(),
+                      controller: context.read<TextEditingController>(),
+                      onChanged: (keyword) =>
+                          ref.read(keywordProvider.notifier).state = keyword,
+                      hintText: filterUnseen
+                          ? context.l10n.searchUnread
+                          // ignore: avoid-non-ascii-symbols
+                          : '${context.l10n.search} (${Platform.isMacOS || Platform.isIOS ? '⌘' : 'Ctrl '}K)',
+                    ),
                   ),
                 ),
               ),
@@ -95,42 +91,37 @@ class SearchBar extends HookConsumerWidget {
             const SizedBox(width: 8),
             ActionButton(
               name: Resources.assetsImagesFilterUnseenSvg,
-              onTap:
-                  () =>
-                      ref
-                          .read(
-                            conversationUnseenFilterEnabledProvider.notifier,
-                          )
-                          .toggle(),
+              onTap: () => ref
+                  .read(
+                    conversationUnseenFilterEnabledProvider.notifier,
+                  )
+                  .toggle(),
               color: filterUnseen ? context.theme.accent : context.theme.icon,
             ),
             const SizedBox(width: 4),
             CustomPopupMenuButton(
-              itemBuilder:
-                  (context) => [
-                    CustomPopupMenuItem(
-                      icon: Resources.assetsImagesContextMenuSearchUserSvg,
-                      title: context.l10n.searchContact,
-                      value: _ActionType.searchContact,
-                    ),
-                    CustomPopupMenuItem(
-                      icon:
-                          Resources
-                              .assetsImagesContextMenuCreateConversationSvg,
-                      title: context.l10n.createConversation,
-                      value: _ActionType.createConversation,
-                    ),
-                    CustomPopupMenuItem(
-                      icon: Resources.assetsImagesContextMenuCreateGroupSvg,
-                      title: context.l10n.createGroup,
-                      value: _ActionType.createGroup,
-                    ),
-                    CustomPopupMenuItem(
-                      icon: Resources.assetsImagesCircleSvg,
-                      title: context.l10n.createCircle,
-                      value: _ActionType.createCircle,
-                    ),
-                  ],
+              itemBuilder: (context) => [
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesContextMenuSearchUserSvg,
+                  title: context.l10n.searchContact,
+                  value: _ActionType.searchContact,
+                ),
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesContextMenuCreateConversationSvg,
+                  title: context.l10n.createConversation,
+                  value: _ActionType.createConversation,
+                ),
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesContextMenuCreateGroupSvg,
+                  title: context.l10n.createGroup,
+                  value: _ActionType.createGroup,
+                ),
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesCircleSvg,
+                  title: context.l10n.createCircle,
+                  value: _ActionType.createCircle,
+                ),
+              ],
               onSelected: (type) {
                 switch (type) {
                   case _ActionType.searchContact:

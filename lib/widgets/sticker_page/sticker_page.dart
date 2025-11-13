@@ -78,32 +78,26 @@ class StickerPage extends StatelessWidget {
                         );
                       case PresetStickerGroup.recent:
                         return _StickerAlbumPage(
-                          getStickers:
-                              () => context.database.stickerDao
-                                  .recentUsedStickers()
-                                  .watchWithStream(
-                                    eventStreams: [
-                                      DataBaseEventBus
-                                          .instance
-                                          .updateStickerStream,
-                                    ],
-                                    duration: kVerySlowThrottleDuration,
-                                  ),
+                          getStickers: () => context.database.stickerDao
+                              .recentUsedStickers()
+                              .watchWithStream(
+                                eventStreams: [
+                                  DataBaseEventBus.instance.updateStickerStream,
+                                ],
+                                duration: kVerySlowThrottleDuration,
+                              ),
                           updateUsedAt: false,
                         );
                       case PresetStickerGroup.favorite:
                         return _StickerAlbumPage(
-                          getStickers:
-                              () => context.database.stickerDao
-                                  .personalStickers()
-                                  .watchWithStream(
-                                    eventStreams: [
-                                      DataBaseEventBus
-                                          .instance
-                                          .updateStickerStream,
-                                    ],
-                                    duration: kVerySlowThrottleDuration,
-                                  ),
+                          getStickers: () => context.database.stickerDao
+                              .personalStickers()
+                              .watchWithStream(
+                                eventStreams: [
+                                  DataBaseEventBus.instance.updateStickerStream,
+                                ],
+                                duration: kVerySlowThrottleDuration,
+                              ),
                           delete: (sticker) {
                             final ctx = Navigator.of(context).context;
                             showToastLoading(context: ctx);
@@ -130,10 +124,9 @@ class StickerPage extends StatelessWidget {
                   }
                   return _StickerAlbumPage(
                     getStickers: () {
-                      final albumId =
-                          BlocProvider.of<StickerAlbumsCubit>(
-                            context,
-                          ).state[index - presetStickerGroups.length].albumId;
+                      final albumId = BlocProvider.of<StickerAlbumsCubit>(
+                        context,
+                      ).state[index - presetStickerGroups.length].albumId;
                       return context.database.stickerDao
                           .stickerByAlbumId(albumId)
                           .watchWithStream(
@@ -286,10 +279,9 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
         final conversationItem = ref.read(conversationProvider);
         if (conversationItem == null) return;
 
-        final albumId =
-            await accountServer.database.stickerRelationshipDao
-                .stickerSystemAlbumId(sticker.stickerId)
-                .getSingleOrNull();
+        final albumId = await accountServer.database.stickerRelationshipDao
+            .stickerSystemAlbumId(sticker.stickerId)
+            .getSingleOrNull();
 
         await Future.wait([
           if (updateUsedAt)
@@ -318,27 +310,25 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
         padding: const EdgeInsets.all(8),
         child: RepaintBoundary(
           child: Builder(
-            builder:
-                (context) => StickerItem(
-                  assetUrl: sticker.assetUrl,
-                  assetType: sticker.assetType,
-                ),
+            builder: (context) => StickerItem(
+              assetUrl: sticker.assetUrl,
+              assetType: sticker.assetType,
+            ),
           ),
         ),
       ),
     );
     if (delete != null) {
       widget = CustomContextMenuWidget(
-        menuProvider:
-            (request) => Menu(
-              children: [
-                MenuAction(
-                  title: context.l10n.delete,
-                  image: MenuImage.icon(IconFonts.delete),
-                  callback: () => delete?.call(sticker),
-                ),
-              ],
+        menuProvider: (request) => Menu(
+          children: [
+            MenuAction(
+              title: context.l10n.delete,
+              image: MenuImage.icon(IconFonts.delete),
+              callback: () => delete?.call(sticker),
             ),
+          ],
+        ),
         child: widget,
       );
     }
@@ -447,10 +437,9 @@ class _StickerAlbumBarItem extends StatelessWidget {
             child: Builder(
               builder: (context) {
                 final presetStickerAlbum = {
-                  PresetStickerGroup.store:
-                      AccountKeyValue.instance.hasNewAlbum
-                          ? Resources.assetsImagesStickerStoreRedDotSvg
-                          : Resources.assetsImagesStickerStoreSvg,
+                  PresetStickerGroup.store: AccountKeyValue.instance.hasNewAlbum
+                      ? Resources.assetsImagesStickerStoreRedDotSvg
+                      : Resources.assetsImagesStickerStoreSvg,
                   PresetStickerGroup.emoji:
                       Resources.assetsImagesEmojiStickerSvg,
                   PresetStickerGroup.recent:
@@ -463,13 +452,12 @@ class _StickerAlbumBarItem extends StatelessWidget {
                 if (index < presetStickerGroups.length) {
                   return SvgPicture.asset(
                     presetStickerAlbum[presetStickerGroups[index]]!,
-                    colorFilter:
-                        index != 0
-                            ? ColorFilter.mode(
-                              context.theme.secondaryText,
-                              BlendMode.srcIn,
-                            )
-                            : null,
+                    colorFilter: index != 0
+                        ? ColorFilter.mode(
+                            context.theme.secondaryText,
+                            BlendMode.srcIn,
+                          )
+                        : null,
                     width: 24,
                     height: 24,
                   );
@@ -480,12 +468,10 @@ class _StickerAlbumBarItem extends StatelessWidget {
                   List<StickerAlbum>,
                   String
                 >(
-                  converter:
-                      (state) =>
-                          state[index - presetStickerGroups.length].iconUrl,
-                  builder:
-                      (context, iconUrl) =>
-                          StickerGroupIcon(iconUrl: iconUrl, size: 28),
+                  converter: (state) =>
+                      state[index - presetStickerGroups.length].iconUrl,
+                  builder: (context, iconUrl) =>
+                      StickerGroupIcon(iconUrl: iconUrl, size: 28),
                 );
               },
             ),
@@ -513,13 +499,12 @@ class _StickerGroupIconHoverContainer extends HookConsumerWidget {
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color:
-              isHovering.value
-                  ? context.dynamicColor(
-                    const Color.fromRGBO(229, 231, 235, 1),
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                  )
-                  : null,
+          color: isHovering.value
+              ? context.dynamicColor(
+                  const Color.fromRGBO(229, 231, 235, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                )
+              : null,
           borderRadius: const BorderRadius.all(Radius.circular(8)),
         ),
         child: child,

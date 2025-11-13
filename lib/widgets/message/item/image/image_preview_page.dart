@@ -47,26 +47,27 @@ class ImagePreviewPage extends HookConsumerWidget {
     barrierColor: Colors.transparent,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    pageBuilder: (
-      BuildContext buildContext,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-    ) {
-      final child = ImagePreviewPage(
-        conversationId: conversationId,
-        messageId: messageId,
-        isTranscriptPage: isTranscriptPage,
-      );
+    pageBuilder:
+        (
+          BuildContext buildContext,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) {
+          final child = ImagePreviewPage(
+            conversationId: conversationId,
+            messageId: messageId,
+            isTranscriptPage: isTranscriptPage,
+          );
 
-      try {
-        return Provider.value(
-          value: context.read<TranscriptMessagesWatcher>(),
-          child: child,
-        );
-      } catch (_) {}
+          try {
+            return Provider.value(
+              value: context.read<TranscriptMessagesWatcher>(),
+              child: child,
+            );
+          } catch (_) {}
 
-      return child;
-    },
+          return child;
+        },
   );
 
   @override
@@ -145,43 +146,41 @@ class ImagePreviewPage extends HookConsumerWidget {
     }, [_messageId.value]);
 
     useEffect(
-      () =>
-          context.database.messageDao
-              .watchInsertOrReplaceMessageStream(conversationId)
-              .switchMap<MessageItem>((value) async* {
-                for (final item in value) {
-                  yield item;
-                }
-              })
-              .where(
-                (event) => [
-                  MessageCategory.plainImage,
-                  MessageCategory.signalImage,
-                ].contains(event.type),
-              )
-              .listen((event) {
-                if (event.messageId == current.value?.messageId) {
-                  current.value = event;
-                }
-                if (event.messageId == prev.value?.messageId) {
-                  prev.value = event;
-                }
-                if (next.value?.messageId == _messageId.value) {
-                  next.value = event;
-                }
-              })
-              .cancel,
+      () => context.database.messageDao
+          .watchInsertOrReplaceMessageStream(conversationId)
+          .switchMap<MessageItem>((value) async* {
+            for (final item in value) {
+              yield item;
+            }
+          })
+          .where(
+            (event) => [
+              MessageCategory.plainImage,
+              MessageCategory.signalImage,
+            ].contains(event.type),
+          )
+          .listen((event) {
+            if (event.messageId == current.value?.messageId) {
+              current.value = event;
+            }
+            if (event.messageId == prev.value?.messageId) {
+              prev.value = event;
+            }
+            if (next.value?.messageId == _messageId.value) {
+              next.value = event;
+            }
+          })
+          .cancel,
       [conversationId],
     );
 
     return FocusableActionDetector(
       shortcuts: {
         SingleActivator(
-              LogicalKeyboardKey.keyC,
-              meta: kPlatformIsDarwin,
-              control: !kPlatformIsDarwin,
-            ):
-            const _CopyIntent(),
+          LogicalKeyboardKey.keyC,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _CopyIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowLeft):
             const _PreviousImageIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowRight):
@@ -189,35 +188,31 @@ class ImagePreviewPage extends HookConsumerWidget {
         const SingleActivator(LogicalKeyboardKey.zoomIn):
             const _ImageZoomInIntent(),
         SingleActivator(
-              LogicalKeyboardKey.equal,
-              meta: kPlatformIsDarwin,
-              control: !kPlatformIsDarwin,
-            ):
-            const _ImageZoomInIntent(),
+          LogicalKeyboardKey.equal,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageZoomInIntent(),
         SingleActivator(
-              LogicalKeyboardKey.minus,
-              meta: kPlatformIsDarwin,
-              control: !kPlatformIsDarwin,
-            ):
-            const _ImageZoomOutIntent(),
+          LogicalKeyboardKey.minus,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageZoomOutIntent(),
         const SingleActivator(LogicalKeyboardKey.zoomOut):
             const _ImageZoomOutIntent(),
         SingleActivator(
-              LogicalKeyboardKey.keyR,
-              meta: kPlatformIsDarwin,
-              control: !kPlatformIsDarwin,
-            ):
-            const _ImageRotateIntent(),
+          LogicalKeyboardKey.keyR,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageRotateIntent(),
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
-          onInvoke:
-              (Intent intent) => copyFile(
-                context.accountServer.convertMessageAbsolutePath(
-                  current.value,
-                  isTranscriptPage,
-                ),
-              ),
+          onInvoke: (Intent intent) => copyFile(
+            context.accountServer.convertMessageAbsolutePath(
+              current.value,
+              isTranscriptPage,
+            ),
+          ),
         ),
         _PreviousImageIntent: CallbackAction<Intent>(
           onInvoke: (intent) {
@@ -282,13 +277,12 @@ class ImagePreviewPage extends HookConsumerWidget {
                       fit: StackFit.expand,
                       children: [
                         LayoutBuilder(
-                          builder:
-                              (context, constraints) => _Item(
-                                message: current.value!,
-                                controller: controller,
-                                isTranscriptPage: isTranscriptPage,
-                                constraints: constraints,
-                              ),
+                          builder: (context, constraints) => _Item(
+                            message: current.value!,
+                            controller: controller,
+                            isTranscriptPage: isTranscriptPage,
+                            constraints: constraints,
+                          ),
                         ),
                         Center(
                           child: Padding(
@@ -297,10 +291,8 @@ class ImagePreviewPage extends HookConsumerWidget {
                               children: [
                                 if (prev.value != null)
                                   InteractiveDecoratedBox(
-                                    onTap:
-                                        () =>
-                                            _messageId.value =
-                                                prev.value!.messageId,
+                                    onTap: () => _messageId.value =
+                                        prev.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesNextSvg,
                                     ),
@@ -308,10 +300,8 @@ class ImagePreviewPage extends HookConsumerWidget {
                                 const Spacer(),
                                 if (next.value != null)
                                   InteractiveDecoratedBox(
-                                    onTap:
-                                        () =>
-                                            _messageId.value =
-                                                next.value!.messageId,
+                                    onTap: () => _messageId.value =
+                                        next.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesPrevSvg,
                                     ),
@@ -484,24 +474,23 @@ class _Action extends StatelessWidget {
     ];
 
     final menu = CustomPopupMenuButton(
-      itemBuilder:
-          (context) => [
-            CustomPopupMenuItem(
-              icon: Resources.assetsImagesShareSvg,
-              title: context.l10n.forward,
-              value: _ActionType.share,
-            ),
-            CustomPopupMenuItem(
-              icon: Resources.assetsImagesCopySvg,
-              title: context.l10n.copy,
-              value: _ActionType.copy,
-            ),
-            CustomPopupMenuItem(
-              icon: Resources.assetsImagesAttachmentDownloadSvg,
-              title: context.l10n.download,
-              value: _ActionType.download,
-            ),
-          ],
+      itemBuilder: (context) => [
+        CustomPopupMenuItem(
+          icon: Resources.assetsImagesShareSvg,
+          title: context.l10n.forward,
+          value: _ActionType.share,
+        ),
+        CustomPopupMenuItem(
+          icon: Resources.assetsImagesCopySvg,
+          title: context.l10n.copy,
+          value: _ActionType.copy,
+        ),
+        CustomPopupMenuItem(
+          icon: Resources.assetsImagesAttachmentDownloadSvg,
+          title: context.l10n.download,
+          value: _ActionType.download,
+        ),
+      ],
       onSelected: (type) {
         switch (type) {
           case _ActionType.share:
@@ -598,11 +587,10 @@ class _Item extends HookConsumerWidget {
                 ),
               ),
               fit: BoxFit.contain,
-              errorBuilder:
-                  (context, error, s) => ImageByBlurHashOrBase64(
-                    imageData: message.thumbImage ?? '',
-                    fit: BoxFit.contain,
-                  ),
+              errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
+                imageData: message.thumbImage ?? '',
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ),

@@ -86,21 +86,18 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SenderKey(
-      groupId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}group_id'],
-          )!,
-      senderId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}sender_id'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      senderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender_id'],
+      )!,
+      record: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}record'],
+      )!,
     );
   }
 
@@ -440,25 +437,22 @@ class Identities extends Table with TableInfo<Identities, Identity> {
   Identity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Identity(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      address:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}address'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      )!,
       registrationId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}registration_id'],
       ),
-      publicKey:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}public_key'],
-          )!,
+      publicKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}public_key'],
+      )!,
       privateKey: attachedDatabase.typeMapping.read(
         DriftSqlType.blob,
         data['${effectivePrefix}private_key'],
@@ -467,11 +461,10 @@ class Identities extends Table with TableInfo<Identities, Identity> {
         DriftSqlType.int,
         data['${effectivePrefix}next_prekey_id'],
       ),
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
     );
   }
 
@@ -524,19 +517,16 @@ class Identity extends DataClass implements Insertable<Identity> {
     return IdentitiesCompanion(
       id: Value(id),
       address: Value(address),
-      registrationId:
-          registrationId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(registrationId),
+      registrationId: registrationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(registrationId),
       publicKey: Value(publicKey),
-      privateKey:
-          privateKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(privateKey),
-      nextPrekeyId:
-          nextPrekeyId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(nextPrekeyId),
+      privateKey: privateKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(privateKey),
+      nextPrekeyId: nextPrekeyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextPrekeyId),
       timestamp: Value(timestamp),
     );
   }
@@ -581,8 +571,9 @@ class Identity extends DataClass implements Insertable<Identity> {
   }) => Identity(
     id: id ?? this.id,
     address: address ?? this.address,
-    registrationId:
-        registrationId.present ? registrationId.value : this.registrationId,
+    registrationId: registrationId.present
+        ? registrationId.value
+        : this.registrationId,
     publicKey: publicKey ?? this.publicKey,
     privateKey: privateKey.present ? privateKey.value : this.privateKey,
     nextPrekeyId: nextPrekeyId.present ? nextPrekeyId.value : this.nextPrekeyId,
@@ -592,17 +583,16 @@ class Identity extends DataClass implements Insertable<Identity> {
     return Identity(
       id: data.id.present ? data.id.value : this.id,
       address: data.address.present ? data.address.value : this.address,
-      registrationId:
-          data.registrationId.present
-              ? data.registrationId.value
-              : this.registrationId,
+      registrationId: data.registrationId.present
+          ? data.registrationId.value
+          : this.registrationId,
       publicKey: data.publicKey.present ? data.publicKey.value : this.publicKey,
-      privateKey:
-          data.privateKey.present ? data.privateKey.value : this.privateKey,
-      nextPrekeyId:
-          data.nextPrekeyId.present
-              ? data.nextPrekeyId.value
-              : this.nextPrekeyId,
+      privateKey: data.privateKey.present
+          ? data.privateKey.value
+          : this.privateKey,
+      nextPrekeyId: data.nextPrekeyId.present
+          ? data.nextPrekeyId.value
+          : this.nextPrekeyId,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
     );
   }
@@ -831,21 +821,18 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   Prekey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Prekey(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      prekeyId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}prekey_id'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      prekeyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prekey_id'],
+      )!,
+      record: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}record'],
+      )!,
     );
   }
 
@@ -1101,26 +1088,22 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   SignedPrekey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SignedPrekey(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      prekeyId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}prekey_id'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      prekeyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}prekey_id'],
+      )!,
+      record: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}record'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
     );
   }
 
@@ -1426,31 +1409,26 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   Session map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Session(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}id'],
-          )!,
-      address:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}address'],
-          )!,
-      device:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}device'],
-          )!,
-      record:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.blob,
-            data['${effectivePrefix}record'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      )!,
+      device: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}device'],
+      )!,
+      record: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}record'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
     );
   }
 
@@ -1791,30 +1769,26 @@ class RatchetSenderKeys extends Table
   RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RatchetSenderKey(
-      groupId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}group_id'],
-          )!,
-      senderId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}sender_id'],
-          )!,
-      status:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}status'],
-          )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      )!,
+      senderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
       messageId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}message_id'],
       ),
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}created_at'],
-          )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
     );
   }
 
@@ -1863,10 +1837,9 @@ class RatchetSenderKey extends DataClass
       groupId: Value(groupId),
       senderId: Value(senderId),
       status: Value(status),
-      messageId:
-          messageId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(messageId),
+      messageId: messageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageId),
       createdAt: Value(createdAt),
     );
   }
@@ -2201,12 +2174,12 @@ class $SenderKeysTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SenderKeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SenderKeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SenderKeysAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $SenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SenderKeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> groupId = const Value.absent(),
@@ -2231,16 +2204,9 @@ class $SenderKeysTableManager
                 record: record,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2427,12 +2393,12 @@ class $IdentitiesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $IdentitiesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $IdentitiesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $IdentitiesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $IdentitiesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $IdentitiesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $IdentitiesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -2469,16 +2435,9 @@ class $IdentitiesTableManager
                 nextPrekeyId: nextPrekeyId,
                 timestamp: timestamp,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2597,12 +2556,12 @@ class $PrekeysTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $PrekeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $PrekeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $PrekeysAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $PrekeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $PrekeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $PrekeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -2620,16 +2579,9 @@ class $PrekeysTableManager
                 prekeyId: prekeyId,
                 record: record,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2769,12 +2721,12 @@ class $SignedPrekeysTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SignedPrekeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SignedPrekeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SignedPrekeysAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $SignedPrekeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SignedPrekeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SignedPrekeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -2799,16 +2751,9 @@ class $SignedPrekeysTableManager
                 record: record,
                 timestamp: timestamp,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -2960,12 +2905,12 @@ class $SessionsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SessionsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SessionsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SessionsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $SessionsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SessionsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SessionsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -2994,16 +2939,9 @@ class $SessionsTableManager
                 record: record,
                 timestamp: timestamp,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -3164,13 +3102,12 @@ class $RatchetSenderKeysTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $RatchetSenderKeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $RatchetSenderKeysOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $RatchetSenderKeysAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $RatchetSenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $RatchetSenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $RatchetSenderKeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> groupId = const Value.absent(),
@@ -3203,16 +3140,9 @@ class $RatchetSenderKeysTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

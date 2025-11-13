@@ -31,12 +31,11 @@ class AccountPage extends HookConsumerWidget {
               cellBackgroundColor: context.theme.settingCellBackgroundColor,
               child: CellItem(
                 title: Text(context.l10n.deleteMyAccount),
-                onTap:
-                    () => ref
-                        .read(responsiveNavigatorProvider.notifier)
-                        .pushPage(
-                          ResponsiveNavigatorStateNotifier.accountDeletePage,
-                        ),
+                onTap: () => ref
+                    .read(responsiveNavigatorProvider.notifier)
+                    .pushPage(
+                      ResponsiveNavigatorStateNotifier.accountDeletePage,
+                    ),
               ),
             ),
           ],

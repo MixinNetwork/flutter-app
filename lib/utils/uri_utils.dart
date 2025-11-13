@@ -76,10 +76,9 @@ Future<bool> openUri(
     if (conversationId != null && conversationId.trim().isNotEmpty) {
       if (startText?.trim().isNotEmpty == true) {
         try {
-          final conversation =
-              await context.database.conversationDao
-                  .conversationItem(conversationId)
-                  .getSingleOrNull();
+          final conversation = await context.database.conversationDao
+              .conversationItem(conversationId)
+              .getSingleOrNull();
 
           if (conversation == null) {
             showToastFailed(null);
@@ -252,10 +251,9 @@ Future<bool> _showTransferDialog(
   try {
     showToastLoading();
 
-    final snapshotId =
-        await context.database.snapshotDao
-            .snapshotIdByTraceId(snapshotTraceId)
-            .getSingleOrNull();
+    final snapshotId = await context.database.snapshotDao
+        .snapshotIdByTraceId(snapshotTraceId)
+        .getSingleOrNull();
 
     if (snapshotId != null && snapshotId.trim().isNotEmpty) {
       Toast.dismiss();

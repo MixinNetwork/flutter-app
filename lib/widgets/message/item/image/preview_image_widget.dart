@@ -479,15 +479,16 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     _scaleAnimation?.removeListener(_onScaleAnimated);
     _scaleAnimationController.reset();
 
-    _scaleAnimation = Tween<double>(
-      begin: _transformationController.scale,
-      end: targetScale,
-    ).animate(
-      CurvedAnimation(
-        parent: _scaleAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _scaleAnimation =
+        Tween<double>(
+          begin: _transformationController.scale,
+          end: targetScale,
+        ).animate(
+          CurvedAnimation(
+            parent: _scaleAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
     _scaleAnimation!.addListener(_onScaleAnimated);
     _scaleAnimationController.forward();
   }
@@ -503,14 +504,20 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
 
   @override
   Widget build(BuildContext context) {
-    final matrix =
-        Matrix4.identity()
-          ..leftTranslate(
-            _transformationController.translate.dx,
-            _transformationController.translate.dy,
-          )
-          ..rotateZ(_transformationController.rotateRadius)
-          ..scale(_transformationController.scale);
+    final matrix = Matrix4.identity()
+      ..leftTranslateByDouble(
+        _transformationController.translate.dx,
+        _transformationController.translate.dy,
+        0,
+        1,
+      )
+      ..rotateZ(_transformationController.rotateRadius)
+      ..scaleByDouble(
+        _transformationController.scale,
+        _transformationController.scale,
+        _transformationController.scale,
+        1,
+      );
 
     return RepaintBoundary(
       child: Listener(

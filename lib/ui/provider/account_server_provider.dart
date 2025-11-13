@@ -101,7 +101,8 @@ class _Args extends Equatable {
 
 final Provider<GetCurrentConversationId> _currentConversationIdProvider =
     Provider<GetCurrentConversationId>(
-      (ref) => () => ref.read(currentConversationIdProvider),
+      (ref) =>
+          () => ref.read(currentConversationIdProvider),
     );
 
 final _argsProvider = Provider.autoDispose((ref) {
@@ -136,29 +137,30 @@ final _argsProvider = Provider.autoDispose((ref) {
   );
 });
 
-final accountServerProvider = StateNotifierProvider.autoDispose<
-  AccountServerOpener,
-  AsyncValue<AccountServer>
->((ref) {
-  final args = ref.watch(_argsProvider);
+final accountServerProvider =
+    StateNotifierProvider.autoDispose<
+      AccountServerOpener,
+      AsyncValue<AccountServer>
+    >((ref) {
+      final args = ref.watch(_argsProvider);
 
-  if (args.database == null) return AccountServerOpener();
-  if (args.userId == null ||
-      args.sessionId == null ||
-      args.identityNumber == null ||
-      args.privateKey == null) {
-    w('[accountServerProvider] Account not ready');
-    return AccountServerOpener();
-  }
+      if (args.database == null) return AccountServerOpener();
+      if (args.userId == null ||
+          args.sessionId == null ||
+          args.identityNumber == null ||
+          args.privateKey == null) {
+        w('[accountServerProvider] Account not ready');
+        return AccountServerOpener();
+      }
 
-  return AccountServerOpener.open(
-    multiAuthChangeNotifier: args.multiAuthChangeNotifier,
-    settingChangeNotifier: args.settingChangeNotifier,
-    database: args.database!,
-    userId: args.userId!,
-    sessionId: args.sessionId!,
-    identityNumber: args.identityNumber!,
-    privateKey: args.privateKey!,
-    currentConversationId: args.currentConversationId,
-  );
-});
+      return AccountServerOpener.open(
+        multiAuthChangeNotifier: args.multiAuthChangeNotifier,
+        settingChangeNotifier: args.settingChangeNotifier,
+        database: args.database!,
+        userId: args.userId!,
+        sessionId: args.sessionId!,
+        identityNumber: args.identityNumber!,
+        privateKey: args.privateKey!,
+        currentConversationId: args.currentConversationId,
+      );
+    });

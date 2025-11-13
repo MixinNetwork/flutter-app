@@ -60,7 +60,8 @@ class DesktopMixinWebView extends MixinWebView {
     };
   }
 
-  String _mixinContextProviderJavaScript(String contextJson) => '''
+  String _mixinContextProviderJavaScript(String contextJson) =>
+      '''
   window.MixinContext = {
     getContext: function() {
       return '$contextJson'
@@ -112,12 +113,11 @@ class DesktopMixinWebView extends MixinWebView {
 
 bool runWebViewNavigationBar(List<String> args) => runWebViewTitleBarWidget(
   args,
-  builder:
-      (context) => const BrightnessData(
-        brightnessThemeData: lightBrightnessThemeData,
-        value: 1,
-        child: WebViewNavigationBar(),
-      ),
+  builder: (context) => const BrightnessData(
+    brightnessThemeData: lightBrightnessThemeData,
+    value: 1,
+    child: WebViewNavigationBar(),
+  ),
   backgroundColor: const Color(0xFFF0E7EA),
 );
 
@@ -149,10 +149,8 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
                     TextSpan(
                       text: runtimeDownloadLink.overflow,
                       style: TextStyle(color: context.theme.accent),
-                      recognizer:
-                          TapGestureRecognizer()
-                            ..onTap =
-                                () => openUri(context, runtimeDownloadLink),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => openUri(context, runtimeDownloadLink),
                     ),
                   ],
                 ),

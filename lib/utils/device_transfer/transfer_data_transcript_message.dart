@@ -64,12 +64,12 @@ class TransferDataTranscriptMessage {
     mediaWidth: data.mediaWidth,
     mediaHeight: data.mediaHeight,
     mediaMimeType: data.mediaMimeType,
-    mediaDuration:
-        data.mediaDuration == null ? null : int.tryParse(data.mediaDuration!),
-    mediaStatus:
-        data.mediaStatus == MediaStatus.pending
-            ? MediaStatus.canceled
-            : data.mediaStatus,
+    mediaDuration: data.mediaDuration == null
+        ? null
+        : int.tryParse(data.mediaDuration!),
+    mediaStatus: data.mediaStatus == MediaStatus.pending
+        ? MediaStatus.canceled
+        : data.mediaStatus,
     mediaWaveform: data.mediaWaveform,
     thumbImage: data.thumbImage,
     thumbUrl: data.thumbUrl,
@@ -182,8 +182,9 @@ class TransferDataTranscriptMessage {
     mediaHeight: mediaHeight,
     mediaMimeType: mediaMimeType,
     mediaDuration: mediaDuration?.toString(),
-    mediaStatus:
-        mediaStatus == MediaStatus.pending ? MediaStatus.canceled : mediaStatus,
+    mediaStatus: mediaStatus == MediaStatus.pending
+        ? MediaStatus.canceled
+        : mediaStatus,
     mediaWaveform: mediaWaveform,
     thumbImage: thumbImage,
     thumbUrl: thumbUrl,

@@ -34,10 +34,9 @@ Future<String> _fileMd5(String path) async {
 }
 
 Future<String> _createTempFile(int fileSize) async {
-  final file =
-      File(p.join(Directory.systemTemp.path, const Uuid().v4()))
-        ..createSync()
-        ..writeAsStringSync(_generateLargeString(fileSize));
+  final file = File(p.join(Directory.systemTemp.path, const Uuid().v4()))
+    ..createSync()
+    ..writeAsStringSync(_generateLargeString(fileSize));
   return file.path;
 }
 

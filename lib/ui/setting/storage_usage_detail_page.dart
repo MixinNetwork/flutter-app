@@ -26,53 +26,48 @@ class StorageUsageDetailPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final watchEvent =
-        useMemoizedStream(
-          () => File(
-            context.accountServer.getMediaFilePath(),
-          ).watch(recursive: true),
-        ).data;
+    final watchEvent = useMemoizedStream(
+      () => File(
+        context.accountServer.getMediaFilePath(),
+      ).watch(recursive: true),
+    ).data;
 
-    final photosSize =
-        useMemoizedFuture(
-          () async => filesize(
-            await getTotalSizeOfFile(
-              context.accountServer.getImagesPath(conversationId),
-            ),
-          ),
-          '0 B',
-          keys: [watchEvent],
-        ).requireData;
-    final videosSize =
-        useMemoizedFuture(
-          () async => filesize(
-            await getTotalSizeOfFile(
-              context.accountServer.getVideosPath(conversationId),
-            ),
-          ),
-          '0 B',
-          keys: [watchEvent],
-        ).requireData;
-    final audiosSize =
-        useMemoizedFuture(
-          () async => filesize(
-            await getTotalSizeOfFile(
-              context.accountServer.getAudiosPath(conversationId),
-            ),
-          ),
-          '0 B',
-          keys: [watchEvent],
-        ).requireData;
-    final filesSize =
-        useMemoizedFuture(
-          () async => filesize(
-            await getTotalSizeOfFile(
-              context.accountServer.getFilesPath(conversationId),
-            ),
-          ),
-          '0 B',
-          keys: [watchEvent],
-        ).requireData;
+    final photosSize = useMemoizedFuture(
+      () async => filesize(
+        await getTotalSizeOfFile(
+          context.accountServer.getImagesPath(conversationId),
+        ),
+      ),
+      '0 B',
+      keys: [watchEvent],
+    ).requireData;
+    final videosSize = useMemoizedFuture(
+      () async => filesize(
+        await getTotalSizeOfFile(
+          context.accountServer.getVideosPath(conversationId),
+        ),
+      ),
+      '0 B',
+      keys: [watchEvent],
+    ).requireData;
+    final audiosSize = useMemoizedFuture(
+      () async => filesize(
+        await getTotalSizeOfFile(
+          context.accountServer.getAudiosPath(conversationId),
+        ),
+      ),
+      '0 B',
+      keys: [watchEvent],
+    ).requireData;
+    final filesSize = useMemoizedFuture(
+      () async => filesize(
+        await getTotalSizeOfFile(
+          context.accountServer.getFilesPath(conversationId),
+        ),
+      ),
+      '0 B',
+      keys: [watchEvent],
+    ).requireData;
 
     final selected = useState<(bool, bool, bool, bool)>(const (
       false,
@@ -95,22 +90,21 @@ class StorageUsageDetailPage extends HookConsumerWidget {
             ].every((element) => !element),
             child: MixinButton(
               backgroundTransparent: true,
-              onTap:
-                  () => runFutureWithToast(() async {
-                    final accountServer = context.accountServer;
-                    if (selected.value.$1) {
-                      await _clear(accountServer.getImagesPath(conversationId));
-                    }
-                    if (selected.value.$2) {
-                      await _clear(accountServer.getVideosPath(conversationId));
-                    }
-                    if (selected.value.$3) {
-                      await _clear(accountServer.getAudiosPath(conversationId));
-                    }
-                    if (selected.value.$4) {
-                      await _clear(accountServer.getFilesPath(conversationId));
-                    }
-                  }()),
+              onTap: () => runFutureWithToast(() async {
+                final accountServer = context.accountServer;
+                if (selected.value.$1) {
+                  await _clear(accountServer.getImagesPath(conversationId));
+                }
+                if (selected.value.$2) {
+                  await _clear(accountServer.getVideosPath(conversationId));
+                }
+                if (selected.value.$3) {
+                  await _clear(accountServer.getAudiosPath(conversationId));
+                }
+                if (selected.value.$4) {
+                  await _clear(accountServer.getFilesPath(conversationId));
+                }
+              }()),
               child: Center(child: Text(context.l10n.clear)),
             ),
           ),

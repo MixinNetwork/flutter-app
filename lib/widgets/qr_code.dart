@@ -28,7 +28,10 @@ class QrCode extends StatelessWidget {
 }
 
 Future<void> showQrCodeDialog(BuildContext context, String data) async =>
-    showMixinDialog<void>(context: context, child: _QrcodeDialog(data: data));
+    showMixinDialog<void>(
+      context: context,
+      child: _QrcodeDialog(data: data),
+    );
 
 class _QrcodeDialog extends StatelessWidget {
   const _QrcodeDialog({required this.data});

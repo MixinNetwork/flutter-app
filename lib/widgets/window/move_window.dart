@@ -14,12 +14,11 @@ class MoveWindowBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onPanStart:
-        enable
-            ? (details) {
-              // do nothing, but we already intercept the events.
-            }
-            : null,
+    onPanStart: enable
+        ? (details) {
+            // do nothing, but we already intercept the events.
+          }
+        : null,
     child: child,
   );
 }
@@ -43,37 +42,36 @@ class MoveWindow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GestureDetector(
     behavior: behavior,
-    onDoubleTap:
-        clickToFullScreen
-            ? () async {
-              if (!kPlatformIsDarwin) {
-                // Only enable for macOS.
-                // Windows and Linux already has a title bar.
-                return;
-              }
-              if (await windowManager.isMaximized()) {
-                d('window is maximized, restore');
-                await windowManager.unmaximize();
-                if (await windowManager.isMaximized()) {
-                  d('window is still maximized, set to default size');
-                  const windowSize = Size(960, 720);
-                  final position = await calcWindowPosition(
-                    windowSize,
-                    Alignment.center,
-                  );
-                  await windowManager.setBounds(
-                    null,
-                    position: position,
-                    size: windowSize,
-                    animate: true,
-                  );
-                }
-              } else {
-                d('window is not maximized, maximize');
-                await windowManager.maximize();
-              }
+    onDoubleTap: clickToFullScreen
+        ? () async {
+            if (!kPlatformIsDarwin) {
+              // Only enable for macOS.
+              // Windows and Linux already has a title bar.
+              return;
             }
-            : null,
+            if (await windowManager.isMaximized()) {
+              d('window is maximized, restore');
+              await windowManager.unmaximize();
+              if (await windowManager.isMaximized()) {
+                d('window is still maximized, set to default size');
+                const windowSize = Size(960, 720);
+                final position = await calcWindowPosition(
+                  windowSize,
+                  Alignment.center,
+                );
+                await windowManager.setBounds(
+                  null,
+                  position: position,
+                  size: windowSize,
+                  animate: true,
+                );
+              }
+            } else {
+              d('window is not maximized, maximize');
+              await windowManager.maximize();
+            }
+          }
+        : null,
     onPanStart: (details) {
       if (defaultTargetPlatform == TargetPlatform.windows) {
         // Disable MoveWindow for windows.

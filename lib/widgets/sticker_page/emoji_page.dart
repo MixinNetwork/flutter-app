@@ -30,9 +30,8 @@ class EmojiPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-    builder:
-        (context, constraints) =>
-            _EmojiPageBody(layoutWidth: constraints.maxWidth),
+    builder: (context, constraints) =>
+        _EmojiPageBody(layoutWidth: constraints.maxWidth),
   );
 }
 
@@ -77,12 +76,11 @@ class _EmojiPageBody extends HookConsumerWidget {
       () => [
         recentUsedEmoji,
         ...emojiGroups.map(
-          (group) =>
-              group
-                  .expand(Emoji.byGroup)
-                  .where((e) => !e.modifiable)
-                  .map((emoji) => emoji.char)
-                  .toList(),
+          (group) => group
+              .expand(Emoji.byGroup)
+              .where((e) => !e.modifiable)
+              .map((emoji) => emoji.char)
+              .toList(),
         ),
       ],
       [recentUsedEmoji],

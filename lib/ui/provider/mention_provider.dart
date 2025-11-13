@@ -46,14 +46,13 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
     required bool? isGroup,
     required bool isBot,
   }) : super(const MentionState()) {
-    final mentionTextStream =
-        textEditingValueStream.map((event) {
-          final text = event.text.substring(
-            0,
-            max(event.selection.baseOffset, 0),
-          );
-          return mentionRegExp.firstMatch(text)?[1];
-        }).asBroadcastStream();
+    final mentionTextStream = textEditingValueStream.map((event) {
+      final text = event.text.substring(
+        0,
+        max(event.selection.baseOffset, 0),
+      );
+      return mentionRegExp.firstMatch(text)?[1];
+    }).asBroadcastStream();
 
     addSubscription(
       mentionTextStream.distinct().listen((index) {
@@ -157,11 +156,11 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
         users: users,
         index:
             listEquals(
-                  users.map(_mapper).toList(),
-                  state.users.map(_mapper).toList(),
-                )
-                ? state.index
-                : 0,
+              users.map(_mapper).toList(),
+              state.users.map(_mapper).toList(),
+            )
+            ? state.index
+            : 0,
       );
 
   String _mapper(User e) => e.userId;
@@ -192,10 +191,9 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
         curve: Curves.easeIn,
       );
     } else if (index >= endIndex) {
-      final pixel =
-          (kMentionItemHeight * index - kMentionItemHeight)
-              .clamp(0, maxValidScrollExtent)
-              .toDouble();
+      final pixel = (kMentionItemHeight * index - kMentionItemHeight)
+          .clamp(0, maxValidScrollExtent)
+          .toDouble();
       scrollController.animateTo(
         pixel,
         duration: const Duration(milliseconds: 150),
@@ -229,35 +227,38 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
   }
 }
 
-final mentionProvider = StateNotifierProvider.autoDispose.family<
-  MentionStateNotifier,
-  MentionState,
-  Stream<TextEditingValue>
->((ref, stream) {
-  final userDao = ref.watch(
-    databaseProvider.select((value) => value.requireValue.userDao),
-  );
-  final authStateNotifier = ref.watch(multiAuthStateNotifierProvider.notifier);
-  final (conversationId, isGroup, isBot) = ref.watch(
-    conversationProvider.select(
-      (value) => (value?.conversationId, value?.isGroup, value?.isBot ?? false),
-    ),
-  );
+final mentionProvider = StateNotifierProvider.autoDispose
+    .family<MentionStateNotifier, MentionState, Stream<TextEditingValue>>((
+      ref,
+      stream,
+    ) {
+      final userDao = ref.watch(
+        databaseProvider.select((value) => value.requireValue.userDao),
+      );
+      final authStateNotifier = ref.watch(
+        multiAuthStateNotifierProvider.notifier,
+      );
+      final (conversationId, isGroup, isBot) = ref.watch(
+        conversationProvider.select(
+          (value) =>
+              (value?.conversationId, value?.isGroup, value?.isBot ?? false),
+        ),
+      );
 
-  if (conversationId == null) {
-    return MentionStateNotifier.idle(
-      userDao: userDao,
-      multiAuthChangeNotifier: authStateNotifier,
-      textEditingValueStream: stream,
-    );
-  }
+      if (conversationId == null) {
+        return MentionStateNotifier.idle(
+          userDao: userDao,
+          multiAuthChangeNotifier: authStateNotifier,
+          textEditingValueStream: stream,
+        );
+      }
 
-  return MentionStateNotifier(
-    userDao: userDao,
-    multiAuthChangeNotifier: authStateNotifier,
-    textEditingValueStream: stream,
-    conversationId: conversationId,
-    isGroup: isGroup,
-    isBot: isBot,
-  );
-});
+      return MentionStateNotifier(
+        userDao: userDao,
+        multiAuthChangeNotifier: authStateNotifier,
+        textEditingValueStream: stream,
+        conversationId: conversationId,
+        isGroup: isGroup,
+        isBot: isBot,
+      );
+    });

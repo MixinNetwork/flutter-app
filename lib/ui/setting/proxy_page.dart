@@ -48,8 +48,8 @@ class _ProxySettingWidget extends HookConsumerWidget {
     final hasProxyConfig =
         useListenableConverter(
           context.database.settingProperties,
-          converter:
-              (settingProperties) => settingProperties.proxyList.isNotEmpty,
+          converter: (settingProperties) =>
+              settingProperties.proxyList.isNotEmpty,
         ).data ??
         false;
     return Column(
@@ -64,12 +64,11 @@ class _ProxySettingWidget extends HookConsumerWidget {
               child: CupertinoSwitch(
                 activeTrackColor: context.theme.accent,
                 value: hasProxyConfig && enableProxy,
-                onChanged:
-                    !hasProxyConfig
-                        ? null
-                        : (bool value) =>
-                            context.database.settingProperties.enableProxy =
-                                value,
+                onChanged: !hasProxyConfig
+                    ? null
+                    : (bool value) =>
+                          context.database.settingProperties.enableProxy =
+                              value,
               ),
             ),
           ),
@@ -117,15 +116,14 @@ class _ProxyItemList extends HookConsumerWidget {
         ).data ??
         proxyList.firstOrNull?.id;
     return Column(
-      children:
-          proxyList
-              .map(
-                (proxy) => _ProxyItemWidget(
-                  proxy: proxy,
-                  selected: selectedProxyId == proxy.id,
-                ),
-              )
-              .toList(),
+      children: proxyList
+          .map(
+            (proxy) => _ProxyItemWidget(
+              proxy: proxy,
+              selected: selectedProxyId == proxy.id,
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -144,10 +142,9 @@ class _ProxyItemWidget extends StatelessWidget {
       leading: SizedBox(
         height: double.infinity,
         width: 20,
-        child:
-            selected
-                ? Icon(Icons.check, color: context.theme.icon, size: 20)
-                : null,
+        child: selected
+            ? Icon(Icons.check, color: context.theme.icon, size: 20)
+            : null,
       ),
       minLeadingWidth: 0,
       title: Text(
@@ -290,14 +287,13 @@ class _ProxyTypeWidget extends StatelessWidget {
         children: [
           ListTile(
             title: const Text('HTTP'),
-            trailing:
-                proxyType.value == ProxyType.http
-                    ? SvgPicture.asset(
-                      Resources.assetsImagesCheckedSvg,
-                      width: 24,
-                      height: 24,
-                    )
-                    : null,
+            trailing: proxyType.value == ProxyType.http
+                ? SvgPicture.asset(
+                    Resources.assetsImagesCheckedSvg,
+                    width: 24,
+                    height: 24,
+                  )
+                : null,
             onTap: () => proxyType.value = ProxyType.http,
           ),
         ],
@@ -348,9 +344,8 @@ class _ProxyInputWidget extends StatelessWidget {
           filled: true,
           fillColor: context.theme.listSelected,
         ),
-        contextMenuBuilder:
-            (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
+        contextMenuBuilder: (context, state) =>
+            MixinAdaptiveSelectionToolbar(editableTextState: state),
       ),
       Divider(height: 1, color: context.theme.divider),
       TextField(
@@ -377,9 +372,8 @@ class _ProxyInputWidget extends StatelessWidget {
           filled: true,
           fillColor: context.theme.listSelected,
         ),
-        contextMenuBuilder:
-            (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
+        contextMenuBuilder: (context, state) =>
+            MixinAdaptiveSelectionToolbar(editableTextState: state),
       ),
     ],
   );

@@ -165,15 +165,14 @@ class HoverOverlay extends HookConsumerWidget {
               curve: visible ? inCurve : outCurve,
             ),
             duration: visible ? duration : Duration(microseconds: totalClose),
-            builder:
-                (context, progress, child) =>
-                    portalBuilder?.call(
-                      context,
-                      progress,
-                      portalHoverWrapper,
-                      child,
-                    ) ??
-                    child!,
+            builder: (context, progress, child) =>
+                portalBuilder?.call(
+                  context,
+                  progress,
+                  portalHoverWrapper,
+                  child,
+                ) ??
+                child!,
             child: MouseRegionIgnoreTouch(
               onEnter: (_) => portalHovering.value = true,
               onHover: (_) => portalHovering.value = true,

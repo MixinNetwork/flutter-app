@@ -38,10 +38,9 @@ class ProxyConfig with EquatableMixin {
 
   String toUri() {
     final scheme = type == ProxyType.http ? 'http' : 'socks5';
-    final userInfo =
-        !username.isNullOrBlank() && !password.isNullOrBlank()
-            ? '$username:$password@'
-            : '';
+    final userInfo = !username.isNullOrBlank() && !password.isNullOrBlank()
+        ? '$username:$password@'
+        : '';
     return '$scheme://$userInfo$host:$port';
   }
 
@@ -64,11 +63,10 @@ extension HttpClientProxy on HttpClient {
     switch (config) {
       case ProxyConfig(type: ProxyType.http):
         final proxyUrl = config.toUri();
-        findProxy =
-            (uri) => HttpClient.findProxyFromEnvironment(
-              uri,
-              environment: {'https_proxy': proxyUrl, 'http_proxy': proxyUrl},
-            );
+        findProxy = (uri) => HttpClient.findProxyFromEnvironment(
+          uri,
+          environment: {'https_proxy': proxyUrl, 'http_proxy': proxyUrl},
+        );
       case ProxyConfig(type: ProxyType.socks5):
       // not supported yet.
       case null:
@@ -88,10 +86,9 @@ Future<rhttp.RhttpCompatibleClient> createRHttpClient({
   }
 
   final settings = rhttp.ClientSettings(
-    proxySettings:
-        proxyConfig != null
-            ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
-            : const rhttp.ProxySettings.noProxy(),
+    proxySettings: proxyConfig != null
+        ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
+        : const rhttp.ProxySettings.noProxy(),
   );
   final client = await rhttp.RhttpCompatibleClient.create(settings: settings);
   _cachedClient = client;

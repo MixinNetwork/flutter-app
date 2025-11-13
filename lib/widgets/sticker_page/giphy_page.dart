@@ -35,12 +35,11 @@ class GiphyPage extends HookConsumerWidget {
       };
     }, [textEditingController]);
 
-    final keyword =
-        useMemoizedStream(
-          () => searchKeywordController.stream.debounceTime(
-            const Duration(seconds: 1),
-          ),
-        ).data;
+    final keyword = useMemoizedStream(
+      () => searchKeywordController.stream.debounceTime(
+        const Duration(seconds: 1),
+      ),
+    ).data;
 
     return Column(
       children: [

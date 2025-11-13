@@ -308,8 +308,8 @@ class _MessageProcessRunner {
 
   Future<void> _scheduleExpiredJob() async {
     d('_scheduleExpiredJob');
-    final messages =
-        await database.expiredMessageDao.getCurrentExpiredMessages();
+    final messages = await database.expiredMessageDao
+        .getCurrentExpiredMessages();
     if (messages.isEmpty) return;
 
     for (final em in messages) {
@@ -335,10 +335,9 @@ class _MessageProcessRunner {
       }
     }
 
-    final firstExpiredMessage =
-        await database.expiredMessageDao
-            .getFirstExpiredMessage()
-            .getSingleOrNull();
+    final firstExpiredMessage = await database.expiredMessageDao
+        .getFirstExpiredMessage()
+        .getSingleOrNull();
     if (firstExpiredMessage == null) {
       _nextExpiredMessageRunner?.cancel();
       _nextExpiredMessageRunner = null;

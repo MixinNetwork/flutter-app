@@ -41,9 +41,8 @@ abstract class AbstractResponsiveNavigatorCubit
     if (index == -1) return;
 
     List<MaterialPage>? list;
-    list =
-        index == 0 ? [] : state.pages.toList()
-          ..sublist(0, index);
+    list = index == 0 ? [] : state.pages.toList()
+      ..sublist(0, index);
     emit(state.copyWith(pages: list));
   }
 

@@ -45,67 +45,67 @@ class UnseenConversationsStateNotifier
   set _state(List<ConversationItem>? state) => super.state = state;
 }
 
-final unseenConversationsProvider = StateNotifierProvider.autoDispose<
-  UnseenConversationsStateNotifier,
-  List<ConversationItem>?
->((ref) {
-  final database = ref.read(databaseProvider).requireValue;
-  final slideCategoryState = ref.watch(slideCategoryStateProvider);
-  final unseenConversationsStateNotifier = UnseenConversationsStateNotifier(
-    null,
-  );
+final unseenConversationsProvider =
+    StateNotifierProvider.autoDispose<
+      UnseenConversationsStateNotifier,
+      List<ConversationItem>?
+    >((ref) {
+      final database = ref.read(databaseProvider).requireValue;
+      final slideCategoryState = ref.watch(slideCategoryStateProvider);
+      final unseenConversationsStateNotifier = UnseenConversationsStateNotifier(
+        null,
+      );
 
-  final updateEvent = Rx.merge([
-    DataBaseEventBus.instance.updateConversationIdStream,
-    DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-  ]);
+      final updateEvent = Rx.merge([
+        DataBaseEventBus.instance.updateConversationIdStream,
+        DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
+      ]);
 
-  final Stream<List<ConversationItem>> unseenConversations;
+      final Stream<List<ConversationItem>> unseenConversations;
 
-  switch (slideCategoryState.type) {
-    case SlideCategoryType.chats:
-    case SlideCategoryType.contacts:
-    case SlideCategoryType.groups:
-    case SlideCategoryType.bots:
-    case SlideCategoryType.strangers:
-      unseenConversations = database.conversationDao
-          .unseenConversationByCategory(slideCategoryState.type)
-          .watchWithStream(
-            eventStreams: [updateEvent],
-            duration: kSlowThrottleDuration,
-          );
-    case SlideCategoryType.circle:
-      unseenConversations = database.conversationDao
-          .unseenConversationsByCircleId(slideCategoryState.id!)
-          .watchWithStream(
-            eventStreams: [updateEvent],
-            duration: kSlowThrottleDuration,
-          );
-    case SlideCategoryType.setting:
-      unseenConversations = const Stream.empty();
-  }
+      switch (slideCategoryState.type) {
+        case SlideCategoryType.chats:
+        case SlideCategoryType.contacts:
+        case SlideCategoryType.groups:
+        case SlideCategoryType.bots:
+        case SlideCategoryType.strangers:
+          unseenConversations = database.conversationDao
+              .unseenConversationByCategory(slideCategoryState.type)
+              .watchWithStream(
+                eventStreams: [updateEvent],
+                duration: kSlowThrottleDuration,
+              );
+        case SlideCategoryType.circle:
+          unseenConversations = database.conversationDao
+              .unseenConversationsByCircleId(slideCategoryState.id!)
+              .watchWithStream(
+                eventStreams: [updateEvent],
+                duration: kSlowThrottleDuration,
+              );
+        case SlideCategoryType.setting:
+          unseenConversations = const Stream.empty();
+      }
 
-  final subscription = unseenConversations.asyncListen((items) async {
-    final newItems = List<ConversationItem>.of(items);
+      final subscription = unseenConversations.asyncListen((items) async {
+        final newItems = List<ConversationItem>.of(items);
 
-    final selectedConversationId = ref.read(currentConversationIdProvider);
+        final selectedConversationId = ref.read(currentConversationIdProvider);
 
-    if (selectedConversationId != null &&
-        !newItems.any(
-          (item) => item.conversationId == selectedConversationId,
-        )) {
-      final selectedConversationItem =
-          await database.conversationDao
+        if (selectedConversationId != null &&
+            !newItems.any(
+              (item) => item.conversationId == selectedConversationId,
+            )) {
+          final selectedConversationItem = await database.conversationDao
               .conversationItem(selectedConversationId)
               .getSingleOrNull();
-      if (selectedConversationItem != null) {
-        newItems.add(selectedConversationItem);
-      }
-    }
-    unseenConversationsStateNotifier._state = newItems..sortConversation();
-  });
+          if (selectedConversationItem != null) {
+            newItems.add(selectedConversationItem);
+          }
+        }
+        unseenConversationsStateNotifier._state = newItems..sortConversation();
+      });
 
-  ref.onDispose(subscription.cancel);
+      ref.onDispose(subscription.cancel);
 
-  return unseenConversationsStateNotifier;
-});
+      return unseenConversationsStateNotifier;
+    });

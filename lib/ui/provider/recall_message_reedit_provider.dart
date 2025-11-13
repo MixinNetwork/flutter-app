@@ -50,10 +50,11 @@ final onReEditStreamProvider = _onReEditStreamControllerProvider.select(
   (value) => value.stream.where((event) => event.isNotEmpty),
 );
 
-final _recallMessageProvider = StateNotifierProvider<
-  RecallMessageNotifier,
-  Map<String, String>
->((ref) => RecallMessageNotifier(ref.watch(_onReEditStreamControllerProvider)));
+final _recallMessageProvider =
+    StateNotifierProvider<RecallMessageNotifier, Map<String, String>>(
+      (ref) =>
+          RecallMessageNotifier(ref.watch(_onReEditStreamControllerProvider)),
+    );
 
 final recalledTextProvider = Provider.family<String?, String>(
   (ref, messageId) => ref.watch(_recallMessageProvider)[messageId],

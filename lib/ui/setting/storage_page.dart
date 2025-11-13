@@ -45,11 +45,9 @@ class StoragePage extends HookConsumerWidget {
                         child: CupertinoSwitch(
                           activeTrackColor: context.theme.accent,
                           value: photoAutoDownload,
-                          onChanged:
-                              (bool value) =>
-                                  context
-                                      .settingChangeNotifier
-                                      .photoAutoDownload = value,
+                          onChanged: (bool value) =>
+                              context.settingChangeNotifier.photoAutoDownload =
+                                  value,
                         ),
                       ),
                     ),
@@ -60,11 +58,9 @@ class StoragePage extends HookConsumerWidget {
                         child: CupertinoSwitch(
                           activeTrackColor: context.theme.accent,
                           value: videoAutoDownload,
-                          onChanged:
-                              (bool value) =>
-                                  context
-                                      .settingChangeNotifier
-                                      .videoAutoDownload = value,
+                          onChanged: (bool value) =>
+                              context.settingChangeNotifier.videoAutoDownload =
+                                  value,
                         ),
                       ),
                     ),
@@ -75,11 +71,9 @@ class StoragePage extends HookConsumerWidget {
                         child: CupertinoSwitch(
                           activeTrackColor: context.theme.accent,
                           value: fileAutoDownload,
-                          onChanged:
-                              (bool value) =>
-                                  context
-                                      .settingChangeNotifier
-                                      .fileAutoDownload = value,
+                          onChanged: (bool value) =>
+                              context.settingChangeNotifier.fileAutoDownload =
+                                  value,
                         ),
                       ),
                     ),
@@ -100,12 +94,11 @@ class StoragePage extends HookConsumerWidget {
                 cellBackgroundColor: context.theme.settingCellBackgroundColor,
                 child: CellItem(
                   title: Text(context.l10n.storageUsage),
-                  onTap:
-                      () => ref
-                          .read(responsiveNavigatorProvider.notifier)
-                          .pushPage(
-                            ResponsiveNavigatorStateNotifier.storageUsage,
-                          ),
+                  onTap: () => ref
+                      .read(responsiveNavigatorProvider.notifier)
+                      .pushPage(
+                        ResponsiveNavigatorStateNotifier.storageUsage,
+                      ),
                 ),
               ),
             ],

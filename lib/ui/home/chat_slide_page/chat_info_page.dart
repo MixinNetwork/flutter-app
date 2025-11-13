@@ -60,20 +60,19 @@ class ChatInfoPage extends HookConsumerWidget {
       accountServer.refreshUsers([userId], force: true);
     }, [userId]);
 
-    final announcement =
-        useMemoizedStream<String?>(
-          () => context.database.conversationDao
-              .announcement(conversationId)
-              .watchSingleWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateConversationStream([
-                    conversationId,
-                  ]),
-                ],
-                duration: kVerySlowThrottleDuration,
-              ),
-          keys: [conversationId],
-        ).data;
+    final announcement = useMemoizedStream<String?>(
+      () => context.database.conversationDao
+          .announcement(conversationId)
+          .watchSingleWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateConversationStream([
+                conversationId,
+              ]),
+            ],
+            duration: kVerySlowThrottleDuration,
+          ),
+      keys: [conversationId],
+    ).data;
     if (!conversationState.isLoaded) return const SizedBox();
 
     final isGroupConversation = conversationState.isGroup ?? false;
@@ -151,10 +150,9 @@ class ChatInfoPage extends HookConsumerWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupParticipants),
-                  onTap:
-                      () => context.read<ChatSideCubit>().pushPage(
-                        ChatSideCubit.participants,
-                      ),
+                  onTap: () => context.read<ChatSideCubit>().pushPage(
+                    ChatSideCubit.participants,
+                  ),
                 ),
               ),
             if (!isGroupConversation)
@@ -171,14 +169,13 @@ class ChatInfoPage extends HookConsumerWidget {
                         alignment: Alignment.bottomCenter,
                         color: context.theme.icon,
                         icon: Resources.assetsImagesInviteShareSvg,
-                        itemBuilder:
-                            (context) => [
-                              CustomPopupMenuItem(
-                                icon: Resources.assetsImagesContextMenuCopySvg,
-                                title: context.l10n.copyLink,
-                                value: null,
-                              ),
-                            ],
+                        itemBuilder: (context) => [
+                          CustomPopupMenuItem(
+                            icon: Resources.assetsImagesContextMenuCopySvg,
+                            title: context.l10n.copyLink,
+                            value: null,
+                          ),
+                        ],
                         onSelected: (_) async {
                           final userId = conversationState.userId;
                           if (userId == null) {
@@ -188,10 +185,9 @@ class ChatInfoPage extends HookConsumerWidget {
                             return;
                           }
 
-                          final user =
-                              await context.database.userDao
-                                  .userById(userId)
-                                  .getSingleOrNull();
+                          final user = await context.database.userDao
+                              .userById(userId)
+                              .getSingleOrNull();
 
                           if (user == null) {
                             e('can not find user $userId');
@@ -231,19 +227,17 @@ class ChatInfoPage extends HookConsumerWidget {
                 children: [
                   CellItem(
                     title: Text(context.l10n.sharedMedia),
-                    onTap:
-                        () => context.read<ChatSideCubit>().pushPage(
-                          ChatSideCubit.sharedMedia,
-                        ),
+                    onTap: () => context.read<ChatSideCubit>().pushPage(
+                      ChatSideCubit.sharedMedia,
+                    ),
                   ),
                   if (conversationState.userId != null)
                     _SharedApps(userId: conversationState.userId!),
                   CellItem(
                     title: Text(context.l10n.searchConversation, maxLines: 1),
-                    onTap:
-                        () => context.read<ChatSideCubit>().pushPage(
-                          ChatSideCubit.searchMessageHistory,
-                        ),
+                    onTap: () => context.read<ChatSideCubit>().pushPage(
+                      ChatSideCubit.searchMessageHistory,
+                    ),
                   ),
                 ],
               ),
@@ -262,12 +256,11 @@ class ChatInfoPage extends HookConsumerWidget {
                     ),
                   ),
                   trailing: canModifyExpireIn ? const Arrow() : null,
-                  onTap:
-                      !canModifyExpireIn
-                          ? null
-                          : () => context.read<ChatSideCubit>().pushPage(
-                            ChatSideCubit.disappearMessages,
-                          ),
+                  onTap: !canModifyExpireIn
+                      ? null
+                      : () => context.read<ChatSideCubit>().pushPage(
+                          ChatSideCubit.disappearMessages,
+                        ),
                 ),
               ),
             if (isGroupConversation && isOwnerOrAdmin)
@@ -277,10 +270,9 @@ class ChatInfoPage extends HookConsumerWidget {
                   children: [
                     Builder(
                       builder: (context) {
-                        final announcementTitle =
-                            announcement?.isEmpty ?? true
-                                ? context.l10n.addGroupDescription
-                                : context.l10n.editGroupDescription;
+                        final announcementTitle = announcement?.isEmpty ?? true
+                            ? context.l10n.addGroupDescription
+                            : context.l10n.editGroupDescription;
                         return CellItem(
                           title: Text(announcementTitle),
                           onTap: () async {
@@ -316,32 +308,29 @@ class ChatInfoPage extends HookConsumerWidget {
                       title: Text(
                         muting ? context.l10n.unmute : context.l10n.mute,
                       ),
-                      description:
-                          muting
-                              ? Text(
-                                DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                  conversationState
-                                      .conversation!
-                                      .validMuteUntil!
-                                      .toLocal(),
-                                ),
-                                style: TextStyle(
-                                  color: context.theme.secondaryText,
-                                  fontSize: 14,
-                                ),
-                              )
-                              : null,
+                      description: muting
+                          ? Text(
+                              DateFormat('yyyy/MM/dd, hh:mm a').format(
+                                conversationState.conversation!.validMuteUntil!
+                                    .toLocal(),
+                              ),
+                              style: TextStyle(
+                                color: context.theme.secondaryText,
+                                fontSize: 14,
+                              ),
+                            )
+                          : null,
                       trailing: null,
                       onTap: () async {
                         if (muting) {
                           await runFutureWithToast(
                             context.accountServer.unMuteConversation(
-                              conversationId:
-                                  isGroupConversation ? conversationId : null,
-                              userId:
-                                  isGroupConversation
-                                      ? null
-                                      : conversationState.userId,
+                              conversationId: isGroupConversation
+                                  ? conversationId
+                                  : null,
+                              userId: isGroupConversation
+                                  ? null
+                                  : conversationState.userId,
                             ),
                           );
                           return;
@@ -356,12 +345,12 @@ class ChatInfoPage extends HookConsumerWidget {
                         await runFutureWithToast(
                           context.accountServer.muteConversation(
                             result,
-                            conversationId:
-                                isGroupConversation ? conversationId : null,
-                            userId:
-                                isGroupConversation
-                                    ? null
-                                    : conversationState.userId,
+                            conversationId: isGroupConversation
+                                ? conversationId
+                                : null,
+                            userId: isGroupConversation
+                                ? null
+                                : conversationState.userId,
                           ),
                         );
                       },
@@ -386,13 +375,13 @@ class ChatInfoPage extends HookConsumerWidget {
                         await runFutureWithToast(
                           isGroupConversation
                               ? accountServer.editGroup(
-                                conversationState.conversationId,
-                                name: name,
-                              )
+                                  conversationState.conversationId,
+                                  name: name,
+                                )
                               : accountServer.editContactName(
-                                conversationState.userId!,
-                                name!,
-                              ),
+                                  conversationState.userId!,
+                                  name!,
+                                ),
                         );
                       },
                     ),
@@ -403,10 +392,9 @@ class ChatInfoPage extends HookConsumerWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupsInCommon),
-                  onTap:
-                      () => context.read<ChatSideCubit>().pushPage(
-                        ChatSideCubit.groupsInCommon,
-                      ),
+                  onTap: () => context.read<ChatSideCubit>().pushPage(
+                    ChatSideCubit.groupsInCommon,
+                  ),
                 ),
               ),
             if (conversationState.app?.creatorId != null)
@@ -414,20 +402,18 @@ class ChatInfoPage extends HookConsumerWidget {
                 child: CellItem(
                   title: Text(context.l10n.developer),
                   trailing: null,
-                  onTap:
-                      () => showUserDialog(
-                        context,
-                        conversationState.app?.creatorId,
-                      ),
+                  onTap: () => showUserDialog(
+                    context,
+                    conversationState.app?.creatorId,
+                  ),
                 ),
               ),
             CellGroup(
               child: CellItem(
                 title: Text(context.l10n.editConversations),
-                onTap:
-                    () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.circles,
-                    ),
+                onTap: () => context.read<ChatSideCubit>().pushPage(
+                  ChatSideCubit.circles,
+                ),
               ),
             ),
             CellGroup(
@@ -454,10 +440,9 @@ class ChatInfoPage extends HookConsumerWidget {
                   if (!isGroupConversation && !conversationState.isStranger!)
                     Builder(
                       builder: (context) {
-                        final title =
-                            conversationState.isBot
-                                ? context.l10n.removeBot
-                                : context.l10n.removeContact;
+                        final title = conversationState.isBot
+                            ? context.l10n.removeBot
+                            : context.l10n.removeContact;
                         return CellItem(
                           title: Text(title),
                           color: context.theme.red,
@@ -651,49 +636,48 @@ class _AddToContactsButton extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedSize(
     duration: const Duration(milliseconds: 200),
     curve: Curves.easeInOut,
-    child:
-        conversation.isStranger!
-            ? Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: context.theme.statusBackground,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 7,
-                  ),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                  ),
+    child: conversation.isStranger!
+        ? Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: context.theme.statusBackground,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 7,
                 ),
-                onPressed: () {
-                  final username =
-                      conversation.user?.fullName ??
-                      conversation.conversation?.validName;
-                  assert(
-                    username != null,
-                    'ContactsAdd: username should not be null.',
-                  );
-                  assert(
-                    conversation.isGroup != true,
-                    'ContactsAdd conversation should not be a group.',
-                  );
-                  runFutureWithToast(
-                    context.accountServer.addUser(
-                      conversation.userId!,
-                      username,
-                    ),
-                  );
-                },
-                child: Text(
-                  conversation.isBot
-                      ? context.l10n.addBotWithPlus
-                      : context.l10n.addContactWithPlus,
-                  style: TextStyle(fontSize: 12, color: context.theme.accent),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
               ),
-            )
-            : const SizedBox(height: 0),
+              onPressed: () {
+                final username =
+                    conversation.user?.fullName ??
+                    conversation.conversation?.validName;
+                assert(
+                  username != null,
+                  'ContactsAdd: username should not be null.',
+                );
+                assert(
+                  conversation.isGroup != true,
+                  'ContactsAdd conversation should not be a group.',
+                );
+                runFutureWithToast(
+                  context.accountServer.addUser(
+                    conversation.userId!,
+                    username,
+                  ),
+                );
+              },
+              child: Text(
+                conversation.isBot
+                    ? context.l10n.addBotWithPlus
+                    : context.l10n.addContactWithPlus,
+                style: TextStyle(fontSize: 12, color: context.theme.accent),
+              ),
+            ),
+          )
+        : const SizedBox(height: 0),
   );
 }
 
@@ -722,17 +706,15 @@ class _SharedApps extends HookConsumerWidget {
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
-      child:
-          data.isEmpty
-              ? const SizedBox()
-              : CellItem(
-                title: Text(context.l10n.shareApps),
-                trailing: OverlappedAppIcons(apps: data),
-                onTap:
-                    () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.sharedApps,
-                    ),
+      child: data.isEmpty
+          ? const SizedBox()
+          : CellItem(
+              title: Text(context.l10n.shareApps),
+              trailing: OverlappedAppIcons(apps: data),
+              onTap: () => context.read<ChatSideCubit>().pushPage(
+                ChatSideCubit.sharedApps,
               ),
+            ),
     );
   }
 }

@@ -53,20 +53,19 @@ class ChatBar extends HookConsumerWidget {
           }
           chatSideCubit.toggleInfoPage();
         },
-        onLongPress:
-            longPressToShareLog
-                ? (details) {
-                  if (conversation == null) return;
+        onLongPress: longPressToShareLog
+            ? (details) {
+                if (conversation == null) return;
 
-                  if ((conversation.isGroup ?? true) || (conversation.isBot)) {
-                    return;
-                  }
-                  showShareLogDialog(
-                    context,
-                    conversationName: conversation.name ?? '',
-                  );
+                if ((conversation.isGroup ?? true) || (conversation.isBot)) {
+                  return;
                 }
-                : null,
+                showShareLogDialog(
+                  context,
+                  conversationName: conversation.name ?? '',
+                );
+              }
+            : null,
         behavior: behavior,
         child: child,
       ),
@@ -77,20 +76,15 @@ class ChatBar extends HookConsumerWidget {
     return Row(
       children: [
         Consumer(
-          builder:
-              (_, ref, _) =>
-                  routeMode
-                      ? MoveWindowBarrier(
-                        child: MixinBackButton(
-                          color: actionColor,
-                          onTap:
-                              () =>
-                                  ref
-                                      .read(conversationProvider.notifier)
-                                      .unselected(),
-                        ),
-                      )
-                      : const SizedBox(width: 16),
+          builder: (_, ref, _) => routeMode
+              ? MoveWindowBarrier(
+                  child: MixinBackButton(
+                    color: actionColor,
+                    onTap: () =>
+                        ref.read(conversationProvider.notifier).unselected(),
+                  ),
+                )
+              : const SizedBox(width: 16),
         ),
         toggleInfoPageWrapper(
           longPressToShareLog: true,
@@ -137,8 +131,8 @@ class ChatBar extends HookConsumerWidget {
         if (inMultiSelectMode)
           MoveWindowBarrier(
             child: TextButton(
-              onPressed:
-                  () => ref.read(messageSelectionProvider).clearSelection(),
+              onPressed: () =>
+                  ref.read(messageSelectionProvider).clearSelection(),
               child: Text(context.l10n.cancel),
             ),
           )
@@ -161,14 +155,13 @@ class ChatBar extends HookConsumerWidget {
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.centerLeft,
             child: MoveWindowBarrier(
-              child:
-                  chatSideRouteMode
-                      ? const SizedBox()
-                      : ActionButton(
-                        name: Resources.assetsImagesIcScreenSvg,
-                        color: actionColor,
-                        onTap: chatSideCubit.toggleInfoPage,
-                      ),
+              child: chatSideRouteMode
+                  ? const SizedBox()
+                  : ActionButton(
+                      name: Resources.assetsImagesIcScreenSvg,
+                      color: actionColor,
+                      onTap: chatSideCubit.toggleInfoPage,
+                    ),
             ),
           ),
           const SizedBox(width: 16),
@@ -317,7 +310,7 @@ class _BotIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (conversation.isBot != true) {
+    if (!conversation.isBot) {
       return const SizedBox();
     }
 

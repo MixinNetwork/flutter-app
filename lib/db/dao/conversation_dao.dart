@@ -39,15 +39,18 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         return groupExpression | userExpression;
       });
 
-  Future<int> insert(Conversation conversation) => into(
-    db.conversations,
-  ).insertOnConflictUpdate(conversation).then((value) {
-    if (value > 0) {
-      DataBaseEventBus.instance.updateConversation(conversation.conversationId);
-    }
+  Future<int> insert(Conversation conversation) =>
+      into(
+        db.conversations,
+      ).insertOnConflictUpdate(conversation).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateConversation(
+            conversation.conversationId,
+          );
+        }
 
-    return value;
-  });
+        return value;
+      });
 
   Selectable<Conversation?> conversationById(String conversationId) =>
       (select(db.conversations)
@@ -306,24 +309,29 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             return value;
           });
 
-  Future<int> unpin(String conversationId) => (update(db.conversations)..where(
-    (tbl) => tbl.conversationId.equals(conversationId),
-  )).write(const ConversationsCompanion(pinTime: Value(null))).then((value) {
-    if (value > 0) {
-      DataBaseEventBus.instance.updateConversation(conversationId);
-    }
-    return value;
-  });
+  Future<int> unpin(String conversationId) =>
+      (update(db.conversations)..where(
+            (tbl) => tbl.conversationId.equals(conversationId),
+          ))
+          .write(const ConversationsCompanion(pinTime: Value(null)))
+          .then((value) {
+            if (value > 0) {
+              DataBaseEventBus.instance.updateConversation(conversationId);
+            }
+            return value;
+          });
 
   Future<int> deleteConversation(String conversationId) =>
       (delete(db.conversations)..where(
-        (tbl) => tbl.conversationId.equals(conversationId),
-      )).go().then((value) {
-        if (value > 0) {
-          DataBaseEventBus.instance.updateConversation(conversationId);
-        }
-        return value;
-      });
+            (tbl) => tbl.conversationId.equals(conversationId),
+          ))
+          .go()
+          .then((value) {
+            if (value > 0) {
+              DataBaseEventBus.instance.updateConversation(conversationId);
+            }
+            return value;
+          });
 
   Future<int> updateConversationStatusById(
     String conversationId,
@@ -338,17 +346,19 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     if (already) return -1;
 
     return (db.update(db.conversations)..where(
-      (tbl) =>
-          tbl.conversationId.equals(conversationId) &
-          tbl.status
-              .equals(const ConversationStatusTypeConverter().toSql(status))
-              .not(),
-    )).write(ConversationsCompanion(status: Value(status))).then((value) {
-      if (value > 0) {
-        DataBaseEventBus.instance.updateConversation(conversationId);
-      }
-      return value;
-    });
+          (tbl) =>
+              tbl.conversationId.equals(conversationId) &
+              tbl.status
+                  .equals(const ConversationStatusTypeConverter().toSql(status))
+                  .not(),
+        ))
+        .write(ConversationsCompanion(status: Value(status)))
+        .then((value) {
+          if (value > 0) {
+            DataBaseEventBus.instance.updateConversation(conversationId);
+          }
+          return value;
+        });
   }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(
@@ -361,10 +371,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       return _fuzzySearchConversationInCircle(
         query.trim().escapeSql(),
         category!.id,
-        (conversation, owner, message, _, cc, _) =>
-            filterUnseen
-                ? conversation.unseenMessageCount.isBiggerThanValue(0)
-                : ignoreWhere,
+        (conversation, owner, message, _, cc, _) => filterUnseen
+            ? conversation.unseenMessageCount.isBiggerThanValue(0)
+            : ignoreWhere,
         (conversation, owner, message, _, cc, _) => Limit(limit, null),
       );
     }
@@ -450,10 +459,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   ) {
     var ownerId = conversation.creatorId;
     if (conversation.category == ConversationCategory.contact) {
-      ownerId =
-          conversation.participants
-              .firstWhere((e) => e.userId != currentUserId)
-              .userId;
+      ownerId = conversation.participants
+          .firstWhere((e) => e.userId != currentUserId)
+          .userId;
     }
     return db
         .transaction(() async {
@@ -519,13 +527,15 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     );
     if (already) return -1;
     return (update(db.conversations)..where(
-      (tbl) => tbl.conversationId.equals(conversationId),
-    )).write(ConversationsCompanion(codeUrl: Value(codeUrl))).then((value) {
-      if (value > 0) {
-        DataBaseEventBus.instance.updateConversation(conversationId);
-      }
-      return value;
-    });
+          (tbl) => tbl.conversationId.equals(conversationId),
+        ))
+        .write(ConversationsCompanion(codeUrl: Value(codeUrl)))
+        .then((value) {
+          if (value > 0) {
+            DataBaseEventBus.instance.updateConversation(conversationId);
+          }
+          return value;
+        });
   }
 
   Future<int> updateMuteUntil(String conversationId, String muteUntil) =>
@@ -554,14 +564,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     if (already) return -1;
 
     return (update(db.conversations)..where(
-      (tbl) => tbl.conversationId.equals(conversationId),
-    )).write(ConversationsCompanion(draft: Value(draft))).then((value) {
-      if (value > 0) {
-        DataBaseEventBus.instance.updateConversation(conversationId);
-      }
+          (tbl) => tbl.conversationId.equals(conversationId),
+        ))
+        .write(ConversationsCompanion(draft: Value(draft)))
+        .then((value) {
+          if (value > 0) {
+            DataBaseEventBus.instance.updateConversation(conversationId);
+          }
 
-      return value;
-    });
+          return value;
+        });
   }
 
   Future<bool> hasConversation(String conversationId) => db.hasData(
@@ -572,13 +584,15 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateConversationExpireIn(String conversationId, int expireIn) =>
       (update(db.conversations)..where(
-        (tbl) => tbl.conversationId.equals(conversationId),
-      )).write(ConversationsCompanion(expireIn: Value(expireIn))).then((value) {
-        if (value > 0) {
-          DataBaseEventBus.instance.updateConversation(conversationId);
-        }
-        return value;
-      });
+            (tbl) => tbl.conversationId.equals(conversationId),
+          ))
+          .write(ConversationsCompanion(expireIn: Value(expireIn)))
+          .then((value) {
+            if (value > 0) {
+              DataBaseEventBus.instance.updateConversation(conversationId);
+            }
+            return value;
+          });
 
   Future<EncryptCategory> getEncryptCategory(
     String ownerId,
@@ -627,15 +641,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     String userId,
     String? lastMessageId,
     DateTime? lastMessageCreatedAt,
-  ) => _updateUnseenMessageCountAndLastMessageId(
-    conversationId,
-    userId,
-    lastMessageId,
-    lastMessageCreatedAt,
-  ).then((value) {
-    if (value > 0) {
-      DataBaseEventBus.instance.updateConversation(conversationId);
-    }
-    return value;
-  });
+  ) =>
+      _updateUnseenMessageCountAndLastMessageId(
+        conversationId,
+        userId,
+        lastMessageId,
+        lastMessageCreatedAt,
+      ).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateConversation(conversationId);
+        }
+        return value;
+      });
 }

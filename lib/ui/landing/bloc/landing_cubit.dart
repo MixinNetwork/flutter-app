@@ -32,8 +32,8 @@ class LandingCubit<T> extends Cubit<T> {
          dioOptions: BaseOptions(
            headers: {
              'Accept-Language': locale.languageCode,
-             if (userAgent != null) 'User-Agent': userAgent,
-             if (deviceId != null) 'Mixin-Device-Id': deviceId,
+             'User-Agent': ?userAgent,
+             'Mixin-Device-Id': ?deviceId,
            },
          ),
        ),
@@ -50,10 +50,9 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
         multiAuthChangeNotifier,
         locale,
         LandingState(
-          status:
-              multiAuthChangeNotifier.current != null
-                  ? LandingStatus.provisioning
-                  : LandingStatus.init,
+          status: multiAuthChangeNotifier.current != null
+              ? LandingStatus.provisioning
+              : LandingStatus.init,
         ),
       ) {
     if (multiAuthChangeNotifier.current != null) return;
@@ -91,14 +90,16 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
         ),
       );
 
-      _periodicSubscription = Stream.periodic(
-            const Duration(milliseconds: 1500),
-            (i) => i,
-          )
-          .asyncBufferMap(
-            (event) => _checkLanding(event.last, rsp.data.deviceId, keyPair),
-          )
-          .listen((event) {});
+      _periodicSubscription =
+          Stream.periodic(
+                const Duration(milliseconds: 1500),
+                (i) => i,
+              )
+              .asyncBufferMap(
+                (event) =>
+                    _checkLanding(event.last, rsp.data.deviceId, keyPair),
+              )
+              .listen((event) {});
     } catch (error, stack) {
       e('requestAuthUrl failed: $error $stack');
       emit(state.needReload('Failed to request auth: $error'));
@@ -120,8 +121,9 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
     String secret;
     try {
-      secret =
-          (await client.provisioningApi.getProvisioning(deviceId)).data.secret;
+      secret = (await client.provisioningApi.getProvisioning(
+        deviceId,
+      )).data.secret;
     } catch (e) {
       return;
     }

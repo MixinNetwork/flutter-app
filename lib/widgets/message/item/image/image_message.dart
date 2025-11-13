@@ -43,26 +43,25 @@ class ImageMessageWidget extends HookConsumerWidget {
     return ImageMessageLayout(
       imageWidthInPixel: mediaWidth,
       imageHeightInPixel: mediaHeight,
-      builder:
-          (context, width, height) => MessageBubble(
-            showBubble: hasCaption,
-            padding: EdgeInsets.zero,
-            includeNip: !hasCaption,
-            clip: true,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: width),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  MessageImage(
-                    size: Size(width, height),
-                    showStatus: !hasCaption,
-                  ),
-                  if (hasCaption) ImageCaption(caption: caption),
-                ],
+      builder: (context, width, height) => MessageBubble(
+        showBubble: hasCaption,
+        padding: EdgeInsets.zero,
+        includeNip: !hasCaption,
+        clip: true,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: width),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              MessageImage(
+                size: Size(width, height),
+                showStatus: !hasCaption,
               ),
-            ),
+              if (hasCaption) ImageCaption(caption: caption),
+            ],
           ),
+        ),
+      ),
     );
   }
 }
@@ -87,10 +86,9 @@ class MessageImage extends HookConsumerWidget {
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
     final isUnDownloadGiphyGif = useMessageConverter(
-      converter:
-          (message) =>
-              message.mediaMimeType == 'image/gif' &&
-              (message.mediaSize == null || message.mediaSize == 0),
+      converter: (message) =>
+          message.mediaMimeType == 'image/gif' &&
+          (message.mediaSize == null || message.mediaSize == 0),
     );
 
     final Widget thumbWidget;
@@ -147,8 +145,9 @@ class MessageImage extends HookConsumerWidget {
           case MediaStatus.canceled:
             if (message.mediaUrl?.isNotEmpty == true && isMessageSentOut) {
               if (isTranscriptPage) {
-                final transcriptMessageId =
-                    TranscriptPage.of(context)?.messageId;
+                final transcriptMessageId = TranscriptPage.of(
+                  context,
+                )?.messageId;
                 assert(
                   transcriptMessageId != null,
                   'transcriptMessageId is null',
@@ -273,14 +272,13 @@ class ImageMessageLayout extends StatelessWidget {
     builder: (context, boxConstraints) {
       final maxWidth = min(boxConstraints.maxWidth * 0.6, 300);
       final minWidth = max(boxConstraints.maxWidth * 0.2, 200);
-      final width =
-          max(
-            min(
-              imageWidthInPixel / MediaQuery.devicePixelRatioOf(context),
-              maxWidth,
-            ),
-            minWidth,
-          ).toDouble();
+      final width = max(
+        min(
+          imageWidthInPixel / MediaQuery.devicePixelRatioOf(context),
+          maxWidth,
+        ),
+        minWidth,
+      ).toDouble();
       final aspectRatio = imageWidthInPixel / imageHeightInPixel;
       final height = min(
         width / aspectRatio,

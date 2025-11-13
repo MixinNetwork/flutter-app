@@ -66,32 +66,33 @@ class StickerItem extends HookConsumerWidget {
       return () => appActiveListener.removeListener(listener);
     }, [controller, appActiveListener]);
 
-    final child =
-        isJson
-            ? LottieBuilder(
-              lottie: CachedNetworkLottie(
-                assetUrl,
-                proxyConfig: context.database.settingProperties.activatedProxy,
-              ),
-              controller: controller,
-              height: height,
-              width: width,
-              fit: BoxFit.contain,
-              onLoaded: (composition) {
-                controller.duration = composition.duration;
-                listener();
-              },
-              errorBuilder:
-                  errorWidget != null ? (_, _, _) => errorWidget! : null,
-            )
-            : MixinImage.network(
+    final child = isJson
+        ? LottieBuilder(
+            lottie: CachedNetworkLottie(
               assetUrl,
-              height: height,
-              width: width,
-              fit: BoxFit.contain,
-              errorBuilder:
-                  errorWidget != null ? (_, _, _) => errorWidget! : null,
-            );
+              proxyConfig: context.database.settingProperties.activatedProxy,
+            ),
+            controller: controller,
+            height: height,
+            width: width,
+            fit: BoxFit.contain,
+            onLoaded: (composition) {
+              controller.duration = composition.duration;
+              listener();
+            },
+            errorBuilder: errorWidget != null
+                ? (_, _, _) => errorWidget!
+                : null,
+          )
+        : MixinImage.network(
+            assetUrl,
+            height: height,
+            width: width,
+            fit: BoxFit.contain,
+            errorBuilder: errorWidget != null
+                ? (_, _, _) => errorWidget!
+                : null,
+          );
 
     if (width == null || height == null) {
       return AspectRatio(aspectRatio: 1, child: child);

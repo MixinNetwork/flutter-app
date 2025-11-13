@@ -115,12 +115,11 @@ class _Providers extends HookConsumerWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create:
-              (BuildContext context) => ConversationListBloc(
-                ref.read(slideCategoryStateProvider.notifier),
-                accountServer.database,
-                ref.read(mentionCacheProvider),
-              ),
+          create: (BuildContext context) => ConversationListBloc(
+            ref.read(slideCategoryStateProvider.notifier),
+            accountServer.database,
+            ref.read(mentionCacheProvider),
+          ),
         ),
       ],
       child: Provider<NotificationService>(
@@ -152,31 +151,30 @@ class _App extends HookConsumerWidget {
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: [...Localization.delegate.supportedLocales],
-        theme:
-            ThemeData(
-              colorScheme: ColorScheme.light(
-                primary: lightBrightnessThemeData.text,
-              ),
-              textSelectionTheme: TextSelectionThemeData(
-                cursorColor: lightBrightnessThemeData.accent,
-              ),
-              useMaterial3: true,
-            ).withFallbackFonts(),
-        darkTheme:
-            ThemeData(
-              colorScheme: ColorScheme.dark(
-                primary: darkBrightnessThemeData.text,
-              ),
-              textSelectionTheme: TextSelectionThemeData(
-                cursorColor: darkBrightnessThemeData.accent,
-              ),
-              useMaterial3: true,
-            ).withFallbackFonts(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.light(
+            primary: lightBrightnessThemeData.text,
+          ),
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: lightBrightnessThemeData.accent,
+          ),
+          useMaterial3: true,
+        ).withFallbackFonts(),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.dark(
+            primary: darkBrightnessThemeData.text,
+          ),
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: darkBrightnessThemeData.accent,
+          ),
+          useMaterial3: true,
+        ).withFallbackFonts(),
         themeMode: ref.watch(settingProvider).themeMode,
         builder: (context, child) {
           try {
-            context.accountServer.language =
-                Localizations.localeOf(context).languageCode;
+            context.accountServer.language = Localizations.localeOf(
+              context,
+            ).languageCode;
           } catch (_) {}
           final mediaQueryData = MediaQuery.of(context);
           return BrightnessObserver(
@@ -186,10 +184,9 @@ class _App extends HookConsumerWidget {
             child: MediaQuery(
               data: mediaQueryData.copyWith(
                 // Different linux distro change the value, e.g. 1.2
-                textScaler:
-                    Platform.isLinux
-                        ? TextScaler.noScaling
-                        : mediaQueryData.textScaler,
+                textScaler: Platform.isLinux
+                    ? TextScaler.noScaling
+                    : mediaQueryData.textScaler,
               ),
               child: SystemTrayWidget(
                 child: TextInputActionHandler(child: AuthGuard(child: child!)),

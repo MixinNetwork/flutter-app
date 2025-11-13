@@ -11,17 +11,18 @@ class StickerRelationshipDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerRelationshipDaoMixin {
   StickerRelationshipDao(super.db);
 
-  Future<int> insert(StickerRelationship stickerRelationship) => into(
-    db.stickerRelationships,
-  ).insertOnConflictUpdate(stickerRelationship).then((value) {
-    DataBaseEventBus.instance.updateSticker([
-      MiniSticker(
-        stickerId: stickerRelationship.stickerId,
-        albumId: stickerRelationship.albumId,
-      ),
-    ]);
-    return value;
-  });
+  Future<int> insert(StickerRelationship stickerRelationship) =>
+      into(
+        db.stickerRelationships,
+      ).insertOnConflictUpdate(stickerRelationship).then((value) {
+        DataBaseEventBus.instance.updateSticker([
+          MiniSticker(
+            stickerId: stickerRelationship.stickerId,
+            albumId: stickerRelationship.albumId,
+          ),
+        ]);
+        return value;
+      });
 
   Future deleteStickerRelationship(StickerRelationship stickerRelationship) =>
       delete(db.stickerRelationships).delete(stickerRelationship).then((value) {

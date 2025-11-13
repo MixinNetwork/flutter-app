@@ -45,8 +45,9 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
         try {
           final stickerId = job.blazeMessage;
           if (stickerId != null) {
-            final sticker =
-                (await client.accountApi.getStickerById(stickerId)).data;
+            final sticker = (await client.accountApi.getStickerById(
+              stickerId,
+            )).data;
             await database.stickerDao.insert(sticker.asStickersCompanion);
           }
           await database.jobDao.deleteJobById(job.jobId);

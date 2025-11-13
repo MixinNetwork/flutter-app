@@ -74,8 +74,8 @@ Future<void> copyFile(String? filePath) async {
     return showToastFailed(null);
   }
   try {
-    final dataWriterItem =
-        DataWriterItem()..add(Formats.fileUri(Uri.file(filePath)));
+    final dataWriterItem = DataWriterItem()
+      ..add(Formats.fileUri(Uri.file(filePath)));
 
     final clipboard = SystemClipboard.instance;
     if (clipboard == null) {

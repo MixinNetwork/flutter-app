@@ -43,9 +43,8 @@ class ImageCaptionInputWidget extends HookWidget {
         contentPadding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
       ),
       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-      contextMenuBuilder:
-          (context, state) =>
-              MixinAdaptiveSelectionToolbar(editableTextState: state),
+      contextMenuBuilder: (context, state) =>
+          MixinAdaptiveSelectionToolbar(editableTextState: state),
     ),
   );
 }

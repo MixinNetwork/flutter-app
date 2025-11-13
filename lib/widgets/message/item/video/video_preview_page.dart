@@ -29,12 +29,11 @@ Future<void> showVideoPreviewPage(
   required bool isTranscriptPage,
 }) => showDialog(
   context: context,
-  builder:
-      (context) => _VideoPreviewPage(
-        path: path,
-        message: message,
-        isTranscriptPage: isTranscriptPage,
-      ),
+  builder: (context) => _VideoPreviewPage(
+    path: path,
+    message: message,
+    isTranscriptPage: isTranscriptPage,
+  ),
   barrierDismissible: false,
 );
 
@@ -55,9 +54,8 @@ class _CupertinoVideoPlayerStyle extends InheritedWidget {
   final Color foreground;
 
   static _CupertinoVideoPlayerStyle of(BuildContext context) {
-    final result =
-        context
-            .dependOnInheritedWidgetOfExactType<_CupertinoVideoPlayerStyle>();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<_CupertinoVideoPlayerStyle>();
     assert(result != null, 'No _CupertinoVideoStyle found in context');
     return result!;
   }
@@ -235,8 +233,10 @@ class _PlayerShortcuts extends HookConsumerWidget {
         ),
         _ForwardIntent: CallbackAction<_ForwardIntent>(
           onInvoke: (intent) {
-            final position =
-                ref.read(videoPlayerValueProvider).position.inMilliseconds;
+            final position = ref
+                .read(videoPlayerValueProvider)
+                .position
+                .inMilliseconds;
             final target = math.min(
               ref.read(videoPlayerValueProvider).duration.inMilliseconds,
               position + 15 * 1000,
@@ -249,8 +249,10 @@ class _PlayerShortcuts extends HookConsumerWidget {
         ),
         _BackwardIntent: CallbackAction<_BackwardIntent>(
           onInvoke: (intent) {
-            final position =
-                ref.read(videoPlayerValueProvider).position.inMilliseconds;
+            final position = ref
+                .read(videoPlayerValueProvider)
+                .position
+                .inMilliseconds;
             final target = math.max(0, position - 15 * 1000);
             ref.read(videoPlayerProvider).seekTo(target.milliseconds);
           },
@@ -367,13 +369,12 @@ class _Bar extends ConsumerWidget {
           name: Resources.assetsImagesCopySvg,
           color: context.theme.icon,
           size: 20,
-          onTap:
-              () => copyFile(
-                context.accountServer.convertMessageAbsolutePath(
-                  message,
-                  isTranscriptPage,
-                ),
-              ),
+          onTap: () => copyFile(
+            context.accountServer.convertMessageAbsolutePath(
+              message,
+              isTranscriptPage,
+            ),
+          ),
         ),
         const SizedBox(width: 14),
         ActionButton(
@@ -483,11 +484,10 @@ class _OperationBar extends ConsumerWidget {
                         color: context.playerStyle.foreground,
                       ),
                       onTap: () {
-                        final position =
-                            ref
-                                .read(videoPlayerValueProvider)
-                                .position
-                                .inMilliseconds;
+                        final position = ref
+                            .read(videoPlayerValueProvider)
+                            .position
+                            .inMilliseconds;
                         final target = math.max(0, position - 15 * 1000);
                         ref
                             .read(videoPlayerProvider)
@@ -503,11 +503,10 @@ class _OperationBar extends ConsumerWidget {
                         color: context.playerStyle.foreground,
                       ),
                       onTap: () {
-                        final position =
-                            ref
-                                .read(videoPlayerValueProvider)
-                                .position
-                                .inMilliseconds;
+                        final position = ref
+                            .read(videoPlayerValueProvider)
+                            .position
+                            .inMilliseconds;
                         final target = math.min(
                           ref
                               .read(videoPlayerValueProvider)
@@ -570,7 +569,7 @@ class _PlayerVolumeBar extends HookConsumerWidget {
                 removeAdditionalActiveTrackHeight: true,
               ),
               overlayShape: RoundSliderOverlayShape(overlayRadius: 10),
-              showValueIndicator: ShowValueIndicator.always,
+              showValueIndicator: ShowValueIndicator.onDrag,
             ),
             child: Slider(
               value: volume,
@@ -640,10 +639,9 @@ class _PlayPause extends ConsumerWidget {
     return ActionButton(
       size: 32,
       color: context.playerStyle.foreground,
-      name:
-          playing
-              ? Resources.assetsImagesPlayerPauseSvg
-              : Resources.assetsImagesPlayerPlaySvg,
+      name: playing
+          ? Resources.assetsImagesPlayerPauseSvg
+          : Resources.assetsImagesPlayerPlaySvg,
       onTap: () => Actions.invoke(context, const _PlayPauseIntent()),
     );
   }

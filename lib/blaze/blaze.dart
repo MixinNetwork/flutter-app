@@ -325,8 +325,9 @@ class Blaze {
     if (blazeMessage.action == kAcknowledgeMessageReceipt) {
       await makeMessageStatus(data.messageId, data.status);
 
-      final offset =
-          await database.offsetDao.findStatusOffset().getSingleOrNull();
+      final offset = await database.offsetDao
+          .findStatusOffset()
+          .getSingleOrNull();
       final timestamp = data.updatedAt.toIso8601String();
 
       if (offset == null || offset != timestamp) {
@@ -371,10 +372,9 @@ class Blaze {
   }
 
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
-    final currentStatus =
-        await database.messageDao
-            .messageStatusById(messageId)
-            .getSingleOrNull();
+    final currentStatus = await database.messageDao
+        .messageStatusById(messageId)
+        .getSingleOrNull();
 
     if (currentStatus != null && status.index > currentStatus.index) {
       await database.messageDao.updateMessageStatusById(messageId, status);
@@ -398,8 +398,8 @@ class Blaze {
   }
 
   Future<void> _sendListPending() async {
-    final offset =
-        await database.floodMessageDao.getLastBlazeMessageCreatedAt();
+    final offset = await database.floodMessageDao
+        .getLastBlazeMessageCreatedAt();
     final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     d('blaze send: ${m.toJson()}');
@@ -407,8 +407,9 @@ class Blaze {
   }
 
   Future<void> _refreshOffset() async {
-    final offset =
-        await database.offsetDao.findStatusOffset().getSingleOrNull();
+    final offset = await database.offsetDao
+        .findStatusOffset()
+        .getSingleOrNull();
     var status = offset != null ? offset.epochNano : DateTime.now().epochNano;
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);

@@ -32,28 +32,27 @@ part 'attachment_download_job.dart';
 
 part 'attachment_upload_job.dart';
 
-final _dio =
-    (() {
-      final dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(milliseconds: 150 * 1000),
-          receiveTimeout: const Duration(milliseconds: 150 * 1000),
-        ),
-      );
+final _dio = (() {
+  final dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(milliseconds: 150 * 1000),
+      receiveTimeout: const Duration(milliseconds: 150 * 1000),
+    ),
+  );
 
-      dio.interceptors.add(
-        RetryInterceptor(
-          dio: dio,
-          logPrint: i,
-          retryDelays: const [
-            Duration(seconds: 1),
-            Duration(seconds: 2),
-            Duration(seconds: 3),
-          ],
-        ),
-      );
-      return dio;
-    })();
+  dio.interceptors.add(
+    RetryInterceptor(
+      dio: dio,
+      logPrint: i,
+      retryDelays: const [
+        Duration(seconds: 1),
+        Duration(seconds: 2),
+        Duration(seconds: 3),
+      ],
+    ),
+  );
+  return dio;
+})();
 
 // isolate kill message
 const _killMessage = 'kill';
@@ -157,11 +156,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
     if (httpClientAdapter is IOHttpClientAdapter) {
-      httpClientAdapter.createHttpClient =
-          () =>
-              HttpClient()
-                ..badCertificateCallback =
-                    (X509Certificate cert, String host, int port) => true;
+      httpClientAdapter.createHttpClient = () => HttpClient()
+        ..badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
     } else {
       w('httpClientAdapter is not IOHttpClientAdapter');
     }
@@ -293,8 +290,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
         void setKeyAndDigestInvalid(String? _mediaKey, String? _mediaDigest) {
           mediaKey = _mediaKey?.trim().isEmpty ?? true ? null : _mediaKey;
-          mediaDigest =
-              _mediaDigest?.trim().isEmpty ?? true ? null : _mediaDigest;
+          mediaDigest = _mediaDigest?.trim().isEmpty ?? true
+              ? null
+              : _mediaDigest;
         }
 
         setKeyAndDigestInvalid(
@@ -317,14 +315,12 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         final attachmentDownloadJob = _AttachmentDownloadJob(
           path: path,
           url: response.data.viewUrl!,
-          keys:
-              mediaKey != null
-                  ? await base64DecodeWithIsolate(mediaKey!)
-                  : null,
-          digest:
-              mediaDigest != null
-                  ? await base64DecodeWithIsolate(mediaDigest!)
-                  : null,
+          keys: mediaKey != null
+              ? await base64DecodeWithIsolate(mediaKey!)
+              : null,
+          digest: mediaDigest != null
+              ? await base64DecodeWithIsolate(mediaDigest!)
+              : null,
         );
 
         _setAttachmentJob(messageId, attachmentDownloadJob);
@@ -450,10 +446,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     String? mimeType,
     bool isTranscript = false,
   }) {
-    final path =
-        isTranscript
-            ? transcriptPath
-            : getAttachmentDirectoryPath(category, conversationId!);
+    final path = isTranscript
+        ? transcriptPath
+        : getAttachmentDirectoryPath(category, conversationId!);
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
@@ -582,15 +577,15 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   }
 
   Future _updateTranscriptMessageStatus(String messageId) async {
-    final transcriptIds = (await _transcriptMessageDao
-            .transcriptMessageByMessageId(messageId, maxLimit)
-            .get())
-        .map((e) => e.transcriptId);
+    final transcriptIds =
+        (await _transcriptMessageDao
+                .transcriptMessageByMessageId(messageId, maxLimit)
+                .get())
+            .map((e) => e.transcriptId);
     await Future.forEach<String>(transcriptIds, (transcriptId) async {
-      final list =
-          await _transcriptMessageDao
-              .transcriptMessageByTranscriptId(transcriptId)
-              .get();
+      final list = await _transcriptMessageDao
+          .transcriptMessageByTranscriptId(transcriptId)
+          .get();
       final attachmentList = list.where(
         (element) => element.category.isAttachment,
       );
@@ -599,10 +594,10 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
       final status =
           attachmentList.every(
-                (element) => element.mediaStatus == MediaStatus.done,
-              )
-              ? MediaStatus.done
-              : MediaStatus.canceled;
+            (element) => element.mediaStatus == MediaStatus.done,
+          )
+          ? MediaStatus.done
+          : MediaStatus.canceled;
       await _messageDao.updateMediaStatus(transcriptId, status);
     });
   }

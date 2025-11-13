@@ -47,22 +47,20 @@ class DataBaseEventBus {
 
   static DataBaseEventBus instance = DataBaseEventBus._();
 
-  Stream<T> _watch<T>(_DatabaseEvent event) =>
-      EventBus.instance.on
-          .whereType<_DatabaseEventWrapper>()
-          .where((e) => event == e.type)
-          .map((e) {
-            if (kDebugMode && e.data is! T) {
-              // ignore: avoid_dynamic_calls
-              w(
-                'DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T',
-              );
-            }
-            return e;
-          })
-          .where((e) => e.data is T)
-          .map((e) => e.data)
-          .cast<T>();
+  Stream<T> _watch<T>(_DatabaseEvent event) => EventBus.instance.on
+      .whereType<_DatabaseEventWrapper>()
+      .where((e) => event == e.type)
+      .map((e) {
+        if (kDebugMode && e.data is! T) {
+          w(
+            'DatabaseEvent: event type is not match: ${e.data.runtimeType} != $T',
+          );
+        }
+        return e;
+      })
+      .where((e) => e.data is T)
+      .map((e) => e.data)
+      .cast<T>();
 
   void _send<T>(_DatabaseEvent event, T value) {
     if (kDebugMode && T.toString().startsWith('Iterable')) {

@@ -107,9 +107,7 @@ final List<Message> messages = [
 
 extension _DatabasePreset on Database {
   void addTestData(String currentUserId) {
-    for (final asset in assets) {
-      assetDao.insertAsset(asset);
-    }
+    assets.forEach(assetDao.insertAsset);
     for (final message in messages) {
       messageDao.insert(message, currentUserId);
     }

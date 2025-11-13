@@ -30,8 +30,10 @@ class PhoneNumberInputLayout extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final countries =
-        useMemoizedFuture(() => compute(_getCountries, null), null).data;
+    final countries = useMemoizedFuture(
+      () => compute(_getCountries, null),
+      null,
+    ).data;
     if (countries == null || countries.isEmpty) {
       return Center(
         child: CircularProgressIndicator(color: context.theme.accent),
@@ -268,17 +270,16 @@ class _CountryPickPortal extends HookConsumerWidget {
       [countries],
     );
     final countryList = useMemoized(
-      () =>
-          groupedCountries.entries
-              .sortedBy<String>((element) => element.key ?? '')
-              .map(
-                (entry) => <dynamic>[
-                  entry.key,
-                  ...entry.value.sortedBy<String>((e) => e.name ?? ''),
-                ],
-              )
-              .expand((element) => element)
-              .toList(),
+      () => groupedCountries.entries
+          .sortedBy<String>((element) => element.key ?? '')
+          .map(
+            (entry) => <dynamic>[
+              entry.key,
+              ...entry.value.sortedBy<String>((e) => e.name ?? ''),
+            ],
+          )
+          .expand((element) => element)
+          .toList(),
       [groupedCountries],
     );
 

@@ -86,7 +86,7 @@ class SearchTextField extends HookConsumerWidget {
                 colorFilter: ColorFilter.mode(hintColor, BlendMode.srcIn),
               ),
             ),
-            if (leading != null) leading!,
+            ?leading,
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
@@ -116,8 +116,8 @@ class SearchTextField extends HookConsumerWidget {
                           kDefaultTextInputLimit,
                         ),
                       ],
-                      contextMenuBuilder:
-                          (context, state) => MixinAdaptiveSelectionToolbar(
+                      contextMenuBuilder: (context, state) =>
+                          MixinAdaptiveSelectionToolbar(
                             editableTextState: state,
                           ),
                     ),

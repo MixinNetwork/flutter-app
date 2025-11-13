@@ -137,8 +137,9 @@ class Database {
       categories: categories,
       anchorMessageId: anchorMessageId,
     );
-    final messages =
-        await mixinDatabase.messageDao.searchMessageByIds(messageIds).get();
+    final messages = await mixinDatabase.messageDao
+        .searchMessageByIds(messageIds)
+        .get();
 
     final result = <SearchMessageDetailItem>[];
 
@@ -166,11 +167,10 @@ class Database {
     Future<List<String>> getConversationIds() async {
       final List<String> conversations;
       if (unseenConversationOnly) {
-        conversations =
-            await conversationDao
-                .unseenConversationByCategory(category.type)
-                .map((item) => item.conversationId)
-                .get();
+        conversations = await conversationDao
+            .unseenConversationByCategory(category.type)
+            .map((item) => item.conversationId)
+            .get();
       } else {
         conversations = await conversationDao
             .conversationItemsByCategory(category.type, 1000, 0)
@@ -223,17 +223,15 @@ class Database {
         final circleId = category.id!;
         final List<String> conversationIds;
         if (unseenConversationOnly) {
-          conversationIds =
-              await conversationDao
-                  .unseenConversationsByCircleId(circleId)
-                  .map((item) => item.conversationId)
-                  .get();
+          conversationIds = await conversationDao
+              .unseenConversationsByCircleId(circleId)
+              .map((item) => item.conversationId)
+              .get();
         } else {
-          conversationIds =
-              await conversationDao
-                  .conversationsByCircleId(circleId, 1000, 0)
-                  .map((item) => item.conversationId)
-                  .get();
+          conversationIds = await conversationDao
+              .conversationsByCircleId(circleId, 1000, 0)
+              .map((item) => item.conversationId)
+              .get();
         }
         if (conversationIds.isEmpty) {
           i(

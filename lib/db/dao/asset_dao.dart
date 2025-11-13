@@ -44,9 +44,9 @@ class AssetDao extends DatabaseAccessor<MixinDatabase> with _$AssetDaoMixin {
 
   Future deleteAsset(Asset asset) => delete(db.assets).delete(asset);
 
-  Future<Asset?> findAssetById(String assetId) =>
-      (select(db.assets)
-        ..where((t) => t.assetId.equals(assetId))).getSingleOrNull();
+  Future<Asset?> findAssetById(String assetId) => (select(
+    db.assets,
+  )..where((t) => t.assetId.equals(assetId))).getSingleOrNull();
 
   SimpleSelectStatement<Assets, Asset> assetById(String assetId) =>
       select(db.assets)

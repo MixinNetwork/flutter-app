@@ -31,21 +31,21 @@ class EncryptedProtocol {
 
     return extensionSessionKey != null && extensionSessionId != null
         ? [
-          ...version,
-          ...toLeByteArray(2),
-          ...senderPublicKey,
-          ...Uuid.parse(extensionSessionId),
-          ...encryptCipherMessageKey(privateKey, extensionSessionKey, key),
-          ...messageKeyWithSession,
-          ...encryptedMessageData,
-        ]
+            ...version,
+            ...toLeByteArray(2),
+            ...senderPublicKey,
+            ...Uuid.parse(extensionSessionId),
+            ...encryptCipherMessageKey(privateKey, extensionSessionKey, key),
+            ...messageKeyWithSession,
+            ...encryptedMessageData,
+          ]
         : [
-          ...version,
-          ...toLeByteArray(1),
-          ...senderPublicKey,
-          ...messageKeyWithSession,
-          ...encryptedMessageData,
-        ];
+            ...version,
+            ...toLeByteArray(1),
+            ...senderPublicKey,
+            ...messageKeyWithSession,
+            ...encryptedMessageData,
+          ];
   }
 
   List<int> encryptCipherMessageKey(

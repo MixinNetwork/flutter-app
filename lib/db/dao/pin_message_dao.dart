@@ -27,13 +27,14 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
           });
 
   Future<void> deleteByIds(List<String> messageIds) async {
-    final pinMessages =
-        await (select(db.pinMessages)
-          ..where((tbl) => tbl.messageId.isIn(messageIds))).get();
+    final pinMessages = await (select(
+      db.pinMessages,
+    )..where((tbl) => tbl.messageId.isIn(messageIds))).get();
     if (pinMessages.isEmpty) return;
 
-    await (delete(db.pinMessages)
-      ..where((tbl) => tbl.messageId.isIn(messageIds))).go();
+    await (delete(
+      db.pinMessages,
+    )..where((tbl) => tbl.messageId.isIn(messageIds))).go();
 
     DataBaseEventBus.instance.updatePinMessage(
       pinMessages.map(
@@ -46,13 +47,14 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<void> deleteByConversationId(String conversationId) async {
-    final pinMessages =
-        await (select(db.pinMessages)
-          ..where((tbl) => tbl.conversationId.equals(conversationId))).get();
+    final pinMessages = await (select(
+      db.pinMessages,
+    )..where((tbl) => tbl.conversationId.equals(conversationId))).get();
     if (pinMessages.isEmpty) return;
 
-    await (delete(db.pinMessages)
-      ..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+    await (delete(
+      db.pinMessages,
+    )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
 
     DataBaseEventBus.instance.updatePinMessage(
       pinMessages.map(

@@ -129,8 +129,8 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
       options: Options(
         headers: {..._uploadHeaders, HttpHeaders.contentLengthHeader: length},
       ),
-      onSendProgress:
-          (int count, int total) => options.sendPort.send((count, total)),
+      onSendProgress: (int count, int total) =>
+          options.sendPort.send((count, total)),
       cancelToken: cancelToken,
     );
 

@@ -12,8 +12,9 @@ class InscriptionCollectionDao extends DatabaseAccessor<MixinDatabase>
   InscriptionCollectionDao(super.attachedDatabase);
 
   Future<InscriptionCollection?> findCollectionByHash(String hash) async =>
-      (select(inscriptionCollections)
-        ..where((tbl) => tbl.collectionHash.equals(hash))).getSingleOrNull();
+      (select(
+        inscriptionCollections,
+      )..where((tbl) => tbl.collectionHash.equals(hash))).getSingleOrNull();
 
   Future<InscriptionCollection> insertSdkCollection(
     sdk.InscriptionCollection collection,

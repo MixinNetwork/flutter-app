@@ -382,12 +382,11 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.reply),
                           title: context.l10n.reply,
-                          callback:
-                              () =>
-                                  context
-                                      .providerContainer
+                          callback: () =>
+                              context.providerContainer
                                       .read(quoteMessageProvider.notifier)
-                                      .state = message,
+                                      .state =
+                                  message,
                         ),
                     ];
 
@@ -416,26 +415,25 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.select),
                           title: context.l10n.select,
-                          callback:
-                              () => ref
-                                  .read(messageSelectionProvider)
-                                  .selectMessage(message),
+                          callback: () => ref
+                              .read(messageSelectionProvider)
+                              .selectMessage(message),
                         ),
                       if (pinEnabled)
                         MenuAction(
                           image: MenuImage.icon(
                             message.pinned ? IconFonts.unPin : IconFonts.pin,
                           ),
-                          title:
-                              message.pinned
-                                  ? context.l10n.unpin
-                                  : context.l10n.pinTitle,
+                          title: message.pinned
+                              ? context.l10n.unpin
+                              : context.l10n.pinTitle,
                           callback: () async {
                             final pinMessageMinimal = PinMessageMinimal(
                               messageId: message.messageId,
                               type: message.type,
-                              content:
-                                  message.type.isText ? message.content : null,
+                              content: message.type.isText
+                                  ? message.content
+                                  : null,
                             );
                             if (message.pinned) {
                               await context.accountServer.unpinMessage(
@@ -516,10 +514,9 @@ class MessageItemWidget extends HookConsumerWidget {
                         ..add(
                           MenuAction(
                             image: MenuImage.icon(IconFonts.copy),
-                            title:
-                                selectedContent == null
-                                    ? context.l10n.copy
-                                    : context.l10n.copySelectedText,
+                            title: selectedContent == null
+                                ? context.l10n.copy
+                                : context.l10n.copySelectedText,
                             callback: () {
                               if (selectedContent != null) {
                                 Clipboard.setData(
@@ -581,25 +578,23 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.download),
                           title: context.l10n.saveToCameraRoll,
-                          callback:
-                              () => saveAs(
-                                context,
-                                context.accountServer,
-                                message,
-                                isTranscriptPage,
-                              ),
+                          callback: () => saveAs(
+                            context,
+                            context.accountServer,
+                            message,
+                            isTranscriptPage,
+                          ),
                         ),
                       if (enableSaveDesktop)
                         MenuAction(
                           image: MenuImage.icon(IconFonts.download),
                           title: context.l10n.saveAs,
-                          callback:
-                              () => saveAs(
-                                context,
-                                context.accountServer,
-                                message,
-                                isTranscriptPage,
-                              ),
+                          callback: () => saveAs(
+                            context,
+                            context.accountServer,
+                            message,
+                            isTranscriptPage,
+                          ),
                         ),
                     ];
                     final deleteActions = [
@@ -626,10 +621,9 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.delete),
                           title: context.l10n.deleteForMe,
-                          callback:
-                              () => context.accountServer.deleteMessage(
-                                message.messageId,
-                              ),
+                          callback: () => context.accountServer.deleteMessage(
+                            message.messageId,
+                          ),
                         ),
                     ];
 
@@ -638,10 +632,9 @@ class MessageItemWidget extends HookConsumerWidget {
                         MenuAction(
                           image: MenuImage.icon(IconFonts.copy),
                           title: 'Copy message',
-                          callback:
-                              () => Clipboard.setData(
-                                ClipboardData(text: message.toString()),
-                              ),
+                          callback: () => Clipboard.setData(
+                            ClipboardData(text: message.toString()),
+                          ),
                         ),
                     ];
 
@@ -766,17 +759,15 @@ class MessageItemWidget extends HookConsumerWidget {
         isCurrentUser: isCurrentUser,
         message: message,
         child: Builder(
-          builder:
-              (context) => GestureDetector(
-                onTap: () => _quickReply(context),
-                child: Padding(
-                  padding:
-                      sameUserPrev
-                          ? EdgeInsets.zero
-                          : const EdgeInsets.only(top: 8),
-                  child: child,
-                ),
-              ),
+          builder: (context) => GestureDetector(
+            onTap: () => _quickReply(context),
+            child: Padding(
+              padding: sameUserPrev
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.only(top: 8),
+              child: child,
+            ),
+          ),
         ),
       ),
     );
@@ -803,8 +794,9 @@ class MessageItemWidget extends HookConsumerWidget {
 
       final database = context.database;
 
-      final personalAlbum =
-          await database.stickerAlbumDao.personalAlbum().getSingleOrNull();
+      final personalAlbum = await database.stickerAlbumDao
+          .personalAlbum()
+          .getSingleOrNull();
       if (personalAlbum == null) {
         unawaited(accountServer.refreshSticker(force: true));
       } else {
@@ -1057,11 +1049,9 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap:
-          inMultiSelectMode
-              ? () =>
-                  ref.read(messageSelectionProvider).toggleSelection(message)
-              : null,
+      onTap: inMultiSelectMode
+          ? () => ref.read(messageSelectionProvider).toggleSelection(message)
+          : null,
       child: Row(
         children: [
           _AnimatedSelectionIcon(
@@ -1122,8 +1112,9 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
       child: Center(
         child: ClipOval(
           child: Container(
-            color:
-                selected ? context.theme.accent : context.theme.secondaryText,
+            color: selected
+                ? context.theme.accent
+                : context.theme.secondaryText,
             height: 16,
             width: 16,
             alignment: const Alignment(0, -0.2),

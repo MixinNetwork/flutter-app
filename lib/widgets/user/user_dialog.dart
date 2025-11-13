@@ -39,7 +39,10 @@ Future<void> showUserDialog(
         (await context.database.userDao.findMultiUserIdsByIdentityNumbers([
           identityNumber!,
         ])).first;
-    await showMixinDialog(context: context, child: UserDialog(userId: _userId));
+    await showMixinDialog(
+      context: context,
+      child: UserDialog(userId: _userId),
+    );
     return;
   }
 
@@ -47,17 +50,15 @@ Future<void> showUserDialog(
 
   User? user;
   if (_userId != null) {
-    user =
-        (await context.accountServer.refreshUsers([
-          _userId,
-        ], force: true))?.firstOrNull;
+    user = (await context.accountServer.refreshUsers([
+      _userId,
+    ], force: true))?.firstOrNull;
   }
 
   if (user == null && identityNumber != null) {
-    user =
-        (await context.accountServer.updateUserByIdentityNumber(
-          identityNumber,
-        ))?.firstOrNull;
+    user = (await context.accountServer.updateUserByIdentityNumber(
+      identityNumber,
+    ))?.firstOrNull;
   }
 
   if (user == null) {
@@ -65,10 +66,11 @@ Future<void> showUserDialog(
     return;
   }
 
-  _userId ??=
-      (await context.database.userDao.findMultiUserIdsByIdentityNumbers([
-        identityNumber!,
-      ])).first;
+  _userId ??= (await context.database.userDao.findMultiUserIdsByIdentityNumbers(
+    [
+      identityNumber!,
+    ],
+  )).first;
 
   Toast.dismiss();
   await showMixinDialog(
@@ -118,18 +120,17 @@ class _UserProfileLoader extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountServer = context.accountServer;
-    final user =
-        useMemoizedStream(
-          () => accountServer.database.userDao
-              .userById(userId)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateUserStream([userId]),
-                ],
-                duration: kDefaultThrottleDuration,
-              ),
-          keys: [userId],
-        ).data;
+    final user = useMemoizedStream(
+      () => accountServer.database.userDao
+          .userById(userId)
+          .watchSingleOrNullWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+            ],
+            duration: kDefaultThrottleDuration,
+          ),
+      keys: [userId],
+    ).data;
 
     useEffect(() {
       if (refreshUser) {
@@ -324,14 +325,13 @@ class _UserProfileButtonBar extends StatelessWidget {
             onlyContact: false,
             action: CustomPopupMenuButton(
               alignment: Alignment.bottomCenter,
-              itemBuilder:
-                  (context) => [
-                    CustomPopupMenuItem(
-                      icon: Resources.assetsImagesContextMenuCopySvg,
-                      title: context.l10n.copyLink,
-                      value: null,
-                    ),
-                  ],
+              itemBuilder: (context) => [
+                CustomPopupMenuItem(
+                  icon: Resources.assetsImagesContextMenuCopySvg,
+                  title: context.l10n.copyLink,
+                  value: null,
+                ),
+              ],
               onSelected: (_) async {
                 final codeUrl = user.codeUrl;
                 if (codeUrl == null) {
@@ -393,10 +393,9 @@ class _UserProfileButtonBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 45),
       child: Row(
-        mainAxisAlignment:
-            children.length == 1
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: children.length == 1
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.spaceBetween,
         children: children,
       ),
     );

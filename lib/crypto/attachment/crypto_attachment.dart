@@ -26,11 +26,11 @@ PaddedBlockCipher _getAesCipher(
     Uint8List.fromList(iv),
   );
   final paddingParams =
-  // ignore: prefer_void_to_null
-  PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
-    ivParams,
-    null,
-  );
+      // ignore: prefer_void_to_null
+      PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+        ivParams,
+        null,
+      );
   return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
     ..init(forEncryption, paddingParams);
 }
@@ -50,7 +50,7 @@ extension _StreamExtension on Stream<List<int>> {
       if (streamController.isClosed) return;
       if (pending) return;
 
-      pending = true && !streamController.isPaused;
+      pending = !streamController.isPaused;
 
       final chunk = await chunkedStreamReader.readChunk(chunkSize);
       if (streamController.isClosed) return;
