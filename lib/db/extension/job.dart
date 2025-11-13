@@ -19,8 +19,8 @@ Job createAckJob(
     status: enumConvertToString(status)!.toUpperCase(),
     expireAt: expireAt,
   );
-  final jobId =
-      '${blazeMessage.messageId}${blazeMessage.status}$action'.nameUuid();
+  final jobId = '${blazeMessage.messageId}${blazeMessage.status}$action'
+      .nameUuid();
   d(
     'createAckJob messageId: ${blazeMessage.messageId} action: $action jobId: $jobId, status: $status expireAt: $expireAt',
   );

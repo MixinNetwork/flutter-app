@@ -82,8 +82,8 @@ class ConversationState extends Equatable {
 
   ParticipantRole? get role =>
       conversation?.category == ConversationCategory.contact
-          ? ParticipantRole.owner
-          : participant?.role;
+      ? ParticipantRole.owner
+      : participant?.role;
 
   @override
   List<Object?> get props => [
@@ -308,15 +308,13 @@ class ConversationStateNotifier
 
     final ownerId = _conversation.ownerId;
 
-    final appFuture =
-        (!_conversation.isGroupConversation && ownerId != null)
-            ? database.appDao.findAppById(ownerId)
-            : null;
+    final appFuture = (!_conversation.isGroupConversation && ownerId != null)
+        ? database.appDao.findAppById(ownerId)
+        : null;
 
-    final participantFuture =
-        database.participantDao
-            .participantById(conversationId, accountServer.userId)
-            .getSingleOrNull();
+    final participantFuture = database.participantDao
+        .participantById(conversationId, accountServer.userId)
+        .getSingleOrNull();
 
     final conversationState = ConversationState(
       conversationId: conversationId,
@@ -400,14 +398,13 @@ class ConversationStateNotifier
     BuildContext context,
     String conversationId,
   ) async {
-    final conversations =
-        context
-            .read<ConversationListBloc>()
-            .state
-            .map
-            .values
-            .cast<ConversationItem?>()
-            .toList();
+    final conversations = context
+        .read<ConversationListBloc>()
+        .state
+        .map
+        .values
+        .cast<ConversationItem?>()
+        .toList();
 
     return conversations.firstWhere(
           (element) => element?.conversationId == conversationId,
@@ -426,61 +423,64 @@ class _LastConversationNotifier
   set _state(ConversationState? value) => super.state = value;
 }
 
-final conversationProvider = StateNotifierProvider.autoDispose<
-  ConversationStateNotifier,
-  ConversationState?
->((ref) {
-  final keepAlive = ref.keepAlive();
+final conversationProvider =
+    StateNotifierProvider.autoDispose<
+      ConversationStateNotifier,
+      ConversationState?
+    >((ref) {
+      final keepAlive = ref.keepAlive();
 
-  final accountServerAsync = ref.watch(accountServerProvider);
+      final accountServerAsync = ref.watch(accountServerProvider);
 
-  if (!accountServerAsync.hasValue) {
-    throw Exception('accountServer is not ready');
-  }
+      if (!accountServerAsync.hasValue) {
+        throw Exception('accountServer is not ready');
+      }
 
-  final responsiveNavigatorNotifier = ref.watch(
-    responsiveNavigatorProvider.notifier,
-  );
+      final responsiveNavigatorNotifier = ref.watch(
+        responsiveNavigatorProvider.notifier,
+      );
 
-  ref
-    ..listen(accountServerProvider, (previous, next) => keepAlive.close())
-    ..listen(
-      responsiveNavigatorProvider.notifier,
-      (previous, next) => keepAlive.close(),
-    );
+      ref
+        ..listen(accountServerProvider, (previous, next) => keepAlive.close())
+        ..listen(
+          responsiveNavigatorProvider.notifier,
+          (previous, next) => keepAlive.close(),
+        );
 
-  return ConversationStateNotifier(
-    accountServer: accountServerAsync.requireValue,
-    responsiveNavigatorStateNotifier: responsiveNavigatorNotifier,
-  );
-});
+      return ConversationStateNotifier(
+        accountServer: accountServerAsync.requireValue,
+        responsiveNavigatorStateNotifier: responsiveNavigatorNotifier,
+      );
+    });
 
-final _lastConversationProvider = StateNotifierProvider.autoDispose<
-  _LastConversationNotifier,
-  ConversationState?
->((ref) {
-  final conversation = ref.read(conversationProvider);
-  final lastConversationNotifier = _LastConversationNotifier(conversation);
-  ref.listen(conversationProvider, (previous, next) {
-    if (next == null) return;
-    lastConversationNotifier._state = next;
-  });
-  return lastConversationNotifier;
-});
+final _lastConversationProvider =
+    StateNotifierProvider.autoDispose<
+      _LastConversationNotifier,
+      ConversationState?
+    >((ref) {
+      final conversation = ref.read(conversationProvider);
+      final lastConversationNotifier = _LastConversationNotifier(conversation);
+      ref.listen(conversationProvider, (previous, next) {
+        if (next == null) return;
+        lastConversationNotifier._state = next;
+      });
+      return lastConversationNotifier;
+    });
 
-final filterLastConversationProvider = StateNotifierProvider.autoDispose.family<
-  _LastConversationNotifier,
-  ConversationState?,
-  bool Function(ConversationState?)
->((ref, filter) {
-  final conversation = ref.read(conversationProvider);
-  final lastConversationNotifier = _LastConversationNotifier(conversation);
-  ref.listen(conversationProvider, (previous, next) {
-    if (!filter(next)) return;
-    lastConversationNotifier._state = next;
-  });
-  return lastConversationNotifier;
-});
+final filterLastConversationProvider = StateNotifierProvider.autoDispose
+    .family<
+      _LastConversationNotifier,
+      ConversationState?,
+      bool Function(ConversationState?)
+    >((ref, filter) {
+      final conversation = ref.read(conversationProvider);
+      final lastConversationNotifier = _LastConversationNotifier(conversation);
+      ref.listen(conversationProvider, (previous, next) {
+        if (!filter(next)) return;
+        lastConversationNotifier._state = next;
+      });
+      return lastConversationNotifier;
+    });
 
 final lastConversationProvider = _lastConversationProvider.select(
   (value) => value,

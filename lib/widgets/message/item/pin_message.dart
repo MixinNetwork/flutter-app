@@ -44,34 +44,33 @@ class PinMessageWidget extends HookConsumerWidget {
       );
 
       final lines = const LineSplitter().convert(preview);
-      final singleLinePreview =
-          lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
+      final singleLinePreview = lines.length > 1
+          ? '${lines.first}...'
+          : lines.firstOrNull ?? '';
 
       return context.l10n.chatPinMessage(userFullName, singleLinePreview);
     }, [userFullName, content, mentionCache]);
 
-    final text =
-        useMemoizedFuture(
-          () async {
-            if (pinMessageMinimal == null) return cachePreview;
+    final text = useMemoizedFuture(
+      () async {
+        if (pinMessageMinimal == null) return cachePreview;
 
-            final preview = await generatePinPreviewText(
-              pinMessageMinimal: pinMessageMinimal,
-              mentionCache: mentionCache,
-            );
+        final preview = await generatePinPreviewText(
+          pinMessageMinimal: pinMessageMinimal,
+          mentionCache: mentionCache,
+        );
 
-            final lines = const LineSplitter().convert(preview);
-            final singleLinePreview =
-                lines.length > 1
-                    ? '${lines.first}...'
-                    : lines.firstOrNull ?? '';
-            return context.l10n
-                .chatPinMessage(userFullName, singleLinePreview)
-                .overflow;
-          },
-          cachePreview,
-          keys: [userFullName, content, mentionCache],
-        ).requireData;
+        final lines = const LineSplitter().convert(preview);
+        final singleLinePreview = lines.length > 1
+            ? '${lines.first}...'
+            : lines.firstOrNull ?? '';
+        return context.l10n
+            .chatPinMessage(userFullName, singleLinePreview)
+            .overflow;
+      },
+      cachePreview,
+      keys: [userFullName, content, mentionCache],
+    ).requireData;
 
     return Center(
       child: Padding(
@@ -107,37 +106,35 @@ class PinMessageWidget extends HookConsumerWidget {
 Future<String> generatePinPreviewText({
   required PinMessageMinimal pinMessageMinimal,
   required MentionCache mentionCache,
-}) async =>
-    pinMessageMinimal.type.isText
-        ? mentionCache.replaceMention(
-              pinMessageMinimal.content,
-              await mentionCache.checkMentionCache({pinMessageMinimal.content}),
-            ) ??
-            ''
-        : messagePreviewOptimize(
-              null,
-              pinMessageMinimal.type,
-              pinMessageMinimal.content,
-              false,
-              true,
-            ) ??
-            '';
+}) async => pinMessageMinimal.type.isText
+    ? mentionCache.replaceMention(
+            pinMessageMinimal.content,
+            await mentionCache.checkMentionCache({pinMessageMinimal.content}),
+          ) ??
+          ''
+    : messagePreviewOptimize(
+            null,
+            pinMessageMinimal.type,
+            pinMessageMinimal.content,
+            false,
+            true,
+          ) ??
+          '';
 
 String cachePinPreviewText({
   required PinMessageMinimal pinMessageMinimal,
   required MentionCache mentionCache,
-}) =>
-    pinMessageMinimal.type.isText
-        ? mentionCache.replaceMention(
-              pinMessageMinimal.content,
-              mentionCache.mentionCache(pinMessageMinimal.content),
-            ) ??
-            ''
-        : messagePreviewOptimize(
-              null,
-              pinMessageMinimal.type,
-              pinMessageMinimal.content,
-              false,
-              true,
-            ) ??
-            '';
+}) => pinMessageMinimal.type.isText
+    ? mentionCache.replaceMention(
+            pinMessageMinimal.content,
+            mentionCache.mentionCache(pinMessageMinimal.content),
+          ) ??
+          ''
+    : messagePreviewOptimize(
+            null,
+            pinMessageMinimal.type,
+            pinMessageMinimal.content,
+            false,
+            true,
+          ) ??
+          '';

@@ -26,18 +26,19 @@ class LastQuoteMessageStateNotifier
   set _state(MessageItem? value) => super.state = value;
 }
 
-final lastQuoteMessageProvider = StateNotifierProvider.autoDispose<
-  LastQuoteMessageStateNotifier,
-  MessageItem?
->((ref) {
-  final lastQuoteMessageStateNotifier = LastQuoteMessageStateNotifier(
-    ref.read(quoteMessageProvider),
-  );
+final lastQuoteMessageProvider =
+    StateNotifierProvider.autoDispose<
+      LastQuoteMessageStateNotifier,
+      MessageItem?
+    >((ref) {
+      final lastQuoteMessageStateNotifier = LastQuoteMessageStateNotifier(
+        ref.read(quoteMessageProvider),
+      );
 
-  ref.listen(quoteMessageProvider, (previous, next) {
-    if (next == null) return;
-    lastQuoteMessageStateNotifier._state = next;
-  });
+      ref.listen(quoteMessageProvider, (previous, next) {
+        if (next == null) return;
+        lastQuoteMessageStateNotifier._state = next;
+      });
 
-  return lastQuoteMessageStateNotifier;
-});
+      return lastQuoteMessageStateNotifier;
+    });

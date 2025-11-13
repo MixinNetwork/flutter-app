@@ -39,12 +39,11 @@ class SettingPage extends HookConsumerWidget {
     }
 
     final appActive = useValueListenable(appActiveListener);
-    final hasNotificationPermission =
-        useMemoizedFuture(
-          requestNotificationPermission,
-          null,
-          keys: [appActive],
-        ).data;
+    final hasNotificationPermission = useMemoizedFuture(
+      requestNotificationPermission,
+      null,
+      keys: [appActive],
+    ).data;
     final controller = useScrollController();
 
     final userHasPin = ref.watch(
@@ -92,37 +91,32 @@ class SettingPage extends HookConsumerWidget {
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcNotificationSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier
-                                    .notificationPage,
+                            pageName: ResponsiveNavigatorStateNotifier
+                                .notificationPage,
                             title: context.l10n.notifications,
-                            trailing:
-                                hasNotificationPermission == false
-                                    ? Padding(
-                                      padding: const EdgeInsets.all(4),
-                                      child: SvgPicture.asset(
-                                        Resources
-                                            .assetsImagesTriangleWarningSvg,
-                                        colorFilter: ColorFilter.mode(
-                                          context.theme.red,
-                                          BlendMode.srcIn,
-                                        ),
-                                        width: 22,
-                                        height: 22,
+                            trailing: hasNotificationPermission == false
+                                ? Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: SvgPicture.asset(
+                                      Resources.assetsImagesTriangleWarningSvg,
+                                      colorFilter: ColorFilter.mode(
+                                        context.theme.red,
+                                        BlendMode.srcIn,
                                       ),
-                                    )
-                                    : const Arrow(),
-                            color:
-                                hasNotificationPermission == false
-                                    ? context.theme.red
-                                    : context.theme.text,
+                                      width: 22,
+                                      height: 22,
+                                    ),
+                                  )
+                                : const Arrow(),
+                            color: hasNotificationPermission == false
+                                ? context.theme.red
+                                : context.theme.text,
                           ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcStorageUsageSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier
-                                    .dataAndStorageUsagePage,
+                            pageName: ResponsiveNavigatorStateNotifier
+                                .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
                           _Item(
@@ -207,18 +201,17 @@ class _Item extends HookConsumerWidget {
     );
 
     return CellItem(
-      leading:
-          (leadingAssetName != null
-              ? SvgPicture.asset(
-                leadingAssetName!,
-                width: 24,
-                height: 24,
-                colorFilter: ColorFilter.mode(
-                  color ?? context.theme.text,
-                  BlendMode.srcIn,
-                ),
-              )
-              : null),
+      leading: (leadingAssetName != null
+          ? SvgPicture.asset(
+              leadingAssetName!,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                color ?? context.theme.text,
+                BlendMode.srcIn,
+              ),
+            )
+          : null),
       title: AutoSizeText(title, maxLines: 1),
       color: color ?? context.theme.text,
       selected: selected,

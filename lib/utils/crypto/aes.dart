@@ -173,8 +173,9 @@ class AesCipherWebCryptoImpl implements AesCipher {
     required Uint8List iv,
     required bool encrypt,
   }) {
-    final cipher =
-        key.length == 16 ? ssl.EVP_aes_128_cbc() : ssl.EVP_aes_256_cbc();
+    final cipher = key.length == 16
+        ? ssl.EVP_aes_128_cbc()
+        : ssl.EVP_aes_256_cbc();
 
     final ivSize = ssl.EVP_CIPHER_iv_length(cipher);
     if (iv.length != ivSize) {

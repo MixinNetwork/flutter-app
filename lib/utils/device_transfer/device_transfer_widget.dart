@@ -228,20 +228,18 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
     _useTransferStatus(
       () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
-      succeedBuilder:
-          (context) => _ConfirmDialog(message: context.l10n.transferCompleted),
-      failedBuilder:
-          (context) =>
-              _ConfirmDialog(message: context.l10n.deviceTransferFailed),
+      succeedBuilder: (context) =>
+          _ConfirmDialog(message: context.l10n.transferCompleted),
+      failedBuilder: (context) =>
+          _ConfirmDialog(message: context.l10n.deviceTransferFailed),
     );
     _useTransferStatus(
       () => _backupBehavior.stream,
       progressBuilder: (context) => const _BackupProcessingDialog(),
-      succeedBuilder:
-          (context) => _ConfirmDialog(message: context.l10n.transferCompleted),
-      failedBuilder:
-          (context) =>
-              _ConfirmDialog(message: context.l10n.deviceTransferFailed),
+      succeedBuilder: (context) =>
+          _ConfirmDialog(message: context.l10n.transferCompleted),
+      failedBuilder: (context) =>
+          _ConfirmDialog(message: context.l10n.deviceTransferFailed),
     );
     useOnTransferEventType(
       DeviceTransferCallbackType.onBackupRequestReceived,

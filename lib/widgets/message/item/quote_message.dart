@@ -133,15 +133,14 @@ class QuoteMessage extends HookConsumerWidget {
             final rawContent = content ?? '';
             final mentionCache = ref.read(mentionCacheProvider);
 
-            final description =
-                useMemoizedFuture(
-                  () async => mentionCache.replaceMention(
-                    rawContent,
-                    await mentionCache.checkMentionCache({rawContent}),
-                  ),
-                  rawContent,
-                  keys: [rawContent],
-                ).requireData;
+            final description = useMemoizedFuture(
+              () async => mentionCache.replaceMention(
+                rawContent,
+                await mentionCache.checkMentionCache({rawContent}),
+              ),
+              rawContent,
+              keys: [rawContent],
+            ).requireData;
 
             return _QuoteMessageBase(
               messageId: messageId,
@@ -193,10 +192,9 @@ class QuoteMessage extends HookConsumerWidget {
       }
 
       if (type.isLive) {
-        final placeholder =
-            thumbImage != null
-                ? ImageByBlurHashOrBase64(imageData: thumbImage)
-                : const SizedBox();
+        final placeholder = thumbImage != null
+            ? ImageByBlurHashOrBase64(imageData: thumbImage)
+            : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -329,14 +327,14 @@ class QuoteMessage extends HookConsumerWidget {
         final json = jsonDecode(content ?? '');
         switch (type) {
           case MessageCategory.appButtonGroup:
-            description =
-                (json as List?)
-                    ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
-                    .map((e) => '[${e.label}]')
-                    .join();
+            description = (json as List?)
+                ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
+                .map((e) => '[${e.label}]')
+                .join();
           case MessageCategory.appCard:
-            description =
-                AppCardData.fromJson(json as Map<String, dynamic>).title;
+            description = AppCardData.fromJson(
+              json as Map<String, dynamic>,
+            ).title;
           default:
             break;
         }
@@ -424,8 +422,8 @@ class _QuoteImage extends HookWidget {
           isTranscriptPage,
         ),
       ),
-      errorBuilder:
-          (_, _, _) => ImageByBlurHashOrBase64(imageData: thumbImage!),
+      errorBuilder: (_, _, _) =>
+          ImageByBlurHashOrBase64(imageData: thumbImage!),
     );
   }
 }
@@ -458,18 +456,16 @@ class _QuoteMessageBase extends HookConsumerWidget {
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
-    final color =
-        userId?.isNotEmpty == true
-            ? getNameColorById(userId!)
-            : context.theme.accent;
+    final color = userId?.isNotEmpty == true
+        ? getNameColorById(userId!)
+        : context.theme.accent;
 
     final user = userId != null ? ref.watch(userCacheProvider(userId!)) : null;
 
     return ClipRRect(
-      borderRadius:
-          inputMode
-              ? BorderRadius.zero
-              : const BorderRadius.all(Radius.circular(8)),
+      borderRadius: inputMode
+          ? BorderRadius.zero
+          : const BorderRadius.all(Radius.circular(8)),
       child: GestureDetector(
         onTap: () {
           if (onTap != null) {
@@ -489,10 +485,10 @@ class _QuoteMessageBase extends HookConsumerWidget {
             }
           } catch (_) {}
 
-          context
-              .providerContainer
-              .read(pendingJumpMessageProvider.notifier)
-              .state = messageId;
+          context.providerContainer
+                  .read(pendingJumpMessageProvider.notifier)
+                  .state =
+              messageId;
           context.read<MessageBloc>().scrollTo(quoteMessageId);
         },
         behavior: HitTestBehavior.opaque,
@@ -529,10 +525,9 @@ class _QuoteMessageBase extends HookConsumerWidget {
                                     CustomText(
                                       name!,
                                       style: TextStyle(
-                                        fontSize:
-                                            context
-                                                .messageStyle
-                                                .secondaryFontSize,
+                                        fontSize: context
+                                            .messageStyle
+                                            .secondaryFontSize,
                                         color: color,
                                         height: 1,
                                       ),

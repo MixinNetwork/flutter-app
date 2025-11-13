@@ -53,17 +53,18 @@ class MessageTextWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userId = useMessageConverter(converter: (state) => state.userId);
 
-    var keyword = useBlocStateConverter<
-      SearchConversationKeywordCubit,
-      (String?, String),
-      String
-    >(
-      converter: (state) {
-        if (state.$1 == null || state.$1 == userId) return state.$2;
-        return '';
-      },
-      keys: [userId],
-    );
+    var keyword =
+        useBlocStateConverter<
+          SearchConversationKeywordCubit,
+          (String?, String),
+          String
+        >(
+          converter: (state) {
+            if (state.$1 == null || state.$1 == userId) return state.$2;
+            return '';
+          },
+          keys: [userId],
+        );
 
     final globalKeyword = ref.watch(trimmedKeywordProvider);
     final conversationKeyword = ref.watch(
@@ -78,12 +79,11 @@ class MessageTextWidget extends HookConsumerWidget {
 
     final mentionCache = ref.read(mentionCacheProvider);
 
-    final mentionMap =
-        useMemoizedFuture(
-          () => mentionCache.checkMentionCache({content}),
-          mentionCache.mentionCache(content),
-          keys: [content],
-        ).requireData;
+    final mentionMap = useMemoizedFuture(
+      () => mentionCache.checkMentionCache({content}),
+      mentionCache.mentionCache(content),
+      keys: [content],
+    ).requireData;
 
     final focusNode = useFocusNode(debugLabel: 'text selection focus');
 

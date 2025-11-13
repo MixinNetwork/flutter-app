@@ -1,4 +1,3 @@
-// ignore_for_file: implementation_imports
 
 import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';

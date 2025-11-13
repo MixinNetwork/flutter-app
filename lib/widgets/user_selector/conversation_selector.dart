@@ -214,29 +214,26 @@ class _ConversationSelector extends HookConsumerWidget {
           bloc: conversationFilterCubit,
         );
 
-    final appMap =
-        useMemoizedFuture(
-          () async {
-            final list =
-                await context.database.appDao
-                    .appInIds(conversationFilterState.appIds)
-                    .get();
-            return {for (final e in list) e.appId: e};
-          },
-          <String, App>{},
-          keys: [conversationFilterState],
-        ).requireData;
+    final appMap = useMemoizedFuture(
+      () async {
+        final list = await context.database.appDao
+            .appInIds(conversationFilterState.appIds)
+            .get();
+        return {for (final e in list) e.appId: e};
+      },
+      <String, App>{},
+      keys: [conversationFilterState],
+    ).requireData;
 
     useEffect(
-      () =>
-          selector.stream.listen((event) {
-            if (event.isNotEmpty && singleSelect) {
-              final item = event.first;
-              Navigator.pop(context, [
-                ConversationSelector.init(item, context, appMap),
-              ]);
-            }
-          }).cancel,
+      () => selector.stream.listen((event) {
+        if (event.isNotEmpty && singleSelect) {
+          final item = event.first;
+          Navigator.pop(context, [
+            ConversationSelector.init(item, context, appMap),
+          ]);
+        }
+      }).cancel,
       [selector.stream],
     );
     final selected = useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(
@@ -301,23 +298,24 @@ class _ConversationSelector extends HookConsumerWidget {
                           action ??
                           (!singleSelect && (allowEmpty || selected.isNotEmpty)
                               ? MixinButton(
-                                backgroundTransparent: true,
-                                padding: const EdgeInsets.all(8),
-                                onTap:
-                                    () => Navigator.pop(
-                                      context,
-                                      selected
-                                          .map(
-                                            (item) => ConversationSelector.init(
-                                              item,
-                                              context,
-                                              appMap,
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                                child: Text(confirmedText ?? context.l10n.next),
-                              )
+                                  backgroundTransparent: true,
+                                  padding: const EdgeInsets.all(8),
+                                  onTap: () => Navigator.pop(
+                                    context,
+                                    selected
+                                        .map(
+                                          (item) => ConversationSelector.init(
+                                            item,
+                                            context,
+                                            appMap,
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                  child: Text(
+                                    confirmedText ?? context.l10n.next,
+                                  ),
+                                )
                               : const SizedBox()),
                     ),
                   ),
@@ -328,50 +326,46 @@ class _ConversationSelector extends HookConsumerWidget {
             AnimatedSize(
               alignment: Alignment.topCenter,
               duration: const Duration(milliseconds: 200),
-              child:
-                  singleSelect || selected.isEmpty
-                      ? const SizedBox(height: 8)
-                      : SizedBox(
-                        height: 120,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          itemBuilder:
-                              (context, index) => SizedBox(
-                                width: 66,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const SizedBox(height: 20),
-                                    Stack(
-                                      children: [
-                                        _getAvatarWidget(selected[index]),
-                                        _AvatarSmallCloseIcon(
-                                          onTap:
-                                              () => selectItem(selected[index]),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      _getConversationName(selected[index]),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: context.theme.text,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
-                                  ],
-                                ),
+              child: singleSelect || selected.isEmpty
+                  ? const SizedBox(height: 8)
+                  : SizedBox(
+                      height: 120,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        itemBuilder: (context, index) => SizedBox(
+                          width: 66,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 20),
+                              Stack(
+                                children: [
+                                  _getAvatarWidget(selected[index]),
+                                  _AvatarSmallCloseIcon(
+                                    onTap: () => selectItem(selected[index]),
+                                  ),
+                                ],
                               ),
-                          separatorBuilder:
-                              (BuildContext context, int index) =>
-                                  const SizedBox(width: 4),
-                          itemCount: selected.length,
+                              const SizedBox(height: 10),
+                              Text(
+                                _getConversationName(selected[index]),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.theme.text,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                            ],
+                          ),
                         ),
+                        separatorBuilder: (BuildContext context, int index) =>
+                            const SizedBox(width: 4),
+                        itemCount: selected.length,
                       ),
+                    ),
             ),
             Expanded(
               child: Padding(
@@ -384,9 +378,8 @@ class _ConversationSelector extends HookConsumerWidget {
                         count:
                             conversationFilterState.recentConversations.length,
                         builder: (BuildContext context, int index) {
-                          final item =
-                              conversationFilterState
-                                  .recentConversations[index];
+                          final item = conversationFilterState
+                              .recentConversations[index];
                           return InteractiveDecoratedBox.color(
                             decoration: boxDecoration,
                             hoveringColor: context.theme.listSelected,
@@ -482,10 +475,9 @@ class _FilterTextField extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isTextEmpty =
         useMemoizedStream(
-          () =>
-              conversationFilterCubit.stream
-                  .map((event) => event.keyword?.isEmpty ?? true)
-                  .distinct(),
+          () => conversationFilterCubit.stream
+              .map((event) => event.keyword?.isEmpty ?? true)
+              .distinct(),
           keys: [conversationFilterCubit],
         ).data ??
         conversationFilterCubit.state.keyword?.isEmpty ??
@@ -528,9 +520,8 @@ class _FilterTextField extends HookConsumerWidget {
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
             ),
-            contextMenuBuilder:
-                (context, state) =>
-                    MixinAdaptiveSelectionToolbar(editableTextState: state),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
           if (isTextEmpty)
             IgnorePointer(
@@ -669,10 +660,9 @@ class _BaseItem extends StatelessWidget {
                 height: 16,
                 width: 16,
                 decoration: BoxDecoration(
-                  color:
-                      selected
-                          ? context.theme.accent
-                          : context.theme.secondaryText,
+                  color: selected
+                      ? context.theme.accent
+                      : context.theme.secondaryText,
                 ),
                 alignment: Alignment.center,
                 child: SvgPicture.asset(Resources.assetsImagesSelectedSvg),

@@ -14,10 +14,9 @@ class AZSelection extends SingleChildRenderObjectWidget {
   final TextStyle? textStyle;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      AZRender()
-        ..onSelection = onSelection
-        ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
+  RenderObject createRenderObject(BuildContext context) => AZRender()
+    ..onSelection = onSelection
+    ..textStyle = textStyle ?? Theme.of(context).textTheme.bodyLarge;
 
   @override
   void updateRenderObject(
@@ -31,8 +30,10 @@ class AZSelection extends SingleChildRenderObjectWidget {
 }
 
 class AZRender extends RenderBox {
-  static final _chars =
-      'abcdefghijklmnopqrstuvwxyz'.toUpperCase().characters.toList();
+  static final _chars = 'abcdefghijklmnopqrstuvwxyz'
+      .toUpperCase()
+      .characters
+      .toList();
 
   final _offsets = HashMap<TextPainter, Offset>();
 

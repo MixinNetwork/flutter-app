@@ -53,7 +53,9 @@ class StickerAlbumPage extends HookConsumerWidget {
     return Column(
       children: [
         _StickerAlbumHeader(album: album),
-        Expanded(child: _StickerAlbumDetail(album: album, stickers: stickers)),
+        Expanded(
+          child: _StickerAlbumDetail(album: album, stickers: stickers),
+        ),
       ],
     );
   }
@@ -70,8 +72,9 @@ class _StickerAlbumHeader extends StatelessWidget {
     title: Text(
       album == null ? context.l10n.stickerAlbumDetail : (album?.name ?? ''),
     ),
-    leading:
-        navigatorKey.currentState?.canPop() == true ? null : const SizedBox(),
+    leading: navigatorKey.currentState?.canPop() == true
+        ? null
+        : const SizedBox(),
     actions: [
       MixinCloseButton(
         onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
@@ -130,20 +133,18 @@ class _StickerAlbumDetail extends HookConsumerWidget {
               children: [
                 const Spacer(),
                 MixinButton(
-                  backgroundColor:
-                      album.added == true
-                          ? context.theme.red
-                          : context.theme.accent,
+                  backgroundColor: album.added == true
+                      ? context.theme.red
+                      : context.theme.accent,
                   child: Text(
                     album.added == true
                         ? context.l10n.removeStickers
                         : context.l10n.addStickers,
                   ),
-                  onTap:
-                      () => context.database.stickerAlbumDao.updateAdded(
-                        album.albumId,
-                        !(album.added == true),
-                      ),
+                  onTap: () => context.database.stickerAlbumDao.updateAdded(
+                    album.albumId,
+                    !(album.added == true),
+                  ),
                 ),
                 const SizedBox(height: 40),
               ],

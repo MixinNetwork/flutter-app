@@ -40,8 +40,8 @@ class CaptchaWebViewDialog extends HookConsumerWidget {
     );
 
     final controller = useMemoized(() {
-      final controller =
-          WebViewController()..setJavaScriptMode(JavaScriptMode.unrestricted);
+      final controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted);
 
       void loadFallback() {
         if (captcha.value == CaptchaType.gCaptcha) {

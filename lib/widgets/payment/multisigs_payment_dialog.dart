@@ -54,7 +54,10 @@ Future<void> showMultisigsPaymentDialog(
   BuildContext context, {
   required MultisigsPaymentItem item,
 }) async {
-  await showMixinDialog(context: context, child: _PaymentDialog(item: item));
+  await showMixinDialog(
+    context: context,
+    child: _PaymentDialog(item: item),
+  );
 }
 
 extension _PaymentCodeResponseExt on MultisigsPaymentItem {
@@ -201,20 +204,19 @@ class _OverlappedUserAvatars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-    children:
-        [
-          for (var index = 0; index < children.length; index++)
-            Padding(
-              padding: EdgeInsets.fromLTRB(index.toDouble() * 20, 0, 0, 0),
-              child: ClipOval(
-                child: Container(
-                  color: context.theme.popUp,
-                  padding: const EdgeInsets.all(2),
-                  child: children[index],
-                ),
-              ),
+    children: [
+      for (var index = 0; index < children.length; index++)
+        Padding(
+          padding: EdgeInsets.fromLTRB(index.toDouble() * 20, 0, 0, 0),
+          child: ClipOval(
+            child: Container(
+              color: context.theme.popUp,
+              padding: const EdgeInsets.all(2),
+              child: children[index],
             ),
-        ].reversed.toList(),
+          ),
+        ),
+    ].reversed.toList(),
   );
 }
 
@@ -225,17 +227,16 @@ class _UserIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user =
-        useMemoizedStream(
-          () => context.accountServer.database.userDao
-              .userById(userId)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateUserStream([userId]),
-                ],
-                duration: kDefaultThrottleDuration,
-              ),
-        ).data;
+    final user = useMemoizedStream(
+      () => context.accountServer.database.userDao
+          .userById(userId)
+          .watchSingleOrNullWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateUserStream([userId]),
+            ],
+            duration: kDefaultThrottleDuration,
+          ),
+    ).data;
 
     final Widget child;
 

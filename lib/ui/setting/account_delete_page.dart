@@ -85,12 +85,11 @@ class AccountDeletePage extends StatelessWidget {
                       context,
                       phoneNumber: user.phone,
                       verificationResponse: verificationResponse,
-                      reRequestVerification:
-                          () => requestVerificationCode(
-                            phone: user.phone,
-                            context: context,
-                            purpose: VerificationPurpose.deactivated,
-                          ),
+                      reRequestVerification: () => requestVerificationCode(
+                        phone: user.phone,
+                        context: context,
+                        purpose: VerificationPurpose.deactivated,
+                      ),
                       onVerification: (code, response) async {
                         final result = await context
                             .accountServer
@@ -220,13 +219,11 @@ class _DeleteAccountPinDialog extends StatelessWidget {
           TextSpan(
             text: context.l10n.learnMore,
             style: TextStyle(color: context.theme.accent),
-            recognizer:
-                TapGestureRecognizer()
-                  ..onTap =
-                      () => openUri(
-                        context,
-                        context.l10n.settingDeleteAccountUrl,
-                      ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => openUri(
+                context,
+                context.l10n.settingDeleteAccountUrl,
+              ),
           ),
           TextSpan(
             text: content.substring(index + context.l10n.learnMore.length),

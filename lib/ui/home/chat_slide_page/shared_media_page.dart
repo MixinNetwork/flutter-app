@@ -31,55 +31,52 @@ class SharedMediaPage extends HookConsumerWidget {
         children: [
           Expanded(
             child: LayoutBuilder(
-              builder:
-                  (BuildContext context, BoxConstraints constraints) =>
-                      IndexedStack(
-                        index: selectedIndex.value,
-                        children: [
-                          MediaPage(
-                            conversationId: conversationId,
-                            maxHeight: constraints.maxHeight,
-                          ),
-                          PostPage(
-                            conversationId: conversationId,
-                            maxHeight: constraints.maxHeight,
-                          ),
-                          FilePage(
-                            conversationId: conversationId,
-                            maxHeight: constraints.maxHeight,
-                          ),
-                        ],
+              builder: (BuildContext context, BoxConstraints constraints) =>
+                  IndexedStack(
+                    index: selectedIndex.value,
+                    children: [
+                      MediaPage(
+                        conversationId: conversationId,
+                        maxHeight: constraints.maxHeight,
                       ),
+                      PostPage(
+                        conversationId: conversationId,
+                        maxHeight: constraints.maxHeight,
+                      ),
+                      FilePage(
+                        conversationId: conversationId,
+                        maxHeight: constraints.maxHeight,
+                      ),
+                    ],
+                  ),
             ),
           ),
           Row(
-            children:
-                [context.l10n.media, context.l10n.post, context.l10n.file]
-                    .asMap()
-                    .entries
-                    .map(
-                      (e) => Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => selectedIndex.value = e.key,
-                          child: Container(
-                            height: 56,
-                            alignment: Alignment.center,
-                            child: Text(
-                              e.value,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color:
-                                    e.key == selectedIndex.value
-                                        ? context.theme.accent
-                                        : context.theme.secondaryText,
-                              ),
-                            ),
+            children: [context.l10n.media, context.l10n.post, context.l10n.file]
+                .asMap()
+                .entries
+                .map(
+                  (e) => Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => selectedIndex.value = e.key,
+                      child: Container(
+                        height: 56,
+                        alignment: Alignment.center,
+                        child: Text(
+                          e.value,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: e.key == selectedIndex.value
+                                ? context.theme.accent
+                                : context.theme.secondaryText,
                           ),
                         ),
                       ),
-                    )
-                    .toList(),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
@@ -100,19 +97,18 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CustomContextMenuWidget(
     desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-    menuProvider:
-        (request) => Menu(
-          children: [
-            MenuAction(
-              image: MenuImage.icon(IconFonts.positionToChat),
-              title: context.l10n.locateToChat,
-              callback: () {
-                context.read<BlinkCubit>().blinkByMessageId(messageId);
-                context.read<MessageBloc>().scrollTo(messageId);
-              },
-            ),
-          ],
+    menuProvider: (request) => Menu(
+      children: [
+        MenuAction(
+          image: MenuImage.icon(IconFonts.positionToChat),
+          title: context.l10n.locateToChat,
+          callback: () {
+            context.read<BlinkCubit>().blinkByMessageId(messageId);
+            context.read<MessageBloc>().scrollTo(messageId);
+          },
         ),
+      ],
+    ),
     child: child,
   );
 }

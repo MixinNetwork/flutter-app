@@ -12,9 +12,9 @@ class InscriptionItemDao extends DatabaseAccessor<MixinDatabase>
     with _$InscriptionItemDaoMixin {
   InscriptionItemDao(super.attachedDatabase);
 
-  Future<InscriptionItem?> findInscriptionByHash(String hash) =>
-      (select(inscriptionItems)
-        ..where((tbl) => tbl.inscriptionHash.equals(hash))).getSingleOrNull();
+  Future<InscriptionItem?> findInscriptionByHash(String hash) => (select(
+    inscriptionItems,
+  )..where((tbl) => tbl.inscriptionHash.equals(hash))).getSingleOrNull();
 
   Future<InscriptionItem> insertSdkItem(sdk.InscriptionItem inscription) async {
     final dbItem = inscription.asDbItem;

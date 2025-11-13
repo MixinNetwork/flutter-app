@@ -132,12 +132,11 @@ class _ParticipantList extends HookConsumerWidget {
     return ListView.builder(
       itemCount: filteredParticipants.length,
       padding: const EdgeInsets.only(top: 8),
-      itemBuilder:
-          (context, index) => _ParticipantTile(
-            participant: filteredParticipants[index],
-            currentUser: currentUser,
-            keyword: keyword,
-          ),
+      itemBuilder: (context, index) => _ParticipantTile(
+        participant: filteredParticipants[index],
+        currentUser: currentUser,
+        keyword: keyword,
+      ),
     );
   }
 }
@@ -249,89 +248,88 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
 
     return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-      menuProvider:
-          (request) => MenusWithSeparator(
-            childrens: [
-              [
+      menuProvider: (request) => MenusWithSeparator(
+        childrens: [
+          [
+            MenuAction(
+              image: MenuImage.icon(IconFonts.chat),
+              title: context.l10n.groupPopMenuMessage(
+                participant.fullName ?? '?',
+              ),
+              callback: () {
+                ConversationStateNotifier.selectUser(
+                  context,
+                  participant.userId,
+                );
+              },
+            ),
+          ],
+          if (currentUser?.role == ParticipantRole.owner)
+            [
+              if (participant.role != ParticipantRole.admin)
                 MenuAction(
-                  image: MenuImage.icon(IconFonts.chat),
-                  title: context.l10n.groupPopMenuMessage(
-                    participant.fullName ?? '?',
-                  ),
+                  image: MenuImage.icon(IconFonts.manageUser),
+                  title: context.l10n.makeGroupAdmin,
                   callback: () {
-                    ConversationStateNotifier.selectUser(
-                      context,
-                      participant.userId,
+                    final conversationId = ref.read(
+                      currentConversationIdProvider,
+                    );
+                    if (conversationId == null) return;
+
+                    runFutureWithToast(
+                      context.accountServer.updateParticipantRole(
+                        conversationId,
+                        participant.userId,
+                        ParticipantRole.admin,
+                      ),
+                    );
+                  },
+                )
+              else
+                MenuAction(
+                  image: MenuImage.icon(IconFonts.stop),
+                  title: context.l10n.dismissAsAdmin,
+                  callback: () {
+                    final conversationId = ref.read(
+                      currentConversationIdProvider,
+                    );
+                    if (conversationId == null) return;
+
+                    runFutureWithToast(
+                      context.accountServer.updateParticipantRole(
+                        conversationId,
+                        participant.userId,
+                        null,
+                      ),
                     );
                   },
                 ),
-              ],
-              if (currentUser?.role == ParticipantRole.owner)
-                [
-                  if (participant.role != ParticipantRole.admin)
-                    MenuAction(
-                      image: MenuImage.icon(IconFonts.manageUser),
-                      title: context.l10n.makeGroupAdmin,
-                      callback: () {
-                        final conversationId = ref.read(
-                          currentConversationIdProvider,
-                        );
-                        if (conversationId == null) return;
-
-                        runFutureWithToast(
-                          context.accountServer.updateParticipantRole(
-                            conversationId,
-                            participant.userId,
-                            ParticipantRole.admin,
-                          ),
-                        );
-                      },
-                    )
-                  else
-                    MenuAction(
-                      image: MenuImage.icon(IconFonts.stop),
-                      title: context.l10n.dismissAsAdmin,
-                      callback: () {
-                        final conversationId = ref.read(
-                          currentConversationIdProvider,
-                        );
-                        if (conversationId == null) return;
-
-                        runFutureWithToast(
-                          context.accountServer.updateParticipantRole(
-                            conversationId,
-                            participant.userId,
-                            null,
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              [
-                if (currentUser?.role != null && participant.role == null ||
-                    currentUser?.role == ParticipantRole.owner)
-                  MenuAction(
-                    image: MenuImage.icon(IconFonts.delete),
-                    title: context.l10n.groupPopMenuRemove(
-                      participant.fullName ?? '?',
-                    ),
-                    callback: () {
-                      final conversationId = ref.read(
-                        currentConversationIdProvider,
-                      );
-                      if (conversationId == null) return;
-
-                      runFutureWithToast(
-                        context.accountServer.removeParticipant(
-                          conversationId,
-                          participant.userId,
-                        ),
-                      );
-                    },
-                  ),
-              ],
             ],
-          ),
+          [
+            if (currentUser?.role != null && participant.role == null ||
+                currentUser?.role == ParticipantRole.owner)
+              MenuAction(
+                image: MenuImage.icon(IconFonts.delete),
+                title: context.l10n.groupPopMenuRemove(
+                  participant.fullName ?? '?',
+                ),
+                callback: () {
+                  final conversationId = ref.read(
+                    currentConversationIdProvider,
+                  );
+                  if (conversationId == null) return;
+
+                  runFutureWithToast(
+                    context.accountServer.removeParticipant(
+                      conversationId,
+                      participant.userId,
+                    ),
+                  );
+                },
+              ),
+          ],
+        ],
+      ),
       child: child,
     );
   }
@@ -376,19 +374,18 @@ class _ActionAddParticipants extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => CustomPopupMenuButton(
-    itemBuilder:
-        (context) => [
-          CustomPopupMenuItem(
-            icon: Resources.assetsImagesContextMenuSearchUserSvg,
-            title: context.l10n.addParticipants,
-            value: _ActionType.addParticipants,
-          ),
-          CustomPopupMenuItem(
-            icon: Resources.assetsImagesContextMenuLinkSvg,
-            title: context.l10n.inviteToGroupViaLink,
-            value: _ActionType.inviteByLink,
-          ),
-        ],
+    itemBuilder: (context) => [
+      CustomPopupMenuItem(
+        icon: Resources.assetsImagesContextMenuSearchUserSvg,
+        title: context.l10n.addParticipants,
+        value: _ActionType.addParticipants,
+      ),
+      CustomPopupMenuItem(
+        icon: Resources.assetsImagesContextMenuLinkSvg,
+        title: context.l10n.inviteToGroupViaLink,
+        value: _ActionType.inviteByLink,
+      ),
+    ],
     onSelected: (action) async {
       switch (action) {
         case _ActionType.addParticipants:

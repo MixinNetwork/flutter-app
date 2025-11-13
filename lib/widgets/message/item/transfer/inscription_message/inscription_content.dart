@@ -89,16 +89,15 @@ class _TextInscriptionContent extends HookWidget {
       [],
     );
 
-    final text =
-        useMemoizedFuture(
-          () async {
-            final response = await client.get(Uri.parse(contentUrl));
-            final text = utf8.decode(response.bodyBytes, allowMalformed: true);
-            return inscriptionDisplayContent(text);
-          },
-          null,
-          keys: [client, contentUrl],
-        ).data;
+    final text = useMemoizedFuture(
+      () async {
+        final response = await client.get(Uri.parse(contentUrl));
+        final text = utf8.decode(response.bodyBytes, allowMalformed: true);
+        return inscriptionDisplayContent(text);
+      },
+      null,
+      keys: [client, contentUrl],
+    ).data;
 
     return Stack(
       fit: StackFit.expand,
@@ -144,15 +143,14 @@ class _TextInscriptionContent extends HookWidget {
                     right: constraints.maxWidth / 10,
                     left: constraints.maxWidth / 10,
                   ),
-                  child:
-                      mode == InscriptionContentMode.large
-                          ? autoSizeText
-                          : _MinLinesWrapper(
-                            text: text,
-                            style: textStyle,
-                            minLines: mode.maxLines,
-                            child: autoSizeText,
-                          ),
+                  child: mode == InscriptionContentMode.large
+                      ? autoSizeText
+                      : _MinLinesWrapper(
+                          text: text,
+                          style: textStyle,
+                          minLines: mode.maxLines,
+                          child: autoSizeText,
+                        ),
                 ),
               ],
             );

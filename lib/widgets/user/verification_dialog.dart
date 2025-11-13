@@ -94,8 +94,9 @@ Future<VerificationResponse> requestVerificationCode({
     phone: phone,
     purpose: purpose,
     packageName: 'one.mixin.messenger',
-    gRecaptchaResponse:
-        captcha?.$1 == CaptchaType.gCaptcha ? captcha?.$2 : null,
+    gRecaptchaResponse: captcha?.$1 == CaptchaType.gCaptcha
+        ? captcha?.$2
+        : null,
     hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
   final api = accountApi ?? context.accountServer.client.accountApi;
@@ -232,25 +233,28 @@ class ResendCodeWidget extends HookConsumerWidget {
 
     return nextDuration.value > 0
         ? Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            context.l10n.resendCodeIn(nextDuration.value),
-            style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
-          ),
-        )
-        : InteractiveDecoratedBox(
-          onTap: () async {
-            if (await onResend()) {
-              nextDuration.value = 60;
-            }
-          },
-          child: Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              context.l10n.resendCode,
-              style: TextStyle(fontSize: 14, color: context.theme.accent),
+              context.l10n.resendCodeIn(nextDuration.value),
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
             ),
-          ),
-        );
+          )
+        : InteractiveDecoratedBox(
+            onTap: () async {
+              if (await onResend()) {
+                nextDuration.value = 60;
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                context.l10n.resendCode,
+                style: TextStyle(fontSize: 14, color: context.theme.accent),
+              ),
+            ),
+          );
   }
 }

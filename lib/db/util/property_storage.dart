@@ -90,20 +90,19 @@ class PropertyStorage extends ChangeNotifier {
       return null;
     }
     try {
-      switch (T) {
-        case const (String):
-          return value as T?;
-        case const (int):
-          return int.tryParse(value) as T?;
-        case const (double):
-          return double.tryParse(value) as T?;
-        case const (bool):
-          return (value == 'true') as T?;
-        case const (dynamic):
-          return value as T?;
-        default:
-          e('getProperty unknown type: $T');
-          return null;
+      if (T == String) {
+        return value as T;
+      } else if (T == int) {
+        return int.tryParse(value) as T?;
+      } else if (T == double) {
+        return double.tryParse(value) as T?;
+      } else if (T == bool) {
+        return (value == 'true') as T?;
+      } else if (T == dynamic) {
+        return value as T?;
+      } else {
+        e('getProperty unknown type: $T');
+        return null;
       }
     } catch (error, stacktrace) {
       e('getProperty error: $error, stacktrace: $stacktrace');

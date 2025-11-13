@@ -172,8 +172,10 @@ final _fiatRateProvider = StreamProvider.autoDispose<double?>((ref) {
     return const Stream.empty();
   }
   return (db.select(db.fiats)..where(
-    (tbl) => tbl.code.equals(fiatCurrency),
-  )).map((e) => e.rate).watchSingle();
+        (tbl) => tbl.code.equals(fiatCurrency),
+      ))
+      .map((e) => e.rate)
+      .watchSingle();
 });
 
 final _tickerProvider = FutureProvider.family
@@ -206,10 +208,9 @@ class _ValuesDescription extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ticker =
-        ref
-            .watch(_tickerProvider((snapshot.assetId, snapshot.createdAt)))
-            .valueOrNull;
+    final ticker = ref
+        .watch(_tickerProvider((snapshot.assetId, snapshot.createdAt)))
+        .valueOrNull;
 
     final String? thatTimeValue;
 
@@ -321,10 +322,10 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
                 snapshot.opponentId.isNullOrBlank()
                     ? 'N/A'
                     : (ref
-                            .watch(_userProvider(snapshot.opponentId))
-                            .valueOrNull
-                            ?.fullName ??
-                        ''),
+                              .watch(_userProvider(snapshot.opponentId))
+                              .valueOrNull
+                              ?.fullName ??
+                          ''),
               ),
             ),
             if (!memo.isNullOrBlank())
@@ -347,7 +348,6 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
                 snapshot.withdrawal?.receiver ?? '',
               ),
             ),
-            // ignore: unnecessary_parenthesis
             if ((snapshot.withdrawal?.withdrawalHash).isNullOrBlank())
               TransactionInfoTile(
                 title: Text(context.l10n.withdrawalHash),

@@ -30,13 +30,13 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
     DataBaseEventBus.instance.updateExpiredMessageTable();
   }
 
-  Future<void> deleteByMessageId(String messageId) =>
-      (delete(db.expiredMessages)
-        ..where((tbl) => tbl.messageId.equals(messageId))).go();
+  Future<void> deleteByMessageId(String messageId) => (delete(
+    db.expiredMessages,
+  )..where((tbl) => tbl.messageId.equals(messageId))).go();
 
-  Future<void> deleteByMessageIds(List<String> messageIds) =>
-      (delete(db.expiredMessages)
-        ..where((tbl) => tbl.messageId.isIn(messageIds))).go();
+  Future<void> deleteByMessageIds(List<String> messageIds) => (delete(
+    db.expiredMessages,
+  )..where((tbl) => tbl.messageId.isIn(messageIds))).go();
 
   Future<List<ExpiredMessage>> getCurrentExpiredMessages() =>
       getExpiredMessages(DateTime.now().millisecondsSinceEpoch ~/ 1000).get();
@@ -53,9 +53,9 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<Map<String, int?>> getMessageExpireAt(List<String> messageIds) async {
-    final messages =
-        await (select(db.expiredMessages)
-          ..where((tbl) => tbl.messageId.isIn(messageIds))).get();
+    final messages = await (select(
+      db.expiredMessages,
+    )..where((tbl) => tbl.messageId.isIn(messageIds))).get();
     return Map.fromEntries(
       messages.map((e) => MapEntry(e.messageId, e.expireAt)),
     );

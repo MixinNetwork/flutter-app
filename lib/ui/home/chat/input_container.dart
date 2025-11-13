@@ -81,11 +81,10 @@ class InputContainer extends HookConsumerWidget {
     return BlocProvider<VoiceRecorderCubit>.value(
       value: voiceRecorderCubit,
       child: LayoutBuilder(
-        builder:
-            (context, constraints) => VoiceRecorderBarOverlayComposition(
-              layoutWidth: constraints.maxWidth,
-              child: const _InputContainer(),
-            ),
+        builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
+          layoutWidth: constraints.maxWidth,
+          child: const _InputContainer(),
+        ),
       ),
     );
   }
@@ -189,52 +188,51 @@ class _InputContainer extends HookConsumerWidget {
     }, [chatSidePageSize]);
 
     return LayoutBuilder(
-      builder:
-          (context, BoxConstraints constraints) => MentionPanelPortalEntry(
-            textEditingController: textEditingController,
-            mentionProviderInstance: mentionProviderInstance,
-            constraints: constraints,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const _QuoteMessage(),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 56),
-                  child: Container(
-                    decoration: BoxDecoration(color: context.theme.primary),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const _SendActionTypeButton(),
-                        const SizedBox(width: 6),
-                        _StickerButton(
-                          textEditingController: textEditingController,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _SendTextField(
-                            focusNode: focusNode,
-                            textEditingController: textEditingController,
-                            mentionProviderInstance: mentionProviderInstance,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        _AnimatedSendOrVoiceButton(
-                          textEditingController: textEditingController,
-                          textEditingValueStream: textEditingValueStream,
-                        ),
-                      ],
-                    ),
-                  ),
+      builder: (context, BoxConstraints constraints) => MentionPanelPortalEntry(
+        textEditingController: textEditingController,
+        mentionProviderInstance: mentionProviderInstance,
+        constraints: constraints,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const _QuoteMessage(),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Container(
+                decoration: BoxDecoration(color: context.theme.primary),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-              ],
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const _SendActionTypeButton(),
+                    const SizedBox(width: 6),
+                    _StickerButton(
+                      textEditingController: textEditingController,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _SendTextField(
+                        focusNode: focusNode,
+                        textEditingController: textEditingController,
+                        mentionProviderInstance: mentionProviderInstance,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    _AnimatedSendOrVoiceButton(
+                      textEditingController: textEditingController,
+                      textEditingValueStream: textEditingValueStream,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -252,10 +250,9 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hasInputText =
         useMemoizedStream(
-          () =>
-              textEditingValueStream
-                  .map((event) => event.text.isNotEmpty)
-                  .distinct(),
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
           keys: [textEditingValueStream],
           initialData: textEditingController.text.isNotEmpty,
         ).data ??
@@ -305,21 +302,19 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
             scale: sendScale,
             child: CustomContextMenuWidget(
               desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-              menuProvider:
-                  (_) => Menu(
-                    children: [
-                      MenuAction(
-                        image: MenuImage.icon(IconFonts.mute),
-                        title: context.l10n.sendWithoutSound,
-                        callback:
-                            () => _sendMessage(
-                              context,
-                              textEditingController,
-                              silent: true,
-                            ),
-                      ),
-                    ],
+              menuProvider: (_) => Menu(
+                children: [
+                  MenuAction(
+                    image: MenuImage.icon(IconFonts.mute),
+                    title: context.l10n.sendWithoutSound,
+                    callback: () => _sendMessage(
+                      context,
+                      textEditingController,
+                      silent: true,
+                    ),
                   ),
+                ],
+              ),
               child: ActionButton(
                 name: Resources.assetsImagesIcSendSvg,
                 color: context.theme.icon,
@@ -418,29 +413,26 @@ class _SendTextField extends HookConsumerWidget {
 
     final sendable =
         useMemoizedStream(
-          () =>
-              Rx.combineLatest2<TextEditingValue, MentionState, bool>(
-                textEditingValueStream,
-                mentionStream.startWith(ref.read(mentionProviderInstance)),
-                (textEditingValue, mentionState) =>
-                    (textEditingValue.text.trim().isNotEmpty) &&
-                    (textEditingValue.composing.composed) &&
-                    mentionState.users.isEmpty,
-              ).distinct(),
+          () => Rx.combineLatest2<TextEditingValue, MentionState, bool>(
+            textEditingValueStream,
+            mentionStream.startWith(ref.read(mentionProviderInstance)),
+            (textEditingValue, mentionState) =>
+                (textEditingValue.text.trim().isNotEmpty) &&
+                (textEditingValue.composing.composed) &&
+                mentionState.users.isEmpty,
+          ).distinct(),
           keys: [textEditingValueStream, mentionStream],
         ).data ??
         true;
 
     useEffect(
-      () =>
-          ref
-              .read(onReEditStreamProvider)
-              .listen(
-                (event) =>
-                    textEditingController.text =
-                        textEditingController.text + event,
-              )
-              .cancel,
+      () => ref
+          .read(onReEditStreamProvider)
+          .listen(
+            (event) =>
+                textEditingController.text = textEditingController.text + event,
+          )
+          .cancel,
       [textEditingController],
     );
 
@@ -452,10 +444,9 @@ class _SendTextField extends HookConsumerWidget {
 
     final hasInputText =
         useMemoizedStream(
-          () =>
-              textEditingValueStream
-                  .map((event) => event.text.isNotEmpty)
-                  .distinct(),
+          () => textEditingValueStream
+              .map((event) => event.text.isNotEmpty)
+              .distinct(),
           keys: [textEditingValueStream],
           initialData: textEditingController.text.isNotEmpty,
         ).data ??
@@ -478,27 +469,26 @@ class _SendTextField extends HookConsumerWidget {
             const SingleActivator(LogicalKeyboardKey.enter):
                 const _SendMessageIntent(),
           SingleActivator(
-                LogicalKeyboardKey.enter,
-                meta: kPlatformIsDarwin,
-                shift: true,
-                alt: !kPlatformIsDarwin,
-              ):
-              const _SendPostMessageIntent(),
+            LogicalKeyboardKey.enter,
+            meta: kPlatformIsDarwin,
+            shift: true,
+            alt: !kPlatformIsDarwin,
+          ): const _SendPostMessageIntent(),
           const SingleActivator(LogicalKeyboardKey.escape):
               const EscapeIntent(),
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
-            onInvoke:
-                (Intent intent) => _sendMessage(context, textEditingController),
+            onInvoke: (Intent intent) =>
+                _sendMessage(context, textEditingController),
           ),
           PasteTextIntent: _PasteContextAction(context),
           _SendPostMessageIntent: CallbackAction<Intent>(
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
           EscapeIntent: CallbackAction<Intent>(
-            onInvoke:
-                (_) => ref.read(quoteMessageProvider.notifier).state = null,
+            onInvoke: (_) =>
+                ref.read(quoteMessageProvider.notifier).state = null,
           ),
         },
         child: Stack(
@@ -520,9 +510,8 @@ class _SendTextField extends HookConsumerWidget {
                 contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
               ),
               selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
-              contextMenuBuilder:
-                  (context, state) =>
-                      MixinAdaptiveSelectionToolbar(editableTextState: state),
+              contextMenuBuilder: (context, state) =>
+                  MixinAdaptiveSelectionToolbar(editableTextState: state),
             ),
             if (!hasInputText)
               Positioned.fill(
@@ -564,8 +553,8 @@ class _QuoteMessage extends HookConsumerWidget {
       tween: Tween(begin: 0, end: quoting ? 1 : 0),
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
-      builder:
-          (BuildContext context, double progress, Widget? child) => ClipRect(
+      builder: (BuildContext context, double progress, Widget? child) =>
+          ClipRect(
             child: Align(
               alignment: AlignmentDirectional.topCenter,
               heightFactor: progress,
@@ -588,9 +577,8 @@ class _QuoteMessage extends HookConsumerWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap:
-                      () =>
-                          ref.read(quoteMessageProvider.notifier).state = null,
+                  onTap: () =>
+                      ref.read(quoteMessageProvider.notifier).state = null,
                   behavior: HitTestBehavior.opaque,
                   child: Container(
                     padding: const EdgeInsets.all(14),
@@ -624,107 +612,104 @@ class _SendActionTypeButton extends HookConsumerWidget {
       padding: const EdgeInsets.only(left: 6),
       child: ContextMenuPortalEntry(
         interactive: false,
-        showedMenu:
-            (value) => Future(() {
-              menuDisplayed.value = value;
-            }),
-        buildMenus:
-            () => [
-              ContextMenu(
-                icon: Resources.assetsImagesContactSvg,
-                title: context.l10n.contact,
-                onTap: () async {
-                  final conversationState = context.providerContainer.read(
-                    conversationProvider,
-                  );
+        showedMenu: (value) => Future(() {
+          menuDisplayed.value = value;
+        }),
+        buildMenus: () => [
+          ContextMenu(
+            icon: Resources.assetsImagesContactSvg,
+            title: context.l10n.contact,
+            onTap: () async {
+              final conversationState = context.providerContainer.read(
+                conversationProvider,
+              );
 
-                  if (conversationState == null) return;
+              if (conversationState == null) return;
 
-                  final result = await showConversationSelector(
-                    context: context,
-                    singleSelect: true,
-                    onlyContact: true,
-                    title: context.l10n.select,
-                    filteredIds: [conversationState.userId].nonNulls,
-                  );
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: true,
+                onlyContact: true,
+                title: context.l10n.select,
+                filteredIds: [conversationState.userId].nonNulls,
+              );
 
-                  if (result == null || result.isEmpty) return;
-                  final userId = result.first.userId;
-                  if (userId == null || userId.isEmpty) return;
+              if (result == null || result.isEmpty) return;
+              final userId = result.first.userId;
+              if (userId == null || userId.isEmpty) return;
 
-                  await runWithToast(() async {
-                    final user =
-                        await context.database.userDao
-                            .userById(userId)
-                            .getSingleOrNull();
-                    if (user == null) throw Exception('User not found');
+              await runWithToast(() async {
+                final user = await context.database.userDao
+                    .userById(userId)
+                    .getSingleOrNull();
+                if (user == null) throw Exception('User not found');
 
-                    final quoteMessage = ref.read(
-                      quoteMessageProvider.notifier,
-                    );
+                final quoteMessage = ref.read(
+                  quoteMessageProvider.notifier,
+                );
 
-                    await context.accountServer.sendContactMessage(
-                      userId,
-                      user.fullName,
-                      conversationState.encryptCategory,
-                      conversationId: conversationState.conversationId,
-                      recipientId: conversationState.userId,
-                      quoteMessageId: quoteMessage.state?.messageId,
-                    );
-                    quoteMessage.state = null;
-                  });
-                },
-              ),
-              ContextMenu(
-                icon: Resources.assetsImagesFileSvg,
-                title: context.l10n.files,
-                onTap: () async {
-                  final files = await selectFiles();
-                  if (files.isNotEmpty) {
-                    await showFilesPreviewDialog(context, files);
-                  }
-                },
-              ),
-              if (isDesktop)
-                ContextMenu(
-                  icon: Resources.assetsImagesFilePreviewImagesSvg,
-                  title: context.l10n.picturesAndVideos,
-                  onTap: () async {
-                    final files = await selectFiles();
-                    if (files.isNotEmpty) {
-                      await showFilesPreviewDialog(context, files);
-                    }
-                  },
-                ),
-              if (!isDesktop)
-                ContextMenu(
-                  icon: Resources.assetsImagesImageSvg,
-                  title: context.l10n.image,
-                  onTap: () async {
-                    final image = await ImagePicker().pickImage(
-                      source: ImageSource.gallery,
-                    );
-                    if (image == null) return;
-                    await showFilesPreviewDialog(context, [
-                      image.withMineType(),
-                    ]);
-                  },
-                ),
-              if (!isDesktop)
-                ContextMenu(
-                  icon: Resources.assetsImagesVideoSvg,
-                  title: context.l10n.video,
-                  onTap: () async {
-                    final video = await ImagePicker().pickVideo(
-                      source: ImageSource.gallery,
-                    );
-                    if (video == null) return;
-                    await showFilesPreviewDialog(context, [
-                      video.withMineType(),
-                    ]);
-                  },
-                ),
-            ],
+                await context.accountServer.sendContactMessage(
+                  userId,
+                  user.fullName,
+                  conversationState.encryptCategory,
+                  conversationId: conversationState.conversationId,
+                  recipientId: conversationState.userId,
+                  quoteMessageId: quoteMessage.state?.messageId,
+                );
+                quoteMessage.state = null;
+              });
+            },
+          ),
+          ContextMenu(
+            icon: Resources.assetsImagesFileSvg,
+            title: context.l10n.files,
+            onTap: () async {
+              final files = await selectFiles();
+              if (files.isNotEmpty) {
+                await showFilesPreviewDialog(context, files);
+              }
+            },
+          ),
+          if (isDesktop)
+            ContextMenu(
+              icon: Resources.assetsImagesFilePreviewImagesSvg,
+              title: context.l10n.picturesAndVideos,
+              onTap: () async {
+                final files = await selectFiles();
+                if (files.isNotEmpty) {
+                  await showFilesPreviewDialog(context, files);
+                }
+              },
+            ),
+          if (!isDesktop)
+            ContextMenu(
+              icon: Resources.assetsImagesImageSvg,
+              title: context.l10n.image,
+              onTap: () async {
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                );
+                if (image == null) return;
+                await showFilesPreviewDialog(context, [
+                  image.withMineType(),
+                ]);
+              },
+            ),
+          if (!isDesktop)
+            ContextMenu(
+              icon: Resources.assetsImagesVideoSvg,
+              title: context.l10n.video,
+              onTap: () async {
+                final video = await ImagePicker().pickVideo(
+                  source: ImageSource.gallery,
+                );
+                if (video == null) return;
+                await showFilesPreviewDialog(context, [
+                  video.withMineType(),
+                ]);
+              },
+            ),
+        ],
         child: _AnimatedSendTypeButton(menuDisplayed: menuDisplayed.value),
       ),
     );
@@ -738,22 +723,21 @@ class _AnimatedSendTypeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tween =
-        MovieTween()
-          ..scene(
-            duration: 200.milliseconds,
-            curve: Curves.easeInOut,
-          ).tween('rotate', Tween<double>(begin: 0, end: math.pi / 4))
-          ..scene(
-            duration: 100.milliseconds,
-            curve: Curves.easeIn,
-            end: 100.milliseconds,
-          ).tween('scale', Tween<double>(begin: 1, end: 0.8))
-          ..scene(
-            duration: 100.milliseconds,
-            curve: Curves.easeOut,
-            begin: 100.milliseconds,
-          ).tween('scale', Tween<double>(begin: 0.8, end: 1));
+    final tween = MovieTween()
+      ..scene(
+        duration: 200.milliseconds,
+        curve: Curves.easeInOut,
+      ).tween('rotate', Tween<double>(begin: 0, end: math.pi / 4))
+      ..scene(
+        duration: 100.milliseconds,
+        curve: Curves.easeIn,
+        end: 100.milliseconds,
+      ).tween('scale', Tween<double>(begin: 1, end: 0.8))
+      ..scene(
+        duration: 100.milliseconds,
+        curve: Curves.easeOut,
+        begin: 100.milliseconds,
+      ).tween('scale', Tween<double>(begin: 0.8, end: 1));
     return CustomAnimationBuilder(
       duration: 200.milliseconds,
       tween: tween,
@@ -776,11 +760,10 @@ class _AnimatedSendTypeButton extends StatelessWidget {
         },
         color: context.theme.icon,
       ),
-      builder:
-          (context, value, child) => Transform.scale(
-            scale: value.get('scale'),
-            child: Transform.rotate(angle: value.get('rotate'), child: child),
-          ),
+      builder: (context, value, child) => Transform.scale(
+        scale: value.get('scale'),
+        child: Transform.rotate(angle: value.get('rotate'), child: child),
+      ),
     );
   }
 }
@@ -861,12 +844,11 @@ class _StickerButton extends HookConsumerWidget {
           portal: Padding(
             padding: const EdgeInsets.all(8),
             child: Builder(
-              builder:
-                  (context) => StickerPage(
-                    tabController: DefaultTabController.of(context),
-                    tabLength: tabLength,
-                    presetStickerGroups: presetStickerGroups,
-                  ),
+              builder: (context) => StickerPage(
+                tabController: DefaultTabController.of(context),
+                tabLength: tabLength,
+                presetStickerGroups: presetStickerGroups,
+              ),
             ),
           ),
           child: ActionButton(
@@ -916,12 +898,11 @@ class MentionTextMatcher extends TextMatcher implements EquatableMixin {
 
           return TextSpan(
             text: displayString,
-            style:
-                valid
-                    ? (span.style ?? const TextStyle()).merge(
-                      highlightTextStyle,
-                    )
-                    : span.style,
+            style: valid
+                ? (span.style ?? const TextStyle()).merge(
+                    highlightTextStyle,
+                  )
+                : span.style,
           );
         },
       );
@@ -987,14 +968,13 @@ class _HighlightTextEditingController extends TextEditingController {
 
   TextSpan _buildTextSpan(String text, TextStyle? style) => TextSpan(
     style: style,
-    children:
-        TextMatcher.applyTextMatchers(
-          [TextSpan(text: text, style: style)],
-          [
-            MentionTextMatcher(mentionCache, highlightTextStyle),
-            EmojiTextMatcher(),
-          ],
-        ).toList(),
+    children: TextMatcher.applyTextMatchers(
+      [TextSpan(text: text, style: style)],
+      [
+        MentionTextMatcher(mentionCache, highlightTextStyle),
+        EmojiTextMatcher(),
+      ],
+    ).toList(),
   );
 }
 

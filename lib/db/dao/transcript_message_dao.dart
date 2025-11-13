@@ -18,19 +18,21 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
   Future<void> insertAll(
     List<TranscriptMessage> transcripts, {
     InsertMode mode = InsertMode.insertOrReplace,
-  }) => batch(
-    (batch) => batch.insertAll(db.transcriptMessages, transcripts, mode: mode),
-  ).then((value) {
-    DataBaseEventBus.instance.updateTranscriptMessage(
-      transcripts.map(
-        (e) => MiniTranscriptMessage(
-          transcriptId: e.transcriptId,
-          messageId: e.messageId,
-        ),
-      ),
-    );
-    return value;
-  });
+  }) =>
+      batch(
+        (batch) =>
+            batch.insertAll(db.transcriptMessages, transcripts, mode: mode),
+      ).then((value) {
+        DataBaseEventBus.instance.updateTranscriptMessage(
+          transcripts.map(
+            (e) => MiniTranscriptMessage(
+              transcriptId: e.transcriptId,
+              messageId: e.messageId,
+            ),
+          ),
+        );
+        return value;
+      });
 
   Selectable<TranscriptMessageItem> transactionMessageItem(String messageId) =>
       baseTranscriptMessageItem(
@@ -67,29 +69,30 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     required MediaStatus mediaStatus,
     required DateTime? mediaCreatedAt,
     required String category,
-  }) => (db.update(db.transcriptMessages)..where(
-        (tbl) =>
-            tbl.transcriptId.equals(transcriptId) &
-            tbl.messageId.equals(messageId),
-      ))
-      .write(
-        TranscriptMessagesCompanion(
-          category: Value(category),
-          mediaStatus: Value(mediaStatus),
-          mediaKey: Value(key),
-          mediaDigest: Value(digest),
-          content: Value(attachmentId),
-          mediaCreatedAt: Value(mediaCreatedAt),
-        ),
-      )
-      .then((value) {
-        DataBaseEventBus.instance.updateTranscriptMessage([
-          MiniTranscriptMessage(
-            transcriptId: transcriptId,
-            messageId: messageId,
-          ),
-        ]);
-      });
+  }) =>
+      (db.update(db.transcriptMessages)..where(
+            (tbl) =>
+                tbl.transcriptId.equals(transcriptId) &
+                tbl.messageId.equals(messageId),
+          ))
+          .write(
+            TranscriptMessagesCompanion(
+              category: Value(category),
+              mediaStatus: Value(mediaStatus),
+              mediaKey: Value(key),
+              mediaDigest: Value(digest),
+              content: Value(attachmentId),
+              mediaCreatedAt: Value(mediaCreatedAt),
+            ),
+          )
+          .then((value) {
+            DataBaseEventBus.instance.updateTranscriptMessage([
+              MiniTranscriptMessage(
+                transcriptId: transcriptId,
+                messageId: messageId,
+              ),
+            ]);
+          });
 
   Future<String> generateTranscriptMessageFts5Content(
     List<TranscriptMessage> transcriptMessages,

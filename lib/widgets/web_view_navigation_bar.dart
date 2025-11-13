@@ -17,10 +17,9 @@ class WebViewNavigationBar extends StatelessWidget {
         const SizedBox(width: 10),
         ActionButton(
           name: Resources.assetsImagesIcBackSvg,
-          color:
-              state.canGoBack
-                  ? context.theme.icon
-                  : context.theme.icon.withValues(alpha: 0.5),
+          color: state.canGoBack
+              ? context.theme.icon
+              : context.theme.icon.withValues(alpha: 0.5),
           onTap: controller.back,
           size: 16,
           padding: EdgeInsets.zero,
@@ -28,10 +27,9 @@ class WebViewNavigationBar extends StatelessWidget {
         const SizedBox(width: 16),
         ActionButton(
           name: Resources.assetsImagesIcForwardSvg,
-          color:
-              state.canGoForward
-                  ? context.theme.icon
-                  : context.theme.icon.withValues(alpha: 0.5),
+          color: state.canGoForward
+              ? context.theme.icon
+              : context.theme.icon.withValues(alpha: 0.5),
           onTap: controller.forward,
           size: 16,
           padding: EdgeInsets.zero,

@@ -41,12 +41,11 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
     final pinned = useMessageConverter(converter: (state) => state.pinned);
     final isSecret = useMessageConverter(converter: (state) => state.isSecret);
     final isRepresentative = useMessageConverter(
-      converter:
-          (state) => _isRepresentative(
-            state,
-            ref.read(conversationProvider),
-            context.accountServer.userId,
-          ),
+      converter: (state) => _isRepresentative(
+        state,
+        ref.read(conversationProvider),
+        context.accountServer.userId,
+      ),
     );
     final createdAt = useMessageConverter(
       converter: (state) => state.createdAt,

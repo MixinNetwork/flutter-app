@@ -87,10 +87,10 @@ class _CurrentShowingMessages {
 
     final dayTimeElement =
         !isSameDay(widget.message.createdAt, widget.prev?.createdAt)
-            ? element.descendantFirstOf(
-              (e) => e.widget is _MessageDayTimeWidget,
-            )
-            : null;
+        ? element.descendantFirstOf(
+            (e) => e.widget is _MessageDayTimeWidget,
+          )
+        : null;
     if (!reverse) {
       items.add(widget.message);
       elements.add(item);
@@ -312,40 +312,39 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
     }, [reTraversalKey]);
 
     return LayoutBuilder(
-      builder:
-          (context, constraints) => HookBuilder(
-            builder: (context) {
-              useEffect(() {
-                WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
-                  doTraversal();
-                });
-              }, [constraints]);
-              return BlocProvider.value(
-                value: bloc,
-                child: ClipRect(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      child,
-                      if (dateTime.value != null)
-                        Transform.translate(
-                          offset: Offset(
-                            0,
-                            dateTimeTopOffset.value.clamp(-60.0, 0.0),
-                          ),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: _MessageDayTimeWidget(
-                              dateTime: dateTime.value!,
-                            ),
-                          ),
+      builder: (context, constraints) => HookBuilder(
+        builder: (context) {
+          useEffect(() {
+            WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+              doTraversal();
+            });
+          }, [constraints]);
+          return BlocProvider.value(
+            value: bloc,
+            child: ClipRect(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  child,
+                  if (dateTime.value != null)
+                    Transform.translate(
+                      offset: Offset(
+                        0,
+                        dateTimeTopOffset.value.clamp(-60.0, 0.0),
+                      ),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: _MessageDayTimeWidget(
+                          dateTime: dateTime.value!,
                         ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

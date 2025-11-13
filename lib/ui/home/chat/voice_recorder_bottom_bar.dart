@@ -184,11 +184,12 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isRecorderMode = useBlocStateConverter<
-      VoiceRecorderCubit,
-      VoiceRecorderCubitState,
-      bool
-    >(converter: (state) => state.state != RecorderState.idle);
+    final isRecorderMode =
+        useBlocStateConverter<
+          VoiceRecorderCubit,
+          VoiceRecorderCubitState,
+          bool
+        >(converter: (state) => state.state != RecorderState.idle);
     final link = useMemoized(LayerLink.new);
 
     final overlay = Navigator.of(context).overlay ?? Overlay.of(context);
@@ -204,28 +205,27 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
         return;
       }
       final entry = OverlayEntry(
-        builder:
-            (context) => MultiBlocProvider(
-              providers: [
-                BlocProvider<VoiceRecorderCubit>.value(
-                  value: voiceRecorderCubit,
-                ),
-              ],
-              child: _RecordingInterceptor(
-                child: UnconstrainedBox(
-                  child: CompositedTransformFollower(
-                    link: link,
-                    showWhenUnlinked: false,
-                    targetAnchor: Alignment.bottomCenter,
-                    followerAnchor: Alignment.bottomCenter,
-                    child: SizedBox(
-                      width: layoutWidth,
-                      child: const Material(child: VoiceRecorderBottomBar()),
-                    ),
-                  ),
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider<VoiceRecorderCubit>.value(
+              value: voiceRecorderCubit,
+            ),
+          ],
+          child: _RecordingInterceptor(
+            child: UnconstrainedBox(
+              child: CompositedTransformFollower(
+                link: link,
+                showWhenUnlinked: false,
+                targetAnchor: Alignment.bottomCenter,
+                followerAnchor: Alignment.bottomCenter,
+                child: SizedBox(
+                  width: layoutWidth,
+                  child: const Material(child: VoiceRecorderBottomBar()),
                 ),
               ),
             ),
+          ),
+        ),
       );
       recorderBottomBarEntry.value = entry;
       WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
@@ -244,11 +244,12 @@ class _RecordingInterceptor extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isRecording = useBlocStateConverter<
-      VoiceRecorderCubit,
-      VoiceRecorderCubitState,
-      bool
-    >(converter: (state) => state.state == RecorderState.recording);
+    final isRecording =
+        useBlocStateConverter<
+          VoiceRecorderCubit,
+          VoiceRecorderCubitState,
+          bool
+        >(converter: (state) => state.state == RecorderState.recording);
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -285,64 +286,63 @@ void _showDiscardRecordingWarningAlertOverlay(
   }
 
   entry = OverlayEntry(
-    builder:
-        (context) => Stack(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: dimiss,
-              child: const SizedBox.expand(
-                child: ColoredBox(color: Color(0x80000000)),
-              ),
-            ),
-            Center(
-              child: SizedBox(
-                width: 400,
-                child: Material(
-                  borderRadius: const BorderRadius.all(Radius.circular(11)),
-                  color: context.theme.popUp,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+    builder: (context) => Stack(
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: dimiss,
+          child: const SizedBox.expand(
+            child: ColoredBox(color: Color(0x80000000)),
+          ),
+        ),
+        Center(
+          child: SizedBox(
+            width: 400,
+            child: Material(
+              borderRadius: const BorderRadius.all(Radius.circular(11)),
+              color: context.theme.popUp,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 40),
+                    Text(
+                      context.l10n.discardRecordingWarning,
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 2,
+                        color: context.theme.text,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    Row(
                       children: [
-                        const SizedBox(height: 40),
-                        Text(
-                          context.l10n.discardRecordingWarning,
-                          style: TextStyle(
-                            fontSize: 16,
-                            height: 2,
-                            color: context.theme.text,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        const Spacer(),
+                        MixinButton(
+                          backgroundTransparent: true,
+                          onTap: dimiss,
+                          child: Text(context.l10n.cancel),
                         ),
-                        const SizedBox(height: 36),
-                        Row(
-                          children: [
-                            const Spacer(),
-                            MixinButton(
-                              backgroundTransparent: true,
-                              onTap: dimiss,
-                              child: Text(context.l10n.cancel),
-                            ),
-                            MixinButton(
-                              onTap: () {
-                                dimiss();
-                                onDiscard();
-                              },
-                              child: Text(context.l10n.discard),
-                            ),
-                          ],
+                        MixinButton(
+                          onTap: () {
+                            dimiss();
+                            onDiscard();
+                          },
+                          child: Text(context.l10n.discard),
                         ),
-                        const SizedBox(height: 30),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 30),
+                  ],
                 ),
               ),
             ),
-          ],
+          ),
         ),
+      ],
+    ),
   );
   overlay.insert(entry!);
 }
@@ -352,21 +352,24 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final startTime = useBlocStateConverter<
-      VoiceRecorderCubit,
-      VoiceRecorderCubitState,
-      DateTime?
-    >(converter: (state) => state.startTime);
-    final isRecording = useBlocStateConverter<
-      VoiceRecorderCubit,
-      VoiceRecorderCubitState,
-      bool
-    >(converter: (state) => state.state == RecorderState.recording);
-    final recordedResult = useBlocStateConverter<
-      VoiceRecorderCubit,
-      VoiceRecorderCubitState,
-      RecordedData?
-    >(converter: (state) => state.recodedData);
+    final startTime =
+        useBlocStateConverter<
+          VoiceRecorderCubit,
+          VoiceRecorderCubitState,
+          DateTime?
+        >(converter: (state) => state.startTime);
+    final isRecording =
+        useBlocStateConverter<
+          VoiceRecorderCubit,
+          VoiceRecorderCubitState,
+          bool
+        >(converter: (state) => state.state == RecorderState.recording);
+    final recordedResult =
+        useBlocStateConverter<
+          VoiceRecorderCubit,
+          VoiceRecorderCubitState,
+          RecordedData?
+        >(converter: (state) => state.recodedData);
 
     useEffect(() {
       if (recordedResult == null) {
@@ -417,12 +420,11 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child:
-                  recordedResult == null
-                      ? startTime == null
-                          ? const SizedBox()
-                          : _RecordingLayout(startTime: startTime)
-                      : _RecordedResultPreviewLayout(result: recordedResult),
+              child: recordedResult == null
+                  ? startTime == null
+                        ? const SizedBox()
+                        : _RecordingLayout(startTime: startTime)
+                  : _RecordedResultPreviewLayout(result: recordedResult),
             ),
           ),
           if (isRecording)
@@ -574,18 +576,18 @@ class _RecordedResultPreviewLayout extends HookConsumerWidget {
                 height: 20,
                 child: _TickRefreshContainer(
                   active: isPlaying,
-                  builder:
-                      (context) => WaveformWidget(
-                        value: (player.position *
+                  builder: (context) => WaveformWidget(
+                    value:
+                        (player.position *
                                 1000 /
                                 result.duration.inMilliseconds)
                             .clamp(0.0, 1.0),
-                        waveform: result.waveform,
-                        backgroundColor: context.theme.waveformBackground,
-                        foregroundColor: context.theme.waveformForeground,
-                        maxBarCount: null,
-                        alignment: WaveBarAlignment.center,
-                      ),
+                    waveform: result.waveform,
+                    backgroundColor: context.theme.waveformBackground,
+                    foregroundColor: context.theme.waveformForeground,
+                    maxBarCount: null,
+                    alignment: WaveBarAlignment.center,
+                  ),
                 ),
               ),
             ),
@@ -642,10 +644,9 @@ class _RecordingLayout extends StatelessWidget {
     children: [
       const Spacer(),
       _TickRefreshContainer(
-        builder:
-            (context) => _RecorderDurationText(
-              duration: DateTime.now().difference(startTime),
-            ),
+        builder: (context) => _RecorderDurationText(
+          duration: DateTime.now().difference(startTime),
+        ),
         active: true,
       ),
       const Spacer(),

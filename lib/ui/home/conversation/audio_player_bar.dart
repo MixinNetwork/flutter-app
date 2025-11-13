@@ -24,22 +24,21 @@ class AudioPlayerBar extends HookConsumerWidget {
 
     final state = useAudioMessagePlayerState();
 
-    final conversationItem =
-        useMemoizedStream(() {
-          if (message == null) {
-            return Stream.value(null);
-          }
-          return context.database.conversationDao
-              .conversationItem(message.conversationId)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateConversationStream([
-                    message.conversationId,
-                  ]),
-                ],
-                duration: kSlowThrottleDuration,
-              );
-        }, keys: [message?.conversationId]).data;
+    final conversationItem = useMemoizedStream(() {
+      if (message == null) {
+        return Stream.value(null);
+      }
+      return context.database.conversationDao
+          .conversationItem(message.conversationId)
+          .watchSingleOrNullWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateConversationStream([
+                message.conversationId,
+              ]),
+            ],
+            duration: kSlowThrottleDuration,
+          );
+    }, keys: [message?.conversationId]).data;
 
     final selectedConversationId = ref.watch(currentConversationIdProvider);
 
@@ -69,10 +68,9 @@ class AudioPlayerBar extends HookConsumerWidget {
               children: [
                 const _PlaybackSpeedButton(),
                 ActionButton(
-                  name:
-                      state.isPlaying
-                          ? Resources.assetsImagesPlayerPauseSvg
-                          : Resources.assetsImagesPlayerPlaySvg,
+                  name: state.isPlaying
+                      ? Resources.assetsImagesPlayerPauseSvg
+                      : Resources.assetsImagesPlayerPlaySvg,
                   color: context.theme.icon,
                   onTap: () {
                     if (state.isPlaying) {
@@ -132,8 +130,9 @@ class _PlaybackSpeedButton extends HookConsumerWidget {
         child: Text(
           '2X',
           style: TextStyle(
-            color:
-                speed == 2 ? context.theme.accent : context.theme.secondaryText,
+            color: speed == 2
+                ? context.theme.accent
+                : context.theme.secondaryText,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -164,13 +163,12 @@ class _Icon extends StatelessWidget {
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child:
-              conversation == null
-                  ? const SizedBox.square(dimension: 32)
-                  : ConversationAvatarWidget(
-                    conversation: conversation,
-                    size: 32,
-                  ),
+          child: conversation == null
+              ? const SizedBox.square(dimension: 32)
+              : ConversationAvatarWidget(
+                  conversation: conversation,
+                  size: 32,
+                ),
         ),
         Align(
           alignment: Alignment.bottomRight,

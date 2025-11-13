@@ -110,9 +110,8 @@ class _QrCode extends HookConsumerWidget {
                   visible: visible,
                   child: _Retry(
                     errorMessage: errorMessage,
-                    onTap:
-                        () =>
-                            context.read<LandingQrCodeCubit>().requestAuthUrl(),
+                    onTap: () =>
+                        context.read<LandingQrCodeCubit>().requestAuthUrl(),
                   ),
                 ),
               ],

@@ -602,10 +602,13 @@ class AccountServer {
         );
 
     assert(messageIds.isNotEmpty);
-    final messages =
-        await database.messageDao.messageItemByMessageIds(messageIds).get();
-    final transcripts =
-        messages.where((e) => e.canForward).map(toTranscript).toList();
+    final messages = await database.messageDao
+        .messageItemByMessageIds(messageIds)
+        .get();
+    final transcripts = messages
+        .where((e) => e.canForward)
+        .map(toTranscript)
+        .toList();
     if (transcripts.isEmpty) {
       e('sendTranscriptMessage: transcripts is empty');
       return;
@@ -827,8 +830,9 @@ class AccountServer {
     final res = await client.accountApi.getStickerAlbums();
     final albums = res.data..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-    final localLatestCreatedAt =
-        await database.stickerAlbumDao.latestCreatedAt().getSingleOrNull();
+    final localLatestCreatedAt = await database.stickerAlbumDao
+        .latestCreatedAt()
+        .getSingleOrNull();
 
     var hasNewAlbum = false;
     if (localLatestCreatedAt == null && albums.isNotEmpty) {
@@ -839,8 +843,9 @@ class AccountServer {
         await database.stickerAlbumDao.maxOrder().getSingleOrNull() ?? 0;
 
     for (final a in albums) {
-      final localAlbum =
-          await database.stickerAlbumDao.album(a.albumId).getSingleOrNull();
+      final localAlbum = await database.stickerAlbumDao
+          .album(a.albumId)
+          .getSingleOrNull();
       if (localAlbum == null) {
         maxOrder++;
       }
@@ -904,8 +909,9 @@ class AccountServer {
   }
 
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
-    final ccList =
-        (await client.circleApi.getCircleConversations(circle.circleId)).data;
+    final ccList = (await client.circleApi.getCircleConversations(
+      circle.circleId,
+    )).data;
     for (final cc in ccList) {
       await database.circleConversationDao.insert(
         db.CircleConversation(
@@ -1032,8 +1038,9 @@ class AccountServer {
         conversationId: conversationId,
         category: ConversationCategory.group,
         name: name.trim(),
-        participants:
-            userIds.map((e) => ParticipantRequest(userId: e)).toList(),
+        participants: userIds
+            .map((e) => ParticipantRequest(userId: e))
+            .toList(),
         randomId: randomId,
       ),
     );
@@ -1137,10 +1144,9 @@ class AccountServer {
           'cid: $cid != conversationId: $conversationId',
         );
       }
-      final conversation =
-          await database.conversationDao
-              .conversationById(conversationId)
-              .getSingleOrNull();
+      final conversation = await database.conversationDao
+          .conversationById(conversationId)
+          .getSingleOrNull();
       if (conversation == null) {
         await database.conversationDao.insert(
           db.Conversation(
@@ -1216,8 +1222,9 @@ class AccountServer {
             ),
           );
           if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-            final u =
-                await database.userDao.userById(cc.userId!).getSingleOrNull();
+            final u = await database.userDao
+                .userById(cc.userId!)
+                .getSingleOrNull();
             if (u == null) {
               refreshUserIdSet.add(cc.userId);
             }
@@ -1398,15 +1405,13 @@ class AccountServer {
       final file = File(path);
       if (file.existsSync()) await file.delete();
     } else if (message.category.isTranscript) {
-      final iterable =
-          await database.transcriptMessageDao
-              .transcriptMessageByTranscriptId(message.messageId)
-              .get();
+      final iterable = await database.transcriptMessageDao
+          .transcriptMessageByTranscriptId(message.messageId)
+          .get();
 
-      final list =
-          await database.transcriptMessageDao
-              .messageIdsByMessageIds(iterable.map((e) => e.messageId))
-              .get();
+      final list = await database.transcriptMessageDao
+          .messageIdsByMessageIds(iterable.map((e) => e.messageId))
+          .get();
       iterable.where((element) => !list.contains(element.messageId)).forEach((
         e,
       ) {
@@ -1451,10 +1456,9 @@ class AccountServer {
   }
 
   Future<void> deleteMessagesByConversationId(String conversationId) async {
-    final miniMessageIds =
-        await database.messageDao
-            .miniMessageByIds(attachmentUtil.downloadingIds.toList())
-            .get();
+    final miniMessageIds = await database.messageDao
+        .miniMessageByIds(attachmentUtil.downloadingIds.toList())
+        .get();
     await Future.forEach(
       miniMessageIds.where(
         (message) => message.conversationId == conversationId,
@@ -1560,8 +1564,9 @@ class AccountServer {
         e('checkAsset: $error $stacktrace');
       }
     } else {
-      final chain =
-          await database.chainDao.chain(asset.chainId).getSingleOrNull();
+      final chain = await database.chainDao
+          .chain(asset.chainId)
+          .getSingleOrNull();
       if (chain == null) {
         await checkAsset(assetId: assetId, force: true);
       }

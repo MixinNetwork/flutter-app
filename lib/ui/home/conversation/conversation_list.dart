@@ -62,43 +62,42 @@ class ConversationList extends HookConsumerWidget {
 
     Widget child;
 
-    child =
-        pagingState.count == 0
-            ? pagingState.hasData
-                ? Center(
+    child = pagingState.count == 0
+        ? pagingState.hasData
+              ? Center(
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation(context.theme.accent),
                   ),
                 )
-                : const _Empty()
-            : ScrollablePositionedList.builder(
-              key: PageStorageKey(slideCategoryState),
-              itemPositionsListener: itemPositionsListener,
-              itemCount: pagingState.count,
-              itemScrollController: itemScrollController,
-              itemBuilder: (context, index) {
-                final conversation = pagingState.map[index];
-                if (conversation == null) return const SizedBox(height: 80);
-                final selected =
-                    conversation.conversationId == conversationId && !routeMode;
-                return ConversationMenuWrapper(
+              : const _Empty()
+        : ScrollablePositionedList.builder(
+            key: PageStorageKey(slideCategoryState),
+            itemPositionsListener: itemPositionsListener,
+            itemCount: pagingState.count,
+            itemScrollController: itemScrollController,
+            itemBuilder: (context, index) {
+              final conversation = pagingState.map[index];
+              if (conversation == null) return const SizedBox(height: 80);
+              final selected =
+                  conversation.conversationId == conversationId && !routeMode;
+              return ConversationMenuWrapper(
+                conversation: conversation,
+                removeChatFromCircle: true,
+                child: ConversationItemWidget(
+                  selected: selected,
                   conversation: conversation,
-                  removeChatFromCircle: true,
-                  child: ConversationItemWidget(
-                    selected: selected,
-                    conversation: conversation,
-                    onTap: () {
-                      ConversationStateNotifier.selectConversation(
-                        context,
-                        conversation.conversationId,
-                        conversation: conversation,
-                      );
-                    },
-                  ),
-                );
-              },
-            );
+                  onTap: () {
+                    ConversationStateNotifier.selectConversation(
+                      context,
+                      conversation.conversationId,
+                      conversation: conversation,
+                    );
+                  },
+                ),
+              );
+            },
+          );
 
     return Column(
       children: [
@@ -165,13 +164,12 @@ class ConversationItemWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: DecoratedBox(
-            decoration:
-                selected
-                    ? BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: context.theme.listSelected,
-                    )
-                    : const BoxDecoration(),
+            decoration: selected
+                ? BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    color: context.theme.listSelected,
+                  )
+                : const BoxDecoration(),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
@@ -274,10 +272,9 @@ class _ItemConversationSubtitle extends StatelessWidget {
               UnreadText(
                 data: '${conversation.unseenMessageCount}',
                 textColor: const Color.fromRGBO(255, 255, 255, 1),
-                backgroundColor:
-                    conversation.isMute
-                        ? context.theme.secondaryText
-                        : context.theme.accent,
+                backgroundColor: conversation.isMute
+                    ? context.theme.secondaryText
+                    : context.theme.accent,
               ),
             if ((conversation.unseenMessageCount ?? 0) <= 0)
               _StatusRow(conversation: conversation),
@@ -325,75 +322,73 @@ class _MessageContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text =
-        useMemoizedFuture(
-          () async {
-            if (hasDraft) return conversation.draft;
-            final isGroup =
-                conversation.category == ConversationCategory.group ||
-                conversation.senderId != conversation.ownerId;
+    final text = useMemoizedFuture(
+      () async {
+        if (hasDraft) return conversation.draft;
+        final isGroup =
+            conversation.category == ConversationCategory.group ||
+            conversation.senderId != conversation.ownerId;
 
-            final mentionCache = ref.read(mentionCacheProvider);
+        final mentionCache = ref.read(mentionCacheProvider);
 
-            if (conversation.contentType ==
-                MessageCategory.systemConversation) {
-              return generateSystemText(
-                actionName: conversation.actionName,
-                participantUserId: conversation.participantUserId,
-                senderId: conversation.senderId,
-                currentUserId: context.accountServer.userId,
-                participantFullName: conversation.participantFullName,
-                senderFullName: conversation.senderFullName,
-                expireIn: int.tryParse(conversation.content ?? '0'),
-              );
-            } else if (conversation.contentType.isPin) {
-              final pinMessageMinimal = PinMessageMinimal.fromJsonString(
-                conversation.content ?? '',
-              );
-              if (pinMessageMinimal == null) {
-                return context.l10n.chatPinMessage(
-                  conversation.senderFullName ?? '',
-                  context.l10n.aMessage,
-                );
-              }
-              final preview = await generatePinPreviewText(
-                pinMessageMinimal: pinMessageMinimal,
-                mentionCache: mentionCache,
-              );
-              return context.l10n.chatPinMessage(
-                conversation.senderFullName ?? '',
-                preview,
-              );
-            }
-
-            return messagePreviewOptimize(
-              conversation.messageStatus,
-              conversation.contentType,
-              mentionCache.replaceMention(
-                conversation.content,
-                await mentionCache.checkMentionCache({conversation.content}),
-              ),
-              conversation.senderId == context.accountServer.userId,
-              isGroup,
-              conversation.senderFullName,
+        if (conversation.contentType == MessageCategory.systemConversation) {
+          return generateSystemText(
+            actionName: conversation.actionName,
+            participantUserId: conversation.participantUserId,
+            senderId: conversation.senderId,
+            currentUserId: context.accountServer.userId,
+            participantFullName: conversation.participantFullName,
+            senderFullName: conversation.senderFullName,
+            expireIn: int.tryParse(conversation.content ?? '0'),
+          );
+        } else if (conversation.contentType.isPin) {
+          final pinMessageMinimal = PinMessageMinimal.fromJsonString(
+            conversation.content ?? '',
+          );
+          if (pinMessageMinimal == null) {
+            return context.l10n.chatPinMessage(
+              conversation.senderFullName ?? '',
+              context.l10n.aMessage,
             );
-          },
-          null,
-          keys: [
-            conversation.actionName,
-            conversation.messageStatus,
-            conversation.contentType,
+          }
+          final preview = await generatePinPreviewText(
+            pinMessageMinimal: pinMessageMinimal,
+            mentionCache: mentionCache,
+          );
+          return context.l10n.chatPinMessage(
+            conversation.senderFullName ?? '',
+            preview,
+          );
+        }
+
+        return messagePreviewOptimize(
+          conversation.messageStatus,
+          conversation.contentType,
+          mentionCache.replaceMention(
             conversation.content,
-            conversation.senderId,
-            conversation.ownerId,
-            conversation.relationship,
-            conversation.participantFullName,
-            conversation.senderFullName,
-            conversation.groupName,
-            conversation.draft,
-            hasDraft,
-          ],
-        ).data;
+            await mentionCache.checkMentionCache({conversation.content}),
+          ),
+          conversation.senderId == context.accountServer.userId,
+          isGroup,
+          conversation.senderFullName,
+        );
+      },
+      null,
+      keys: [
+        conversation.actionName,
+        conversation.messageStatus,
+        conversation.contentType,
+        conversation.content,
+        conversation.senderId,
+        conversation.ownerId,
+        conversation.relationship,
+        conversation.participantFullName,
+        conversation.senderFullName,
+        conversation.groupName,
+        conversation.draft,
+        hasDraft,
+      ],
+    ).data;
 
     final icon = useMemoized(
       () => messagePreviewIcon(

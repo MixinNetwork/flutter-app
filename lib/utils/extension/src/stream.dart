@@ -87,8 +87,9 @@ extension StreamExtension<T> on Stream<T> {
 
   Stream<E> asyncBufferMap<E>(FutureOr<E> Function(List<T> event) convert) {
     StreamController<E> controller;
-    controller =
-        isBroadcast ? StreamController<E>.broadcast() : StreamController<E>();
+    controller = isBroadcast
+        ? StreamController<E>.broadcast()
+        : StreamController<E>();
 
     final events = <T>[];
     var querying = false;

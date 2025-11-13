@@ -116,8 +116,9 @@ String generateSystemText({
             : participantFullName!,
       );
     case MessageAction.expire:
-      final senderName =
-          senderIsCurrentUser ? Localization.current.you : senderFullName!;
+      final senderName = senderIsCurrentUser
+          ? Localization.current.you
+          : senderFullName!;
       if (expireIn == null) {
         text = Localization.current.changedDisappearingMessageSettings(
           senderName,

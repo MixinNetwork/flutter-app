@@ -29,10 +29,9 @@ class Injector {
         conversationId == accountId) {
       return;
     }
-    final conversation =
-        await database.conversationDao
-            .conversationById(conversationId)
-            .getSingleOrNull();
+    final conversation = await database.conversationDao
+        .conversationById(conversationId)
+        .getSingleOrNull();
     if (conversation == null || force) {
       if (unWait) {
         unawaited(refreshConversation(conversationId));
@@ -75,11 +74,11 @@ class Injector {
       }
       final status =
           response.data.participants.firstWhereOrNull(
-                    (element) => element.userId == accountId,
-                  ) !=
-                  null
-              ? ConversationStatus.success
-              : ConversationStatus.quit;
+                (element) => element.userId == accountId,
+              ) !=
+              null
+          ? ConversationStatus.success
+          : ConversationStatus.quit;
 
       await database.conversationDao.insert(
         db.Conversation(
@@ -249,8 +248,9 @@ class Injector {
   }
 
   Future<void> _handleCircle(CircleResponse circle, {int? offset}) async {
-    final ccList =
-        (await client.circleApi.getCircleConversations(circle.circleId)).data;
+    final ccList = (await client.circleApi.getCircleConversations(
+      circle.circleId,
+    )).data;
     for (final cc in ccList) {
       await database.circleConversationDao.insert(
         db.CircleConversation(

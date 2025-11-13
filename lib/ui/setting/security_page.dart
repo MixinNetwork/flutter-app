@@ -49,12 +49,11 @@ class _Passcode extends HookConsumerWidget {
         useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
         SecurityKeyValue.instance.biometric;
 
-    final minutes =
-        useStream(
-          SecurityKeyValue.instance.watchLockDuration().map(
-            (event) => event.inMinutes,
-          ),
-        ).data;
+    final minutes = useStream(
+      SecurityKeyValue.instance.watchLockDuration().map(
+        (event) => event.inMinutes,
+      ),
+    ).data;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -92,45 +91,43 @@ class _Passcode extends HookConsumerWidget {
                       context.theme.listSelected,
                       context.theme.background,
                     ),
-                    itemBuilder:
-                        (BuildContext context) =>
-                            [
-                                  PopupMenuItem(
-                                    value: Duration.zero,
-                                    child: Text(context.l10n.disabled),
+                    itemBuilder: (BuildContext context) =>
+                        [
+                              PopupMenuItem(
+                                value: Duration.zero,
+                                child: Text(context.l10n.disabled),
+                              ),
+                              PopupMenuItem(
+                                value: const Duration(minutes: 1),
+                                child: Text(context.l10n.minute(1, 1)),
+                              ),
+                              PopupMenuItem(
+                                value: const Duration(minutes: 5),
+                                child: Text(context.l10n.minute(5, 5)),
+                              ),
+                              PopupMenuItem(
+                                value: const Duration(hours: 1),
+                                child: Text(context.l10n.hour(1, 1)),
+                              ),
+                              PopupMenuItem(
+                                value: const Duration(hours: 5),
+                                child: Text(context.l10n.hour(5, 5)),
+                              ),
+                            ]
+                            .map(
+                              (e) => PopupMenuItem(
+                                value: e.value,
+                                child: DefaultTextStyle.merge(
+                                  child: e.child ?? const SizedBox(),
+                                  style: TextStyle(
+                                    color: context.theme.text,
                                   ),
-                                  PopupMenuItem(
-                                    value: const Duration(minutes: 1),
-                                    child: Text(context.l10n.minute(1, 1)),
-                                  ),
-                                  PopupMenuItem(
-                                    value: const Duration(minutes: 5),
-                                    child: Text(context.l10n.minute(5, 5)),
-                                  ),
-                                  PopupMenuItem(
-                                    value: const Duration(hours: 1),
-                                    child: Text(context.l10n.hour(1, 1)),
-                                  ),
-                                  PopupMenuItem(
-                                    value: const Duration(hours: 5),
-                                    child: Text(context.l10n.hour(5, 5)),
-                                  ),
-                                ]
-                                .map(
-                                  (e) => PopupMenuItem(
-                                    value: e.value,
-                                    child: DefaultTextStyle.merge(
-                                      child: e.child ?? const SizedBox(),
-                                      style: TextStyle(
-                                        color: context.theme.text,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                    onSelected:
-                        (value) =>
-                            SecurityKeyValue.instance.lockDuration = value,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                    onSelected: (value) =>
+                        SecurityKeyValue.instance.lockDuration = value,
                     child: Text(
                       (minutes == null || minutes == 0)
                           ? context.l10n.disabled

@@ -71,15 +71,14 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     return SizedBox.fromSize(
       size: Size.square(size),
       child: ClipOval(
-        child:
-            _category == ConversationCategory.contact
-                ? AvatarWidget(
-                  userId: _userId,
-                  name: _name,
-                  avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
-                  size: size,
-                )
-                : AvatarPuzzlesWidget(list, size),
+        child: _category == ConversationCategory.contact
+            ? AvatarWidget(
+                userId: _userId,
+                name: _name,
+                avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
+                size: size,
+              )
+            : AvatarPuzzlesWidget(list, size),
       ),
     );
   }
@@ -126,16 +125,15 @@ class AvatarPuzzlesWidget extends HookConsumerWidget {
         );
       default:
         return Row(
-          children:
-              [users.sublist(0, 2), users.sublist(2)]
-                  .map(
-                    (e) => Expanded(
-                      child: Column(
-                        children: e.map(_buildAvatarImage).toList(),
-                      ),
-                    ),
-                  )
-                  .toList(),
+          children: [users.sublist(0, 2), users.sublist(2)]
+              .map(
+                (e) => Expanded(
+                  child: Column(
+                    children: e.map(_buildAvatarImage).toList(),
+                  ),
+                ),
+              )
+              .toList(),
         );
     }
   }
@@ -173,10 +171,9 @@ class AvatarWidget extends StatelessWidget {
       size: Size.square(size),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color:
-              userId != null
-                  ? getAvatarColorById(userId!)
-                  : context.theme.listSelected,
+          color: userId != null
+              ? getAvatarColorById(userId!)
+              : context.theme.listSelected,
         ),
         child: Center(
           child: Text(
@@ -193,16 +190,15 @@ class AvatarWidget extends StatelessWidget {
       ),
     );
 
-    final child =
-        avatarUrl?.isNotEmpty == true
-            ? MixinImage.network(
-              avatarUrl!,
-              width: size,
-              height: size,
-              placeholder: () => placeholder,
-              errorBuilder: (_, _, _) => placeholder,
-            )
-            : placeholder;
+    final child = avatarUrl?.isNotEmpty == true
+        ? MixinImage.network(
+            avatarUrl!,
+            width: size,
+            height: size,
+            placeholder: () => placeholder,
+            errorBuilder: (_, _, _) => placeholder,
+          )
+        : placeholder;
 
     if (clipOval) return ClipOval(child: child);
     return child;

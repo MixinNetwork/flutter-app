@@ -93,10 +93,9 @@ class _AddStickerDialog extends StatelessWidget {
                       );
                   final sticker = response.data;
 
-                  final personalAlbum =
-                      await database.stickerAlbumDao
-                          .personalAlbum()
-                          .getSingleOrNull();
+                  final personalAlbum = await database.stickerAlbumDao
+                      .personalAlbum()
+                      .getSingleOrNull();
                   if (personalAlbum == null) {
                     unawaited(
                       context.accountServer.refreshSticker(force: true),

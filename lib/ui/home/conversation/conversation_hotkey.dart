@@ -19,17 +19,15 @@ class ConversationHotKey extends StatelessWidget {
   Widget build(BuildContext context) => FocusableActionDetector(
     shortcuts: {
       SingleActivator(
-            LogicalKeyboardKey.arrowDown,
-            meta: kPlatformIsDarwin,
-            control: !kPlatformIsDarwin,
-          ):
-          const NextConversationIntent(),
+        LogicalKeyboardKey.arrowDown,
+        meta: kPlatformIsDarwin,
+        control: !kPlatformIsDarwin,
+      ): const NextConversationIntent(),
       SingleActivator(
-            LogicalKeyboardKey.arrowUp,
-            meta: kPlatformIsDarwin,
-            control: !kPlatformIsDarwin,
-          ):
-          const PreviousConversationIntent(),
+        LogicalKeyboardKey.arrowUp,
+        meta: kPlatformIsDarwin,
+        control: !kPlatformIsDarwin,
+      ): const PreviousConversationIntent(),
     },
     actions: {
       NextConversationIntent: CallbackAction<NextConversationIntent>(
@@ -93,8 +91,9 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
 
     if (currentConversationIndex == -1) return;
 
-    nextConversationIndex =
-        forward ? currentConversationIndex + 1 : currentConversationIndex - 1;
+    nextConversationIndex = forward
+        ? currentConversationIndex + 1
+        : currentConversationIndex - 1;
 
     final nextConversation =
         conversationListBloc.state.map[nextConversationIndex];
@@ -106,8 +105,10 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
 
   if (nextConversationIndex == null) return;
 
-  final itemPositions =
-      conversationListBloc.itemPositionsListener(category)?.itemPositions.value;
+  final itemPositions = conversationListBloc
+      .itemPositionsListener(category)
+      ?.itemPositions
+      .value;
 
   if (itemPositions == null) return;
 

@@ -257,8 +257,9 @@ class _ProgressBarPainter extends CustomPainter {
             ? draggableValue.inMilliseconds
             : value.position.inMilliseconds) /
         value.duration.inMilliseconds;
-    final playedPart =
-        playedPartPercent > 1 ? size.width : playedPartPercent * size.width;
+    final playedPart = playedPartPercent > 1
+        ? size.width
+        : playedPartPercent * size.width;
     for (final range in value.buffered) {
       final start = range.startFraction(value.duration) * size.width;
       final end = range.endFraction(value.duration) * size.width;
@@ -285,13 +286,13 @@ class _ProgressBarPainter extends CustomPainter {
     );
 
     if (drawShadow) {
-      final shadowPath =
-          Path()..addOval(
-            Rect.fromCircle(
-              center: Offset(playedPart, baseOffset + barHeight / 2),
-              radius: handleHeight,
-            ),
-          );
+      final shadowPath = Path()
+        ..addOval(
+          Rect.fromCircle(
+            center: Offset(playedPart, baseOffset + barHeight / 2),
+            radius: handleHeight,
+          ),
+        );
 
       canvas.drawShadow(shadowPath, Colors.black, 0.2, false);
     }

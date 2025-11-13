@@ -147,10 +147,11 @@ class ResponsiveNavigatorStateNotifier
   }
 }
 
-final responsiveNavigatorProvider = StateNotifierProvider.autoDispose<
-  ResponsiveNavigatorStateNotifier,
-  ResponsiveNavigatorState
->((ref) => ResponsiveNavigatorStateNotifier());
+final responsiveNavigatorProvider =
+    StateNotifierProvider.autoDispose<
+      ResponsiveNavigatorStateNotifier,
+      ResponsiveNavigatorState
+    >((ref) => ResponsiveNavigatorStateNotifier());
 
 final navigatorRouteModeProvider = responsiveNavigatorProvider.select(
   (value) => value.routeMode,

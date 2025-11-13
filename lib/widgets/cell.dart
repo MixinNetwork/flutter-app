@@ -100,7 +100,7 @@ class CellItem extends HookConsumerWidget {
         ),
         child: Row(
           children: [
-            if (leading != null) leading!,
+            ?leading,
             if (leading != null) const SizedBox(width: 8),
             Expanded(
               child: DefaultTextStyle.merge(
@@ -118,7 +118,7 @@ class CellItem extends HookConsumerWidget {
                 child: description!,
               ),
             if (trailing != null) const SizedBox(width: 4),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
       ),

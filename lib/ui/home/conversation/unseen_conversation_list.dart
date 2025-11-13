@@ -37,12 +37,11 @@ class UnseenConversationList extends HookConsumerWidget {
             selected:
                 conversation.conversationId == currentConversationId &&
                 !routeMode,
-            onTap:
-                () => ConversationStateNotifier.selectConversation(
-                  context,
-                  conversation.conversationId,
-                  conversation: conversation,
-                ),
+            onTap: () => ConversationStateNotifier.selectConversation(
+              context,
+              conversation.conversationId,
+              conversation: conversation,
+            ),
           ),
         );
       },

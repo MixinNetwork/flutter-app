@@ -31,16 +31,18 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteMessageMention(MessageMention messageMention) =>
       (delete(db.messageMentions)..where(
-        (tbl) => tbl.messageId.equals(messageMention.messageId),
-      )).go().then((value) {
-        DataBaseEventBus.instance.updateMessageMention([
-          MiniMessageItem(
-            conversationId: messageMention.conversationId,
-            messageId: messageMention.messageId,
-          ),
-        ]);
-        return value;
-      });
+            (tbl) => tbl.messageId.equals(messageMention.messageId),
+          ))
+          .go()
+          .then((value) {
+            DataBaseEventBus.instance.updateMessageMention([
+              MiniMessageItem(
+                conversationId: messageMention.conversationId,
+                messageId: messageMention.messageId,
+              ),
+            ]);
+            return value;
+          });
 
   Future<void> parseMentionData(
     String? content,
@@ -80,17 +82,19 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
   }
 
   SimpleSelectStatement<MessageMentions, MessageMention>
-  unreadMentionMessageByConversationId(String conversationId) => (db.select(
-    db.messageMentions,
-  )..where(
-    (tbl) =>
-        tbl.conversationId.equals(conversationId) & tbl.hasRead.equals(false),
-  ));
+  unreadMentionMessageByConversationId(String conversationId) =>
+      (db.select(
+        db.messageMentions,
+      )..where(
+        (tbl) =>
+            tbl.conversationId.equals(conversationId) &
+            tbl.hasRead.equals(false),
+      ));
 
   Future<void> markMentionRead(String messageId) async {
-    final messageMention =
-        await (db.select(db.messageMentions)
-          ..where((tbl) => tbl.messageId.equals(messageId))).getSingleOrNull();
+    final messageMention = await (db.select(
+      db.messageMentions,
+    )..where((tbl) => tbl.messageId.equals(messageId))).getSingleOrNull();
 
     if (messageMention == null) return;
     if (messageMention.hasRead ?? false) return;
@@ -120,13 +124,13 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
             ..limit(kQueryLimit, offset: offset))
           .get();
 
-  Future<int> getMessageMentionsCount() =>
-      db
-          .customSelect('SELECT COUNT(1) as _result FROM message_mentions')
-          .map((p0) => p0.read<int>('_result'))
-          .getSingle();
+  Future<int> getMessageMentionsCount() => db
+      .customSelect('SELECT COUNT(1) as _result FROM message_mentions')
+      .map((p0) => p0.read<int>('_result'))
+      .getSingle();
 
   Future<void> clearMessageMentionByConversationId(String conversationId) =>
-      (db.delete(db.messageMentions)
-        ..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+      (db.delete(
+        db.messageMentions,
+      )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
 }

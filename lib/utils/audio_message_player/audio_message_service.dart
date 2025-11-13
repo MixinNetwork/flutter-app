@@ -145,20 +145,23 @@ bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
     final ams = context.audioMessageService;
 
     return CombineLatestStream.combine2<
-      MessageMedia?,
-      bool,
-      (MessageMedia?, bool)
-    >(
-      ams._player.currentStream,
-      ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
-      (a, b) => (a, b),
-    ).map((event) {
-      if (!event.$2) return false;
+          MessageMedia?,
+          bool,
+          (MessageMedia?, bool)
+        >(
+          ams._player.currentStream,
+          ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
+          (a, b) => (a, b),
+        )
+        .map((event) {
+          if (!event.$2) return false;
 
-      final message = event.$1?.messageItem;
+          final message = event.$1?.messageItem;
 
-      return message?.messageId == messageId && isMediaList == ams._isMediaList;
-    }).distinct();
+          return message?.messageId == messageId &&
+              isMediaList == ams._isMediaList;
+        })
+        .distinct();
   }, keys: [messageId, isMediaList, context]);
   return result.data ?? false;
 }

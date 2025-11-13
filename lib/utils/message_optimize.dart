@@ -51,12 +51,10 @@ String? messagePreviewOptimize(
     _content = '';
     try {
       final list = jsonDecode(trimContent!) as List<dynamic>;
-      _content =
-          list
-              .map((e) => ActionData.fromJson(e as Map<String, dynamic>))
-              // ignore: avoid_dynamic_calls
-              .map((e) => '[${e.label}]')
-              .join();
+      _content = list
+          .map((e) => ActionData.fromJson(e as Map<String, dynamic>))
+          .map((e) => '[${e.label}]')
+          .join();
     } catch (_) {}
   } else if (messageCategory == MessageCategory.appCard) {
     _content = '[${Localization.current.card}]';
@@ -80,8 +78,9 @@ String? messagePreviewOptimize(
   }
 
   if ((_content?.isNotEmpty ?? false) && isGroup) {
-    final sender =
-        isCurrentUser ? Localization.current.you : senderFullName ?? '';
+    final sender = isCurrentUser
+        ? Localization.current.you
+        : senderFullName ?? '';
     _content = '$sender: $_content';
   }
 

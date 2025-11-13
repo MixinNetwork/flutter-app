@@ -5,7 +5,10 @@ import 'dialog.dart';
 import 'qr_code.dart';
 
 Future<void> showUnknownMixinUrlDialog(BuildContext context, Uri uri) async =>
-    showMixinDialog<void>(context: context, child: _UnknownMixinUri(uri: uri));
+    showMixinDialog<void>(
+      context: context,
+      child: _UnknownMixinUri(uri: uri),
+    );
 
 class _UnknownMixinUri extends StatelessWidget {
   const _UnknownMixinUri({required this.uri});

@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -72,14 +71,13 @@ class BrightnessObserver extends HookConsumerWidget {
       curve: curve,
       onEnd: onEnd,
       tween: Tween<double>(
-        end:
-            const {
-              Brightness.light: 0.0,
-              Brightness.dark: 1.0,
-            }[currentBrightness],
+        end: const {
+          Brightness.light: 0.0,
+          Brightness.dark: 1.0,
+        }[currentBrightness],
       ),
-      builder:
-          (BuildContext context, double value, Widget? child) => BrightnessData(
+      builder: (BuildContext context, double value, Widget? child) =>
+          BrightnessData(
             value: value,
             brightnessThemeData: BrightnessThemeData.lerp(
               lightThemeData,
@@ -112,10 +110,9 @@ class BrightnessData extends InheritedWidget {
   static double of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<BrightnessData>()!.value;
 
-  static BrightnessThemeData themeOf(BuildContext context) =>
-      context
-          .dependOnInheritedWidgetOfExactType<BrightnessData>()!
-          .brightnessThemeData;
+  static BrightnessThemeData themeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<BrightnessData>()!
+      .brightnessThemeData;
 
   static Color dynamicColor(
     BuildContext context,
@@ -199,24 +196,31 @@ class BrightnessThemeData {
     dateTime: Color.lerp(begin.dateTime, end.dateTime, t)!,
     encrypt: Color.lerp(begin.encrypt, end.encrypt, t)!,
     popUp: Color.lerp(begin.popUp, end.popUp, t)!,
-    statusBackground:
-        Color.lerp(begin.statusBackground, end.statusBackground, t)!,
-    stickerPlaceholderColor:
-        Color.lerp(
-          begin.stickerPlaceholderColor,
-          end.stickerPlaceholderColor,
-          t,
-        )!,
-    waveformBackground:
-        Color.lerp(begin.waveformBackground, end.waveformBackground, t)!,
-    waveformForeground:
-        Color.lerp(begin.waveformForeground, end.waveformForeground, t)!,
-    settingCellBackgroundColor:
-        Color.lerp(
-          begin.settingCellBackgroundColor,
-          end.settingCellBackgroundColor,
-          t,
-        )!,
+    statusBackground: Color.lerp(
+      begin.statusBackground,
+      end.statusBackground,
+      t,
+    )!,
+    stickerPlaceholderColor: Color.lerp(
+      begin.stickerPlaceholderColor,
+      end.stickerPlaceholderColor,
+      t,
+    )!,
+    waveformBackground: Color.lerp(
+      begin.waveformBackground,
+      end.waveformBackground,
+      t,
+    )!,
+    waveformForeground: Color.lerp(
+      begin.waveformForeground,
+      end.waveformForeground,
+      t,
+    )!,
+    settingCellBackgroundColor: Color.lerp(
+      begin.settingCellBackgroundColor,
+      end.settingCellBackgroundColor,
+      t,
+    )!,
   );
 
   @override

@@ -59,10 +59,9 @@ class SendMessageHelper {
     bool cleanDraft = true,
   }) async {
     final conversationId = message.conversationId;
-    final conversation =
-        await _database.conversationDao
-            .conversationItem(conversationId)
-            .getSingleOrNull();
+    final conversation = await _database.conversationDao
+        .conversationItem(conversationId)
+        .getSingleOrNull();
     assert(conversation != null, 'no conversation');
     final expireIn = conversation?.expireIn ?? 0;
     await _messageDao.insert(
@@ -97,10 +96,9 @@ class SendMessageHelper {
     if (content.startsWith('@7000')) {
       final botNumber = botNumberRegExp.firstMatch(content)?[0];
       if (botNumber != null && botNumber.isNotEmpty) {
-        recipientId =
-            await _participantDao
-                .userIdByIdentityNumber(conversationId, botNumber)
-                .getSingleOrNull();
+        recipientId = await _participantDao
+            .userIdByIdentityNumber(conversationId, botNumber)
+            .getSingleOrNull();
         category = recipientId != null ? MessageCategory.plainText : category;
       }
     }
@@ -307,7 +305,6 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _insertSendMessageToDb(message, cleanDraft: cleanDraft);
-    // ignore: parameter_assignments
     attachmentResult ??= await _attachmentUtil.uploadAttachment(
       attachment,
       messageId,
@@ -418,7 +415,6 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _insertSendMessageToDb(message, cleanDraft: cleanDraft);
-    // ignore: parameter_assignments
     attachmentResult ??= await _attachmentUtil.uploadAttachment(
       attachment,
       messageId,
@@ -538,7 +534,6 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _insertSendMessageToDb(message, cleanDraft: cleanDraft);
-    // ignore: parameter_assignments
     attachmentResult ??= await _attachmentUtil.uploadAttachment(
       attachment,
       messageId,
@@ -776,10 +771,9 @@ class SendMessageHelper {
         MessageCategory.encryptedImage,
       );
       AttachmentResult? attachmentResult;
-      attachmentResult =
-          message.category == category
-              ? await _checkAttachmentExtra(message)
-              : null;
+      attachmentResult = message.category == category
+          ? await _checkAttachmentExtra(message)
+          : null;
       await sendImageMessage(
         conversationId: conversationId,
         senderId: senderId,
@@ -802,10 +796,9 @@ class SendMessageHelper {
         MessageCategory.encryptedVideo,
       );
       AttachmentResult? attachmentResult;
-      attachmentResult =
-          message.category == category
-              ? await _checkAttachmentExtra(message)
-              : null;
+      attachmentResult = message.category == category
+          ? await _checkAttachmentExtra(message)
+          : null;
       await sendVideoMessage(
         conversationId,
         senderId,
@@ -832,10 +825,9 @@ class SendMessageHelper {
         MessageCategory.encryptedAudio,
       );
       AttachmentResult? attachmentResult;
-      attachmentResult =
-          message.category == category
-              ? await _checkAttachmentExtra(message)
-              : null;
+      attachmentResult = message.category == category
+          ? await _checkAttachmentExtra(message)
+          : null;
       await sendAudioMessage(
         conversationId,
         senderId,
@@ -860,10 +852,9 @@ class SendMessageHelper {
         MessageCategory.encryptedData,
       );
       AttachmentResult? attachmentResult;
-      attachmentResult =
-          message.category == category
-              ? await _checkAttachmentExtra(message)
-              : null;
+      attachmentResult = message.category == category
+          ? await _checkAttachmentExtra(message)
+          : null;
 
       await sendDataMessage(
         conversationId,
@@ -907,8 +898,9 @@ class SendMessageHelper {
       if (message.content != null) {
         try {
           final map = await jsonDecodeWithIsolate(message.content!);
-          shareable =
-              LiveMessage.fromJson(map as Map<String, dynamic>).shareable;
+          shareable = LiveMessage.fromJson(
+            map as Map<String, dynamic>,
+          ).shareable;
         } catch (_) {
           // ignore
         }
@@ -956,10 +948,9 @@ class SendMessageHelper {
         cleanDraft: false,
       );
     } else if (message.category.isTranscript) {
-      final transcripts =
-          await _transcriptMessageDao
-              .transcriptMessageByTranscriptId(message.messageId)
-              .get();
+      final transcripts = await _transcriptMessageDao
+          .transcriptMessageByTranscriptId(message.messageId)
+          .get();
       await sendTranscriptMessage(
         conversationId: conversationId,
         senderId: senderId,
@@ -989,33 +980,30 @@ class SendMessageHelper {
       (element) => element.category.isAttachment,
     );
 
-    final transcriptMessages =
-        transcripts.map((e) {
-          var mediaUrl = e.mediaUrl;
-          var mediaStatus = e.mediaStatus;
+    final transcriptMessages = transcripts.map((e) {
+      var mediaUrl = e.mediaUrl;
+      var mediaStatus = e.mediaStatus;
 
-          if (e.category.isAttachment) {
-            mediaStatus = MediaStatus.canceled;
-            if (e.mediaUrl == null) mediaUrl = null;
-          }
-          return e.copyWith(
-            transcriptId: messageId,
-            mediaUrl: Value(mediaUrl),
-            mediaStatus: Value(mediaStatus),
-          );
-        }).toList();
+      if (e.category.isAttachment) {
+        mediaStatus = MediaStatus.canceled;
+        if (e.mediaUrl == null) mediaUrl = null;
+      }
+      return e.copyWith(
+        transcriptId: messageId,
+        mediaUrl: Value(mediaUrl),
+        mediaStatus: Value(mediaStatus),
+      );
+    }).toList();
 
-    final transcriptMinimals =
-        transcriptMessages
-            .map(
-              (e) =>
-                  TranscriptMinimal(
-                    name: e.userFullName ?? '',
-                    category: encryptCategory.asCategory(e.category),
-                    content: e.content,
-                  ).toJson(),
-            )
-            .toList();
+    final transcriptMinimals = transcriptMessages
+        .map(
+          (e) => TranscriptMinimal(
+            name: e.userFullName ?? '',
+            category: encryptCategory.asCategory(e.category),
+            content: e.content,
+          ).toJson(),
+        )
+        .toList();
 
     final message = Message(
       messageId: messageId,
@@ -1053,10 +1041,9 @@ class SendMessageHelper {
 
     final status = message.mediaStatus;
     if (status == MediaStatus.done || status == MediaStatus.pending) return;
-    final transcripts =
-        await _transcriptMessageDao
-            .transcriptMessageByTranscriptId(messageId)
-            .get();
+    final transcripts = await _transcriptMessageDao
+        .transcriptMessageByTranscriptId(messageId)
+        .get();
 
     if (!transcripts.any((element) => element.category.isAttachment)) {
       _addSendingJob(

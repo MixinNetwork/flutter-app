@@ -38,10 +38,9 @@ class SlidePage extends StatelessWidget {
     child: RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color:
-              context.brightnessValue == 1.0
-                  ? Colors.black.withValues(alpha: 0.03)
-                  : Colors.white.withValues(alpha: 0.01),
+          color: context.brightnessValue == 1.0
+              ? Colors.black.withValues(alpha: 0.03)
+              : Colors.white.withValues(alpha: 0.01),
           border: Border(right: BorderSide(color: context.theme.divider)),
         ),
         child: MoveWindow(
@@ -52,10 +51,9 @@ class SlidePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height:
-                      (defaultTargetPlatform == TargetPlatform.macOS)
-                          ? 64.0
-                          : 16.0,
+                  height: (defaultTargetPlatform == TargetPlatform.macOS)
+                      ? 64.0
+                      : 16.0,
                 ),
                 const _CurrentUser(),
                 const SizedBox(height: 24),
@@ -117,10 +115,9 @@ class SlidePage extends StatelessWidget {
                           ),
                         ),
                         title: Text(context.l10n.collapse),
-                        onTap:
-                            () =>
-                                context.settingChangeNotifier.collapsedSidebar =
-                                    !collapse,
+                        onTap: () =>
+                            context.settingChangeNotifier.collapsedSidebar =
+                                !collapse,
                       );
                     },
                   ),
@@ -264,148 +261,138 @@ class _CircleList extends HookConsumerWidget {
                       child: CustomContextMenuWidget(
                         desktopMenuWidgetBuilder:
                             CustomDesktopMenuWidgetBuilder(),
-                        menuProvider:
-                            (request) => MenusWithSeparator(
-                              childrens: [
-                                [
-                                  MenuAction(
-                                    image: MenuImage.icon(IconFonts.edit),
-                                    title: context.l10n.editCircleName,
-                                    callback: () async {
-                                      final name =
-                                          await showMixinDialog<String>(
-                                            context: context,
-                                            child: EditDialog(
-                                              editText: circle.name,
-                                              title: Text(context.l10n.circles),
-                                              hintText:
-                                                  context.l10n.editCircleName,
-                                              positiveAction: context.l10n.edit,
-                                              maxLength: 64,
-                                            ),
-                                          );
-                                      if (name?.isEmpty ?? true) return;
-
-                                      await runFutureWithToast(
-                                        context.accountServer.updateCircle(
-                                          circle.circleId,
-                                          name!,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  MenuAction(
-                                    image: MenuImage.icon(
-                                      IconFonts.manageCircle,
+                        menuProvider: (request) => MenusWithSeparator(
+                          childrens: [
+                            [
+                              MenuAction(
+                                image: MenuImage.icon(IconFonts.edit),
+                                title: context.l10n.editCircleName,
+                                callback: () async {
+                                  final name = await showMixinDialog<String>(
+                                    context: context,
+                                    child: EditDialog(
+                                      editText: circle.name,
+                                      title: Text(context.l10n.circles),
+                                      hintText: context.l10n.editCircleName,
+                                      positiveAction: context.l10n.edit,
+                                      maxLength: 64,
                                     ),
-                                    title: context.l10n.editConversations,
-                                    callback: () async {
-                                      final initSelected =
-                                          (await context
-                                                  .database
-                                                  .circleConversationDao
-                                                  .allCircleConversations(
-                                                    circle.circleId,
-                                                  )
-                                                  .get())
-                                              .map(
-                                                (e) => ConversationSelector(
-                                                  conversationId:
-                                                      e.conversationId,
-                                                  userId: e.userId,
-                                                ),
+                                  );
+                                  if (name?.isEmpty ?? true) return;
+
+                                  await runFutureWithToast(
+                                    context.accountServer.updateCircle(
+                                      circle.circleId,
+                                      name!,
+                                    ),
+                                  );
+                                },
+                              ),
+                              MenuAction(
+                                image: MenuImage.icon(
+                                  IconFonts.manageCircle,
+                                ),
+                                title: context.l10n.editConversations,
+                                callback: () async {
+                                  final initSelected =
+                                      (await context
+                                              .database
+                                              .circleConversationDao
+                                              .allCircleConversations(
+                                                circle.circleId,
                                               )
-                                              .toList();
-
-                                      final result =
-                                          await showConversationSelector(
-                                            context: context,
-                                            singleSelect: false,
-                                            title: circle.name,
-                                            onlyContact: false,
-                                            initSelected: initSelected,
-                                            allowEmpty: true,
-                                            confirmedText: context.l10n.done,
-                                          );
-
-                                      if (result == null || result.isEmpty) {
-                                        return;
-                                      }
-
-                                      await runFutureWithToast(() async {
-                                        final add = result.where(
-                                          (element) =>
-                                              !initSelected
-                                                  .map((e) => e.conversationId)
-                                                  .contains(
-                                                    element.conversationId,
-                                                  ),
-                                        );
-                                        final remove = initSelected.where(
-                                          (element) =>
-                                              !result
-                                                  .map((e) => e.conversationId)
-                                                  .contains(
-                                                    element.conversationId,
-                                                  ),
-                                        );
-
-                                        final requests = [
-                                          ...add.map(
-                                            (e) => CircleConversationRequest(
-                                              action:
-                                                  CircleConversationAction.add,
+                                              .get())
+                                          .map(
+                                            (e) => ConversationSelector(
                                               conversationId: e.conversationId,
                                               userId: e.userId,
                                             ),
+                                          )
+                                          .toList();
+
+                                  final result = await showConversationSelector(
+                                    context: context,
+                                    singleSelect: false,
+                                    title: circle.name,
+                                    onlyContact: false,
+                                    initSelected: initSelected,
+                                    allowEmpty: true,
+                                    confirmedText: context.l10n.done,
+                                  );
+
+                                  if (result == null || result.isEmpty) {
+                                    return;
+                                  }
+
+                                  await runFutureWithToast(() async {
+                                    final add = result.where(
+                                      (element) => !initSelected
+                                          .map((e) => e.conversationId)
+                                          .contains(
+                                            element.conversationId,
                                           ),
-                                          ...remove.map(
-                                            (e) => CircleConversationRequest(
-                                              action:
-                                                  CircleConversationAction
-                                                      .remove,
-                                              conversationId: e.conversationId,
-                                              userId: e.userId,
-                                            ),
+                                    );
+                                    final remove = initSelected.where(
+                                      (element) => !result
+                                          .map((e) => e.conversationId)
+                                          .contains(
+                                            element.conversationId,
                                           ),
-                                        ];
-                                        await context.accountServer
-                                            .editCircleConversation(
-                                              circle.circleId,
-                                              requests,
-                                            );
-                                      }());
-                                    },
-                                  ),
-                                ],
-                                [
-                                  MenuAction(
-                                    image: MenuImage.icon(IconFonts.delete),
-                                    title: context.l10n.deleteCircle,
-                                    callback: () async {
-                                      final result =
-                                          await showConfirmMixinDialog(
-                                            context,
-                                            context.l10n.deleteTheCircle(
-                                              circle.name,
-                                            ),
-                                          );
-                                      if (result == null) return;
-                                      await runFutureWithToast(() async {
-                                        await context.accountServer
-                                            .deleteCircle(circle.circleId);
-                                        ref
-                                            .read(
-                                              slideCategoryStateProvider
-                                                  .notifier,
-                                            )
-                                            .select(SlideCategoryType.chats);
-                                      }());
-                                    },
-                                  ),
-                                ],
-                              ],
-                            ),
+                                    );
+
+                                    final requests = [
+                                      ...add.map(
+                                        (e) => CircleConversationRequest(
+                                          action: CircleConversationAction.add,
+                                          conversationId: e.conversationId,
+                                          userId: e.userId,
+                                        ),
+                                      ),
+                                      ...remove.map(
+                                        (e) => CircleConversationRequest(
+                                          action:
+                                              CircleConversationAction.remove,
+                                          conversationId: e.conversationId,
+                                          userId: e.userId,
+                                        ),
+                                      ),
+                                    ];
+                                    await context.accountServer
+                                        .editCircleConversation(
+                                          circle.circleId,
+                                          requests,
+                                        );
+                                  }());
+                                },
+                              ),
+                            ],
+                            [
+                              MenuAction(
+                                image: MenuImage.icon(IconFonts.delete),
+                                title: context.l10n.deleteCircle,
+                                callback: () async {
+                                  final result = await showConfirmMixinDialog(
+                                    context,
+                                    context.l10n.deleteTheCircle(
+                                      circle.name,
+                                    ),
+                                  );
+                                  if (result == null) return;
+                                  await runFutureWithToast(() async {
+                                    await context.accountServer.deleteCircle(
+                                      circle.circleId,
+                                    );
+                                    ref
+                                        .read(
+                                          slideCategoryStateProvider.notifier,
+                                        )
+                                        .select(SlideCategoryType.chats);
+                                  }());
+                                },
+                              ),
+                            ],
+                          ],
+                        ),
                         child: Material(
                           color: context.theme.primary,
                           child: Padding(
@@ -465,8 +452,8 @@ class _CategoryList extends HookConsumerWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (BuildContext context, int index) => children[index],
-      separatorBuilder:
-          (BuildContext context, int index) => const SizedBox(height: 8),
+      separatorBuilder: (BuildContext context, int index) =>
+          const SizedBox(height: 8),
       itemCount: children.length,
     );
   }
@@ -485,28 +472,27 @@ class _Item extends HookConsumerWidget {
       slideCategoryStateProvider.select((value) => value.type == type),
     );
 
-    final result =
-        useMemoizedStream<BaseUnseenConversationCountResult>(() {
-          final dao = context.database.conversationDao;
-          switch (type) {
-            case SlideCategoryType.contacts:
-            case SlideCategoryType.groups:
-            case SlideCategoryType.bots:
-            case SlideCategoryType.strangers:
-              return dao
-                  .unseenConversationCountByCategory(type)
-                  .watchSingleWithStream(
-                    eventStreams: [
-                      DataBaseEventBus.instance.updateConversationIdStream,
-                    ],
-                    duration: kDefaultThrottleDuration,
-                  );
-            case SlideCategoryType.chats:
-            case SlideCategoryType.circle:
-            case SlideCategoryType.setting:
-              return const Stream.empty();
-          }
-        }, keys: [type]).data;
+    final result = useMemoizedStream<BaseUnseenConversationCountResult>(() {
+      final dao = context.database.conversationDao;
+      switch (type) {
+        case SlideCategoryType.contacts:
+        case SlideCategoryType.groups:
+        case SlideCategoryType.bots:
+        case SlideCategoryType.strangers:
+          return dao
+              .unseenConversationCountByCategory(type)
+              .watchSingleWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.updateConversationIdStream,
+                ],
+                duration: kDefaultThrottleDuration,
+              );
+        case SlideCategoryType.chats:
+        case SlideCategoryType.circle:
+        case SlideCategoryType.setting:
+          return const Stream.empty();
+      }
+    }, keys: [type]).data;
 
     return MoveWindowBarrier(
       child: SelectItem(

@@ -39,10 +39,9 @@ class SelectItem extends HookConsumerWidget {
       onEnter: (_) => showed.value = true,
       onExit: (_) => showed.value = false,
       onTap: onTap,
-      decoration:
-          selected
-              ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
-              : boxDecoration,
+      decoration: selected
+          ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
+          : boxDecoration,
       hoveringColor: context.theme.sidebarSelected.withValues(
         alpha: context.theme.sidebarSelected.a / 2,
       ),
@@ -119,12 +118,11 @@ class SelectItem extends HookConsumerWidget {
                     width: 6,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color:
-                          count > 0 && hideUnreadText
-                              ? count == mutedCount
-                                  ? dynamicColor
-                                  : context.theme.red
-                              : Colors.transparent,
+                      color: count > 0 && hideUnreadText
+                          ? count == mutedCount
+                                ? dynamicColor
+                                : context.theme.red
+                          : Colors.transparent,
                     ),
                     duration: const Duration(milliseconds: 100),
                   ),

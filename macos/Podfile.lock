@@ -199,7 +199,7 @@ SPEC CHECKSUMS:
   flutter_local_notifications: 4bf37a31afde695b56091b4ae3e4d9c7a7e6cda0
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
-  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
+  local_auth_darwin: c3ee6cce0a8d56be34c8ccb66ba31f7f180aaebb
   mixin_logger: 6b31328b08f546a8defd32cd910370562fc48405
   network_info_plus: 21d1cd6a015ccb2fdff06a1fbfa88d54b4e92f61
   objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7

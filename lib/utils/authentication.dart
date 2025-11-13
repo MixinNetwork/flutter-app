@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
@@ -32,24 +30,14 @@ Future<bool> authenticate() async {
   try {
     return await _auth.authenticate(
       localizedReason: Localization.current.unlockMixinMessenger,
-      options: const AuthenticationOptions(biometricOnly: true),
+      biometricOnly: true,
     );
-  } catch (error) {
-    if (error is! PlatformException) rethrow;
-    e('authenticate error code: ${error.code}, message: ${error.message}');
-
-    switch (error.code) {
-      case 'auth_in_progress':
-        await _auth.stopAuthentication();
-        return authenticate();
-      case auth_error.passcodeNotSet:
-      case auth_error.notEnrolled:
-      case auth_error.notAvailable:
-      case auth_error.otherOperatingSystem:
-      case auth_error.biometricOnlyNotSupported:
-        d('authenticate error code: ${error.code}');
+  } on LocalAuthException catch (error) {
+    e('authenticate error code: ${error.code}, message: ${error.description}');
+    if (error.code == .authInProgress) {
+      await _auth.stopAuthentication();
+      return authenticate();
     }
-
     rethrow;
   }
 }

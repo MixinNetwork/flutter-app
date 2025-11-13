@@ -55,10 +55,9 @@ class CustomText extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spans = useMemoized(
-      () =>
-          TextMatcher.applyTextMatchers([
-            textSpan ?? TextSpan(text: text, style: style),
-          ], textMatchers ?? [EmojiTextMatcher()]).toList(),
+      () => TextMatcher.applyTextMatchers([
+        textSpan ?? TextSpan(text: text, style: style),
+      ], textMatchers ?? [EmojiTextMatcher()]).toList(),
       [text, style, textMatchers],
     );
 
@@ -139,10 +138,9 @@ class CustomSelectableText extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final spans = useMemoized(
-      () =>
-          TextMatcher.applyTextMatchers([
-            textSpan ?? TextSpan(text: text, style: style),
-          ], textMatchers ?? [EmojiTextMatcher()]).toList(),
+      () => TextMatcher.applyTextMatchers([
+        textSpan ?? TextSpan(text: text, style: style),
+      ], textMatchers ?? [EmojiTextMatcher()]).toList(),
       [text, style, textMatchers],
     );
     return SelectableText.rich(
@@ -151,9 +149,8 @@ class CustomSelectableText extends HookWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       selectionHeightStyle: ui.BoxHeightStyle.max,
-      contextMenuBuilder:
-          (context, selectableState) =>
-              MixinAdaptiveSelectionToolbar(editableTextState: selectableState),
+      contextMenuBuilder: (context, selectableState) =>
+          MixinAdaptiveSelectionToolbar(editableTextState: selectableState),
     );
   }
 }
@@ -311,14 +308,15 @@ class _TextCache {
       '${objectRuntimeType(this, '_TextCache')}($text, $_lengths)';
 }
 
-typedef _MatchSpanRecursion =
-    (InlineSpan linkedSpan, Iterable<_TextMatch> unusedTextMatcherMatches);
+typedef _MatchSpanRecursion = (
+  InlineSpan linkedSpan,
+  Iterable<_TextMatch> unusedTextMatcherMatches,
+);
 
-typedef _MatchSpansRecursion =
-    (
-      Iterable<InlineSpan> linkedSpans,
-      Iterable<_TextMatch> unusedTextMatcherMatches,
-    );
+typedef _MatchSpansRecursion = (
+  Iterable<InlineSpan> linkedSpans,
+  Iterable<_TextMatch> unusedTextMatcherMatches,
+);
 
 class _MatchedSpans {
   factory _MatchedSpans({
@@ -334,7 +332,11 @@ class _MatchedSpans {
     final (
       Iterable<InlineSpan> linkedSpans,
       Iterable<_TextMatch> _,
-    ) = _linkSpansRecurse(spans, textCache, textMatcherMatches);
+    ) = _linkSpansRecurse(
+      spans,
+      textCache,
+      textMatcherMatches,
+    );
 
     return _MatchedSpans._(linkedSpans: linkedSpans);
   }
@@ -346,11 +348,11 @@ class _MatchedSpans {
   static List<_TextMatch> _cleanTextMatcherMatches(
     Iterable<_TextMatch> textMatcherMatches,
   ) {
-    final nextTextMatcherMatches =
-        textMatcherMatches.toList()..sort(
-          (_TextMatch a, _TextMatch b) =>
-              a.textRange.start.compareTo(b.textRange.start),
-        );
+    final nextTextMatcherMatches = textMatcherMatches.toList()
+      ..sort(
+        (_TextMatch a, _TextMatch b) =>
+            a.textRange.start.compareTo(b.textRange.start),
+      );
 
     // Validate that there are no overlapping matches.
     var lastEnd = 0;
@@ -385,7 +387,12 @@ class _MatchedSpans {
       final (
         InlineSpan childSpan,
         Iterable<_TextMatch> childTextMatcherMatches,
-      ) = _linkSpanRecurse(span, textCache, nextTextMatcherMatches, nextIndex);
+      ) = _linkSpanRecurse(
+        span,
+        textCache,
+        nextTextMatcherMatches,
+        nextIndex,
+      );
       output.add(childSpan);
       nextTextMatcherMatches = childTextMatcherMatches;
       nextIndex += textCache.getLength(span)!;
@@ -521,22 +528,19 @@ class UrlTextMatcher extends TextMatcher implements EquatableMixin {
             return TextMatcher._textRangesFromText(text, uriRegExp);
           }
         },
-        matchBuilder:
-            (span, displayString, linkString) => TextSpan(
-              text: displayString,
-              style: TextStyle(color: context.theme.accent),
-              mouseCursor: SystemMouseCursors.click,
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap =
-                        () => openUri(
-                          context,
-                          linkString,
-                          app: context.providerContainer.read(
-                            conversationProvider.select((value) => value?.app),
-                          ),
-                        ),
+        matchBuilder: (span, displayString, linkString) => TextSpan(
+          text: displayString,
+          style: TextStyle(color: context.theme.accent),
+          mouseCursor: SystemMouseCursors.click,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => openUri(
+              context,
+              linkString,
+              app: context.providerContainer.read(
+                conversationProvider.select((value) => value?.app),
+              ),
             ),
+        ),
       );
 
   @override
@@ -550,15 +554,13 @@ class MailTextMatcher extends TextMatcher implements EquatableMixin {
   MailTextMatcher(BuildContext context)
     : super.regExp(
         regExp: mailRegExp,
-        matchBuilder:
-            (span, displayString, linkString) => TextSpan(
-              text: displayString,
-              style: TextStyle(color: context.theme.accent),
-              mouseCursor: SystemMouseCursors.click,
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap = () => launchUrlString(linkString),
-            ),
+        matchBuilder: (span, displayString, linkString) => TextSpan(
+          text: displayString,
+          style: TextStyle(color: context.theme.accent),
+          mouseCursor: SystemMouseCursors.click,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => launchUrlString(linkString),
+        ),
       );
 
   @override
@@ -572,18 +574,17 @@ class EmojiTextMatcher extends TextMatcher implements EquatableMixin {
   EmojiTextMatcher()
     : super.regExp(
         regExp: emojiRegex,
-        matchBuilder:
-            (span, displayString, linkString) => TextSpan(
-              text: displayString,
-              style: TextStyle(fontFamily: kEmojiFontFamily),
-              recognizer: span.recognizer,
-              mouseCursor: span.mouseCursor,
-              onEnter: span.onEnter,
-              onExit: span.onExit,
-              semanticsLabel: span.semanticsLabel,
-              locale: span.locale,
-              spellOut: span.spellOut,
-            ),
+        matchBuilder: (span, displayString, linkString) => TextSpan(
+          text: displayString,
+          style: TextStyle(fontFamily: kEmojiFontFamily),
+          recognizer: span.recognizer,
+          mouseCursor: span.mouseCursor,
+          onEnter: span.onEnter,
+          onExit: span.onExit,
+          semanticsLabel: span.semanticsLabel,
+          locale: span.locale,
+          spellOut: span.spellOut,
+        ),
       );
 
   @override
@@ -597,18 +598,17 @@ class KeyWordTextMatcher extends TextMatcher implements EquatableMixin {
   KeyWordTextMatcher(this.keyword, {this.style, this.caseSensitive = true})
     : super.regExp(
         regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
-        matchBuilder:
-            (span, displayString, linkString) => TextSpan(
-              text: displayString,
-              style: style,
-              recognizer: span.recognizer,
-              mouseCursor: span.mouseCursor,
-              onEnter: span.onEnter,
-              onExit: span.onExit,
-              semanticsLabel: span.semanticsLabel,
-              locale: span.locale,
-              spellOut: span.spellOut,
-            ),
+        matchBuilder: (span, displayString, linkString) => TextSpan(
+          text: displayString,
+          style: style,
+          recognizer: span.recognizer,
+          mouseCursor: span.mouseCursor,
+          onEnter: span.onEnter,
+          onExit: span.onExit,
+          semanticsLabel: span.semanticsLabel,
+          locale: span.locale,
+          spellOut: span.spellOut,
+        ),
       );
 
   final String keyword;
@@ -629,18 +629,17 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
     this.caseSensitive = true,
   }) : super.regExp(
          regExp: _createMultiKeywordRegExp(keywords, caseSensitive),
-         matchBuilder:
-             (span, displayString, linkString) => TextSpan(
-               text: displayString,
-               style: style,
-               recognizer: span.recognizer,
-               mouseCursor: span.mouseCursor,
-               onEnter: span.onEnter,
-               onExit: span.onExit,
-               semanticsLabel: span.semanticsLabel,
-               locale: span.locale,
-               spellOut: span.spellOut,
-             ),
+         matchBuilder: (span, displayString, linkString) => TextSpan(
+           text: displayString,
+           style: style,
+           recognizer: span.recognizer,
+           mouseCursor: span.mouseCursor,
+           onEnter: span.onEnter,
+           onExit: span.onExit,
+           semanticsLabel: span.semanticsLabel,
+           locale: span.locale,
+           spellOut: span.spellOut,
+         ),
        );
 
   final List<String> keywords;
@@ -655,11 +654,10 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
       return RegExp('(?!)'); // Never match
     }
 
-    final escapedKeywords =
-        keywords
-            .where((k) => k.trim().isNotEmpty)
-            .map((k) => RegExp.escape(k.trim()))
-            .toList();
+    final escapedKeywords = keywords
+        .where((k) => k.trim().isNotEmpty)
+        .map((k) => RegExp.escape(k.trim()))
+        .toList();
 
     if (escapedKeywords.isEmpty) {
       return RegExp('(?!)'); // Never match
@@ -707,15 +705,13 @@ class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
   BotNumberTextMatcher(BuildContext context)
     : super.regExp(
         regExp: botNumberRegExp,
-        matchBuilder:
-            (span, displayString, linkString) => TextSpan(
-              text: displayString,
-              style: TextStyle(color: context.theme.accent),
-              mouseCursor: SystemMouseCursors.click,
-              recognizer:
-                  TapGestureRecognizer()
-                    ..onTap = () => showUserDialog(context, null, linkString),
-            ),
+        matchBuilder: (span, displayString, linkString) => TextSpan(
+          text: displayString,
+          style: TextStyle(color: context.theme.accent),
+          mouseCursor: SystemMouseCursors.click,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => showUserDialog(context, null, linkString),
+        ),
       );
 
   @override
@@ -739,14 +735,12 @@ class MentionTextMatcher extends TextMatcher implements EquatableMixin {
             text: '@${mentionUser.fullName ?? mentionUser.identityNumber}',
             style: TextStyle(color: context.theme.accent),
             mouseCursor: SystemMouseCursors.click,
-            recognizer:
-                TapGestureRecognizer()
-                  ..onTap =
-                      () => showUserDialog(
-                        context,
-                        null,
-                        mentionUser.identityNumber,
-                      ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => showUserDialog(
+                context,
+                null,
+                mentionUser.identityNumber,
+              ),
           );
         },
       );
@@ -811,11 +805,10 @@ class HighlightStarLinkText extends HookConsumerWidget {
           TextSpan(
             text: text.substring(start + 2, end),
             style: style?.merge(highlightStyle),
-            recognizer:
-                TapGestureRecognizer()
-                  ..onTap = () {
-                    onLinkClick?.call(link);
-                  },
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                onLinkClick?.call(link);
+              },
           ),
         );
         start = text.indexOf('**', end + 2);

@@ -56,10 +56,9 @@ class TransferDataMessage {
       try {
         final map = jsonDecode(quoteContent) as Map<String, dynamic>;
         final createdAtJson = map['created_at'] ?? map['createdAt'];
-        final createdAt =
-            createdAtJson is String
-                ? DateTime.parse(createdAtJson)
-                : const MillisDateConverter().fromSql(createdAtJson as int);
+        final createdAt = createdAtJson is String
+            ? DateTime.parse(createdAtJson)
+            : const MillisDateConverter().fromSql(createdAtJson as int);
         map['created_at'] = createdAt.toIso8601String();
         map['createdAt'] = createdAt.toIso8601String();
         quoteContent = jsonEncode(map);
@@ -85,10 +84,9 @@ class TransferDataMessage {
       thumbImage: data.thumbImage,
       mediaKey: data.mediaKey,
       mediaDigest: data.mediaDigest,
-      mediaStatus:
-          data.mediaStatus == MediaStatus.pending
-              ? MediaStatus.canceled
-              : data.mediaStatus,
+      mediaStatus: data.mediaStatus == MediaStatus.pending
+          ? MediaStatus.canceled
+          : data.mediaStatus,
       action: data.action,
       participantId: data.participantId,
       snapshotId: data.snapshotId,
@@ -186,8 +184,9 @@ class TransferDataMessage {
     thumbImage: thumbImage,
     mediaKey: mediaKey,
     mediaDigest: mediaDigest,
-    mediaStatus:
-        mediaStatus == MediaStatus.pending ? MediaStatus.canceled : mediaStatus,
+    mediaStatus: mediaStatus == MediaStatus.pending
+        ? MediaStatus.canceled
+        : mediaStatus,
     status: status,
     createdAt: createdAt,
     action: action,

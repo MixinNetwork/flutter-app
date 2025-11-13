@@ -103,19 +103,21 @@ class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
     });
   }
 
-  Selectable<DateTime?> latestCreatedAt() => (selectOnly(db.stickerAlbums)
-        ..addColumns([db.stickerAlbums.createdAt])
-        ..orderBy([OrderingTerm.desc(db.stickerAlbums.createdAt)])
-        ..limit(1))
-      .map(
-        (row) => db.stickerAlbums.createdAt.converter.fromSql(
-          row.read(db.stickerAlbums.createdAt),
-        ),
-      );
+  Selectable<DateTime?> latestCreatedAt() =>
+      (selectOnly(db.stickerAlbums)
+            ..addColumns([db.stickerAlbums.createdAt])
+            ..orderBy([OrderingTerm.desc(db.stickerAlbums.createdAt)])
+            ..limit(1))
+          .map(
+            (row) => db.stickerAlbums.createdAt.converter.fromSql(
+              row.read(db.stickerAlbums.createdAt),
+            ),
+          );
 
   Selectable<int?> maxOrder() {
     final max = db.stickerAlbums.orderedAt.max();
-    return (selectOnly(db.stickerAlbums)
-      ..addColumns([max])).map((row) => row.read(max));
+    return (selectOnly(
+      db.stickerAlbums,
+    )..addColumns([max])).map((row) => row.read(max));
   }
 }

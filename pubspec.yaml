@@ -15,14 +15,14 @@ publish_to: none
 version: 3.4.1+470
 
 environment:
-  sdk: "^3.7.0"
-  flutter: 3.29.3
+  sdk: "^3.10.0-290.4.beta"
+  flutter: ^3.38.0
 
 dependencies:
   android_id: ^0.4.0
   ansicolor: ^2.0.3
   archive: ^4.0.7
-  async: ^2.8.1
+  async: ^2.13.0
   audio_session: ^0.2.2
   auto_size_text: ^3.0.0
   bloc: ^9.1.0
@@ -53,14 +53,14 @@ dependencies:
   dio_compatibility_layer: ^0.1.0
   rhttp: ^0.14.0
   flutter_rust_bridge: ^2.6.0
-  drift: ^2.28.2
+  drift: ^2.29.0
   ecache: ^2.1.2
   emojis: ^0.9.9
   equatable: ^2.0.7
-  file_picker: ^10.3.3
+  file_picker: ^10.3.6
   file_selector: ^1.0.4
-  file_selector_linux: ^0.9.0
-  file_selector_macos: ^0.9.3
+  file_selector_linux: ^0.9.3
+  file_selector_macos: ^0.9.4
   file_selector_windows: ^0.9.3
   filesize: ^2.0.1
   flutter:
@@ -68,7 +68,7 @@ dependencies:
   flutter_animate: ^4.4.0
   flutter_app_icon_badge: ^2.0.0
   flutter_bloc: ^9.1.1
-  flutter_hooks: ^0.21.2
+  flutter_hooks: ^0.21.3
   flutter_local_notifications: ^19.5.0
   flutter_localizations:
     sdk: flutter
@@ -82,18 +82,18 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.0.0
   hooks_riverpod: ^2.5.1
-  http: ^1.5.0
+  http: ^1.6.0
   http_client_helper: ^3.0.0
   hydrated_bloc: ^10.1.1
   image: ^4.5.4
-  image_picker: ^1.2.0
+  image_picker: ^1.2.1
   intl: ^0.20.2
   intl_phone_number_input: ^0.7.5
   isolate: ^2.1.0
   json_annotation: ^4.8.1
   libsignal_protocol_dart: ^0.7.4
-  local_auth: ^2.3.0
-  lottie: ^3.1.2
+  local_auth: ^3.0.0
+  lottie: ^3.3.2
   map: ^2.0.2
   markdown_widget: ^2.3.2+2
   mime: ^2.0.0
@@ -127,7 +127,7 @@ dependencies:
   super_clipboard: ^0.9.1
   super_context_menu: ^0.9.1
   super_native_extensions: ^0.9.1
-  synchronized: ^3.3.0
+  synchronized: ^3.4.0
   system_tray:
     path: third_party/system_tray
   ui_device:
@@ -142,7 +142,7 @@ dependencies:
   watcher: ^1.1.4
   web_socket_channel: ^3.0.3
   webview_flutter: ^4.13.0
-  win32: ^5.13.0
+  win32: ^5.15.0
   win_toast: ^0.4.0
   window_manager: 0.5.1
   window_size:
@@ -151,7 +151,7 @@ dependencies:
       path: plugins/window_size
       ref: 12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1
   html: ^0.15.6
-  video_player: ^2.10.0
+  video_player: ^2.10.1
   cupertino_icons: ^1.0.6
   video_compress: ^3.1.4
   webcrypto:
@@ -174,18 +174,18 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.28.0
+  drift_dev: ^2.29.0
   flutter_test:
     sdk: flutter
-  intl_utils: ^2.8.11
-  json_serializable: ^6.7.1
+  intl_utils: ^2.8.12
+  json_serializable: ^6.11.1
   msix:
     git:
       url: https://github.com/riccardo-lomazzi/msix.git
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
-  flutter_lints: ^5.0.0
-  very_good_analysis: ^8.0.0
-  envied_generator: ^1.1.1
+  flutter_lints: ^6.0.0
+  very_good_analysis: ^10.0.0
+  envied_generator: ^1.3.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

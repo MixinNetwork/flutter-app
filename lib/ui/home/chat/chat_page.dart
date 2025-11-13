@@ -254,16 +254,15 @@ class ChatPage extends HookConsumerWidget {
         BlocProvider.value(value: chatSideCubit),
         BlocProvider.value(value: searchConversationKeywordCubit),
         BlocProvider(
-          create:
-              (context) => MessageBloc(
-                accountServer: context.accountServer,
-                database: context.database,
-                conversationNotifier: ref.read(conversationProvider.notifier),
-                mentionCache: context.providerContainer.read(
-                  mentionCacheProvider,
-                ),
-                limit: windowHeight ~/ 20,
-              ),
+          create: (context) => MessageBloc(
+            accountServer: context.accountServer,
+            database: context.database,
+            conversationNotifier: ref.read(conversationProvider.notifier),
+            mentionCache: context.providerContainer.read(
+              mentionCacheProvider,
+            ),
+            limit: windowHeight ~/ 20,
+          ),
         ),
         Provider.value(value: pinMessageState),
       ],
@@ -335,14 +334,14 @@ class _SideRouter extends StatelessWidget {
     final routeMode = chatSideCubit.state.routeMode;
     return routeMode
         ? SizedBox(
-          width: constraints.maxWidth,
-          child: Navigator(pages: pages, onDidRemovePage: onDidRemovePage),
-        )
+            width: constraints.maxWidth,
+            child: Navigator(pages: pages, onDidRemovePage: onDidRemovePage),
+          )
         : _AnimatedChatSlide(
-          constraints: constraints,
-          pages: pages,
-          onDidRemovePage: onDidRemovePage,
-        );
+            constraints: constraints,
+            pages: pages,
+            onDidRemovePage: onDidRemovePage,
+          );
   }
 }
 
@@ -380,14 +379,12 @@ class _AnimatedChatSlide extends HookConsumerWidget {
 
     return AnimatedBuilder(
       animation: controller,
-      builder:
-          (context, child) => SizedBox(
-            width:
-                kChatSidePageWidth *
-                Curves.easeInOut.transform(controller.value),
-            height: constraints.maxHeight,
-            child: controller.value != 0 ? child : null,
-          ),
+      builder: (context, child) => SizedBox(
+        width:
+            kChatSidePageWidth * Curves.easeInOut.transform(controller.value),
+        height: constraints.maxHeight,
+        child: controller.value != 0 ? child : null,
+      ),
       child: ClipRect(
         child: OverflowBox(
           alignment: AlignmentDirectional.centerStart,
@@ -507,10 +504,9 @@ class ChatContainer extends HookConsumerWidget {
                             AnimatedCrossFade(
                               firstChild: const InputContainer(),
                               secondChild: const SelectionBottomBar(),
-                              crossFadeState:
-                                  inMultiSelectMode
-                                      ? CrossFadeState.showSecond
-                                      : CrossFadeState.showFirst,
+                              crossFadeState: inMultiSelectMode
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
                               duration: const Duration(milliseconds: 300),
                             ),
                           ],
@@ -596,8 +592,9 @@ class _List extends HookConsumerWidget {
       () => GlobalKey(debugLabel: 'chat list bottom'),
     );
 
-    final scrollController =
-        BlocProvider.of<MessageBloc>(context).scrollController;
+    final scrollController = BlocProvider.of<MessageBloc>(
+      context,
+    ).scrollController;
 
     return MessageDayTimeViewportWidget.chatPage(
       key: key,
@@ -605,8 +602,9 @@ class _List extends HookConsumerWidget {
       center: center,
       topKey: topKey,
       scrollController: scrollController,
-      centerKey:
-          center == null ? null : ref.value[center.messageId] as GlobalKey?,
+      centerKey: center == null
+          ? null
+          : ref.value[center.messageId] as GlobalKey?,
       child: ClampingCustomScrollView(
         key: key,
         center: key,
@@ -692,12 +690,11 @@ class _JumpCurrentButton extends HookConsumerWidget {
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback(
-        (timeStamp) =>
-            listPositionIsLatest.value =
-                scrollController.hasClients &&
-                (scrollController.position.maxScrollExtent -
-                        scrollController.position.pixels) >
-                    40,
+        (timeStamp) => listPositionIsLatest.value =
+            scrollController.hasClients &&
+            (scrollController.position.maxScrollExtent -
+                    scrollController.position.pixels) >
+                40,
       );
     }, [scrollController.hasClients, pixels, conversationId, state.refreshKey]);
 
@@ -955,22 +952,21 @@ class _JumpMentionButton extends HookConsumerWidget {
     return CustomContextMenuWidget(
       hitTestBehavior: HitTestBehavior.translucent,
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-      menuProvider:
-          (MenuRequest request) => Menu(
-            children: [
-              MenuAction(
-                title: context.l10n.clear,
-                callback: () {
-                  for (final mention in messageMentions) {
-                    context.accountServer.markMentionRead(
-                      mention.messageId,
-                      mention.conversationId,
-                    );
-                  }
-                },
-              ),
-            ],
+      menuProvider: (MenuRequest request) => Menu(
+        children: [
+          MenuAction(
+            title: context.l10n.clear,
+            callback: () {
+              for (final mention in messageMentions) {
+                context.accountServer.markMentionRead(
+                  mention.messageId,
+                  mention.conversationId,
+                );
+              }
+            },
           ),
+        ],
+      ),
       child: InteractiveDecoratedBox(
         onTap: () {
           if (messageMentions.isEmpty) return;
@@ -1074,11 +1070,10 @@ class _ChatDropOverlay extends HookConsumerWidget {
       onDragEntered: (_) => dragging.value = true,
       onDragExited: (_) => dragging.value = false,
       onDragDone: (details) async {
-        final files =
-            details.files.where((xFile) {
-              final file = File(xFile.path);
-              return file.existsSync();
-            }).toList();
+        final files = details.files.where((xFile) {
+          final file = File(xFile.path);
+          return file.existsSync();
+        }).toList();
         if (files.isEmpty) {
           return;
         }
@@ -1201,10 +1196,9 @@ class _ConversationHandle extends ConversationMenuHandle {
       context.accountServer.muteConversation(
         result,
         conversationId: isGroupConversation ? conversationId : null,
-        userId:
-            isGroupConversation
-                ? null
-                : conversationState.conversation?.ownerId,
+        userId: isGroupConversation
+            ? null
+            : conversationState.conversation?.ownerId,
       ),
     );
   }

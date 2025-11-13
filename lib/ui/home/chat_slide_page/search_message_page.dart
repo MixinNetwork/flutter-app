@@ -127,32 +127,30 @@ class SearchMessagePage extends HookConsumerWidget {
                       controller: editingController,
                       hintText: context.l10n.search,
                       showClear: userMode.value,
-                      leading:
-                          userMode.value
-                              ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    context.l10n.fromWithColon,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: context.theme.text,
+                      leading: userMode.value
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  context.l10n.fromWithColon,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: context.theme.text,
+                                  ),
+                                ),
+                                if (selectedUser.value != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: AvatarWidget(
+                                      size: 20,
+                                      name: selectedUser.value?.fullName,
+                                      avatarUrl: selectedUser.value?.avatarUrl,
+                                      userId: selectedUser.value?.userId,
                                     ),
                                   ),
-                                  if (selectedUser.value != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: AvatarWidget(
-                                        size: 20,
-                                        name: selectedUser.value?.fullName,
-                                        avatarUrl:
-                                            selectedUser.value?.avatarUrl,
-                                        userId: selectedUser.value?.userId,
-                                      ),
-                                    ),
-                                ],
-                              )
-                              : null,
+                              ],
+                            )
+                          : null,
                       onTapClear: () {
                         userMode.value = false;
                         selectedUser.value = null;
@@ -226,9 +224,8 @@ class SearchMessagePage extends HookConsumerWidget {
                           },
                         );
                       },
-                      separatorBuilder:
-                          (BuildContext context, int index) =>
-                              const SizedBox(width: 8),
+                      separatorBuilder: (BuildContext context, int index) =>
+                          const SizedBox(width: 8),
                     ),
                   ),
                 );
@@ -236,22 +233,21 @@ class SearchMessagePage extends HookConsumerWidget {
             ),
           ),
           Expanded(
-            child:
-                userMode.value && selectedUser.value == null
-                    ? _SearchParticipantList(
-                      editingController: editingController,
-                      onSelected: (user) {
-                        editingController.text = '';
-                        selectedUser.value = user;
-                      },
-                      conversationId: conversationState.conversationId,
-                      isBot: conversationState.isBot,
-                    )
-                    : _SearchMessageList(
-                      selectedUserId: selectedUser.value?.userId,
-                      categories: selectedCategories.value,
-                      conversationId: conversationState.conversationId,
-                    ),
+            child: userMode.value && selectedUser.value == null
+                ? _SearchParticipantList(
+                    editingController: editingController,
+                    onSelected: (user) {
+                      editingController.text = '';
+                      selectedUser.value = user;
+                    },
+                    conversationId: conversationState.conversationId,
+                    isBot: conversationState.isBot,
+                  )
+                : _SearchMessageList(
+                    selectedUserId: selectedUser.value?.userId,
+                    categories: selectedCategories.value,
+                    conversationId: conversationState.conversationId,
+                  ),
           ),
         ],
       ),
@@ -356,32 +352,32 @@ class _SearchParticipantList extends HookConsumerWidget {
                 if (isBot) {
                   return value.isEmpty
                       ? userDao.friends().watchWithStream(
-                        eventStreams: [
-                          DataBaseEventBus.instance.updateUserIdsStream,
-                        ],
-                        duration: kSlowThrottleDuration,
-                      )
+                          eventStreams: [
+                            DataBaseEventBus.instance.updateUserIdsStream,
+                          ],
+                          duration: kSlowThrottleDuration,
+                        )
                       : userDao
-                          .fuzzySearchBotGroupUser(
-                            currentUserId:
-                                context
-                                    .multiAuthChangeNotifier
-                                    .current
-                                    ?.userId ??
-                                '',
-                            conversationId: conversationId,
-                            keyword: value,
-                          )
-                          .watchWithStream(
-                            eventStreams: [
-                              DataBaseEventBus
-                                  .instance
-                                  .insertOrReplaceMessageIdsStream,
-                              DataBaseEventBus.instance.deleteMessageIdStream,
-                              DataBaseEventBus.instance.updateUserIdsStream,
-                            ],
-                            duration: kVerySlowThrottleDuration,
-                          );
+                            .fuzzySearchBotGroupUser(
+                              currentUserId:
+                                  context
+                                      .multiAuthChangeNotifier
+                                      .current
+                                      ?.userId ??
+                                  '',
+                              conversationId: conversationId,
+                              keyword: value,
+                            )
+                            .watchWithStream(
+                              eventStreams: [
+                                DataBaseEventBus
+                                    .instance
+                                    .insertOrReplaceMessageIdsStream,
+                                DataBaseEventBus.instance.deleteMessageIdStream,
+                                DataBaseEventBus.instance.updateUserIdsStream,
+                              ],
+                              duration: kVerySlowThrottleDuration,
+                            );
                 }
 
                 if (value.isEmpty) {

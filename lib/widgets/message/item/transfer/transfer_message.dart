@@ -32,22 +32,21 @@ class TransferMessage extends HookConsumerWidget {
       converter: (state) => state.assetSymbol ?? '',
     );
 
-    final assetItem =
-        useMemoizedStream(() {
-          if (assetId == null || assetIcon != null) {
-            return Stream.value(null);
-          }
-          return context.database.assetDao
-              .assetItem(assetId)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.updateAssetStream.where(
-                    (event) => event.contains(assetId),
-                  ),
-                ],
-                duration: kDefaultThrottleDuration,
-              );
-        }, keys: [assetId, assetIcon]).data;
+    final assetItem = useMemoizedStream(() {
+      if (assetId == null || assetIcon != null) {
+        return Stream.value(null);
+      }
+      return context.database.assetDao
+          .assetItem(assetId)
+          .watchSingleOrNullWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateAssetStream.where(
+                (event) => event.contains(assetId),
+              ),
+            ],
+            duration: kDefaultThrottleDuration,
+          );
+    }, keys: [assetId, assetIcon]).data;
 
     assetIcon = assetIcon ?? assetItem?.iconUrl;
     chainIcon = chainIcon ?? assetItem?.chainIconUrl;

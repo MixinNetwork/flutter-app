@@ -30,6 +30,7 @@ linter:
   rules:
     avoid_renaming_method_parameters: false
     prefer_const_constructors_in_immutables: true
+    always_use_package_imports: false
     prefer_relative_imports: true
     prefer_final_locals: true
     avoid_void_async: true
@@ -72,3 +73,5 @@ linter:
     avoid_catches_without_on_clauses: false
     document_ignores: false
     specify_nonobvious_property_types: false
+    discarded_futures: false
+    matching_super_parameters: false

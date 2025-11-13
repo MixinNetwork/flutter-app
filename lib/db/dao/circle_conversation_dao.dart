@@ -10,12 +10,13 @@ class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$CircleConversationDaoMixin {
   CircleConversationDao(super.db);
 
-  Future<int> insert(CircleConversation circleConversation) => into(
-    db.circleConversations,
-  ).insertOnConflictUpdate(circleConversation).then((value) {
-    DataBaseEventBus.instance.updateCircleConversation();
-    return value;
-  });
+  Future<int> insert(CircleConversation circleConversation) =>
+      into(
+        db.circleConversations,
+      ).insertOnConflictUpdate(circleConversation).then((value) {
+        DataBaseEventBus.instance.updateCircleConversation();
+        return value;
+      });
 
   SimpleSelectStatement<CircleConversations, CircleConversation>
   allCircleConversations(String circleId) =>

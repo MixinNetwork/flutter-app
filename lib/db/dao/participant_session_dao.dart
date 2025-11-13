@@ -15,34 +15,38 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteByStatus(String conversationId) async {
     await (delete(db.participantSession)..where(
-      (tbl) =>
-          tbl.conversationId.equals(conversationId) &
-          tbl.sentToServer.equals(1).not(),
-    )).go();
+          (tbl) =>
+              tbl.conversationId.equals(conversationId) &
+              tbl.sentToServer.equals(1).not(),
+        ))
+        .go();
   }
 
   Future deleteByConversationId(String conversationId) async {
-    await (delete(db.participantSession)
-      ..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+    await (delete(
+      db.participantSession,
+    )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
   }
 
   Future deleteByCIdAndPId(String conversationId, String participantId) async =>
       (delete(db.participantSession)..where(
-        (tbl) =>
-            tbl.conversationId.equals(conversationId) &
-            tbl.userId.equals(participantId),
-      )).go();
+            (tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.userId.equals(participantId),
+          ))
+          .go();
 
   Future emptyStatusByConversationId(String conversationId) async =>
       (update(db.participantSession)..where(
-        (tbl) => tbl.conversationId.equals(conversationId),
-      )).write(const ParticipantSessionCompanion(sentToServer: Value(null)));
+            (tbl) => tbl.conversationId.equals(conversationId),
+          ))
+          .write(const ParticipantSessionCompanion(sentToServer: Value(null)));
 
   Future<List<ParticipantSessionData>> getParticipantSessionsByConversationId(
     String conversationId,
-  ) async =>
-      (select(db.participantSession)
-        ..where((tbl) => tbl.conversationId.equals(conversationId))).get();
+  ) async => (select(
+    db.participantSession,
+  )..where((tbl) => tbl.conversationId.equals(conversationId))).get();
 
   Future insertAll(List<ParticipantSessionData> list) async {
     await batch(
@@ -75,8 +79,9 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<void> deleteBySessionId(String sessionId) async {
-    await (delete(db.participantSession)
-      ..where((t) => t.sessionId.equals(sessionId))).go();
+    await (delete(
+      db.participantSession,
+    )..where((t) => t.sessionId.equals(sessionId))).go();
   }
 
   Future<void> updateSentToServer() async {

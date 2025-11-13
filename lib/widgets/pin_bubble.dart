@@ -46,42 +46,41 @@ class _PinBubbleClipper extends CustomClipper<Path> {
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) =>
-      Path()..addRRect(
-        const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
-      );
+  Path _bubblePath(Size size) => Path()
+    ..addRRect(
+      const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
+    );
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 10);
-    final path =
-        Path()
-          ..lineTo(0, 0)
-          ..cubicTo(
-            0,
-            0,
-            size.width * 0.85,
-            size.height / 3,
-            size.width * 0.85,
-            size.height / 3,
-          )
-          ..cubicTo(
-            size.width * 1.05,
-            size.height * 0.41,
-            size.width * 1.05,
-            size.height * 0.59,
-            size.width * 0.85,
-            size.height * 0.67,
-          )
-          ..cubicTo(
-            size.width * 0.85,
-            size.height * 0.67,
-            0,
-            size.height,
-            0,
-            size.height,
-          )
-          ..cubicTo(0, size.height, 0, 0, 0, 0)
-          ..cubicTo(0, 0, 0, 0, 0, 0);
+    final path = Path()
+      ..lineTo(0, 0)
+      ..cubicTo(
+        0,
+        0,
+        size.width * 0.85,
+        size.height / 3,
+        size.width * 0.85,
+        size.height / 3,
+      )
+      ..cubicTo(
+        size.width * 1.05,
+        size.height * 0.41,
+        size.width * 1.05,
+        size.height * 0.59,
+        size.width * 0.85,
+        size.height * 0.67,
+      )
+      ..cubicTo(
+        size.width * 0.85,
+        size.height * 0.67,
+        0,
+        size.height,
+        0,
+        size.height,
+      )
+      ..cubicTo(0, size.height, 0, 0, 0, 0)
+      ..cubicTo(0, 0, 0, 0, 0, 0);
     return path.shift(
       Offset(
         bubbleSize.width - size.width,

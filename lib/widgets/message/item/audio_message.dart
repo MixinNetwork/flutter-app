@@ -42,10 +42,9 @@ class AudioMessage extends HookConsumerWidget {
     );
 
     final duration = useMessageConverter(
-      converter:
-          (state) => Duration(
-            milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
-          ),
+      converter: (state) => Duration(
+        milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
+      ),
     );
 
     final isMessageSentOut =
@@ -80,8 +79,9 @@ class AudioMessage extends HookConsumerWidget {
             case MediaStatus.canceled:
               if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
                 if (isTranscriptPage) {
-                  final transcriptMessageId =
-                      TranscriptPage.of(context)?.messageId;
+                  final transcriptMessageId = TranscriptPage.of(
+                    context,
+                  )?.messageId;
                   context.accountServer.reUploadTranscriptAttachment(
                     transcriptMessageId!,
                   );
@@ -193,14 +193,12 @@ class _AnimatedWave extends HookConsumerWidget {
       child: WaveformWidget(
         value: playing ? position : 0,
         waveform: waveform,
-        backgroundColor:
-            isMe || read
-                ? context.theme.waveformBackground
-                : context.theme.accent,
-        foregroundColor:
-            isMe || read
-                ? context.theme.waveformForeground
-                : context.theme.accent,
+        backgroundColor: isMe || read
+            ? context.theme.waveformBackground
+            : context.theme.accent,
+        foregroundColor: isMe || read
+            ? context.theme.waveformForeground
+            : context.theme.accent,
       ),
     );
   }

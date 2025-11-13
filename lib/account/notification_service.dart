@@ -62,12 +62,11 @@ class NotificationService {
               return true;
             })
             .asyncMapBuffer(
-              (event) =>
-                  context.database.messageDao
-                      .notificationMessage(
-                        event.map((e) => e.messageId).toList(),
-                      )
-                      .get(),
+              (event) => context.database.messageDao
+                  .notificationMessage(
+                    event.map((e) => e.messageId).toList(),
+                  )
+                  .get(),
             )
             .expand((event) => event)
             .asyncWhere((event) async {
@@ -96,10 +95,9 @@ class NotificationService {
               // quote current user
               if (await quotedCurrentUser()) return true;
 
-              final muteUntil =
-                  event.category == ConversationCategory.group
-                      ? event.muteUntil
-                      : event.ownerMuteUntil;
+              final muteUntil = event.category == ConversationCategory.group
+                  ? event.muteUntil
+                  : event.ownerMuteUntil;
               return muteUntil?.isAfter(DateTime.now()) != true;
             })
             .asyncMap((event) async {

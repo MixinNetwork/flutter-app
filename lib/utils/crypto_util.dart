@@ -39,11 +39,11 @@ List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
     Uint8List.fromList(nonce),
   );
   final paddingParams =
-  // ignore: prefer_void_to_null
-  PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
-    ivParams,
-    null,
-  );
+      // ignore: prefer_void_to_null
+      PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+        ivParams,
+        null,
+      );
 
   final paddedCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
     ..init(true, paddingParams);
@@ -60,11 +60,11 @@ List<int> aesDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
     Uint8List.fromList(iv),
   );
   final paddingParams =
-  // ignore: prefer_void_to_null
-  PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
-    ivParams,
-    null,
-  );
+      // ignore: prefer_void_to_null
+      PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+        ivParams,
+        null,
+      );
   final paddedCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
     ..init(false, paddingParams);
   return paddedCipher.process(Uint8List.fromList(cipherText));

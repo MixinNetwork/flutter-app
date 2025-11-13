@@ -114,8 +114,9 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   List<int> lastItemPositions = [];
 
   void onItemPositions() {
-    final list =
-        itemPositionsListener.itemPositions.value.map((e) => e.index).toList();
+    final list = itemPositionsListener.itemPositions.value
+        .map((e) => e.index)
+        .toList();
     if (list.isEmpty) return;
 
     add(PagingItemPositionEvent(list));
@@ -237,7 +238,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
       after = (max(loadedIndexes.last, start), end);
     }
 
-    return [if (before != null) before, if (after != null) after];
+    return [?before, ?after];
   }
 
   Future<int> queryCount();

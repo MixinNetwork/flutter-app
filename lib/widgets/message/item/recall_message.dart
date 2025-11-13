@@ -41,21 +41,18 @@ class RecallMessage extends HookConsumerWidget {
             TextSpan(
               children: [
                 TextSpan(
-                  text:
-                      isCurrentUser
-                          ? context.l10n.youDeletedThisMessage
-                          : context.l10n.thisMessageWasDeleted,
+                  text: isCurrentUser
+                      ? context.l10n.youDeletedThisMessage
+                      : context.l10n.thisMessageWasDeleted,
                 ),
                 if (recalledText != null)
                   TextSpan(
                     text: ' ${context.l10n.reedit}',
                     style: TextStyle(color: context.theme.accent),
-                    recognizer:
-                        TapGestureRecognizer()
-                          ..onTap =
-                              () => ref
-                                  .read(recallMessageNotifierProvider)
-                                  .onReedit(recalledText),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => ref
+                          .read(recallMessageNotifierProvider)
+                          .onReedit(recalledText),
                   ),
               ],
             ),

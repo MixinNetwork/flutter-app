@@ -18,19 +18,19 @@ class MarkdownColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final widgets = MarkdownGenerator(
-      textGenerator:
-          (node, config, visitor) =>
+    final widgets =
+        MarkdownGenerator(
+          textGenerator: (node, config, visitor) =>
               CustomTextNode(node.textContent, config, visitor),
-      generators: _kMixinGenerators,
-      richTextBuilder: CustomText.rich,
-    ).buildWidgets(
-      data,
-      config: _createMarkdownConfig(
-        context: context,
-        darkMode: context.brightness == Brightness.dark,
-      ),
-    );
+          generators: _kMixinGenerators,
+          richTextBuilder: CustomText.rich,
+        ).buildWidgets(
+          data,
+          config: _createMarkdownConfig(
+            context: context,
+            darkMode: context.brightness == Brightness.dark,
+          ),
+        );
     return ClipRect(
       child: DefaultTextStyle.merge(
         style: TextStyle(color: context.theme.text),
@@ -67,9 +67,8 @@ class Markdown extends StatelessWidget {
         darkMode: context.brightness == Brightness.dark,
       ),
       markdownGenerator: MarkdownGenerator(
-        textGenerator:
-            (node, config, visitor) =>
-                CustomTextNode(node.textContent, config, visitor),
+        textGenerator: (node, config, visitor) =>
+            CustomTextNode(node.textContent, config, visitor),
         generators: _kMixinGenerators,
         richTextBuilder: CustomText.rich,
       ),
@@ -237,9 +236,7 @@ class HtmlToSpanVisitor extends TreeVisitor {
       last.accept(spanNode);
     }
     _spansStack.add(spanNode);
-    for (final child in node.nodes.toList(growable: false)) {
-      visit(child);
-    }
+    node.nodes.toList(growable: false).forEach(visit);
     _spansStack.removeLast();
   }
 }
@@ -273,8 +270,8 @@ class CustomTextNode extends ElementNode {
 final _kMixinGenerators = <SpanNodeGeneratorWithTag>[
   SpanNodeGeneratorWithTag(
     tag: MarkdownTag.pre.name,
-    generator:
-        (e, config, visitor) => _MixinCodeBlockNode(e, config.pre, visitor),
+    generator: (e, config, visitor) =>
+        _MixinCodeBlockNode(e, config.pre, visitor),
   ),
 ];
 

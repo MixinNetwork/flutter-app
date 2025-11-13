@@ -55,10 +55,9 @@ Future<void> showStickerPageDialog(
   BuildContext context,
   String stickerId,
 ) async {
-  final a =
-      await context.database.stickerRelationshipDao
-          .stickerSystemAlbum(stickerId)
-          .getSingleOrNull();
+  final a = await context.database.stickerRelationshipDao
+      .stickerSystemAlbum(stickerId)
+      .getSingleOrNull();
 
   return showMixinDialog(
     context: context,
@@ -94,15 +93,15 @@ Future<void> showStickerPageDialog(
                 final database = context.database;
                 final client = accountServer.client;
 
-                albumId ??=
-                    (await client.accountApi.getStickerById(
-                      stickerId,
-                    )).data.albumId;
+                albumId ??= (await client.accountApi.getStickerById(
+                  stickerId,
+                )).data.albumId;
 
                 if (albumId == null || albumId.isEmpty) return;
 
-                final stickerAlbum =
-                    (await client.accountApi.getStickerAlbum(albumId)).data;
+                final stickerAlbum = (await client.accountApi.getStickerAlbum(
+                  albumId,
+                )).data;
                 await database.stickerAlbumDao.insert(
                   stickerAlbum.asStickerAlbumsCompanion,
                 );
@@ -115,8 +114,8 @@ Future<void> showStickerPageDialog(
 
             final albumId =
                 album?.albumId.isNotEmpty == true && album?.category == 'SYSTEM'
-                    ? album!.albumId
-                    : null;
+                ? album!.albumId
+                : null;
 
             return _StickerPage(stickerId: stickerId, albumId: albumId);
           },
@@ -143,23 +142,21 @@ class _StickerStorePage extends HookConsumerWidget {
             child: ActionButton(
               name: Resources.assetsImagesSettingSvg,
               color: context.theme.icon,
-              onTap:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => ColoredBox(
-                            color: context.theme.popUp,
-                            child: const _StickerAlbumManagePage(),
-                          ),
-                    ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ColoredBox(
+                    color: context.theme.popUp,
+                    child: const _StickerAlbumManagePage(),
                   ),
+                ),
+              ),
             ),
           ),
           actions: [
             MixinCloseButton(
-              onTap:
-                  () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+              onTap: () =>
+                  Navigator.maybeOf(context, rootNavigator: true)?.pop(),
             ),
           ],
         ),
@@ -176,21 +173,21 @@ class _List extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final albums =
         useMemoizedStream(
-          () => Rx.combineLatest2<
-            List<StickerAlbum>,
-            List<Sticker>,
-            List<(StickerAlbum, List<Sticker>)>
-          >(
-            context.database.stickerAlbumDao.systemAlbums().watchWithStream(
-              eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-              duration: kSlowThrottleDuration,
-            ),
-            context.database.stickerDao.systemStickers().watchWithStream(
-              eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-              duration: kSlowThrottleDuration,
-            ),
-            (albums, stickers) =>
-                albums
+          () =>
+              Rx.combineLatest2<
+                List<StickerAlbum>,
+                List<Sticker>,
+                List<(StickerAlbum, List<Sticker>)>
+              >(
+                context.database.stickerAlbumDao.systemAlbums().watchWithStream(
+                  eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                  duration: kSlowThrottleDuration,
+                ),
+                context.database.stickerDao.systemStickers().watchWithStream(
+                  eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                  duration: kSlowThrottleDuration,
+                ),
+                (albums, stickers) => albums
                     .map(
                       (e) => (
                         e,
@@ -200,7 +197,7 @@ class _List extends HookConsumerWidget {
                       ),
                     )
                     .toList(),
-          ),
+              ),
         ).data ??
         [];
     return ListView.builder(
@@ -243,21 +240,19 @@ class _Item extends HookConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: InteractiveDecoratedBox(
-                      onTap:
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (_) => ColoredBox(
-                                    color: context.theme.popUp,
-                                    child: StickerAlbumPage(
-                                      album: album,
-                                      stickers: stickers,
-                                      albumId: album.albumId,
-                                    ),
-                                  ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ColoredBox(
+                            color: context.theme.popUp,
+                            child: StickerAlbumPage(
+                              album: album,
+                              stickers: stickers,
+                              albumId: album.albumId,
                             ),
                           ),
+                        ),
+                      ),
                       child: SizedBox(
                         width: 72,
                         height: 72,
@@ -273,11 +268,10 @@ class _Item extends HookConsumerWidget {
                   opacity: album.added == true ? 0.4 : 1,
                   duration: const Duration(milliseconds: 200),
                   child: MixinButton(
-                    onTap:
-                        () => context.database.stickerAlbumDao.updateAdded(
-                          album.albumId,
-                          !(album.added == true),
-                        ),
+                    onTap: () => context.database.stickerAlbumDao.updateAdded(
+                      album.albumId,
+                      !(album.added == true),
+                    ),
                     child: Text(
                       album.added == true
                           ? context.l10n.added
@@ -302,15 +296,13 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useScrollController();
 
-    final albums =
-        useMemoizedStream(
-          () => context.database.stickerAlbumDao
-              .systemAddedAlbums()
-              .watchWithStream(
-                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-                duration: kSlowThrottleDuration,
-              ),
-        ).data;
+    final albums = useMemoizedStream(
+      () =>
+          context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
+            eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+            duration: kSlowThrottleDuration,
+          ),
+    ).data;
     final list = useState(albums ?? []);
     useEffect(() {
       list.value = albums ?? [];
@@ -324,8 +316,8 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
           title: Text(context.l10n.myStickers),
           actions: [
             MixinCloseButton(
-              onTap:
-                  () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+              onTap: () =>
+                  Navigator.maybeOf(context, rootNavigator: true)?.pop(),
             ),
           ],
         ),
@@ -386,8 +378,8 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
                       ActionButton(
                         name: Resources.assetsImagesDeleteSvg,
                         color: context.theme.secondaryText,
-                        onTap:
-                            () => context.database.stickerAlbumDao.updateAdded(
+                        onTap: () =>
+                            context.database.stickerAlbumDao.updateAdded(
                               album.albumId,
                               false,
                             ),
@@ -415,10 +407,9 @@ class _StickerPage extends HookConsumerWidget {
     final sticker = useState<Sticker?>(null);
     useEffect(() {
       Future<void> effect() async {
-        final s =
-            await context.database.stickerDao
-                .sticker(stickerId)
-                .getSingleOrNull();
+        final s = await context.database.stickerDao
+            .sticker(stickerId)
+            .getSingleOrNull();
         sticker.value = s;
       }
 
@@ -426,20 +417,19 @@ class _StickerPage extends HookConsumerWidget {
       return;
     }, []);
 
-    final album =
-        useMemoizedStream(() {
-          if (albumId == null) return Stream.value(null);
-          return context.database.stickerAlbumDao
-              .album(albumId!)
-              .watchSingleWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateStickerStream(
-                    albumIds: [albumId!],
-                  ),
-                ],
-                duration: kDefaultThrottleDuration,
-              );
-        }, keys: [albumId]).data;
+    final album = useMemoizedStream(() {
+      if (albumId == null) return Stream.value(null);
+      return context.database.stickerAlbumDao
+          .album(albumId!)
+          .watchSingleWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateStickerStream(
+                albumIds: [albumId!],
+              ),
+            ],
+            duration: kDefaultThrottleDuration,
+          );
+    }, keys: [albumId]).data;
 
     final stickers =
         useMemoizedStream(() {
@@ -484,12 +474,10 @@ class _StickerPage extends HookConsumerWidget {
                   leading: const SizedBox(),
                   actions: [
                     MixinCloseButton(
-                      onTap:
-                          () =>
-                              Navigator.maybeOf(
-                                context,
-                                rootNavigator: true,
-                              )?.pop(),
+                      onTap: () => Navigator.maybeOf(
+                        context,
+                        rootNavigator: true,
+                      )?.pop(),
                     ),
                   ],
                 ),
@@ -502,13 +490,12 @@ class _StickerPage extends HookConsumerWidget {
                     child: SizedBox(
                       height: 256,
                       width: 256,
-                      child:
-                          sticker.value?.assetUrl.isNotEmpty == true
-                              ? StickerItem(
-                                assetUrl: sticker.value?.assetUrl ?? '',
-                                assetType: sticker.value?.assetType ?? '',
-                              )
-                              : const SizedBox(),
+                      child: sticker.value?.assetUrl.isNotEmpty == true
+                          ? StickerItem(
+                              assetUrl: sticker.value?.assetUrl ?? '',
+                              assetType: sticker.value?.assetType ?? '',
+                            )
+                          : const SizedBox(),
                     ),
                   ),
                 ),
@@ -532,16 +519,14 @@ class _StickerPage extends HookConsumerWidget {
                           ),
                         ),
                         MixinButton(
-                          backgroundColor:
-                              album.added == true
-                                  ? context.theme.red
-                                  : context.theme.accent,
-                          onTap:
-                              () =>
-                                  context.database.stickerAlbumDao.updateAdded(
-                                    album.albumId,
-                                    !(album.added == true),
-                                  ),
+                          backgroundColor: album.added == true
+                              ? context.theme.red
+                              : context.theme.accent,
+                          onTap: () =>
+                              context.database.stickerAlbumDao.updateAdded(
+                                album.albumId,
+                                !(album.added == true),
+                              ),
                           child: Text(
                             album.added == true
                                 ? context.l10n.removeStickers
@@ -565,20 +550,19 @@ class _StickerPage extends HookConsumerWidget {
                     labelPadding: EdgeInsets.zero,
                     indicatorPadding: const EdgeInsets.all(6),
                     dividerHeight: 0,
-                    tabs:
-                        stickers
-                            .map(
-                              (e) => Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: StickerItem(
-                                  assetUrl: e.assetUrl,
-                                  assetType: e.assetType,
-                                  width: 64,
-                                  height: 64,
-                                ),
-                              ),
-                            )
-                            .toList(),
+                    tabs: stickers
+                        .map(
+                          (e) => Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: StickerItem(
+                              assetUrl: e.assetUrl,
+                              assetType: e.assetType,
+                              width: 64,
+                              height: 64,
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
               ],
             ),

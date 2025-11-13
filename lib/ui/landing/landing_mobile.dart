@@ -1,4 +1,3 @@
-// ignore_for_file: implementation_imports
 
 import 'dart:async';
 import 'dart:convert';
@@ -45,13 +44,12 @@ class LoginWithMobileWidget extends HookConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     return BlocProvider<LandingMobileCubit>(
-      create:
-          (_) => LandingMobileCubit(
-            context.multiAuthChangeNotifier,
-            locale,
-            userAgent: userAgent,
-            deviceId: deviceId,
-          ),
+      create: (_) => LandingMobileCubit(
+        context.multiAuthChangeNotifier,
+        locale,
+        userAgent: userAgent,
+        deviceId: deviceId,
+      ),
       child: Navigator(
         onDidRemovePage: (page) {},
         pages: const [MaterialPage(child: _PhoneNumberInputScene())],
@@ -106,11 +104,10 @@ class _PhoneNumberInputScene extends StatelessWidget {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder:
-                      (context) => _CodeInputScene(
-                        phoneNumber: phoneNumber,
-                        initialVerificationResponse: response,
-                      ),
+                  builder: (context) => _CodeInputScene(
+                    phoneNumber: phoneNumber,
+                    initialVerificationResponse: response,
+                  ),
                 ),
               );
             } on MixinApiError catch (error) {
@@ -307,8 +304,9 @@ Future<VerificationResponse> _requestVerificationCode({
     phone: phone,
     purpose: VerificationPurpose.session,
     packageName: 'one.mixin.messenger',
-    gRecaptchaResponse:
-        captcha?.$1 == CaptchaType.gCaptcha ? captcha?.$2 : null,
+    gRecaptchaResponse: captcha?.$1 == CaptchaType.gCaptcha
+        ? captcha?.$2
+        : null,
     hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
   try {

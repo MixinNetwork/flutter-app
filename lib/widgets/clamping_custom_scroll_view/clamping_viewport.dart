@@ -321,10 +321,9 @@ class ClampingRenderViewport extends RenderViewport {
       child: center,
       scrollOffset: math.max(0, -centerOffset),
       overlap: leadingNegativeChild == null ? math.min(0, -centerOffset) : 0.0,
-      layoutOffset:
-          centerOffset >= mainAxisExtent
-              ? centerOffset
-              : reverseDirectionRemainingPaintExtent,
+      layoutOffset: centerOffset >= mainAxisExtent
+          ? centerOffset
+          : reverseDirectionRemainingPaintExtent,
       remainingPaintExtent: forwardDirectionRemainingPaintExtent,
       mainAxisExtent: mainAxisExtent,
       crossAxisExtent: crossAxisExtent,

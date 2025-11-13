@@ -46,21 +46,22 @@ class SafeSnapshotDao extends DatabaseAccessor<MixinDatabase>
         return value;
       });
 
-  Future<List<SafeSnapshot>> snapshotItem(String assetId) =>
-      (select(db.safeSnapshots)
-        ..where((tbl) => tbl.assetId.equals(assetId))).get();
+  Future<List<SafeSnapshot>> snapshotItem(String assetId) => (select(
+    db.safeSnapshots,
+  )..where((tbl) => tbl.assetId.equals(assetId))).get();
 
   Selectable<SafeSnapshot> safeSnapshotById(String snapshotId) =>
       select(safeSnapshots)..where((tbl) => tbl.snapshotId.equals(snapshotId));
 
-  Future<int> insertSdkSnapshot(sdk.SafeSnapshot data) => into(
-    safeSnapshots,
-  ).insertOnConflictUpdate(data.asDbSafeSnapshotObject).then((value) {
-    if (value > 0) {
-      DataBaseEventBus.instance.updateSafeSnapshot([data.snapshotId]);
-    }
-    return value;
-  });
+  Future<int> insertSdkSnapshot(sdk.SafeSnapshot data) =>
+      into(
+        safeSnapshots,
+      ).insertOnConflictUpdate(data.asDbSafeSnapshotObject).then((value) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateSafeSnapshot([data.snapshotId]);
+        }
+        return value;
+      });
 
   Future<List<SafeSnapshot>> getSnapshots({
     required int limit,

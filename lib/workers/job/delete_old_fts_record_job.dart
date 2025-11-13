@@ -7,25 +7,23 @@ class DeleteOldFtsRecordJob extends JobQueue<bool, List<bool>> {
   @override
   Future<List<bool>> fetchJobs() async {
     // check if messages_fts table exists in mixinDatabase
-    final exists =
-        await database.mixinDatabase
-            .customSelect(
-              "select EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages_fts') as result",
-            )
-            .map((row) => row.read<bool>('result'))
-            .getSingle();
+    final exists = await database.mixinDatabase
+        .customSelect(
+          "select EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages_fts') as result",
+        )
+        .map((row) => row.read<bool>('result'))
+        .getSingle();
     if (!exists) {
       e('DeleteOldFtsRecordJob: messages_fts table not exists');
       return [];
     }
 
-    final hasRecord =
-        await database.mixinDatabase
-            .customSelect(
-              'select EXISTS(select 1 from messages_fts limit 1) as result',
-            )
-            .map((row) => row.read<bool>('result'))
-            .getSingle();
+    final hasRecord = await database.mixinDatabase
+        .customSelect(
+          'select EXISTS(select 1 from messages_fts limit 1) as result',
+        )
+        .map((row) => row.read<bool>('result'))
+        .getSingle();
     if (hasRecord) return [hasRecord];
     return [];
   }

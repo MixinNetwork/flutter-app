@@ -84,8 +84,9 @@ class DeviceTransferReceiver {
 
   Future<void> _notifyProgressUpdate() async {
     _progress++;
-    final progress =
-        _total == 0 ? 0.0 : (_progress / _total * 100.0).clamp(0.0, 100.0);
+    final progress = _total == 0
+        ? 0.0
+        : (_progress / _total * 100.0).clamp(0.0, 100.0);
     onReceiverProgressUpdate?.call(progress);
     if (DateTime.now().difference(_lastProgressNotifyTime) >
         const Duration(milliseconds: 200)) {
@@ -214,10 +215,9 @@ class DeviceTransferReceiver {
         case JsonTransferDataType.conversation:
           final conversation = TransferDataConversation.fromJson(data.data);
           d('client: conversation: $conversation');
-          final local =
-              await database.conversationDao
-                  .conversationById(conversation.conversationId)
-                  .getSingleOrNull();
+          final local = await database.conversationDao
+              .conversationById(conversation.conversationId)
+              .getSingleOrNull();
           if (local != null) {
             i('conversation already exist: ${conversation.conversationId}');
             return;
@@ -357,10 +357,9 @@ class DeviceTransferReceiver {
       }
     }
 
-    final tm =
-        await database.transcriptMessageDao
-            .transcriptMessageByMessageId(packet.messageId)
-            .getSingleOrNull();
+    final tm = await database.transcriptMessageDao
+        .transcriptMessageByMessageId(packet.messageId)
+        .getSingleOrNull();
     if (tm != null) {
       final path = attachmentUtil.convertAbsolutePath(
         category: tm.category,

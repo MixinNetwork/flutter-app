@@ -288,8 +288,8 @@ class SelectableRegionState extends State<SelectableRegion>
         return rawCount <= maxConsecutiveTap
             ? rawCount
             : (rawCount % maxConsecutiveTap == 0
-                ? maxConsecutiveTap
-                : rawCount % maxConsecutiveTap);
+                  ? maxConsecutiveTap
+                  : rawCount % maxConsecutiveTap);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -500,8 +500,8 @@ class SelectableRegionState extends State<SelectableRegion>
       _selectionOverlay!.hideMagnifier();
       _selectionOverlay!.showToolbar(
         context: context,
-        contextMenuBuilder:
-            (BuildContext context) => widget.contextMenuBuilder!(context, this),
+        contextMenuBuilder: (BuildContext context) =>
+            widget.contextMenuBuilder!(context, this),
       );
     }
     _stopSelectionStartEdgeUpdate();
@@ -765,8 +765,8 @@ class SelectableRegionState extends State<SelectableRegion>
 
     _selectionOverlay!.showToolbar(
       context: context,
-      contextMenuBuilder:
-          (BuildContext context) => widget.contextMenuBuilder!(context, this),
+      contextMenuBuilder: (BuildContext context) =>
+          widget.contextMenuBuilder!(context, this),
     );
     return true;
   }
@@ -1001,10 +1001,9 @@ class SelectableRegionState extends State<SelectableRegion>
       return;
     }
     final adjustingSelectionExtend = _determineIsAdjustingSelectionEnd(forward);
-    final baseLinePoint =
-        adjustingSelectionExtend
-            ? _selectionDelegate.value.endSelectionPoint!
-            : _selectionDelegate.value.startSelectionPoint!;
+    final baseLinePoint = adjustingSelectionExtend
+        ? _selectionDelegate.value.endSelectionPoint!
+        : _selectionDelegate.value.startSelectionPoint!;
     _directionalHorizontalBaseline ??= baseLinePoint.localPosition.dx;
     final globalSelectionPointOffset = MatrixUtils.transformPoint(
       context.findRenderObject()!.getTransformTo(null),
@@ -1013,10 +1012,9 @@ class SelectableRegionState extends State<SelectableRegion>
     _selectable?.dispatchSelectionEvent(
       DirectionallyExtendSelectionEvent(
         isEnd: _adjustingSelectionEnd!,
-        direction:
-            forward
-                ? SelectionExtendDirection.nextLine
-                : SelectionExtendDirection.previousLine,
+        direction: forward
+            ? SelectionExtendDirection.nextLine
+            : SelectionExtendDirection.previousLine,
         dx: globalSelectionPointOffset.dx,
       ),
     );

@@ -44,19 +44,23 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
     with _$SnapshotDaoMixin {
   SnapshotDao(super.db);
 
-  Future<int> insert(Snapshot snapshot, {bool updateIfConflict = true}) => into(
-    db.snapshots,
-  ).simpleInsert(snapshot, updateIfConflict: updateIfConflict).then((value) {
-    DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
-    return value;
-  });
+  Future<int> insert(Snapshot snapshot, {bool updateIfConflict = true}) =>
+      into(
+        db.snapshots,
+      ).simpleInsert(snapshot, updateIfConflict: updateIfConflict).then((
+        value,
+      ) {
+        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+        return value;
+      });
 
-  Future<int> insertSdkSnapshot(sdk.Snapshot snapshot) => into(
-    db.snapshots,
-  ).insertOnConflictUpdate(snapshot.asDbSnapshotObject).then((value) {
-    DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
-    return value;
-  });
+  Future<int> insertSdkSnapshot(sdk.Snapshot snapshot) =>
+      into(
+        db.snapshots,
+      ).insertOnConflictUpdate(snapshot.asDbSnapshotObject).then((value) {
+        DataBaseEventBus.instance.updateSnapshot([snapshot.snapshotId]);
+        return value;
+      });
 
   Future deleteSnapshot(Snapshot snapshot) =>
       delete(db.snapshots).delete(snapshot).then((value) {

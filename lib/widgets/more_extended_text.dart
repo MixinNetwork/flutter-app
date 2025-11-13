@@ -14,9 +14,8 @@ class MoreExtendedText extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => LayoutBuilder(
-    builder:
-        (context, constraints) =>
-            _MoreExtendedText(text, style: style, constraints: constraints),
+    builder: (context, constraints) =>
+        _MoreExtendedText(text, style: style, constraints: constraints),
   );
 }
 
@@ -37,11 +36,10 @@ class _MoreExtendedText extends HookConsumerWidget {
     final overflowTextSpan = TextSpan(
       text: '...${context.l10n.more}',
       style: style?.merge(TextStyle(color: context.theme.accent)),
-      recognizer:
-          TapGestureRecognizer()
-            ..onTap = () {
-              expand.value = true;
-            },
+      recognizer: TapGestureRecognizer()
+        ..onTap = () {
+          expand.value = true;
+        },
     );
 
     final endIndex = useMemoized(() {

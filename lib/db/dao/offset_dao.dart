@@ -14,6 +14,7 @@ class OffsetDao extends DatabaseAccessor<MixinDatabase> with _$OffsetDaoMixin {
 
   Future deleteOffset(Offset offset) => delete(db.offsets).delete(offset);
 
-  Selectable<String> findStatusOffset() => (select(db.offsets)
-    ..where((tbl) => tbl.key.equals(statusOffset))).map((row) => row.timestamp);
+  Selectable<String> findStatusOffset() => (select(
+    db.offsets,
+  )..where((tbl) => tbl.key.equals(statusOffset))).map((row) => row.timestamp);
 }

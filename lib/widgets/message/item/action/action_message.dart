@@ -46,10 +46,9 @@ class ActionMessage extends HookConsumerWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 240, maxWidth: 340),
         child: ActionButtonLayout(
-          children:
-              actionDataList
-                  .map((e) => ActionMessageButton(action: e))
-                  .toList(),
+          children: actionDataList
+              .map((e) => ActionMessageButton(action: e))
+              .toList(),
         ),
       ),
     );

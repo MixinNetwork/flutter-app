@@ -112,25 +112,24 @@ Future<DeviceTransferIsolateController> startTransferIsolate({
     onExit: exitReceivePort.sendPort,
     onError: errorReceivePort.sendPort,
   );
-  final jobSubscribers =
-      <StreamSubscription>{}
-        ..add(
-          exitReceivePort.listen((message) {
-            w('device transfer isolate exit: $message');
-          }),
-        )
-        ..add(
-          errorReceivePort.listen((message) {
-            w('device transfer isolate error: $message');
-          }),
-        )
-        ..add(
-          isolateChannel.stream.listen((message) {
-            if (message is DeviceTransferIsolateDeliverMessage) {
-              messageDeliver(message.message);
-            }
-          }),
-        );
+  final jobSubscribers = <StreamSubscription>{}
+    ..add(
+      exitReceivePort.listen((message) {
+        w('device transfer isolate exit: $message');
+      }),
+    )
+    ..add(
+      errorReceivePort.listen((message) {
+        w('device transfer isolate error: $message');
+      }),
+    )
+    ..add(
+      isolateChannel.stream.listen((message) {
+        if (message is DeviceTransferIsolateDeliverMessage) {
+          messageDeliver(message.message);
+        }
+      }),
+    );
 
   return DeviceTransferIsolateController(
     dispose: () {

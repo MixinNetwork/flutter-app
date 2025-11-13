@@ -92,42 +92,40 @@ class SelectionBottomBar extends HookConsumerWidget {
           _Button(
             label: context.l10n.copy,
             iconAssetName: Resources.assetsImagesCopySvg,
-            onTap:
-                () async => runFutureWithToast(
-                  (() async {
-                    final messageSelectionNotifier = ref.read(
-                      messageSelectionProvider,
-                    );
+            onTap: () async => runFutureWithToast(
+              (() async {
+                final messageSelectionNotifier = ref.read(
+                  messageSelectionProvider,
+                );
 
-                    final selectedMessageIds =
-                        messageSelectionNotifier.selectedMessageIds;
-                    final messages =
-                        await context.database.messageDao
-                            .messageItemByMessageIds(
-                              selectedMessageIds.toList(),
-                            )
-                            .get();
+                final selectedMessageIds =
+                    messageSelectionNotifier.selectedMessageIds;
+                final messages = await context.database.messageDao
+                    .messageItemByMessageIds(
+                      selectedMessageIds.toList(),
+                    )
+                    .get();
 
-                    final dateFormat = DateFormat.yMd().add_Hms();
-                    final text = messages
-                        .map((e) {
-                          var content = e.content;
-                          if (!e.type.isText) {
-                            content = messagePreviewOptimize(
-                              e.status,
-                              e.type,
-                              e.content,
-                            );
-                          }
-                          return '${e.userFullName}, (${dateFormat.format(e.createdAt.toLocal())}):\n$content';
-                        })
-                        .join('\n\n');
+                final dateFormat = DateFormat.yMd().add_Hms();
+                final text = messages
+                    .map((e) {
+                      var content = e.content;
+                      if (!e.type.isText) {
+                        content = messagePreviewOptimize(
+                          e.status,
+                          e.type,
+                          e.content,
+                        );
+                      }
+                      return '${e.userFullName}, (${dateFormat.format(e.createdAt.toLocal())}):\n$content';
+                    })
+                    .join('\n\n');
 
-                    await Clipboard.setData(ClipboardData(text: text));
+                await Clipboard.setData(ClipboardData(text: text));
 
-                    messageSelectionNotifier.clearSelection();
-                  })(),
-                ),
+                messageSelectionNotifier.clearSelection();
+              })(),
+            ),
           ),
           _Button(
             label: context.l10n.delete,

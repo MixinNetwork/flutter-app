@@ -39,11 +39,10 @@ Future<void> showConversationDialog(
     return;
   }
 
-  final userIds =
-      conversationResponse.participants
-          .sublist(0, min(conversationResponse.participants.length, 4))
-          .map((e) => e.userId)
-          .toList();
+  final userIds = conversationResponse.participants
+      .sublist(0, min(conversationResponse.participants.length, 4))
+      .map((e) => e.userId)
+      .toList();
   final users = await context.accountServer.refreshUsers(userIds);
 
   Toast.dismiss();
@@ -133,15 +132,14 @@ class _ConversationInfo extends HookConsumerWidget {
       ),
       const SizedBox(height: 8),
       DialogAddOrJoinButton(
-        onTap:
-            () => runFutureWithToast(() async {
-              await context.accountServer.joinGroup(code);
-              await ConversationStateNotifier.selectConversation(
-                context,
-                conversationResponse.conversationId,
-              );
-              Navigator.pop(context);
-            }()),
+        onTap: () => runFutureWithToast(() async {
+          await context.accountServer.joinGroup(code);
+          await ConversationStateNotifier.selectConversation(
+            context,
+            conversationResponse.conversationId,
+          );
+          Navigator.pop(context);
+        }()),
         title: Text(context.l10n.joinGroupWithPlus),
       ),
       const SizedBox(height: 56),

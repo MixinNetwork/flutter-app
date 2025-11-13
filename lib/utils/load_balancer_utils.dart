@@ -9,10 +9,9 @@ LoadBalancer? loadBalancer;
 Future<R> runLoadBalancer<R, P>(
   FutureOr<R> Function(P argument) function,
   P argument,
-) =>
-    loadBalancer != null
-        ? loadBalancer!.run(function, argument)
-        : compute(function, argument);
+) => loadBalancer != null
+    ? loadBalancer!.run(function, argument)
+    : compute(function, argument);
 
 dynamic _jsonDecode(String json) => convert.jsonDecode(json);
 

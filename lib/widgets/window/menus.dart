@@ -164,15 +164,14 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.comma,
                   meta: true,
                 ),
-                onSelected:
-                    signed
-                        ? () {
-                          windowManager.show();
-                          ref
-                              .read(slideCategoryStateProvider.notifier)
-                              .select(SlideCategoryType.setting);
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        windowManager.show();
+                        ref
+                            .read(slideCategoryStateProvider.notifier)
+                            .select(SlideCategoryType.setting);
+                      }
+                    : null,
               ),
             ],
           ),
@@ -185,10 +184,9 @@ class _Menus extends HookConsumerWidget {
                   meta: true,
                   shift: true,
                 ),
-                onSelected:
-                    hasPasscode
-                        ? () => EventBus.instance.fire(LockEvent.lock)
-                        : null,
+                onSelected: hasPasscode
+                    ? () => EventBus.instance.fire(LockEvent.lock)
+                    : null,
               ),
             ],
           ),
@@ -200,15 +198,14 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.keyK,
                   meta: true,
                 ),
-                onSelected:
-                    signed
-                        ? () {
-                          Actions.invoke<ToggleCommandPaletteIntent>(
-                            context,
-                            const ToggleCommandPaletteIntent(),
-                          );
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        Actions.invoke<ToggleCommandPaletteIntent>(
+                          context,
+                          const ToggleCommandPaletteIntent(),
+                        );
+                      }
+                    : null,
               ),
               PlatformMenuItem(
                 label: context.l10n.hideMixin,
@@ -245,16 +242,15 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.keyN,
                   meta: true,
                 ),
-                onSelected:
-                    signed
-                        ? () {
-                          windowManager.show();
-                          Actions.invoke<CreateConversationIntent>(
-                            context,
-                            const CreateConversationIntent(),
-                          );
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        windowManager.show();
+                        Actions.invoke<CreateConversationIntent>(
+                          context,
+                          const CreateConversationIntent(),
+                        );
+                      }
+                    : null,
               ),
               PlatformMenuItem(
                 label: context.l10n.createGroup,
@@ -263,43 +259,40 @@ class _Menus extends HookConsumerWidget {
                   shift: true,
                   meta: true,
                 ),
-                onSelected:
-                    signed
-                        ? () {
-                          windowManager.show();
-                          Actions.invoke<CreateGroupConversationIntent>(
-                            context,
-                            const CreateGroupConversationIntent(),
-                          );
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        windowManager.show();
+                        Actions.invoke<CreateGroupConversationIntent>(
+                          context,
+                          const CreateGroupConversationIntent(),
+                        );
+                      }
+                    : null,
               ),
               if (kDebugMode)
                 PlatformMenuItemGroup(
                   members: [
                     PlatformMenuItem(
                       label: 'chat backup and restore',
-                      onSelected:
-                          signed
-                              ? () {
-                                showDeviceTransferDialog(context);
-                              }
-                              : null,
+                      onSelected: signed
+                          ? () {
+                              showDeviceTransferDialog(context);
+                            }
+                          : null,
                     ),
                   ],
                 ),
               PlatformMenuItem(
                 label: context.l10n.createCircle,
-                onSelected:
-                    signed
-                        ? () {
-                          windowManager.show();
-                          Actions.invoke<CreateCircleIntent>(
-                            context,
-                            const CreateCircleIntent(),
-                          );
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        windowManager.show();
+                        Actions.invoke<CreateCircleIntent>(
+                          context,
+                          const CreateCircleIntent(),
+                        );
+                      }
+                    : null,
               ),
               PlatformMenuItemGroup(
                 members: [
@@ -327,11 +320,9 @@ class _Menus extends HookConsumerWidget {
           ),
           PlatformMenuItem(
             label: context.l10n.zoom,
-            onSelected:
-                () async =>
-                    !await windowManager.isMaximized()
-                        ? windowManager.maximize()
-                        : windowManager.restore(),
+            onSelected: () async => !await windowManager.isMaximized()
+                ? windowManager.maximize()
+                : windowManager.restore(),
           ),
           PlatformMenuItemGroup(
             members: [
@@ -341,15 +332,14 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.arrowUp,
                   meta: true,
                 ),
-                onSelected:
-                    signed
-                        ? () {
-                          Actions.maybeInvoke(
-                            context,
-                            const PreviousConversationIntent(),
-                          );
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        Actions.maybeInvoke(
+                          context,
+                          const PreviousConversationIntent(),
+                        );
+                      }
+                    : null,
               ),
               PlatformMenuItem(
                 label: context.l10n.nextConversation,
@@ -357,15 +347,14 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.arrowDown,
                   meta: true,
                 ),
-                onSelected:
-                    signed
-                        ? () {
-                          Actions.maybeInvoke(
-                            context,
-                            const NextConversationIntent(),
-                          );
-                        }
-                        : null,
+                onSelected: signed
+                    ? () {
+                        Actions.maybeInvoke(
+                          context,
+                          const NextConversationIntent(),
+                        );
+                      }
+                    : null,
               ),
             ],
           ),
@@ -405,8 +394,8 @@ class _Menus extends HookConsumerWidget {
           ),
           PlatformMenuItem(
             label: context.l10n.privacyPolicy,
-            onSelected:
-                () => openUri(context, 'https://mixin.one/pages/privacy'),
+            onSelected: () =>
+                openUri(context, 'https://mixin.one/pages/privacy'),
           ),
         ],
       ),

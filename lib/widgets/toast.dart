@@ -91,12 +91,11 @@ class ToastWidget extends StatelessWidget {
 
 void showToastSuccessful({BuildContext? context}) => Toast.createView(
   context: context,
-  builder:
-      (context) => ToastWidget(
-        barrierColor: Colors.transparent,
-        icon: const _Successful(),
-        text: context.l10n.successful,
-      ),
+  builder: (context) => ToastWidget(
+    barrierColor: Colors.transparent,
+    icon: const _Successful(),
+    text: context.l10n.successful,
+  ),
 );
 
 class ToastError extends Error {
@@ -134,28 +133,26 @@ class ToastError extends Error {
 void showToastFailed(Object? error, {BuildContext? context}) =>
     Toast.createView(
       context: context,
-      builder:
-          (context) => ToastWidget(
-            barrierColor: Colors.transparent,
-            icon: const _Failed(),
-            text: ToastError.errorToString(context, error),
-          ),
+      builder: (context) => ToastWidget(
+        barrierColor: Colors.transparent,
+        icon: const _Failed(),
+        text: ToastError.errorToString(context, error),
+      ),
     );
 
 void showToast(String message, {BuildContext? context}) => Toast.createView(
   context: context,
-  builder:
-      (context) => ToastWidget(barrierColor: Colors.transparent, text: message),
+  builder: (context) =>
+      ToastWidget(barrierColor: Colors.transparent, text: message),
 );
 
 void showToastLoading({BuildContext? context}) => Toast.createView(
   context: context,
-  builder:
-      (context) => ToastWidget(
-        icon: const _Loading(),
-        text: context.l10n.loading,
-        ignoring: false,
-      ),
+  builder: (context) => ToastWidget(
+    icon: const _Loading(),
+    text: context.l10n.loading,
+    ignoring: false,
+  ),
   duration: null,
 );
 

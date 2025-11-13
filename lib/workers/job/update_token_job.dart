@@ -47,8 +47,9 @@ class UpdateTokenJob extends JobQueue<Job, List<Job>> {
     final tokenIds = await Future.wait<String?>(
       jobs.map((Job job) async {
         try {
-          final token =
-              (await client.tokenApi.getAssetById(job.blazeMessage!)).data;
+          final token = (await client.tokenApi.getAssetById(
+            job.blazeMessage!,
+          )).data;
 
           final chain = (await client.assetApi.getChain(token.chainId)).data;
 

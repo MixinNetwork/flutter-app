@@ -297,10 +297,9 @@ class MixinDatabase extends _$MixinDatabase {
   }
 
   Future<bool> _checkColumnExists(String tableName, String columnName) async {
-    final queryRow =
-        await customSelect(
-          "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('$tableName') WHERE name='$columnName'",
-        ).getSingle();
+    final queryRow = await customSelect(
+      "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('$tableName') WHERE name='$columnName'",
+    ).getSingle();
     return queryRow.read<bool>('CNTREC');
   }
 

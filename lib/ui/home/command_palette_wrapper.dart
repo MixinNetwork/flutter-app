@@ -13,11 +13,10 @@ class CommandPaletteWrapper extends StatelessWidget {
   Widget build(BuildContext context) => FocusableActionDetector(
     shortcuts: {
       SingleActivator(
-            LogicalKeyboardKey.keyK,
-            meta: kPlatformIsDarwin,
-            control: !kPlatformIsDarwin,
-          ):
-          const ToggleCommandPaletteIntent(),
+        LogicalKeyboardKey.keyK,
+        meta: kPlatformIsDarwin,
+        control: !kPlatformIsDarwin,
+      ): const ToggleCommandPaletteIntent(),
     },
     child: child,
   );

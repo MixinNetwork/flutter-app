@@ -43,10 +43,8 @@ class WaitingMessage extends HookConsumerWidget {
               fontSize: context.messageStyle.primaryFontSize,
               color: context.theme.accent,
             ),
-            recognizer:
-                TapGestureRecognizer()
-                  ..onTap =
-                      () => openUri(context, context.l10n.chatNotSupportUrl),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => openUri(context, context.l10n.chatNotSupportUrl),
           ),
         ],
       ),

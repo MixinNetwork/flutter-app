@@ -122,12 +122,11 @@ class _MessageSendingIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round
-          ..strokeWidth = 1;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1;
 
     final center = Offset(size.width / 2, size.height / 2);
 
@@ -140,25 +139,23 @@ class _MessageSendingIconPainter extends CustomPainter {
     // draw hour hand
     const hourHandLength = 3;
     final hourAngle = math.pi * 2 * (1 - hour / 12);
-    final hourHand =
-        Path()
-          ..moveTo(center.dx, center.dy)
-          ..lineTo(
-            center.dx + math.sin(hourAngle) * hourHandLength,
-            center.dy + math.cos(hourAngle) * hourHandLength,
-          );
+    final hourHand = Path()
+      ..moveTo(center.dx, center.dy)
+      ..lineTo(
+        center.dx + math.sin(hourAngle) * hourHandLength,
+        center.dy + math.cos(hourAngle) * hourHandLength,
+      );
     canvas.drawPath(hourHand, paint);
 
     // draw minute hand
     const minuteHandLength = 4;
     final minuteAngle = math.pi * 2 * (1 - minute / 60);
-    final minuteHand =
-        Path()
-          ..moveTo(center.dx, center.dy)
-          ..lineTo(
-            center.dx + math.sin(minuteAngle) * minuteHandLength,
-            center.dy + math.cos(minuteAngle) * minuteHandLength,
-          );
+    final minuteHand = Path()
+      ..moveTo(center.dx, center.dy)
+      ..lineTo(
+        center.dx + math.sin(minuteAngle) * minuteHandLength,
+        center.dy + math.cos(minuteAngle) * minuteHandLength,
+      );
     canvas.drawPath(minuteHand, paint);
   }
 

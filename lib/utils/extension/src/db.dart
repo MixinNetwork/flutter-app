@@ -5,10 +5,10 @@ const kSlowThrottleDuration = Duration(seconds: 1);
 const kVerySlowThrottleDuration = Duration(seconds: 3);
 
 extension SelectedableThrottle<T> on Selectable<T> {
-  Stream<Value> _watchWithStream<Value>({
+  Stream<V> _watchWithStream<V>({
     required Iterable<Stream<dynamic>> eventStreams,
     required Duration duration,
-    required Future<Value> Function() fetch,
+    required Future<V> Function() fetch,
     bool prepend = true,
   }) {
     var stream = Rx.merge(eventStreams).throttleTime(duration);

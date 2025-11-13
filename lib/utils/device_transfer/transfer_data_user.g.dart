@@ -17,24 +17,21 @@ TransferDataUser _$TransferDataUserFromJson(Map<String, dynamic> json) =>
       avatarUrl: json['avatar_url'] as String?,
       phone: json['phone'] as String?,
       isVerified: json['is_verified'] as bool?,
-      createdAt:
-          json['created_at'] == null
-              ? null
-              : DateTime.parse(json['created_at'] as String),
-      muteUntil:
-          json['mute_until'] == null
-              ? null
-              : DateTime.parse(json['mute_until'] as String),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      muteUntil: json['mute_until'] == null
+          ? null
+          : DateTime.parse(json['mute_until'] as String),
       hasPin: json['has_pin'] as bool?,
       appId: json['app_id'] as String?,
       biography: json['biography'] as String?,
       isScam: json['is_scam'] as bool?,
       codeUrl: json['code_url'] as String?,
       codeId: json['code_id'] as String?,
-      membership:
-          json['membership'] == null
-              ? null
-              : Membership.fromJson(json['membership'] as Map<String, dynamic>),
+      membership: json['membership'] == null
+          ? null
+          : Membership.fromJson(json['membership'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TransferDataUserToJson(TransferDataUser instance) =>

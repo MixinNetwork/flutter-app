@@ -64,8 +64,9 @@ class UnboundedRoundedRectSliderTrackShape extends RoundedRectSliderTrackShape
       thumbCenter: thumbCenter,
       isDiscrete: isDiscrete,
       isEnabled: isEnabled,
-      additionalActiveTrackHeight:
-          removeAdditionalActiveTrackHeight ? 0 : additionalActiveTrackHeight,
+      additionalActiveTrackHeight: removeAdditionalActiveTrackHeight
+          ? 0
+          : additionalActiveTrackHeight,
     );
   }
 }

@@ -45,19 +45,18 @@ Future<bool> saveFileToSystem(
   final mineType = lookupMimeType(file);
   final extension = p.extension(targetName);
 
-  var path =
-      (await file_selector.getSaveLocation(
-        confirmButtonText: context.l10n.save,
-        suggestedName: targetName,
-        acceptedTypeGroups: [
-          if (Platform.isWindows)
-            file_selector.XTypeGroup(
-              label: mineType,
-              extensions: [extension],
-              mimeTypes: [if (mineType != null) mineType],
-            ),
-        ],
-      ))?.path;
+  var path = (await file_selector.getSaveLocation(
+    confirmButtonText: context.l10n.save,
+    suggestedName: targetName,
+    acceptedTypeGroups: [
+      if (Platform.isWindows)
+        file_selector.XTypeGroup(
+          label: mineType,
+          extensions: [extension],
+          mimeTypes: [?mineType],
+        ),
+    ],
+  ))?.path;
   if (path == null || path.isEmpty) {
     return false;
   }
@@ -117,7 +116,8 @@ enum TempFileType {
   voiceRecord('voice_record', '.ogg'),
   logZip('log', '.zip'),
   // video thumbnail
-  thumbnail('thumbnail', '.png');
+  thumbnail('thumbnail', '.png')
+  ;
 
   const TempFileType(this.prefix, this.suffix);
 

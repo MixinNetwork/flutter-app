@@ -321,11 +321,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   Conversation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Conversation(
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
       ownerId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
@@ -553,63 +552,51 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   ConversationsCompanion toCompanion(bool nullToAbsent) {
     return ConversationsCompanion(
       conversationId: Value(conversationId),
-      ownerId:
-          ownerId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(ownerId),
-      category:
-          category == null && nullToAbsent
-              ? const Value.absent()
-              : Value(category),
+      ownerId: ownerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerId),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      iconUrl:
-          iconUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(iconUrl),
-      announcement:
-          announcement == null && nullToAbsent
-              ? const Value.absent()
-              : Value(announcement),
-      codeUrl:
-          codeUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(codeUrl),
-      payType:
-          payType == null && nullToAbsent
-              ? const Value.absent()
-              : Value(payType),
+      iconUrl: iconUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(iconUrl),
+      announcement: announcement == null && nullToAbsent
+          ? const Value.absent()
+          : Value(announcement),
+      codeUrl: codeUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codeUrl),
+      payType: payType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payType),
       createdAt: Value(createdAt),
-      pinTime:
-          pinTime == null && nullToAbsent
-              ? const Value.absent()
-              : Value(pinTime),
-      lastMessageId:
-          lastMessageId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastMessageId),
-      lastMessageCreatedAt:
-          lastMessageCreatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastMessageCreatedAt),
-      lastReadMessageId:
-          lastReadMessageId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastReadMessageId),
-      unseenMessageCount:
-          unseenMessageCount == null && nullToAbsent
-              ? const Value.absent()
-              : Value(unseenMessageCount),
+      pinTime: pinTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinTime),
+      lastMessageId: lastMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMessageId),
+      lastMessageCreatedAt: lastMessageCreatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMessageCreatedAt),
+      lastReadMessageId: lastReadMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastReadMessageId),
+      unseenMessageCount: unseenMessageCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unseenMessageCount),
       status: Value(status),
-      draft:
-          draft == null && nullToAbsent ? const Value.absent() : Value(draft),
-      muteUntil:
-          muteUntil == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muteUntil),
-      expireIn:
-          expireIn == null && nullToAbsent
-              ? const Value.absent()
-              : Value(expireIn),
+      draft: draft == null && nullToAbsent
+          ? const Value.absent()
+          : Value(draft),
+      muteUntil: muteUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muteUntil),
+      expireIn: expireIn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expireIn),
     );
   }
 
@@ -702,20 +689,18 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     payType: payType.present ? payType.value : this.payType,
     createdAt: createdAt ?? this.createdAt,
     pinTime: pinTime.present ? pinTime.value : this.pinTime,
-    lastMessageId:
-        lastMessageId.present ? lastMessageId.value : this.lastMessageId,
-    lastMessageCreatedAt:
-        lastMessageCreatedAt.present
-            ? lastMessageCreatedAt.value
-            : this.lastMessageCreatedAt,
-    lastReadMessageId:
-        lastReadMessageId.present
-            ? lastReadMessageId.value
-            : this.lastReadMessageId,
-    unseenMessageCount:
-        unseenMessageCount.present
-            ? unseenMessageCount.value
-            : this.unseenMessageCount,
+    lastMessageId: lastMessageId.present
+        ? lastMessageId.value
+        : this.lastMessageId,
+    lastMessageCreatedAt: lastMessageCreatedAt.present
+        ? lastMessageCreatedAt.value
+        : this.lastMessageCreatedAt,
+    lastReadMessageId: lastReadMessageId.present
+        ? lastReadMessageId.value
+        : this.lastReadMessageId,
+    unseenMessageCount: unseenMessageCount.present
+        ? unseenMessageCount.value
+        : this.unseenMessageCount,
     status: status ?? this.status,
     draft: draft.present ? draft.value : this.draft,
     muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
@@ -723,38 +708,32 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   );
   Conversation copyWithCompanion(ConversationsCompanion data) {
     return Conversation(
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
       category: data.category.present ? data.category.value : this.category,
       name: data.name.present ? data.name.value : this.name,
       iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
-      announcement:
-          data.announcement.present
-              ? data.announcement.value
-              : this.announcement,
+      announcement: data.announcement.present
+          ? data.announcement.value
+          : this.announcement,
       codeUrl: data.codeUrl.present ? data.codeUrl.value : this.codeUrl,
       payType: data.payType.present ? data.payType.value : this.payType,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       pinTime: data.pinTime.present ? data.pinTime.value : this.pinTime,
-      lastMessageId:
-          data.lastMessageId.present
-              ? data.lastMessageId.value
-              : this.lastMessageId,
-      lastMessageCreatedAt:
-          data.lastMessageCreatedAt.present
-              ? data.lastMessageCreatedAt.value
-              : this.lastMessageCreatedAt,
-      lastReadMessageId:
-          data.lastReadMessageId.present
-              ? data.lastReadMessageId.value
-              : this.lastReadMessageId,
-      unseenMessageCount:
-          data.unseenMessageCount.present
-              ? data.unseenMessageCount.value
-              : this.unseenMessageCount,
+      lastMessageId: data.lastMessageId.present
+          ? data.lastMessageId.value
+          : this.lastMessageId,
+      lastMessageCreatedAt: data.lastMessageCreatedAt.present
+          ? data.lastMessageCreatedAt.value
+          : this.lastMessageCreatedAt,
+      lastReadMessageId: data.lastReadMessageId.present
+          ? data.lastReadMessageId.value
+          : this.lastReadMessageId,
+      unseenMessageCount: data.unseenMessageCount.present
+          ? data.unseenMessageCount.value
+          : this.unseenMessageCount,
       status: data.status.present ? data.status.value : this.status,
       draft: data.draft.present ? data.draft.value : this.draft,
       muteUntil: data.muteUntil.present ? data.muteUntil.value : this.muteUntil,
@@ -1685,26 +1664,22 @@ class Messages extends Table with TableInfo<Messages, Message> {
   Message map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Message(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      category:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}category'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
       content: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}content'],
@@ -2008,103 +1983,81 @@ class Message extends DataClass implements Insertable<Message> {
       conversationId: Value(conversationId),
       userId: Value(userId),
       category: Value(category),
-      content:
-          content == null && nullToAbsent
-              ? const Value.absent()
-              : Value(content),
-      mediaUrl:
-          mediaUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaUrl),
-      mediaMimeType:
-          mediaMimeType == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaMimeType),
-      mediaSize:
-          mediaSize == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaSize),
-      mediaDuration:
-          mediaDuration == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaDuration),
-      mediaWidth:
-          mediaWidth == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaWidth),
-      mediaHeight:
-          mediaHeight == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaHeight),
-      mediaHash:
-          mediaHash == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaHash),
-      thumbImage:
-          thumbImage == null && nullToAbsent
-              ? const Value.absent()
-              : Value(thumbImage),
-      mediaKey:
-          mediaKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaKey),
-      mediaDigest:
-          mediaDigest == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaDigest),
-      mediaStatus:
-          mediaStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaStatus),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      mediaUrl: mediaUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaUrl),
+      mediaMimeType: mediaMimeType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaMimeType),
+      mediaSize: mediaSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaSize),
+      mediaDuration: mediaDuration == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDuration),
+      mediaWidth: mediaWidth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaWidth),
+      mediaHeight: mediaHeight == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaHeight),
+      mediaHash: mediaHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaHash),
+      thumbImage: thumbImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbImage),
+      mediaKey: mediaKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaKey),
+      mediaDigest: mediaDigest == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDigest),
+      mediaStatus: mediaStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaStatus),
       status: Value(status),
       createdAt: Value(createdAt),
-      action:
-          action == null && nullToAbsent ? const Value.absent() : Value(action),
-      participantId:
-          participantId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(participantId),
-      snapshotId:
-          snapshotId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(snapshotId),
-      hyperlink:
-          hyperlink == null && nullToAbsent
-              ? const Value.absent()
-              : Value(hyperlink),
+      action: action == null && nullToAbsent
+          ? const Value.absent()
+          : Value(action),
+      participantId: participantId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(participantId),
+      snapshotId: snapshotId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(snapshotId),
+      hyperlink: hyperlink == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hyperlink),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      albumId:
-          albumId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(albumId),
-      stickerId:
-          stickerId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(stickerId),
-      sharedUserId:
-          sharedUserId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(sharedUserId),
-      mediaWaveform:
-          mediaWaveform == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaWaveform),
-      quoteMessageId:
-          quoteMessageId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(quoteMessageId),
-      quoteContent:
-          quoteContent == null && nullToAbsent
-              ? const Value.absent()
-              : Value(quoteContent),
-      thumbUrl:
-          thumbUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(thumbUrl),
-      caption:
-          caption == null && nullToAbsent
-              ? const Value.absent()
-              : Value(caption),
+      albumId: albumId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(albumId),
+      stickerId: stickerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stickerId),
+      sharedUserId: sharedUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sharedUserId),
+      mediaWaveform: mediaWaveform == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaWaveform),
+      quoteMessageId: quoteMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteMessageId),
+      quoteContent: quoteContent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteContent),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
+      caption: caption == null && nullToAbsent
+          ? const Value.absent()
+          : Value(caption),
     );
   }
 
@@ -2224,11 +2177,13 @@ class Message extends DataClass implements Insertable<Message> {
     category: category ?? this.category,
     content: content.present ? content.value : this.content,
     mediaUrl: mediaUrl.present ? mediaUrl.value : this.mediaUrl,
-    mediaMimeType:
-        mediaMimeType.present ? mediaMimeType.value : this.mediaMimeType,
+    mediaMimeType: mediaMimeType.present
+        ? mediaMimeType.value
+        : this.mediaMimeType,
     mediaSize: mediaSize.present ? mediaSize.value : this.mediaSize,
-    mediaDuration:
-        mediaDuration.present ? mediaDuration.value : this.mediaDuration,
+    mediaDuration: mediaDuration.present
+        ? mediaDuration.value
+        : this.mediaDuration,
     mediaWidth: mediaWidth.present ? mediaWidth.value : this.mediaWidth,
     mediaHeight: mediaHeight.present ? mediaHeight.value : this.mediaHeight,
     mediaHash: mediaHash.present ? mediaHash.value : this.mediaHash,
@@ -2239,18 +2194,21 @@ class Message extends DataClass implements Insertable<Message> {
     status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
     action: action.present ? action.value : this.action,
-    participantId:
-        participantId.present ? participantId.value : this.participantId,
+    participantId: participantId.present
+        ? participantId.value
+        : this.participantId,
     snapshotId: snapshotId.present ? snapshotId.value : this.snapshotId,
     hyperlink: hyperlink.present ? hyperlink.value : this.hyperlink,
     name: name.present ? name.value : this.name,
     albumId: albumId.present ? albumId.value : this.albumId,
     stickerId: stickerId.present ? stickerId.value : this.stickerId,
     sharedUserId: sharedUserId.present ? sharedUserId.value : this.sharedUserId,
-    mediaWaveform:
-        mediaWaveform.present ? mediaWaveform.value : this.mediaWaveform,
-    quoteMessageId:
-        quoteMessageId.present ? quoteMessageId.value : this.quoteMessageId,
+    mediaWaveform: mediaWaveform.present
+        ? mediaWaveform.value
+        : this.mediaWaveform,
+    quoteMessageId: quoteMessageId.present
+        ? quoteMessageId.value
+        : this.quoteMessageId,
     quoteContent: quoteContent.present ? quoteContent.value : this.quoteContent,
     thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
     caption: caption.present ? caption.value : this.caption,
@@ -2258,64 +2216,62 @@ class Message extends DataClass implements Insertable<Message> {
   Message copyWithCompanion(MessagesCompanion data) {
     return Message(
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       userId: data.userId.present ? data.userId.value : this.userId,
       category: data.category.present ? data.category.value : this.category,
       content: data.content.present ? data.content.value : this.content,
       mediaUrl: data.mediaUrl.present ? data.mediaUrl.value : this.mediaUrl,
-      mediaMimeType:
-          data.mediaMimeType.present
-              ? data.mediaMimeType.value
-              : this.mediaMimeType,
+      mediaMimeType: data.mediaMimeType.present
+          ? data.mediaMimeType.value
+          : this.mediaMimeType,
       mediaSize: data.mediaSize.present ? data.mediaSize.value : this.mediaSize,
-      mediaDuration:
-          data.mediaDuration.present
-              ? data.mediaDuration.value
-              : this.mediaDuration,
-      mediaWidth:
-          data.mediaWidth.present ? data.mediaWidth.value : this.mediaWidth,
-      mediaHeight:
-          data.mediaHeight.present ? data.mediaHeight.value : this.mediaHeight,
+      mediaDuration: data.mediaDuration.present
+          ? data.mediaDuration.value
+          : this.mediaDuration,
+      mediaWidth: data.mediaWidth.present
+          ? data.mediaWidth.value
+          : this.mediaWidth,
+      mediaHeight: data.mediaHeight.present
+          ? data.mediaHeight.value
+          : this.mediaHeight,
       mediaHash: data.mediaHash.present ? data.mediaHash.value : this.mediaHash,
-      thumbImage:
-          data.thumbImage.present ? data.thumbImage.value : this.thumbImage,
+      thumbImage: data.thumbImage.present
+          ? data.thumbImage.value
+          : this.thumbImage,
       mediaKey: data.mediaKey.present ? data.mediaKey.value : this.mediaKey,
-      mediaDigest:
-          data.mediaDigest.present ? data.mediaDigest.value : this.mediaDigest,
-      mediaStatus:
-          data.mediaStatus.present ? data.mediaStatus.value : this.mediaStatus,
+      mediaDigest: data.mediaDigest.present
+          ? data.mediaDigest.value
+          : this.mediaDigest,
+      mediaStatus: data.mediaStatus.present
+          ? data.mediaStatus.value
+          : this.mediaStatus,
       status: data.status.present ? data.status.value : this.status,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       action: data.action.present ? data.action.value : this.action,
-      participantId:
-          data.participantId.present
-              ? data.participantId.value
-              : this.participantId,
-      snapshotId:
-          data.snapshotId.present ? data.snapshotId.value : this.snapshotId,
+      participantId: data.participantId.present
+          ? data.participantId.value
+          : this.participantId,
+      snapshotId: data.snapshotId.present
+          ? data.snapshotId.value
+          : this.snapshotId,
       hyperlink: data.hyperlink.present ? data.hyperlink.value : this.hyperlink,
       name: data.name.present ? data.name.value : this.name,
       albumId: data.albumId.present ? data.albumId.value : this.albumId,
       stickerId: data.stickerId.present ? data.stickerId.value : this.stickerId,
-      sharedUserId:
-          data.sharedUserId.present
-              ? data.sharedUserId.value
-              : this.sharedUserId,
-      mediaWaveform:
-          data.mediaWaveform.present
-              ? data.mediaWaveform.value
-              : this.mediaWaveform,
-      quoteMessageId:
-          data.quoteMessageId.present
-              ? data.quoteMessageId.value
-              : this.quoteMessageId,
-      quoteContent:
-          data.quoteContent.present
-              ? data.quoteContent.value
-              : this.quoteContent,
+      sharedUserId: data.sharedUserId.present
+          ? data.sharedUserId.value
+          : this.sharedUserId,
+      mediaWaveform: data.mediaWaveform.present
+          ? data.mediaWaveform.value
+          : this.mediaWaveform,
+      quoteMessageId: data.quoteMessageId.present
+          ? data.quoteMessageId.value
+          : this.quoteMessageId,
+      quoteContent: data.quoteContent.present
+          ? data.quoteContent.value
+          : this.quoteContent,
       thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
       caption: data.caption.present ? data.caption.value : this.caption,
     );
@@ -3125,16 +3081,14 @@ class Users extends Table with TableInfo<Users, User> {
   User map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return User(
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      identityNumber:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}identity_number'],
-          )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      identityNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}identity_number'],
+      )!,
       relationship: Users.$converterrelationship.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -3331,56 +3285,51 @@ class User extends DataClass implements Insertable<User> {
     return UsersCompanion(
       userId: Value(userId),
       identityNumber: Value(identityNumber),
-      relationship:
-          relationship == null && nullToAbsent
-              ? const Value.absent()
-              : Value(relationship),
-      membership:
-          membership == null && nullToAbsent
-              ? const Value.absent()
-              : Value(membership),
-      fullName:
-          fullName == null && nullToAbsent
-              ? const Value.absent()
-              : Value(fullName),
-      avatarUrl:
-          avatarUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(avatarUrl),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      isVerified:
-          isVerified == null && nullToAbsent
-              ? const Value.absent()
-              : Value(isVerified),
-      createdAt:
-          createdAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(createdAt),
-      muteUntil:
-          muteUntil == null && nullToAbsent
-              ? const Value.absent()
-              : Value(muteUntil),
-      hasPin:
-          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
-      appId:
-          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
-      biography:
-          biography == null && nullToAbsent
-              ? const Value.absent()
-              : Value(biography),
-      isScam:
-          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
-      codeUrl:
-          codeUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(codeUrl),
-      codeId:
-          codeId == null && nullToAbsent ? const Value.absent() : Value(codeId),
-      isDeactivated:
-          isDeactivated == null && nullToAbsent
-              ? const Value.absent()
-              : Value(isDeactivated),
+      relationship: relationship == null && nullToAbsent
+          ? const Value.absent()
+          : Value(relationship),
+      membership: membership == null && nullToAbsent
+          ? const Value.absent()
+          : Value(membership),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      phone: phone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(phone),
+      isVerified: isVerified == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isVerified),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      muteUntil: muteUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muteUntil),
+      hasPin: hasPin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hasPin),
+      appId: appId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(appId),
+      biography: biography == null && nullToAbsent
+          ? const Value.absent()
+          : Value(biography),
+      isScam: isScam == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isScam),
+      codeUrl: codeUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codeUrl),
+      codeId: codeId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(codeId),
+      isDeactivated: isDeactivated == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isDeactivated),
     );
   }
 
@@ -3470,27 +3419,28 @@ class User extends DataClass implements Insertable<User> {
     isScam: isScam.present ? isScam.value : this.isScam,
     codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
     codeId: codeId.present ? codeId.value : this.codeId,
-    isDeactivated:
-        isDeactivated.present ? isDeactivated.value : this.isDeactivated,
+    isDeactivated: isDeactivated.present
+        ? isDeactivated.value
+        : this.isDeactivated,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
       userId: data.userId.present ? data.userId.value : this.userId,
-      identityNumber:
-          data.identityNumber.present
-              ? data.identityNumber.value
-              : this.identityNumber,
-      relationship:
-          data.relationship.present
-              ? data.relationship.value
-              : this.relationship,
-      membership:
-          data.membership.present ? data.membership.value : this.membership,
+      identityNumber: data.identityNumber.present
+          ? data.identityNumber.value
+          : this.identityNumber,
+      relationship: data.relationship.present
+          ? data.relationship.value
+          : this.relationship,
+      membership: data.membership.present
+          ? data.membership.value
+          : this.membership,
       fullName: data.fullName.present ? data.fullName.value : this.fullName,
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       phone: data.phone.present ? data.phone.value : this.phone,
-      isVerified:
-          data.isVerified.present ? data.isVerified.value : this.isVerified,
+      isVerified: data.isVerified.present
+          ? data.isVerified.value
+          : this.isVerified,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       muteUntil: data.muteUntil.present ? data.muteUntil.value : this.muteUntil,
       hasPin: data.hasPin.present ? data.hasPin.value : this.hasPin,
@@ -3499,10 +3449,9 @@ class User extends DataClass implements Insertable<User> {
       isScam: data.isScam.present ? data.isScam.value : this.isScam,
       codeUrl: data.codeUrl.present ? data.codeUrl.value : this.codeUrl,
       codeId: data.codeId.present ? data.codeId.value : this.codeId,
-      isDeactivated:
-          data.isDeactivated.present
-              ? data.isDeactivated.value
-              : this.isDeactivated,
+      isDeactivated: data.isDeactivated.present
+          ? data.isDeactivated.value
+          : this.isDeactivated,
     );
   }
 
@@ -4117,30 +4066,26 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   Snapshot map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Snapshot(
-      snapshotId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}snapshot_id'],
-          )!,
+      snapshotId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}snapshot_id'],
+      )!,
       traceId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}trace_id'],
       ),
-      type:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}type'],
-          )!,
-      assetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_id'],
-          )!,
-      amount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}amount'],
-          )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}amount'],
+      )!,
       createdAt: Snapshots.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -4280,45 +4225,38 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   SnapshotsCompanion toCompanion(bool nullToAbsent) {
     return SnapshotsCompanion(
       snapshotId: Value(snapshotId),
-      traceId:
-          traceId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(traceId),
+      traceId: traceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(traceId),
       type: Value(type),
       assetId: Value(assetId),
       amount: Value(amount),
       createdAt: Value(createdAt),
-      opponentId:
-          opponentId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(opponentId),
-      transactionHash:
-          transactionHash == null && nullToAbsent
-              ? const Value.absent()
-              : Value(transactionHash),
-      sender:
-          sender == null && nullToAbsent ? const Value.absent() : Value(sender),
-      receiver:
-          receiver == null && nullToAbsent
-              ? const Value.absent()
-              : Value(receiver),
+      opponentId: opponentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(opponentId),
+      transactionHash: transactionHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionHash),
+      sender: sender == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sender),
+      receiver: receiver == null && nullToAbsent
+          ? const Value.absent()
+          : Value(receiver),
       memo: memo == null && nullToAbsent ? const Value.absent() : Value(memo),
-      confirmations:
-          confirmations == null && nullToAbsent
-              ? const Value.absent()
-              : Value(confirmations),
-      snapshotHash:
-          snapshotHash == null && nullToAbsent
-              ? const Value.absent()
-              : Value(snapshotHash),
-      openingBalance:
-          openingBalance == null && nullToAbsent
-              ? const Value.absent()
-              : Value(openingBalance),
-      closingBalance:
-          closingBalance == null && nullToAbsent
-              ? const Value.absent()
-              : Value(closingBalance),
+      confirmations: confirmations == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmations),
+      snapshotHash: snapshotHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(snapshotHash),
+      openingBalance: openingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openingBalance),
+      closingBalance: closingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closingBalance),
     );
   }
 
@@ -4391,53 +4329,54 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
     amount: amount ?? this.amount,
     createdAt: createdAt ?? this.createdAt,
     opponentId: opponentId.present ? opponentId.value : this.opponentId,
-    transactionHash:
-        transactionHash.present ? transactionHash.value : this.transactionHash,
+    transactionHash: transactionHash.present
+        ? transactionHash.value
+        : this.transactionHash,
     sender: sender.present ? sender.value : this.sender,
     receiver: receiver.present ? receiver.value : this.receiver,
     memo: memo.present ? memo.value : this.memo,
-    confirmations:
-        confirmations.present ? confirmations.value : this.confirmations,
+    confirmations: confirmations.present
+        ? confirmations.value
+        : this.confirmations,
     snapshotHash: snapshotHash.present ? snapshotHash.value : this.snapshotHash,
-    openingBalance:
-        openingBalance.present ? openingBalance.value : this.openingBalance,
-    closingBalance:
-        closingBalance.present ? closingBalance.value : this.closingBalance,
+    openingBalance: openingBalance.present
+        ? openingBalance.value
+        : this.openingBalance,
+    closingBalance: closingBalance.present
+        ? closingBalance.value
+        : this.closingBalance,
   );
   Snapshot copyWithCompanion(SnapshotsCompanion data) {
     return Snapshot(
-      snapshotId:
-          data.snapshotId.present ? data.snapshotId.value : this.snapshotId,
+      snapshotId: data.snapshotId.present
+          ? data.snapshotId.value
+          : this.snapshotId,
       traceId: data.traceId.present ? data.traceId.value : this.traceId,
       type: data.type.present ? data.type.value : this.type,
       assetId: data.assetId.present ? data.assetId.value : this.assetId,
       amount: data.amount.present ? data.amount.value : this.amount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-      opponentId:
-          data.opponentId.present ? data.opponentId.value : this.opponentId,
-      transactionHash:
-          data.transactionHash.present
-              ? data.transactionHash.value
-              : this.transactionHash,
+      opponentId: data.opponentId.present
+          ? data.opponentId.value
+          : this.opponentId,
+      transactionHash: data.transactionHash.present
+          ? data.transactionHash.value
+          : this.transactionHash,
       sender: data.sender.present ? data.sender.value : this.sender,
       receiver: data.receiver.present ? data.receiver.value : this.receiver,
       memo: data.memo.present ? data.memo.value : this.memo,
-      confirmations:
-          data.confirmations.present
-              ? data.confirmations.value
-              : this.confirmations,
-      snapshotHash:
-          data.snapshotHash.present
-              ? data.snapshotHash.value
-              : this.snapshotHash,
-      openingBalance:
-          data.openingBalance.present
-              ? data.openingBalance.value
-              : this.openingBalance,
-      closingBalance:
-          data.closingBalance.present
-              ? data.closingBalance.value
-              : this.closingBalance,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
+      snapshotHash: data.snapshotHash.present
+          ? data.snapshotHash.value
+          : this.snapshotHash,
+      openingBalance: data.openingBalance.present
+          ? data.openingBalance.value
+          : this.openingBalance,
+      closingBalance: data.closingBalance.present
+          ? data.closingBalance.value
+          : this.closingBalance,
     );
   }
 
@@ -5041,51 +4980,42 @@ class SafeSnapshots extends Table with TableInfo<SafeSnapshots, SafeSnapshot> {
   SafeSnapshot map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SafeSnapshot(
-      snapshotId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}snapshot_id'],
-          )!,
-      type:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}type'],
-          )!,
-      assetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_id'],
-          )!,
-      amount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}amount'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      opponentId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}opponent_id'],
-          )!,
-      memo:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}memo'],
-          )!,
-      transactionHash:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}transaction_hash'],
-          )!,
-      createdAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}created_at'],
-          )!,
+      snapshotId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}snapshot_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}amount'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      opponentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}opponent_id'],
+      )!,
+      memo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}memo'],
+      )!,
+      transactionHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transaction_hash'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
       traceId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}trace_id'],
@@ -5222,34 +5152,27 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
       memo: Value(memo),
       transactionHash: Value(transactionHash),
       createdAt: Value(createdAt),
-      traceId:
-          traceId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(traceId),
-      confirmations:
-          confirmations == null && nullToAbsent
-              ? const Value.absent()
-              : Value(confirmations),
-      openingBalance:
-          openingBalance == null && nullToAbsent
-              ? const Value.absent()
-              : Value(openingBalance),
-      closingBalance:
-          closingBalance == null && nullToAbsent
-              ? const Value.absent()
-              : Value(closingBalance),
-      withdrawal:
-          withdrawal == null && nullToAbsent
-              ? const Value.absent()
-              : Value(withdrawal),
-      deposit:
-          deposit == null && nullToAbsent
-              ? const Value.absent()
-              : Value(deposit),
-      inscriptionHash:
-          inscriptionHash == null && nullToAbsent
-              ? const Value.absent()
-              : Value(inscriptionHash),
+      traceId: traceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(traceId),
+      confirmations: confirmations == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confirmations),
+      openingBalance: openingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openingBalance),
+      closingBalance: closingBalance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closingBalance),
+      withdrawal: withdrawal == null && nullToAbsent
+          ? const Value.absent()
+          : Value(withdrawal),
+      deposit: deposit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deposit),
+      inscriptionHash: inscriptionHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inscriptionHash),
     );
   }
 
@@ -5328,53 +5251,55 @@ class SafeSnapshot extends DataClass implements Insertable<SafeSnapshot> {
     transactionHash: transactionHash ?? this.transactionHash,
     createdAt: createdAt ?? this.createdAt,
     traceId: traceId.present ? traceId.value : this.traceId,
-    confirmations:
-        confirmations.present ? confirmations.value : this.confirmations,
-    openingBalance:
-        openingBalance.present ? openingBalance.value : this.openingBalance,
-    closingBalance:
-        closingBalance.present ? closingBalance.value : this.closingBalance,
+    confirmations: confirmations.present
+        ? confirmations.value
+        : this.confirmations,
+    openingBalance: openingBalance.present
+        ? openingBalance.value
+        : this.openingBalance,
+    closingBalance: closingBalance.present
+        ? closingBalance.value
+        : this.closingBalance,
     withdrawal: withdrawal.present ? withdrawal.value : this.withdrawal,
     deposit: deposit.present ? deposit.value : this.deposit,
-    inscriptionHash:
-        inscriptionHash.present ? inscriptionHash.value : this.inscriptionHash,
+    inscriptionHash: inscriptionHash.present
+        ? inscriptionHash.value
+        : this.inscriptionHash,
   );
   SafeSnapshot copyWithCompanion(SafeSnapshotsCompanion data) {
     return SafeSnapshot(
-      snapshotId:
-          data.snapshotId.present ? data.snapshotId.value : this.snapshotId,
+      snapshotId: data.snapshotId.present
+          ? data.snapshotId.value
+          : this.snapshotId,
       type: data.type.present ? data.type.value : this.type,
       assetId: data.assetId.present ? data.assetId.value : this.assetId,
       amount: data.amount.present ? data.amount.value : this.amount,
       userId: data.userId.present ? data.userId.value : this.userId,
-      opponentId:
-          data.opponentId.present ? data.opponentId.value : this.opponentId,
+      opponentId: data.opponentId.present
+          ? data.opponentId.value
+          : this.opponentId,
       memo: data.memo.present ? data.memo.value : this.memo,
-      transactionHash:
-          data.transactionHash.present
-              ? data.transactionHash.value
-              : this.transactionHash,
+      transactionHash: data.transactionHash.present
+          ? data.transactionHash.value
+          : this.transactionHash,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       traceId: data.traceId.present ? data.traceId.value : this.traceId,
-      confirmations:
-          data.confirmations.present
-              ? data.confirmations.value
-              : this.confirmations,
-      openingBalance:
-          data.openingBalance.present
-              ? data.openingBalance.value
-              : this.openingBalance,
-      closingBalance:
-          data.closingBalance.present
-              ? data.closingBalance.value
-              : this.closingBalance,
-      withdrawal:
-          data.withdrawal.present ? data.withdrawal.value : this.withdrawal,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
+      openingBalance: data.openingBalance.present
+          ? data.openingBalance.value
+          : this.openingBalance,
+      closingBalance: data.closingBalance.present
+          ? data.closingBalance.value
+          : this.closingBalance,
+      withdrawal: data.withdrawal.present
+          ? data.withdrawal.value
+          : this.withdrawal,
       deposit: data.deposit.present ? data.deposit.value : this.deposit,
-      inscriptionHash:
-          data.inscriptionHash.present
-              ? data.inscriptionHash.value
-              : this.inscriptionHash,
+      inscriptionHash: data.inscriptionHash.present
+          ? data.inscriptionHash.value
+          : this.inscriptionHash,
     );
   }
 
@@ -5995,70 +5920,58 @@ class Assets extends Table with TableInfo<Assets, Asset> {
   Asset map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Asset(
-      assetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_id'],
-          )!,
-      symbol:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}symbol'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      iconUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}icon_url'],
-          )!,
-      balance:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}balance'],
-          )!,
-      destination:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}destination'],
-          )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      iconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_url'],
+      )!,
+      balance: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}balance'],
+      )!,
+      destination: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}destination'],
+      )!,
       tag: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tag'],
       ),
-      priceBtc:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}price_btc'],
-          )!,
-      priceUsd:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}price_usd'],
-          )!,
-      chainId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}chain_id'],
-          )!,
-      changeUsd:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}change_usd'],
-          )!,
-      changeBtc:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}change_btc'],
-          )!,
-      confirmations:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}confirmations'],
-          )!,
+      priceBtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}price_btc'],
+      )!,
+      priceUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}price_usd'],
+      )!,
+      chainId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chain_id'],
+      )!,
+      changeUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}change_usd'],
+      )!,
+      changeBtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}change_btc'],
+      )!,
+      confirmations: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confirmations'],
+      )!,
       assetKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}asset_key'],
@@ -6156,14 +6069,12 @@ class Asset extends DataClass implements Insertable<Asset> {
       changeUsd: Value(changeUsd),
       changeBtc: Value(changeBtc),
       confirmations: Value(confirmations),
-      assetKey:
-          assetKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(assetKey),
-      reserve:
-          reserve == null && nullToAbsent
-              ? const Value.absent()
-              : Value(reserve),
+      assetKey: assetKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assetKey),
+      reserve: reserve == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reserve),
     );
   }
 
@@ -6252,18 +6163,18 @@ class Asset extends DataClass implements Insertable<Asset> {
       name: data.name.present ? data.name.value : this.name,
       iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
       balance: data.balance.present ? data.balance.value : this.balance,
-      destination:
-          data.destination.present ? data.destination.value : this.destination,
+      destination: data.destination.present
+          ? data.destination.value
+          : this.destination,
       tag: data.tag.present ? data.tag.value : this.tag,
       priceBtc: data.priceBtc.present ? data.priceBtc.value : this.priceBtc,
       priceUsd: data.priceUsd.present ? data.priceUsd.value : this.priceUsd,
       chainId: data.chainId.present ? data.chainId.value : this.chainId,
       changeUsd: data.changeUsd.present ? data.changeUsd.value : this.changeUsd,
       changeBtc: data.changeBtc.present ? data.changeBtc.value : this.changeBtc,
-      confirmations:
-          data.confirmations.present
-              ? data.confirmations.value
-              : this.confirmations,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
       assetKey: data.assetKey.present ? data.assetKey.value : this.assetKey,
       reserve: data.reserve.present ? data.reserve.value : this.reserve,
     );
@@ -6877,80 +6788,66 @@ class Tokens extends Table with TableInfo<Tokens, Token> {
   Token map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Token(
-      assetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_id'],
-          )!,
-      kernelAssetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}kernel_asset_id'],
-          )!,
-      symbol:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}symbol'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      iconUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}icon_url'],
-          )!,
-      priceBtc:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}price_btc'],
-          )!,
-      priceUsd:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}price_usd'],
-          )!,
-      chainId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}chain_id'],
-          )!,
-      changeUsd:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}change_usd'],
-          )!,
-      changeBtc:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}change_btc'],
-          )!,
-      confirmations:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}confirmations'],
-          )!,
-      assetKey:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_key'],
-          )!,
-      dust:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}dust'],
-          )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      kernelAssetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kernel_asset_id'],
+      )!,
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      iconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_url'],
+      )!,
+      priceBtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}price_btc'],
+      )!,
+      priceUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}price_usd'],
+      )!,
+      chainId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chain_id'],
+      )!,
+      changeUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}change_usd'],
+      )!,
+      changeBtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}change_btc'],
+      )!,
+      confirmations: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confirmations'],
+      )!,
+      assetKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_key'],
+      )!,
+      dust: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dust'],
+      )!,
       collectionHash: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}collection_hash'],
       ),
-      precision:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}precision'],
-          )!,
+      precision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}precision'],
+      )!,
     );
   }
 
@@ -7036,10 +6933,9 @@ class Token extends DataClass implements Insertable<Token> {
       confirmations: Value(confirmations),
       assetKey: Value(assetKey),
       dust: Value(dust),
-      collectionHash:
-          collectionHash == null && nullToAbsent
-              ? const Value.absent()
-              : Value(collectionHash),
+      collectionHash: collectionHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(collectionHash),
       precision: Value(precision),
     );
   }
@@ -7119,17 +7015,17 @@ class Token extends DataClass implements Insertable<Token> {
     confirmations: confirmations ?? this.confirmations,
     assetKey: assetKey ?? this.assetKey,
     dust: dust ?? this.dust,
-    collectionHash:
-        collectionHash.present ? collectionHash.value : this.collectionHash,
+    collectionHash: collectionHash.present
+        ? collectionHash.value
+        : this.collectionHash,
     precision: precision ?? this.precision,
   );
   Token copyWithCompanion(TokensCompanion data) {
     return Token(
       assetId: data.assetId.present ? data.assetId.value : this.assetId,
-      kernelAssetId:
-          data.kernelAssetId.present
-              ? data.kernelAssetId.value
-              : this.kernelAssetId,
+      kernelAssetId: data.kernelAssetId.present
+          ? data.kernelAssetId.value
+          : this.kernelAssetId,
       symbol: data.symbol.present ? data.symbol.value : this.symbol,
       name: data.name.present ? data.name.value : this.name,
       iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
@@ -7138,16 +7034,14 @@ class Token extends DataClass implements Insertable<Token> {
       chainId: data.chainId.present ? data.chainId.value : this.chainId,
       changeUsd: data.changeUsd.present ? data.changeUsd.value : this.changeUsd,
       changeBtc: data.changeBtc.present ? data.changeBtc.value : this.changeBtc,
-      confirmations:
-          data.confirmations.present
-              ? data.confirmations.value
-              : this.confirmations,
+      confirmations: data.confirmations.present
+          ? data.confirmations.value
+          : this.confirmations,
       assetKey: data.assetKey.present ? data.assetKey.value : this.assetKey,
       dust: data.dust.present ? data.dust.value : this.dust,
-      collectionHash:
-          data.collectionHash.present
-              ? data.collectionHash.value
-              : this.collectionHash,
+      collectionHash: data.collectionHash.present
+          ? data.collectionHash.value
+          : this.collectionHash,
       precision: data.precision.present ? data.precision.value : this.precision,
     );
   }
@@ -7557,31 +7451,26 @@ class Chains extends Table with TableInfo<Chains, Chain> {
   Chain map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Chain(
-      chainId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}chain_id'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      symbol:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}symbol'],
-          )!,
-      iconUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}icon_url'],
-          )!,
-      threshold:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}threshold'],
-          )!,
+      chainId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chain_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      iconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_url'],
+      )!,
+      threshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}threshold'],
+      )!,
     );
   }
 
@@ -7992,40 +7881,34 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   Sticker map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Sticker(
-      stickerId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}sticker_id'],
-          )!,
+      stickerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sticker_id'],
+      )!,
       albumId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}album_id'],
       ),
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      assetUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_url'],
-          )!,
-      assetType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_type'],
-          )!,
-      assetWidth:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}asset_width'],
-          )!,
-      assetHeight:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}asset_height'],
-          )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      assetUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_url'],
+      )!,
+      assetType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_type'],
+      )!,
+      assetWidth: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}asset_width'],
+      )!,
+      assetHeight: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}asset_height'],
+      )!,
       createdAt: Stickers.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -8107,20 +7990,18 @@ class Sticker extends DataClass implements Insertable<Sticker> {
   StickersCompanion toCompanion(bool nullToAbsent) {
     return StickersCompanion(
       stickerId: Value(stickerId),
-      albumId:
-          albumId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(albumId),
+      albumId: albumId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(albumId),
       name: Value(name),
       assetUrl: Value(assetUrl),
       assetType: Value(assetType),
       assetWidth: Value(assetWidth),
       assetHeight: Value(assetHeight),
       createdAt: Value(createdAt),
-      lastUseAt:
-          lastUseAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(lastUseAt),
+      lastUseAt: lastUseAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUseAt),
     );
   }
 
@@ -8185,10 +8066,12 @@ class Sticker extends DataClass implements Insertable<Sticker> {
       name: data.name.present ? data.name.value : this.name,
       assetUrl: data.assetUrl.present ? data.assetUrl.value : this.assetUrl,
       assetType: data.assetType.present ? data.assetType.value : this.assetType,
-      assetWidth:
-          data.assetWidth.present ? data.assetWidth.value : this.assetWidth,
-      assetHeight:
-          data.assetHeight.present ? data.assetHeight.value : this.assetHeight,
+      assetWidth: data.assetWidth.present
+          ? data.assetWidth.value
+          : this.assetWidth,
+      assetHeight: data.assetHeight.present
+          ? data.assetHeight.value
+          : this.assetHeight,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastUseAt: data.lastUseAt.present ? data.lastUseAt.value : this.lastUseAt,
     );
@@ -8516,21 +8399,18 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   Hyperlink map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Hyperlink(
-      hyperlink:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}hyperlink'],
-          )!,
-      siteName:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}site_name'],
-          )!,
-      siteTitle:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}site_title'],
-          )!,
+      hyperlink: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hyperlink'],
+      )!,
+      siteName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}site_name'],
+      )!,
+      siteTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}site_title'],
+      )!,
       siteDescription: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}site_description'],
@@ -8586,14 +8466,12 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
       hyperlink: Value(hyperlink),
       siteName: Value(siteName),
       siteTitle: Value(siteTitle),
-      siteDescription:
-          siteDescription == null && nullToAbsent
-              ? const Value.absent()
-              : Value(siteDescription),
-      siteImage:
-          siteImage == null && nullToAbsent
-              ? const Value.absent()
-              : Value(siteImage),
+      siteDescription: siteDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteDescription),
+      siteImage: siteImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteImage),
     );
   }
 
@@ -8632,8 +8510,9 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
     hyperlink: hyperlink ?? this.hyperlink,
     siteName: siteName ?? this.siteName,
     siteTitle: siteTitle ?? this.siteTitle,
-    siteDescription:
-        siteDescription.present ? siteDescription.value : this.siteDescription,
+    siteDescription: siteDescription.present
+        ? siteDescription.value
+        : this.siteDescription,
     siteImage: siteImage.present ? siteImage.value : this.siteImage,
   );
   Hyperlink copyWithCompanion(HyperlinksCompanion data) {
@@ -8641,10 +8520,9 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
       hyperlink: data.hyperlink.present ? data.hyperlink.value : this.hyperlink,
       siteName: data.siteName.present ? data.siteName.value : this.siteName,
       siteTitle: data.siteTitle.present ? data.siteTitle.value : this.siteTitle,
-      siteDescription:
-          data.siteDescription.present
-              ? data.siteDescription.value
-              : this.siteDescription,
+      siteDescription: data.siteDescription.present
+          ? data.siteDescription.value
+          : this.siteDescription,
       siteImage: data.siteImage.present ? data.siteImage.value : this.siteImage,
     );
   }
@@ -8861,16 +8739,14 @@ class MessageMentions extends Table
   MessageMention map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MessageMention(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
       hasRead: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}has_read'],
@@ -8913,10 +8789,9 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
     return MessageMentionsCompanion(
       messageId: Value(messageId),
       conversationId: Value(conversationId),
-      hasRead:
-          hasRead == null && nullToAbsent
-              ? const Value.absent()
-              : Value(hasRead),
+      hasRead: hasRead == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hasRead),
     );
   }
 
@@ -8953,10 +8828,9 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
   MessageMention copyWithCompanion(MessageMentionsCompanion data) {
     return MessageMention(
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       hasRead: data.hasRead.present ? data.hasRead.value : this.hasRead,
     );
   }
@@ -9136,16 +9010,14 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   PinMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PinMessage(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
       createdAt: PinMessages.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -9231,10 +9103,9 @@ class PinMessage extends DataClass implements Insertable<PinMessage> {
   PinMessage copyWithCompanion(PinMessagesCompanion data) {
     return PinMessage(
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -9423,16 +9294,14 @@ class ExpiredMessages extends Table
   ExpiredMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ExpiredMessage(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      expireIn:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}expire_in'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      expireIn: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}expire_in'],
+      )!,
       expireAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}expire_at'],
@@ -9475,10 +9344,9 @@ class ExpiredMessage extends DataClass implements Insertable<ExpiredMessage> {
     return ExpiredMessagesCompanion(
       messageId: Value(messageId),
       expireIn: Value(expireIn),
-      expireAt:
-          expireAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(expireAt),
+      expireAt: expireAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expireAt),
     );
   }
 
@@ -9825,47 +9693,40 @@ class Addresses extends Table with TableInfo<Addresses, Address> {
   Address map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Address(
-      addressId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}address_id'],
-          )!,
-      type:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}type'],
-          )!,
-      assetId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}asset_id'],
-          )!,
-      destination:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}destination'],
-          )!,
-      label:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}label'],
-          )!,
+      addressId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      destination: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}destination'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
       updatedAt: Addresses.$converterupdatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}updated_at'],
         )!,
       ),
-      reserve:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}reserve'],
-          )!,
-      fee:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}fee'],
-          )!,
+      reserve: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reserve'],
+      )!,
+      fee: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fee'],
+      )!,
       tag: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tag'],
@@ -10015,8 +9876,9 @@ class Address extends DataClass implements Insertable<Address> {
       addressId: data.addressId.present ? data.addressId.value : this.addressId,
       type: data.type.present ? data.type.value : this.type,
       assetId: data.assetId.present ? data.assetId.value : this.assetId,
-      destination:
-          data.destination.present ? data.destination.value : this.destination,
+      destination: data.destination.present
+          ? data.destination.value
+          : this.destination,
       label: data.label.present ? data.label.value : this.label,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       reserve: data.reserve.present ? data.reserve.value : this.reserve,
@@ -10514,59 +10376,50 @@ class Apps extends Table with TableInfo<Apps, App> {
   App map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return App(
-      appId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}app_id'],
-          )!,
-      appNumber:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}app_number'],
-          )!,
-      homeUri:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}home_uri'],
-          )!,
-      redirectUri:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}redirect_uri'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      iconUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}icon_url'],
-          )!,
+      appId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_id'],
+      )!,
+      appNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_number'],
+      )!,
+      homeUri: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}home_uri'],
+      )!,
+      redirectUri: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}redirect_uri'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      iconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_url'],
+      )!,
       category: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}category'],
       ),
-      description:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}description'],
-          )!,
-      appSecret:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}app_secret'],
-          )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      appSecret: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_secret'],
+      )!,
       capabilities: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}capabilities'],
       ),
-      creatorId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}creator_id'],
-          )!,
+      creatorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}creator_id'],
+      )!,
       resourcePatterns: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}resource_patterns'],
@@ -10661,25 +10514,21 @@ class App extends DataClass implements Insertable<App> {
       redirectUri: Value(redirectUri),
       name: Value(name),
       iconUrl: Value(iconUrl),
-      category:
-          category == null && nullToAbsent
-              ? const Value.absent()
-              : Value(category),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
       description: Value(description),
       appSecret: Value(appSecret),
-      capabilities:
-          capabilities == null && nullToAbsent
-              ? const Value.absent()
-              : Value(capabilities),
+      capabilities: capabilities == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capabilities),
       creatorId: Value(creatorId),
-      resourcePatterns:
-          resourcePatterns == null && nullToAbsent
-              ? const Value.absent()
-              : Value(resourcePatterns),
-      updatedAt:
-          updatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(updatedAt),
+      resourcePatterns: resourcePatterns == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resourcePatterns),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -10750,10 +10599,9 @@ class App extends DataClass implements Insertable<App> {
     appSecret: appSecret ?? this.appSecret,
     capabilities: capabilities.present ? capabilities.value : this.capabilities,
     creatorId: creatorId ?? this.creatorId,
-    resourcePatterns:
-        resourcePatterns.present
-            ? resourcePatterns.value
-            : this.resourcePatterns,
+    resourcePatterns: resourcePatterns.present
+        ? resourcePatterns.value
+        : this.resourcePatterns,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
   App copyWithCompanion(AppsCompanion data) {
@@ -10761,23 +10609,23 @@ class App extends DataClass implements Insertable<App> {
       appId: data.appId.present ? data.appId.value : this.appId,
       appNumber: data.appNumber.present ? data.appNumber.value : this.appNumber,
       homeUri: data.homeUri.present ? data.homeUri.value : this.homeUri,
-      redirectUri:
-          data.redirectUri.present ? data.redirectUri.value : this.redirectUri,
+      redirectUri: data.redirectUri.present
+          ? data.redirectUri.value
+          : this.redirectUri,
       name: data.name.present ? data.name.value : this.name,
       iconUrl: data.iconUrl.present ? data.iconUrl.value : this.iconUrl,
       category: data.category.present ? data.category.value : this.category,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       appSecret: data.appSecret.present ? data.appSecret.value : this.appSecret,
-      capabilities:
-          data.capabilities.present
-              ? data.capabilities.value
-              : this.capabilities,
+      capabilities: data.capabilities.present
+          ? data.capabilities.value
+          : this.capabilities,
       creatorId: data.creatorId.present ? data.creatorId.value : this.creatorId,
-      resourcePatterns:
-          data.resourcePatterns.present
-              ? data.resourcePatterns.value
-              : this.resourcePatterns,
+      resourcePatterns: data.resourcePatterns.present
+          ? data.resourcePatterns.value
+          : this.resourcePatterns,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -11141,16 +10989,14 @@ class CircleConversations extends Table
   CircleConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return CircleConversation(
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
-      circleId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}circle_id'],
-          )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      circleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}circle_id'],
+      )!,
       userId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}user_id'],
@@ -11228,13 +11074,13 @@ class CircleConversation extends DataClass
     return CircleConversationsCompanion(
       conversationId: Value(conversationId),
       circleId: Value(circleId),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       createdAt: Value(createdAt),
-      pinTime:
-          pinTime == null && nullToAbsent
-              ? const Value.absent()
-              : Value(pinTime),
+      pinTime: pinTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinTime),
     );
   }
 
@@ -11278,10 +11124,9 @@ class CircleConversation extends DataClass
   );
   CircleConversation copyWithCompanion(CircleConversationsCompanion data) {
     return CircleConversation(
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       circleId: data.circleId.present ? data.circleId.value : this.circleId,
       userId: data.userId.present ? data.userId.value : this.userId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -11500,16 +11345,14 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   Circle map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Circle(
-      circleId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}circle_id'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
+      circleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}circle_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
       createdAt: Circles.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -11576,10 +11419,9 @@ class Circle extends DataClass implements Insertable<Circle> {
       circleId: Value(circleId),
       name: Value(name),
       createdAt: Value(createdAt),
-      orderedAt:
-          orderedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(orderedAt),
+      orderedAt: orderedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderedAt),
     );
   }
 
@@ -11814,16 +11656,14 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return FloodMessage(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      data:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}data'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}data'],
+      )!,
       createdAt: FloodMessages.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -12226,16 +12066,14 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
   Job map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Job(
-      jobId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}job_id'],
-          )!,
-      action:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}action'],
-          )!,
+      jobId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}job_id'],
+      )!,
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      )!,
       createdAt: Jobs.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -12246,11 +12084,10 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
         DriftSqlType.int,
         data['${effectivePrefix}order_id'],
       ),
-      priority:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}priority'],
-          )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
       userId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}user_id'],
@@ -12267,11 +12104,10 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
         DriftSqlType.string,
         data['${effectivePrefix}resend_message_id'],
       ),
-      runCount:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}run_count'],
-          )!,
+      runCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}run_count'],
+      )!,
     );
   }
 
@@ -12346,25 +12182,22 @@ class Job extends DataClass implements Insertable<Job> {
       jobId: Value(jobId),
       action: Value(action),
       createdAt: Value(createdAt),
-      orderId:
-          orderId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(orderId),
+      orderId: orderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderId),
       priority: Value(priority),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      blazeMessage:
-          blazeMessage == null && nullToAbsent
-              ? const Value.absent()
-              : Value(blazeMessage),
-      conversationId:
-          conversationId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(conversationId),
-      resendMessageId:
-          resendMessageId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(resendMessageId),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
+      blazeMessage: blazeMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(blazeMessage),
+      conversationId: conversationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conversationId),
+      resendMessageId: resendMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resendMessageId),
       runCount: Value(runCount),
     );
   }
@@ -12423,10 +12256,12 @@ class Job extends DataClass implements Insertable<Job> {
     priority: priority ?? this.priority,
     userId: userId.present ? userId.value : this.userId,
     blazeMessage: blazeMessage.present ? blazeMessage.value : this.blazeMessage,
-    conversationId:
-        conversationId.present ? conversationId.value : this.conversationId,
-    resendMessageId:
-        resendMessageId.present ? resendMessageId.value : this.resendMessageId,
+    conversationId: conversationId.present
+        ? conversationId.value
+        : this.conversationId,
+    resendMessageId: resendMessageId.present
+        ? resendMessageId.value
+        : this.resendMessageId,
     runCount: runCount ?? this.runCount,
   );
   Job copyWithCompanion(JobsCompanion data) {
@@ -12437,18 +12272,15 @@ class Job extends DataClass implements Insertable<Job> {
       orderId: data.orderId.present ? data.orderId.value : this.orderId,
       priority: data.priority.present ? data.priority.value : this.priority,
       userId: data.userId.present ? data.userId.value : this.userId,
-      blazeMessage:
-          data.blazeMessage.present
-              ? data.blazeMessage.value
-              : this.blazeMessage,
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
-      resendMessageId:
-          data.resendMessageId.present
-              ? data.resendMessageId.value
-              : this.resendMessageId,
+      blazeMessage: data.blazeMessage.present
+          ? data.blazeMessage.value
+          : this.blazeMessage,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      resendMessageId: data.resendMessageId.present
+          ? data.resendMessageId.value
+          : this.resendMessageId,
       runCount: data.runCount.present ? data.runCount.value : this.runCount,
     );
   }
@@ -12705,11 +12537,10 @@ class MessagesHistory extends Table
   MessagesHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return MessagesHistoryData(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
     );
   }
 
@@ -12897,16 +12728,14 @@ class Offsets extends Table with TableInfo<Offsets, Offset> {
   Offset map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Offset(
-      key:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}key'],
-          )!,
-      timestamp:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}timestamp'],
-          )!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}timestamp'],
+      )!,
     );
   }
 
@@ -13189,21 +13018,18 @@ class ParticipantSession extends Table
   ParticipantSessionData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ParticipantSessionData(
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      sessionId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}session_id'],
-          )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      )!,
       sentToServer: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sent_to_server'],
@@ -13279,18 +13105,15 @@ class ParticipantSessionData extends DataClass
       conversationId: Value(conversationId),
       userId: Value(userId),
       sessionId: Value(sessionId),
-      sentToServer:
-          sentToServer == null && nullToAbsent
-              ? const Value.absent()
-              : Value(sentToServer),
-      createdAt:
-          createdAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(createdAt),
-      publicKey:
-          publicKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(publicKey),
+      sentToServer: sentToServer == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sentToServer),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      publicKey: publicKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publicKey),
     );
   }
 
@@ -13338,16 +13161,14 @@ class ParticipantSessionData extends DataClass
   );
   ParticipantSessionData copyWithCompanion(ParticipantSessionCompanion data) {
     return ParticipantSessionData(
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       userId: data.userId.present ? data.userId.value : this.userId,
       sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
-      sentToServer:
-          data.sentToServer.present
-              ? data.sentToServer.value
-              : this.sentToServer,
+      sentToServer: data.sentToServer.present
+          ? data.sentToServer.value
+          : this.sentToServer,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       publicKey: data.publicKey.present ? data.publicKey.value : this.publicKey,
     );
@@ -13590,16 +13411,14 @@ class Participants extends Table with TableInfo<Participants, Participant> {
   Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Participant(
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
       role: Participants.$converterrole.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -13705,10 +13524,9 @@ class Participant extends DataClass implements Insertable<Participant> {
   );
   Participant copyWithCompanion(ParticipantsCompanion data) {
     return Participant(
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       userId: data.userId.present ? data.userId.value : this.userId,
       role: data.role.present ? data.role.value : this.role,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -13946,26 +13764,22 @@ class ResendSessionMessages extends Table
   ResendSessionMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ResendSessionMessage(
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      sessionId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}session_id'],
-          )!,
-      status:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}status'],
-          )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}status'],
+      )!,
       createdAt: ResendSessionMessages.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -14352,26 +14166,22 @@ class SentSessionSenderKeys extends Table
   SentSessionSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return SentSessionSenderKey(
-      conversationId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}conversation_id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      sessionId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}session_id'],
-          )!,
-      sentToServer:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}sent_to_server'],
-          )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      )!,
+      sentToServer: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sent_to_server'],
+      )!,
       senderKeyId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sender_key_id'],
@@ -14442,14 +14252,12 @@ class SentSessionSenderKey extends DataClass
       userId: Value(userId),
       sessionId: Value(sessionId),
       sentToServer: Value(sentToServer),
-      senderKeyId:
-          senderKeyId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(senderKeyId),
-      createdAt:
-          createdAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(createdAt),
+      senderKeyId: senderKeyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(senderKeyId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
     );
   }
 
@@ -14497,18 +14305,17 @@ class SentSessionSenderKey extends DataClass
   );
   SentSessionSenderKey copyWithCompanion(SentSessionSenderKeysCompanion data) {
     return SentSessionSenderKey(
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
       userId: data.userId.present ? data.userId.value : this.userId,
       sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
-      sentToServer:
-          data.sentToServer.present
-              ? data.sentToServer.value
-              : this.sentToServer,
-      senderKeyId:
-          data.senderKeyId.present ? data.senderKeyId.value : this.senderKeyId,
+      sentToServer: data.sentToServer.present
+          ? data.sentToServer.value
+          : this.sentToServer,
+      senderKeyId: data.senderKeyId.present
+          ? data.senderKeyId.value
+          : this.senderKeyId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -14900,21 +14707,18 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return StickerAlbum(
-      albumId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}album_id'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      iconUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}icon_url'],
-          )!,
+      albumId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}album_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      iconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_url'],
+      )!,
       createdAt: StickerAlbums.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -14927,26 +14731,22 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
           data['${effectivePrefix}update_at'],
         )!,
       ),
-      orderedAt:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}ordered_at'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
-      category:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}category'],
-          )!,
-      description:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}description'],
-          )!,
+      orderedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ordered_at'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
       banner: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}banner'],
@@ -14955,11 +14755,10 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
         DriftSqlType.bool,
         data['${effectivePrefix}added'],
       ),
-      isVerified:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.bool,
-            data['${effectivePrefix}is_verified'],
-          )!,
+      isVerified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_verified'],
+      )!,
     );
   }
 
@@ -15046,10 +14845,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       userId: Value(userId),
       category: Value(category),
       description: Value(description),
-      banner:
-          banner == null && nullToAbsent ? const Value.absent() : Value(banner),
-      added:
-          added == null && nullToAbsent ? const Value.absent() : Value(added),
+      banner: banner == null && nullToAbsent
+          ? const Value.absent()
+          : Value(banner),
+      added: added == null && nullToAbsent
+          ? const Value.absent()
+          : Value(added),
       isVerified: Value(isVerified),
     );
   }
@@ -15130,12 +14931,14 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       orderedAt: data.orderedAt.present ? data.orderedAt.value : this.orderedAt,
       userId: data.userId.present ? data.userId.value : this.userId,
       category: data.category.present ? data.category.value : this.category,
-      description:
-          data.description.present ? data.description.value : this.description,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       banner: data.banner.present ? data.banner.value : this.banner,
       added: data.added.present ? data.added.value : this.added,
-      isVerified:
-          data.isVerified.present ? data.isVerified.value : this.isVerified,
+      isVerified: data.isVerified.present
+          ? data.isVerified.value
+          : this.isVerified,
     );
   }
 
@@ -15443,16 +15246,14 @@ class StickerRelationships extends Table
   StickerRelationship map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return StickerRelationship(
-      albumId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}album_id'],
-          )!,
-      stickerId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}sticker_id'],
-          )!,
+      albumId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}album_id'],
+      )!,
+      stickerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sticker_id'],
+      )!,
     );
   }
 
@@ -16128,16 +15929,14 @@ class TranscriptMessages extends Table
   TranscriptMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TranscriptMessage(
-      transcriptId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}transcript_id'],
-          )!,
-      messageId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}message_id'],
-          )!,
+      transcriptId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transcript_id'],
+      )!,
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
       userId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}user_id'],
@@ -16146,11 +15945,10 @@ class TranscriptMessages extends Table
         DriftSqlType.string,
         data['${effectivePrefix}user_full_name'],
       ),
-      category:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}category'],
-          )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
       createdAt: TranscriptMessages.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -16418,98 +16216,77 @@ class TranscriptMessage extends DataClass
     return TranscriptMessagesCompanion(
       transcriptId: Value(transcriptId),
       messageId: Value(messageId),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      userFullName:
-          userFullName == null && nullToAbsent
-              ? const Value.absent()
-              : Value(userFullName),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
+      userFullName: userFullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userFullName),
       category: Value(category),
       createdAt: Value(createdAt),
-      content:
-          content == null && nullToAbsent
-              ? const Value.absent()
-              : Value(content),
-      mediaUrl:
-          mediaUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaUrl),
-      mediaName:
-          mediaName == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaName),
-      mediaSize:
-          mediaSize == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaSize),
-      mediaWidth:
-          mediaWidth == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaWidth),
-      mediaHeight:
-          mediaHeight == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaHeight),
-      mediaMimeType:
-          mediaMimeType == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaMimeType),
-      mediaDuration:
-          mediaDuration == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaDuration),
-      mediaStatus:
-          mediaStatus == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaStatus),
-      mediaWaveform:
-          mediaWaveform == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaWaveform),
-      thumbImage:
-          thumbImage == null && nullToAbsent
-              ? const Value.absent()
-              : Value(thumbImage),
-      thumbUrl:
-          thumbUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(thumbUrl),
-      mediaKey:
-          mediaKey == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaKey),
-      mediaDigest:
-          mediaDigest == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaDigest),
-      mediaCreatedAt:
-          mediaCreatedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mediaCreatedAt),
-      stickerId:
-          stickerId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(stickerId),
-      sharedUserId:
-          sharedUserId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(sharedUserId),
-      mentions:
-          mentions == null && nullToAbsent
-              ? const Value.absent()
-              : Value(mentions),
-      quoteId:
-          quoteId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(quoteId),
-      quoteContent:
-          quoteContent == null && nullToAbsent
-              ? const Value.absent()
-              : Value(quoteContent),
-      caption:
-          caption == null && nullToAbsent
-              ? const Value.absent()
-              : Value(caption),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      mediaUrl: mediaUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaUrl),
+      mediaName: mediaName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaName),
+      mediaSize: mediaSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaSize),
+      mediaWidth: mediaWidth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaWidth),
+      mediaHeight: mediaHeight == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaHeight),
+      mediaMimeType: mediaMimeType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaMimeType),
+      mediaDuration: mediaDuration == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDuration),
+      mediaStatus: mediaStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaStatus),
+      mediaWaveform: mediaWaveform == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaWaveform),
+      thumbImage: thumbImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbImage),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
+      mediaKey: mediaKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaKey),
+      mediaDigest: mediaDigest == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDigest),
+      mediaCreatedAt: mediaCreatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaCreatedAt),
+      stickerId: stickerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stickerId),
+      sharedUserId: sharedUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sharedUserId),
+      mentions: mentions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mentions),
+      quoteId: quoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteId),
+      quoteContent: quoteContent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteContent),
+      caption: caption == null && nullToAbsent
+          ? const Value.absent()
+          : Value(caption),
     );
   }
 
@@ -16623,19 +16400,23 @@ class TranscriptMessage extends DataClass
     mediaSize: mediaSize.present ? mediaSize.value : this.mediaSize,
     mediaWidth: mediaWidth.present ? mediaWidth.value : this.mediaWidth,
     mediaHeight: mediaHeight.present ? mediaHeight.value : this.mediaHeight,
-    mediaMimeType:
-        mediaMimeType.present ? mediaMimeType.value : this.mediaMimeType,
-    mediaDuration:
-        mediaDuration.present ? mediaDuration.value : this.mediaDuration,
+    mediaMimeType: mediaMimeType.present
+        ? mediaMimeType.value
+        : this.mediaMimeType,
+    mediaDuration: mediaDuration.present
+        ? mediaDuration.value
+        : this.mediaDuration,
     mediaStatus: mediaStatus.present ? mediaStatus.value : this.mediaStatus,
-    mediaWaveform:
-        mediaWaveform.present ? mediaWaveform.value : this.mediaWaveform,
+    mediaWaveform: mediaWaveform.present
+        ? mediaWaveform.value
+        : this.mediaWaveform,
     thumbImage: thumbImage.present ? thumbImage.value : this.thumbImage,
     thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
     mediaKey: mediaKey.present ? mediaKey.value : this.mediaKey,
     mediaDigest: mediaDigest.present ? mediaDigest.value : this.mediaDigest,
-    mediaCreatedAt:
-        mediaCreatedAt.present ? mediaCreatedAt.value : this.mediaCreatedAt,
+    mediaCreatedAt: mediaCreatedAt.present
+        ? mediaCreatedAt.value
+        : this.mediaCreatedAt,
     stickerId: stickerId.present ? stickerId.value : this.stickerId,
     sharedUserId: sharedUserId.present ? sharedUserId.value : this.sharedUserId,
     mentions: mentions.present ? mentions.value : this.mentions,
@@ -16645,61 +16426,58 @@ class TranscriptMessage extends DataClass
   );
   TranscriptMessage copyWithCompanion(TranscriptMessagesCompanion data) {
     return TranscriptMessage(
-      transcriptId:
-          data.transcriptId.present
-              ? data.transcriptId.value
-              : this.transcriptId,
+      transcriptId: data.transcriptId.present
+          ? data.transcriptId.value
+          : this.transcriptId,
       messageId: data.messageId.present ? data.messageId.value : this.messageId,
       userId: data.userId.present ? data.userId.value : this.userId,
-      userFullName:
-          data.userFullName.present
-              ? data.userFullName.value
-              : this.userFullName,
+      userFullName: data.userFullName.present
+          ? data.userFullName.value
+          : this.userFullName,
       category: data.category.present ? data.category.value : this.category,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       content: data.content.present ? data.content.value : this.content,
       mediaUrl: data.mediaUrl.present ? data.mediaUrl.value : this.mediaUrl,
       mediaName: data.mediaName.present ? data.mediaName.value : this.mediaName,
       mediaSize: data.mediaSize.present ? data.mediaSize.value : this.mediaSize,
-      mediaWidth:
-          data.mediaWidth.present ? data.mediaWidth.value : this.mediaWidth,
-      mediaHeight:
-          data.mediaHeight.present ? data.mediaHeight.value : this.mediaHeight,
-      mediaMimeType:
-          data.mediaMimeType.present
-              ? data.mediaMimeType.value
-              : this.mediaMimeType,
-      mediaDuration:
-          data.mediaDuration.present
-              ? data.mediaDuration.value
-              : this.mediaDuration,
-      mediaStatus:
-          data.mediaStatus.present ? data.mediaStatus.value : this.mediaStatus,
-      mediaWaveform:
-          data.mediaWaveform.present
-              ? data.mediaWaveform.value
-              : this.mediaWaveform,
-      thumbImage:
-          data.thumbImage.present ? data.thumbImage.value : this.thumbImage,
+      mediaWidth: data.mediaWidth.present
+          ? data.mediaWidth.value
+          : this.mediaWidth,
+      mediaHeight: data.mediaHeight.present
+          ? data.mediaHeight.value
+          : this.mediaHeight,
+      mediaMimeType: data.mediaMimeType.present
+          ? data.mediaMimeType.value
+          : this.mediaMimeType,
+      mediaDuration: data.mediaDuration.present
+          ? data.mediaDuration.value
+          : this.mediaDuration,
+      mediaStatus: data.mediaStatus.present
+          ? data.mediaStatus.value
+          : this.mediaStatus,
+      mediaWaveform: data.mediaWaveform.present
+          ? data.mediaWaveform.value
+          : this.mediaWaveform,
+      thumbImage: data.thumbImage.present
+          ? data.thumbImage.value
+          : this.thumbImage,
       thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
       mediaKey: data.mediaKey.present ? data.mediaKey.value : this.mediaKey,
-      mediaDigest:
-          data.mediaDigest.present ? data.mediaDigest.value : this.mediaDigest,
-      mediaCreatedAt:
-          data.mediaCreatedAt.present
-              ? data.mediaCreatedAt.value
-              : this.mediaCreatedAt,
+      mediaDigest: data.mediaDigest.present
+          ? data.mediaDigest.value
+          : this.mediaDigest,
+      mediaCreatedAt: data.mediaCreatedAt.present
+          ? data.mediaCreatedAt.value
+          : this.mediaCreatedAt,
       stickerId: data.stickerId.present ? data.stickerId.value : this.stickerId,
-      sharedUserId:
-          data.sharedUserId.present
-              ? data.sharedUserId.value
-              : this.sharedUserId,
+      sharedUserId: data.sharedUserId.present
+          ? data.sharedUserId.value
+          : this.sharedUserId,
       mentions: data.mentions.present ? data.mentions.value : this.mentions,
       quoteId: data.quoteId.present ? data.quoteId.value : this.quoteId,
-      quoteContent:
-          data.quoteContent.present
-              ? data.quoteContent.value
-              : this.quoteContent,
+      quoteContent: data.quoteContent.present
+          ? data.quoteContent.value
+          : this.quoteContent,
       caption: data.caption.present ? data.caption.value : this.caption,
     );
   }
@@ -17213,16 +16991,14 @@ class Fiats extends Table with TableInfo<Fiats, Fiat> {
   Fiat map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Fiat(
-      code:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}code'],
-          )!,
-      rate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}rate'],
-          )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      rate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}rate'],
+      )!,
     );
   }
 
@@ -17434,16 +17210,14 @@ class FavoriteApps extends Table with TableInfo<FavoriteApps, FavoriteApp> {
   FavoriteApp map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return FavoriteApp(
-      appId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}app_id'],
-          )!,
-      userId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
-          )!,
+      appId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
       createdAt: FavoriteApps.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -17702,22 +17476,20 @@ class Properties extends Table with TableInfo<Properties, Property> {
   Property map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Property(
-      key:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}key'],
-          )!,
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
       group: Properties.$convertergroup.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}group'],
         )!,
       ),
-      value:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}value'],
-          )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
     );
   }
 
@@ -18058,36 +17830,30 @@ class InscriptionCollections extends Table
   InscriptionCollection map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return InscriptionCollection(
-      collectionHash:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}collection_hash'],
-          )!,
-      supply:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}supply'],
-          )!,
-      unit:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}unit'],
-          )!,
-      symbol:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}symbol'],
-          )!,
-      name:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}name'],
-          )!,
-      iconUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}icon_url'],
-          )!,
+      collectionHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collection_hash'],
+      )!,
+      supply: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supply'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      symbol: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}symbol'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      iconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_url'],
+      )!,
       createdAt: InscriptionCollections.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -18227,10 +17993,9 @@ class InscriptionCollection extends DataClass
     InscriptionCollectionsCompanion data,
   ) {
     return InscriptionCollection(
-      collectionHash:
-          data.collectionHash.present
-              ? data.collectionHash.value
-              : this.collectionHash,
+      collectionHash: data.collectionHash.present
+          ? data.collectionHash.value
+          : this.collectionHash,
       supply: data.supply.present ? data.supply.value : this.supply,
       unit: data.unit.present ? data.unit.value : this.unit,
       symbol: data.symbol.present ? data.symbol.value : this.symbol,
@@ -18618,31 +18383,26 @@ class InscriptionItems extends Table
   InscriptionItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return InscriptionItem(
-      inscriptionHash:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}inscription_hash'],
-          )!,
-      collectionHash:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}collection_hash'],
-          )!,
-      sequence:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}sequence'],
-          )!,
-      contentType:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}content_type'],
-          )!,
-      contentUrl:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}content_url'],
-          )!,
+      inscriptionHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}inscription_hash'],
+      )!,
+      collectionHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collection_hash'],
+      )!,
+      sequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sequence'],
+      )!,
+      contentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_type'],
+      )!,
+      contentUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_url'],
+      )!,
       occupiedBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}occupied_by'],
@@ -18736,14 +18496,12 @@ class InscriptionItem extends DataClass implements Insertable<InscriptionItem> {
       sequence: Value(sequence),
       contentType: Value(contentType),
       contentUrl: Value(contentUrl),
-      occupiedBy:
-          occupiedBy == null && nullToAbsent
-              ? const Value.absent()
-              : Value(occupiedBy),
-      occupiedAt:
-          occupiedAt == null && nullToAbsent
-              ? const Value.absent()
-              : Value(occupiedAt),
+      occupiedBy: occupiedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occupiedBy),
+      occupiedAt: occupiedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(occupiedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -18805,23 +18563,25 @@ class InscriptionItem extends DataClass implements Insertable<InscriptionItem> {
   );
   InscriptionItem copyWithCompanion(InscriptionItemsCompanion data) {
     return InscriptionItem(
-      inscriptionHash:
-          data.inscriptionHash.present
-              ? data.inscriptionHash.value
-              : this.inscriptionHash,
-      collectionHash:
-          data.collectionHash.present
-              ? data.collectionHash.value
-              : this.collectionHash,
+      inscriptionHash: data.inscriptionHash.present
+          ? data.inscriptionHash.value
+          : this.inscriptionHash,
+      collectionHash: data.collectionHash.present
+          ? data.collectionHash.value
+          : this.collectionHash,
       sequence: data.sequence.present ? data.sequence.value : this.sequence,
-      contentType:
-          data.contentType.present ? data.contentType.value : this.contentType,
-      contentUrl:
-          data.contentUrl.present ? data.contentUrl.value : this.contentUrl,
-      occupiedBy:
-          data.occupiedBy.present ? data.occupiedBy.value : this.occupiedBy,
-      occupiedAt:
-          data.occupiedAt.present ? data.occupiedAt.value : this.occupiedAt,
+      contentType: data.contentType.present
+          ? data.contentType.value
+          : this.contentType,
+      contentUrl: data.contentUrl.present
+          ? data.contentUrl.value
+          : this.contentUrl,
+      occupiedBy: data.occupiedBy.present
+          ? data.occupiedBy.value
+          : this.occupiedBy,
+      occupiedAt: data.occupiedAt.present
+          ? data.occupiedAt.value
+          : this.occupiedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -20048,12 +19808,12 @@ class $ConversationsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ConversationsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ConversationsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ConversationsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ConversationsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ConversationsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ConversationsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> conversationId = const Value.absent(),
@@ -20138,16 +19898,9 @@ class $ConversationsTableManager
                 expireIn: expireIn,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -20723,12 +20476,12 @@ class $MessagesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $MessagesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $MessagesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $MessagesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $MessagesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessagesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessagesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -20865,16 +20618,9 @@ class $MessagesTableManager
                 caption: caption,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -21221,12 +20967,12 @@ class $UsersTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $UsersFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $UsersOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $UsersAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $UsersFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $UsersOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $UsersAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> userId = const Value.absent(),
@@ -21307,16 +21053,9 @@ class $UsersTableManager
                 isDeactivated: isDeactivated,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -21633,12 +21372,12 @@ class $SnapshotsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SnapshotsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SnapshotsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SnapshotsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $SnapshotsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SnapshotsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SnapshotsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> snapshotId = const Value.absent(),
@@ -21711,16 +21450,9 @@ class $SnapshotsTableManager
                 closingBalance: closingBalance,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -22061,12 +21793,12 @@ class $SafeSnapshotsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $SafeSnapshotsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SafeSnapshotsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $SafeSnapshotsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $SafeSnapshotsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SafeSnapshotsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SafeSnapshotsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> snapshotId = const Value.absent(),
@@ -22143,16 +21875,9 @@ class $SafeSnapshotsTableManager
                 inscriptionHash: inscriptionHash,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -22460,12 +22185,12 @@ class $AssetsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $AssetsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $AssetsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $AssetsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $AssetsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $AssetsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $AssetsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> assetId = const Value.absent(),
@@ -22538,16 +22263,9 @@ class $AssetsTableManager
                 reserve: reserve,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -22854,12 +22572,12 @@ class $TokensTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $TokensFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $TokensOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $TokensAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $TokensFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TokensOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TokensAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> assetId = const Value.absent(),
@@ -22932,16 +22650,9 @@ class $TokensTableManager
                 precision: precision,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -23092,12 +22803,12 @@ class $ChainsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ChainsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ChainsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ChainsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ChainsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ChainsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ChainsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> chainId = const Value.absent(),
@@ -23130,16 +22841,9 @@ class $ChainsTableManager
                 threshold: threshold,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -23356,12 +23060,12 @@ class $StickersTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $StickersFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $StickersOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $StickersAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $StickersFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $StickersOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $StickersAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> stickerId = const Value.absent(),
@@ -23410,16 +23114,9 @@ class $StickersTableManager
                 lastUseAt: lastUseAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -23574,12 +23271,12 @@ class $HyperlinksTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $HyperlinksFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $HyperlinksOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $HyperlinksAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $HyperlinksFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $HyperlinksOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $HyperlinksAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> hyperlink = const Value.absent(),
@@ -23612,16 +23309,9 @@ class $HyperlinksTableManager
                 siteImage: siteImage,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -23750,12 +23440,12 @@ class $MessageMentionsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $MessageMentionsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $MessageMentionsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $MessageMentionsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $MessageMentionsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessageMentionsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessageMentionsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -23780,16 +23470,9 @@ class $MessageMentionsTableManager
                 hasRead: hasRead,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -23922,12 +23605,12 @@ class $PinMessagesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $PinMessagesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $PinMessagesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $PinMessagesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $PinMessagesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $PinMessagesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $PinMessagesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -23952,16 +23635,9 @@ class $PinMessagesTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -24088,12 +23764,12 @@ class $ExpiredMessagesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ExpiredMessagesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ExpiredMessagesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ExpiredMessagesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ExpiredMessagesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ExpiredMessagesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ExpiredMessagesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -24118,16 +23794,9 @@ class $ExpiredMessagesTableManager
                 expireAt: expireAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -24360,12 +24029,12 @@ class $AddressesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $AddressesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $AddressesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $AddressesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $AddressesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $AddressesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $AddressesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> addressId = const Value.absent(),
@@ -24418,16 +24087,9 @@ class $AddressesTableManager
                 dust: dust,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -24707,12 +24369,12 @@ class $AppsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $AppsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $AppsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $AppsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $AppsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $AppsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $AppsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> appId = const Value.absent(),
@@ -24777,16 +24439,9 @@ class $AppsTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -24953,16 +24608,12 @@ class $CircleConversationsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $CircleConversationsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () =>
-                  $CircleConversationsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $CircleConversationsAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $CircleConversationsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $CircleConversationsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $CircleConversationsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> conversationId = const Value.absent(),
@@ -24995,16 +24646,9 @@ class $CircleConversationsTableManager
                 pinTime: pinTime,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -25149,12 +24793,12 @@ class $CirclesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $CirclesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $CirclesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $CirclesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $CirclesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $CirclesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $CirclesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> circleId = const Value.absent(),
@@ -25183,16 +24827,9 @@ class $CirclesTableManager
                 orderedAt: orderedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -25320,12 +24957,12 @@ class $FloodMessagesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $FloodMessagesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $FloodMessagesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $FloodMessagesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $FloodMessagesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $FloodMessagesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $FloodMessagesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -25350,16 +24987,9 @@ class $FloodMessagesTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -25595,12 +25225,12 @@ class $JobsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $JobsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $JobsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $JobsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $JobsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $JobsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $JobsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> jobId = const Value.absent(),
@@ -25653,16 +25283,9 @@ class $JobsTableManager
                 runCount: runCount,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -25763,12 +25386,12 @@ class $MessagesHistoryTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $MessagesHistoryFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $MessagesHistoryOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $MessagesHistoryAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $MessagesHistoryFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $MessagesHistoryOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $MessagesHistoryAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -25783,16 +25406,9 @@ class $MessagesHistoryTableManager
                 messageId: messageId,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -25901,12 +25517,12 @@ class $OffsetsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $OffsetsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $OffsetsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $OffsetsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $OffsetsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $OffsetsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $OffsetsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> key = const Value.absent(),
@@ -25927,16 +25543,9 @@ class $OffsetsTableManager
                 timestamp: timestamp,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -26117,13 +25726,12 @@ class $ParticipantSessionTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ParticipantSessionFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ParticipantSessionOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $ParticipantSessionAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ParticipantSessionFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ParticipantSessionOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ParticipantSessionAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> conversationId = const Value.absent(),
@@ -26160,16 +25768,9 @@ class $ParticipantSessionTableManager
                 publicKey: publicKey,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -26322,12 +25923,12 @@ class $ParticipantsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $ParticipantsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ParticipantsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $ParticipantsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $ParticipantsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ParticipantsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ParticipantsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> conversationId = const Value.absent(),
@@ -26356,16 +25957,9 @@ class $ParticipantsTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -26529,19 +26123,12 @@ class $ResendSessionMessagesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () =>
-                  $ResendSessionMessagesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $ResendSessionMessagesOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $ResendSessionMessagesAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $ResendSessionMessagesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ResendSessionMessagesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ResendSessionMessagesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> messageId = const Value.absent(),
@@ -26574,16 +26161,9 @@ class $ResendSessionMessagesTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -26775,19 +26355,12 @@ class $SentSessionSenderKeysTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () =>
-                  $SentSessionSenderKeysFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $SentSessionSenderKeysOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $SentSessionSenderKeysAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $SentSessionSenderKeysFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $SentSessionSenderKeysOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $SentSessionSenderKeysAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> conversationId = const Value.absent(),
@@ -26824,16 +26397,9 @@ class $SentSessionSenderKeysTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -27108,12 +26674,12 @@ class $StickerAlbumsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $StickerAlbumsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $StickerAlbumsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $StickerAlbumsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $StickerAlbumsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $StickerAlbumsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $StickerAlbumsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> albumId = const Value.absent(),
@@ -27174,16 +26740,9 @@ class $StickerAlbumsTableManager
                 isVerified: isVerified,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -27304,16 +26863,12 @@ class $StickerRelationshipsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $StickerRelationshipsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () =>
-                  $StickerRelationshipsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $StickerRelationshipsAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $StickerRelationshipsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $StickerRelationshipsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $StickerRelationshipsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> albumId = const Value.absent(),
@@ -27334,16 +26889,9 @@ class $StickerRelationshipsTableManager
                 stickerId: stickerId,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -27872,13 +27420,12 @@ class $TranscriptMessagesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $TranscriptMessagesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $TranscriptMessagesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () =>
-                  $TranscriptMessagesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $TranscriptMessagesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TranscriptMessagesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TranscriptMessagesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> transcriptId = const Value.absent(),
@@ -27999,16 +27546,9 @@ class $TranscriptMessagesTableManager
                 caption: caption,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -28117,12 +27657,12 @@ class $FiatsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $FiatsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $FiatsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $FiatsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $FiatsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $FiatsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $FiatsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> code = const Value.absent(),
@@ -28135,16 +27675,9 @@ class $FiatsTableManager
                 required double rate,
                 Value<int> rowid = const Value.absent(),
               }) => FiatsCompanion.insert(code: code, rate: rate, rowid: rowid),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -28272,12 +27805,12 @@ class $FavoriteAppsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $FavoriteAppsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $FavoriteAppsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $FavoriteAppsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $FavoriteAppsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $FavoriteAppsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $FavoriteAppsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> appId = const Value.absent(),
@@ -28302,16 +27835,9 @@ class $FavoriteAppsTableManager
                 createdAt: createdAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -28435,12 +27961,12 @@ class $PropertiesTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $PropertiesFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $PropertiesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $PropertiesAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $PropertiesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $PropertiesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $PropertiesAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> key = const Value.absent(),
@@ -28465,16 +27991,9 @@ class $PropertiesTableManager
                 value: value,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -28686,19 +28205,12 @@ class $InscriptionCollectionsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () =>
-                  $InscriptionCollectionsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $InscriptionCollectionsOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
-          createComputedFieldComposer:
-              () => $InscriptionCollectionsAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+          createFilteringComposer: () =>
+              $InscriptionCollectionsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $InscriptionCollectionsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $InscriptionCollectionsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> collectionHash = const Value.absent(),
@@ -28743,16 +28255,9 @@ class $InscriptionCollectionsTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -28990,12 +28495,12 @@ class $InscriptionItemsTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer:
-              () => $InscriptionItemsFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $InscriptionItemsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $InscriptionItemsAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () =>
+              $InscriptionItemsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $InscriptionItemsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $InscriptionItemsAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> inscriptionHash = const Value.absent(),
@@ -29044,16 +28549,9 @@ class $InscriptionItemsTableManager
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );

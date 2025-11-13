@@ -28,8 +28,10 @@ class CreateGroupConversationAction
       onlyContact: true,
     );
     if (result == null || result.isEmpty) return;
-    final userIds =
-        result.where((e) => e.userId != null).map((e) => e.userId!).toList();
+    final userIds = result
+        .where((e) => e.userId != null)
+        .map((e) => e.userId!)
+        .toList();
 
     final name = await showMixinDialog<String>(
       context: context,
@@ -53,14 +55,12 @@ class _NewConversationConfirm extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final users =
-        useMemoizedFuture(
-          () =>
-              context.database.userDao
-                  .usersByIn(userIds.sublist(0, math.min(4, userIds.length)))
-                  .get(),
-          <User>[],
-        ).requireData;
+    final users = useMemoizedFuture(
+      () => context.database.userDao
+          .usersByIn(userIds.sublist(0, math.min(4, userIds.length)))
+          .get(),
+      <User>[],
+    ).requireData;
 
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);

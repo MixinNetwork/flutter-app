@@ -28,10 +28,9 @@ class RadioItem<T> extends StatelessWidget {
         children: [
           ClipOval(
             child: Container(
-              color:
-                  groupValue == value
-                      ? context.theme.accent
-                      : context.theme.secondaryText,
+              color: groupValue == value
+                  ? context.theme.accent
+                  : context.theme.secondaryText,
               height: 16,
               width: 16,
               alignment: const Alignment(0, -0.2),

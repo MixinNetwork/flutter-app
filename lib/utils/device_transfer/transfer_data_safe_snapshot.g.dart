@@ -22,14 +22,12 @@ TransferDataSafeSnapshot _$TransferDataSafeSnapshotFromJson(
   confirmations: (json['confirmations'] as num?)?.toInt(),
   openingBalance: json['opening_balance'] as String?,
   closingBalance: json['closing_balance'] as String?,
-  withdrawal:
-      json['withdrawal'] == null
-          ? null
-          : SafeWithdrawal.fromJson(json['withdrawal'] as Map<String, dynamic>),
-  deposit:
-      json['deposit'] == null
-          ? null
-          : SafeDeposit.fromJson(json['deposit'] as Map<String, dynamic>),
+  withdrawal: json['withdrawal'] == null
+      ? null
+      : SafeWithdrawal.fromJson(json['withdrawal'] as Map<String, dynamic>),
+  deposit: json['deposit'] == null
+      ? null
+      : SafeDeposit.fromJson(json['deposit'] as Map<String, dynamic>),
   inscriptionHash: json['inscription_hash'] as String?,
 );
 

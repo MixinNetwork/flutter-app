@@ -52,15 +52,13 @@ Future<void> _writeDataToSink({
 
   final bodyLength = iv.length + encryptedData.length;
 
-  final header =
-      ByteData(5)
-        ..setInt8(0, type)
-        ..setInt32(1, bodyLength);
+  final header = ByteData(5)
+    ..setInt8(0, type)
+    ..setInt32(1, bodyLength);
 
-  final hMacCalculator =
-      HMacCalculator(key.hMacKey)
-        ..addBytes(iv)
-        ..addBytes(encryptedData);
+  final hMacCalculator = HMacCalculator(key.hMacKey)
+    ..addBytes(iv)
+    ..addBytes(encryptedData);
   sink
     ..add(header.buffer.asUint8List())
     ..add(iv)
@@ -146,10 +144,9 @@ class TransferAttachmentPacket extends TransferPacket {
     final iv = generateTransferIv();
     final aesCipher = AesCipher(key: key.aesKey, iv: iv, encrypt: true);
 
-    final header =
-        ByteData(5)
-          ..setInt8(0, kTypeFile)
-          ..setInt32(1, encryptedDataLength + iv.length + _kUUIDBytesCount);
+    final header = ByteData(5)
+      ..setInt8(0, kTypeFile)
+      ..setInt32(1, encryptedDataLength + iv.length + _kUUIDBytesCount);
 
     sink
       ..add(header.buffer.asUint8List())

@@ -49,10 +49,9 @@ void _jumpToPosition(ScrollController scrollController, int length, int index) {
     final remainingContentHeight = contentHeight - itemEndOffset;
     final halfViewport = (viewportDimension - itemExtent) / 2;
 
-    final targetOffset =
-        remainingContentHeight < halfViewport
-            ? maxScrollExtent
-            : middleOffset.clamp(0.0, maxScrollExtent);
+    final targetOffset = remainingContentHeight < halfViewport
+        ? maxScrollExtent
+        : middleOffset.clamp(0.0, maxScrollExtent);
 
     scrollController.animateTo(
       targetOffset,
@@ -226,11 +225,10 @@ class CommandPalettePage extends HookConsumerWidget {
     final stream = useValueNotifierConvertSteam(textEditingController);
     final keyword =
         useMemoizedStream(
-          () =>
-              stream
-                  .map((event) => event.text)
-                  .throttleTime(const Duration(milliseconds: 100))
-                  .distinct(),
+          () => stream
+              .map((event) => event.text)
+              .throttleTime(const Duration(milliseconds: 100))
+              .distinct(),
         ).data ??
         '';
 
@@ -348,19 +346,18 @@ class CommandPalettePage extends HookConsumerWidget {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                               ),
-                              avatar:
-                                  item.type == 'GROUP'
-                                      ? ConversationAvatarWidget(
-                                        conversationId: item.id,
-                                        size: 40,
-                                        category: ConversationCategory.group,
-                                      )
-                                      : AvatarWidget(
-                                        name: item.name,
-                                        userId: item.id,
-                                        size: 40,
-                                        avatarUrl: item.avatarUrl,
-                                      ),
+                              avatar: item.type == 'GROUP'
+                                  ? ConversationAvatarWidget(
+                                      conversationId: item.id,
+                                      size: 40,
+                                      category: ConversationCategory.group,
+                                    )
+                                  : AvatarWidget(
+                                      name: item.name,
+                                      userId: item.id,
+                                      size: 40,
+                                      avatarUrl: item.avatarUrl,
+                                    ),
                               name: item.name ?? '',
                               trailing: BadgesWidget(
                                 verified: item.isVerified,

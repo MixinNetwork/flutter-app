@@ -16,10 +16,9 @@ TransferDataSticker _$TransferDataStickerFromJson(Map<String, dynamic> json) =>
       assetHeight: (json['asset_height'] as num).toInt(),
       createdAt: DateTime.parse(json['created_at'] as String),
       albumId: json['album_id'] as String?,
-      lastUseAt:
-          json['last_use_at'] == null
-              ? null
-              : DateTime.parse(json['last_use_at'] as String),
+      lastUseAt: json['last_use_at'] == null
+          ? null
+          : DateTime.parse(json['last_use_at'] as String),
     );
 
 Map<String, dynamic> _$TransferDataStickerToJson(

@@ -37,8 +37,11 @@ class FtsDatabase extends _$FtsDatabase {
 
   Future<List<String>> getAllMessageIds() =>
       (select(messagesMetas)..orderBy([
-        (t) => OrderingTerm(expression: t.messageId, mode: OrderingMode.desc),
-      ])).map((e) => e.messageId).get();
+            (t) =>
+                OrderingTerm(expression: t.messageId, mode: OrderingMode.desc),
+          ]))
+          .map((e) => e.messageId)
+          .get();
 
   /// Insert a message fts content into the database.
   /// return the row id of the inserted message. null if the message is not inserted.
@@ -100,14 +103,16 @@ class FtsDatabase extends _$FtsDatabase {
 
   Future<void> deleteByMessageId(String messageId) async {
     await _deleteFtsByMessageId(messageId);
-    await (delete(messagesMetas)
-      ..where((tbl) => tbl.messageId.equals(messageId))).go();
+    await (delete(
+      messagesMetas,
+    )..where((tbl) => tbl.messageId.equals(messageId))).go();
   }
 
   Future<void> deleteByConversationId(String conversationId) async {
     await _deleteFtsByConversationId(conversationId);
-    await (delete(messagesMetas)
-      ..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+    await (delete(
+      messagesMetas,
+    )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
   }
 
   /// query the fts table.

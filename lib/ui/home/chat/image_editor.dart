@@ -61,9 +61,8 @@ class _ImageEditorDialog extends HookConsumerWidget {
       return const SizedBox();
     }
     return BlocProvider<_ImageEditorBloc>(
-      create:
-          (BuildContext context) =>
-              _ImageEditorBloc(path: path, image: uiImage, snapshot: snapshot),
+      create: (BuildContext context) =>
+          _ImageEditorBloc(path: path, image: uiImage, snapshot: snapshot),
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: ColoredBox(
@@ -75,13 +74,12 @@ class _ImageEditorDialog extends HookConsumerWidget {
                 const SizedBox(height: 56),
                 Expanded(
                   child: LayoutBuilder(
-                    builder:
-                        (context, constraints) => _Preview(
-                          path: path,
-                          viewPortSize: constraints.biggest,
-                          boundaryKey: boundaryKey,
-                          image: uiImage,
-                        ),
+                    builder: (context, constraints) => _Preview(
+                      path: path,
+                      viewPortSize: constraints.biggest,
+                      boundaryKey: boundaryKey,
+                      image: uiImage,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -419,10 +417,9 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   Future<ImageEditorSnapshot?> takeSnapshot() async {
     final recorder = ui.PictureRecorder();
 
-    final cropRect =
-        !state.cropRect.isEmpty && !state.cropRect.isInfinite
-            ? state.cropRect
-            : null;
+    final cropRect = !state.cropRect.isEmpty && !state.cropRect.isInfinite
+        ? state.cropRect
+        : null;
 
     final imageSize = Size(image.width.toDouble(), image.height.toDouble());
     final center = imageSize.center(Offset.zero);
@@ -453,35 +450,32 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       ..saveLayer(imageRect, Paint())
       ..translate(imageRect.left, imageRect.top);
     for (final line in _customDrawLines) {
-      final paint =
-          Paint()
-            ..color = line.eraser ? Colors.white : line.color
-            ..strokeWidth = line.width
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke
-            ..blendMode = line.eraser ? BlendMode.clear : BlendMode.srcOver
-            ..isAntiAlias = true;
+      final paint = Paint()
+        ..color = line.eraser ? Colors.white : line.color
+        ..strokeWidth = line.width
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke
+        ..blendMode = line.eraser ? BlendMode.clear : BlendMode.srcOver
+        ..isAntiAlias = true;
       canvas.drawPath(line.path, paint);
     }
     canvas.restore();
 
     final picture = recorder.endRecording();
-    final snapshotImage =
-        cropRect != null
-            ? await picture.toImage(
-              cropRect.width.round(),
-              cropRect.height.round(),
-            )
-            : await picture.toImage(
-              imageSize.width.round(),
-              imageSize.height.round(),
-            );
+    final snapshotImage = cropRect != null
+        ? await picture.toImage(
+            cropRect.width.round(),
+            cropRect.height.round(),
+          )
+        : await picture.toImage(
+            imageSize.width.round(),
+            imageSize.height.round(),
+          );
 
-    final bytes =
-        !state.flip && state.rotate == ImageRotate.none
-            ? await snapshotImage.toBytes(format: ui.ImageByteFormat.png)
-            : await _flipAndRotateImage(snapshotImage);
+    final bytes = !state.flip && state.rotate == ImageRotate.none
+        ? await snapshotImage.toBytes(format: ui.ImageByteFormat.png)
+        : await _flipAndRotateImage(snapshotImage);
     if (bytes == null) {
       e('failed to convert image to bytes');
       return null;
@@ -584,8 +578,9 @@ class _Preview extends HookConsumerWidget {
                 key: boundaryKey,
                 child: Transform(
                   alignment: Alignment.center,
-                  transform:
-                      isFlip ? Matrix4.rotationY(math.pi) : Matrix4.identity(),
+                  transform: isFlip
+                      ? Matrix4.rotationY(math.pi)
+                      : Matrix4.identity(),
                   transformHitTests: false,
                   child: RepaintBoundary(
                     child: _CustomDrawingWidget(
@@ -830,20 +825,18 @@ class _CropShadowOverlayPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.saveLayer(Offset.zero & size, Paint());
-    final paint =
-        Paint()
-          ..color = overlayColor
-          ..style = PaintingStyle.fill;
+    final paint = Paint()
+      ..color = overlayColor
+      ..style = PaintingStyle.fill;
     canvas
       ..drawRect(Offset.zero & size, paint)
       ..drawRect(cropRect, paint..blendMode = BlendMode.clear)
       ..restore();
 
-    final linePaint =
-        Paint()
-          ..color = lineColor
-          ..strokeWidth = lineWidth
-          ..style = PaintingStyle.stroke;
+    final linePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = lineWidth
+      ..style = PaintingStyle.stroke;
     canvas
       ..drawRect(cropRect, linePaint)
       ..drawLine(
@@ -867,12 +860,11 @@ class _CropShadowOverlayPainter extends CustomPainter {
         linePaint,
       );
 
-    final cornerHandlePaint =
-        Paint()
-          ..color = lineColor
-          ..strokeWidth = cornerHandleWidth
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.fill;
+    final cornerHandlePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = cornerHandleWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.fill;
     canvas
       // left top
       ..drawLine(
@@ -955,11 +947,12 @@ class _CustomDrawingWidget extends HookConsumerWidget {
 
     final editorBloc = context.read<_ImageEditorBloc>();
 
-    final lines = useBlocStateConverter<
-      _ImageEditorBloc,
-      _ImageEditorState,
-      List<CustomDrawLine>
-    >(bloc: editorBloc, converter: (state) => state.drawLines);
+    final lines =
+        useBlocStateConverter<
+          _ImageEditorBloc,
+          _ImageEditorState,
+          List<CustomDrawLine>
+        >(bloc: editorBloc, converter: (state) => state.drawLines);
 
     Offset screenToImage(Offset position) {
       final center = viewPortSize.center(Offset.zero);
@@ -1092,15 +1085,14 @@ class _DrawerPainter extends CustomPainter {
       ..translate(0, 0)
       ..scale(scale);
     for (final line in lines) {
-      final paint =
-          Paint()
-            ..color = line.eraser ? Colors.white : line.color
-            ..strokeWidth = line.width
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke
-            ..blendMode = line.eraser ? BlendMode.clear : BlendMode.srcOver
-            ..isAntiAlias = true;
+      final paint = Paint()
+        ..color = line.eraser ? Colors.white : line.color
+        ..strokeWidth = line.width
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke
+        ..blendMode = line.eraser ? BlendMode.clear : BlendMode.srcOver
+        ..isAntiAlias = true;
       canvas.drawPath(line.path, paint);
     }
     canvas.restore();
@@ -1358,15 +1350,14 @@ class _ResetButton extends HookConsumerWidget {
         );
     return SizedBox(
       height: 38,
-      child:
-          canReset
-              ? TextButton(
-                child: Text(context.l10n.reset),
-                onPressed: () {
-                  context.read<_ImageEditorBloc>().reset();
-                },
-              )
-              : null,
+      child: canReset
+          ? TextButton(
+              child: Text(context.l10n.reset),
+              onPressed: () {
+                context.read<_ImageEditorBloc>().reset();
+              },
+            )
+          : null,
     );
   }
 }
@@ -1462,20 +1453,19 @@ class _NormalOperationBar extends HookConsumerWidget {
             const SizedBox(width: 4),
             CustomPopupMenuButton<double>(
               alignment: Alignment.topCenter,
-              itemBuilder:
-                  (context) => [
-                    CustomPopupMenuItem(
-                      title: context.l10n.originalImage,
-                      value: 0,
-                    ),
-                    CustomPopupMenuItem(title: '1:1', value: 1),
-                    CustomPopupMenuItem(title: '2:3', value: 2 / 3),
-                    CustomPopupMenuItem(title: '3:2', value: 3 / 2),
-                    CustomPopupMenuItem(title: '3:4', value: 3 / 4),
-                    CustomPopupMenuItem(title: '4:3', value: 4 / 3),
-                    CustomPopupMenuItem(title: '9:16', value: 9 / 16),
-                    CustomPopupMenuItem(title: '16:9', value: 16 / 9),
-                  ],
+              itemBuilder: (context) => [
+                CustomPopupMenuItem(
+                  title: context.l10n.originalImage,
+                  value: 0,
+                ),
+                CustomPopupMenuItem(title: '1:1', value: 1),
+                CustomPopupMenuItem(title: '2:3', value: 2 / 3),
+                CustomPopupMenuItem(title: '3:2', value: 3 / 2),
+                CustomPopupMenuItem(title: '3:4', value: 3 / 4),
+                CustomPopupMenuItem(title: '4:3', value: 4 / 3),
+                CustomPopupMenuItem(title: '9:16', value: 9 / 16),
+                CustomPopupMenuItem(title: '16:9', value: 16 / 9),
+              ],
               onSelected: (value) {
                 if (value == 0) {
                   imageEditorBloc.setCropRatio(null);
@@ -1497,8 +1487,9 @@ class _NormalOperationBar extends HookConsumerWidget {
             TextButton(
               onPressed: () async {
                 showToastLoading();
-                final snapshot =
-                    await context.read<_ImageEditorBloc>().takeSnapshot();
+                final snapshot = await context
+                    .read<_ImageEditorBloc>()
+                    .takeSnapshot();
                 if (snapshot == null) {
                   showToastFailed(null);
                   return;
@@ -1550,10 +1541,9 @@ class _DrawOperationBar extends HookConsumerWidget {
               ),
             ),
             ActionButton(
-              color:
-                  canUndo
-                      ? context.theme.icon
-                      : context.theme.icon.withValues(alpha: 0.2),
+              color: canUndo
+                  ? context.theme.icon
+                  : context.theme.icon.withValues(alpha: 0.2),
               name: Resources.assetsImagesEditImageUndoSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().undoDraw();
@@ -1561,10 +1551,9 @@ class _DrawOperationBar extends HookConsumerWidget {
             ),
             const SizedBox(width: 4),
             ActionButton(
-              color:
-                  canRedo
-                      ? context.theme.icon
-                      : context.theme.icon.withValues(alpha: 0.2),
+              color: canRedo
+                  ? context.theme.icon
+                  : context.theme.icon.withValues(alpha: 0.2),
               name: Resources.assetsImagesEditImageRedoSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().redoDraw();
@@ -1572,20 +1561,18 @@ class _DrawOperationBar extends HookConsumerWidget {
             ),
             const SizedBox(width: 4),
             ActionButton(
-              color:
-                  drawMode == DrawMode.brush
-                      ? context.theme.accent
-                      : context.theme.icon,
+              color: drawMode == DrawMode.brush
+                  ? context.theme.accent
+                  : context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
               },
             ),
             ActionButton(
-              color:
-                  drawMode == DrawMode.eraser
-                      ? context.theme.accent
-                      : context.theme.icon,
+              color: drawMode == DrawMode.eraser
+                  ? context.theme.accent
+                  : context.theme.icon,
               name: Resources.assetsImagesEditImageEraseSvg,
               onTap: () {
                 context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.eraser);

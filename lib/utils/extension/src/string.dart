@@ -1,11 +1,10 @@
 part of '../extension.dart';
 
 extension StringExtension on String {
-  String get overflow =>
-      Characters(this)
-          // ignore: avoid-non-ascii-symbols
-          .replaceAll(Characters(''), Characters('\u{200B}'))
-          .toString();
+  String get overflow => Characters(this)
+      // ignore: avoid-non-ascii-symbols
+      .replaceAll(Characters(''), Characters('\u{200B}'))
+      .toString();
 
   String fts5ContentFilter() {
     final text = trim();

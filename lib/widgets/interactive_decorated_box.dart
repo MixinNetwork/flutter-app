@@ -83,14 +83,12 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
       },
       child: GestureDetector(
         behavior: widget.behavior,
-        onTapDown:
-            (_) => setState(() {
-              tapDowning = true;
-            }),
-        onTapCancel:
-            () => setState(() {
-              tapDowning = false;
-            }),
+        onTapDown: (_) => setState(() {
+          tapDowning = true;
+        }),
+        onTapCancel: () => setState(() {
+          tapDowning = false;
+        }),
         onTap: () {
           setState(() {
             tapDowning = false;
@@ -147,14 +145,12 @@ class InteractiveDecoratedBox extends StatelessWidget {
     this.cursor = MouseCursor.defer,
     this.behavior = HitTestBehavior.opaque,
   }) : _decoration = decoration ?? const BoxDecoration(),
-       hoveringDecoration =
-           hoveringColor != null
-               ? decoration?.copyWith(color: hoveringColor)
-               : null,
-       tapDowningDecoration =
-           tapDowningColor != null
-               ? decoration?.copyWith(color: tapDowningColor)
-               : null;
+       hoveringDecoration = hoveringColor != null
+           ? decoration?.copyWith(color: hoveringColor)
+           : null,
+       tapDowningDecoration = tapDowningColor != null
+           ? decoration?.copyWith(color: tapDowningColor)
+           : null;
 
   final Decoration? _decoration;
   final Decoration? hoveringDecoration;
@@ -214,9 +210,8 @@ class InteractiveDecoratedBox extends StatelessWidget {
                   : outDuration) ??
               Duration.zero,
           curve: Curves.decelerate,
-          builder:
-              (BuildContext context, Decoration value, Widget? child) =>
-                  DecoratedBox(decoration: value, child: child),
+          builder: (BuildContext context, Decoration value, Widget? child) =>
+              DecoratedBox(decoration: value, child: child),
           child: child,
         ),
     child: child,

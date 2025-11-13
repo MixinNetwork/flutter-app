@@ -11,8 +11,10 @@ class SenderKeyDao extends DatabaseAccessor<SignalDatabase>
 
   Future<SenderKey?> getSenderKey(String groupId, String senderId) async =>
       (select(db.senderKeys)..where(
-        (tbl) => tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
-      )).getSingleOrNull();
+            (tbl) =>
+                tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
+          ))
+          .getSingleOrNull();
 
   Future<List<SenderKey>> getSenderKeys() async => select(db.senderKeys).get();
 
@@ -21,6 +23,8 @@ class SenderKeyDao extends DatabaseAccessor<SignalDatabase>
 
   Future deleteByGroupIdAndSenderId(String groupId, String senderId) async =>
       (delete(db.senderKeys)..where(
-        (tbl) => tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
-      )).go();
+            (tbl) =>
+                tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
+          ))
+          .go();
 }

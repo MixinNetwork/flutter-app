@@ -24,13 +24,12 @@ Future<void> showInscriptionDialog(
 );
 
 final _inscriptionProvider = StreamProvider.family<Inscription?, String>(
-  (ref, inscriptionHash) =>
-      ref
-          .read(databaseProvider)
-          .requireValue
-          .inscriptionItemDao
-          .inscriptionByHash(inscriptionHash)
-          .watchSingleOrNull(),
+  (ref, inscriptionHash) => ref
+      .read(databaseProvider)
+      .requireValue
+      .inscriptionItemDao
+      .inscriptionByHash(inscriptionHash)
+      .watchSingleOrNull(),
 );
 
 class _InscriptionDialog extends ConsumerWidget {
@@ -40,8 +39,9 @@ class _InscriptionDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inscription =
-        ref.watch(_inscriptionProvider(inscriptionHash)).valueOrNull;
+    final inscription = ref
+        .watch(_inscriptionProvider(inscriptionHash))
+        .valueOrNull;
     const theme = darkBrightnessThemeData;
     return SizedBox(
       width: 400,

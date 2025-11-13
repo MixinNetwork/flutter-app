@@ -43,8 +43,9 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
     final assetIds = await Future.wait<String?>(
       jobs.map((Job job) async {
         try {
-          final asset =
-              (await client.assetApi.getAssetById(job.blazeMessage!)).data;
+          final asset = (await client.assetApi.getAssetById(
+            job.blazeMessage!,
+          )).data;
 
           final chain = (await client.assetApi.getChain(asset.chainId)).data;
 

@@ -33,20 +33,19 @@ class _GroupInviteByLinkDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conversation =
-        useMemoizedStream(() {
-          context.accountServer.refreshConversation(conversationId);
-          return context.database.conversationDao
-              .conversationById(conversationId)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateConversationStream([
-                    conversationId,
-                  ]),
-                ],
-                duration: kDefaultThrottleDuration,
-              );
-        }, keys: [conversationId]).data;
+    final conversation = useMemoizedStream(() {
+      context.accountServer.refreshConversation(conversationId);
+      return context.database.conversationDao
+          .conversationById(conversationId)
+          .watchSingleOrNullWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateConversationStream([
+                conversationId,
+              ]),
+            ],
+            duration: kDefaultThrottleDuration,
+          );
+    }, keys: [conversationId]).data;
     return Material(
       color: context.theme.popUp,
       child: SizedBox(

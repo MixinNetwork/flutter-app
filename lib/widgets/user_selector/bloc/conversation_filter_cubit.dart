@@ -34,35 +34,33 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     if (onlyContact) {
       conversations = [];
     } else {
-      conversations =
-          await accountServer.database.conversationDao
-              .conversationItems()
-              .get();
-      contactConversationIds =
-          conversations
-              .where(
-                (element) =>
-                    element.isContactConversation && element.ownerId != null,
-              )
-              .map((e) => e.ownerId)
-              .nonNulls
-              .toSet();
-      botConversationIds =
-          conversations
-              .where((element) => element.isBotConversation)
-              .map((e) => e.appId)
-              .nonNulls
-              .toSet();
+      conversations = await accountServer.database.conversationDao
+          .conversationItems()
+          .get();
+      contactConversationIds = conversations
+          .where(
+            (element) =>
+                element.isContactConversation && element.ownerId != null,
+          )
+          .map((e) => e.ownerId)
+          .nonNulls
+          .toSet();
+      botConversationIds = conversations
+          .where((element) => element.isBotConversation)
+          .map((e) => e.appId)
+          .nonNulls
+          .toSet();
     }
 
     friends = <User>[];
     bots = <User>[];
 
-    final Iterable<User> users =
-        await accountServer.database.userDao.notInFriends([
+    final Iterable<User> users = await accountServer.database.userDao
+        .notInFriends([
           ...contactConversationIds,
           ...botConversationIds,
-        ]).get();
+        ])
+        .get();
     users.where((element) => !filteredIds.contains(element.userId)).forEach((
       e,
     ) {
@@ -98,14 +96,13 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     final recentConversations =
         conversations
             .where(
-              (element) =>
-                  element.isGroupConversation
-                      ? element.groupName != null &&
-                          element.groupName!.toLowerCase().contains(keyword)
-                      : element.name!.toLowerCase().contains(keyword) ||
-                          element.ownerIdentityNumber.toLowerCase().startsWith(
-                            keyword,
-                          ),
+              (element) => element.isGroupConversation
+                  ? element.groupName != null &&
+                        element.groupName!.toLowerCase().contains(keyword)
+                  : element.name!.toLowerCase().contains(keyword) ||
+                        element.ownerIdentityNumber.toLowerCase().startsWith(
+                          keyword,
+                        ),
             )
             .toList()
           ..sort(

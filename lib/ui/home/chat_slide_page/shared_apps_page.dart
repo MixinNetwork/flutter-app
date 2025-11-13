@@ -92,23 +92,22 @@ class OverlappedAppIcons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-    children:
-        [
-          for (var index = 0; index < apps.length; index++)
-            Padding(
-              padding: EdgeInsets.fromLTRB(index.toDouble() * 14, 0, 0, 0),
-              child: ClipOval(
-                child: Container(
-                  color: Color.alphaBlend(
-                    context.theme.listSelected,
-                    context.theme.popUp,
-                  ),
-                  padding: const EdgeInsets.all(2),
-                  child: _AppIcon(size: 24, app: apps[index]),
-                ),
+    children: [
+      for (var index = 0; index < apps.length; index++)
+        Padding(
+          padding: EdgeInsets.fromLTRB(index.toDouble() * 14, 0, 0, 0),
+          child: ClipOval(
+            child: Container(
+              color: Color.alphaBlend(
+                context.theme.listSelected,
+                context.theme.popUp,
               ),
+              padding: const EdgeInsets.all(2),
+              child: _AppIcon(size: 24, app: apps[index]),
             ),
-        ].reversed.toList(),
+          ),
+        ),
+    ].reversed.toList(),
   );
 }
 
@@ -125,11 +124,10 @@ class _AppIcon extends StatelessWidget {
       app.iconUrl,
       width: size,
       height: size,
-      placeholder:
-          () => SizedBox.fromSize(
-            size: Size.square(size),
-            child: ColoredBox(color: context.theme.listSelected),
-          ),
+      placeholder: () => SizedBox.fromSize(
+        size: Size.square(size),
+        child: ColoredBox(color: context.theme.listSelected),
+      ),
     ),
   );
 }

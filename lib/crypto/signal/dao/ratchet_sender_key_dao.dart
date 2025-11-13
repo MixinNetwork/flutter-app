@@ -14,13 +14,17 @@ class RatchetSenderKeyDao extends DatabaseAccessor<SignalDatabase>
     String senderId,
   ) async =>
       (select(db.ratchetSenderKeys)..where(
-        (tbl) => tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
-      )).getSingleOrNull();
+            (tbl) =>
+                tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
+          ))
+          .getSingleOrNull();
 
   Future deleteByGroupIdAndSenderId(String groupId, String senderId) async =>
       (delete(db.ratchetSenderKeys)..where(
-        (tbl) => tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
-      )).go();
+            (tbl) =>
+                tbl.groupId.equals(groupId) & tbl.senderId.equals(senderId),
+          ))
+          .go();
 
   Future insertSenderKey(
     RatchetSenderKeysCompanion ratchetSenderKeysCompanion,

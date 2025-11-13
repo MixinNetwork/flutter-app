@@ -110,8 +110,8 @@ class EditProfilePage extends HookConsumerWidget {
             Text(
               createdAt != null
                   ? context.l10n.joinedIn(
-                    DateFormat.yMMMd().format(createdAt.toLocal()),
-                  )
+                      DateFormat.yMMMd().format(createdAt.toLocal()),
+                    )
                   : '',
               style: TextStyle(
                 fontSize: 14,
@@ -147,16 +147,15 @@ class _Item extends StatelessWidget {
       gapPadding: 0,
     );
 
-    final backgroundColor =
-        readOnly
-            ? context.dynamicColor(
-              const Color.fromRGBO(236, 238, 242, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.04),
-            )
-            : context.dynamicColor(
-              const Color.fromRGBO(255, 255, 255, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-            );
+    final backgroundColor = readOnly
+        ? context.dynamicColor(
+            const Color.fromRGBO(236, 238, 242, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.04),
+          )
+        : context.dynamicColor(
+            const Color.fromRGBO(255, 255, 255, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+          );
 
     return _DynamicHorizontalPadding(
       child: Column(
@@ -177,8 +176,9 @@ class _Item extends StatelessWidget {
             controller: controller,
             style: TextStyle(
               fontSize: 16,
-              color:
-                  readOnly ? context.theme.secondaryText : context.theme.text,
+              color: readOnly
+                  ? context.theme.secondaryText
+                  : context.theme.text,
             ),
             minLines: 1,
             maxLines: 10,
@@ -201,9 +201,8 @@ class _Item extends StatelessWidget {
                 color: context.theme.secondaryText,
               ),
             ),
-            contextMenuBuilder:
-                (context, state) =>
-                    MixinAdaptiveSelectionToolbar(editableTextState: state),
+            contextMenuBuilder: (context, state) =>
+                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
         ],
       ),

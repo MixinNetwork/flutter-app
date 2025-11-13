@@ -487,8 +487,9 @@ class DeviceTransferSender {
   Future<int> _processTransferMessage(TransferSocket socket) async {
     // check cleanup_quote_content_job finished before transfer message
     while (true) {
-      final jobs =
-          await database.jobDao.jobByAction(kCleanupQuoteContent).get();
+      final jobs = await database.jobDao
+          .jobByAction(kCleanupQuoteContent)
+          .get();
       if (jobs.isEmpty) {
         break;
       }
@@ -595,10 +596,9 @@ class DeviceTransferSender {
   Future<int> _processTransferExpiredMessage(TransferSocket socket) async {
     var offset = 0;
     while (true) {
-      final messages =
-          await database.expiredMessageDao
-              .getAllExpiredMessages(_kQueryLimit, offset)
-              .get();
+      final messages = await database.expiredMessageDao
+          .getAllExpiredMessages(_kQueryLimit, offset)
+          .get();
       offset += messages.length;
       for (final message in messages) {
         await socket.addExpiredMessage(
