@@ -197,7 +197,7 @@ SPEC CHECKSUMS:
   file_selector_macos: 6280b52b459ae6c590af5d78fc35c7267a3c4b31
   flutter_app_icon_badge: e05568a57ac0d98a0e7bc35c5b9ae9b118109b1e
   flutter_local_notifications: 4bf37a31afde695b56091b4ae3e4d9c7a7e6cda0
-  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
   local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   mixin_logger: 6b31328b08f546a8defd32cd910370562fc48405
@@ -221,6 +221,6 @@ SPEC CHECKSUMS:
   window_manager: b729e31d38fb04905235df9ea896128991cad99e
   window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9
 
-PODFILE CHECKSUM: 3b8f158a5c29479cd85985740fcc6ce70c370046
+PODFILE CHECKSUM: 79f215ba0ed5f5732c2fc484c6279e46c5c42059
 
 COCOAPODS: 1.16.2
