@@ -212,13 +212,13 @@ SPEC CHECKSUMS:
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   file_selector_ios: f92e583d43608aebc2e4a18daac30b8902845502
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_app_icon_badge: 44f31cf93bad265c20fe8f13f6e0a1d4e4707fe8
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   gal: 44e5b10dbd347c8247a2851acee6c1fbe282c1d3
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
-  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
+  local_auth_darwin: c3ee6cce0a8d56be34c8ccb66ba31f7f180aaebb
   mixin_logger: c613ba9ee39d409e9de69216b6bee00340bf077c
   network_info_plus: cf61925ab5205dce05a4f0895989afdb6aade5fc
   objective_c: a86b8b4cc01f607d2f65f73fcba1f7b1ac593745
@@ -238,6 +238,6 @@ SPEC CHECKSUMS:
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
-PODFILE CHECKSUM: c7cf6cd0af5391000f485bb7f6561b845e054d60
+PODFILE CHECKSUM: 840568367d9568a61281d8a747b636d2adb10664
 
 COCOAPODS: 1.16.2
