@@ -19,7 +19,7 @@ environment:
   flutter: ^3.38.0
 
 dependencies:
-  android_id: ^0.4.0
+  android_id: ^0.5.1
   ansicolor: ^2.0.3
   archive: ^4.0.7
   async: ^2.13.0
