@@ -60,7 +60,7 @@ dependencies:
   file_picker: ^10.3.6
   file_selector: ^1.0.4
   file_selector_linux: ^0.9.4
-  file_selector_macos: ^0.9.4
+  file_selector_macos: ^0.9.5
   file_selector_windows: ^0.9.3
   filesize: ^2.0.1
   flutter:
