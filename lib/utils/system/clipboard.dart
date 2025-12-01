@@ -23,15 +23,19 @@ Future<Iterable<File>> getClipboardFiles() async {
   );
 
   if (fileReaders.isNotEmpty) {
-    final uris = await Future.wait(
-      fileReaders.map((item) => item.readValue(Formats.fileUri)),
-    );
+    try {
+      final uris = await Future.wait(
+        fileReaders.map((item) => item.readValue(Formats.fileUri)),
+      );
 
-    final files = uris.nonNulls
-        .map((e) => e.toFilePath(windows: Platform.isWindows))
-        .map(File.new)
-        .where((element) => element.existsSync());
-    if (files.isNotEmpty) return files;
+      final files = uris.nonNulls
+          .map((e) => e.toFilePath(windows: Platform.isWindows))
+          .map(File.new)
+          .where((element) => element.existsSync());
+      if (files.isNotEmpty) return files;
+    } catch (error, stackTrace) {
+      e('read clipboard files failed: $error\n$stackTrace');
+    }
   }
 
   final list = await Future.wait(
