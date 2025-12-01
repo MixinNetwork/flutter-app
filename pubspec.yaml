@@ -178,7 +178,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   intl_utils: ^2.8.12
-  json_serializable: ^6.11.1
+  json_serializable: ^6.11.2
   msix:
     git:
       url: https://github.com/riccardo-lomazzi/msix.git
