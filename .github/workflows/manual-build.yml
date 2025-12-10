@@ -32,7 +32,7 @@ on:
       - 'v*'
 
 env:
-  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version || '3.38.3' }}
+  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version || '3.38.4' }}
   FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
 
 jobs:

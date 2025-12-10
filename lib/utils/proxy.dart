@@ -70,7 +70,7 @@ extension HttpClientProxy on HttpClient {
       case ProxyConfig(type: ProxyType.socks5):
       // not supported yet.
       case null:
-        findProxy = null;
+        findProxy = HttpClient.findProxyFromEnvironment;
     }
   }
 }
@@ -88,7 +88,7 @@ Future<rhttp.RhttpCompatibleClient> createRHttpClient({
   final settings = rhttp.ClientSettings(
     proxySettings: proxyConfig != null
         ? rhttp.ProxySettings.proxy(proxyConfig.toUri())
-        : const rhttp.ProxySettings.noProxy(),
+        : null,
   );
   final client = await rhttp.RhttpCompatibleClient.create(settings: settings);
   _cachedClient = client;

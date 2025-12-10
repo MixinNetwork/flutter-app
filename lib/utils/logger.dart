@@ -47,9 +47,24 @@ Future<String> _dumpAppAndSystemInfo() async {
     )
     ..writeln('DartRuntime: ${Platform.version}')
     ..writeln('NumberOfProcessors: ${Platform.numberOfProcessors} cores')
-    ..writeln('DiskUsage: ${dumpFreeDiskSpaceToString()}');
+    ..writeln('DiskUsage: ${dumpFreeDiskSpaceToString()}')
+    ..writeln('Proxy: ${_getProxyFromEnv()}');
 
   return info.toString();
+}
+
+String _getProxyFromEnv() {
+  final env = Platform.environment;
+  String? checkEnv(String upper, String lower) {
+    if (env[upper]?.isNotEmpty ?? false) return '$upper=defined';
+    if (env[lower]?.isNotEmpty ?? false) return '$lower=defined';
+    return null;
+  }
+
+  return [
+    checkEnv('HTTP_PROXY', 'http_proxy'),
+    checkEnv('HTTPS_PROXY', 'https_proxy'),
+  ].whereType<String>().join(';');
 }
 
 Future<void> showShareLogDialog(
