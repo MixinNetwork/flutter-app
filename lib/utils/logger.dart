@@ -54,26 +54,17 @@ Future<String> _dumpAppAndSystemInfo() async {
 }
 
 String _getProxyFromEnv() {
-  final proxy = <String>[];
-  final httpProxy = Platform.environment['HTTP_PROXY'];
-  if (httpProxy != null && httpProxy.isNotEmpty) {
-    proxy.add('HTTP_PROXY=$httpProxy');
-  } else {
-    final httpProxyLower = Platform.environment['http_proxy'];
-    if (httpProxyLower != null && httpProxyLower.isNotEmpty) {
-      proxy.add('http_proxy=$httpProxyLower');
-    }
+  final env = Platform.environment;
+  String? checkEnv(String upper, String lower) {
+    if (env[upper]?.isNotEmpty ?? false) return '$upper=defined';
+    if (env[lower]?.isNotEmpty ?? false) return '$lower=defined';
+    return null;
   }
-  final httpsProxy = Platform.environment['HTTPS_PROXY'];
-  if (httpsProxy != null && httpsProxy.isNotEmpty) {
-    proxy.add('HTTPS_PROXY=$httpsProxy');
-  } else {
-    final httpsProxyLower = Platform.environment['https_proxy'];
-    if (httpsProxyLower != null && httpsProxyLower.isNotEmpty) {
-      proxy.add('https_proxy=$httpsProxyLower');
-    }
-  }
-  return proxy.join(';');
+
+  return [
+    checkEnv('HTTP_PROXY', 'http_proxy'),
+    checkEnv('HTTPS_PROXY', 'https_proxy'),
+  ].whereType<String>().join(';');
 }
 
 Future<void> showShareLogDialog(
