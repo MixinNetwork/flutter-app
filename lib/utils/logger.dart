@@ -47,9 +47,33 @@ Future<String> _dumpAppAndSystemInfo() async {
     )
     ..writeln('DartRuntime: ${Platform.version}')
     ..writeln('NumberOfProcessors: ${Platform.numberOfProcessors} cores')
-    ..writeln('DiskUsage: ${dumpFreeDiskSpaceToString()}');
+    ..writeln('DiskUsage: ${dumpFreeDiskSpaceToString()}')
+    ..writeln('Proxy: ${_getProxyFromEnv()}');
 
   return info.toString();
+}
+
+String _getProxyFromEnv() {
+  final proxy = <String>[];
+  final httpProxy = Platform.environment['HTTP_PROXY'];
+  if (httpProxy != null && httpProxy.isNotEmpty) {
+    proxy.add('HTTP_PROXY=$httpProxy');
+  } else {
+    final httpProxyLower = Platform.environment['http_proxy'];
+    if (httpProxyLower != null && httpProxyLower.isNotEmpty) {
+      proxy.add('http_proxy=$httpProxyLower');
+    }
+  }
+  final httpsProxy = Platform.environment['HTTPS_PROXY'];
+  if (httpsProxy != null && httpsProxy.isNotEmpty) {
+    proxy.add('HTTPS_PROXY=$httpsProxy');
+  } else {
+    final httpsProxyLower = Platform.environment['https_proxy'];
+    if (httpsProxyLower != null && httpsProxyLower.isNotEmpty) {
+      proxy.add('https_proxy=$httpsProxyLower');
+    }
+  }
+  return proxy.join(';');
 }
 
 Future<void> showShareLogDialog(
