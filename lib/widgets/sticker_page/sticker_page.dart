@@ -311,6 +311,7 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
         child: RepaintBoundary(
           child: Builder(
             builder: (context) => StickerItem(
+              stickerId: sticker.stickerId,
               assetUrl: sticker.assetUrl,
               assetType: sticker.assetType,
             ),

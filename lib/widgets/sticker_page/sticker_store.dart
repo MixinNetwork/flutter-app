@@ -257,6 +257,7 @@ class _Item extends HookConsumerWidget {
                         width: 72,
                         height: 72,
                         child: StickerItem(
+                          stickerId: sticker.stickerId,
                           assetUrl: sticker.assetUrl,
                           assetType: sticker.assetType,
                         ),
@@ -492,6 +493,7 @@ class _StickerPage extends HookConsumerWidget {
                       width: 256,
                       child: sticker.value?.assetUrl.isNotEmpty == true
                           ? StickerItem(
+                              stickerId: sticker.value?.stickerId,
                               assetUrl: sticker.value?.assetUrl ?? '',
                               assetType: sticker.value?.assetType ?? '',
                             )
@@ -555,6 +557,7 @@ class _StickerPage extends HookConsumerWidget {
                           (e) => Padding(
                             padding: const EdgeInsets.all(16),
                             child: StickerItem(
+                              stickerId: e.stickerId,
                               assetUrl: e.assetUrl,
                               assetType: e.assetType,
                               width: 64,
