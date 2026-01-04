@@ -457,6 +457,7 @@ class _Sticker extends HookConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(45),
       child: StickerItem(
+        stickerId: sticker.stickerId,
         assetUrl: sticker.assetUrl,
         assetType: sticker.assetType,
       ),

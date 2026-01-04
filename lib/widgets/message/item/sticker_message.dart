@@ -126,6 +126,7 @@ class StickerMessageWidget extends HookConsumerWidget {
               showStickerPageDialog(context, stickerId);
             },
             child: StickerItem(
+              stickerId: stickerId,
               assetUrl: stickerData.assetUrl,
               assetType: assetType,
               errorWidget: errorWidget,

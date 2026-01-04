@@ -79,6 +79,7 @@ class QuoteMessage extends HookConsumerWidget {
       String? mediaName;
       String? assetUrl;
       String? assetType;
+      String? stickerId;
       String? sharedUserId;
       String? sharedUserFullName;
       String? sharedUserAvatarUrl;
@@ -93,6 +94,7 @@ class QuoteMessage extends HookConsumerWidget {
           mediaName = quote.mediaName;
           assetUrl = quote.assetUrl;
           assetType = quote.assetType;
+          stickerId = quote.stickerId;
           sharedUserId = quote.sharedUserId;
           sharedUserFullName = quote.sharedUserFullName;
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
@@ -106,6 +108,7 @@ class QuoteMessage extends HookConsumerWidget {
           mediaName = quote.mediaName;
           assetUrl = quote.assetUrl;
           assetType = quote.assetType;
+          stickerId = quote.stickerId;
           sharedUserId = quote.sharedUserId;
           sharedUserFullName = quote.sharedUserFullName;
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
@@ -289,7 +292,11 @@ class QuoteMessage extends HookConsumerWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: StickerItem(assetUrl: assetUrl ?? '', assetType: assetType),
+          image: StickerItem(
+            stickerId: stickerId,
+            assetUrl: assetUrl ?? '',
+            assetType: assetType,
+          ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
