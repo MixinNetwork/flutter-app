@@ -102,7 +102,7 @@ dependencies:
   network_info_plus: ^7.0.0
   octo_image: ^2.0.0
   ogg_opus_player: ^0.7.0
-  open_file: ^3.3.2
+  open_file: ^3.5.11
   overlay_support: ^2.1.0
   package_info_plus: ^9.0.0
   path: ^1.8.0
