@@ -77,7 +77,7 @@ class _LocalNotificationManager extends _NotificationManager {
       ),
     );
     await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: _onSelectNotification,
     );
     await flutterLocalNotificationsPlugin.cancelAll();
@@ -105,10 +105,10 @@ class _LocalNotificationManager extends _NotificationManager {
     );
 
     await flutterLocalNotificationsPlugin.show(
-      id,
-      title,
-      body,
-      platformChannelSpecifics,
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: platformChannelSpecifics,
       payload: uri.toString(),
     );
     notifications.add(
@@ -154,7 +154,7 @@ class _LocalNotificationManager extends _NotificationManager {
           .where((element) => element.conversationId == conversationId)
           .map((e) async {
             final (_, id) = e.notification as (Uri, int);
-            await flutterLocalNotificationsPlugin.cancel(id);
+            await flutterLocalNotificationsPlugin.cancel(id: id);
             return e;
           }),
     );
@@ -172,7 +172,7 @@ class _LocalNotificationManager extends _NotificationManager {
     );
     if (notification == null) return;
     final (_, id) = notification.notification as (Uri, int);
-    await flutterLocalNotificationsPlugin.cancel(id);
+    await flutterLocalNotificationsPlugin.cancel(id: id);
     notifications.remove(notification);
   }
 }
