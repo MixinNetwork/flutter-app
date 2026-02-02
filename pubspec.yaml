@@ -90,7 +90,7 @@ dependencies:
   intl: ^0.20.2
   intl_phone_number_input: ^0.7.5
   isolate: ^2.1.0
-  json_annotation: ^4.8.1
+  json_annotation: ^4.10.0
   libsignal_protocol_dart: ^0.7.4
   local_auth: ^3.0.0
   lottie: ^3.3.2
