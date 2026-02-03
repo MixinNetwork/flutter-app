@@ -31,7 +31,7 @@ PODS:
     - FlutterMacOS
   - ogg_opus_player (0.0.1):
     - FlutterMacOS
-  - open_file_mac (0.0.1):
+  - open_file_mac (1.0.3):
     - FlutterMacOS
   - package_info_plus (0.0.1):
     - FlutterMacOS
@@ -175,7 +175,7 @@ SPEC CHECKSUMS:
   network_info_plus: 21d1cd6a015ccb2fdff06a1fbfa88d54b4e92f61
   objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7
   ogg_opus_player: 40ad7ee05152b420727fdb922afa0a90763b1817
-  open_file_mac: 01874b6d6a2c1485ac9b126d7105b99102dea2cf
+  open_file_mac: 76f06c8597551249bdb5e8fd8827a98eae0f4585
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
