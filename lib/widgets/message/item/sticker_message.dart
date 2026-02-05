@@ -76,16 +76,17 @@ class StickerMessageWidget extends HookConsumerWidget {
             if (stickerId == null) return;
 
             d('stickerData watch: $stickerId, ${context.message.messageId}');
-            yield* watchStickerById(context.database, stickerId)
-                .whereNotNull()
-                .map(
-                  (event) => _StickerData(
-                    assetUrl: event.assetUrl,
-                    assetWidth: event.assetWidth,
-                    assetHeight: event.assetHeight,
-                    assetType: event.assetType,
-                  ),
-                );
+            yield* watchStickerById(
+              context.database,
+              stickerId,
+            ).whereNotNull().map(
+              (event) => _StickerData(
+                assetUrl: event.assetUrl,
+                assetWidth: event.assetWidth,
+                assetHeight: event.assetHeight,
+                assetType: event.assetType,
+              ),
+            );
           },
           keys: [messageStickerData, stickerId],
         ).data ??

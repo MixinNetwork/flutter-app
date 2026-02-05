@@ -10,12 +10,14 @@ Stream<Sticker?> watchStickerById(
 }) {
   if (stickerId.isEmpty) return const Stream<Sticker?>.empty();
 
-  return database.stickerDao.sticker(stickerId).watchSingleOrNullWithStream(
-    eventStreams: [
-      DataBaseEventBus.instance.watchUpdateStickerStream(
-        stickerIds: [stickerId],
-      ),
-    ],
-    duration: duration,
-  );
+  return database.stickerDao
+      .sticker(stickerId)
+      .watchSingleOrNullWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.watchUpdateStickerStream(
+            stickerIds: [stickerId],
+          ),
+        ],
+        duration: duration,
+      );
 }
