@@ -5,9 +5,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/sticker_watch.dart';
 import '../../interactive_decorated_box.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../../sticker_page/sticker_store.dart';
@@ -76,16 +76,7 @@ class StickerMessageWidget extends HookConsumerWidget {
             if (stickerId == null) return;
 
             d('stickerData watch: $stickerId, ${context.message.messageId}');
-            yield* context.database.stickerDao
-                .sticker(stickerId)
-                .watchSingleOrNullWithStream(
-                  eventStreams: [
-                    DataBaseEventBus.instance.watchUpdateStickerStream(
-                      stickerIds: [stickerId],
-                    ),
-                  ],
-                  duration: kDefaultThrottleDuration,
-                )
+            yield* watchStickerById(context.database, stickerId)
                 .whereNotNull()
                 .map(
                   (event) => _StickerData(

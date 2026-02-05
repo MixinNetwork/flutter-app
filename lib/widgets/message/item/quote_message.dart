@@ -9,7 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/dao/message_dao.dart';
-import '../../../db/database_event_bus.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -23,6 +22,7 @@ import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/sticker_watch.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../conversation/badges_widget.dart';
 import '../../high_light_text.dart';
@@ -123,16 +123,7 @@ class QuoteMessage extends HookConsumerWidget {
             return const Stream<Sticker?>.empty();
           }
 
-          return context.database.stickerDao
-              .sticker(stickerId)
-              .watchSingleOrNullWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateStickerStream(
-                    stickerIds: [stickerId],
-                  ),
-                ],
-                duration: kDefaultThrottleDuration,
-              );
+          return watchStickerById(context.database, stickerId);
         },
         keys: [type, stickerId],
       ).data;
