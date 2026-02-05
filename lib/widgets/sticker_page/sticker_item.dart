@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,7 +15,13 @@ import '../mixin_image.dart';
 
 void _triggerRefreshJob(BuildContext context, String? stickerId) {
   if (stickerId == null || stickerId.isEmpty) return;
-  context.accountServer.addUpdateStickerJob(createUpdateStickerJob(stickerId));
+
+  scheduleMicrotask(() {
+    if (!context.mounted) return;
+    context.accountServer.addUpdateStickerJob(
+      createUpdateStickerJob(stickerId),
+    );
+  });
 }
 
 class StickerItem extends HookConsumerWidget {

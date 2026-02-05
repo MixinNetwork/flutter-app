@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/dao/message_dao.dart';
+import '../../../db/database_event_bus.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -114,6 +115,27 @@ class QuoteMessage extends HookConsumerWidget {
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
           sharedUserIdentityNumber = quote.sharedUserIdentityNumber;
       }
+
+      final quoteSticker = useMemoizedStream(
+        () {
+          if (!type.isSticker) return const Stream<Sticker?>.empty();
+          if (stickerId == null || stickerId.isEmpty) {
+            return const Stream<Sticker?>.empty();
+          }
+
+          return context.database.stickerDao
+              .sticker(stickerId)
+              .watchSingleOrNullWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateStickerStream(
+                    stickerIds: [stickerId],
+                  ),
+                ],
+                duration: kDefaultThrottleDuration,
+              );
+        },
+        keys: [type, stickerId],
+      ).data;
 
       if (quoteContent != null &&
           (type == null || type.isIllegalMessageCategory)) {
@@ -287,6 +309,8 @@ class QuoteMessage extends HookConsumerWidget {
         );
       }
       if (type.isSticker) {
+        final shownAssetUrl = quoteSticker?.assetUrl ?? assetUrl;
+        final shownAssetType = quoteSticker?.assetType ?? assetType;
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -294,8 +318,8 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           image: StickerItem(
             stickerId: stickerId,
-            assetUrl: assetUrl ?? '',
-            assetType: assetType,
+            assetUrl: shownAssetUrl ?? '',
+            assetType: shownAssetType,
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,

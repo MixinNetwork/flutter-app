@@ -63,17 +63,20 @@ class StickerMessageWidget extends HookConsumerWidget {
     }, [stickerId, messageAssetUrl]);
 
     final stickerData =
-        useMemoizedStream(() {
-          if (messageStickerData != null) {
-            return const Stream<_StickerData>.empty();
-          } else {
+        useMemoizedStream(
+          () async* {
+            if (messageStickerData != null) {
+              yield messageStickerData;
+            }
+
             assert(
               stickerId != null,
               'stickerId is null. ${context.message.messageId}',
             );
-            if (stickerId == null) return const Stream<_StickerData?>.empty();
-            d('stickerData2: $stickerId, ${context.message.messageId}');
-            return context.database.stickerDao
+            if (stickerId == null) return;
+
+            d('stickerData watch: $stickerId, ${context.message.messageId}');
+            yield* context.database.stickerDao
                 .sticker(stickerId)
                 .watchSingleOrNullWithStream(
                   eventStreams: [
@@ -92,8 +95,9 @@ class StickerMessageWidget extends HookConsumerWidget {
                     assetType: event.assetType,
                   ),
                 );
-          }
-        }, keys: [messageStickerData, stickerId]).data ??
+          },
+          keys: [messageStickerData, stickerId],
+        ).data ??
         messageStickerData;
 
     final assetType = stickerData?.assetType;

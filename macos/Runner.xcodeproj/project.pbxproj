@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -287,7 +287,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
+			shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename\n\n# Xcode may invoke this script with CURRENT_ARCH unset or as 'undefined_arch'.\n# Normalize it so Flutter can locate/build the correct artifacts.\nif [ -z \"${CURRENT_ARCH:-}\" ] || [ \"$CURRENT_ARCH\" = \"undefined_arch\" ]; then\n  export CURRENT_ARCH=\"$(uname -m)\"\nfi\n\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
 		};
 		33CC111E2044C6BF0003C045 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -307,7 +307,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh\ntouch Flutter/ephemeral/tripwire\n";
+			shellScript = "# Xcode may invoke this script with CURRENT_ARCH unset or as 'undefined_arch'.\n# Normalize it so Flutter can produce the correct App.framework.\nif [ -z \"${CURRENT_ARCH:-}\" ] || [ \"$CURRENT_ARCH\" = \"undefined_arch\" ]; then\n  export CURRENT_ARCH=\"$(uname -m)\"\nfi\n\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh\ntouch Flutter/ephemeral/tripwire\n";
 		};
 		3A5B6F3B8685204095528592 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
