@@ -130,7 +130,11 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
         ..limit(100);
 
   SimpleSelectStatement<Jobs, Job> updateStickerJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(kUpdateSticker))
+    ..where(
+      (Jobs row) =>
+          row.action.equals(kUpdateSticker) & row.blazeMessage.isNotNull(),
+    )
+    ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
     ..limit(100);
 
   SimpleSelectStatement<Jobs, Job> migrateFtsJobs() =>

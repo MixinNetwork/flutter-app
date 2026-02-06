@@ -172,6 +172,7 @@ class _StickerAlbumDetailBody extends StatelessWidget {
       ),
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) => StickerItem(
+          stickerId: stickers[index].stickerId,
           assetType: stickers[index].assetType,
           assetUrl: stickers[index].assetUrl,
         ),

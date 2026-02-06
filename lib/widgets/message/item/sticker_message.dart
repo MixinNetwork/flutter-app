@@ -5,9 +5,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/sticker_watch.dart';
 import '../../interactive_decorated_box.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../../sticker_page/sticker_store.dart';
@@ -63,37 +63,33 @@ class StickerMessageWidget extends HookConsumerWidget {
     }, [stickerId, messageAssetUrl]);
 
     final stickerData =
-        useMemoizedStream(() {
-          if (messageStickerData != null) {
-            return const Stream<_StickerData>.empty();
-          } else {
+        useMemoizedStream(
+          () async* {
+            if (messageStickerData != null) {
+              yield messageStickerData;
+            }
+
             assert(
               stickerId != null,
               'stickerId is null. ${context.message.messageId}',
             );
-            if (stickerId == null) return const Stream<_StickerData?>.empty();
-            d('stickerData2: $stickerId, ${context.message.messageId}');
-            return context.database.stickerDao
-                .sticker(stickerId)
-                .watchSingleOrNullWithStream(
-                  eventStreams: [
-                    DataBaseEventBus.instance.watchUpdateStickerStream(
-                      stickerIds: [stickerId],
-                    ),
-                  ],
-                  duration: kDefaultThrottleDuration,
-                )
-                .whereNotNull()
-                .map(
-                  (event) => _StickerData(
-                    assetUrl: event.assetUrl,
-                    assetWidth: event.assetWidth,
-                    assetHeight: event.assetHeight,
-                    assetType: event.assetType,
-                  ),
-                );
-          }
-        }, keys: [messageStickerData, stickerId]).data ??
+            if (stickerId == null) return;
+
+            d('stickerData watch: $stickerId, ${context.message.messageId}');
+            yield* watchStickerById(
+              context.database,
+              stickerId,
+            ).whereNotNull().map(
+              (event) => _StickerData(
+                assetUrl: event.assetUrl,
+                assetWidth: event.assetWidth,
+                assetHeight: event.assetHeight,
+                assetType: event.assetType,
+              ),
+            );
+          },
+          keys: [messageStickerData, stickerId],
+        ).data ??
         messageStickerData;
 
     final assetType = stickerData?.assetType;
@@ -126,6 +122,7 @@ class StickerMessageWidget extends HookConsumerWidget {
               showStickerPageDialog(context, stickerId);
             },
             child: StickerItem(
+              stickerId: stickerId,
               assetUrl: stickerData.assetUrl,
               assetType: assetType,
               errorWidget: errorWidget,

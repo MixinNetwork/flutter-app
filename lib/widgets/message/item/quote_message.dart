@@ -22,6 +22,7 @@ import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/sticker_watch.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../conversation/badges_widget.dart';
 import '../../high_light_text.dart';
@@ -79,6 +80,7 @@ class QuoteMessage extends HookConsumerWidget {
       String? mediaName;
       String? assetUrl;
       String? assetType;
+      String? stickerId;
       String? sharedUserId;
       String? sharedUserFullName;
       String? sharedUserAvatarUrl;
@@ -93,6 +95,7 @@ class QuoteMessage extends HookConsumerWidget {
           mediaName = quote.mediaName;
           assetUrl = quote.assetUrl;
           assetType = quote.assetType;
+          stickerId = quote.stickerId;
           sharedUserId = quote.sharedUserId;
           sharedUserFullName = quote.sharedUserFullName;
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
@@ -106,11 +109,24 @@ class QuoteMessage extends HookConsumerWidget {
           mediaName = quote.mediaName;
           assetUrl = quote.assetUrl;
           assetType = quote.assetType;
+          stickerId = quote.stickerId;
           sharedUserId = quote.sharedUserId;
           sharedUserFullName = quote.sharedUserFullName;
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
           sharedUserIdentityNumber = quote.sharedUserIdentityNumber;
       }
+
+      final quoteSticker = useMemoizedStream(
+        () {
+          if (!type.isSticker) return const Stream<Sticker?>.empty();
+          if (stickerId == null || stickerId.isEmpty) {
+            return const Stream<Sticker?>.empty();
+          }
+
+          return watchStickerById(context.database, stickerId);
+        },
+        keys: [type, stickerId],
+      ).data;
 
       if (quoteContent != null &&
           (type == null || type.isIllegalMessageCategory)) {
@@ -284,12 +300,18 @@ class QuoteMessage extends HookConsumerWidget {
         );
       }
       if (type.isSticker) {
+        final shownAssetUrl = quoteSticker?.assetUrl ?? assetUrl;
+        final shownAssetType = quoteSticker?.assetType ?? assetType;
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: StickerItem(assetUrl: assetUrl ?? '', assetType: assetType),
+          image: StickerItem(
+            stickerId: stickerId,
+            assetUrl: shownAssetUrl ?? '',
+            assetType: shownAssetType,
+          ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),

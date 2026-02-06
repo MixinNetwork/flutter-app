@@ -39,38 +39,68 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
   }
 
   @override
-  Future<List<Job>?> run(List<Job> jobs) async {
-    final list = await Future.wait(
-      jobs.map((Job job) async {
-        try {
-          final stickerId = job.blazeMessage;
-          if (stickerId != null) {
-            final sticker = (await client.accountApi.getStickerById(
-              stickerId,
-            )).data;
-            await database.stickerDao.insert(sticker.asStickersCompanion);
-          }
-          await database.jobDao.deleteJobById(job.jobId);
-        } catch (e, s) {
-          if (e is MixinApiError) {
-            var code = e.response?.statusCode;
-            final error = e.error;
-            if (code != 404 && error != null && error is MixinError) {
-              code = error.code;
-            }
-            if (code == 404) {
-              i('Sticker not found: ${job.blazeMessage}');
-              await database.jobDao.deleteJobById(job.jobId);
-              return null;
-            }
-          }
-          w('Update sticker job error: $e, stack: $s');
-          await Future.delayed(const Duration(seconds: 1));
-          return job;
-        }
-      }),
-    );
+  Future<void> run(List<Job> jobs) async {
+    if (jobs.isEmpty) return;
 
-    return list.where((element) => element != null).cast<Job>().toList();
+    final now = DateTime.now();
+    final first = jobs.first;
+    final wait = first.createdAt.difference(now);
+    if (wait.inMilliseconds > 0) {
+      await Future.delayed(
+        wait > const Duration(seconds: 10) ? const Duration(seconds: 10) : wait,
+      );
+      return;
+    }
+
+    for (final job in jobs) {
+      final dueIn = job.createdAt.difference(DateTime.now());
+      if (dueIn.inMilliseconds > 0) {
+        break;
+      }
+
+      try {
+        final stickerId = job.blazeMessage;
+        if (stickerId != null && stickerId.isNotEmpty) {
+          final sticker = (await client.accountApi.getStickerById(
+            stickerId,
+          )).data;
+          await database.stickerDao.insert(sticker.asStickersCompanion);
+        }
+        await database.jobDao.deleteJobById(job.jobId);
+      } catch (e, s) {
+        if (e is MixinApiError) {
+          var code = e.response?.statusCode;
+          final error = e.error;
+          if (code != 404 && error != null && error is MixinError) {
+            code = error.code;
+          }
+          if (code == 404) {
+            i('Sticker not found: ${job.blazeMessage}');
+            await database.jobDao.deleteJobById(job.jobId);
+            continue;
+          }
+        }
+
+        w('Update sticker job error: $e, stack: $s');
+
+        final nextRunAt = DateTime.now().add(_backoffDuration(job.runCount));
+        await (database.mixinDatabase.update(
+          database.mixinDatabase.jobs,
+        )..where((tbl) => tbl.jobId.equals(job.jobId))).write(
+          JobsCompanion(
+            createdAt: Value(nextRunAt),
+            runCount: Value(job.runCount + 1),
+          ),
+        );
+      }
+    }
   }
+}
+
+Duration _backoffDuration(int runCount) {
+  if (runCount <= 0) return const Duration(minutes: 1);
+  if (runCount == 1) return const Duration(minutes: 5);
+  if (runCount == 2) return const Duration(minutes: 15);
+  if (runCount == 3) return const Duration(hours: 1);
+  return const Duration(hours: 6);
 }

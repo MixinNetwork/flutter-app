@@ -1,20 +1,35 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../app.dart';
+import '../../db/extension/job.dart';
 import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../cache_lottie.dart';
 import '../mixin_image.dart';
 
+void _triggerRefreshJob(BuildContext context, String? stickerId) {
+  if (stickerId == null || stickerId.isEmpty) return;
+
+  scheduleMicrotask(() {
+    if (!context.mounted) return;
+    context.accountServer.addUpdateStickerJob(
+      createUpdateStickerJob(stickerId),
+    );
+  });
+}
+
 class StickerItem extends HookConsumerWidget {
   const StickerItem({
     required this.assetUrl,
     required this.assetType,
     super.key,
+    this.stickerId,
     this.errorWidget,
     this.width,
     this.height,
@@ -22,6 +37,7 @@ class StickerItem extends HookConsumerWidget {
 
   final String assetUrl;
   final String? assetType;
+  final String? stickerId;
   final Widget? errorWidget;
   final double? width;
   final double? height;
@@ -80,18 +96,20 @@ class StickerItem extends HookConsumerWidget {
               controller.duration = composition.duration;
               listener();
             },
-            errorBuilder: errorWidget != null
-                ? (_, _, _) => errorWidget!
-                : null,
+            errorBuilder: (context, error, stackTrace) {
+              _triggerRefreshJob(context, stickerId);
+              return errorWidget ?? const SizedBox();
+            },
           )
         : MixinImage.network(
             assetUrl,
             height: height,
             width: width,
             fit: BoxFit.contain,
-            errorBuilder: errorWidget != null
-                ? (_, _, _) => errorWidget!
-                : null,
+            errorBuilder: (context, error, stackTrace) {
+              _triggerRefreshJob(context, stickerId);
+              return errorWidget ?? const SizedBox();
+            },
           );
 
     if (width == null || height == null) {
