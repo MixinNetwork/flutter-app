@@ -167,9 +167,9 @@ class SelectableRegionState extends State<SelectableRegion>
         GestureRecognizerFactoryWithHandlers<
           TapGestureRecognizer
         >(() => TapGestureRecognizer(debugOwner: this), (
-          TapGestureRecognizer instance,
+          instance,
         ) {
-          instance.onTapUp = (TapUpDetails details) {
+          instance.onTapUp = (details) {
             if (defaultTargetPlatform == TargetPlatform.iOS &&
                 _positionIsOnActiveSelection(
                   globalPosition: details.globalPosition,
@@ -308,7 +308,7 @@ class SelectableRegionState extends State<SelectableRegion>
             debugOwner: this,
             supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse},
           ),
-          (TapAndPanGestureRecognizer instance) {
+          (instance) {
             instance
               ..onTapDown = _startNewMouseSelectionGesture
               ..onTapUp = _handleMouseTapUp
@@ -328,7 +328,7 @@ class SelectableRegionState extends State<SelectableRegion>
             debugOwner: this,
             supportedDevices: _kLongPressSelectionDevices,
           ),
-          (LongPressGestureRecognizer instance) {
+          (instance) {
             instance
               ..onLongPressStart = _handleTouchLongPressStart
               ..onLongPressMoveUpdate = _handleTouchLongPressMoveUpdate
@@ -481,7 +481,7 @@ class SelectableRegionState extends State<SelectableRegion>
         ) ==
         SelectionResult.pending) {
       _scheduledSelectionEndEdgeUpdate = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (!_scheduledSelectionEndEdgeUpdate) {
           return;
         }
@@ -500,7 +500,7 @@ class SelectableRegionState extends State<SelectableRegion>
       _selectionOverlay!.hideMagnifier();
       _selectionOverlay!.showToolbar(
         context: context,
-        contextMenuBuilder: (BuildContext context) =>
+        contextMenuBuilder: (context) =>
             widget.contextMenuBuilder!(context, this),
       );
     }
@@ -540,7 +540,7 @@ class SelectableRegionState extends State<SelectableRegion>
         ) ==
         SelectionResult.pending) {
       _scheduledSelectionStartEdgeUpdate = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (!_scheduledSelectionStartEdgeUpdate) {
           return;
         }
@@ -765,7 +765,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
     _selectionOverlay!.showToolbar(
       context: context,
-      contextMenuBuilder: (BuildContext context) =>
+      contextMenuBuilder: (context) =>
           widget.contextMenuBuilder!(context, this),
     );
     return true;
@@ -1503,10 +1503,10 @@ class _SelectableRegionContainerDelegate
     }
     final selectableSet = selectables.toSet();
     _hasReceivedEndEvent.removeWhere(
-      (Selectable selectable) => !selectableSet.contains(selectable),
+      (selectable) => !selectableSet.contains(selectable),
     );
     _hasReceivedStartEvent.removeWhere(
-      (Selectable selectable) => !selectableSet.contains(selectable),
+      (selectable) => !selectableSet.contains(selectable),
     );
     super.didChangeSelectables();
   }

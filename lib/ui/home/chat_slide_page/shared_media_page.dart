@@ -31,24 +31,23 @@ class SharedMediaPage extends HookConsumerWidget {
         children: [
           Expanded(
             child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) =>
-                  IndexedStack(
-                    index: selectedIndex.value,
-                    children: [
-                      MediaPage(
-                        conversationId: conversationId,
-                        maxHeight: constraints.maxHeight,
-                      ),
-                      PostPage(
-                        conversationId: conversationId,
-                        maxHeight: constraints.maxHeight,
-                      ),
-                      FilePage(
-                        conversationId: conversationId,
-                        maxHeight: constraints.maxHeight,
-                      ),
-                    ],
+              builder: (context, constraints) => IndexedStack(
+                index: selectedIndex.value,
+                children: [
+                  MediaPage(
+                    conversationId: conversationId,
+                    maxHeight: constraints.maxHeight,
                   ),
+                  PostPage(
+                    conversationId: conversationId,
+                    maxHeight: constraints.maxHeight,
+                  ),
+                  FilePage(
+                    conversationId: conversationId,
+                    maxHeight: constraints.maxHeight,
+                  ),
+                ],
+              ),
             ),
           ),
           Row(

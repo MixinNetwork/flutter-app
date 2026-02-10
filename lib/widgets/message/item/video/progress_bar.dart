@@ -132,7 +132,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onHorizontalDragStart: (DragStartDetails details) {
+      onHorizontalDragStart: (details) {
         if (!controller.value.isInitialized) {
           return;
         }
@@ -143,7 +143,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
         widget.onDragStart?.call();
       },
-      onHorizontalDragUpdate: (DragUpdateDetails details) {
+      onHorizontalDragUpdate: (details) {
         if (!controller.value.isInitialized) {
           return;
         }
@@ -152,7 +152,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
         widget.onDragUpdate?.call();
       },
-      onHorizontalDragEnd: (DragEndDetails details) async {
+      onHorizontalDragEnd: (details) async {
         if (_controllerWasPlaying) {
           unawaited(controller.play());
         }
@@ -167,7 +167,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
         widget.onDragEnd?.call();
       },
-      onTapUp: (TapUpDetails details) {
+      onTapUp: (details) {
         if (!controller.value.isInitialized) {
           return;
         }

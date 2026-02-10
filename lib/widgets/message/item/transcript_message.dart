@@ -332,13 +332,12 @@ class TranscriptPage extends HookConsumerWidget {
                   controller: scrollController,
                   key: listKey,
                   padding: const EdgeInsets.only(bottom: 16),
-                  itemBuilder: (BuildContext context, int index) =>
-                      MessageItemWidget(
-                        prev: list.getOrNull(index - 1),
-                        message: list[index],
-                        next: list.getOrNull(index + 1),
-                        isTranscriptPage: true,
-                      ),
+                  itemBuilder: (context, index) => MessageItemWidget(
+                    prev: list.getOrNull(index - 1),
+                    message: list[index],
+                    next: list.getOrNull(index + 1),
+                    isTranscriptPage: true,
+                  ),
                   itemCount: list.length,
                 ),
               ),

@@ -188,7 +188,7 @@ class _InputContainer extends HookConsumerWidget {
     }, [chatSidePageSize]);
 
     return LayoutBuilder(
-      builder: (context, BoxConstraints constraints) => MentionPanelPortalEntry(
+      builder: (context, constraints) => MentionPanelPortalEntry(
         textEditingController: textEditingController,
         mentionProviderInstance: mentionProviderInstance,
         constraints: constraints,
@@ -479,8 +479,7 @@ class _SendTextField extends HookConsumerWidget {
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) =>
-                _sendMessage(context, textEditingController),
+            onInvoke: (intent) => _sendMessage(context, textEditingController),
           ),
           PasteTextIntent: _PasteContextAction(context),
           _SendPostMessageIntent: CallbackAction<Intent>(
@@ -553,14 +552,13 @@ class _QuoteMessage extends HookConsumerWidget {
       tween: Tween(begin: 0, end: quoting ? 1 : 0),
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
-      builder: (BuildContext context, double progress, Widget? child) =>
-          ClipRect(
-            child: Align(
-              alignment: AlignmentDirectional.topCenter,
-              heightFactor: progress,
-              child: child,
-            ),
-          ),
+      builder: (context, progress, child) => ClipRect(
+        child: Align(
+          alignment: AlignmentDirectional.topCenter,
+          heightFactor: progress,
+          child: child,
+        ),
+      ),
       child: Consumer(
         builder: (context, ref, child) {
           final message = ref.watch(lastQuoteMessageProvider);

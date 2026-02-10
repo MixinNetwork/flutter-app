@@ -133,7 +133,7 @@ extension StreamExtension<T> on Stream<T> {
         }
       }
 
-      subscription.onData((T event) {
+      subscription.onData((event) {
         events.add(event);
         onData();
       });

@@ -143,7 +143,7 @@ class DatabaseProfiler extends Database {
 
         needPrint = details
             .where(
-              (String detail) =>
+              (detail) =>
                   detail.startsWith('SCAN') ||
                   detail.startsWith('USE TEMP B-TREE'),
             )

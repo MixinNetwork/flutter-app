@@ -45,7 +45,7 @@ class UpdateTokenJob extends JobQueue<Job, List<Job>> {
   @override
   Future<void> run(List<Job> jobs) async {
     final tokenIds = await Future.wait<String?>(
-      jobs.map((Job job) async {
+      jobs.map((job) async {
         try {
           final token = (await client.tokenApi.getAssetById(
             job.blazeMessage!,

@@ -39,7 +39,7 @@ class _PinVerificationDialog extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             PinInputLayout(
-              doVerify: (String pin) async {
+              doVerify: (pin) async {
                 await context.accountServer.client.accountApi.verifyPin(
                   encryptPin(pin)!,
                 );

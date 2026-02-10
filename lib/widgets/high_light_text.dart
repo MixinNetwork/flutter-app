@@ -195,7 +195,7 @@ class TextMatcher {
   static Iterable<TextRange> _textRangesFromText(String text, RegExp regExp) {
     final matches = regExp.allMatches(text);
     return matches.map(
-      (RegExpMatch match) => TextRange(start: match.start, end: match.end),
+      (match) => TextRange(start: match.start, end: match.end),
     );
   }
 
@@ -210,7 +210,7 @@ class TextMatcher {
       throw ArgumentError('regExp or textRangesFromText must not be null');
     }
     return textRanges.map(
-      (TextRange textRange) => _TextMatch(
+      (textRange) => _TextMatch(
         textRange: textRange,
         linkBuilder: matchBuilder,
         linkString: text.substring(textRange.start, textRange.end),
@@ -239,8 +239,7 @@ class _TextMatch {
     String text,
   ) => textMatchers.fold<List<_TextMatch>>(
     <_TextMatch>[],
-    (List<_TextMatch> previousValue, TextMatcher value) =>
-        previousValue..addAll(value._link(text)),
+    (previousValue, value) => previousValue..addAll(value._link(text)),
   );
 
   @override
@@ -350,8 +349,7 @@ class _MatchedSpans {
   ) {
     final nextTextMatcherMatches = textMatcherMatches.toList()
       ..sort(
-        (_TextMatch a, _TextMatch b) =>
-            a.textRange.start.compareTo(b.textRange.start),
+        (a, b) => a.textRange.start.compareTo(b.textRange.start),
       );
 
     // Validate that there are no overlapping matches.
@@ -367,7 +365,7 @@ class _MatchedSpans {
 
     // Remove empty ranges.
     nextTextMatcherMatches.removeWhere(
-      (_TextMatch textMatcherMatch) =>
+      (textMatcherMatch) =>
           textMatcherMatch.textRange.start == textMatcherMatch.textRange.end,
     );
 

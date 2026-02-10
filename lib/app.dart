@@ -115,7 +115,7 @@ class _Providers extends HookConsumerWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (BuildContext context) => ConversationListBloc(
+          create: (context) => ConversationListBloc(
             ref.read(slideCategoryStateProvider.notifier),
             accountServer.database,
             ref.read(mentionCacheProvider),
@@ -123,7 +123,7 @@ class _Providers extends HookConsumerWidget {
         ),
       ],
       child: Provider<NotificationService>(
-        create: (BuildContext context) => NotificationService(context: context),
+        create: (context) => NotificationService(context: context),
         lazy: false,
         dispose: (_, notificationService) => notificationService.close(),
         child: PortalProviders(child: app),

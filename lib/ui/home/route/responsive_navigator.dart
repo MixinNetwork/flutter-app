@@ -96,7 +96,7 @@ class ResponsiveNavigator extends HookConsumerWidget {
                   transitionDelegate: WithoutAnimationDelegate(
                     routeWithoutAnimation: {leftPage.name, rightEmptyPage.name},
                   ),
-                  onDidRemovePage: (Page<dynamic> page) {},
+                  onDidRemovePage: (page) {},
                   pages: [
                     if (routeMode) leftPage,
                     if (!routeMode && responsiveNavigatorState.pages.isEmpty)

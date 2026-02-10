@@ -66,7 +66,7 @@ class _ProxySettingWidget extends HookConsumerWidget {
                 value: hasProxyConfig && enableProxy,
                 onChanged: !hasProxyConfig
                     ? null
-                    : (bool value) =>
+                    : (value) =>
                           context.database.settingProperties.enableProxy =
                               value,
               ),

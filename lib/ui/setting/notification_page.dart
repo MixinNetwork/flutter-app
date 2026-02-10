@@ -50,7 +50,7 @@ class NotificationPage extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: currentMessagePreview,
-                    onChanged: (bool value) =>
+                    onChanged: (value) =>
                         context.settingChangeNotifier.messagePreview = value,
                   ),
                 ),

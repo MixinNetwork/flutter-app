@@ -170,7 +170,7 @@ _NavigationState _useNavigationState({
     _jumpToPosition(scrollController, items.length, selectedIndex.value);
   }, [items]);
 
-  final select = useCallback(([int? index]) {
+  final select = useCallback<void Function([int?])>(([index]) {
     if (index != null) {
       selectedIndex.value = index;
     }
@@ -263,13 +263,13 @@ class CommandPalettePage extends HookConsumerWidget {
       },
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => navigationState.next(),
+          onInvoke: (intent) => navigationState.next(),
         ),
         ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => navigationState.prev(),
+          onInvoke: (intent) => navigationState.prev(),
         ),
         ListSelectionSelectedIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => navigationState.select(),
+          onInvoke: (intent) => navigationState.select(),
         ),
       },
       child: Material(
@@ -334,8 +334,8 @@ class CommandPalettePage extends HookConsumerWidget {
                     slivers: [
                       SliverList(
                         delegate: SliverChildBuilderDelegate((
-                          BuildContext context,
-                          int index,
+                          context,
+                          index,
                         ) {
                           final item = searchState.items[index];
                           return Padding(

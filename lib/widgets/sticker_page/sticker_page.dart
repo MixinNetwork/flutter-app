@@ -189,7 +189,7 @@ class _StickerAlbumPage extends HookConsumerWidget {
           crossAxisSpacing: 8,
         ),
         itemCount: canAddSticker ? itemCount + 1 : itemCount,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (context, index) {
           if (canAddSticker && index == 0) {
             return const _AddStickerWidget();
           }

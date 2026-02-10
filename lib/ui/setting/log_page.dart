@@ -19,9 +19,9 @@ Future<void> showLogPage(BuildContext context) => showGeneralDialog(
   barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   pageBuilder:
       (
-        BuildContext buildContext,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
+        buildContext,
+        animation,
+        secondaryAnimation,
       ) => InheritedTheme.capture(
         from: context,
         to: Navigator.of(context, rootNavigator: true).context,

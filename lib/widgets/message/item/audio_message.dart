@@ -104,7 +104,7 @@ class AudioMessage extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Builder(
-              builder: (BuildContext context) {
+              builder: (context) {
                 switch (mediaStatus) {
                   case MediaStatus.canceled:
                     return isMessageSentOut && mediaUrl?.isNotEmpty == true

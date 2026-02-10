@@ -650,7 +650,7 @@ class DecryptMessage extends Injector {
           : _decode(plainText);
       QuoteMessageItem? _quoteContent;
       final message = await _generateMessage(data, (
-        QuoteMessageItem? quoteContent,
+        quoteContent,
       ) {
         _quoteContent = quoteContent;
         return Message(
@@ -689,7 +689,7 @@ class DecryptMessage extends Injector {
       );
       final message = await _generateMessage(
         data,
-        (QuoteMessageItem? quoteContent) => Message(
+        (quoteContent) => Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
           userId: data.senderId,
@@ -729,7 +729,7 @@ class DecryptMessage extends Injector {
       );
       final message = await _generateMessage(
         data,
-        (QuoteMessageItem? quoteContent) => Message(
+        (quoteContent) => Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
           userId: data.senderId,
@@ -770,7 +770,7 @@ class DecryptMessage extends Injector {
       );
       final message = await _generateMessage(
         data,
-        (QuoteMessageItem? quoteContent) => Message(
+        (quoteContent) => Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
           userId: data.senderId,
@@ -807,7 +807,7 @@ class DecryptMessage extends Injector {
       );
       final message = await _generateMessage(
         data,
-        (QuoteMessageItem? quoteContent) => Message(
+        (quoteContent) => Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
           userId: data.senderId,
@@ -868,7 +868,7 @@ class DecryptMessage extends Injector {
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
         data,
-        (QuoteMessageItem? quoteContent) => Message(
+        (quoteContent) => Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
           userId: data.senderId,

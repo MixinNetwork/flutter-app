@@ -74,15 +74,15 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       },
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) =>
+          onInvoke: (intent) =>
               ref.read(mentionProviderInstance.notifier).next(),
         ),
         ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) =>
+          onInvoke: (intent) =>
               ref.read(mentionProviderInstance.notifier).prev(),
         ),
         ListSelectionSelectedIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) {
+          onInvoke: (intent) {
             final state = ref.read(mentionProviderInstance);
             _select(state.users[state.index]);
           },
@@ -160,7 +160,7 @@ class _MentionPanel extends StatelessWidget {
       controller: scrollController,
       itemCount: mentionState.users.length,
       shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) => _MentionItem(
+      itemBuilder: (context, index) => _MentionItem(
         user: mentionState.users[index],
         keyword: mentionState.text,
         selected: mentionState.index == index,

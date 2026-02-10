@@ -216,7 +216,7 @@ class _CircleList extends HookConsumerWidget {
         Expanded(
           child: ReorderableList(
             controller: controller,
-            onReorder: (int oldIndex, int newIndex) {
+            onReorder: (oldIndex, newIndex) {
               final newList = list.value.toList();
 
               final _newIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
@@ -227,11 +227,11 @@ class _CircleList extends HookConsumerWidget {
               context.database.circleDao.updateOrders(list.value);
             },
             itemCount: list.value.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (context, index) {
               final circle = list.value[index];
               return Consumer(
                 key: Key(circle.circleId),
-                builder: (BuildContext context, ref, _) {
+                builder: (context, ref, _) {
                   final selected = ref.watch(
                     slideCategoryStateProvider.select((value) {
                       final conversationCircleItem = list.value[index];
@@ -451,9 +451,8 @@ class _CategoryList extends HookConsumerWidget {
       controller: controller,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) => children[index],
-      separatorBuilder: (BuildContext context, int index) =>
-          const SizedBox(height: 8),
+      itemBuilder: (context, index) => children[index],
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemCount: children.length,
     );
   }

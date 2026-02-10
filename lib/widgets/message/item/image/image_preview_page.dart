@@ -49,9 +49,9 @@ class ImagePreviewPage extends HookConsumerWidget {
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     pageBuilder:
         (
-          BuildContext buildContext,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
+          buildContext,
+          animation,
+          secondaryAnimation,
         ) {
           final child = ImagePreviewPage(
             conversationId: conversationId,
@@ -207,7 +207,7 @@ class ImagePreviewPage extends HookConsumerWidget {
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => copyFile(
+          onInvoke: (intent) => copyFile(
             context.accountServer.convertMessageAbsolutePath(
               current.value,
               isTranscriptPage,

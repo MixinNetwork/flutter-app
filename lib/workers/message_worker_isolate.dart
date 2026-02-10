@@ -157,7 +157,7 @@ class _MessageProcessRunner {
       privateKey: privateKeyStr,
       interceptors: [
         InterceptorsWrapper(
-          onError: (DioException e, ErrorInterceptorHandler handler) async {
+          onError: (e, handler) async {
             _sendEventToMainIsolate(
               WorkerIsolateEventType.onApiRequestedError,
               e,

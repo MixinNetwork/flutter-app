@@ -35,7 +35,7 @@ class WaveformWidget extends StatelessWidget {
     assert(value >= 0 && value <= 1);
 
     return LayoutBuilder(
-      builder: (context, BoxConstraints constraints) => HookBuilder(
+      builder: (context, constraints) => HookBuilder(
         builder: (context) {
           final maxBarCount =
               ((constraints.maxWidth + _barSpacing) / (_barWidth + _barSpacing))

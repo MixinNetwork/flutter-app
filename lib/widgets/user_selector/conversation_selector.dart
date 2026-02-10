@@ -361,7 +361,7 @@ class _ConversationSelector extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                        separatorBuilder: (BuildContext context, int index) =>
+                        separatorBuilder: (context, index) =>
                             const SizedBox(width: 4),
                         itemCount: selected.length,
                       ),
@@ -377,7 +377,7 @@ class _ConversationSelector extends HookConsumerWidget {
                         title: context.l10n.recentChats,
                         count:
                             conversationFilterState.recentConversations.length,
-                        builder: (BuildContext context, int index) {
+                        builder: (context, index) {
                           final item = conversationFilterState
                               .recentConversations[index];
                           return InteractiveDecoratedBox.color(
@@ -405,7 +405,7 @@ class _ConversationSelector extends HookConsumerWidget {
                       _Section(
                         title: context.l10n.contactTitle,
                         count: conversationFilterState.friends.length,
-                        builder: (BuildContext context, int index) {
+                        builder: (context, index) {
                           final item = conversationFilterState.friends[index];
                           return InteractiveDecoratedBox.color(
                             decoration: boxDecoration,
@@ -432,7 +432,7 @@ class _ConversationSelector extends HookConsumerWidget {
                       _Section(
                         title: context.l10n.bots,
                         count: conversationFilterState.bots.length,
-                        builder: (BuildContext context, int index) {
+                        builder: (context, index) {
                           final item = conversationFilterState.bots[index];
                           return InteractiveDecoratedBox.color(
                             decoration: boxDecoration,

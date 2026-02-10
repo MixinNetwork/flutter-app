@@ -199,7 +199,7 @@ class _SearchUserDialog extends HookConsumerWidget {
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (context) {
           if (resultUserId.value?.isNotEmpty ?? false) {
             return UserDialog(userId: resultUserId.value!);
           }
@@ -225,7 +225,7 @@ class _SearchUserDialog extends HookConsumerWidget {
                         },
                         actions: {
                           _SearchIntent: CallbackAction<Intent>(
-                            onInvoke: (Intent intent) => search(),
+                            onInvoke: (intent) => search(),
                           ),
                         },
                         child: DialogTextField(

@@ -120,7 +120,7 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
         (element.fullName != null &&
             element.fullName!.toLowerCase().contains(keyword)) ||
         element.identityNumber.contains(keyword);
-    final sort = compareValuesBy((User e) {
+    final sort = compareValuesBy<User>((e) {
       final indexOf = e.fullName?.toLowerCase().indexOf(keyword) ?? -1;
       if (indexOf != -1) return indexOf;
       return e.identityNumber.indexOf(keyword);

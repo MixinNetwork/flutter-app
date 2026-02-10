@@ -113,7 +113,7 @@ class SearchMessagePage extends HookConsumerWidget {
                     },
                     actions: {
                       _ResetModeIntent: CallbackAction(
-                        onInvoke: (Intent intent) {
+                        onInvoke: (intent) {
                           if (selectedUser.value != null) {
                             return selectedUser.value = null;
                           }
@@ -215,7 +215,7 @@ class SearchMessagePage extends HookConsumerWidget {
                           name: category.name,
                           categories: category.categories,
                           selectedCategories: selectedCategories.value,
-                          onSelected: (List<String> value) {
+                          onSelected: (value) {
                             if (selectedCategories.value == value) {
                               selectedCategories.value = null;
                               return;
@@ -224,7 +224,7 @@ class SearchMessagePage extends HookConsumerWidget {
                           },
                         );
                       },
-                      separatorBuilder: (BuildContext context, int index) =>
+                      separatorBuilder: (context, index) =>
                           const SizedBox(width: 8),
                     ),
                   ),

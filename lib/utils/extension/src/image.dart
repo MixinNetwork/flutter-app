@@ -7,7 +7,7 @@ extension ImageProviderExtension<T extends Object> on ImageProvider<T> {
     final completer = Completer<ui.Image>();
     late ImageStreamListener listener;
     final stream = resolve(configuration);
-    listener = ImageStreamListener((ImageInfo frame, bool sync) {
+    listener = ImageStreamListener((frame, sync) {
       final image = frame.image;
       completer.complete(image);
       stream.removeListener(listener);

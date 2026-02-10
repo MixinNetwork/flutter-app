@@ -209,7 +209,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
         return plaintext.toList();
       }
 
-      subscription.onData((List<int> event) {
+      subscription.onData((event) {
         pause();
         process(
           event,
@@ -317,7 +317,7 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
         return result;
       }
 
-      subscription.onData((List<int> event) {
+      subscription.onData((event) {
         pause();
         process(
           event,

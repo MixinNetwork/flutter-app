@@ -125,7 +125,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                       groupValue: true,
                       value: selected.value.$1,
                       title: Text(context.l10n.photos),
-                      onChanged: (bool value) {
+                      onChanged: (value) {
                         final (_, item2, item3, item4) = selected.value;
 
                         selected.value = (!value, item2, item3, item4);
@@ -144,7 +144,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                       groupValue: true,
                       value: selected.value.$2,
                       title: Text(context.l10n.videos),
-                      onChanged: (bool value) {
+                      onChanged: (value) {
                         final (item1, _, item3, item4) = selected.value;
 
                         selected.value = (item1, !value, item3, item4);
@@ -163,7 +163,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                       groupValue: true,
                       value: selected.value.$3,
                       title: Text(context.l10n.audio),
-                      onChanged: (bool value) {
+                      onChanged: (value) {
                         final (item1, item2, _, item4) = selected.value;
 
                         selected.value = (item1, item2, !value, item4);
@@ -182,7 +182,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                       groupValue: true,
                       value: selected.value.$4,
                       title: Text(context.l10n.files),
-                      onChanged: (bool value) {
+                      onChanged: (value) {
                         final (item1, item2, item3, _) = selected.value;
 
                         selected.value = (item1, item2, item3, !value);

@@ -45,7 +45,7 @@ class StoragePage extends HookConsumerWidget {
                         child: CupertinoSwitch(
                           activeTrackColor: context.theme.accent,
                           value: photoAutoDownload,
-                          onChanged: (bool value) =>
+                          onChanged: (value) =>
                               context.settingChangeNotifier.photoAutoDownload =
                                   value,
                         ),
@@ -58,7 +58,7 @@ class StoragePage extends HookConsumerWidget {
                         child: CupertinoSwitch(
                           activeTrackColor: context.theme.accent,
                           value: videoAutoDownload,
-                          onChanged: (bool value) =>
+                          onChanged: (value) =>
                               context.settingChangeNotifier.videoAutoDownload =
                                   value,
                         ),
@@ -71,7 +71,7 @@ class StoragePage extends HookConsumerWidget {
                         child: CupertinoSwitch(
                           activeTrackColor: context.theme.accent,
                           value: fileAutoDownload,
-                          onChanged: (bool value) =>
+                          onChanged: (value) =>
                               context.settingChangeNotifier.fileAutoDownload =
                                   value,
                         ),
