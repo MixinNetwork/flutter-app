@@ -203,7 +203,7 @@ class _List extends HookConsumerWidget {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 16),
       itemCount: albums.length,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (context, index) {
         final (album, stickers) = albums[index];
         return _Item(album, stickers);
       },
@@ -326,7 +326,7 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
           child: ReorderableList(
             controller: controller,
             itemCount: list.value.length,
-            onReorder: (int oldIndex, int newIndex) {
+            onReorder: (oldIndex, newIndex) {
               final newList = list.value.toList();
 
               final _newIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;

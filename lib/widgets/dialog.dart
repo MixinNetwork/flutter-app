@@ -22,9 +22,9 @@ Future<T?> _showDialog<T>({
   context: context,
   pageBuilder:
       (
-        BuildContext buildContext,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
+        buildContext,
+        animation,
+        secondaryAnimation,
       ) =>
           InheritedTheme.capture(
             from: context,
@@ -57,9 +57,9 @@ Future<T?> showMixinDialog<T>({
   routeSettings: routeSettings,
   pageBuilder:
       (
-        BuildContext buildContext,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
+        buildContext,
+        animation,
+        secondaryAnimation,
       ) =>
           InheritedTheme.capture(
             from: context,

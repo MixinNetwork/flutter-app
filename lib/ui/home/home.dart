@@ -78,7 +78,7 @@ class HomePage extends HookConsumerWidget {
             fit: StackFit.expand,
             children: [
               LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) =>
+                builder: (context, constraints) =>
                     _HomePage(constraints: constraints),
               ),
               if (isEmptyUserName) const _SetupNameWidget(),
@@ -260,8 +260,7 @@ class _HomePage extends HookConsumerWidget {
         ChangeNotifierProvider.value(value: hasDrawerValueNotifier),
         Provider(
           create: (context) => AudioMessagePlayService(context.accountServer),
-          dispose: (BuildContext context, AudioMessagePlayService service) =>
-              service.dispose(),
+          dispose: (context, service) => service.dispose(),
         ),
       ],
       child: Scaffold(
@@ -284,12 +283,10 @@ class _HomePage extends HookConsumerWidget {
                   tween: Tween<double>(end: targetWidth),
                   duration: const Duration(milliseconds: 200),
                   onEnd: () => hasDrawerValueNotifier.value = targetWidth == 0,
-                  builder:
-                      (BuildContext context, double? value, Widget? child) =>
-                          SizedBox(
-                            width: value,
-                            child: value == 0 ? null : child,
-                          ),
+                  builder: (context, value, child) => SizedBox(
+                    width: value,
+                    child: value == 0 ? null : child,
+                  ),
                   child: OverflowBox(
                     alignment: Alignment.centerLeft,
                     minWidth: kSlidePageMinWidth,

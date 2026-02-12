@@ -193,7 +193,7 @@ class MessageImage extends HookConsumerWidget {
             ),
             Center(
               child: HookBuilder(
-                builder: (BuildContext context) {
+                builder: (context) {
                   final mediaStatus = useMessageConverter(
                     converter: (state) => state.mediaStatus,
                   );

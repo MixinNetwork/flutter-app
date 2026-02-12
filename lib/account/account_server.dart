@@ -162,7 +162,7 @@ class AccountServer {
       loginByPhoneNumber: _loginByPhoneNumber,
       interceptors: [
         InterceptorsWrapper(
-          onError: (DioException e, ErrorInterceptorHandler handler) async {
+          onError: (e, handler) async {
             await _onClientRequestError(e);
             handler.next(e);
           },

@@ -105,7 +105,7 @@ class MixinDatabase extends _$MixinDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onUpgrade: (Migrator m, int from, int to) async {
+    onUpgrade: (m, from, to) async {
       if (from <= 2) {
         await m.drop(
           Index('index_conversations_category_status_pin_time_created_at', ''),

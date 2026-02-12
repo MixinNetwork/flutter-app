@@ -156,9 +156,8 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   ) {
     final httpClientAdapter = _dio.httpClientAdapter;
     if (httpClientAdapter is IOHttpClientAdapter) {
-      httpClientAdapter.createHttpClient = () => HttpClient()
-        ..badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
+      httpClientAdapter.createHttpClient = () =>
+          HttpClient()..badCertificateCallback = (cert, host, port) => true;
     } else {
       w('httpClientAdapter is not IOHttpClientAdapter');
     }
@@ -327,7 +326,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
         await attachmentDownloadJob.download(
           _settingProperties.activatedProxy,
-          (int count, int total) => notifyListeners(),
+          (count, total) => notifyListeners(),
         );
 
         final fileSize = await file.length();
@@ -408,7 +407,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
 
       final digest = await attachmentUploadJob.upload(
         _settingProperties.activatedProxy,
-        (int count, int total) => notifyListeners(),
+        (count, total) => notifyListeners(),
       );
       await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
       return AttachmentResult(

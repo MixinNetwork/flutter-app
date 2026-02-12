@@ -101,7 +101,7 @@ class PinMessagesPage extends HookConsumerWidget {
                   reverse: true,
                   padding: const EdgeInsets.only(bottom: 16),
                   controller: scrollController,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (context, index) {
                     final messageItem = list[index];
                     return MessageItemWidget(
                       key: ValueKey(messageItem.messageId),

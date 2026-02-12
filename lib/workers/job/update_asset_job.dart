@@ -41,7 +41,7 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
   @override
   Future<void> run(List<Job> jobs) async {
     final assetIds = await Future.wait<String?>(
-      jobs.map((Job job) async {
+      jobs.map((job) async {
         try {
           final asset = (await client.assetApi.getAssetById(
             job.blazeMessage!,

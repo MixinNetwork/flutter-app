@@ -57,7 +57,7 @@ class BackupPage extends HookConsumerWidget {
                     child: CupertinoSwitch(
                       activeTrackColor: context.theme.accent,
                       value: true,
-                      onChanged: (bool value) {},
+                      onChanged: (value) {},
                     ),
                   ),
                 ),
@@ -68,7 +68,7 @@ class BackupPage extends HookConsumerWidget {
                     child: CupertinoSwitch(
                       activeTrackColor: context.theme.accent,
                       value: true,
-                      onChanged: (bool value) {},
+                      onChanged: (value) {},
                     ),
                   ),
                 ),
@@ -79,7 +79,7 @@ class BackupPage extends HookConsumerWidget {
                     child: CupertinoSwitch(
                       activeTrackColor: context.theme.accent,
                       value: true,
-                      onChanged: (bool value) {},
+                      onChanged: (value) {},
                     ),
                   ),
                 ),

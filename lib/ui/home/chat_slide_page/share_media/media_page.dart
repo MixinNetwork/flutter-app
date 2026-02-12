@@ -117,7 +117,7 @@ class MediaPage extends HookConsumerWidget {
     }
 
     return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
+      onNotification: (notification) {
         if (notification is! ScrollUpdateNotification) return false;
         if (notification.scrollDelta == null) return false;
         if (notification.scrollDelta! < 0) return false;
@@ -155,8 +155,8 @@ class MediaPage extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     sliver: SliverGrid(
                       delegate: SliverChildBuilderDelegate((
-                        BuildContext context,
-                        int index,
+                        context,
+                        index,
                       ) {
                         final message = e.value[index];
                         return _Item(message: message);

@@ -251,7 +251,7 @@ class _CodeInputScene extends HookConsumerWidget {
                 borderWidth: 2,
               ),
               textStyle: TextStyle(fontSize: 18, color: context.theme.text),
-              onChanged: (String value) {},
+              onChanged: (value) {},
             ),
           ),
           const SizedBox(height: 0),

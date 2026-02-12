@@ -81,7 +81,7 @@ class MentionCache {
       });
 
       for (final element in noCacheContentUserIdMap.entries) {
-        element.value.forEach((String element) {
+        element.value.forEach((element) {
           if (map[element] != null) return;
           final mentionUser = _userLruCache.get(element);
           if (mentionUser == null) return;

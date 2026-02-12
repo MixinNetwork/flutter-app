@@ -261,10 +261,10 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
                   style: TextStyle(color: context.theme.text, fontSize: 16),
                   buildCounter:
                       (
-                        BuildContext context, {
-                        required int currentLength,
-                        required int? maxLength,
-                        required bool isFocused,
+                        context, {
+                        required currentLength,
+                        required maxLength,
+                        required isFocused,
                       }) => null,
                   decoration: InputDecoration(
                     fillColor: context.theme.sidebarSelected,

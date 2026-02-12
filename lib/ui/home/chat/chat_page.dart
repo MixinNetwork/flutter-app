@@ -181,8 +181,8 @@ class _ChatSidePageBuilder extends HookConsumerWidget {
       [],
     );
 
-    final filter = useCallback(
-      (ConversationState? state) => state?.conversationId == conversationId,
+    final filter = useCallback<bool Function(ConversationState?)>(
+      (state) => state?.conversationId == conversationId,
       [conversationId],
     );
 
@@ -532,7 +532,7 @@ class _NotificationListener extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
+        onNotification: (notification) {
           final dimension = notification.metrics.viewportDimension / 2;
 
           if (notification is ScrollUpdateNotification) {
@@ -615,8 +615,8 @@ class _List extends HookConsumerWidget {
           SliverList(
             key: topKey,
             delegate: SliverChildBuilderDelegate((
-              BuildContext context,
-              int index,
+              context,
+              index,
             ) {
               final actualIndex = top.length - index - 1;
               final messageItem = top[actualIndex];
@@ -650,8 +650,8 @@ class _List extends HookConsumerWidget {
           SliverList(
             key: bottomKey,
             delegate: SliverChildBuilderDelegate((
-              BuildContext context,
-              int index,
+              context,
+              index,
             ) {
               final messageItem = bottom[index];
               return MessageItemWidget(
@@ -952,7 +952,7 @@ class _JumpMentionButton extends HookConsumerWidget {
     return CustomContextMenuWidget(
       hitTestBehavior: HitTestBehavior.translucent,
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-      menuProvider: (MenuRequest request) => Menu(
+      menuProvider: (request) => Menu(
         children: [
           MenuAction(
             title: context.l10n.clear,

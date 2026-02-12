@@ -116,7 +116,7 @@ class _ProtocolHandler extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    useProtocol((String url) {
+    useProtocol((url) {
       windowManager.show();
       openUri(context, url);
     });

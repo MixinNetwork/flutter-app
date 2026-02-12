@@ -186,10 +186,10 @@ class InteractiveDecoratedBox extends StatelessWidget {
     behavior: behavior,
     builder:
         (
-          BuildContext context,
-          InteractiveStatus status,
-          InteractiveStatus lastStatus,
-          Widget? child,
+          context,
+          status,
+          lastStatus,
+          child,
         ) => TweenAnimationBuilder<Decoration>(
           tween: DecorationTween(
             end:
@@ -210,7 +210,7 @@ class InteractiveDecoratedBox extends StatelessWidget {
                   : outDuration) ??
               Duration.zero,
           curve: Curves.decelerate,
-          builder: (BuildContext context, Decoration value, Widget? child) =>
+          builder: (context, value, child) =>
               DecoratedBox(decoration: value, child: child),
           child: child,
         ),

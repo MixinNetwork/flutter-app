@@ -248,7 +248,7 @@ class _DeleteAccountPinDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 29),
                 PinInputLayout(
-                  doVerify: (String pin) async {
+                  doVerify: (pin) async {
                     await context.accountServer.client.accountApi.deactivate(
                       DeactivateRequest(encryptPin(pin)!, verificationId),
                     );

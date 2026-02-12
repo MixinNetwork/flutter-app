@@ -266,7 +266,7 @@ class MessageItemWidget extends HookConsumerWidget {
           () => Rx.combineLatest2(
             blinkCubit.stream.startWith(blinkCubit.state),
             showedMenuCubit.stream.startWith(showedMenuCubit.state),
-            (BlinkState blinkState, bool showedMenu) {
+            (blinkState, showedMenu) {
               if (showedMenu) return context.theme.listSelected;
               if (blinkState.messageId == message.messageId && blink) {
                 return blinkState.color;
@@ -650,7 +650,7 @@ class MessageItemWidget extends HookConsumerWidget {
                       ],
                     );
                   },
-                  builder: (BuildContext context) {
+                  builder: (context) {
                     if (message.type.isIllegalMessageCategory ||
                         message.status == MessageStatus.unknown) {
                       return const UnknownMessage();
@@ -738,7 +738,7 @@ class MessageItemWidget extends HookConsumerWidget {
 
     if (message.mentionRead == false) {
       child = VisibilityDetector(
-        onVisibilityChanged: (VisibilityInfo info) {
+        onVisibilityChanged: (info) {
           if (info.visibleFraction < 1) return;
           context.accountServer.markMentionRead(
             message.messageId,

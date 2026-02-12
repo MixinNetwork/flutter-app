@@ -29,7 +29,7 @@ class MuteDialog extends HookConsumerWidget {
                       title: Text(e.$1),
                       groupValue: result.value,
                       value: e.$2,
-                      onChanged: (int? value) => result.value = value,
+                      onChanged: (value) => result.value = value,
                     ),
                   )
                   .toList(),

@@ -279,7 +279,7 @@ extension _Finder on RenderObject {
     if (this is T) return this as T?;
     if (this is! RenderObjectWithChildMixin<RenderBox>) return null;
     T? result;
-    visitChildren((RenderObject child) {
+    visitChildren((child) {
       if (result != null) return;
 
       if (child is T) {

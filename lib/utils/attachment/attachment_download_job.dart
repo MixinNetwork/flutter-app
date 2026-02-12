@@ -102,7 +102,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
       options: Options(
         headers: {HttpHeaders.contentTypeHeader: 'application/octet-stream'},
       ),
-      transformStream: (Stream<Uint8List> stream, int total) {
+      transformStream: (stream, total) {
         var _stream = stream.cast<List<int>>();
         if (options.keys != null && options.digest != null) {
           _stream = _stream.decrypt(options.keys!, options.digest!, total);

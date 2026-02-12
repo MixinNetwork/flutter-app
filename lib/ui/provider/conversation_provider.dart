@@ -217,7 +217,7 @@ class ConversationStateNotifier
                   prepend: false,
                 ),
           )
-          .listen((Participant? event) {
+          .listen((event) {
             state = state?.copyWith(participant: event);
           }),
     );

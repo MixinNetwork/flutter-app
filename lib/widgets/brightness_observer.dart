@@ -34,7 +34,7 @@ class BrightnessObserver extends HookConsumerWidget {
 
     final brightnessRefreshKey = useState(Object());
 
-    final refresh = useCallback((Brightness currentBrightness) {
+    final refresh = useCallback<void Function(Brightness)>((currentBrightness) {
       if (currentBrightness == brightnessRef.value) return;
 
       brightnessRef.value = currentBrightness;
@@ -75,16 +75,15 @@ class BrightnessObserver extends HookConsumerWidget {
           Brightness.dark: 1.0,
         }[currentBrightness],
       ),
-      builder: (BuildContext context, double value, Widget? child) =>
-          BrightnessData(
-            value: value,
-            brightnessThemeData: BrightnessThemeData.lerp(
-              lightThemeData,
-              darkThemeData,
-              value,
-            ),
-            child: child!,
-          ),
+      builder: (context, value, child) => BrightnessData(
+        value: value,
+        brightnessThemeData: BrightnessThemeData.lerp(
+          lightThemeData,
+          darkThemeData,
+          value,
+        ),
+        child: child!,
+      ),
       child: child,
     );
   }

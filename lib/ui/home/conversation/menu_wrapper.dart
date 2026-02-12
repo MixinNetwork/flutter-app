@@ -43,7 +43,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
 
     return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-      menuProvider: (MenuRequest request) async {
+      menuProvider: (request) async {
         final circleId = ref.read(
           slideCategoryStateProvider.select((value) {
             if (value.type != SlideCategoryType.circle) return null;

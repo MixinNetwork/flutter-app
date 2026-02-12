@@ -111,7 +111,7 @@ class PostPage extends HookConsumerWidget {
     }
 
     return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
+      onNotification: (notification) {
         if (notification is! ScrollUpdateNotification) return false;
         if (notification.scrollDelta == null) return false;
         if (notification.scrollDelta! < 0) return false;
@@ -147,8 +147,8 @@ class PostPage extends HookConsumerWidget {
                   ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate((
-                      BuildContext context,
-                      int index,
+                      context,
+                      index,
                     ) {
                       final message = e.value[index];
                       return _Item(message: message);

@@ -61,7 +61,7 @@ class _ImageEditorDialog extends HookConsumerWidget {
       return const SizedBox();
     }
     return BlocProvider<_ImageEditorBloc>(
-      create: (BuildContext context) =>
+      create: (context) =>
           _ImageEditorBloc(path: path, image: uiImage, snapshot: snapshot),
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -1130,7 +1130,7 @@ class _DrawColorSelector extends HookConsumerWidget {
             if (!isCustomColor.value)
               for (final color in _kPresetColors) _NormalColorTile(color: color)
             else
-              _CustomColorBar(onColorSelected: (Color color) {}),
+              _CustomColorBar(onColorSelected: (color) {}),
             const SizedBox(width: 2),
           ],
         ),

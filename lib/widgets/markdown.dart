@@ -118,7 +118,7 @@ MarkdownConfig _createMarkdownConfig({
       },
     ),
     ListConfig(
-      marker: (bool isOrdered, int depth, int index) {
+      marker: (isOrdered, depth, index) {
         final style = DefaultTextStyle.of(context).style;
         final height = (style.fontSize ?? 16) * (style.height ?? 1.25);
         return getDefaultMarker(

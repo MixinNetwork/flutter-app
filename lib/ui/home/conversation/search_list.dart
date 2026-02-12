@@ -232,7 +232,7 @@ class SearchList extends HookConsumerWidget {
         if (users.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (context, index) {
                 final user = users[index];
                 return SearchItemWidget(
                   avatar: AvatarWidget(
@@ -282,7 +282,7 @@ class SearchList extends HookConsumerWidget {
         if (conversations.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (context, index) {
                 final conversation = conversations[index];
                 return HookConsumer(
                   builder: (context, ref, _) {
@@ -412,7 +412,7 @@ class SearchList extends HookConsumerWidget {
         if (messages.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (context, index) {
                 final message = messages[index];
                 return SearchMessageItem(
                   message: message,

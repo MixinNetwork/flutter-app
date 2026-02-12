@@ -131,7 +131,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: showAvatar,
-                    onChanged: (bool value) =>
+                    onChanged: (value) =>
                         context.settingChangeNotifier.messageShowAvatar = value,
                   ),
                 ),
@@ -143,7 +143,7 @@ class _MessageAvatarSetting extends HookConsumerWidget {
                   child: CupertinoSwitch(
                     activeTrackColor: context.theme.accent,
                     value: showIdentityNumber,
-                    onChanged: (bool value) =>
+                    onChanged: (value) =>
                         context
                                 .settingChangeNotifier
                                 .messageShowIdentityNumber =
