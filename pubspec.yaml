@@ -54,7 +54,7 @@ dependencies:
   rhttp: ^0.15.1
   flutter_rust_bridge: ^2.6.0
   drift: ^2.31.0
-  sqlite3_flutter_libs: ^0.5.41
+  sqlite3_flutter_libs: ^0.6.0+eol
   ecache: ^2.2.0
   emojis: ^0.9.9
   equatable: ^2.0.8
