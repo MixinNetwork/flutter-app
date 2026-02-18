@@ -78,7 +78,7 @@ class EditProfilePage extends HookConsumerWidget {
               },
             ),
             const SizedBox(height: 10),
-            Text(
+            SelectableText(
               'Mixin ID: $identityNumber',
               style: TextStyle(
                 fontSize: 14,
