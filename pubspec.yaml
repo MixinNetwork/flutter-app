@@ -21,7 +21,7 @@ environment:
 dependencies:
   android_id: ^0.5.1
   ansicolor: ^2.0.3
-  archive: ^4.0.7
+  archive: ^4.0.9
   async: ^2.13.0
   audio_session: ^0.2.2
   auto_size_text: ^3.0.0
