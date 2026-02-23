@@ -33,7 +33,7 @@ class InscriptionContent extends HookWidget {
     return AspectRatio(
       aspectRatio: 1,
       child: switch (inscription) {
-        Inscription(contentType: final type, contentUrl: final contentUrl)
+        Inscription(contentType: final type, :final contentUrl)
             when type.startsWith('image') =>
           MixinImage.network(
             contentUrl,
@@ -42,7 +42,7 @@ class InscriptionContent extends HookWidget {
           ),
         Inscription(
           contentType: final type,
-          contentUrl: final contentUrl,
+          :final contentUrl,
           iconUrl: final iconUrl?,
         )
             when type.startsWith('text') =>
