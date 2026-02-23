@@ -21,7 +21,7 @@ environment:
 dependencies:
   android_id: ^0.5.1
   ansicolor: ^2.0.3
-  archive: ^4.0.7
+  archive: ^4.0.9
   async: ^2.13.0
   audio_session: ^0.2.2
   auto_size_text: ^3.0.0
@@ -54,7 +54,7 @@ dependencies:
   rhttp: ^0.15.1
   flutter_rust_bridge: ^2.6.0
   drift: ^2.31.0
-  sqlite3_flutter_libs: ^0.6.0+eol
+  sqlite3_flutter_libs: ^0.5.41
   ecache: ^2.2.0
   emojis: ^0.9.9
   equatable: ^2.0.8
