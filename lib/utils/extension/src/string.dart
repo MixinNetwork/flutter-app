@@ -1,5 +1,3 @@
-// ignore_for_file: experimental_member_use
-
 part of '../extension.dart';
 
 extension StringExtension on String {
