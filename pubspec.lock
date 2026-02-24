@@ -498,10 +498,10 @@ packages:
     dependency: "direct main"
     description:
       name: envied
-      sha256: "4cfe31953c13977d1118b4f14cc5dfb683d8bb4c35d5b0c64b29d5b2e30712e8"
+      sha256: "2ca9842c7f513ab527e4f35a58331d6f9a7f90f270b5ba501d73ff2d9fa449ff"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.2"
+    version: "1.3.3"
   envied_generator:
     dependency: "direct dev"
     description:
@@ -2334,4 +2334,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.10.0 <4.0.0"
-  flutter: ">=3.38.0 <4.0.0"
+  flutter: ">=3.38.0"
