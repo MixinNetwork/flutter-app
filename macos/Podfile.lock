@@ -216,7 +216,7 @@ SPEC CHECKSUMS:
   super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
   video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534
-  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+  video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
   window_manager: b729e31d38fb04905235df9ea896128991cad99e
   window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9
