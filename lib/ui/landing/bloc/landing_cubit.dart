@@ -92,7 +92,7 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
 
       _periodicSubscription =
           Stream.periodic(
-                const Duration(milliseconds: 1500),
+                const Duration(seconds: 1),
                 (i) => i,
               )
               .asyncBufferMap(

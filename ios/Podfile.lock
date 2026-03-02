@@ -76,6 +76,31 @@ PODS:
   - SDWebImage (5.19.1):
     - SDWebImage/Core (= 5.19.1)
   - SDWebImage/Core (5.19.1)
+  - sqlite3 (3.51.1):
+    - sqlite3/common (= 3.51.1)
+  - sqlite3/common (3.51.1)
+  - sqlite3/dbstatvtab (3.51.1):
+    - sqlite3/common
+  - sqlite3/fts5 (3.51.1):
+    - sqlite3/common
+  - sqlite3/math (3.51.1):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.51.1):
+    - sqlite3/common
+  - sqlite3/rtree (3.51.1):
+    - sqlite3/common
+  - sqlite3/session (3.51.1):
+    - sqlite3/common
+  - sqlite3_flutter_libs (0.0.1):
+    - Flutter
+    - FlutterMacOS
+    - sqlite3 (~> 3.51.1)
+    - sqlite3/dbstatvtab
+    - sqlite3/fts5
+    - sqlite3/math
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
+    - sqlite3/session
   - super_native_extensions (0.0.1):
     - Flutter
   - SwiftyGif (5.4.5)
@@ -111,6 +136,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - protocol_handler_ios (from `.symlinks/plugins/protocol_handler_ios/ios`)
   - rhttp (from `.symlinks/plugins/rhttp/ios`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_compress (from `.symlinks/plugins/video_compress/ios`)
@@ -122,6 +148,7 @@ SPEC REPOS:
     - DKImagePickerController
     - DKPhotoGallery
     - SDWebImage
+    - sqlite3
     - SwiftyGif
 
 EXTERNAL SOURCES:
@@ -165,6 +192,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/protocol_handler_ios/ios"
   rhttp:
     :path: ".symlinks/plugins/rhttp/ios"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   super_native_extensions:
     :path: ".symlinks/plugins/super_native_extensions/ios"
   url_launcher_ios:
@@ -200,6 +229,8 @@ SPEC CHECKSUMS:
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5
   rhttp: 359daed992674fc912552df3106bfbc746bcc929
   SDWebImage: 40b0b4053e36c660a764958bff99eed16610acbb
+  sqlite3: 8d708bc63e9f4ce48f0ad9d6269e478c5ced1d9b
+  sqlite3_flutter_libs: d13b8b3003f18f596e542bcb9482d105577eff41
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
