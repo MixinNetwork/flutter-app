@@ -48,7 +48,7 @@ dependencies:
   desktop_keep_screen_on: ^0.0.3
   desktop_webview_window: ^0.2.3
   device_info_plus: ^11.3.0
-  dio: ^5.9.1
+  dio: ^5.9.2
   dio_smart_retry: ^7.0.1
   dio_compatibility_layer: ^0.1.0
   rhttp: ^0.15.1
@@ -174,7 +174,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.31.0
+  drift_dev: ^2.32.0
   flutter_test:
     sdk: flutter
   intl_utils: ^2.8.14
