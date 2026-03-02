@@ -32,6 +32,7 @@ class DatabaseProfiler extends Database {
     AllowedArgumentCount argumentCount = const AllowedArgumentCount.any(),
     bool deterministic = false,
     bool directOnly = true,
+    bool subtype = false,
   }) {
     database.createAggregateFunction(
       functionName: functionName,
@@ -39,6 +40,7 @@ class DatabaseProfiler extends Database {
       argumentCount: argumentCount,
       deterministic: deterministic,
       directOnly: directOnly,
+      subtype: subtype,
     );
   }
 
@@ -57,6 +59,7 @@ class DatabaseProfiler extends Database {
     AllowedArgumentCount argumentCount = const AllowedArgumentCount.any(),
     bool deterministic = false,
     bool directOnly = true,
+    bool subtype = false,
   }) {
     database.createFunction(
       functionName: functionName,
@@ -64,11 +67,15 @@ class DatabaseProfiler extends Database {
       argumentCount: argumentCount,
       deterministic: deterministic,
       directOnly: directOnly,
+      subtype: subtype,
     );
   }
 
   @override
-  void dispose() => database.dispose();
+  void dispose() => database.close();
+
+  @override
+  void close() => database.close();
 
   @override
   void execute(String sql, [List<Object?> parameters = const []]) =>
@@ -113,6 +120,9 @@ class DatabaseProfiler extends Database {
 
   @override
   Stream<SqliteUpdate> get updates => database.updates;
+
+  @override
+  Stream<SqliteUpdate> get updatesSync => database.updatesSync;
 
   T logWrapper<T>(T Function() run, String sql, List<Object?>? parameters) {
     Stopwatch? stopwatch;
@@ -170,6 +180,9 @@ parameter: $parameters
   int get updatedRows => database.updatedRows;
 
   @override
+  Pointer<void> leak() => database.leak();
+
+  @override
   bool get autocommit => database.autocommit;
 
   @override
@@ -178,6 +191,11 @@ parameter: $parameters
   @override
   set commitFilter(VoidPredicate? commitFilter) {
     database.commitFilter = commitFilter;
+  }
+
+  @override
+  set busyHandler(bool Function(int count)? handler) {
+    database.busyHandler = handler;
   }
 
   @override
@@ -195,7 +213,10 @@ class _PreparedStatementWrapper implements PreparedStatement {
   logWrapper;
 
   @override
-  void dispose() => stmt.dispose();
+  void dispose() => stmt.close();
+
+  @override
+  void close() => stmt.close();
 
   @override
   void execute([List<Object?> parameters = const <Object>[]]) =>
