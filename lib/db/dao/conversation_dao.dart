@@ -56,7 +56,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       (select(db.conversations)
         ..where((tbl) => tbl.conversationId.equals(conversationId)));
 
-  OrderBy _baseConversationItemOrder(Conversations conversation) => OrderBy([
+  List<OrderingTerm> _baseConversationOrderTerms(
+    Conversations conversation,
+  ) => [
     OrderingTerm.desc(conversation.pinTime),
     OrderingTerm.desc(
       conversation.status.equalsValue(ConversationStatus.quit).not() &
@@ -65,7 +67,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     ),
     OrderingTerm.desc(conversation.lastMessageCreatedAt),
     OrderingTerm.desc(conversation.createdAt),
-  ]);
+  ];
+
+  OrderBy _baseConversationItemOrder(Conversations conversation) =>
+      OrderBy(_baseConversationOrderTerms(conversation));
 
   Expression<bool> _conversationPredicateByCategory(
     SlideCategoryType category, [
@@ -111,6 +116,73 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, owner, circle) =>
             _conversationPredicateByCategory(category, conversation, owner),
       ).getSingle();
+
+  Future<List<String>> conversationIdsByCategory(
+    SlideCategoryType category, {
+    bool unseenOnly = false,
+    int limit = 1000,
+  }) async {
+    final conversations = db.conversations;
+    final owners = db.users;
+    final rows =
+        await (selectOnly(conversations, distinct: true)
+              ..addColumns([conversations.conversationId])
+              ..join([
+                innerJoin(
+                  owners,
+                  conversations.ownerId.equalsExp(owners.userId),
+                  useColumns: false,
+                ),
+              ])
+              ..where(
+                _conversationPredicateByCategory(
+                      category,
+                      conversations,
+                      owners,
+                    ) &
+                    (unseenOnly
+                        ? conversations.unseenMessageCount.isBiggerThanValue(0)
+                        : ignoreWhere),
+              )
+              ..orderBy(_baseConversationOrderTerms(conversations))
+              ..limit(limit))
+            .map((row) => row.read(conversations.conversationId))
+            .get();
+    return rows.nonNulls.toList();
+  }
+
+  Future<List<String>> conversationIdsByCircleId(
+    String circleId, {
+    bool unseenOnly = false,
+    int limit = 1000,
+  }) async {
+    final conversations = db.conversations;
+    final circles = db.circleConversations;
+
+    final rows =
+        await (selectOnly(conversations, distinct: true)
+              ..addColumns([conversations.conversationId])
+              ..join([
+                innerJoin(
+                  circles,
+                  circles.conversationId.equalsExp(
+                    conversations.conversationId,
+                  ),
+                  useColumns: false,
+                ),
+              ])
+              ..where(
+                circles.circleId.equals(circleId) &
+                    (unseenOnly
+                        ? conversations.unseenMessageCount.isBiggerThanValue(0)
+                        : ignoreWhere),
+              )
+              ..orderBy(_baseConversationOrderTerms(conversations))
+              ..limit(limit))
+            .map((row) => row.read(conversations.conversationId))
+            .get();
+    return rows.nonNulls.toList();
+  }
 
   Selectable<ConversationItem> conversationItemsByCategory(
     SlideCategoryType category,

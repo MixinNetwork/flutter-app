@@ -10,7 +10,6 @@ import '../widgets/message/item/action_card/action_card_data.dart';
 import 'converter/millis_date_converter.dart';
 import 'mixin_database.dart' show Message;
 import 'util/open_database.dart';
-import 'util/util.dart';
 
 part 'fts_database.g.dart';
 
@@ -128,29 +127,65 @@ class FtsDatabase extends _$FtsDatabase {
   }) {
     final keywordFts5 = query.trim().escapeFts5();
 
-    Expression<bool> where(MessagesMetas m) {
-      Expression<bool> where = ignoreWhere;
-      if (conversationIds.isNotEmpty) {
-        where = where & m.conversationId.isIn(conversationIds);
-      }
-      if (userId != null) {
-        where = where & m.userId.equals(userId);
-      }
-      if (categories != null) {
-        where = where & m.category.isIn(categories);
-      }
-      return where;
+    final variables = <Variable<Object>>[Variable<String>(keywordFts5)];
+    final predicates = <String>[];
+
+    String inClause<T extends Object>(List<T> values) =>
+        values.map((_) => '?').join(',');
+
+    if (conversationIds.isNotEmpty) {
+      predicates.add('conversation_id IN (${inClause(conversationIds)})');
+      variables.addAll(conversationIds.map(Variable<String>.new));
+    }
+    if (userId != null) {
+      predicates.add('user_id = ?');
+      variables.add(Variable<String>(userId));
+    }
+    if (categories != null && categories.isNotEmpty) {
+      predicates.add('category IN (${inClause(categories)})');
+      variables.addAll(categories.map(Variable<String>.new));
     }
 
+    final where = predicates.isEmpty ? '' : ' AND ${predicates.join(' AND ')}';
+
     if (anchorMessageId == null) {
-      return _fuzzySearchAllMessage(keywordFts5, where, limit).get();
-    } else {
-      return _fuzzySearchAllMessageWithAnchor(
-        keywordFts5,
-        anchorMessageId,
-        where,
-        limit,
-      ).get();
+      variables.add(Variable<int>(limit));
+      return customSelect(
+        '''
+SELECT message_id
+FROM messages_metas
+WHERE doc_id IN (SELECT rowid FROM messages_fts WHERE messages_fts MATCH ?)$where
+ORDER BY created_at DESC, rowid DESC
+LIMIT ?
+''',
+        variables: variables,
+        readsFrom: {messagesMetas, messagesFts},
+      ).map((row) => row.read<String>('message_id')).get();
     }
+
+    variables.addAll([
+      Variable<String>(anchorMessageId),
+      Variable<String>(anchorMessageId),
+      Variable<String>(anchorMessageId),
+      Variable<int>(limit),
+    ]);
+    return customSelect(
+      '''
+SELECT message_id
+FROM messages_metas
+WHERE doc_id IN (SELECT rowid FROM messages_fts WHERE messages_fts MATCH ?)$where
+  AND (
+    created_at < (SELECT created_at FROM messages_metas WHERE message_id = ?)
+    OR (
+      created_at = (SELECT created_at FROM messages_metas WHERE message_id = ?)
+      AND rowid < (SELECT rowid FROM messages_metas WHERE message_id = ?)
+    )
+  )
+ORDER BY created_at DESC, rowid DESC
+LIMIT ?
+''',
+      variables: variables,
+      readsFrom: {messagesMetas, messagesFts},
+    ).map((row) => row.read<String>('message_id')).get();
   }
 }

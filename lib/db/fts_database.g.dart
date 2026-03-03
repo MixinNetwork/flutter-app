@@ -630,60 +630,6 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
     );
   }
 
-  Selectable<String> _fuzzySearchAllMessage(
-    String query,
-    FuzzySearchAllMessage$where where,
-    int limit,
-  ) {
-    var $arrayStartIndex = 3;
-    final generatedwhere = $write(
-      where(alias(this.messagesMetas, 'm')),
-      startIndex: $arrayStartIndex,
-    );
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-      'SELECT m.message_id FROM messages_metas AS m,(SELECT "rowid" FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.doc_id = fts."rowid" AND ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC LIMIT ?2',
-      variables: [
-        Variable<String>(query),
-        Variable<int>(limit),
-        ...generatedwhere.introducedVariables,
-      ],
-      readsFrom: {messagesMetas, messagesFts, ...generatedwhere.watchedTables},
-    ).map((QueryRow row) => row.read<String>('message_id'));
-  }
-
-  Selectable<String> _fuzzySearchAllMessageWithAnchor(
-    String query,
-    String anchorMessageId,
-    FuzzySearchAllMessageWithAnchor$where where,
-    int limit,
-  ) {
-    var $arrayStartIndex = 4;
-    final generatedwhere = $write(
-      where(alias(this.messagesMetas, 'm')),
-      startIndex: $arrayStartIndex,
-    );
-    $arrayStartIndex += generatedwhere.amountOfVariables;
-    return customSelect(
-      'SELECT m.message_id FROM messages_metas AS m,(SELECT "rowid" FROM messages_fts WHERE messages_fts MATCH ?1) AS fts,(SELECT created_at, "rowid" FROM messages_metas WHERE message_id = ?2) AS anchor WHERE m.doc_id = fts."rowid" AND(m.created_at < anchor.created_at OR(m.created_at = anchor.created_at AND m."rowid" < anchor."rowid"))AND ${generatedwhere.sql} ORDER BY m.created_at DESC, m."rowid" DESC LIMIT ?3',
-      variables: [
-        Variable<String>(query),
-        Variable<String>(anchorMessageId),
-        Variable<int>(limit),
-        ...generatedwhere.introducedVariables,
-      ],
-      readsFrom: {messagesMetas, messagesFts, ...generatedwhere.watchedTables},
-    ).map((QueryRow row) => row.read<String>('message_id'));
-  }
-
-  Selectable<String> getAllMatchedMessageIds(String query) {
-    return customSelect(
-      'SELECT message_id FROM messages_metas WHERE doc_id IN (SELECT "rowid" FROM messages_fts WHERE messages_fts MATCH ?1) ORDER BY created_at DESC, "rowid" DESC',
-      variables: [Variable<String>(query)],
-      readsFrom: {messagesMetas, messagesFts},
-    ).map((QueryRow row) => row.read<String>('message_id'));
-  }
-
   Selectable<bool> checkMessageMetaExists(String messageId) {
     return customSelect(
       'SELECT EXISTS (SELECT 1 AS _c1 FROM messages_metas WHERE message_id = ?1) AS _c0',
@@ -1040,8 +986,3 @@ class $FtsDatabaseManager {
   $MessagesMetasTableManager get messagesMetas =>
       $MessagesMetasTableManager(_db, _db.messagesMetas);
 }
-
-typedef FuzzySearchAllMessage$where =
-    Expression<bool> Function(MessagesMetas m);
-typedef FuzzySearchAllMessageWithAnchor$where =
-    Expression<bool> Function(MessagesMetas m);

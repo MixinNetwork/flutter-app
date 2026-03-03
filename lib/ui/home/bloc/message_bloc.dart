@@ -198,9 +198,34 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.mentionCache,
     required this.accountServer,
   }) : super(MessageState()) {
-    on<_MessageEvent>((event, emit) async {
-      await _onEvent(event, emit);
-    }, transformer: sequential());
+    on<_MessageInitEvent>(
+      _onEvent,
+      transformer: restartable(),
+    );
+    on<_MessageLoadAfterEvent>(
+      _onEvent,
+      transformer: droppable(),
+    );
+    on<_MessageLoadBeforeEvent>(
+      _onEvent,
+      transformer: droppable(),
+    );
+    on<_MessageInsertOrReplaceEvent>(
+      _onEvent,
+      transformer: restartable(),
+    );
+    on<_MessageDeleteEvent>(
+      _onEvent,
+      transformer: sequential(),
+    );
+    on<_MessageScrollEvent>(
+      _onEvent,
+      transformer: restartable(),
+    );
+    on<_MessageJumpCurrentEvent>(
+      _onEvent,
+      transformer: droppable(),
+    );
 
     add(
       _MessageInitEvent(
