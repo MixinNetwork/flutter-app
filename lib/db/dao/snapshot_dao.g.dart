@@ -147,6 +147,100 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
       readsFrom: {snapshots},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
+
+  SnapshotDaoManager get managers => SnapshotDaoManager(this);
+}
+
+class SnapshotDaoManager {
+  final _$SnapshotDaoMixin _db;
+  SnapshotDaoManager(this._db);
+  $SnapshotsTableManager get snapshots =>
+      $SnapshotsTableManager(_db.attachedDatabase, _db.snapshots);
+  $UsersTableManager get users =>
+      $UsersTableManager(_db.attachedDatabase, _db.users);
+  $AssetsTableManager get assets =>
+      $AssetsTableManager(_db.attachedDatabase, _db.assets);
+  $ChainsTableManager get chains =>
+      $ChainsTableManager(_db.attachedDatabase, _db.chains);
+  $FiatsTableManager get fiats =>
+      $FiatsTableManager(_db.attachedDatabase, _db.fiats);
+  $AddressesTableManager get addresses =>
+      $AddressesTableManager(_db.attachedDatabase, _db.addresses);
+  $AppsTableManager get apps =>
+      $AppsTableManager(_db.attachedDatabase, _db.apps);
+  $CircleConversationsTableManager get circleConversations =>
+      $CircleConversationsTableManager(
+        _db.attachedDatabase,
+        _db.circleConversations,
+      );
+  $CirclesTableManager get circles =>
+      $CirclesTableManager(_db.attachedDatabase, _db.circles);
+  $ConversationsTableManager get conversations =>
+      $ConversationsTableManager(_db.attachedDatabase, _db.conversations);
+  $FloodMessagesTableManager get floodMessages =>
+      $FloodMessagesTableManager(_db.attachedDatabase, _db.floodMessages);
+  $HyperlinksTableManager get hyperlinks =>
+      $HyperlinksTableManager(_db.attachedDatabase, _db.hyperlinks);
+  $JobsTableManager get jobs =>
+      $JobsTableManager(_db.attachedDatabase, _db.jobs);
+  $MessageMentionsTableManager get messageMentions =>
+      $MessageMentionsTableManager(_db.attachedDatabase, _db.messageMentions);
+  $MessagesTableManager get messages =>
+      $MessagesTableManager(_db.attachedDatabase, _db.messages);
+  $MessagesHistoryTableManager get messagesHistory =>
+      $MessagesHistoryTableManager(_db.attachedDatabase, _db.messagesHistory);
+  $OffsetsTableManager get offsets =>
+      $OffsetsTableManager(_db.attachedDatabase, _db.offsets);
+  $ParticipantSessionTableManager get participantSession =>
+      $ParticipantSessionTableManager(
+        _db.attachedDatabase,
+        _db.participantSession,
+      );
+  $ParticipantsTableManager get participants =>
+      $ParticipantsTableManager(_db.attachedDatabase, _db.participants);
+  $ResendSessionMessagesTableManager get resendSessionMessages =>
+      $ResendSessionMessagesTableManager(
+        _db.attachedDatabase,
+        _db.resendSessionMessages,
+      );
+  $SentSessionSenderKeysTableManager get sentSessionSenderKeys =>
+      $SentSessionSenderKeysTableManager(
+        _db.attachedDatabase,
+        _db.sentSessionSenderKeys,
+      );
+  $StickerAlbumsTableManager get stickerAlbums =>
+      $StickerAlbumsTableManager(_db.attachedDatabase, _db.stickerAlbums);
+  $StickerRelationshipsTableManager get stickerRelationships =>
+      $StickerRelationshipsTableManager(
+        _db.attachedDatabase,
+        _db.stickerRelationships,
+      );
+  $StickersTableManager get stickers =>
+      $StickersTableManager(_db.attachedDatabase, _db.stickers);
+  $TranscriptMessagesTableManager get transcriptMessages =>
+      $TranscriptMessagesTableManager(
+        _db.attachedDatabase,
+        _db.transcriptMessages,
+      );
+  $PinMessagesTableManager get pinMessages =>
+      $PinMessagesTableManager(_db.attachedDatabase, _db.pinMessages);
+  $FavoriteAppsTableManager get favoriteApps =>
+      $FavoriteAppsTableManager(_db.attachedDatabase, _db.favoriteApps);
+  $ExpiredMessagesTableManager get expiredMessages =>
+      $ExpiredMessagesTableManager(_db.attachedDatabase, _db.expiredMessages);
+  $PropertiesTableManager get properties =>
+      $PropertiesTableManager(_db.attachedDatabase, _db.properties);
+  $SafeSnapshotsTableManager get safeSnapshots =>
+      $SafeSnapshotsTableManager(_db.attachedDatabase, _db.safeSnapshots);
+  $TokensTableManager get tokens =>
+      $TokensTableManager(_db.attachedDatabase, _db.tokens);
+  $InscriptionCollectionsTableManager get inscriptionCollections =>
+      $InscriptionCollectionsTableManager(
+        _db.attachedDatabase,
+        _db.inscriptionCollections,
+      );
+  $InscriptionItemsTableManager get inscriptionItems =>
+      $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
 }
 
 class SnapshotItem {

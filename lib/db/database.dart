@@ -164,21 +164,11 @@ class Database {
     bool unseenConversationOnly = false,
     String? anchorMessageId,
   }) async {
-    Future<List<String>> getConversationIds() async {
-      final List<String> conversations;
-      if (unseenConversationOnly) {
-        conversations = await conversationDao
-            .unseenConversationByCategory(category.type)
-            .map((item) => item.conversationId)
-            .get();
-      } else {
-        conversations = await conversationDao
-            .conversationItemsByCategory(category.type, 1000, 0)
-            .get()
-            .then((value) => value.map((e) => e.conversationId).toList());
-      }
-      return conversations;
-    }
+    Future<List<String>> getConversationIds() =>
+        conversationDao.conversationIdsByCategory(
+          category.type,
+          unseenOnly: unseenConversationOnly,
+        );
 
     switch (category.type) {
       case SlideCategoryType.chats:
@@ -217,22 +207,14 @@ class Database {
           query: keyword,
           limit: limit,
           anchorMessageId: anchorMessageId,
-          conversationIds: await getConversationIds(),
+          conversationIds: conversationIds,
         );
       case SlideCategoryType.circle:
         final circleId = category.id!;
-        final List<String> conversationIds;
-        if (unseenConversationOnly) {
-          conversationIds = await conversationDao
-              .unseenConversationsByCircleId(circleId)
-              .map((item) => item.conversationId)
-              .get();
-        } else {
-          conversationIds = await conversationDao
-              .conversationsByCircleId(circleId, 1000, 0)
-              .map((item) => item.conversationId)
-              .get();
-        }
+        final conversationIds = await conversationDao.conversationIdsByCircleId(
+          circleId,
+          unseenOnly: unseenConversationOnly,
+        );
         if (conversationIds.isEmpty) {
           i(
             'fuzzySearchMessageByCategory $category $unseenConversationOnly no conversationIds',

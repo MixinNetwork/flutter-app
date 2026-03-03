@@ -61,6 +61,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   }
 
   StreamSubscription? streamSubscription;
+  SlideCategoryState? _activeState;
 
   ItemPositionsListener? itemPositionsListener(
     SlideCategoryState slideCategoryState,
@@ -123,14 +124,23 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.setting:
         return;
     }
-    final bloc = _map[state];
-    emit(bloc!.state);
+    final previous = _activeState;
+    if (previous != null && previous != state) {
+      _map[previous]?.deactivate();
+    }
+
+    final bloc = _map[state]!..activate();
+    _activeState = state;
+
+    emit(bloc.state);
     streamSubscription?.cancel();
     streamSubscription = bloc.stream.listen(emit);
   }
 
   @override
   Future<void> close() async {
+    await streamSubscription?.cancel();
+    _map[_activeState]?.deactivate();
     await Future.wait(_map.values.map((e) => e.close()));
     await super.close();
   }
@@ -172,21 +182,41 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   ) : _queryCount = queryCount,
       _queryRange = queryRange,
       _queryHasData = queryHasData,
+      _updateEvent = updateEvent,
       super(
         initState: const PagingState<ConversationItem>(),
         itemPositionsListener: ItemPositionsListener.create(),
         limit: limit,
-      ) {
-    addSubscription(updateEvent.listen((event) => add(PagingUpdateEvent())));
-  }
+      );
 
   final MentionCache mentionCache;
   final Future<int> Function() _queryCount;
   final Future<List<ConversationItem>> Function(int limit, int offset)
   _queryRange;
   final Future<bool> Function() _queryHasData;
+  final Stream<void> _updateEvent;
+
+  StreamSubscription<void>? _updateSubscription;
 
   final ItemScrollController itemScrollController = ItemScrollController();
+
+  void activate() {
+    _updateSubscription ??= _updateEvent.listen(
+      (_) => add(PagingUpdateEvent()),
+    );
+    add(PagingUpdateEvent());
+  }
+
+  void deactivate() {
+    _updateSubscription?.cancel();
+    _updateSubscription = null;
+  }
+
+  @override
+  Future<void> close() async {
+    deactivate();
+    await super.close();
+  }
 
   @override
   Future<int> queryCount() => _queryCount();
