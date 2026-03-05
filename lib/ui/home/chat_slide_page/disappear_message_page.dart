@@ -183,9 +183,8 @@ Future<void> _updateConversationExpireDuration(
       conversationId,
       DisappearRequest(duration: duration.inSeconds),
     );
-    await context.database.conversationDao.updateConversation(
+    await context.accountServer.updateConversationFromResponse(
       response.data,
-      context.accountServer.userId,
     );
   } catch (error, stackTrace) {
     e('update conversation expire duration failed $error $stackTrace');

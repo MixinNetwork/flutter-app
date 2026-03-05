@@ -187,7 +187,7 @@ class _SearchUserDialog extends HookConsumerWidget {
         final mixinResponse = await context.accountServer.client.userApi.search(
           textEditingController.text,
         );
-        await context.database.userDao.insertSdkUser(mixinResponse.data);
+        await context.accountServer.upsertSdkUser(mixinResponse.data);
         resultUserId.value = mixinResponse.data.userId;
       } catch (e) {
         showToastFailed(ToastError(context.l10n.userNotFound));

@@ -442,9 +442,7 @@ class _Sticker extends HookConsumerWidget {
         final s = await context.accountServer.client.accountApi.getStickerById(
           stickerId,
         );
-        await context.database.stickerDao.insert(
-          s.data.asStickersCompanion,
-        );
+        await context.accountServer.upsertSticker(s.data.asStickersCompanion);
 
         return context.database.stickerDao.sticker(stickerId).getSingle();
       },

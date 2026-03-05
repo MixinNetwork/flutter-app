@@ -7,10 +7,16 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/constants.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../job_queue.dart';
 
 class UpdateTokenJob extends JobQueue<Job, List<Job>> {
-  UpdateTokenJob({required super.database, required this.client});
+  UpdateTokenJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.client,
+  });
 
   final Client client;
 
@@ -37,7 +43,7 @@ class UpdateTokenJob extends JobQueue<Job, List<Job>> {
 
     if (exists) return;
 
-    await database.jobDao.insert(job);
+    await requestDbWrite(DbWriteMethod.insertJob, payload: job);
   }
 
   final _retryDelay = <String, int>{};
@@ -53,11 +59,14 @@ class UpdateTokenJob extends JobQueue<Job, List<Job>> {
 
           final chain = (await client.assetApi.getChain(token.chainId)).data;
 
-          await Future.wait([
-            database.tokenDao.insertSdkToken(token),
-            database.chainDao.insertSdkChain(chain),
-            database.jobDao.deleteJobById(job.jobId),
-          ]);
+          await requestDbWrite(
+            DbWriteMethod.upsertTokenAndChain,
+            payload: DbWriteUpsertTokenAndChainPayload(
+              token: token,
+              chain: chain,
+            ),
+          );
+          await requestDbWrite(DbWriteMethod.deleteJobById, payload: job.jobId);
           return token.assetId;
         } catch (e, s) {
           w('Update token job error: $e, stack: $s');

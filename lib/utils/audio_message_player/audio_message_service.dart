@@ -82,7 +82,7 @@ class AudioMessagePlayService {
 
     if (message.mediaStatus == MediaStatus.done) {
       unawaited(
-        _accountServer.database.messageDao.updateMediaStatus(
+        _accountServer.updateMessageMediaStatus(
           message.messageId,
           MediaStatus.read,
         ),

@@ -14,9 +14,7 @@ import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/transcript_minimal.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
-import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
-import '../db/dao/pin_message_dao.dart';
 import '../db/dao/transcript_message_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
@@ -24,6 +22,8 @@ import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/image.dart';
@@ -39,19 +39,24 @@ const jpegMimeType = 'image/jpeg';
 const gifMimeType = 'image/gif';
 
 class SendMessageHelper {
-  SendMessageHelper(this._database, this._attachmentUtil, this._addSendingJob);
+  SendMessageHelper(
+    this._database,
+    this._attachmentUtil,
+    this._addSendingJob,
+    this._requestDbWrite,
+  );
 
   final Database _database;
   late final MessageDao _messageDao = _database.messageDao;
-  late final MessageMentionDao _messageMentionDao = _database.messageMentionDao;
   late final ParticipantDao _participantDao = _database.participantDao;
   late final JobDao _jobDao = _database.jobDao;
-  late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
 
   late final TranscriptMessageDao _transcriptMessageDao =
       _database.transcriptMessageDao;
   final AttachmentUtil _attachmentUtil;
   final Function(Job) _addSendingJob;
+  final Future<void> Function(DbWriteMethod method, {Object? payload})
+  _requestDbWrite;
 
   Future<void> _insertSendMessageToDb(
     Message message, {
@@ -64,14 +69,41 @@ class SendMessageHelper {
         .getSingleOrNull();
     assert(conversation != null, 'no conversation');
     final expireIn = conversation?.expireIn ?? 0;
-    await _messageDao.insert(
-      message,
-      message.userId,
-      expireIn: expireIn,
-      cleanDraft: cleanDraft,
+    await _requestDbWrite(
+      DbWriteMethod.insertSendMessage,
+      payload: DbWriteInsertSendMessagePayload(
+        message: message,
+        currentUserId: message.userId,
+        expireIn: expireIn,
+        cleanDraft: cleanDraft,
+        ftsContent: ftsContent,
+      ),
     );
-    unawaited(_database.ftsDatabase.insertFts(message, ftsContent));
   }
+
+  Future<void> _updateAttachmentMessageContentAndStatus(
+    String messageId,
+    String content,
+    String? key,
+    String? digest,
+  ) => _requestDbWrite(
+    DbWriteMethod.updateAttachmentMessageContentAndStatus,
+    payload: DbWriteUpdateAttachmentMessageContentAndStatusPayload(
+      messageId: messageId,
+      content: content,
+      key: key,
+      digest: digest,
+    ),
+  );
+
+  Future<void> _updateMessageMediaStatus(String messageId, MediaStatus status) =>
+      _requestDbWrite(
+        DbWriteMethod.updateMessageMediaStatus,
+        payload: DbWriteUpdateMessageMediaStatusPayload(
+          messageId: messageId,
+          status: status,
+        ),
+      );
 
   Future<void> sendTextMessage(
     String conversationId,
@@ -244,7 +276,7 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       messageId,
       encoded,
       attachmentResult.keys,
@@ -329,7 +361,7 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       messageId,
       encoded,
       attachmentResult.keys,
@@ -439,7 +471,7 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       messageId,
       encoded,
       attachmentResult.keys,
@@ -558,7 +590,7 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       messageId,
       encoded,
       attachmentResult.keys,
@@ -705,9 +737,17 @@ class SendMessageHelper {
       messageIds.map((messageId) async {
         final message = await _messageDao.findMessageByMessageId(messageId);
 
-        await _messageDao.recallMessage(conversationId, messageId);
+        await _requestDbWrite(
+          DbWriteMethod.recallMessage,
+          payload: DbWriteRecallMessagePayload(
+            conversationId: conversationId,
+            messageId: messageId,
+          ),
+        );
 
-        unawaited(_database.ftsDatabase.deleteByMessageId(messageId));
+        unawaited(
+          _requestDbWrite(DbWriteMethod.deleteFtsByMessageId, payload: messageId),
+        );
 
         await Future.wait([
           (() async {
@@ -719,10 +759,13 @@ class SendMessageHelper {
               }
             }
           })(),
-          _messageMentionDao.deleteMessageMention(
-            MessageMention(
-              messageId: messageId,
-              conversationId: conversationId,
+          _requestDbWrite(
+            DbWriteMethod.deleteMessageMention,
+            payload: DbWriteDeleteMessageMentionPayload(
+              messageMention: MessageMention(
+                messageId: messageId,
+                conversationId: conversationId,
+              ),
             ),
           ),
           (() async => _addSendingJob(
@@ -735,10 +778,13 @@ class SendMessageHelper {
             );
 
             if (quoteMessage != null) {
-              await _messageDao.updateQuoteContentByQuoteId(
-                conversationId,
-                messageId,
-                quoteMessage.toJson(),
+              await _requestDbWrite(
+                DbWriteMethod.updateQuoteContentByQuoteId,
+                payload: DbWriteUpdateQuoteContentByQuoteIdPayload(
+                  conversationId: conversationId,
+                  quoteMessageId: messageId,
+                  content: quoteMessage.toJson(),
+                ),
               );
             }
           })(),
@@ -1017,7 +1063,12 @@ class SendMessageHelper {
     );
 
     await Future.wait([
-      _transcriptMessageDao.insertAll(transcriptMessages),
+      _requestDbWrite(
+        DbWriteMethod.insertTranscriptMessages,
+        payload: DbWriteInsertTranscriptMessagesPayload(
+          transcripts: transcriptMessages,
+        ),
+      ),
       _insertSendMessageToDb(
         message,
         ftsContent: await _transcriptMessageDao
@@ -1113,37 +1164,40 @@ class SendMessageHelper {
         );
         attachmentId = attachmentResult!.attachmentId;
 
-        await _transcriptMessageDao.updateTranscript(
-          transcriptId: transcriptMessage.transcriptId,
-          messageId: transcriptMessage.messageId,
-          attachmentId: attachmentId,
-          category: newCategory,
-          key: attachmentResult.keys,
-          digest: attachmentResult.digest,
-          mediaStatus: MediaStatus.done,
-          mediaCreatedAt:
-              DateTime.tryParse(attachmentResult.createdAt ?? '') ??
-              DateTime.now(),
+        await _requestDbWrite(
+          DbWriteMethod.updateTranscript,
+          payload: DbWriteUpdateTranscriptPayload(
+            transcriptId: transcriptMessage.transcriptId,
+            messageId: transcriptMessage.messageId,
+            attachmentId: attachmentId,
+            category: newCategory,
+            key: attachmentResult.keys,
+            digest: attachmentResult.digest,
+            mediaStatus: MediaStatus.done,
+            mediaCreatedAt:
+                DateTime.tryParse(attachmentResult.createdAt ?? '') ??
+                DateTime.now(),
+          ),
         );
       } else {
-        await _transcriptMessageDao.updateTranscript(
-          transcriptId: transcriptMessage.transcriptId,
-          messageId: transcriptMessage.messageId,
-          attachmentId: attachmentId,
-          category: transcriptMessage.category,
-          key: transcriptMessage.mediaKey,
-          digest: transcriptMessage.mediaDigest,
-          mediaStatus: MediaStatus.done,
-          mediaCreatedAt: transcriptMessage.mediaCreatedAt,
+        await _requestDbWrite(
+          DbWriteMethod.updateTranscript,
+          payload: DbWriteUpdateTranscriptPayload(
+            transcriptId: transcriptMessage.transcriptId,
+            messageId: transcriptMessage.messageId,
+            attachmentId: attachmentId,
+            category: transcriptMessage.category,
+            key: transcriptMessage.mediaKey,
+            digest: transcriptMessage.mediaDigest,
+            mediaStatus: MediaStatus.done,
+            mediaCreatedAt: transcriptMessage.mediaCreatedAt,
+          ),
         );
       }
     }
 
     try {
-      await _messageDao.updateMediaStatus(
-        message.messageId,
-        MediaStatus.pending,
-      );
+      await _updateMessageMediaStatus(message.messageId, MediaStatus.pending);
       final attachmentTranscripts = transcripts.where(
         (element) => element.category.isAttachment,
       );
@@ -1151,7 +1205,7 @@ class SendMessageHelper {
         await Future.wait(attachmentTranscripts.map(uploadAttachment));
       }
 
-      await _messageDao.updateMediaStatus(message.messageId, MediaStatus.done);
+      await _updateMessageMediaStatus(message.messageId, MediaStatus.done);
       _addSendingJob(
         await _jobDao.createSendingJob(
           message.messageId,
@@ -1160,10 +1214,7 @@ class SendMessageHelper {
       );
     } catch (error, stacktrace) {
       e('reUploadTranscriptAttachment error: $error, stacktrace: $stacktrace');
-      await _messageDao.updateMediaStatus(
-        message.messageId,
-        MediaStatus.canceled,
-      );
+      await _updateMessageMediaStatus(message.messageId, MediaStatus.canceled);
     }
   }
 
@@ -1209,7 +1260,7 @@ class SendMessageHelper {
       attachmentResult.createdAt,
     );
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       messageId,
       encoded,
       attachmentResult.keys,
@@ -1291,18 +1342,17 @@ class SendMessageHelper {
     );
     final encoded = await jsonEncodeWithIsolate(pinMessagePayload);
     if (pin) {
-      await Future.forEach<PinMessageMinimal>(pinMessageMinimals, (
-        pinMessageMinimal,
-      ) async {
-        await _pinMessageDao.insert(
+      final pinMessages = <PinMessage>[];
+      final systemMessages = <Message>[];
+      for (final pinMessageMinimal in pinMessageMinimals) {
+        pinMessages.add(
           PinMessage(
             messageId: pinMessageMinimal.messageId,
             conversationId: conversationId,
             createdAt: DateTime.now(),
           ),
         );
-
-        await _messageDao.insert(
+        systemMessages.add(
           Message(
             messageId: const Uuid().v4(),
             conversationId: conversationId,
@@ -1313,14 +1363,23 @@ class SendMessageHelper {
             category: MessageCategory.messagePin,
             quoteMessageId: pinMessageMinimal.messageId,
           ),
-          senderId,
-          cleanDraft: false,
         );
-      });
+      }
+      await _requestDbWrite(
+        DbWriteMethod.pinAndInsertPinMessages,
+        payload: DbWritePinAndInsertPinMessagesPayload(
+          pinMessages: pinMessages,
+          systemMessages: systemMessages,
+          currentUserId: senderId,
+        ),
+      );
       unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
     } else {
-      await _pinMessageDao.deleteByIds(
-        pinMessageMinimals.map((e) => e.messageId).toList(),
+      await _requestDbWrite(
+        DbWriteMethod.deletePinMessagesByIds,
+        payload: DbWriteDeletePinMessagesPayload(
+          messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
+        ),
       );
     }
 
@@ -1380,7 +1439,7 @@ class SendMessageHelper {
     }
     if (result == null) {
       e('failed to get send image bytes. $url');
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
+      await _updateMessageMediaStatus(messageId, MediaStatus.canceled);
       return;
     }
 
@@ -1399,11 +1458,14 @@ class SendMessageHelper {
     await attachment.writeAsBytes(data);
     final thumbImage = await attachment.encodeBlurHash();
     final mediaSize = await attachment.length();
-    await _messageDao.updateGiphyMessage(
-      messageId,
-      attachment.pathBasename,
-      mediaSize,
-      thumbImage,
+    await _requestDbWrite(
+      DbWriteMethod.updateGiphyMessage,
+      payload: DbWriteUpdateGiphyMessagePayload(
+        messageId: messageId,
+        mediaUrl: attachment.pathBasename,
+        mediaSize: mediaSize,
+        thumbImage: thumbImage,
+      ),
     );
 
     if (await _attachmentUtil.isNotPending(messageId)) return;
@@ -1431,7 +1493,7 @@ class SendMessageHelper {
       attachmentResult.createdAt,
     );
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       messageId,
       encoded,
       attachmentResult.keys,
@@ -1441,7 +1503,7 @@ class SendMessageHelper {
   }
 
   Future<void> reUploadGiphyGif(MessageItem message) async {
-    await _messageDao.updateMediaStatus(message.messageId, MediaStatus.pending);
+    await _updateMessageMediaStatus(message.messageId, MediaStatus.pending);
     final attachment = _attachmentUtil.getAttachmentFile(
       message.type,
       message.conversationId,
@@ -1467,10 +1529,7 @@ class SendMessageHelper {
         e(
           'reUploadGiphyGif: failed to get send image bytes. ${message.mediaUrl}',
         );
-        await _messageDao.updateMediaStatus(
-          message.messageId,
-          MediaStatus.canceled,
-        );
+        await _updateMessageMediaStatus(message.messageId, MediaStatus.canceled);
         return;
       }
       await attachment.writeAsBytes(sendImageBytes);
@@ -1478,11 +1537,14 @@ class SendMessageHelper {
       thumbImage = await attachment.encodeBlurHash();
       mediaSize = await attachment.length();
 
-      await _messageDao.updateGiphyMessage(
-        message.messageId,
-        attachment.pathBasename,
-        mediaSize,
-        thumbImage,
+      await _requestDbWrite(
+        DbWriteMethod.updateGiphyMessage,
+        payload: DbWriteUpdateGiphyMessagePayload(
+          messageId: message.messageId,
+          mediaUrl: attachment.pathBasename,
+          mediaSize: mediaSize,
+          thumbImage: thumbImage,
+        ),
       );
     }
     final attachmentResult = await _attachmentUtil.uploadAttachment(
@@ -1508,7 +1570,7 @@ class SendMessageHelper {
       attachmentResult.createdAt,
     );
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messageDao.updateAttachmentMessageContentAndStatus(
+    await _updateAttachmentMessageContentAndStatus(
       message.messageId,
       encoded,
       attachmentResult.keys,

@@ -224,7 +224,7 @@ class _CircleList extends HookConsumerWidget {
               newList.insert(_newIndex, oldItem);
 
               list.value = newList;
-              context.database.circleDao.updateOrders(list.value);
+              context.accountServer.updateCircleOrders(list.value);
             },
             itemCount: list.value.length,
             itemBuilder: (context, index) {

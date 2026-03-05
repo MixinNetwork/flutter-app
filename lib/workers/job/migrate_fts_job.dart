@@ -3,9 +3,10 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/constants.dart';
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
-import '../../db/extension/job.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../../utils/extension/extension.dart';
 import '../job_queue.dart';
 
@@ -15,7 +16,10 @@ import '../job_queue.dart';
 /// The fist job is created by [MixinDatabase.migration].
 ///
 class MigrateFtsJob extends JobQueue<Job, List<Job>> {
-  MigrateFtsJob({required super.database})
+  MigrateFtsJob({
+    required super.database,
+    required super.requestDbWrite,
+  })
     : messageDao = database.messageDao,
       ftsDatabase = database.ftsDatabase,
       transcriptMessageDao = database.transcriptMessageDao;
@@ -38,7 +42,10 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
     final first = jobs.first;
 
     final invalidJobs = jobs.skip(1).map((e) => e.jobId).toList();
-    await database.jobDao.deleteJobs(invalidJobs);
+    await requestDbWrite(
+      DbWriteMethod.deleteJobs,
+      payload: DbWriteDeleteJobsPayload(jobIds: invalidJobs),
+    );
 
     return [first];
   }
@@ -69,7 +76,10 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
           .where((e) => e.jobId != job.jobId)
           .map((e) => e.jobId)
           .toList();
-      await database.jobDao.deleteJobs(invalidJobs);
+      await requestDbWrite(
+        DbWriteMethod.deleteJobs,
+        payload: DbWriteDeleteJobsPayload(jobIds: invalidJobs),
+      );
     } else if (jobs.length == 1) {
       job = jobs.first;
     } else {
@@ -87,7 +97,7 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
       final messages = await messageDao.getMessages(lastMessageRowId, 1000);
       if (messages.isEmpty) {
         d('migrateFtsDatabase done');
-        await database.jobDao.deleteJobByAction(kMigrateFts);
+        await requestDbWrite(DbWriteMethod.deleteJobByAction, payload: kMigrateFts);
         break;
       }
       try {
@@ -120,37 +130,20 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
           transcriptMessageFtsContent[message.messageId] = content;
         }
 
-        // insert fts
-        final messageMeta = <int, Message>{};
-        for (final message in messagesToMigrate) {
-          final rowId = await ftsDatabase.insertFtsOnly(
-            message,
-            transcriptMessageFtsContent[message.messageId],
-          );
-          if (rowId != null) {
-            messageMeta[rowId] = message;
-          }
-        }
+        await requestDbWrite(
+          DbWriteMethod.migrateFtsInsertBatch,
+          payload: DbWriteMigrateFtsInsertBatchPayload(
+            messages: messagesToMigrate.toList(),
+            transcriptContentMap: transcriptMessageFtsContent,
+          ),
+        );
 
-        // insert metas
-        await ftsDatabase.batch((batch) {
-          batch.insertAll(ftsDatabase.messagesMetas, [
-            for (final MapEntry<int, Message> entry in messageMeta.entries)
-              MessagesMeta(
-                docId: entry.key,
-                messageId: entry.value.messageId,
-                conversationId: entry.value.conversationId,
-                category: entry.value.category,
-                userId: entry.value.userId,
-                createdAt: entry.value.createdAt,
-              ),
-          ]);
-        });
-
-        await database.jobDao.transaction(() async {
-          await database.jobDao.deleteJobByAction(kMigrateFts);
-          await database.jobDao.insert(createMigrationFtsJob(lastMessageRowId));
-        });
+        await requestDbWrite(
+          DbWriteMethod.replaceMigrateFtsJob,
+          payload: DbWriteReplaceMigrateFtsJobPayload(
+            messageRowId: lastMessageRowId,
+          ),
+        );
 
         i(
           'migrateFtsDatabase(${messages.length}) elapsed: ${stopwatch.elapsed} lastMessageRowId: $lastMessageRowId',

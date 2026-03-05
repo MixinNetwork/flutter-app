@@ -202,9 +202,7 @@ class SearchList extends HookConsumerWidget {
                       .client
                       .userApi
                       .search(keyword);
-                  await context.database.userDao.insertSdkUser(
-                    mixinResponse.data,
-                  );
+                  await context.accountServer.upsertSdkUser(mixinResponse.data);
                   userId = mixinResponse.data.userId;
                 } catch (error) {
                   showToastFailed(ToastError(context.l10n.userNotFound));

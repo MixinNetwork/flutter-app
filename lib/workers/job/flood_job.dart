@@ -1,10 +1,15 @@
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
 import '../job_queue.dart';
 
 class FloodJob extends JobQueue<FloodMessage, List<FloodMessage>> {
-  FloodJob({required super.database, required this.getProcessFloodJob});
+  FloodJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.getProcessFloodJob,
+  });
 
   Function(FloodMessage floodMessage)? Function() getProcessFloodJob;
 
@@ -14,7 +19,7 @@ class FloodJob extends JobQueue<FloodMessage, List<FloodMessage>> {
 
   @override
   Future<void> insertJob(FloodMessage job) =>
-      database.floodMessageDao.insert(job);
+      requestDbWrite(DbWriteMethod.insertFloodMessage, payload: job);
 
   @override
   bool get enable => getProcessFloodJob() != null;

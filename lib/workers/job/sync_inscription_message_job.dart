@@ -7,11 +7,17 @@ import '../../db/dao/inscription_collection_dao.dart';
 import '../../db/dao/inscription_item_dao.dart';
 import '../../db/mixin_database.dart';
 import '../../db/vo/inscription.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../job_queue.dart';
 
 class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
-  SyncInscriptionMessageJob({required super.database, required this.client});
+  SyncInscriptionMessageJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.client,
+  });
 
   final Client client;
 
@@ -36,7 +42,7 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
 
     if (exists) return;
 
-    await database.jobDao.insert(job);
+    await requestDbWrite(DbWriteMethod.insertJob, payload: job);
   }
 
   @override
@@ -56,7 +62,7 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
         continue;
       }
       await syncInscriptionMessageItem(messageId);
-      await database.jobDao.deleteJobById(job.jobId);
+      await requestDbWrite(DbWriteMethod.deleteJobById, payload: job.jobId);
     }
   }
 
@@ -111,17 +117,20 @@ class SyncInscriptionMessageJob extends JobQueue<Job, List<Job>> {
       }
     }
 
-    await database.messageDao.updateMessageContent(
-      messageId,
-      jsonEncode(
-        Inscription(
-          collectionHash: collection.collectionHash,
-          inscriptionHash: inscriptionHash,
-          sequence: inscription.sequence,
-          contentType: inscription.contentType,
-          contentUrl: inscription.contentUrl,
-          name: collection.name,
-          iconUrl: collection.iconUrl,
+    await requestDbWrite(
+      DbWriteMethod.updateMessageContent,
+      payload: DbWriteUpdateMessageContentPayload(
+        messageId: messageId,
+        content: jsonEncode(
+          Inscription(
+            collectionHash: collection.collectionHash,
+            inscriptionHash: inscriptionHash,
+            sequence: inscription.sequence,
+            contentType: inscription.contentType,
+            contentUrl: inscription.contentUrl,
+            name: collection.name,
+            iconUrl: collection.iconUrl,
+          ),
         ),
       ),
     );

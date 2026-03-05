@@ -1,8 +1,12 @@
+import '../../runtime/db_write/method.dart';
 import '../../utils/logger.dart';
 import '../job_queue.dart';
 
 class DeleteOldFtsRecordJob extends JobQueue<bool, List<bool>> {
-  DeleteOldFtsRecordJob({required super.database});
+  DeleteOldFtsRecordJob({
+    required super.database,
+    required super.requestDbWrite,
+  });
 
   @override
   Future<List<bool>> fetchJobs() async {
@@ -55,8 +59,8 @@ class DeleteOldFtsRecordJob extends JobQueue<bool, List<bool>> {
         return;
       }
 
-      await database.mixinDatabase.customStatement(
-        'DELETE FROM messages_fts WHERE rowid IN (SELECT rowid FROM messages_fts LIMIT 1000)',
+      await requestDbWrite(
+        DbWriteMethod.deleteLegacyFtsChunk,
       );
 
       deleted += 1000;

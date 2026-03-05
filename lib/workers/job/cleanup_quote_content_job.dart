@@ -2,14 +2,18 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../constants/constants.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../../utils/extension/extension.dart';
 import 'base_migration_job.dart';
 
 const _kQueryMax = 100;
 
 class CleanupQuoteContentJob extends BaseMigrationJob {
-  CleanupQuoteContentJob({required super.database})
-    : super(action: kCleanupQuoteContent);
+  CleanupQuoteContentJob({
+    required super.database,
+    required super.requestDbWrite,
+  }) : super(action: kCleanupQuoteContent);
 
   @override
   Future<void> migration(Job job) async {
@@ -30,10 +34,13 @@ class CleanupQuoteContentJob extends BaseMigrationJob {
           message.conversationId,
           quoteMessageId,
         );
-        await database.messageDao.updateQuoteContentByQuoteId(
-          message.conversationId,
-          quoteMessageId,
-          quote?.toJson(),
+        await requestDbWrite(
+          DbWriteMethod.updateQuoteContentByQuoteId,
+          payload: DbWriteUpdateQuoteContentByQuoteIdPayload(
+            conversationId: message.conversationId,
+            quoteMessageId: quoteMessageId,
+            content: quote?.toJson(),
+          ),
         );
       }
       if (messages.length < _kQueryMax) {

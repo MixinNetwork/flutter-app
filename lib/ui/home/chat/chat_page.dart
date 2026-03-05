@@ -1158,7 +1158,7 @@ class _ConversationHandle extends ConversationMenuHandle {
     );
     if (ret == null) return;
     await context.accountServer.deleteMessagesByConversationId(conversationId);
-    await context.database.conversationDao.deleteConversation(conversationId);
+    await context.accountServer.deleteConversation(conversationId);
     if (context.providerContainer.read(currentConversationIdProvider) ==
         conversationId) {
       context.providerContainer

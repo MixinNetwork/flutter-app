@@ -12,6 +12,8 @@ import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';
@@ -52,6 +54,7 @@ class Blaze {
     this.userAgent,
     this.ackJob,
     this.floodJob,
+    this.requestDbWrite,
   ) {
     database.settingProperties.addListener(_onProxySettingChanged);
     proxyConfig = database.settingProperties.activatedProxy;
@@ -69,6 +72,8 @@ class Blaze {
   final Client client;
   final AckJob ackJob;
   final FloodJob floodJob;
+  final Future<void> Function(DbWriteMethod method, {Object? payload})
+  requestDbWrite;
 
   final String? userAgent;
 
@@ -331,9 +336,7 @@ class Blaze {
       final timestamp = data.updatedAt.toIso8601String();
 
       if (offset == null || offset != timestamp) {
-        await database.offsetDao.insert(
-          Offset(key: statusOffset, timestamp: timestamp),
-        );
+        await _upsertStatusOffset(timestamp);
       }
     } else if (blazeMessage.action == kCreateMessage) {
       if (data.userId == userId &&
@@ -377,7 +380,7 @@ class Blaze {
         .getSingleOrNull();
 
     if (currentStatus != null && status.index > currentStatus.index) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
+      await _updateMessageStatusById(messageId, status);
       return;
     }
 
@@ -421,9 +424,7 @@ class Blaze {
         // Use unified status handling logic in makeMessageStatus
         await makeMessageStatus(m.messageId, m.status);
 
-        await database.offsetDao.insert(
-          Offset(key: statusOffset, timestamp: m.updatedAt.toIso8601String()),
-        );
+        await _upsertStatusOffset(m.updatedAt.toIso8601String());
       });
       final lastUpdateAt = blazeMessages.last.updatedAt.epochNano;
       if (lastUpdateAt == status) {
@@ -436,6 +437,26 @@ class Blaze {
   Future<void> _sendGZip(BlazeMessage msg) async {
     channel?.sink.add(
       const GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)),
+    );
+  }
+
+  Future<void> _upsertStatusOffset(String timestamp) async {
+    await requestDbWrite(
+      DbWriteMethod.upsertOffset,
+      payload: Offset(key: statusOffset, timestamp: timestamp),
+    );
+  }
+
+  Future<void> _updateMessageStatusById(
+    String messageId,
+    MessageStatus status,
+  ) async {
+    await requestDbWrite(
+      DbWriteMethod.updateMessageStatusById,
+      payload: DbWriteUpdateMessageStatusPayload(
+        messageId: messageId,
+        status: status,
+      ),
     );
   }
 

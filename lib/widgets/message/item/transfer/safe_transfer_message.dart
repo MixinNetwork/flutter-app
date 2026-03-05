@@ -83,7 +83,6 @@ class SafeTransferMessage extends HookConsumerWidget {
       if (content == null) {
         return;
       }
-      final database = context.database;
       final messageId = context.message.messageId;
       scheduleMicrotask(() async {
         try {
@@ -94,8 +93,8 @@ class SafeTransferMessage extends HookConsumerWidget {
           context.accountServer.addUpdateTokenJob(
             createUpdateTokenJob(snapshot.assetId),
           );
-          await database.safeSnapshotDao.insert(snapshot);
-          await database.messageDao.updateSafeSnapshotMessage(
+          await context.accountServer.upsertDbSafeSnapshot(snapshot);
+          await context.accountServer.updateSafeSnapshotMessage(
             messageId,
             snapshot.snapshotId,
           );

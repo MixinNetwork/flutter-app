@@ -530,8 +530,9 @@ class ChatInfoPage extends HookConsumerWidget {
                           await accountServer.deleteMessagesByConversationId(
                             conversationId,
                           );
-                          await context.database.conversationDao
-                              .deleteConversation(conversationId);
+                          await accountServer.deleteConversation(
+                            conversationId,
+                          );
                           ref.read(conversationProvider.notifier).unselected();
                         },
                       ),

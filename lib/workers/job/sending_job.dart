@@ -21,6 +21,8 @@ import '../../db/dao/message_dao.dart';
 import '../../db/extension/message.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../../utils/reg_exp_utils.dart';
@@ -32,6 +34,7 @@ import '../sender.dart';
 class SendingJob extends JobQueue<Job, List<Job>> {
   SendingJob({
     required super.database,
+    required super.requestDbWrite,
     required this.sender,
     required this.userId,
     required this.sessionId,
@@ -51,7 +54,8 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   String get name => 'SendingJob';
 
   @override
-  Future<void> insertJob(Job job) => database.jobDao.insert(job);
+  Future<void> insertJob(Job job) =>
+      requestDbWrite(DbWriteMethod.insertJob, payload: job);
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.sendingJobs().get();
@@ -95,7 +99,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     try {
       final result = await sender.deliver(blazeMessage);
       if (result.success || result.errorCode == badData) {
-        await database.jobDao.deleteJobById(job.jobId);
+        await _deleteJobById(job.jobId);
       }
     } catch (e, s) {
       w('Send pin error: $e, stack: $s');
@@ -120,7 +124,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     try {
       final result = await sender.deliver(blazeMessage);
       if (result.success || result.errorCode == badData) {
-        await database.jobDao.deleteJobById(job.jobId);
+        await _deleteJobById(job.jobId);
       }
     } catch (e, s) {
       w('Send recall error: $e, stack: $s');
@@ -147,7 +151,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
         .sendingMessage(messageId)
         .getSingleOrNull();
     if (message == null) {
-      await database.jobDao.deleteJobById(job.jobId);
+      await _deleteJobById(job.jobId);
       return;
     }
 
@@ -219,7 +223,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
       // Maybe get a badData response when create conversation with
       // an invalid user(for example: network user).
       if (error is MixinError && error.code == badData) {
-        await database.jobDao.deleteJobById(job.jobId);
+        await _deleteJobById(job.jobId);
         return;
       }
       rethrow;
@@ -248,9 +252,9 @@ class SendingJob extends JobQueue<Job, List<Job>> {
           category: message.category.replaceAll('ENCRYPTED_', 'PLAIN_'),
         );
         d('category: ${message.category}');
-        await database.messageDao.updateCategoryById(
-          messageId,
-          message.category,
+        await _updateMessageCategoryById(
+          messageId: messageId,
+          category: message.category,
         );
         result = await _sendPlainMessage(
           message,
@@ -269,16 +273,16 @@ class SendingJob extends JobQueue<Job, List<Job>> {
 
     if (result?.success ?? (result?.errorCode == badData)) {
       if (result?.errorCode == null) {
-        await database.messageDao.updateMessageContentAndStatus(
-          message.messageId,
-          sentContent,
-          MessageStatus.sent,
+        await _updateMessageContentAndStatus(
+          messageId: message.messageId,
+          content: sentContent,
+          status: MessageStatus.sent,
         );
       }
-      await database.jobDao.deleteJobById(job.jobId);
+      await _deleteJobById(job.jobId);
 
       if (conversation.expireIn != null && conversation.expireIn! > 0) {
-        await database.expiredMessageDao.insert(
+        await _insertExpiredMessage(
           messageId: messageId,
           expireIn: conversation.expireIn!,
           expireAt:
@@ -464,8 +468,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
           );
           result = await sender.deliver(encrypted);
           if (result.success || result.errorCode == badData) {
-            await database.resendSessionMessageDao
-                .deleteResendSessionMessageById(message.messageId);
+            await _deleteResendSessionMessageById(message.messageId);
           }
         }
       }
@@ -486,6 +489,54 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     }
     return result;
   }
+
+  Future<void> _deleteJobById(String jobId) =>
+      requestDbWrite(DbWriteMethod.deleteJobById, payload: jobId);
+
+  Future<void> _updateMessageCategoryById({
+    required String messageId,
+    required String category,
+  }) => requestDbWrite(
+    DbWriteMethod.updateMessageCategoryById,
+    payload: DbWriteUpdateMessageCategoryPayload(
+      messageId: messageId,
+      category: category,
+    ),
+  );
+
+  Future<void> _updateMessageContentAndStatus({
+    required String messageId,
+    required String? content,
+    required MessageStatus status,
+  }) => requestDbWrite(
+    DbWriteMethod.updateMessageContentAndStatus,
+    payload: DbWriteUpdateMessageContentAndStatusPayload(
+      messageId: messageId,
+      content: content,
+      status: status,
+    ),
+  );
+
+  Future<void> _insertExpiredMessage({
+    required String messageId,
+    required int expireIn,
+    required int expireAt,
+  }) => requestDbWrite(
+    DbWriteMethod.insertExpiredMessage,
+    payload: DbWriteInsertExpiredMessagePayload(
+      messageId: messageId,
+      expireIn: expireIn,
+      expireAt: expireAt,
+    ),
+  );
+
+  Future<void> _deleteResendSessionMessageById(String messageId) =>
+      requestDbWrite(
+        DbWriteMethod.deleteResendSessionMessageById,
+        payload: DbWriteDeleteResendSessionMessagePayload(
+          messageId: messageId,
+        ),
+      );
 }
 
 class _NoParticipantSessionKeyException implements Exception {

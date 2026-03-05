@@ -7,15 +7,25 @@ import '../db/dao/user_dao.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/mixin_database.dart' as db;
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 
 class Injector {
-  Injector(this.accountId, this.database, this.client);
+  Injector(
+    this.accountId,
+    this.database,
+    this.client, {
+    required Future<void> Function(DbWriteMethod method, {Object? payload})
+    requestDbWrite,
+  }) : _requestDbWrite = requestDbWrite;
 
   String accountId;
   Database database;
   Client client;
+  final Future<void> Function(DbWriteMethod method, {Object? payload})
+  _requestDbWrite;
 
   final refreshUserIdSet = <String>{};
 
@@ -80,7 +90,7 @@ class Injector {
           ? ConversationStatus.success
           : ConversationStatus.quit;
 
-      await database.conversationDao.insert(
+      await _upsertConversation(
         db.Conversation(
           conversationId: response.data.conversationId,
           ownerId: ownerId,
@@ -125,7 +135,7 @@ class Injector {
     List<db.Participant> remote,
     List<UserSession>? userSessions,
   ) async {
-    await database.participantDao.replaceAll(conversationId, remote);
+    await _replaceParticipants(conversationId, remote);
     final participantSessions = <db.ParticipantSessionData>[];
     userSessions?.forEach((u) {
       participantSessions.add(
@@ -137,10 +147,7 @@ class Injector {
         ),
       );
     });
-    await database.participantSessionDao.replaceAll(
-      conversationId,
-      participantSessions,
-    );
+    await _replaceParticipantSessions(conversationId, participantSessions);
   }
 
   Future<List<db.User>?> refreshUsers(
@@ -190,10 +197,10 @@ class Injector {
       final user = e.asDbUser;
       result.add(user);
 
-      await database.userDao.insert(user);
+      await _upsertUser(user);
       final app = e.app;
       if (app != null) {
-        await database.appDao.insert(
+        await _upsertApp(
           db.App(
             appId: app.appId,
             appNumber: app.appNumber,
@@ -220,7 +227,7 @@ class Injector {
     if (circleId == null) {
       final res = await client.circleApi.getCircles();
       res.data.forEach((circle) async {
-        await database.circleDao.insertUpdate(
+        await _upsertCircle(
           db.Circle(
             circleId: circle.circleId,
             name: circle.name,
@@ -231,7 +238,7 @@ class Injector {
       });
     } else {
       final circle = (await client.circleApi.getCircle(circleId)).data;
-      await database.circleDao.insertUpdate(
+      await _upsertCircle(
         db.Circle(
           circleId: circle.circleId,
           name: circle.name,
@@ -252,13 +259,13 @@ class Injector {
       circle.circleId,
     )).data;
     for (final cc in ccList) {
-      await database.circleConversationDao.insert(
+      await _upsertCircleConversations([
         db.CircleConversation(
           conversationId: cc.conversationId,
           circleId: cc.circleId,
           createdAt: cc.createdAt,
         ),
-      );
+      ]);
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
         if (u == null) {
@@ -269,6 +276,64 @@ class Injector {
     if (ccList.length >= 500) {
       await _handleCircle(circle, offset: offset ?? 0 + 500);
     }
+  }
+
+  Future<void> _upsertConversation(db.Conversation conversation) async {
+    await _requestDbWrite(
+      DbWriteMethod.upsertConversation,
+      payload: conversation,
+    );
+  }
+
+  Future<void> _replaceParticipants(
+    String conversationId,
+    List<db.Participant> participants,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.replaceParticipants,
+      payload: DbWriteReplaceParticipantsPayload(
+        conversationId: conversationId,
+        participants: participants,
+      ),
+    );
+  }
+
+  Future<void> _replaceParticipantSessions(
+    String conversationId,
+    List<db.ParticipantSessionData> sessions,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.replaceParticipantSessions,
+      payload: DbWriteReplaceParticipantSessionsPayload(
+        conversationId: conversationId,
+        sessions: sessions,
+      ),
+    );
+  }
+
+  Future<void> _upsertUser(db.User user) async {
+    await _requestDbWrite(DbWriteMethod.upsertUser, payload: user);
+  }
+
+  Future<void> _upsertApp(db.App app) async {
+    await _requestDbWrite(DbWriteMethod.upsertApp, payload: app);
+  }
+
+  Future<void> _upsertCircle(db.Circle circle) async {
+    await _requestDbWrite(
+      DbWriteMethod.upsertCircle,
+      payload: DbWriteCirclePayload(circle: circle),
+    );
+  }
+
+  Future<void> _upsertCircleConversations(
+    List<db.CircleConversation> items,
+  ) async {
+    if (items.isEmpty) return;
+    await _requestDbWrite(
+      DbWriteMethod.upsertCircleConversations,
+      payload: DbWriteCircleConversationsPayload(items: items),
+    );
   }
 
   Future<List<db.User>?> updateUserByIdentityNumber(

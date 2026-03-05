@@ -18,6 +18,8 @@ import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 
@@ -29,6 +31,7 @@ class Sender {
     this.sessionId,
     this.accountId,
     this.database,
+    this._requestDbWrite,
   );
 
   final SignalProtocol signalProtocol;
@@ -37,6 +40,8 @@ class Sender {
   final String sessionId;
   final String accountId;
   final Database database;
+  final Future<void> Function(DbWriteMethod method, {Object? payload})
+  _requestDbWrite;
 
   Future<MessageResult> deliver(BlazeMessage blazeMessage) async {
     final params = blazeMessage.params as BlazeMessageParam;
@@ -216,7 +221,7 @@ class Sender {
                 ),
               )
               .toList();
-          await database.participantSessionDao.updateList(sentSenderKeys);
+          await _insertParticipantSessions(sentSenderKeys);
         }
       }
     }
@@ -235,10 +240,9 @@ class Sender {
       return checkSessionSenderKey(conversationId);
     }
     if (result.success) {
-      final messageIds = signalKeyMessages.map(
-        (e) => db.MessagesHistoryData(messageId: e.messageId),
+      await _insertMessageHistoryBatch(
+        signalKeyMessages.map((e) => e.messageId).toList(),
       );
-      await database.messageHistoryDao.insertList(messageIds);
 
       final sentSenderKeys = signalKeyMessages
           .map(
@@ -250,7 +254,7 @@ class Sender {
             ),
           )
           .toList();
-      await database.participantSessionDao.updateList(sentSenderKeys);
+      await _insertParticipantSessions(sentSenderKeys);
     }
   }
 
@@ -294,7 +298,7 @@ class Sender {
         ),
       ),
     );
-    await database.participantDao.replaceAll(conversationId, participants);
+    await _replaceParticipants(conversationId, participants);
     if (conversation.participantSessions != null) {
       await _syncParticipantSession(
         conversationId,
@@ -307,7 +311,6 @@ class Sender {
     String conversationId,
     List<UserSession> data,
   ) async {
-    await database.participantSessionDao.deleteByStatus(conversationId);
     final remote = <db.ParticipantSessionData>[];
     for (final s in data) {
       remote.add(
@@ -319,37 +322,7 @@ class Sender {
         ),
       );
     }
-    if (remote.isEmpty) {
-      await database.participantSessionDao.deleteByConversationId(
-        conversationId,
-      );
-      return;
-    }
-    final local = await database.participantSessionDao
-        .getParticipantSessionsByConversationId(conversationId);
-    if (local.isEmpty) {
-      await database.participantSessionDao.insertAll(remote);
-      return;
-    }
-    final common = remote.toSet().intersection(local.toSet());
-    final remove = <db.ParticipantSessionData>[];
-    for (final p in local) {
-      if (!common.contains(p)) {
-        remove.add(p);
-      }
-    }
-    final add = <db.ParticipantSessionData>[];
-    for (final p in remote) {
-      if (!common.contains(p)) {
-        add.add(p);
-      }
-    }
-    if (remove.isNotEmpty) {
-      await database.participantSessionDao.deleteList(remove);
-    }
-    if (add.isNotEmpty) {
-      await database.participantSessionDao.insertAll(add);
-    }
+    await _replaceParticipantSessions(conversationId, remote);
   }
 
   Future<void> checkConversationExists(db.Conversation conversation) async {
@@ -369,7 +342,7 @@ class Sender {
       ),
     );
 
-    await database.conversationDao.updateConversationStatusById(
+    await _updateConversationStatus(
       conversation.conversationId,
       ConversationStatus.success,
     );
@@ -388,7 +361,7 @@ class Sender {
         );
       }
       if (newParticipantSessions.isNotEmpty) {
-        await database.participantSessionDao.replaceAll(
+        await _replaceParticipantSessions(
           conversation.conversationId,
           newParticipantSessions,
         );
@@ -420,13 +393,13 @@ class Sender {
       final preKeyBundle = keys.first.createPreKeyBundle();
       await signalProtocol.processSession(recipientId, preKeyBundle);
     } else {
-      await database.participantSessionDao.insert(
+      await _insertParticipantSessions([
         db.ParticipantSessionData(
           conversationId: conversationId,
           userId: recipientId,
           sessionId: sessionId,
         ),
-      );
+      ]);
       return false;
     }
     final encryptedResult = await signalProtocol.encryptSenderKey(
@@ -452,14 +425,14 @@ class Sender {
       return sendSenderKey(conversationId, recipientId, sessionId);
     }
     if (result.success) {
-      await database.participantSessionDao.insert(
+      await _insertParticipantSessions([
         db.ParticipantSessionData(
           conversationId: conversationId,
           userId: recipientId,
           sessionId: sessionId,
           sentToServer: SenderKeyStatus.sent.index,
         ),
-      );
+      ]);
     }
     return result.success;
   }
@@ -509,19 +482,7 @@ class Sender {
       }
     } else if (action == ProcessSignalKeyAction.removeParticipant) {
       final pid = participantId!;
-      await database.transaction(() async {
-        await database.participantDao.deleteByCIdAndPId(
-          data.conversationId,
-          pid,
-        );
-        await database.participantSessionDao.deleteByCIdAndPId(
-          data.conversationId,
-          pid,
-        );
-        await database.participantSessionDao.emptyStatusByConversationId(
-          data.conversationId,
-        );
-      });
+      await _removeParticipantAndResetSessions(data.conversationId, pid);
       await signalProtocol.clearSenderKey(data.conversationId, accountId);
     } else if (action == ProcessSignalKeyAction.addParticipant) {
       final userIds = <String>[participantId!];
@@ -546,8 +507,78 @@ class Sender {
       );
     });
     if (list.isNotEmpty) {
-      await database.participantSessionDao.insertAll(list);
+      await _insertParticipantSessions(list);
     }
+  }
+
+  Future<void> _insertMessageHistoryBatch(List<String> messageIds) async {
+    if (messageIds.isEmpty) return;
+    await _requestDbWrite(
+      DbWriteMethod.insertMessageHistoryBatch,
+      payload: DbWriteInsertMessageHistoryBatchPayload(messageIds: messageIds),
+    );
+  }
+
+  Future<void> _replaceParticipants(
+    String conversationId,
+    List<db.Participant> participants,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.replaceParticipants,
+      payload: DbWriteReplaceParticipantsPayload(
+        conversationId: conversationId,
+        participants: participants,
+      ),
+    );
+  }
+
+  Future<void> _replaceParticipantSessions(
+    String conversationId,
+    List<db.ParticipantSessionData> sessions,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.replaceParticipantSessions,
+      payload: DbWriteReplaceParticipantSessionsPayload(
+        conversationId: conversationId,
+        sessions: sessions,
+      ),
+    );
+  }
+
+  Future<void> _insertParticipantSessions(
+    List<db.ParticipantSessionData> sessions,
+  ) async {
+    if (sessions.isEmpty) return;
+    await _requestDbWrite(
+      DbWriteMethod.insertParticipantSessions,
+      payload: DbWriteInsertParticipantSessionsPayload(sessions: sessions),
+    );
+  }
+
+  Future<void> _updateConversationStatus(
+    String conversationId,
+    ConversationStatus status,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.updateConversationStatus,
+      payload: DbWriteUpdateConversationStatusPayload(
+        conversationId: conversationId,
+        status: status,
+      ),
+    );
+  }
+
+  Future<void> _removeParticipantAndResetSessions(
+    String conversationId,
+    String participantId,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.removeParticipantAndResetSessions,
+      payload: DbWriteRemoveParticipantAndResetSessionsPayload(
+        conversationId: conversationId,
+        participantId: participantId,
+      ),
+    );
   }
 }
 

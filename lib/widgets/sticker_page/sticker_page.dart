@@ -105,7 +105,7 @@ class StickerPage extends StatelessWidget {
                               ctx.accountServer.client.accountApi.removeSticker(
                                 [sticker.stickerId],
                               );
-                              ctx.database.stickerDao.deletePersonalSticker(
+                              ctx.accountServer.deletePersonalSticker(
                                 sticker.stickerId,
                               );
                               showToastSuccessful(context: ctx);
@@ -285,7 +285,7 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
 
         await Future.wait([
           if (updateUsedAt)
-            accountServer.database.stickerDao.updateUsedAt(
+            accountServer.updateStickerUsedAt(
               sticker.albumId,
               sticker.stickerId,
               DateTime.now(),

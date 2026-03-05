@@ -5,7 +5,6 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../db/dao/user_dao.dart';
 import '../../db/mixin_database.dart';
 import 'account_server_provider.dart';
-import 'database_provider.dart';
 
 class MaoUser with EquatableMixin {
   MaoUser({required this.user, required this.mao});
@@ -28,7 +27,7 @@ final searchMaoUserProvider = FutureProvider.autoDispose
       }
       try {
         final user = (await client.userApi.search(keyword)).data.asDbUser;
-        await ref.read(databaseProvider).valueOrNull?.userDao.insert(user);
+        await ref.read(accountServerProvider).valueOrNull?.upsertDbUser(user);
         return MaoUser(user: user, mao: keyword.completeMao());
       } catch (error, stackTrace) {
         e('searchMaoUserProvider error: $error, $stackTrace');

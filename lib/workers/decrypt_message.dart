@@ -35,6 +35,8 @@ import '../enum/message_action.dart';
 import '../enum/message_category.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../runtime/isolate/protocol.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/extension/extension.dart';
@@ -71,7 +73,15 @@ class DecryptMessage extends Injector {
     this._deviceTransfer,
     this._updateTokenJob,
     this._syncInscriptionJob,
-  ) : super(userId, database, client) {
+    Future<void> Function(DbWriteMethod method, {Object? payload})
+    requestDbWrite,
+  ) : _requestDbWrite = requestDbWrite,
+      super(
+        userId,
+        database,
+        client,
+        requestDbWrite: requestDbWrite,
+      ) {
     _encryptedProtocol = EncryptedProtocol();
   }
 
@@ -92,6 +102,8 @@ class DecryptMessage extends Injector {
   final UpdateTokenJob _updateTokenJob;
   final SyncInscriptionMessageJob _syncInscriptionJob;
   final DeviceTransferIsolateController? _deviceTransfer;
+  final Future<void> Function(DbWriteMethod method, {Object? payload})
+  _requestDbWrite;
 
   final refreshKeyMap = <String, int?>{};
 
@@ -112,22 +124,280 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _insertMessage(Message message, BlazeMessageData data) async {
-    await database.messageDao.insert(
-      message,
-      accountId,
-      silent: data.silent,
-      expireIn: data.expireIn,
+    await _requestDbWrite(
+      DbWriteMethod.insertSendMessage,
+      payload: DbWriteInsertSendMessagePayload(
+        message: message,
+        currentUserId: accountId,
+        expireIn: data.expireIn,
+        cleanDraft: false,
+        silent: data.silent ?? false,
+      ),
     );
-    unawaited(database.ftsDatabase.insertFts(message));
     if (data.expireIn > 0 && message.userId == accountId) {
       final expiredAt =
           data.createdAt.millisecondsSinceEpoch ~/ 1000 + data.expireIn;
-      await database.expiredMessageDao.updateMessageExpireAt(
-        expiredAt,
-        message.messageId,
+      await _requestDbWrite(
+        DbWriteMethod.updateExpiredMessageExpireAt,
+        payload: DbWriteUpdateExpiredMessageExpireAtPayload(
+          messageId: message.messageId,
+          expireAt: expiredAt,
+        ),
       );
     }
   }
+
+  Future<void> _insertMessageHistory(String messageId) => _requestDbWrite(
+    DbWriteMethod.insertMessageHistory,
+    payload: DbWriteInsertMessageHistoryPayload(messageId: messageId),
+  );
+
+  Future<void> _insertResendSessionMessage(db.ResendSessionMessage message) =>
+      _requestDbWrite(
+        DbWriteMethod.insertResendSessionMessage,
+        payload: DbWriteInsertResendSessionMessagePayload(message: message),
+      );
+
+  Future<void> _parseMentionData({
+    required String? content,
+    required String messageId,
+    required String conversationId,
+    required String senderId,
+    required QuoteMessageItem? quoteContent,
+  }) => _requestDbWrite(
+    DbWriteMethod.parseMentionData,
+    payload: DbWriteParseMentionDataPayload(
+      content: content,
+      messageId: messageId,
+      conversationId: conversationId,
+      senderId: senderId,
+      quoteContentJson: quoteContent?.toJson(),
+      currentUserId: accountId,
+      currentUserIdentityNumber: identityNumber,
+    ),
+  );
+
+  Future<void> _deleteFloodMessage(db.FloodMessage floodMessage) =>
+      _requestDbWrite(
+        DbWriteMethod.deleteFloodMessage,
+        payload: floodMessage,
+      );
+
+  Future<void> _insertTranscriptMessages(
+    List<db.TranscriptMessage> transcripts,
+  ) => _requestDbWrite(
+    DbWriteMethod.insertTranscriptMessages,
+    payload: DbWriteInsertTranscriptMessagesPayload(
+      transcripts: transcripts,
+    ),
+  );
+
+  Future<void> _insertFts(db.Message message, {String? content}) =>
+      _requestDbWrite(
+        DbWriteMethod.insertFts,
+        payload: DbWriteInsertFtsPayload(message: message, content: content),
+      );
+
+  Future<void> _upsertUser(db.User user) => _requestDbWrite(
+    DbWriteMethod.upsertUser,
+    payload: user,
+  );
+
+  Future<void> _upsertParticipant(db.Participant participant) =>
+      _requestDbWrite(
+        DbWriteMethod.upsertParticipant,
+        payload: participant,
+      );
+
+  Future<void> _updateConversationStatus(
+    String conversationId,
+    ConversationStatus status,
+  ) => _requestDbWrite(
+    DbWriteMethod.updateConversationStatus,
+    payload: DbWriteUpdateConversationStatusPayload(
+      conversationId: conversationId,
+      status: status,
+    ),
+  );
+
+  Future<void> _updateConversationExpireIn(
+    String conversationId,
+    int expireIn,
+  ) => _requestDbWrite(
+    DbWriteMethod.updateConversationExpireIn,
+    payload: DbWriteUpdateConversationExpireInPayload(
+      conversationId: conversationId,
+      expireIn: expireIn,
+    ),
+  );
+
+  Future<void> _updateParticipantRole(
+    String conversationId,
+    String participantId,
+    ParticipantRole? role,
+  ) => _requestDbWrite(
+    DbWriteMethod.updateParticipantRole,
+    payload: DbWriteUpdateParticipantRolePayload(
+      conversationId: conversationId,
+      participantId: participantId,
+      role: role,
+    ),
+  );
+
+  Future<void> _upsertCircleConversations(List<db.CircleConversation> items) =>
+      _requestDbWrite(
+        DbWriteMethod.upsertCircleConversations,
+        payload: DbWriteCircleConversationsPayload(items: items),
+      );
+
+  Future<void> _deleteCircleConversationById(
+    String conversationId,
+    String circleId,
+  ) => _requestDbWrite(
+    DbWriteMethod.deleteCircleConversationById,
+    payload: DbWriteDeleteCircleConversationPayload(
+      conversationId: conversationId,
+      circleId: circleId,
+    ),
+  );
+
+  Future<void> _deleteCircleAndConversations(String circleId) =>
+      _requestDbWrite(
+        DbWriteMethod.deleteCircleAndConversations,
+        payload: circleId,
+      );
+
+  Future<void> _upsertSnapshot(db.Snapshot snapshot) => _requestDbWrite(
+    DbWriteMethod.upsertSnapshot,
+    payload: snapshot,
+  );
+
+  Future<void> _upsertSafeSnapshot(db.SafeSnapshot snapshot) => _requestDbWrite(
+    DbWriteMethod.upsertSafeSnapshot,
+    payload: snapshot,
+  );
+
+  Future<void> _deletePendingSafeSnapshotByHash(String depositHash) =>
+      _requestDbWrite(
+        DbWriteMethod.deletePendingSafeSnapshotByHash,
+        payload: DbWriteDeletePendingSafeSnapshotByHashPayload(
+          depositHash: depositHash,
+        ),
+      );
+
+  Future<void> _markMessagesRead(List<MiniMessageItem> items) =>
+      _requestDbWrite(
+        DbWriteMethod.markMessagesRead,
+        payload: DbWriteMarkMessagesReadPayload(
+          items: items
+              .map(
+                (item) => DbWriteMiniMessagePayload(
+                  messageId: item.messageId,
+                  conversationId: item.conversationId,
+                ),
+              )
+              .toList(),
+        ),
+      );
+
+  Future<void> _updateMessageContentAndStatus({
+    required String messageId,
+    required String? content,
+    required MessageStatus status,
+  }) => _requestDbWrite(
+    DbWriteMethod.updateMessageContentAndStatus,
+    payload: DbWriteUpdateMessageContentAndStatusPayload(
+      messageId: messageId,
+      content: content,
+      status: status,
+    ),
+  );
+
+  Future<void> _updateAttachmentMessage({
+    required String messageId,
+    required MessagesCompanion messagesCompanion,
+  }) => _requestDbWrite(
+    DbWriteMethod.updateAttachmentMessage,
+    payload: DbWriteUpdateAttachmentMessagePayload(
+      messageId: messageId,
+      status: messagesCompanion.status.value,
+      content: messagesCompanion.content.value!,
+      mediaMimeType: messagesCompanion.mediaMimeType.value,
+      mediaSize: messagesCompanion.mediaSize.value,
+      mediaStatus: messagesCompanion.mediaStatus.value ?? MediaStatus.canceled,
+      mediaWidth: messagesCompanion.mediaWidth.value,
+      mediaHeight: messagesCompanion.mediaHeight.value,
+      mediaDigest: messagesCompanion.mediaDigest.value,
+      mediaKey: messagesCompanion.mediaKey.value,
+      mediaWaveform: messagesCompanion.mediaWaveform.value,
+      caption: messagesCompanion.caption.value,
+      name: messagesCompanion.name.value,
+      thumbImage: messagesCompanion.thumbImage.value,
+      mediaDuration: messagesCompanion.mediaDuration.value,
+    ),
+  );
+
+  Future<void> _updateStickerMessage({
+    required String messageId,
+    required MessageStatus status,
+    required String stickerId,
+  }) => _requestDbWrite(
+    DbWriteMethod.updateStickerMessage,
+    payload: DbWriteUpdateStickerMessagePayload(
+      messageId: messageId,
+      status: status,
+      stickerId: stickerId,
+    ),
+  );
+
+  Future<void> _updateContactMessage({
+    required String messageId,
+    required MessageStatus status,
+    required String sharedUserId,
+  }) => _requestDbWrite(
+    DbWriteMethod.updateContactMessage,
+    payload: DbWriteUpdateContactMessagePayload(
+      messageId: messageId,
+      status: status,
+      sharedUserId: sharedUserId,
+    ),
+  );
+
+  Future<void> _updateLiveMessage({
+    required String messageId,
+    required int width,
+    required int height,
+    required String url,
+    required String thumbUrl,
+    required MessageStatus status,
+  }) => _requestDbWrite(
+    DbWriteMethod.updateLiveMessage,
+    payload: DbWriteUpdateLiveMessagePayload(
+      messageId: messageId,
+      width: width,
+      height: height,
+      url: url,
+      thumbUrl: thumbUrl,
+      status: status,
+    ),
+  );
+
+  Future<void> _updateTranscriptMessage({
+    required String messageId,
+    required String? content,
+    required int? mediaSize,
+    required MediaStatus? mediaStatus,
+    required MessageStatus status,
+  }) => _requestDbWrite(
+    DbWriteMethod.updateTranscriptMessage,
+    payload: DbWriteUpdateTranscriptMessagePayload(
+      messageId: messageId,
+      content: content,
+      mediaSize: mediaSize,
+      mediaStatus: mediaStatus,
+      status: status,
+    ),
+  );
 
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
@@ -136,7 +406,7 @@ class DecryptMessage extends Injector {
     d('DecryptMessage process data: ${data.toJson()}');
     if (await isExistMessage(data.messageId)) {
       await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
-      await database.floodMessageDao.deleteFloodMessage(floodMessage);
+      await _deleteFloodMessage(floodMessage);
       return;
     }
     try {
@@ -159,9 +429,7 @@ class DecryptMessage extends Injector {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
-          await database.messageHistoryDao.insert(
-            MessagesHistoryData(messageId: data.messageId),
-          );
+          await _insertMessageHistory(data.messageId);
         }
         await _processSignalMessage(data);
       } else if (category.isPlain) {
@@ -204,7 +472,7 @@ class DecryptMessage extends Injector {
 
     await _updateRemoteMessageStatus(messageId, _remoteStatus);
 
-    await database.floodMessageDao.deleteFloodMessage(floodMessage);
+    await _deleteFloodMessage(floodMessage);
   }
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {
@@ -227,9 +495,7 @@ class DecryptMessage extends Injector {
                 composeMessageData.resendMessageId!,
                 plain,
               );
-              await database.messageHistoryDao.insert(
-                MessagesHistoryData(messageId: data.messageId),
-              );
+              await _insertMessageHistory(data.messageId);
             } else {
               try {
                 await _processDecryptSuccess(data, plain);
@@ -314,9 +580,7 @@ class DecryptMessage extends Injector {
         i('on device transfer command: $command');
         _deviceTransfer?.handleRemoteCommand(command);
       }
-      await database.messageHistoryDao.insert(
-        MessagesHistoryData(messageId: data.messageId),
-      );
+      await _insertMessageHistory(data.messageId);
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
         data.category == MessageCategory.plainVideo ||
@@ -379,7 +643,7 @@ class DecryptMessage extends Injector {
           .findMessageByMessageIdAndUserId(id, accountId);
       if (needResendMessage == null ||
           needResendMessage.category == MessageCategory.messageRecall) {
-        await database.resendSessionMessageDao.insert(
+        await _insertResendSessionMessage(
           ResendSessionMessage(
             messageId: id,
             userId: data.userId,
@@ -396,7 +660,7 @@ class DecryptMessage extends Injector {
       if (p.createdAt.isAfter(needResendMessage.createdAt)) {
         continue;
       }
-      await database.resendSessionMessageDao.insert(
+      await _insertResendSessionMessage(
         ResendSessionMessage(
           messageId: id,
           userId: data.userId,
@@ -517,6 +781,8 @@ class DecryptMessage extends Injector {
     );
 
     if (pinMessage.action == PinMessagePayloadAction.pin) {
+      final pinMessages = <PinMessage>[];
+      final systemMessages = <Message>[];
       await futureForEachIndexed(pinMessage.messageIds, (
         index,
         messageId,
@@ -530,14 +796,14 @@ class DecryptMessage extends Injector {
           messageId: message.messageId,
           content: message.category.isText ? message.content : null,
         );
-        await database.pinMessageDao.insert(
+        pinMessages.add(
           PinMessage(
             messageId: messageId,
             conversationId: message.conversationId,
             createdAt: data.createdAt,
           ),
         );
-        await database.messageDao.insert(
+        systemMessages.add(
           Message(
             messageId: index == 0 ? data.messageId : const Uuid().v4(),
             conversationId: data.conversationId,
@@ -548,19 +814,29 @@ class DecryptMessage extends Injector {
             createdAt: data.createdAt,
             category: MessageCategory.messagePin,
           ),
-          accountId,
         );
       });
+      await _requestDbWrite(
+        DbWriteMethod.pinAndInsertPinMessages,
+        payload: DbWritePinAndInsertPinMessagesPayload(
+          pinMessages: pinMessages,
+          systemMessages: systemMessages,
+          currentUserId: accountId,
+        ),
+      );
       _isolateEventSender(
         WorkerShowPinMessageEvent(conversationId: data.conversationId),
       );
     } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
-      await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
+      await _requestDbWrite(
+        DbWriteMethod.deletePinMessagesByIds,
+        payload: DbWriteDeletePinMessagesPayload(
+          messageIds: pinMessage.messageIds,
+        ),
+      );
     }
 
-    await database.messageHistoryDao.insert(
-      MessagesHistoryData(messageId: data.messageId),
-    );
+    await _insertMessageHistory(data.messageId);
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
@@ -571,12 +847,20 @@ class DecryptMessage extends Injector {
       recallMessage.messageId,
     );
 
-    await database.messageDao.recallMessage(
-      data.conversationId,
-      recallMessage.messageId,
+    await _requestDbWrite(
+      DbWriteMethod.recallMessage,
+      payload: DbWriteRecallMessagePayload(
+        conversationId: data.conversationId,
+        messageId: recallMessage.messageId,
+      ),
     );
 
-    unawaited(database.ftsDatabase.deleteByMessageId(recallMessage.messageId));
+    unawaited(
+      _requestDbWrite(
+        DbWriteMethod.deleteFtsByMessageId,
+        payload: recallMessage.messageId,
+      ),
+    );
 
     await Future.wait([
       (() async {
@@ -601,22 +885,26 @@ class DecryptMessage extends Injector {
           recallMessage.messageId,
         );
         if (quoteMessage != null) {
-          await database.messageDao.updateQuoteContentByQuoteId(
-            data.conversationId,
-            recallMessage.messageId,
-            quoteMessage.toJson(),
+          await _requestDbWrite(
+            DbWriteMethod.updateQuoteContentByQuoteId,
+            payload: DbWriteUpdateQuoteContentByQuoteIdPayload(
+              conversationId: data.conversationId,
+              quoteMessageId: recallMessage.messageId,
+              content: quoteMessage.toJson(),
+            ),
           );
         }
       })(),
-      database.messageMentionDao.deleteMessageMention(
-        MessageMention(
-          messageId: recallMessage.messageId,
-          conversationId: data.conversationId,
+      _requestDbWrite(
+        DbWriteMethod.deleteMessageMention,
+        payload: DbWriteDeleteMessageMentionPayload(
+          messageMention: MessageMention(
+            messageId: recallMessage.messageId,
+            conversationId: data.conversationId,
+          ),
         ),
       ),
-      database.messageHistoryDao.insert(
-        MessagesHistoryData(messageId: data.messageId),
-      ),
+      _insertMessageHistory(data.messageId),
     ]);
   }
 
@@ -665,14 +953,12 @@ class DecryptMessage extends Injector {
           quoteContent: quoteContent?.toJson(),
         );
       });
-      await database.messageMentionDao.parseMentionData(
-        message.content,
-        message.messageId,
-        message.conversationId,
-        data.senderId,
-        _quoteContent,
-        accountId,
-        identityNumber,
+      await _parseMentionData(
+        content: message.content,
+        messageId: message.messageId,
+        conversationId: message.conversationId,
+        senderId: data.senderId,
+        quoteContent: _quoteContent,
       );
       await _insertMessage(message, data);
     } else if (data.category.isImage) {
@@ -976,9 +1262,7 @@ class DecryptMessage extends Injector {
     final userId = systemMessage.userId ?? data.senderId;
     if (userId == systemUser &&
         (await database.userDao.userById(userId).getSingleOrNull()) == null) {
-      await database.userDao.insert(
-        const db.User(userId: systemUser, identityNumber: '0'),
-      );
+      await _upsertUser(const db.User(userId: systemUser, identityNumber: '0'));
     }
     var message = db.Message(
       messageId: data.messageId,
@@ -993,7 +1277,7 @@ class DecryptMessage extends Injector {
     );
     if (systemMessage.action == MessageAction.add ||
         systemMessage.action == MessageAction.join) {
-      await database.participantDao.insert(
+      await _upsertParticipant(
         db.Participant(
           conversationId: data.conversationId,
           userId: systemMessage.participantId!,
@@ -1024,7 +1308,7 @@ class DecryptMessage extends Injector {
         systemMessage.action == MessageAction.exit) {
       if (systemMessage.participantId == accountId) {
         unawaited(
-          database.conversationDao.updateConversationStatusById(
+          _updateConversationStatus(
             data.conversationId,
             ConversationStatus.quit,
           ),
@@ -1050,7 +1334,7 @@ class DecryptMessage extends Injector {
       return;
     } else if (systemMessage.action == MessageAction.create) {
     } else if (systemMessage.action == MessageAction.role) {
-      await database.participantDao.updateParticipantRole(
+      await _updateParticipantRole(
         data.conversationId,
         systemMessage.participantId!,
         systemMessage.role,
@@ -1063,7 +1347,7 @@ class DecryptMessage extends Injector {
       message = message.copyWith(
         content: Value(systemMessage.expireIn.toString()),
       );
-      await database.conversationDao.updateConversationExpireIn(
+      await _updateConversationExpireIn(
         data.conversationId,
         systemMessage.expireIn,
       );
@@ -1097,7 +1381,7 @@ class DecryptMessage extends Injector {
       if (systemMessage.userId != null) {
         await refreshUsers(<String>[systemMessage.userId!]);
       }
-      await database.circleConversationDao.insert(
+      await _upsertCircleConversations([
         db.CircleConversation(
           conversationId:
               conversationId ??
@@ -1106,20 +1390,17 @@ class DecryptMessage extends Injector {
           userId: systemMessage.userId,
           createdAt: data.createdAt,
         ),
-      );
+      ]);
     } else if (systemMessage.action == SystemCircleAction.remove) {
       final conversationId =
           systemMessage.conversationId ??
           generateConversationId(accountId, systemMessage.userId!);
-      await database.circleConversationDao.deleteById(
+      await _deleteCircleConversationById(
         conversationId,
         systemMessage.circleId,
       );
     } else if (systemMessage.action == SystemCircleAction.delete) {
-      await database.circleDao.deleteCircleById(systemMessage.circleId);
-      await database.circleConversationDao.deleteByCircleId(
-        systemMessage.circleId,
-      );
+      await _deleteCircleAndConversations(systemMessage.circleId);
     }
   }
 
@@ -1138,7 +1419,7 @@ class DecryptMessage extends Injector {
       openingBalance: snapshotMessage.openingBalance,
       closingBalance: snapshotMessage.closingBalance,
     );
-    await database.snapshotDao.insert(snapshot);
+    await _upsertSnapshot(snapshot);
     await _updateAssetJob.add(createUpdateAssetJob(snapshotMessage.assetId));
     var status = data.status;
     if (_conversationId == data.conversationId && data.userId != accountId) {
@@ -1163,14 +1444,14 @@ class DecryptMessage extends Injector {
     String? depositHash,
   ) async {
     if (depositHash != null && depositHash.isNotEmpty) {
-      await database.safeSnapshotDao.deletePendingSnapshotByHash(depositHash);
-      await database.safeSnapshotDao.insert(
+      await _deletePendingSafeSnapshotByHash(depositHash);
+      await _upsertSafeSnapshot(
         snapshot.copyWith(
           deposit: Value(SafeDeposit(depositHash: depositHash, sender: '')),
         ),
       );
     } else {
-      await database.safeSnapshotDao.insert(snapshot);
+      await _upsertSafeSnapshot(snapshot);
     }
 
     final message = Message(
@@ -1203,7 +1484,7 @@ class DecryptMessage extends Injector {
       createdAt: data.createdAt,
       action: snapshot.type,
     );
-    await database.safeSnapshotDao.insert(snapshot);
+    await _upsertSafeSnapshot(snapshot);
     await _insertMessage(message, data);
     await _syncInscriptionJob.add(
       createSyncInscriptionMessageJob(data.messageId),
@@ -1229,7 +1510,10 @@ class DecryptMessage extends Injector {
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
         .forEach((m) async {
           if (m.status == 'MENTION_READ') {
-            await database.messageMentionDao.markMentionRead(m.messageId);
+            await _requestDbWrite(
+              DbWriteMethod.markMentionRead,
+              payload: m.messageId,
+            );
           } else if (m.status == 'READ') {
             messagesWithExpiredAt.add((m.messageId, m.expireAt));
           }
@@ -1239,13 +1523,16 @@ class DecryptMessage extends Injector {
       final messageIds = messagesWithExpiredAt.map((e) => e.$1).toList();
       final list = await database.messageDao.miniMessageByIds(messageIds).get();
 
-      await database.messageDao.markMessageRead(list, updateExpired: false);
+      await _markMessagesRead(list);
       for (final item in messagesWithExpiredAt) {
         final (messageId, expireAt) = item;
         if (expireAt != null && expireAt > 0) {
-          await database.expiredMessageDao.updateMessageExpireAt(
-            expireAt,
-            messageId,
+          await _requestDbWrite(
+            DbWriteMethod.updateExpiredMessageExpireAt,
+            payload: DbWriteUpdateExpiredMessageExpireAtPayload(
+              messageId: messageId,
+              expireAt: expireAt,
+            ),
           );
         } else {
           final expiredMessage = await database.expiredMessageDao
@@ -1253,13 +1540,22 @@ class DecryptMessage extends Injector {
               .getSingleOrNull();
           if (expiredMessage != null) {
             w('expireAt is null or 0. messageId: $messageId');
-            await database.expiredMessageDao.onMessageRead([messageId]);
+            await _requestDbWrite(
+              DbWriteMethod.markExpiredMessagesRead,
+              payload: [messageId],
+            );
           }
         }
       }
       final set = list.map((e) => e.conversationId).toSet();
       for (final cId in set) {
-        await database.messageDao.takeUnseen(accountId, cId);
+        await _requestDbWrite(
+          DbWriteMethod.takeConversationUnseen,
+          payload: DbWriteTakeConversationUnseenPayload(
+            currentUserId: accountId,
+            conversationId: cId,
+          ),
+        );
       }
     }
   }
@@ -1309,31 +1605,29 @@ class DecryptMessage extends Injector {
     String plaintext,
   ) async {
     if (data.category == MessageCategory.signalText) {
-      await database.messageMentionDao.parseMentionData(
-        plaintext,
-        messageId,
-        data.conversationId,
-        data.senderId,
-        null,
-        accountId,
-        identityNumber,
+      await _parseMentionData(
+        content: plaintext,
+        messageId: messageId,
+        conversationId: data.conversationId,
+        senderId: data.senderId,
+        quoteContent: null,
       );
-      await database.messageDao.updateMessageContentAndStatus(
-        messageId,
-        plaintext,
-        data.status,
+      await _updateMessageContentAndStatus(
+        messageId: messageId,
+        content: plaintext,
+        status: data.status,
       );
     } else if (data.category == MessageCategory.signalPost) {
-      await database.messageDao.updateMessageContentAndStatus(
-        messageId,
-        plaintext,
-        data.status,
+      await _updateMessageContentAndStatus(
+        messageId: messageId,
+        content: plaintext,
+        status: data.status,
       );
     } else if (data.category == MessageCategory.signalLocation) {
-      await database.messageDao.updateMessageContentAndStatus(
-        messageId,
-        plaintext,
-        data.status,
+      await _updateMessageContentAndStatus(
+        messageId: messageId,
+        content: plaintext,
+        status: data.status,
       );
     } else if (data.category == MessageCategory.signalImage ||
         data.category == MessageCategory.signalVideo ||
@@ -1365,9 +1659,9 @@ class DecryptMessage extends Injector {
         thumbImage: Value(attachment.thumbnail),
         mediaDuration: Value(attachment.duration.toString()),
       );
-      await database.messageDao.updateAttachmentMessage(
-        messageId,
-        messagesCompanion,
+      await _updateAttachmentMessage(
+        messageId: messageId,
+        messagesCompanion: messagesCompanion,
       );
 
       final message = await database.messageDao.findMessageByMessageId(
@@ -1396,45 +1690,45 @@ class DecryptMessage extends Injector {
           createUpdateStickerJob(stickerMessage.stickerId),
         );
       }
-      await database.messageDao.updateStickerMessage(
-        messageId,
-        data.status,
-        stickerMessage.stickerId,
+      await _updateStickerMessage(
+        messageId: messageId,
+        status: data.status,
+        stickerId: stickerMessage.stickerId,
       );
     } else if (data.category == MessageCategory.signalContact) {
       final plain = _decode(plaintext);
       final contactMessage = ContactMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
-      await database.messageDao.updateContactMessage(
-        messageId,
-        data.status,
-        contactMessage.userId,
+      await _updateContactMessage(
+        messageId: messageId,
+        status: data.status,
+        sharedUserId: contactMessage.userId,
       );
     } else if (data.category == MessageCategory.signalLive) {
       final plain = _decode(plaintext);
       final liveMessage = LiveMessage.fromJson(
         jsonDecode(plain) as Map<String, dynamic>,
       );
-      await database.messageDao.updateLiveMessage(
-        messageId,
-        liveMessage.width,
-        liveMessage.height,
-        liveMessage.url,
-        liveMessage.thumbUrl,
-        data.status,
+      await _updateLiveMessage(
+        messageId: messageId,
+        width: liveMessage.width,
+        height: liveMessage.height,
+        url: liveMessage.url,
+        thumbUrl: liveMessage.thumbUrl,
+        status: data.status,
       );
     } else if (data.category == MessageCategory.signalTranscript) {
       final plain = _decode(plaintext);
       final list = jsonDecode(plain) as List<dynamic>;
       final message = await processTranscriptMessage(data, list);
       if (message != null) {
-        await database.messageDao.updateTranscriptMessage(
-          message.content,
-          message.mediaSize,
-          message.mediaStatus,
-          message.status,
-          messageId,
+        await _updateTranscriptMessage(
+          messageId: messageId,
+          content: message.content,
+          mediaSize: message.mediaSize,
+          mediaStatus: message.mediaStatus,
+          status: message.status,
         );
       }
     }
@@ -1448,10 +1742,13 @@ class DecryptMessage extends Injector {
         messageId,
       );
       if (messageItem != null) {
-        await database.messageDao.updateQuoteContentByQuoteId(
-          data.conversationId,
-          messageId,
-          messageItem.toJson(),
+        await _requestDbWrite(
+          DbWriteMethod.updateQuoteContentByQuoteId,
+          payload: DbWriteUpdateQuoteContentByQuoteIdPayload(
+            conversationId: data.conversationId,
+            quoteMessageId: messageId,
+            content: messageItem.toJson(),
+          ),
         );
       }
     }
@@ -1621,17 +1918,18 @@ class DecryptMessage extends Injector {
       (transcript) => transcript.category.isAttachment,
     );
 
-    final insertAllTranscriptMessageFuture = database.transcriptMessageDao
-        .insertAll(
-          transcripts.map((transcript) {
-            if (transcript.category.isAttachment) {
-              return transcript.copyWith(
-                mediaStatus: const Value(MediaStatus.canceled),
-              );
-            }
-            return transcript;
-          }).toList(),
+    final transcriptsForInsert = transcripts.map((transcript) {
+      if (transcript.category.isAttachment) {
+        return transcript.copyWith(
+          mediaStatus: const Value(MediaStatus.canceled),
         );
+      }
+      return transcript;
+    }).toList();
+
+    final insertAllTranscriptMessageFuture = _insertTranscriptMessages(
+      transcriptsForInsert,
+    );
 
     await Future.wait([
       _refreshSticker(),
@@ -1687,7 +1985,7 @@ class DecryptMessage extends Injector {
       Future.sync(() async {
         final content = await database.transcriptMessageDao
             .generateTranscriptMessageFts5Content(transcripts);
-        await database.ftsDatabase.insertFts(message, content);
+        await _insertFts(message, content: content);
       }),
     );
 

@@ -320,7 +320,7 @@ class MixinDatabase extends _$MixinDatabase {
 /// Connect to the database.
 Future<MixinDatabase> connectToDatabase(
   String identityNumber, {
-  int readCount = 8,
+  int readCount = 3,
   bool fromMainIsolate = false,
 }) async {
   final queryExecutor = await openQueryExecutor(

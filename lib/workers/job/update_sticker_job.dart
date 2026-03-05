@@ -5,10 +5,16 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/constants.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../job_queue.dart';
 
 class UpdateStickerJob extends JobQueue<Job, List<Job>> {
-  UpdateStickerJob({required super.database, required this.client});
+  UpdateStickerJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.client,
+  });
 
   final Client client;
 
@@ -35,7 +41,7 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
 
     if (exists) return;
 
-    await database.jobDao.insert(job);
+    await requestDbWrite(DbWriteMethod.insertJob, payload: job);
   }
 
   @override
@@ -64,9 +70,12 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
           final sticker = (await client.accountApi.getStickerById(
             stickerId,
           )).data;
-          await database.stickerDao.insert(sticker.asStickersCompanion);
+          await requestDbWrite(
+            DbWriteMethod.insertSticker,
+            payload: sticker.asStickersCompanion,
+          );
         }
-        await database.jobDao.deleteJobById(job.jobId);
+        await requestDbWrite(DbWriteMethod.deleteJobById, payload: job.jobId);
       } catch (e, s) {
         if (e is MixinApiError) {
           var code = e.response?.statusCode;
@@ -76,7 +85,10 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
           }
           if (code == 404) {
             i('Sticker not found: ${job.blazeMessage}');
-            await database.jobDao.deleteJobById(job.jobId);
+            await requestDbWrite(
+              DbWriteMethod.deleteJobById,
+              payload: job.jobId,
+            );
             continue;
           }
         }
@@ -84,12 +96,12 @@ class UpdateStickerJob extends JobQueue<Job, List<Job>> {
         w('Update sticker job error: $e, stack: $s');
 
         final nextRunAt = DateTime.now().add(_backoffDuration(job.runCount));
-        await (database.mixinDatabase.update(
-          database.mixinDatabase.jobs,
-        )..where((tbl) => tbl.jobId.equals(job.jobId))).write(
-          JobsCompanion(
-            createdAt: Value(nextRunAt),
-            runCount: Value(job.runCount + 1),
+        await requestDbWrite(
+          DbWriteMethod.updateJobRunState,
+          payload: DbWriteUpdateJobRunStatePayload(
+            jobId: job.jobId,
+            createdAt: nextRunAt,
+            runCount: job.runCount + 1,
           ),
         );
       }

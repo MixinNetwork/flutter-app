@@ -8,6 +8,8 @@ import '../../blaze/vo/plain_json_message.dart';
 import '../../constants/constants.dart';
 import '../../crypto/uuid/uuid.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../job_queue.dart';
 import '../sender.dart';
@@ -15,6 +17,7 @@ import '../sender.dart';
 class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
   SessionAckJob({
     required super.database,
+    required super.requestDbWrite,
     required this.userId,
     required this.primarySessionId,
     required this.sender,
@@ -31,7 +34,8 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
   String get name => 'SessionAckJob';
 
   @override
-  Future<void> insertJob(List<Job> jobs) => database.jobDao.insertAll(jobs);
+  Future<void> insertJob(List<Job> jobs) =>
+      requestDbWrite(DbWriteMethod.insertJobs, payload: jobs);
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.sessionAckJobs().get();
@@ -84,7 +88,10 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
       'session ack, ${stopwatch.elapsed} ids: ${ack.map((e) => e.messageId).toList()}, BlazeMessage.id: ${bm.id}, param.messageId: ${param.messageId}',
     );
     if (result.success || result.errorCode == badData) {
-      await database.jobDao.deleteJobs(jobIds);
+      await requestDbWrite(
+        DbWriteMethod.deleteJobs,
+        payload: DbWriteDeleteJobsPayload(jobIds: jobIds),
+      );
     } else {
       return jobs;
     }

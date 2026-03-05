@@ -18,6 +18,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/dao/asset_dao.dart';
+import '../db/dao/circle_dao.dart';
 import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
@@ -25,7 +26,10 @@ import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
+import '../enum/media_status.dart';
 import '../enum/message_category.dart';
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../runtime/isolate/protocol.dart';
 import '../runtime/isolate/router.dart';
 import '../runtime/isolate/rpc_client.dart';
@@ -43,12 +47,15 @@ import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
+import '../workers/db_write_worker_isolate.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
 import '../workers/message_worker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
+
+const _kWorkerDbWriteRpcPrefix = 'db_write:';
 
 class AccountServer {
   AccountServer({
@@ -92,6 +99,7 @@ class AccountServer {
 
     await initKeyValues(identityNumber);
 
+    await _startDbWriteWorker();
     await _initClient();
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
@@ -178,9 +186,15 @@ class AccountServer {
       database,
       attachmentUtil,
       addSendingJob,
+      _requestDbWrite,
     );
 
-    _injector = Injector(userId, database, client);
+    _injector = Injector(
+      userId,
+      database,
+      client,
+      requestDbWrite: _requestDbWrite,
+    );
   }
 
   late String userId;
@@ -196,6 +210,10 @@ class AccountServer {
   WorkerSupervisor<IsolateInitParams>? _workerSupervisor;
   IsolateRouter? _workerRouter;
   IsolateRpcClient? _workerRpcClient;
+
+  WorkerSupervisor<DbWriteWorkerInitParams>? _dbWriteWorkerSupervisor;
+  IsolateRouter? _dbWriteWorkerRouter;
+  IsolateRpcClient? _dbWriteRpcClient;
 
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
@@ -267,9 +285,109 @@ class AccountServer {
             e('handle worker isolate event failed: $error, $stacktrace');
           }
         }),
+      )
+      ..add(
+        _workerRouter!.rpcRequests.listen((request) async {
+          final router = _workerRouter;
+          if (router == null) return;
+
+          final method = request.method;
+          if (!method.startsWith(_kWorkerDbWriteRpcPrefix)) {
+            router.sendRpcResponse(
+              RpcErrorResponse(
+                requestId: request.requestId,
+                code: 'unsupported_worker_rpc',
+                message: 'Unsupported worker rpc method: $method',
+              ),
+            );
+            return;
+          }
+
+          final dbWriteMethodName = method.substring(
+            _kWorkerDbWriteRpcPrefix.length,
+          );
+          try {
+            final dbRpcClient = _dbWriteRpcClient;
+            if (dbRpcClient == null) {
+              throw StateError('db write rpc client not ready');
+            }
+            final result = await dbRpcClient.request(
+              dbWriteMethodName,
+              payload: request.payload,
+              timeout: const Duration(seconds: 20),
+            );
+            router.sendRpcResponse(
+              RpcSuccessResponse(
+                requestId: request.requestId,
+                result: result,
+              ),
+            );
+          } catch (error, stackTrace) {
+            e(
+              'worker->db write rpc forwarding failed: method=$dbWriteMethodName '
+              'error=$error, $stackTrace',
+            );
+            router.sendRpcResponse(
+              RpcErrorResponse(
+                requestId: request.requestId,
+                code: 'db_write_forward_failed',
+                message: error.toString(),
+              ),
+            );
+          }
+        }),
       );
 
     await _workerSupervisor!.start();
+  }
+
+  Future<void> _startDbWriteWorker() async {
+    await _dbWriteWorkerSupervisor?.dispose();
+    _dbWriteWorkerSupervisor = WorkerSupervisor<DbWriteWorkerInitParams>(
+      entryPoint: startDbWriteWorkerIsolate,
+      initParamsFactory: (sendPort) => DbWriteWorkerInitParams(
+        sendPort: sendPort,
+        identityNumber: identityNumber,
+      ),
+      debugName: 'mixin_db_write_worker_supervisor',
+    );
+
+    _dbWriteWorkerRouter = IsolateRouter.main(
+      inbound: _dbWriteWorkerSupervisor!.messages,
+      sendMessage: _dbWriteWorkerSupervisor!.send,
+    );
+    await _dbWriteRpcClient?.dispose();
+    _dbWriteRpcClient = IsolateRpcClient(_dbWriteWorkerRouter!);
+
+    jobSubscribers
+      ..add(
+        _dbWriteWorkerSupervisor!.events.listen((event) {
+          switch (event) {
+            case WorkerExitedEvent(:final payload):
+              w('db write worker exited. $payload');
+            case WorkerErrorEvent(:final payload):
+              e('db write worker error: $payload');
+            case WorkerRestartScheduledEvent(:final reason, :final delay):
+              w(
+                'db write worker restart scheduled: $reason after ${delay.inMilliseconds}ms',
+              );
+            case WorkerStartingEvent():
+            case WorkerStartedEvent():
+            case WorkerStoppedEvent():
+              break;
+          }
+        }),
+      )
+      ..add(
+        _dbWriteWorkerRouter!.events.listen((event) {
+          try {
+            _handleDbWriteIsolateEvent(event);
+          } catch (error, stackTrace) {
+            e('handle db write isolate event failed: $error, $stackTrace');
+          }
+        }),
+      );
+    await _dbWriteWorkerSupervisor!.start();
   }
 
   void _handleWorkIsolateEvent(WorkerEvent event) {
@@ -286,6 +404,20 @@ class AccountServer {
         unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
       case WorkerSyncPatchesEvent(:final patches):
         DataBaseEventBus.instance.applyPatches(patches);
+    }
+  }
+
+  void _handleDbWriteIsolateEvent(WorkerEvent event) {
+    switch (event) {
+      case WorkerSyncPatchesEvent(:final patches):
+        DataBaseEventBus.instance.applyPatches(patches);
+      case WorkerIsolateReadyEvent():
+      case WorkerBlazeConnectStateChangedEvent():
+      case WorkerApiRequestedErrorEvent():
+      case WorkerRequestDownloadAttachmentEvent():
+      case WorkerShowPinMessageEvent():
+        // No-op for db write worker.
+        break;
     }
   }
 
@@ -352,8 +484,10 @@ class AccountServer {
     }
 
     try {
-      await database.participantSessionDao.deleteBySessionId(sessionId);
-      await database.participantSessionDao.updateSentToServer();
+      await _requestDbWrite(
+        DbWriteMethod.cleanupParticipantSession,
+        payload: DbWriteCleanupParticipantSessionPayload(sessionId: sessionId),
+      );
     } catch (_) {
       // ignore closed database error
     }
@@ -788,6 +922,7 @@ class AccountServer {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendCommandToWorker(const ExitWorkerCommand());
+    _sendCommandToDbWriteWorker(const ExitWorkerCommand());
     await _shutdownWorker();
   }
 
@@ -797,30 +932,32 @@ class AccountServer {
 
   Future<void> refreshSelf() async {
     final me = (await client.accountApi.getMe()).data;
-    await database.userDao.insert(
-      db.User(
-        userId: me.userId,
-        identityNumber: me.identityNumber,
-        relationship: me.relationship,
-        fullName: me.fullName,
-        avatarUrl: me.avatarUrl,
-        phone: me.phone,
-        isVerified: me.isVerified,
-        createdAt: me.createdAt,
-        muteUntil: DateTime.tryParse(me.muteUntil),
-        biography: me.biography,
-        isScam: me.isScam ? 1 : 0,
-        codeId: me.codeId,
-        codeUrl: me.codeUrl,
-        membership: me.membership,
-      ),
+    final user = db.User(
+      userId: me.userId,
+      identityNumber: me.identityNumber,
+      relationship: me.relationship,
+      fullName: me.fullName,
+      avatarUrl: me.avatarUrl,
+      phone: me.phone,
+      isVerified: me.isVerified,
+      createdAt: me.createdAt,
+      muteUntil: DateTime.tryParse(me.muteUntil),
+      biography: me.biography,
+      isScam: me.isScam ? 1 : 0,
+      codeId: me.codeId,
+      codeUrl: me.codeUrl,
+      membership: me.membership,
+    );
+    await _requestDbWrite(
+      DbWriteMethod.upsertUser,
+      payload: user,
     );
     multiAuthNotifier.updateAccount(me);
   }
 
   Future<void> refreshFriends() async {
     final friends = (await client.accountApi.getFriends()).data;
-    await _injector.insertUpdateUsers(friends);
+    await _insertUpdateUsers(friends);
   }
 
   Future<void> checkSignalKeys() async {
@@ -863,8 +1000,9 @@ class AccountServer {
       if (localAlbum == null) {
         maxOrder++;
       }
-      await database.stickerAlbumDao.insert(
-        a.asStickerAlbumsCompanion.copyWith(
+      await _requestDbWrite(
+        DbWriteMethod.upsertStickerAlbum,
+        payload: a.asStickerAlbumsCompanion.copyWith(
           orderedAt: Value(localAlbum?.orderedAt ?? maxOrder),
           added: Value(localAlbum?.added ?? a.banner?.isNotEmpty == true),
         ),
@@ -896,7 +1034,7 @@ class AccountServer {
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
     await Future.forEach<CircleResponse>(res.data, (circle) async {
-      await database.circleDao.insertUpdate(
+      await _upsertCircle(
         db.Circle(
           circleId: circle.circleId,
           name: circle.name,
@@ -914,7 +1052,9 @@ class AccountServer {
     if (clean) {
       return;
     }
-    await database.jobDao.insert(createCleanupQuoteContentJob());
+    await _requestDbWrite(
+      DbWriteMethod.insertCleanupQuoteContentJob,
+    );
     AccountKeyValue.instance.alreadyCleanupQuoteContent = true;
   }
 
@@ -927,13 +1067,13 @@ class AccountServer {
       circle.circleId,
     )).data;
     for (final cc in ccList) {
-      await database.circleConversationDao.insert(
+      await _upsertCircleConversations([
         db.CircleConversation(
           conversationId: cc.conversationId,
           circleId: cc.circleId,
           createdAt: cc.createdAt,
         ),
-      );
+      ]);
       await _injector.syncConversion(cc.conversationId);
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
@@ -964,10 +1104,13 @@ class AccountServer {
         );
       });
 
-      await database.mixinDatabase.transaction(() async {
-        await database.stickerRelationshipDao.insertAll(relationships);
-        await database.stickerDao.insertAll(stickers);
-      });
+      await _requestDbWrite(
+        DbWriteMethod.replaceStickersByAlbum,
+        payload: DbWriteReplaceStickersByAlbumPayload(
+          relationships: relationships,
+          stickers: stickers,
+        ),
+      );
     } catch (e, s) {
       w('Update sticker albums error: $e, stack: $s');
     }
@@ -1029,7 +1172,7 @@ class AccountServer {
   Future<void> _relationship(RelationshipRequest request) async {
     try {
       final response = await client.userApi.relationships(request);
-      await database.userDao.insertSdkUser(response.data);
+      await _upsertSdkUser(response.data);
     } catch (e) {
       w('_relationship error $e');
     }
@@ -1058,7 +1201,7 @@ class AccountServer {
         randomId: randomId,
       ),
     );
-    await database.conversationDao.updateConversation(response.data, userId);
+    await _updateConversationFromResponse(response.data);
     await addParticipant(conversationId, userIds);
   }
 
@@ -1069,7 +1212,7 @@ class AccountServer {
 
   Future<void> joinGroup(String code) async {
     final response = await client.conversationApi.join(code);
-    await database.conversationDao.updateConversation(response.data, userId);
+    await _updateConversationFromResponse(response.data);
   }
 
   Future<void> addParticipant(
@@ -1083,7 +1226,7 @@ class AccountServer {
         userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       );
 
-      await database.conversationDao.updateConversation(response.data, userId);
+      await _updateConversationFromResponse(response.data);
     } catch (e) {
       w('addParticipant error $e');
       // throw error??
@@ -1124,7 +1267,7 @@ class AccountServer {
       CircleName(name: name),
     );
 
-    await database.circleDao.insertUpdate(
+    await _upsertCircle(
       db.Circle(
         circleId: response.data.circleId,
         name: response.data.name,
@@ -1140,7 +1283,7 @@ class AccountServer {
       circleId,
       CircleName(name: name),
     );
-    await database.circleDao.insertUpdate(
+    await _upsertCircle(
       db.Circle(
         circleId: response.data.circleId,
         name: response.data.name,
@@ -1162,26 +1305,12 @@ class AccountServer {
           .conversationById(conversationId)
           .getSingleOrNull();
       if (conversation == null) {
-        await database.conversationDao.insert(
-          db.Conversation(
+        await _requestDbWrite(
+          DbWriteMethod.upsertContactConversation,
+          payload: DbWriteUpsertContactConversationPayload(
             conversationId: conversationId,
-            category: ConversationCategory.contact,
-            createdAt: DateTime.now(),
-            ownerId: recipientId,
-            status: ConversationStatus.start,
-          ),
-        );
-        await database.participantDao.insert(
-          db.Participant(
-            conversationId: conversationId,
-            userId: userId,
-            createdAt: DateTime.now(),
-          ),
-        );
-        await database.participantDao.insert(
-          db.Participant(
-            conversationId: conversationId,
-            userId: recipientId,
+            currentUserId: userId,
+            recipientId: recipientId,
             createdAt: DateTime.now(),
           ),
         );
@@ -1213,7 +1342,13 @@ class AccountServer {
         userId: userId,
       ),
     ]);
-    await database.circleConversationDao.deleteById(conversationId, circleId);
+    await _requestDbWrite(
+      DbWriteMethod.deleteCircleConversationById,
+      payload: DbWriteDeleteCircleConversationPayload(
+        conversationId: conversationId,
+        circleId: circleId,
+      ),
+    );
   }
 
   Future<void> editCircleConversation(
@@ -1225,27 +1360,23 @@ class AccountServer {
       circleId,
       list,
     );
-    await database.transaction(
-      () => Future.wait(
-        response.data.map((cc) async {
-          await database.circleConversationDao.insert(
-            db.CircleConversation(
-              conversationId: cc.conversationId,
-              circleId: cc.circleId,
-              createdAt: cc.createdAt,
-            ),
-          );
-          if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-            final u = await database.userDao
-                .userById(cc.userId!)
-                .getSingleOrNull();
-            if (u == null) {
-              refreshUserIdSet.add(cc.userId);
-            }
-          }
-        }),
-      ),
-    );
+    final items = <db.CircleConversation>[];
+    for (final cc in response.data) {
+      items.add(
+        db.CircleConversation(
+          conversationId: cc.conversationId,
+          circleId: cc.circleId,
+          createdAt: cc.createdAt,
+        ),
+      );
+      if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+        final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
+        if (u == null) {
+          refreshUserIdSet.add(cc.userId);
+        }
+      }
+    }
+    await _upsertCircleConversations(items);
   }
 
   Future<void> deleteCircle(String circleId) async {
@@ -1257,17 +1388,17 @@ class AccountServer {
       }
     }
 
-    await database.transaction(() async {
-      await database.circleDao.deleteCircleById(circleId);
-      await database.circleConversationDao.deleteByCircleId(circleId);
-    });
+    await _requestDbWrite(
+      DbWriteMethod.deleteCircleAndConversations,
+      payload: circleId,
+    );
   }
 
   Future<void> report(String userId) async {
     final response = await client.userApi.report(
       RelationshipRequest(userId: userId, action: RelationshipAction.block),
     );
-    await database.userDao.insertSdkUser(response.data);
+    await _upsertSdkUser(response.data);
   }
 
   Future<void> unMuteConversation({
@@ -1317,13 +1448,22 @@ class AccountServer {
     final cr = response.data;
     if (cr.category == ConversationCategory.contact) {
       if (userId != null) {
-        await database.userDao.updateMuteUntil(userId, cr.muteUntil);
+        await _requestDbWrite(
+          DbWriteMethod.updateUserMuteUntil,
+          payload: DbWriteUpdateUserMuteUntilPayload(
+            userId: userId,
+            muteUntil: cr.muteUntil,
+          ),
+        );
       }
     } else {
       if (conversationId != null) {
-        await database.conversationDao.updateMuteUntil(
-          conversationId,
-          cr.muteUntil,
+        await _requestDbWrite(
+          DbWriteMethod.updateConversationMuteUntil,
+          payload: DbWriteUpdateConversationMuteUntilPayload(
+            conversationId: conversationId,
+            muteUntil: cr.muteUntil,
+          ),
         );
       }
     }
@@ -1343,22 +1483,55 @@ class AccountServer {
       ),
     );
 
-    await database.conversationDao.updateConversation(response.data, userId);
+    await _updateConversationFromResponse(response.data);
   }
 
   Future<void> rotate(String conversationId) async {
     final response = await client.conversationApi.rotate(conversationId);
-    await database.conversationDao.updateCodeUrl(
-      conversationId,
-      response.data.codeUrl,
+    await _requestDbWrite(
+      DbWriteMethod.updateConversationCodeUrl,
+      payload: DbWriteUpdateConversationCodeUrlPayload(
+        conversationId: conversationId,
+        codeUrl: response.data.codeUrl,
+      ),
     );
   }
 
-  Future<void> unpin(String conversationId) =>
-      database.conversationDao.unpin(conversationId);
+  Future<void> unpin(String conversationId) => _requestDbWrite(
+    DbWriteMethod.unpinConversation,
+    payload: conversationId,
+  );
 
-  Future<void> pin(String conversationId) =>
-      database.conversationDao.pin(conversationId);
+  Future<void> pin(String conversationId) => _requestDbWrite(
+    DbWriteMethod.pinConversation,
+    payload: conversationId,
+  );
+
+  Future<void> deleteConversation(String conversationId) => _requestDbWrite(
+    DbWriteMethod.deleteConversation,
+    payload: conversationId,
+  );
+
+  Future<void> updateConversationDraft(String conversationId, String draft) =>
+      _requestDbWrite(
+        DbWriteMethod.updateConversationDraft,
+        payload: DbWriteUpdateConversationDraftPayload(
+          conversationId: conversationId,
+          draft: draft,
+        ),
+      );
+
+  Future<void> updateCircleOrders(List<ConversationCircleItem> items) {
+    if (items.isEmpty) return Future.value();
+    return _requestDbWrite(
+      DbWriteMethod.updateCircleOrders,
+      payload: DbWriteUpdateCircleOrdersPayload(items: items),
+    );
+  }
+
+  Future<void> updateConversationFromResponse(
+    ConversationResponse conversation,
+  ) => _updateConversationFromResponse(conversation);
 
   Future<int> getConversationMediaSize(String conversationId) async =>
       (await getTotalSizeOfFile(attachmentUtil.getImagesPath(conversationId))) +
@@ -1382,7 +1555,7 @@ class AccountServer {
 
   Future<void> markMentionRead(String messageId, String conversationId) =>
       Future.wait([
-        database.messageMentionDao.markMentionRead(messageId),
+        _requestDbWrite(DbWriteMethod.markMentionRead, payload: messageId),
         (() async => addSessionAckJob([
           await createMentionReadAckJob(conversationId, messageId),
         ]))(),
@@ -1405,6 +1578,89 @@ class AccountServer {
     );
     multiAuthNotifier.updateAccount(user.data);
   }
+
+  Future<void> upsertSdkUser(User user) => _upsertSdkUser(user);
+
+  Future<void> upsertDbUser(db.User user) =>
+      _requestDbWrite(DbWriteMethod.upsertUser, payload: user);
+
+  Future<void> upsertSticker(db.StickersCompanion sticker) => _requestDbWrite(
+    DbWriteMethod.insertSticker,
+    payload: sticker,
+  );
+
+  Future<void> insertStickerAndRelationship(
+    db.StickersCompanion sticker,
+    db.StickerRelationship relationship,
+  ) => _requestDbWrite(
+    DbWriteMethod.insertStickerAndRelationship,
+    payload: DbWriteInsertStickerAndRelationshipPayload(
+      sticker: sticker,
+      relationship: relationship,
+    ),
+  );
+
+  Future<void> deletePersonalSticker(String stickerId) => _requestDbWrite(
+    DbWriteMethod.deletePersonalSticker,
+    payload: stickerId,
+  );
+
+  Future<void> updateStickerUsedAt(
+    String? albumId,
+    String stickerId,
+    DateTime usedAt,
+  ) => _requestDbWrite(
+    DbWriteMethod.updateStickerUsedAt,
+    payload: DbWriteUpdateStickerUsedAtPayload(
+      albumId: albumId,
+      stickerId: stickerId,
+      usedAt: usedAt,
+    ),
+  );
+
+  Future<void> updateStickerAlbumAdded(String albumId, bool added) =>
+      _requestDbWrite(
+        DbWriteMethod.updateStickerAlbumAdded,
+        payload: DbWriteUpdateStickerAlbumAddedPayload(
+          albumId: albumId,
+          added: added,
+        ),
+      );
+
+  Future<void> updateStickerAlbumOrders(List<db.StickerAlbum> albums) {
+    if (albums.isEmpty) return Future.value();
+    return _requestDbWrite(
+      DbWriteMethod.updateStickerAlbumOrders,
+      payload: DbWriteUpdateStickerAlbumOrdersPayload(albums: albums),
+    );
+  }
+
+  Future<void> upsertStickerAlbum(db.StickerAlbumsCompanion stickerAlbum) =>
+      _requestDbWrite(DbWriteMethod.upsertStickerAlbum, payload: stickerAlbum);
+
+  Future<void> upsertSafeSnapshot(SafeSnapshot snapshot) =>
+      _requestDbWrite(DbWriteMethod.upsertSafeSnapshot, payload: snapshot);
+
+  Future<void> upsertDbSafeSnapshot(db.SafeSnapshot snapshot) =>
+      _requestDbWrite(DbWriteMethod.upsertSafeSnapshot, payload: snapshot);
+
+  Future<void> updateSafeSnapshotMessage(String messageId, String snapshotId) =>
+      _requestDbWrite(
+        DbWriteMethod.updateSafeSnapshotMessage,
+        payload: DbWriteUpdateSafeSnapshotMessagePayload(
+          messageId: messageId,
+          snapshotId: snapshotId,
+        ),
+      );
+
+  Future<void> updateMessageMediaStatus(String messageId, MediaStatus status) =>
+      _requestDbWrite(
+        DbWriteMethod.updateMessageMediaStatus,
+        payload: DbWriteUpdateMessageMediaStatusPayload(
+          messageId: messageId,
+          status: status,
+        ),
+      );
 
   Future<bool> cancelProgressAttachmentJob(String messageId) =>
       attachmentUtil.cancelProgressAttachmentJob(messageId);
@@ -1464,8 +1720,16 @@ class AccountServer {
     final message = await database.messageDao.findMessageByMessageId(messageId);
     if (message == null) return;
     await attachmentUtil.cancelProgressAttachmentJob(messageId);
-    await database.messageDao.deleteMessage(message.conversationId, messageId);
-    unawaited(database.ftsDatabase.deleteByMessageId(messageId));
+    await _requestDbWrite(
+      DbWriteMethod.deleteMessage,
+      payload: DbWriteDeleteMessagePayload(
+        conversationId: message.conversationId,
+        messageId: messageId,
+      ),
+    );
+    unawaited(
+      _requestDbWrite(DbWriteMethod.deleteFtsByMessageId, payload: messageId),
+    );
     unawaited(_deleteMessageAttachment(message));
   }
 
@@ -1481,11 +1745,18 @@ class AccountServer {
           attachmentUtil.cancelProgressAttachmentJob(message.messageId),
     );
 
-    await database.messageDao.deleteMessagesByConversationId(conversationId);
-    await database.messageMentionDao.clearMessageMentionByConversationId(
-      conversationId,
+    await _requestDbWrite(
+      DbWriteMethod.deleteMessagesByConversation,
+      payload: DbWriteDeleteMessagesByConversationPayload(
+        conversationId: conversationId,
+      ),
     );
-    unawaited(database.ftsDatabase.deleteByConversationId(conversationId));
+    unawaited(
+      _requestDbWrite(
+        DbWriteMethod.deleteFtsByConversationId,
+        payload: conversationId,
+      ),
+    );
     unawaited(_deleteMessageAttachmentByConversationId(conversationId));
   }
 
@@ -1539,18 +1810,18 @@ class AccountServer {
 
   Future<void> updateSnapshotById({required String snapshotId}) async {
     final data = await client.snapshotApi.getSnapshotById(snapshotId);
-    await database.snapshotDao.insertSdkSnapshot(data.data);
+    await _requestDbWrite(DbWriteMethod.upsertSnapshot, payload: data.data);
   }
 
   Future<void> updateSafeSnapshotById({required String snapshotId}) async {
     final data = await client.tokenApi.getSnapshotById(snapshotId);
-    await database.safeSnapshotDao.insertSdkSnapshot(data.data);
+    await _requestDbWrite(DbWriteMethod.upsertSafeSnapshot, payload: data.data);
   }
 
   Future<Snapshot> updateSnapshotByTraceId({required String traceId}) async {
     final data = await client.snapshotApi.getSnapshotByTraceId(traceId);
     final snapshot = data.data;
-    await database.snapshotDao.insertSdkSnapshot(snapshot);
+    await _requestDbWrite(DbWriteMethod.upsertSnapshot, payload: snapshot);
     return snapshot;
   }
 
@@ -1570,10 +1841,10 @@ class AccountServer {
         final a = (await client.assetApi.getAssetById(assetId)).data;
         final chain = (await client.assetApi.getChain(a.chainId)).data;
 
-        await Future.wait([
-          database.assetDao.insertSdkAsset(a),
-          database.chainDao.insertSdkChain(chain),
-        ]);
+        await _requestDbWrite(
+          DbWriteMethod.upsertAssetAndChain,
+          payload: DbWriteUpsertAssetAndChainPayload(asset: a, chain: chain),
+        );
       } catch (error, stacktrace) {
         e('checkAsset: $error $stacktrace');
       }
@@ -1590,7 +1861,7 @@ class AccountServer {
 
   Future<void> updateFiats() async {
     final data = await client.accountApi.getFiats();
-    await database.fiatDao.insertAllSdkFiat(data.data);
+    await _requestDbWrite(DbWriteMethod.replaceFiats, payload: data.data);
   }
 
   Future<db.App?> findOrSyncApp(String id) async =>
@@ -1609,7 +1880,7 @@ class AccountServer {
 
     try {
       final user = await client.userApi.getUserById(id);
-      await _injector.insertUpdateUsers([user.data]);
+      await _insertUpdateUsers([user.data]);
       return database.appDao.findAppById(id);
     } catch (error, stackTrace) {
       d('get app and check user error: $error, $stackTrace');
@@ -1620,7 +1891,10 @@ class AccountServer {
   Future<void> loadFavoriteApps(String userId) async {
     final result = await client.userApi.getUserFavoriteApps(userId);
     final apps = result.data;
-    await database.favoriteAppDao.insertFavoriteApps(userId, apps);
+    await _requestDbWrite(
+      DbWriteMethod.insertFavoriteApps,
+      payload: DbWriteFavoriteAppsPayload(userId: userId, apps: apps),
+    );
 
     // refresh app not exist.
     final appIds = apps.map((e) => e.appId).toList();
@@ -1638,7 +1912,71 @@ class AccountServer {
       return;
     }
     final usersResponse = await client.userApi.getUsers(notExits);
-    await _injector.insertUpdateUsers(usersResponse.data);
+    await _insertUpdateUsers(usersResponse.data);
+  }
+
+  Future<void> _insertUpdateUsers(List<User> users) async {
+    if (users.isEmpty) return;
+    await _requestDbWrite(
+      DbWriteMethod.insertUpdateUsers,
+      payload: users,
+    );
+  }
+
+  Future<void> _upsertSdkUser(User user) async {
+    await _requestDbWrite(DbWriteMethod.upsertSdkUser, payload: user);
+  }
+
+  Future<void> _updateConversationFromResponse(
+    ConversationResponse conversation,
+  ) async {
+    await _requestDbWrite(
+      DbWriteMethod.updateConversationFromResponse,
+      payload: DbWriteUpdateConversationPayload(
+        conversation: conversation,
+        currentUserId: userId,
+      ),
+    );
+  }
+
+  Future<void> _upsertCircle(db.Circle circle) async {
+    await _requestDbWrite(
+      DbWriteMethod.upsertCircle,
+      payload: DbWriteCirclePayload(circle: circle),
+    );
+  }
+
+  Future<void> _upsertCircleConversations(
+    List<db.CircleConversation> items,
+  ) async {
+    if (items.isEmpty) return;
+    await _requestDbWrite(
+      DbWriteMethod.upsertCircleConversations,
+      payload: DbWriteCircleConversationsPayload(items: items),
+    );
+  }
+
+  Future<void> _requestDbWrite(
+    DbWriteMethod method, {
+    Object? payload,
+  }) async {
+    final rpcClient = _dbWriteRpcClient;
+    if (rpcClient == null) {
+      throw StateError('db write rpc client not ready: ${method.name}');
+    }
+
+    try {
+      await rpcClient.request(
+        method.name,
+        payload: payload,
+        timeout: const Duration(seconds: 20),
+      );
+    } catch (error, stackTrace) {
+      e(
+        'db write request failed: method=${method.name} error=$error, $stackTrace',
+      );
+      rethrow;
+    }
   }
 
   void _sendCommandToWorker(WorkerCommand command) {
@@ -1655,9 +1993,30 @@ class AccountServer {
     }
   }
 
+  void _sendCommandToDbWriteWorker(WorkerCommand command) {
+    try {
+      final router = _dbWriteWorkerRouter;
+      if (router == null) {
+        d('_sendCommandToDbWriteWorker: _dbWriteWorkerRouter is null $command');
+        assert(command is ExitWorkerCommand);
+        return;
+      }
+      router.sendCommand(command);
+    } catch (error, s) {
+      e('_sendCommandToDbWriteWorker: $error, $s');
+    }
+  }
+
   Future<void> _shutdownWorker() async {
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
+    await _dbWriteRpcClient?.dispose();
+    _dbWriteRpcClient = null;
+    await _dbWriteWorkerRouter?.dispose();
+    _dbWriteWorkerRouter = null;
+    await _dbWriteWorkerSupervisor?.stop();
+    await _dbWriteWorkerSupervisor?.dispose();
+    _dbWriteWorkerSupervisor = null;
     await _workerRpcClient?.dispose();
     _workerRpcClient = null;
     await _workerRouter?.dispose();

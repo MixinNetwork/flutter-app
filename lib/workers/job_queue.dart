@@ -3,15 +3,22 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../db/database.dart';
+import '../runtime/db_write/method.dart';
 import '../utils/logger.dart';
 
 abstract class JobQueue<AddType, RunType> {
-  JobQueue({required this.database}) {
+  JobQueue({
+    required this.database,
+    required this.requestDbWrite,
+  }) {
     start();
   }
 
   @protected
   final Database database;
+  @protected
+  final Future<void> Function(DbWriteMethod method, {Object? payload})
+  requestDbWrite;
 
   @protected
   bool isRunning = false;

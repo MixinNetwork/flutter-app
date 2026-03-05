@@ -141,7 +141,7 @@ class _StickerAlbumDetail extends HookConsumerWidget {
                         ? context.l10n.removeStickers
                         : context.l10n.addStickers,
                   ),
-                  onTap: () => context.database.stickerAlbumDao.updateAdded(
+                  onTap: () => context.accountServer.updateStickerAlbumAdded(
                     album.albumId,
                     !(album.added == true),
                   ),

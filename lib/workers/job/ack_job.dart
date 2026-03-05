@@ -4,10 +4,16 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../job_queue.dart';
 
 class AckJob extends JobQueue<List<Job>, List<Job>> {
-  AckJob({required super.database, required this.client});
+  AckJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.client,
+  });
 
   final Client client;
 
@@ -15,7 +21,8 @@ class AckJob extends JobQueue<List<Job>, List<Job>> {
   String get name => 'AckJob';
 
   @override
-  Future<void> insertJob(List<Job> jobs) => database.jobDao.insertAll(jobs);
+  Future<void> insertJob(List<Job> jobs) =>
+      requestDbWrite(DbWriteMethod.insertJobs, payload: jobs);
 
   @override
   Future<List<Job>> fetchJobs() => database.jobDao.ackJobs().get();
@@ -39,7 +46,10 @@ class AckJob extends JobQueue<List<Job>, List<Job>> {
       i(
         'ack ids: ${ack.map((e) => e.messageId).toList()}, request id: ${rsp.headers['x-request-id']}',
       );
-      await database.jobDao.deleteJobs(jobIds);
+      await requestDbWrite(
+        DbWriteMethod.deleteJobs,
+        payload: DbWriteDeleteJobsPayload(jobIds: jobIds),
+      );
     } catch (e, s) {
       w('Send ack error: $e, stack: $s');
       await Future.delayed(const Duration(seconds: 1));

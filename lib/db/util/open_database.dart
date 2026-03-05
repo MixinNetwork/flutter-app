@@ -37,7 +37,7 @@ Future<QueryExecutor> openQueryExecutor({
   required String identityNumber,
   required String dbName,
   required bool fromMainIsolate,
-  int readCount = 8,
+  int readCount = 3,
 }) async {
   final backgroundPortName =
       'one_mixin_drift_background_${identityNumber}_$dbName';

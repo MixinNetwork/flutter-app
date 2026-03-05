@@ -2,10 +2,16 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../job_queue.dart';
 
 abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
-  BaseMigrationJob({required super.database, required this.action}) {
+  BaseMigrationJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.action,
+  }) {
     DataBaseEventBus.instance.addJobStream
         .where((event) => event.action == action)
         .listen((event) => start());
@@ -27,7 +33,10 @@ abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
     final first = jobs.first;
 
     final invalidJobs = jobs.skip(1).map((e) => e.jobId).toList();
-    await database.jobDao.deleteJobs(invalidJobs);
+    await requestDbWrite(
+      DbWriteMethod.deleteJobs,
+      payload: DbWriteDeleteJobsPayload(jobIds: invalidJobs),
+    );
 
     return [first];
   }
@@ -68,7 +77,7 @@ abstract class BaseMigrationJob extends JobQueue<Job, List<Job>> {
   Future<void> migration(Job job);
 
   Future<void> onMigrationSuccess(Job job) async {
-    await database.jobDao.deleteJobById(job.jobId);
+    await requestDbWrite(DbWriteMethod.deleteJobById, payload: job.jobId);
   }
 
   @override

@@ -90,7 +90,6 @@ Future<void> showStickerPageDialog(
                 var albumId = album?.albumId;
 
                 final accountServer = context.accountServer;
-                final database = context.database;
                 final client = accountServer.client;
 
                 albumId ??= (await client.accountApi.getStickerById(
@@ -102,7 +101,7 @@ Future<void> showStickerPageDialog(
                 final stickerAlbum = (await client.accountApi.getStickerAlbum(
                   albumId,
                 )).data;
-                await database.stickerAlbumDao.insert(
+                await accountServer.upsertStickerAlbum(
                   stickerAlbum.asStickerAlbumsCompanion,
                 );
 
@@ -269,7 +268,7 @@ class _Item extends HookConsumerWidget {
                   opacity: album.added == true ? 0.4 : 1,
                   duration: const Duration(milliseconds: 200),
                   child: MixinButton(
-                    onTap: () => context.database.stickerAlbumDao.updateAdded(
+                    onTap: () => context.accountServer.updateStickerAlbumAdded(
                       album.albumId,
                       !(album.added == true),
                     ),
@@ -334,7 +333,7 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
               newList.insert(_newIndex, oldItem);
 
               list.value = newList;
-              context.database.stickerAlbumDao.updateOrders(list.value);
+              context.accountServer.updateStickerAlbumOrders(list.value);
             },
             itemBuilder: (context, index) {
               final album = list.value[index];
@@ -379,11 +378,8 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
                       ActionButton(
                         name: Resources.assetsImagesDeleteSvg,
                         color: context.theme.secondaryText,
-                        onTap: () =>
-                            context.database.stickerAlbumDao.updateAdded(
-                              album.albumId,
-                              false,
-                            ),
+                        onTap: () => context.accountServer
+                            .updateStickerAlbumAdded(album.albumId, false),
                       ),
                     ],
                   ),
@@ -525,7 +521,7 @@ class _StickerPage extends HookConsumerWidget {
                               ? context.theme.red
                               : context.theme.accent,
                           onTap: () =>
-                              context.database.stickerAlbumDao.updateAdded(
+                              context.accountServer.updateStickerAlbumAdded(
                                 album.albumId,
                                 !(album.added == true),
                               ),

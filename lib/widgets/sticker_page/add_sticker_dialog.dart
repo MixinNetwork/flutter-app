@@ -101,17 +101,13 @@ class _AddStickerDialog extends StatelessWidget {
                       context.accountServer.refreshSticker(force: true),
                     );
                   } else {
-                    await database.mixinDatabase.transaction(() async {
-                      await database.stickerDao.insert(
-                        sticker.asStickersCompanion,
-                      );
-                      await database.stickerRelationshipDao.insert(
-                        StickerRelationship(
-                          albumId: personalAlbum.albumId,
-                          stickerId: sticker.stickerId,
-                        ),
-                      );
-                    });
+                    await accountServer.insertStickerAndRelationship(
+                      sticker.asStickersCompanion,
+                      StickerRelationship(
+                        albumId: personalAlbum.albumId,
+                        stickerId: sticker.stickerId,
+                      ),
+                    );
                   }
                   showToastSuccessful();
                   Navigator.pop(context);

@@ -5,10 +5,16 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../constants/constants.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../runtime/db_write/method.dart';
+import '../../runtime/db_write/payload.dart';
 import '../job_queue.dart';
 
 class UpdateAssetJob extends JobQueue<Job, List<Job>> {
-  UpdateAssetJob({required super.database, required this.client});
+  UpdateAssetJob({
+    required super.database,
+    required super.requestDbWrite,
+    required this.client,
+  });
 
   final Client client;
 
@@ -35,7 +41,7 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
 
     if (exists) return;
 
-    await database.jobDao.insert(job);
+    await requestDbWrite(DbWriteMethod.insertJob, payload: job);
   }
 
   @override
@@ -49,11 +55,14 @@ class UpdateAssetJob extends JobQueue<Job, List<Job>> {
 
           final chain = (await client.assetApi.getChain(asset.chainId)).data;
 
-          await Future.wait([
-            database.assetDao.insertSdkAsset(asset),
-            database.chainDao.insertSdkChain(chain),
-            database.jobDao.deleteJobById(job.jobId),
-          ]);
+          await requestDbWrite(
+            DbWriteMethod.upsertAssetAndChain,
+            payload: DbWriteUpsertAssetAndChainPayload(
+              asset: asset,
+              chain: chain,
+            ),
+          );
+          await requestDbWrite(DbWriteMethod.deleteJobById, payload: job.jobId);
           return asset.assetId;
         } catch (e, s) {
           w('Update asset job error: $e, stack: $s');

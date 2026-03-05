@@ -801,15 +801,13 @@ class MessageItemWidget extends HookConsumerWidget {
         unawaited(accountServer.refreshSticker(force: true));
       } else {
         final data = mixinResponse.data;
-        await database.mixinDatabase.transaction(() async {
-          await database.stickerDao.insert(data.asStickersCompanion);
-          await database.stickerRelationshipDao.insert(
-            StickerRelationship(
-              albumId: personalAlbum.albumId,
-              stickerId: data.stickerId,
-            ),
-          );
-        });
+        await accountServer.insertStickerAndRelationship(
+          data.asStickersCompanion,
+          StickerRelationship(
+            albumId: personalAlbum.albumId,
+            stickerId: data.stickerId,
+          ),
+        );
       }
       showToastSuccessful();
     } catch (_) {

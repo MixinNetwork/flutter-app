@@ -123,15 +123,18 @@ class _InputContainer extends HookConsumerWidget {
 
     final mentionProviderInstance = mentionProvider(textEditingValueStream);
 
-    useEffect(() {
-      final updateDraft = context.database.conversationDao.updateDraft;
-      return () {
+    useEffect(
+      () => () {
         if (conversationId == null) return;
         if (textEditingController.text == originalDraft) return;
 
-        updateDraft(conversationId, textEditingController.text);
-      };
-    }, [conversationId, originalDraft]);
+        context.accountServer.updateConversationDraft(
+          conversationId,
+          textEditingController.text,
+        );
+      },
+      [conversationId, originalDraft],
+    );
 
     final focusNode = useFocusNode(
       onKeyEvent: (_, _) => KeyEventResult.ignored,

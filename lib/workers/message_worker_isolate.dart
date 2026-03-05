@@ -20,8 +20,11 @@ import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart' hide Chain;
+import '../runtime/db_write/method.dart';
+import '../runtime/db_write/payload.dart';
 import '../runtime/isolate/protocol.dart';
 import '../runtime/isolate/router.dart';
+import '../runtime/isolate/rpc_client.dart';
 import '../runtime/sync/tick_patch_batcher.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -43,6 +46,8 @@ import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
 import 'job/update_token_job.dart';
 import 'sender.dart';
+
+const _kWorkerDbWriteRpcPrefix = 'db_write:';
 
 class IsolateInitParams {
   IsolateInitParams({
@@ -82,6 +87,7 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
     inbound: isolateChannel.stream,
     sendMessage: isolateChannel.sink.add,
   );
+  final rpcClient = IsolateRpcClient(router);
   final runner = _MessageProcessRunner(
     identityNumber: params.identityNumber,
     userId: params.userId,
@@ -90,6 +96,7 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
     primarySessionId: params.primarySessionId,
     emitEvent: router.sendEvent,
     sendPort: params.sendPort,
+    rpcClient: rpcClient,
   );
   router.commands.listen((command) {
     try {
@@ -116,6 +123,7 @@ class _MessageProcessRunner {
     required this.primarySessionId,
     required this.emitEvent,
     required this.sendPort,
+    required this.rpcClient,
   }) : privateKey = ed.PrivateKey(base64Decode(privateKeyStr));
 
   final String identityNumber;
@@ -125,6 +133,7 @@ class _MessageProcessRunner {
   final ed.PrivateKey privateKey;
   final String? primarySessionId;
   final SendPort sendPort;
+  final IsolateRpcClient rpcClient;
 
   final void Function(WorkerEvent event) emitEvent;
   late final TickPatchBatcher _syncPatchBatcher = TickPatchBatcher(
@@ -157,7 +166,7 @@ class _MessageProcessRunner {
   Future<void> init(IsolateInitParams initParams) async {
     DataBaseEventBus.instance.legacyEventBridgeEnabled = false;
     database = Database(
-      await connectToDatabase(identityNumber, readCount: 4),
+      await connectToDatabase(identityNumber),
       await FtsDatabase.connect(identityNumber),
     );
 
@@ -176,10 +185,15 @@ class _MessageProcessRunner {
       loginByPhoneNumber: initParams.loginByPhoneNumber,
     )..configProxySetting(database.settingProperties);
 
-    _ackJob = AckJob(database: database, client: client);
+    _ackJob = AckJob(
+      database: database,
+      requestDbWrite: _requestDbWrite,
+      client: client,
+    );
 
     _floodJob = FloodJob(
       database: database,
+      requestDbWrite: _requestDbWrite,
       getProcessFloodJob: getProcessFloodJob,
     );
 
@@ -192,6 +206,7 @@ class _MessageProcessRunner {
       await generateUserAgent(),
       _ackJob,
       _floodJob,
+      _requestDbWrite,
     );
 
     blaze.connectedStateStream.listen((event) {
@@ -209,10 +224,12 @@ class _MessageProcessRunner {
       sessionId,
       userId,
       database,
+      _requestDbWrite,
     );
 
     _sendingJob = SendingJob(
       database: database,
+      requestDbWrite: _requestDbWrite,
       sender: _sender,
       userId: userId,
       sessionId: sessionId,
@@ -222,22 +239,36 @@ class _MessageProcessRunner {
 
     _sessionAckJob = SessionAckJob(
       database: database,
+      requestDbWrite: _requestDbWrite,
       userId: userId,
       primarySessionId: primarySessionId,
       sender: _sender,
     );
-    _updateAssetJob = UpdateAssetJob(database: database, client: client);
-    _updateTokenJob = UpdateTokenJob(database: database, client: client);
-
-    _updateStickerJob = UpdateStickerJob(database: database, client: client);
-    _syncInscriptionMessageJob = SyncInscriptionMessageJob(
+    _updateAssetJob = UpdateAssetJob(
       database: database,
+      requestDbWrite: _requestDbWrite,
+      client: client,
+    );
+    _updateTokenJob = UpdateTokenJob(
+      database: database,
+      requestDbWrite: _requestDbWrite,
       client: client,
     );
 
-    MigrateFtsJob(database: database);
-    DeleteOldFtsRecordJob(database: database);
-    CleanupQuoteContentJob(database: database);
+    _updateStickerJob = UpdateStickerJob(
+      database: database,
+      requestDbWrite: _requestDbWrite,
+      client: client,
+    );
+    _syncInscriptionMessageJob = SyncInscriptionMessageJob(
+      database: database,
+      requestDbWrite: _requestDbWrite,
+      client: client,
+    );
+
+    MigrateFtsJob(database: database, requestDbWrite: _requestDbWrite);
+    DeleteOldFtsRecordJob(database: database, requestDbWrite: _requestDbWrite);
+    CleanupQuoteContentJob(database: database, requestDbWrite: _requestDbWrite);
 
     if (primarySessionId != null) {
       _deviceTransfer = await startTransferIsolate(
@@ -279,6 +310,7 @@ class _MessageProcessRunner {
       _deviceTransfer,
       _updateTokenJob,
       _syncInscriptionMessageJob,
+      _requestDbWrite,
     );
 
     jobSubscribers.add(
@@ -313,6 +345,17 @@ class _MessageProcessRunner {
 
   void _sendEventToMainIsolate(WorkerEvent event) => emitEvent(event);
 
+  Future<void> _requestDbWrite(
+    DbWriteMethod method, {
+    Object? payload,
+  }) async {
+    await rpcClient.request(
+      '$_kWorkerDbWriteRpcPrefix${method.name}',
+      payload: payload,
+      timeout: const Duration(seconds: 20),
+    );
+  }
+
   Future<void> _scheduleExpiredJob() async {
     d('_scheduleExpiredJob');
     final messages = await database.expiredMessageDao
@@ -326,14 +369,25 @@ class _MessageProcessRunner {
       );
       if (message == null) {
         e('message is null, messageId: ${em.messageId} ${em.expireAt}');
-        await database.expiredMessageDao.deleteByMessageId(em.messageId);
+        await _requestDbWrite(
+          DbWriteMethod.deleteExpiredMessageByMessageId,
+          payload: em.messageId,
+        );
         continue;
       }
-      await database.messageDao.deleteMessage(
-        message.conversationId,
-        em.messageId,
+      await _requestDbWrite(
+        DbWriteMethod.deleteMessage,
+        payload: DbWriteDeleteMessagePayload(
+          conversationId: message.conversationId,
+          messageId: em.messageId,
+        ),
       );
-      unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
+      unawaited(
+        _requestDbWrite(
+          DbWriteMethod.deleteFtsByMessageId,
+          payload: em.messageId,
+        ),
+      );
       if (message.category.isAttachment || message.category.isTranscript) {
         _sendEventToMainIsolate(
           WorkerRequestDownloadAttachmentEvent(
@@ -395,6 +449,7 @@ class _MessageProcessRunner {
     _syncPatchBatcher.dispose();
     blaze.dispose();
     database.dispose();
+    unawaited(rpcClient.dispose());
     jobSubscribers.forEach((subscription) => subscription.cancel());
     _deviceTransfer?.dispose();
   }

@@ -154,7 +154,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                   await context.accountServer.deleteMessagesByConversationId(
                     conversationId,
                   );
-                  await context.database.conversationDao.deleteConversation(
+                  await context.accountServer.deleteConversation(
                     conversationId,
                   );
                   if (ref.read(conversationProvider)?.conversationId ==
