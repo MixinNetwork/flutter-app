@@ -4,13 +4,11 @@ import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
 
-import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
@@ -27,8 +25,6 @@ import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
 import 'ui/provider/slide_category_provider.dart';
 import 'utils/extension/extension.dart';
-import 'utils/logger.dart';
-import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
@@ -208,42 +204,6 @@ class _Home extends HookConsumerWidget {
     final accountServer = ref.watch(
       accountServerProvider.select((value) => value.valueOrNull),
     );
-
-    useEffect(() {
-      accountServer?.refreshSelf();
-      accountServer?.refreshFriends();
-      accountServer?.refreshSticker();
-      accountServer?.initCircles();
-      accountServer?.checkMigration();
-    }, [accountServer]);
-
-    useEffect(() {
-      Future<void> effect() async {
-        if (accountServer == null) return;
-
-        try {
-          final currentDeviceId = await getDeviceId();
-          if (currentDeviceId == 'unknown') return;
-
-          final deviceId = AccountKeyValue.instance.deviceId;
-
-          if (deviceId == null) {
-            await AccountKeyValue.instance.setDeviceId(currentDeviceId);
-            return;
-          }
-
-          if (deviceId.toLowerCase() != currentDeviceId.toLowerCase()) {
-            final multiAuthCubit = context.multiAuthChangeNotifier;
-            await accountServer.signOutAndClear();
-            multiAuthCubit.signOut();
-          }
-        } catch (e) {
-          w('checkDeviceId error: $e');
-        }
-      }
-
-      effect();
-    }, [accountServer]);
 
     if (accountServer != null) {
       BlocProvider.of<ConversationListBloc>(context)
