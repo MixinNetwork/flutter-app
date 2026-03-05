@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
@@ -9,7 +8,6 @@ import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_channel/isolate_channel.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
@@ -27,6 +25,10 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
+import '../runtime/isolate/protocol.dart';
+import '../runtime/isolate/router.dart';
+import '../runtime/isolate/rpc_client.dart';
+import '../runtime/isolate/worker_supervisor.dart';
 import '../ui/provider/account_server_provider.dart';
 import '../ui/provider/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
@@ -190,7 +192,9 @@ class AccountServer {
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
 
-  IsolateChannel<dynamic>? _isolateChannel;
+  WorkerSupervisor<IsolateInitParams>? _workerSupervisor;
+  IsolateRouter? _workerRouter;
+  IsolateRpcClient? _workerRpcClient;
 
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
@@ -199,24 +203,21 @@ class AccountServer {
       _connectedStateBehaviorSubject;
 
   Future<void> reconnectBlaze() async {
-    _sendEventToWorkerIsolate(MainIsolateEventType.reconnectBlaze);
+    _sendCommandToWorker(const ReconnectBlazeCommand());
   }
 
   void _notifyBlazeWaitSyncTime() {
-    _sendEventToWorkerIsolate(MainIsolateEventType.disconnectBlazeWithTime);
+    _sendCommandToWorker(const DisconnectBlazeWithTimeCommand());
   }
 
   final jobSubscribers = <StreamSubscription>{};
 
   Future<void> _start() async {
-    final receivePort = ReceivePort();
-    _isolateChannel = IsolateChannel<dynamic>.connectReceive(receivePort);
-    final exitReceivePort = ReceivePort();
-    final errorReceivePort = ReceivePort();
-    await Isolate.spawn(
-      startMessageProcessIsolate,
-      IsolateInitParams(
-        sendPort: receivePort.sendPort,
+    await _workerSupervisor?.dispose();
+    _workerSupervisor = WorkerSupervisor<IsolateInitParams>(
+      entryPoint: startMessageProcessIsolate,
+      initParamsFactory: (sendPort) => IsolateInitParams(
+        sendPort: sendPort,
         identityNumber: identityNumber,
         userId: userId,
         sessionId: sessionId,
@@ -226,28 +227,39 @@ class AccountServer {
         loginByPhoneNumber: _loginByPhoneNumber,
         rootIsolateToken: ServicesBinding.rootIsolateToken!,
       ),
-      errorsAreFatal: false,
-      onExit: exitReceivePort.sendPort,
-      onError: errorReceivePort.sendPort,
+      debugName: 'mixin_message_worker_supervisor',
     );
+
+    _workerRouter = IsolateRouter.main(
+      inbound: _workerSupervisor!.messages,
+      sendMessage: _workerSupervisor!.send,
+    );
+    await _workerRpcClient?.dispose();
+    _workerRpcClient = IsolateRpcClient(_workerRouter!);
+
     jobSubscribers
       ..add(
-        exitReceivePort.listen((message) {
-          w('worker isolate service exited. $message');
-          _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
-        }),
-      )
-      ..add(
-        errorReceivePort.listen((error) {
-          e('work isolate RemoteError: $error');
-        }),
-      )
-      ..add(
-        _isolateChannel!.stream.listen((event) {
-          if (event is! WorkerIsolateEvent) {
-            e('unexpected event from worker isolate: $event');
-            return;
+        _workerSupervisor!.events.listen((event) {
+          switch (event) {
+            case WorkerExitedEvent(:final payload):
+              w('worker isolate service exited. $payload');
+              _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
+            case WorkerErrorEvent(:final payload):
+              e('worker isolate remote error: $payload');
+            case WorkerRestartScheduledEvent(:final reason, :final delay):
+              w(
+                'worker restart scheduled: $reason after ${delay.inMilliseconds}ms',
+              );
+            case WorkerStartingEvent():
+            case WorkerStartedEvent():
+            case WorkerStoppedEvent():
+              // No-op.
+              break;
           }
+        }),
+      )
+      ..add(
+        _workerRouter!.events.listen((event) {
           try {
             _handleWorkIsolateEvent(event);
           } catch (error, stacktrace) {
@@ -255,21 +267,21 @@ class AccountServer {
           }
         }),
       );
+
+    await _workerSupervisor!.start();
   }
 
-  void _handleWorkIsolateEvent(WorkerIsolateEvent event) {
-    switch (event.type) {
-      case WorkerIsolateEventType.onIsolateReady:
+  void _handleWorkIsolateEvent(WorkerEvent event) {
+    switch (event) {
+      case WorkerIsolateReadyEvent():
         d('message process service ready');
-      case WorkerIsolateEventType.onBlazeConnectStateChanged:
-        _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
-      case WorkerIsolateEventType.onApiRequestedError:
-        _onClientRequestError(event.argument as DioException);
-      case WorkerIsolateEventType.requestDownloadAttachment:
-        final request = event.argument as AttachmentRequest;
+      case WorkerBlazeConnectStateChangedEvent(:final state):
+        _connectedStateBehaviorSubject.add(state);
+      case WorkerApiRequestedErrorEvent(:final error):
+        _onClientRequestError(error);
+      case WorkerRequestDownloadAttachmentEvent(:final request):
         _onAttachmentDownloadRequest(request);
-      case WorkerIsolateEventType.showPinMessage:
-        final conversationId = event.argument as String;
+      case WorkerShowPinMessageEvent(:final conversationId):
         unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
     }
   }
@@ -321,15 +333,13 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
-    _sendEventToWorkerIsolate(MainIsolateEventType.exit);
+    _sendCommandToWorker(const ExitWorkerCommand());
+    await _shutdownWorker();
     try {
       await client.accountApi.logout(LogoutRequest(sessionId));
     } catch (error, stacktrace) {
       e('logout api error: $error, $stacktrace');
     }
-    await Future.wait(jobSubscribers.map((s) => s.cancel()));
-    jobSubscribers.clear();
-
     await clearKeyValues();
 
     try {
@@ -672,20 +682,19 @@ class AccountServer {
   );
 
   void selectConversation(String? conversationId) {
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.updateSelectedConversation,
-      conversationId,
+    _sendCommandToWorker(
+      UpdateSelectedConversationCommand(conversationId: conversationId),
     );
   }
 
   void addAckJob(List<db.Job> jobs) {
     assert(jobs.every((job) => job.action == kAcknowledgeMessageReceipts));
-    _sendEventToWorkerIsolate(MainIsolateEventType.addAckJobs, jobs);
+    _sendCommandToWorker(AddAckJobsCommand(jobs: jobs));
   }
 
   void addSessionAckJob(List<db.Job> jobs) {
     assert(jobs.every((job) => job.action == kCreateMessage));
-    _sendEventToWorkerIsolate(MainIsolateEventType.addSessionAckJobs, jobs);
+    _sendCommandToWorker(AddSessionAckJobsCommand(jobs: jobs));
   }
 
   void addSendingJob(db.Job job) {
@@ -694,28 +703,29 @@ class AccountServer {
           job.action == kPinMessage ||
           job.action == kRecallMessage,
     );
-    _sendEventToWorkerIsolate(MainIsolateEventType.addSendingJob, job);
+    _sendCommandToWorker(AddSendingJobCommand(job: job));
   }
 
   void addUpdateAssetJob(db.Job job) {
     assert(job.action == kUpdateAsset);
-    _sendEventToWorkerIsolate(MainIsolateEventType.addUpdateAssetJob, job);
+    _sendCommandToWorker(AddUpdateAssetJobCommand(job: job));
   }
 
   void addUpdateTokenJob(db.Job job) {
     assert(job.action == kUpdateToken);
-    _sendEventToWorkerIsolate(MainIsolateEventType.addUpdateTokenJob, job);
+    _sendCommandToWorker(AddUpdateTokenJobCommand(job: job));
   }
 
   void addUpdateStickerJob(db.Job job) {
     assert(job.action == kUpdateSticker);
-    _sendEventToWorkerIsolate(MainIsolateEventType.addUpdateStickerJob, job);
+    _sendCommandToWorker(AddUpdateStickerJobCommand(job: job));
   }
 
   void addSyncInscriptionMessageJob(String messageId) {
-    _sendEventToWorkerIsolate(
-      MainIsolateEventType.addSyncInscriptionMessageJob,
-      createSyncInscriptionMessageJob(messageId),
+    _sendCommandToWorker(
+      AddSyncInscriptionMessageJobCommand(
+        job: createSyncInscriptionMessageJob(messageId),
+      ),
     );
   }
 
@@ -774,7 +784,8 @@ class AccountServer {
   Future<void> stop() async {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
-    _sendEventToWorkerIsolate(MainIsolateEventType.exit);
+    _sendCommandToWorker(const ExitWorkerCommand());
+    await _shutdownWorker();
   }
 
   void release() {
@@ -1627,15 +1638,29 @@ class AccountServer {
     await _injector.insertUpdateUsers(usersResponse.data);
   }
 
-  void _sendEventToWorkerIsolate(MainIsolateEventType type, [dynamic args]) {
+  void _sendCommandToWorker(WorkerCommand command) {
     try {
-      if (_isolateChannel == null) {
-        d('_sendEventToWorkerIsolate: _isolateChannel is null $type');
-        assert(type == MainIsolateEventType.exit);
+      final router = _workerRouter;
+      if (router == null) {
+        d('_sendCommandToWorker: _workerRouter is null $command');
+        assert(command is ExitWorkerCommand);
+        return;
       }
-      _isolateChannel?.sink.add(type.toEvent(args));
+      router.sendCommand(command);
     } catch (error, s) {
-      e('_sendEventToWorkerIsolate: $error, $s');
+      e('_sendCommandToWorker: $error, $s');
     }
+  }
+
+  Future<void> _shutdownWorker() async {
+    await Future.wait(jobSubscribers.map((s) => s.cancel()));
+    jobSubscribers.clear();
+    await _workerRpcClient?.dispose();
+    _workerRpcClient = null;
+    await _workerRouter?.dispose();
+    _workerRouter = null;
+    await _workerSupervisor?.stop();
+    await _workerSupervisor?.dispose();
+    _workerSupervisor = null;
   }
 }

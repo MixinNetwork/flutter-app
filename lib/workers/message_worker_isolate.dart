@@ -20,6 +20,8 @@ import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart' hide Chain;
+import '../runtime/isolate/protocol.dart';
+import '../runtime/isolate/router.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
@@ -72,8 +74,12 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   await Rhttp.init();
   BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
-  final isolateChannel = IsolateChannel<IsolateEvent>.connectSend(
+  final isolateChannel = IsolateChannel<dynamic>.connectSend(
     params.sendPort,
+  );
+  final router = IsolateRouter.worker(
+    inbound: isolateChannel.stream,
+    sendMessage: isolateChannel.sink.add,
   );
   final runner = _MessageProcessRunner(
     identityNumber: params.identityNumber,
@@ -81,23 +87,21 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
     sessionId: params.sessionId,
     privateKeyStr: params.privateKey,
     primarySessionId: params.primarySessionId,
-    eventSink: isolateChannel.sink,
+    emitEvent: router.sendEvent,
     sendPort: params.sendPort,
   );
-  isolateChannel.stream.listen((event) {
-    assert(event is MainIsolateEvent, 'event is not MainIsolateEvent');
-    if (event is! MainIsolateEvent) {
-      return;
-    }
+  router.commands.listen((command) {
     try {
-      runner.onEvent(event);
+      runner.onCommand(command);
     } catch (error, stacktrace) {
       e('error: $error, stacktrace: $stacktrace');
     }
   });
   await runner.init(params);
   runner._start();
-  isolateChannel.sink.add(WorkerIsolateEventType.onIsolateReady.toEvent());
+  router
+    ..sendReady()
+    ..sendEvent(const WorkerIsolateReadyEvent());
 }
 
 final Map<String, MessageStatus> pendingMessageStatusMap = {};
@@ -109,7 +113,7 @@ class _MessageProcessRunner {
     required this.sessionId,
     required this.privateKeyStr,
     required this.primarySessionId,
-    required this.eventSink,
+    required this.emitEvent,
     required this.sendPort,
   }) : privateKey = ed.PrivateKey(base64Decode(privateKeyStr));
 
@@ -121,7 +125,7 @@ class _MessageProcessRunner {
   final String? primarySessionId;
   final SendPort sendPort;
 
-  final Sink<IsolateEvent> eventSink;
+  final void Function(WorkerEvent event) emitEvent;
 
   DecryptMessage? _decryptMessage;
 
@@ -158,10 +162,7 @@ class _MessageProcessRunner {
       interceptors: [
         InterceptorsWrapper(
           onError: (e, handler) async {
-            _sendEventToMainIsolate(
-              WorkerIsolateEventType.onApiRequestedError,
-              e,
-            );
+            _sendEventToMainIsolate(WorkerApiRequestedErrorEvent(error: e));
             handler.next(e);
           },
         ),
@@ -189,8 +190,7 @@ class _MessageProcessRunner {
 
     blaze.connectedStateStream.listen((event) {
       _sendEventToMainIsolate(
-        WorkerIsolateEventType.onBlazeConnectStateChanged,
-        event,
+        WorkerBlazeConnectStateChangedEvent(state: event),
       );
     });
 
@@ -299,12 +299,7 @@ class _MessageProcessRunner {
       );
   }
 
-  void _sendEventToMainIsolate(
-    WorkerIsolateEventType event, [
-    dynamic argument,
-  ]) {
-    eventSink.add(event.toEvent(argument));
-  }
+  void _sendEventToMainIsolate(WorkerEvent event) => emitEvent(event);
 
   Future<void> _scheduleExpiredJob() async {
     d('_scheduleExpiredJob');
@@ -329,8 +324,9 @@ class _MessageProcessRunner {
       unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
       if (message.category.isAttachment || message.category.isTranscript) {
         _sendEventToMainIsolate(
-          WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDeleteRequest(message: message),
+          WorkerRequestDownloadAttachmentEvent(
+            request: AttachmentDeleteRequest(message: message),
+          ),
         );
       }
     }
@@ -354,31 +350,30 @@ class _MessageProcessRunner {
     );
   }
 
-  void onEvent(MainIsolateEvent event) {
-    switch (event.type) {
-      case MainIsolateEventType.updateSelectedConversation:
-        final conversationId = event.argument as String?;
+  void onCommand(WorkerCommand command) {
+    switch (command) {
+      case UpdateSelectedConversationCommand(:final conversationId):
         _decryptMessage?.conversationId = conversationId;
-      case MainIsolateEventType.disconnectBlazeWithTime:
+      case DisconnectBlazeWithTimeCommand():
         blaze.waitSyncTime();
-      case MainIsolateEventType.reconnectBlaze:
+      case ReconnectBlazeCommand():
         i('message worker isolate: reconnect blaze');
         blaze.reconnect();
-      case MainIsolateEventType.addAckJobs:
-        _ackJob.add(event.argument as List<Job>);
-      case MainIsolateEventType.addSessionAckJobs:
-        _sessionAckJob.add(event.argument as List<Job>);
-      case MainIsolateEventType.addSendingJob:
-        _sendingJob.add(event.argument as Job);
-      case MainIsolateEventType.addUpdateAssetJob:
-        _updateAssetJob.add(event.argument as Job);
-      case MainIsolateEventType.addUpdateTokenJob:
-        _updateTokenJob.add(event.argument as Job);
-      case MainIsolateEventType.addUpdateStickerJob:
-        _updateStickerJob.add(event.argument as Job);
-      case MainIsolateEventType.addSyncInscriptionMessageJob:
-        _syncInscriptionMessageJob.add(event.argument as Job);
-      case MainIsolateEventType.exit:
+      case AddAckJobsCommand(:final jobs):
+        _ackJob.add(jobs);
+      case AddSessionAckJobsCommand(:final jobs):
+        _sessionAckJob.add(jobs);
+      case AddSendingJobCommand(:final job):
+        _sendingJob.add(job);
+      case AddUpdateAssetJobCommand(:final job):
+        _updateAssetJob.add(job);
+      case AddUpdateTokenJobCommand(:final job):
+        _updateTokenJob.add(job);
+      case AddUpdateStickerJobCommand(:final job):
+        _updateStickerJob.add(job);
+      case AddSyncInscriptionMessageJobCommand(:final job):
+        _syncInscriptionMessageJob.add(job);
+      case ExitWorkerCommand():
         dispose();
         Isolate.exit();
     }

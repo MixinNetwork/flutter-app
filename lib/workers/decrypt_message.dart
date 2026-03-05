@@ -35,6 +35,7 @@ import '../enum/message_action.dart';
 import '../enum/message_category.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
+import '../runtime/isolate/protocol.dart';
 import '../utils/device_transfer/transfer_data_command.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
@@ -74,8 +75,7 @@ class DecryptMessage extends Injector {
     _encryptedProtocol = EncryptedProtocol();
   }
 
-  final void Function(WorkerIsolateEventType event, [dynamic argument])
-  _isolateEventSender;
+  final void Function(WorkerEvent event) _isolateEventSender;
 
   String? _conversationId;
   late final SignalProtocol _signalProtocol;
@@ -552,8 +552,7 @@ class DecryptMessage extends Injector {
         );
       });
       _isolateEventSender(
-        WorkerIsolateEventType.showPinMessage,
-        data.conversationId,
+        WorkerShowPinMessageEvent(conversationId: data.conversationId),
       );
     } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
@@ -583,8 +582,9 @@ class DecryptMessage extends Injector {
       (() async {
         if (message != null && message.category.isAttachment) {
           _isolateEventSender(
-            WorkerIsolateEventType.requestDownloadAttachment,
-            AttachmentCancelRequest(messageId: message.messageId),
+            WorkerRequestDownloadAttachmentEvent(
+              request: AttachmentCancelRequest(messageId: message.messageId),
+            ),
           );
           if (message.mediaUrl?.isNotEmpty ?? false) {
             final file = File(message.mediaUrl!);
@@ -712,8 +712,9 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
       _isolateEventSender(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentDownloadRequest(message),
+        WorkerRequestDownloadAttachmentEvent(
+          request: AttachmentDownloadRequest(message),
+        ),
       );
     } else if (data.category.isVideo) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
@@ -753,8 +754,9 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
       _isolateEventSender(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentDownloadRequest(message),
+        WorkerRequestDownloadAttachmentEvent(
+          request: AttachmentDownloadRequest(message),
+        ),
       );
     } else if (data.category.isData) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
@@ -790,8 +792,9 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
       _isolateEventSender(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentDownloadRequest(message),
+        WorkerRequestDownloadAttachmentEvent(
+          request: AttachmentDownloadRequest(message),
+        ),
       );
     } else if (data.category.isAudio) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
@@ -829,8 +832,9 @@ class DecryptMessage extends Injector {
       );
       await _insertMessage(message, data);
       _isolateEventSender(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentDownloadRequest(message),
+        WorkerRequestDownloadAttachmentEvent(
+          request: AttachmentDownloadRequest(message),
+        ),
       );
     } else if (data.category.isSticker) {
       final plain = data.category.isEncrypted ? plainText : _decode(plainText);
@@ -1372,8 +1376,9 @@ class DecryptMessage extends Injector {
 
       if (message != null) {
         _isolateEventSender(
-          WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDownloadRequest(message),
+          WorkerRequestDownloadAttachmentEvent(
+            request: AttachmentDownloadRequest(message),
+          ),
         );
       }
     } else if (data.category == MessageCategory.signalSticker) {
@@ -1659,8 +1664,9 @@ class DecryptMessage extends Injector {
     transcripts.forEach((message) {
       if (message.category.isAttachment && message.content != null) {
         _isolateEventSender(
-          WorkerIsolateEventType.requestDownloadAttachment,
-          TranscriptAttachmentDownloadRequest(message),
+          WorkerRequestDownloadAttachmentEvent(
+            request: TranscriptAttachmentDownloadRequest(message),
+          ),
         );
       }
     });
