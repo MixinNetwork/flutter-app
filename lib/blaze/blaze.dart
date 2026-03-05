@@ -19,7 +19,7 @@ import '../utils/logger.dart';
 import '../utils/proxy.dart';
 import '../workers/job/ack_job.dart';
 import '../workers/job/flood_job.dart';
-import '../workers/message_worker_isolate.dart';
+import '../workers/sync_worker_isolate.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
 

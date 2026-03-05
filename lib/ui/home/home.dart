@@ -20,6 +20,7 @@ import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
 import '../landing/landing.dart';
+import '../provider/account_server_provider.dart';
 import '../provider/conversation_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/responsive_navigator_provider.dart';
@@ -51,14 +52,11 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localTimeError =
-        useMemoizedStream(
-          () => context.accountServer.connectedStateStream
-              .map((event) => event == ConnectedState.hasLocalTimeError)
-              .distinct(),
-          keys: [context.accountServer],
-        ).data ??
-        false;
+    final localTimeError = ref.watch(
+      appRuntimeHubProvider.select(
+        (value) => value.connectedState == ConnectedState.hasLocalTimeError,
+      ),
+    );
 
     final isEmptyUserName = ref.watch(
       authAccountProvider.select((value) => value?.fullName?.isEmpty ?? true),

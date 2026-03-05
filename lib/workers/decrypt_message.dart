@@ -52,8 +52,8 @@ import 'job/sync_inscription_message_job.dart';
 import 'job/update_asset_job.dart';
 import 'job/update_sticker_job.dart';
 import 'job/update_token_job.dart';
-import 'message_worker_isolate.dart';
 import 'sender.dart';
+import 'sync_worker_isolate.dart';
 
 class DecryptMessage extends Injector {
   DecryptMessage(

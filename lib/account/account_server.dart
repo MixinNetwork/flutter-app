@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
@@ -22,7 +21,6 @@ import '../db/dao/circle_dao.dart';
 import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
-import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
@@ -31,9 +29,7 @@ import '../enum/message_category.dart';
 import '../runtime/db_write/method.dart';
 import '../runtime/db_write/payload.dart';
 import '../runtime/isolate/protocol.dart';
-import '../runtime/isolate/router.dart';
-import '../runtime/isolate/rpc_client.dart';
-import '../runtime/isolate/worker_supervisor.dart';
+import '../runtime/session/app_runtime_session_host.dart';
 import '../ui/provider/account_server_provider.dart';
 import '../ui/provider/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
@@ -47,25 +43,52 @@ import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
-import '../workers/db_write_worker_isolate.dart';
 import '../workers/injector.dart';
 import '../workers/isolate_event.dart';
-import '../workers/message_worker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
 
-const _kWorkerDbWriteRpcPrefix = 'db_write:';
-
 class AccountServer {
-  AccountServer({
+  AccountServer._({
     required this.multiAuthNotifier,
     required this.settingChangeNotifier,
     required this.database,
     required this.currentConversationId,
-    this.userAgent,
-    this.deviceId,
-  });
+    required this.userId,
+    required this.sessionId,
+    required this.identityNumber,
+    required this.privateKey,
+    required AppRuntimeSessionHost runtimeSession,
+  }) : _runtimeSession = runtimeSession;
+
+  factory AccountServer.create({
+    required MultiAuthStateNotifier multiAuthNotifier,
+    required SettingChangeNotifier settingChangeNotifier,
+    required Database database,
+    required GetCurrentConversationId currentConversationId,
+    required String userId,
+    required String sessionId,
+    required String identityNumber,
+    required String privateKey,
+    required AppRuntimeSessionHost runtimeSession,
+  }) {
+    sid = sessionId;
+    final accountServer = AccountServer._(
+      multiAuthNotifier: multiAuthNotifier,
+      settingChangeNotifier: settingChangeNotifier,
+      database: database,
+      currentConversationId: currentConversationId,
+      userId: userId,
+      sessionId: sessionId,
+      identityNumber: identityNumber,
+      privateKey: privateKey,
+      runtimeSession: runtimeSession,
+    );
+    return accountServer
+      .._initClient()
+      .._bindRuntimeSession();
+  }
 
   static String? sid;
 
@@ -76,32 +99,15 @@ class AccountServer {
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   final GetCurrentConversationId currentConversationId;
+  final AppRuntimeSessionHost _runtimeSession;
   Timer? checkSignalKeyTimer;
 
-  bool get _loginByPhoneNumber =>
-      AccountKeyValue.instance.primarySessionId == null;
-  String? userAgent;
-  String? deviceId;
+  final String userId;
+  final String sessionId;
+  final String identityNumber;
+  final String privateKey;
 
-  Future<void> initServer(
-    String userId,
-    String sessionId,
-    String identityNumber,
-    String privateKey,
-  ) async {
-    if (sid == sessionId) return;
-    sid = sessionId;
-
-    this.userId = userId;
-    this.sessionId = sessionId;
-    this.identityNumber = identityNumber;
-    this.privateKey = privateKey;
-
-    await initKeyValues(identityNumber);
-
-    await _startDbWriteWorker();
-    await _initClient();
-
+  Future<void> activate() async {
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
       checkSignalKey(client);
@@ -121,8 +127,6 @@ class AccountServer {
       multiAuthNotifier.signOut();
       rethrow;
     }
-
-    unawaited(_start());
 
     DownloadKeyValue.instance.messageIds.forEach((messageId) {
       attachmentUtil.downloadAttachment(messageId: messageId);
@@ -165,12 +169,12 @@ class AccountServer {
     markRead(id);
   }
 
-  Future<void> _initClient() async {
+  void _initClient() {
     client = createClient(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
-      loginByPhoneNumber: _loginByPhoneNumber,
+      loginByPhoneNumber: AccountKeyValue.instance.primarySessionId == null,
       interceptors: [
         InterceptorsWrapper(
           onError: (e, handler) async {
@@ -197,228 +201,27 @@ class AccountServer {
     );
   }
 
-  late String userId;
-  late String sessionId;
-  late String identityNumber;
-  late String privateKey;
-
   late Client client;
   late Injector _injector;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
 
-  WorkerSupervisor<IsolateInitParams>? _workerSupervisor;
-  IsolateRouter? _workerRouter;
-  IsolateRpcClient? _workerRpcClient;
-
-  WorkerSupervisor<DbWriteWorkerInitParams>? _dbWriteWorkerSupervisor;
-  IsolateRouter? _dbWriteWorkerRouter;
-  IsolateRpcClient? _dbWriteRpcClient;
-
-  final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
-      BehaviorSubject<ConnectedState>();
-
   ValueStream<ConnectedState> get connectedStateStream =>
-      _connectedStateBehaviorSubject;
+      _runtimeSession.connectedStateStream;
 
   Future<void> reconnectBlaze() async {
-    _sendCommandToWorker(const ReconnectBlazeCommand());
+    _runtimeSession.sendSyncCommand(const ReconnectBlazeCommand());
   }
 
   void _notifyBlazeWaitSyncTime() {
-    _sendCommandToWorker(const DisconnectBlazeWithTimeCommand());
+    _runtimeSession.sendSyncCommand(const DisconnectBlazeWithTimeCommand());
   }
 
-  final jobSubscribers = <StreamSubscription>{};
-
-  Future<void> _start() async {
-    await _workerSupervisor?.dispose();
-    _workerSupervisor = WorkerSupervisor<IsolateInitParams>(
-      entryPoint: startMessageProcessIsolate,
-      initParamsFactory: (sendPort) => IsolateInitParams(
-        sendPort: sendPort,
-        identityNumber: identityNumber,
-        userId: userId,
-        sessionId: sessionId,
-        privateKey: privateKey,
-        mixinDocumentDirectory: mixinDocumentsDirectory.path,
-        primarySessionId: AccountKeyValue.instance.primarySessionId,
-        loginByPhoneNumber: _loginByPhoneNumber,
-        rootIsolateToken: ServicesBinding.rootIsolateToken!,
-      ),
-      debugName: 'mixin_message_worker_supervisor',
-    );
-
-    _workerRouter = IsolateRouter.main(
-      inbound: _workerSupervisor!.messages,
-      sendMessage: _workerSupervisor!.send,
-    );
-    await _workerRpcClient?.dispose();
-    _workerRpcClient = IsolateRpcClient(_workerRouter!);
-
-    jobSubscribers
-      ..add(
-        _workerSupervisor!.events.listen((event) {
-          switch (event) {
-            case WorkerExitedEvent(:final payload):
-              w('worker isolate service exited. $payload');
-              _connectedStateBehaviorSubject.add(ConnectedState.disconnected);
-            case WorkerErrorEvent(:final payload):
-              e('worker isolate remote error: $payload');
-            case WorkerRestartScheduledEvent(:final reason, :final delay):
-              w(
-                'worker restart scheduled: $reason after ${delay.inMilliseconds}ms',
-              );
-            case WorkerStartingEvent():
-            case WorkerStartedEvent():
-            case WorkerStoppedEvent():
-              // No-op.
-              break;
-          }
-        }),
-      )
-      ..add(
-        _workerRouter!.events.listen((event) {
-          try {
-            _handleWorkIsolateEvent(event);
-          } catch (error, stacktrace) {
-            e('handle worker isolate event failed: $error, $stacktrace');
-          }
-        }),
-      )
-      ..add(
-        _workerRouter!.rpcRequests.listen((request) async {
-          final router = _workerRouter;
-          if (router == null) return;
-
-          final method = request.method;
-          if (!method.startsWith(_kWorkerDbWriteRpcPrefix)) {
-            router.sendRpcResponse(
-              RpcErrorResponse(
-                requestId: request.requestId,
-                code: 'unsupported_worker_rpc',
-                message: 'Unsupported worker rpc method: $method',
-              ),
-            );
-            return;
-          }
-
-          final dbWriteMethodName = method.substring(
-            _kWorkerDbWriteRpcPrefix.length,
-          );
-          try {
-            final dbRpcClient = _dbWriteRpcClient;
-            if (dbRpcClient == null) {
-              throw StateError('db write rpc client not ready');
-            }
-            final result = await dbRpcClient.request(
-              dbWriteMethodName,
-              payload: request.payload,
-              timeout: const Duration(seconds: 20),
-            );
-            router.sendRpcResponse(
-              RpcSuccessResponse(
-                requestId: request.requestId,
-                result: result,
-              ),
-            );
-          } catch (error, stackTrace) {
-            e(
-              'worker->db write rpc forwarding failed: method=$dbWriteMethodName '
-              'error=$error, $stackTrace',
-            );
-            router.sendRpcResponse(
-              RpcErrorResponse(
-                requestId: request.requestId,
-                code: 'db_write_forward_failed',
-                message: error.toString(),
-              ),
-            );
-          }
-        }),
-      );
-
-    await _workerSupervisor!.start();
-  }
-
-  Future<void> _startDbWriteWorker() async {
-    await _dbWriteWorkerSupervisor?.dispose();
-    _dbWriteWorkerSupervisor = WorkerSupervisor<DbWriteWorkerInitParams>(
-      entryPoint: startDbWriteWorkerIsolate,
-      initParamsFactory: (sendPort) => DbWriteWorkerInitParams(
-        sendPort: sendPort,
-        identityNumber: identityNumber,
-      ),
-      debugName: 'mixin_db_write_worker_supervisor',
-    );
-
-    _dbWriteWorkerRouter = IsolateRouter.main(
-      inbound: _dbWriteWorkerSupervisor!.messages,
-      sendMessage: _dbWriteWorkerSupervisor!.send,
-    );
-    await _dbWriteRpcClient?.dispose();
-    _dbWriteRpcClient = IsolateRpcClient(_dbWriteWorkerRouter!);
-
-    jobSubscribers
-      ..add(
-        _dbWriteWorkerSupervisor!.events.listen((event) {
-          switch (event) {
-            case WorkerExitedEvent(:final payload):
-              w('db write worker exited. $payload');
-            case WorkerErrorEvent(:final payload):
-              e('db write worker error: $payload');
-            case WorkerRestartScheduledEvent(:final reason, :final delay):
-              w(
-                'db write worker restart scheduled: $reason after ${delay.inMilliseconds}ms',
-              );
-            case WorkerStartingEvent():
-            case WorkerStartedEvent():
-            case WorkerStoppedEvent():
-              break;
-          }
-        }),
-      )
-      ..add(
-        _dbWriteWorkerRouter!.events.listen((event) {
-          try {
-            _handleDbWriteIsolateEvent(event);
-          } catch (error, stackTrace) {
-            e('handle db write isolate event failed: $error, $stackTrace');
-          }
-        }),
-      );
-    await _dbWriteWorkerSupervisor!.start();
-  }
-
-  void _handleWorkIsolateEvent(WorkerEvent event) {
-    switch (event) {
-      case WorkerIsolateReadyEvent():
-        d('message process service ready');
-      case WorkerBlazeConnectStateChangedEvent(:final state):
-        _connectedStateBehaviorSubject.add(state);
-      case WorkerApiRequestedErrorEvent(:final error):
-        _onClientRequestError(error);
-      case WorkerRequestDownloadAttachmentEvent(:final request):
-        _onAttachmentDownloadRequest(request);
-      case WorkerShowPinMessageEvent(:final conversationId):
-        unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
-      case WorkerSyncPatchesEvent(:final patches):
-        DataBaseEventBus.instance.applyPatches(patches);
-    }
-  }
-
-  void _handleDbWriteIsolateEvent(WorkerEvent event) {
-    switch (event) {
-      case WorkerSyncPatchesEvent(:final patches):
-        DataBaseEventBus.instance.applyPatches(patches);
-      case WorkerIsolateReadyEvent():
-      case WorkerBlazeConnectStateChangedEvent():
-      case WorkerApiRequestedErrorEvent():
-      case WorkerRequestDownloadAttachmentEvent():
-      case WorkerShowPinMessageEvent():
-        // No-op for db write worker.
-        break;
-    }
+  void _bindRuntimeSession() {
+    _runtimeSession.onApiRequestedError = _onClientRequestError;
+    _runtimeSession.onAttachmentRequest = _onAttachmentDownloadRequest;
+    _runtimeSession.onShowPinMessage = (conversationId) =>
+        ShowPinMessageKeyValue.instance.show(conversationId);
   }
 
   // Call when worker isolate process message need download attachment.
@@ -468,8 +271,7 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
-    _sendCommandToWorker(const ExitWorkerCommand());
-    await _shutdownWorker();
+    await _runtimeSession.dispose();
     try {
       await client.accountApi.logout(LogoutRequest(sessionId));
     } catch (error, stacktrace) {
@@ -819,19 +621,19 @@ class AccountServer {
   );
 
   void selectConversation(String? conversationId) {
-    _sendCommandToWorker(
+    _runtimeSession.sendSyncCommand(
       UpdateSelectedConversationCommand(conversationId: conversationId),
     );
   }
 
   void addAckJob(List<db.Job> jobs) {
     assert(jobs.every((job) => job.action == kAcknowledgeMessageReceipts));
-    _sendCommandToWorker(AddAckJobsCommand(jobs: jobs));
+    _runtimeSession.sendSyncCommand(AddAckJobsCommand(jobs: jobs));
   }
 
   void addSessionAckJob(List<db.Job> jobs) {
     assert(jobs.every((job) => job.action == kCreateMessage));
-    _sendCommandToWorker(AddSessionAckJobsCommand(jobs: jobs));
+    _runtimeSession.sendSyncCommand(AddSessionAckJobsCommand(jobs: jobs));
   }
 
   void addSendingJob(db.Job job) {
@@ -840,26 +642,26 @@ class AccountServer {
           job.action == kPinMessage ||
           job.action == kRecallMessage,
     );
-    _sendCommandToWorker(AddSendingJobCommand(job: job));
+    _runtimeSession.sendSyncCommand(AddSendingJobCommand(job: job));
   }
 
   void addUpdateAssetJob(db.Job job) {
     assert(job.action == kUpdateAsset);
-    _sendCommandToWorker(AddUpdateAssetJobCommand(job: job));
+    _runtimeSession.sendSyncCommand(AddUpdateAssetJobCommand(job: job));
   }
 
   void addUpdateTokenJob(db.Job job) {
     assert(job.action == kUpdateToken);
-    _sendCommandToWorker(AddUpdateTokenJobCommand(job: job));
+    _runtimeSession.sendSyncCommand(AddUpdateTokenJobCommand(job: job));
   }
 
   void addUpdateStickerJob(db.Job job) {
     assert(job.action == kUpdateSticker);
-    _sendCommandToWorker(AddUpdateStickerJobCommand(job: job));
+    _runtimeSession.sendSyncCommand(AddUpdateStickerJobCommand(job: job));
   }
 
   void addSyncInscriptionMessageJob(String messageId) {
-    _sendCommandToWorker(
+    _runtimeSession.sendSyncCommand(
       AddSyncInscriptionMessageJobCommand(
         job: createSyncInscriptionMessageJob(messageId),
       ),
@@ -921,9 +723,7 @@ class AccountServer {
   Future<void> stop() async {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
-    _sendCommandToWorker(const ExitWorkerCommand());
-    _sendCommandToDbWriteWorker(const ExitWorkerCommand());
-    await _shutdownWorker();
+    await _runtimeSession.dispose();
   }
 
   void release() {
@@ -1959,70 +1759,5 @@ class AccountServer {
   Future<void> _requestDbWrite(
     DbWriteMethod method, {
     Object? payload,
-  }) async {
-    final rpcClient = _dbWriteRpcClient;
-    if (rpcClient == null) {
-      throw StateError('db write rpc client not ready: ${method.name}');
-    }
-
-    try {
-      await rpcClient.request(
-        method.name,
-        payload: payload,
-        timeout: const Duration(seconds: 20),
-      );
-    } catch (error, stackTrace) {
-      e(
-        'db write request failed: method=${method.name} error=$error, $stackTrace',
-      );
-      rethrow;
-    }
-  }
-
-  void _sendCommandToWorker(WorkerCommand command) {
-    try {
-      final router = _workerRouter;
-      if (router == null) {
-        d('_sendCommandToWorker: _workerRouter is null $command');
-        assert(command is ExitWorkerCommand);
-        return;
-      }
-      router.sendCommand(command);
-    } catch (error, s) {
-      e('_sendCommandToWorker: $error, $s');
-    }
-  }
-
-  void _sendCommandToDbWriteWorker(WorkerCommand command) {
-    try {
-      final router = _dbWriteWorkerRouter;
-      if (router == null) {
-        d('_sendCommandToDbWriteWorker: _dbWriteWorkerRouter is null $command');
-        assert(command is ExitWorkerCommand);
-        return;
-      }
-      router.sendCommand(command);
-    } catch (error, s) {
-      e('_sendCommandToDbWriteWorker: $error, $s');
-    }
-  }
-
-  Future<void> _shutdownWorker() async {
-    await Future.wait(jobSubscribers.map((s) => s.cancel()));
-    jobSubscribers.clear();
-    await _dbWriteRpcClient?.dispose();
-    _dbWriteRpcClient = null;
-    await _dbWriteWorkerRouter?.dispose();
-    _dbWriteWorkerRouter = null;
-    await _dbWriteWorkerSupervisor?.stop();
-    await _dbWriteWorkerSupervisor?.dispose();
-    _dbWriteWorkerSupervisor = null;
-    await _workerRpcClient?.dispose();
-    _workerRpcClient = null;
-    await _workerRouter?.dispose();
-    _workerRouter = null;
-    await _workerSupervisor?.stop();
-    await _workerSupervisor?.dispose();
-    _workerSupervisor = null;
-  }
+  }) => _runtimeSession.requestDbWrite(method, payload: payload);
 }

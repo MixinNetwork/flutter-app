@@ -7,8 +7,10 @@ import '../account/account_key_value.dart';
 import '../account/account_server.dart';
 import '../blaze/blaze.dart';
 import '../db/database.dart';
+import '../runtime/session/app_runtime_session_host.dart';
 import '../ui/provider/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
+import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 import '../utils/platform.dart';
 import '../utils/rivepod.dart';
@@ -255,18 +257,30 @@ class _ConnectionRuntimeCoordinator {
     if (!snapshot.isReady || database == null) {
       throw StateError('runtime args are not ready');
     }
-    final accountServer = AccountServer(
+    await initKeyValues(snapshot.identityNumber!);
+
+    final runtimeSession = AppRuntimeSessionHost(
+      identityNumber: snapshot.identityNumber!,
+      userId: snapshot.userId!,
+      sessionId: snapshot.sessionId!,
+      privateKey: snapshot.privateKey!,
+      loginByPhoneNumber: AccountKeyValue.instance.primarySessionId == null,
+      primarySessionId: AccountKeyValue.instance.primarySessionId,
+    );
+    await runtimeSession.start();
+
+    final accountServer = AccountServer.create(
       multiAuthNotifier: args.multiAuthNotifier,
       settingChangeNotifier: args.settingChangeNotifier,
       database: database,
       currentConversationId: args.currentConversationId,
+      userId: snapshot.userId!,
+      sessionId: snapshot.sessionId!,
+      identityNumber: snapshot.identityNumber!,
+      privateKey: snapshot.privateKey!,
+      runtimeSession: runtimeSession,
     );
-    await accountServer.initServer(
-      snapshot.userId!,
-      snapshot.sessionId!,
-      snapshot.identityNumber!,
-      snapshot.privateKey!,
-    );
+    await accountServer.activate();
     return accountServer;
   }
 

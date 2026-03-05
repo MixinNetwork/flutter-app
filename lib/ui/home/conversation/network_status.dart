@@ -7,9 +7,9 @@ import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
+import '../../../ui/provider/account_server_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/uri_utils.dart';
 import '../../../widgets/menu.dart';
 
@@ -18,10 +18,11 @@ class NetworkStatus extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connectedState = useMemoizedStream(
-      () => context.accountServer.connectedStateStream.distinct(),
-      initialData: ConnectedState.connecting,
-    ).requireData;
+    final connectedState = ref.watch(
+      appRuntimeHubProvider.select(
+        (value) => value.connectedState ?? ConnectedState.connecting,
+      ),
+    );
 
     final hasDisconnectedBefore = useRef(false);
 
