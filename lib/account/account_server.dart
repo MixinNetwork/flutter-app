@@ -21,6 +21,7 @@ import '../db/dao/asset_dao.dart';
 import '../db/dao/sticker_album_dao.dart';
 import '../db/dao/sticker_dao.dart';
 import '../db/database.dart';
+import '../db/database_event_bus.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
@@ -283,6 +284,8 @@ class AccountServer {
         _onAttachmentDownloadRequest(request);
       case WorkerShowPinMessageEvent(:final conversationId):
         unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
+      case WorkerSyncPatchesEvent(:final patches):
+        DataBaseEventBus.instance.applyPatches(patches);
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../blaze/blaze.dart';
 import '../../db/mixin_database.dart';
 import '../../workers/isolate_event.dart';
+import '../sync/patch.dart';
 
 sealed class WorkerCommand {
   const WorkerCommand();
@@ -163,6 +164,10 @@ sealed class WorkerEvent {
         return WorkerShowPinMessageEvent(
           conversationId: event.argument as String,
         );
+      case WorkerIsolateEventType.syncPatches:
+        return WorkerSyncPatchesEvent(
+          patches: (event.argument as List).cast<SyncPatch>(),
+        );
     }
   }
 
@@ -215,6 +220,16 @@ final class WorkerShowPinMessageEvent extends WorkerEvent {
   @override
   WorkerIsolateEvent toLegacy() =>
       WorkerIsolateEventType.showPinMessage.toEvent(conversationId);
+}
+
+final class WorkerSyncPatchesEvent extends WorkerEvent {
+  const WorkerSyncPatchesEvent({required this.patches});
+
+  final List<SyncPatch> patches;
+
+  @override
+  WorkerIsolateEvent toLegacy() =>
+      WorkerIsolateEventType.syncPatches.toEvent(patches);
 }
 
 final class RpcRequest {

@@ -22,6 +22,7 @@ import '../db/fts_database.dart';
 import '../db/mixin_database.dart' hide Chain;
 import '../runtime/isolate/protocol.dart';
 import '../runtime/isolate/router.dart';
+import '../runtime/sync/tick_patch_batcher.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
@@ -126,6 +127,10 @@ class _MessageProcessRunner {
   final SendPort sendPort;
 
   final void Function(WorkerEvent event) emitEvent;
+  late final TickPatchBatcher _syncPatchBatcher = TickPatchBatcher(
+    onFlush: (patches) =>
+        _sendEventToMainIsolate(WorkerSyncPatchesEvent(patches: patches)),
+  );
 
   DecryptMessage? _decryptMessage;
 
@@ -150,6 +155,7 @@ class _MessageProcessRunner {
   Timer? _nextExpiredMessageRunner;
 
   Future<void> init(IsolateInitParams initParams) async {
+    DataBaseEventBus.instance.legacyEventBridgeEnabled = false;
     database = Database(
       await connectToDatabase(identityNumber, readCount: 4),
       await FtsDatabase.connect(identityNumber),
@@ -274,6 +280,12 @@ class _MessageProcessRunner {
       _updateTokenJob,
       _syncInscriptionMessageJob,
     );
+
+    jobSubscribers.add(
+      DataBaseEventBus.instance.patchStream.listen((event) {
+        _syncPatchBatcher.add(event);
+      }),
+    );
     _floodJob.start();
   }
 
@@ -380,6 +392,7 @@ class _MessageProcessRunner {
   }
 
   void dispose() {
+    _syncPatchBatcher.dispose();
     blaze.dispose();
     database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());

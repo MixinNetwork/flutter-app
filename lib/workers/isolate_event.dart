@@ -33,6 +33,9 @@ enum WorkerIsolateEventType {
 
   /// args: [String] pin message conversationId.
   showPinMessage,
+
+  /// args: [List<SyncPatch>]
+  syncPatches,
 }
 
 extension WorkerIsolateEventTypeExtension on WorkerIsolateEventType {

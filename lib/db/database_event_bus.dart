@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../runtime/sync/patch.dart';
 import '../utils/event_bus.dart';
 import '../utils/logger.dart';
 import 'dao/job_dao.dart';
@@ -47,6 +48,78 @@ class DataBaseEventBus {
 
   static DataBaseEventBus instance = DataBaseEventBus._();
 
+  final StreamController<SyncPatch> _patchController =
+      StreamController<SyncPatch>.broadcast();
+  bool _legacyEventDispatchEnabled = true;
+  bool _suppressPatchEmission = false;
+
+  Stream<SyncPatch> get patchStream => _patchController.stream;
+
+  set legacyEventBridgeEnabled(bool enabled) =>
+      _legacyEventDispatchEnabled = enabled;
+
+  void applyPatches(Iterable<SyncPatch> patches) {
+    final previous = _suppressPatchEmission;
+    _suppressPatchEmission = true;
+    try {
+      patches.forEach(applyPatch);
+    } finally {
+      _suppressPatchEmission = previous;
+    }
+  }
+
+  void applyPatch(SyncPatch patch) {
+    switch (patch.type) {
+      case SyncPatchType.notification:
+        notificationMessage(patch.payload! as MiniNotificationMessage);
+      case SyncPatchType.insertOrReplaceMessage:
+        insertOrReplaceMessages(
+          (patch.payload! as List).cast<MiniMessageItem>(),
+        );
+      case SyncPatchType.deleteMessage:
+        final messageIds = (patch.payload! as List).cast<String>();
+        messageIds.forEach(deleteMessage);
+      case SyncPatchType.updateExpiredMessage:
+        updateExpiredMessageTable();
+      case SyncPatchType.updateConversation:
+        final conversationIds = (patch.payload! as List).cast<String>();
+        conversationIds.forEach(updateConversation);
+      case SyncPatchType.updateFavoriteApp:
+        updateFavoriteApp((patch.payload! as List).cast<String>());
+      case SyncPatchType.updateUser:
+        updateUsers((patch.payload! as List).cast<String>());
+      case SyncPatchType.updateParticipant:
+        updateParticipant((patch.payload! as List).cast<MiniParticipantItem>());
+      case SyncPatchType.updateSticker:
+        updateSticker((patch.payload! as List).cast<MiniSticker>());
+      case SyncPatchType.updateSnapshot:
+        updateSnapshot((patch.payload! as List).cast<String>());
+      case SyncPatchType.updateMessageMention:
+        updateMessageMention((patch.payload! as List).cast<MiniMessageItem>());
+      case SyncPatchType.updateCircle:
+        updateCircle();
+      case SyncPatchType.updateCircleConversation:
+        updateCircleConversation();
+      case SyncPatchType.updatePinMessage:
+        updatePinMessage((patch.payload! as List).cast<MiniMessageItem>());
+      case SyncPatchType.updateTranscriptMessage:
+        updateTranscriptMessage(
+          (patch.payload! as List).cast<MiniTranscriptMessage>(),
+        );
+      case SyncPatchType.updateAsset:
+        updateAsset((patch.payload! as List).cast<String>());
+      case SyncPatchType.updateToken:
+        updateToken((patch.payload! as List).cast<String>());
+      case SyncPatchType.addJob:
+        addJob(patch.payload! as MiniJobItem);
+    }
+  }
+
+  void _emitPatch(SyncPatch patch) {
+    if (_suppressPatchEmission) return;
+    _patchController.add(patch);
+  }
+
   Stream<T> _watch<T>(_DatabaseEvent event) => EventBus.instance.on
       .whereType<_DatabaseEventWrapper>()
       .where((e) => event == e.type)
@@ -66,7 +139,9 @@ class DataBaseEventBus {
     if (kDebugMode && T.toString().startsWith('Iterable')) {
       w('DatabaseEvent: send iterable is not safe: $T');
     }
-    EventBus.instance.fire(_DatabaseEventWrapper(event, value));
+    if (_legacyEventDispatchEnabled) {
+      EventBus.instance.fire(_DatabaseEventWrapper(event, value));
+    }
   }
 
   Stream<_DatabaseEvent> _watchEvent(_DatabaseEvent event) => EventBus
@@ -76,8 +151,11 @@ class DataBaseEventBus {
       .map((e) => e.type)
       .where((e) => e == event);
 
-  void _sendEvent(_DatabaseEvent event) =>
+  void _sendEvent(_DatabaseEvent event) {
+    if (_legacyEventDispatchEnabled) {
       EventBus.instance.fire(_DatabaseEventWrapper(event, null));
+    }
+  }
 
   // user
   late Stream<List<String>> updateUserIdsStream = _watch<List<String>>(
@@ -92,14 +170,15 @@ class DataBaseEventBus {
       if (id.trim().isNotEmpty) return true;
       i('DatabaseEvent: insertOrReplaceUsers userId is empty: $id');
       return false;
-    });
+    }).toList();
 
     if (newUserIds.isEmpty) {
       w('DatabaseEvent: insertOrReplaceUsers userIds is empty');
       return;
     }
 
-    _send(_DatabaseEvent.updateUser, newUserIds.toList());
+    _emitPatch(SyncPatch.updateUser(newUserIds));
+    _send(_DatabaseEvent.updateUser, newUserIds);
   }
 
   // circle
@@ -107,15 +186,20 @@ class DataBaseEventBus {
     _DatabaseEvent.updateCircle,
   );
 
-  void updateCircle() => _sendEvent(_DatabaseEvent.updateCircle);
+  void updateCircle() {
+    _emitPatch(SyncPatch.updateCircle());
+    _sendEvent(_DatabaseEvent.updateCircle);
+  }
 
   // circleConversation
   late Stream<void> updateCircleConversationStream = _watch<void>(
     _DatabaseEvent.updateCircleConversation,
   );
 
-  void updateCircleConversation() =>
-      _sendEvent(_DatabaseEvent.updateCircleConversation);
+  void updateCircleConversation() {
+    _emitPatch(SyncPatch.updateCircleConversation());
+    _sendEvent(_DatabaseEvent.updateCircleConversation);
+  }
 
   // conversation
   late final Stream<List<String>> updateConversationIdStream =
@@ -132,7 +216,9 @@ class DataBaseEventBus {
       w('DatabaseEvent: insertOrReplaceConversation conversationId is empty');
       return;
     }
-    _send(_DatabaseEvent.updateConversation, [conversationId]);
+    final payload = [conversationId];
+    _emitPatch(SyncPatch.updateConversation(payload));
+    _send(_DatabaseEvent.updateConversation, payload);
   }
 
   // participant
@@ -164,13 +250,14 @@ class DataBaseEventBus {
       }
       i('DatabaseEvent: updateParticipant participantId is empty');
       return false;
-    });
+    }).toList();
 
     if (newParticipants.isEmpty) {
       w('DatabaseEvent: updateParticipant participantIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateParticipant, newParticipants.toList());
+    _emitPatch(SyncPatch.updateParticipant(newParticipants));
+    _send(_DatabaseEvent.updateParticipant, newParticipants);
   }
 
   // message
@@ -204,13 +291,14 @@ class DataBaseEventBus {
         'DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event',
       );
       return false;
-    });
+    }).toList();
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: insertOrReplaceMessages messageIds is empty');
       return;
     }
-    _send(_DatabaseEvent.insertOrReplaceMessage, newMessageEvents.toList());
+    _emitPatch(SyncPatch.insertOrReplaceMessage(newMessageEvents));
+    _send(_DatabaseEvent.insertOrReplaceMessage, newMessageEvents);
   }
 
   late Stream<List<String>> deleteMessageIdStream = _watch<List<String>>(
@@ -222,7 +310,9 @@ class DataBaseEventBus {
       w('DatabaseEvent: deleteMessage messageId is empty');
       return;
     }
-    _send(_DatabaseEvent.deleteMessage, [messageId]);
+    final payload = [messageId];
+    _emitPatch(SyncPatch.deleteMessage(payload));
+    _send(_DatabaseEvent.deleteMessage, payload);
   }
 
   late Stream<MiniNotificationMessage> notificationMessageStream =
@@ -234,6 +324,7 @@ class DataBaseEventBus {
       w('DatabaseEvent: notificationMessage messageId is empty');
       return;
     }
+    _emitPatch(SyncPatch.notification(miniNotificationMessage));
     _send(_DatabaseEvent.notification, miniNotificationMessage);
   }
 
@@ -267,13 +358,14 @@ class DataBaseEventBus {
         'DatabaseEvent: insertOrReplaceMessages messageId or conversationId is empty: $event',
       );
       return false;
-    });
+    }).toList();
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: insertOrReplaceMessages messageIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateMessageMention, newMessageEvents.toList());
+    _emitPatch(SyncPatch.updateMessageMention(newMessageEvents));
+    _send(_DatabaseEvent.updateMessageMention, newMessageEvents);
   }
 
   // pinMessage
@@ -307,13 +399,14 @@ class DataBaseEventBus {
         'DatabaseEvent: updatePinMessage messageId or conversationId is empty: $event',
       );
       return false;
-    });
+    }).toList();
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: updatePinMessage messageIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updatePinMessage, newMessageEvents.toList());
+    _emitPatch(SyncPatch.updatePinMessage(newMessageEvents));
+    _send(_DatabaseEvent.updatePinMessage, newMessageEvents);
   }
 
   // transcriptMessage
@@ -344,13 +437,14 @@ class DataBaseEventBus {
       if (event.transcriptId.trim().isNotEmpty) return true;
       i('DatabaseEvent: updateTranscriptMessage transcriptId is empty: $event');
       return false;
-    });
+    }).toList();
 
     if (newMessageEvents.isEmpty) {
       i('DatabaseEvent: updateTranscriptMessage is empty');
       return;
     }
-    _send(_DatabaseEvent.updateTranscriptMessage, newMessageEvents.toList());
+    _emitPatch(SyncPatch.updateTranscriptMessage(newMessageEvents));
+    _send(_DatabaseEvent.updateTranscriptMessage, newMessageEvents);
   }
 
   // expiredMessage
@@ -358,8 +452,10 @@ class DataBaseEventBus {
     _DatabaseEvent.updateExpiredMessage,
   );
 
-  void updateExpiredMessageTable() =>
-      _sendEvent(_DatabaseEvent.updateExpiredMessage);
+  void updateExpiredMessageTable() {
+    _emitPatch(SyncPatch.updateExpiredMessage());
+    _sendEvent(_DatabaseEvent.updateExpiredMessage);
+  }
 
   // sticker
 
@@ -383,16 +479,19 @@ class DataBaseEventBus {
   );
 
   void updateSticker(Iterable<MiniSticker> miniStickers) {
-    final newMiniStickers = miniStickers.where(
-      (element) =>
-          (element.stickerId?.trim().isNotEmpty ?? false) ||
-          (element.albumId?.trim().isNotEmpty ?? false),
-    );
+    final newMiniStickers = miniStickers
+        .where(
+          (element) =>
+              (element.stickerId?.trim().isNotEmpty ?? false) ||
+              (element.albumId?.trim().isNotEmpty ?? false),
+        )
+        .toList();
     if (newMiniStickers.isEmpty) {
       w('DatabaseEvent: updateSticker miniStickers is empty');
       return;
     }
-    _send(_DatabaseEvent.updateSticker, newMiniStickers.toList());
+    _emitPatch(SyncPatch.updateSticker(newMiniStickers));
+    _send(_DatabaseEvent.updateSticker, newMiniStickers);
   }
 
   // app
@@ -401,12 +500,15 @@ class DataBaseEventBus {
   );
 
   void updateFavoriteApp(Iterable<String> appIds) {
-    final newAppIds = appIds.where((element) => element.trim().isNotEmpty);
+    final newAppIds = appIds
+        .where((element) => element.trim().isNotEmpty)
+        .toList();
     if (newAppIds.isEmpty) {
       w('DatabaseEvent: insertOrReplaceFavoriteApp appIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateFavoriteApp, newAppIds.toList());
+    _emitPatch(SyncPatch.updateFavoriteApp(newAppIds));
+    _send(_DatabaseEvent.updateFavoriteApp, newAppIds);
   }
 
   // Snapshot
@@ -415,14 +517,17 @@ class DataBaseEventBus {
   );
 
   void updateSnapshot(Iterable<String> snapshotIds) {
-    final newSnapshotIds = snapshotIds.where(
-      (element) => element.trim().isNotEmpty,
-    );
+    final newSnapshotIds = snapshotIds
+        .where(
+          (element) => element.trim().isNotEmpty,
+        )
+        .toList();
     if (newSnapshotIds.isEmpty) {
       w('DatabaseEvent: updateSnapshot snapshotIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds.toList());
+    _emitPatch(SyncPatch.updateSnapshot(newSnapshotIds));
+    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds);
   }
 
   // Safe Snapshot
@@ -431,14 +536,17 @@ class DataBaseEventBus {
   );
 
   void updateSafeSnapshot(Iterable<String> snapshotIds) {
-    final newSnapshotIds = snapshotIds.where(
-      (element) => element.trim().isNotEmpty,
-    );
+    final newSnapshotIds = snapshotIds
+        .where(
+          (element) => element.trim().isNotEmpty,
+        )
+        .toList();
     if (newSnapshotIds.isEmpty) {
       w('DatabaseEvent: updateSafeSnapshot snapshotIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds.toList());
+    _emitPatch(SyncPatch.updateSnapshot(newSnapshotIds));
+    _send(_DatabaseEvent.updateSnapshot, newSnapshotIds);
   }
 
   // Asset
@@ -447,12 +555,15 @@ class DataBaseEventBus {
   );
 
   void updateAsset(Iterable<String> assetIds) {
-    final newAssetIds = assetIds.where((element) => element.trim().isNotEmpty);
+    final newAssetIds = assetIds
+        .where((element) => element.trim().isNotEmpty)
+        .toList();
     if (newAssetIds.isEmpty) {
       w('DatabaseEvent: updateAsset assetIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateAsset, newAssetIds.toList());
+    _emitPatch(SyncPatch.updateAsset(newAssetIds));
+    _send(_DatabaseEvent.updateAsset, newAssetIds);
   }
 
   // Token
@@ -461,12 +572,15 @@ class DataBaseEventBus {
   );
 
   void updateToken(Iterable<String> tokenIds) {
-    final newTokenIds = tokenIds.where((element) => element.trim().isNotEmpty);
+    final newTokenIds = tokenIds
+        .where((element) => element.trim().isNotEmpty)
+        .toList();
     if (newTokenIds.isEmpty) {
       w('DatabaseEvent: updateToken tokenIds is empty');
       return;
     }
-    _send(_DatabaseEvent.updateToken, newTokenIds.toList());
+    _emitPatch(SyncPatch.updateToken(newTokenIds));
+    _send(_DatabaseEvent.updateToken, newTokenIds);
   }
 
   // Job
@@ -475,6 +589,7 @@ class DataBaseEventBus {
   );
 
   void addJob(MiniJobItem job) {
+    _emitPatch(SyncPatch.addJob(job));
     _send(_DatabaseEvent.addJob, job);
   }
 }
