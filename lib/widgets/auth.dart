@@ -160,7 +160,7 @@ class _AuthGuard extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          context.l10n.unlockWithWasscode,
+                          context.l10n.unlockWithPasscode,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: context.theme.text,

@@ -577,7 +577,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "未允许通知，请到通知设置开启。",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("通知"),
-    "nowAnAddmin": m34,
+    "nowAnAdmin": m34,
     "objects": MessageLookupByLibrary.simpleMessage("物件"),
     "oneByOneForward": MessageLookupByLibrary.simpleMessage("逐条转发"),
     "oneHour": MessageLookupByLibrary.simpleMessage("1 小时"),
@@ -738,11 +738,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "unitMinute": m48,
     "unitSecond": m49,
     "unitWeek": m50,
-    "unknowError": MessageLookupByLibrary.simpleMessage("未知错误"),
+    "unknownError": MessageLookupByLibrary.simpleMessage("未知错误"),
     "unlockMixinMessenger": MessageLookupByLibrary.simpleMessage(
       "解锁 Mixin Messenger",
     ),
-    "unlockWithWasscode": MessageLookupByLibrary.simpleMessage(
+    "unlockWithPasscode": MessageLookupByLibrary.simpleMessage(
       "输入密码解锁 Mixin Messenger",
     ),
     "unmute": MessageLookupByLibrary.simpleMessage("取消静音"),

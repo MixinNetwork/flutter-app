@@ -257,7 +257,7 @@ class Localization {
   /// `Disallow sharing of this URL`
   String get appCardShareDisallow {
     return Intl.message(
-      'Disallow sharing of this URL',
+      'This URL cannot be shared.',
       name: 'appCardShareDisallow',
       desc: '',
       args: [],
@@ -272,7 +272,7 @@ class Localization {
   /// `archived folder`
   String get archivedFolder {
     return Intl.message(
-      'archived folder',
+      'Archived Folder',
       name: 'archivedFolder',
       desc: '',
       args: [],
@@ -291,7 +291,7 @@ class Localization {
 
   /// `Audios`
   String get audios {
-    return Intl.message('Audios', name: 'audios', desc: '', args: []);
+    return Intl.message('Audio', name: 'audios', desc: '', args: []);
   }
 
   /// `Auto Backup`
@@ -352,7 +352,7 @@ class Localization {
   /// `Bring All To Front`
   String get bringAllToFront {
     return Intl.message(
-      'Bring All To Front',
+      'Bring All to Front',
       name: 'bringAllToFront',
       desc: '',
       args: [],
@@ -362,7 +362,7 @@ class Localization {
   /// `Can not recognize the QR code`
   String get canNotRecognizeQrCode {
     return Intl.message(
-      'Can not recognize the QR code',
+      'Cannot recognize the QR code',
       name: 'canNotRecognizeQrCode',
       desc: '',
       args: [],
@@ -494,7 +494,7 @@ class Localization {
   /// `End to end encrypted`
   String get chatHintE2e {
     return Intl.message(
-      'End to end encrypted',
+      'End-to-end encrypted',
       name: 'chatHintE2e',
       desc: '',
       args: [],
@@ -504,7 +504,7 @@ class Localization {
   /// `This type of url is not supported, please check on your phone.`
   String get chatNotSupportUriOnPhone {
     return Intl.message(
-      'This type of url is not supported, please check on your phone.',
+      'This type of URL is not supported. Please check it on your phone.',
       name: 'chatNotSupportUriOnPhone',
       desc: '',
       args: [],
@@ -524,7 +524,7 @@ class Localization {
   /// `This type of message is not supported, please check on your phone.`
   String get chatNotSupportViewOnPhone {
     return Intl.message(
-      'This type of message is not supported, please check on your phone.',
+      'This type of message is not supported. Please check it on your phone.',
       name: 'chatNotSupportViewOnPhone',
       desc: '',
       args: [],
@@ -616,7 +616,7 @@ class Localization {
   /// `Click to reload QR code`
   String get clickToReloadQrcode {
     return Intl.message(
-      'Click to reload QR code',
+      'Click to reload the QR code',
       name: 'clickToReloadQrcode',
       desc: '',
       args: [],
@@ -916,7 +916,7 @@ class Localization {
   /// `Data loading, please wait...`
   String get dataLoading {
     return Intl.message(
-      'Data loading, please wait...',
+      'Loading data, please wait...',
       name: 'dataLoading',
       desc: '',
       args: [],
@@ -956,7 +956,7 @@ class Localization {
   /// `Create a new database file and the old file will be deleted.`
   String get databaseRecreateTips {
     return Intl.message(
-      'Create a new database file and the old file will be deleted.',
+      'Create a new database file. The old file will be deleted.',
       name: 'databaseRecreateTips',
       desc: '',
       args: [],
@@ -966,7 +966,7 @@ class Localization {
   /// `The database is being upgraded, it may take several minutes, please do not close this App.`
   String get databaseUpgradeTips {
     return Intl.message(
-      'The database is being upgraded, it may take several minutes, please do not close this App.',
+      'The database is being upgraded. This may take several minutes. Please do not close this app.',
       name: 'databaseUpgradeTips',
       desc: '',
       args: [],
@@ -1006,7 +1006,7 @@ class Localization {
   /// `Deleting chat will remove messages form this devices only. They will not be removed from other devices.`
   String get deleteChatDescription {
     return Intl.message(
-      'Deleting chat will remove messages form this devices only. They will not be removed from other devices.',
+      'Deleting this chat will remove messages from this device only. They will not be removed from other devices.',
       name: 'deleteChatDescription',
       desc: '',
       args: [],
@@ -1141,7 +1141,7 @@ class Localization {
   /// `When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to **learn more**.`
   String get disappearingMessageHint {
     return Intl.message(
-      'When enabled, new messages sent and received in this chat will disappear after they have been seen, read the document to **learn more**.',
+      'When enabled, new messages sent and received in this chat will disappear after they have been seen. Read the document to **learn more**.',
       name: 'disappearingMessageHint',
       desc: '',
       args: [],
@@ -1291,7 +1291,7 @@ class Localization {
   /// `Enable push notification`
   String get enablePushNotification {
     return Intl.message(
-      'Enable push notification',
+      'Enable push notifications',
       name: 'enablePushNotification',
       desc: '',
       args: [],
@@ -1301,7 +1301,7 @@ class Localization {
   /// `Encrypt zip file with password`
   String get encryptZipFileWithPassword {
     return Intl.message(
-      'Encrypt zip file with password',
+      'Encrypt the ZIP file with a password',
       name: 'encryptZipFileWithPassword',
       desc: '',
       args: [],
@@ -1391,7 +1391,7 @@ class Localization {
   /// `ERROR 10002: The request data has invalid field`
   String get errorBadData {
     return Intl.message(
-      'ERROR 10002: The request data has invalid field',
+      'ERROR 10002: The request data has an invalid field',
       name: 'errorBadData',
       desc: '',
       args: [],
@@ -1471,7 +1471,7 @@ class Localization {
   /// `ERROR 20129: Send verification code too frequent, please try again later.`
   String get errorInvalidCodeTooFrequent {
     return Intl.message(
-      'ERROR 20129: Send verification code too frequent, please try again later.',
+      'ERROR 20129: Verification codes are being sent too frequently. Please try again later.',
       name: 'errorInvalidCodeTooFrequent',
       desc: '',
       args: [],
@@ -1521,7 +1521,7 @@ class Localization {
   /// `No token, Please log in again and try this feature again.`
   String get errorNoPinToken {
     return Intl.message(
-      'No token, Please log in again and try this feature again.',
+      'No token. Please sign in again and try this feature again.',
       name: 'errorNoPinToken',
       desc: '',
       args: [],
@@ -1541,7 +1541,7 @@ class Localization {
   /// `Not supported audio format, please open by other app.`
   String get errorNotSupportedAudioFormat {
     return Intl.message(
-      'Not supported audio format, please open by other app.',
+      'Unsupported audio format. Please open it with another app.',
       name: 'errorNotSupportedAudioFormat',
       desc: '',
       args: [],
@@ -1561,7 +1561,7 @@ class Localization {
   /// `ERROR 10006: Please update Mixin({arg0}) to continue use the service.`
   String errorOldVersion(Object arg0) {
     return Intl.message(
-      'ERROR 10006: Please update Mixin($arg0) to continue use the service.',
+      'ERROR 10006: Please update Mixin ($arg0) to continue using the service.',
       name: 'errorOldVersion',
       desc: '',
       args: [arg0],
@@ -1571,7 +1571,7 @@ class Localization {
   /// `Can't find an map app`
   String get errorOpenLocation {
     return Intl.message(
-      'Can\'t find an map app',
+      'Can\'t find a map app',
       name: 'errorOpenLocation',
       desc: '',
       args: [],
@@ -1735,7 +1735,7 @@ class Localization {
   /// `Can't find an app able to open this media.`
   String get errorUnableToOpenMedia {
     return Intl.message(
-      'Can\'t find an app able to open this media.',
+      'Can\'t find an app that can open this media.',
       name: 'errorUnableToOpenMedia',
       desc: '',
       args: [],
@@ -1805,7 +1805,7 @@ class Localization {
   /// `ERROR 20137: Withdrawal suspend.`
   String get errorWithdrawalSuspend {
     return Intl.message(
-      'ERROR 20137: Withdrawal suspend.',
+      'ERROR 20137: Withdrawals are suspended.',
       name: 'errorWithdrawalSuspend',
       desc: '',
       args: [],
@@ -2039,7 +2039,7 @@ class Localization {
 
   /// `Help center`
   String get helpCenter {
-    return Intl.message('Help center', name: 'helpCenter', desc: '', args: []);
+    return Intl.message('Help Center', name: 'helpCenter', desc: '', args: []);
   }
 
   /// `Hide Mixin`
@@ -2096,7 +2096,7 @@ class Localization {
 
   /// `image`
   String get image {
-    return Intl.message('image', name: 'image', desc: '', args: []);
+    return Intl.message('Image', name: 'image', desc: '', args: []);
   }
 
   /// `Include Files`
@@ -2182,7 +2182,7 @@ class Localization {
   /// `You requested to delete your account on {arg0}. The account will be deleted on {arg1}. If you continue to login, your account deletion will be cancelled.`
   String landingDeleteContent(Object arg0, Object arg1) {
     return Intl.message(
-      'You requested to delete your account on $arg0. The account will be deleted on $arg1. If you continue to login, your account deletion will be cancelled.',
+      'You requested to delete your account on $arg0. The account will be deleted on $arg1. If you continue to log in, your account deletion will be cancelled.',
       name: 'landingDeleteContent',
       desc: '',
       args: [arg0, arg1],
@@ -2192,7 +2192,7 @@ class Localization {
   /// `We will send a 4-digit code to your phone number {arg0}, please enter the code in next screen.`
   String landingInvitationDialogContent(Object arg0) {
     return Intl.message(
-      'We will send a 4-digit code to your phone number $arg0, please enter the code in next screen.',
+      'We will send a 4-digit code to your phone number $arg0. Please enter the code on the next screen.',
       name: 'landingInvitationDialogContent',
       desc: '',
       args: [arg0],
@@ -2247,7 +2247,7 @@ class Localization {
   /// `System time is unusual, please continue to use again after correction`
   String get loadingTime {
     return Intl.message(
-      'System time is unusual, please continue to use again after correction',
+      'The system time appears incorrect. Please correct it and try again.',
       name: 'loadingTime',
       desc: '',
       args: [],
@@ -2257,7 +2257,7 @@ class Localization {
   /// `locate to chat`
   String get locateToChat {
     return Intl.message(
-      'locate to chat',
+      'Locate in Chat',
       name: 'locateToChat',
       desc: '',
       args: [],
@@ -2292,7 +2292,7 @@ class Localization {
   /// `Login to Mixin Messenger by QR Code`
   String get loginByQrcode {
     return Intl.message(
-      'Login to Mixin Messenger by QR Code',
+      'Log in to Mixin Messenger with a QR code',
       name: 'loginByQrcode',
       desc: '',
       args: [],
@@ -2312,7 +2312,7 @@ class Localization {
   /// `Scan the QR Code on the screen and confirm your login.`
   String get loginByQrcodeTips2 {
     return Intl.message(
-      'Scan the QR Code on the screen and confirm your login.',
+      'Scan the QR code on the screen and confirm your sign-in.',
       name: 'loginByQrcodeTips2',
       desc: '',
       args: [],
@@ -2342,7 +2342,7 @@ class Localization {
   /// `Messages to this conversation are end-to-end encrypted, tap for more info.`
   String get messageE2ee {
     return Intl.message(
-      'Messages to this conversation are end-to-end encrypted, tap for more info.',
+      'Messages in this conversation are end-to-end encrypted. Tap for more info.',
       name: 'messageE2ee',
       desc: '',
       args: [],
@@ -2579,7 +2579,7 @@ class Localization {
   /// `This Device is not supported Biometric authentication`
   String get notSupportBiometric {
     return Intl.message(
-      'This Device is not supported Biometric authentication',
+      'This device does not support biometric authentication',
       name: 'notSupportBiometric',
       desc: '',
       args: [],
@@ -2599,7 +2599,7 @@ class Localization {
   /// `Notifications are not allowed, please go to Notification Settings to turn on.`
   String get notificationPermissionManually {
     return Intl.message(
-      'Notifications are not allowed, please go to Notification Settings to turn on.',
+      'Notifications are disabled. Please go to Notification Settings to turn them on.',
       name: 'notificationPermissionManually',
       desc: '',
       args: [],
@@ -2617,10 +2617,10 @@ class Localization {
   }
 
   /// `{arg0} now an admin`
-  String nowAnAddmin(Object arg0) {
+  String nowAnAdmin(Object arg0) {
     return Intl.message(
-      '$arg0 now an admin',
-      name: 'nowAnAddmin',
+      '$arg0 is now an admin',
+      name: 'nowAnAdmin',
       desc: '',
       args: [arg0],
     );
@@ -2664,7 +2664,7 @@ class Localization {
   /// `Open Home page`
   String get openHomePage {
     return Intl.message(
-      'Open Home page',
+      'Open Homepage',
       name: 'openHomePage',
       desc: '',
       args: [],
@@ -2684,7 +2684,7 @@ class Localization {
   /// `open log directory`
   String get openLogDirectory {
     return Intl.message(
-      'open log directory',
+      'Open Log Directory',
       name: 'openLogDirectory',
       desc: '',
       args: [],
@@ -2868,7 +2868,7 @@ class Localization {
   /// `QR Code expired, please retry`
   String get qrCodeExpiredDesc {
     return Intl.message(
-      'QR Code expired, please retry',
+      'QR code expired. Please try again.',
       name: 'qrCodeExpiredDesc',
       desc: '',
       args: [],
@@ -2878,7 +2878,7 @@ class Localization {
   /// `Quick search`
   String get quickSearch {
     return Intl.message(
-      'Quick search',
+      'Quick Search',
       name: 'quickSearch',
       desc: '',
       args: [],
@@ -3098,7 +3098,7 @@ class Localization {
   /// `Search contact`
   String get searchContact {
     return Intl.message(
-      'Search contact',
+      'Search Contacts',
       name: 'searchContact',
       desc: '',
       args: [],
@@ -3185,7 +3185,7 @@ class Localization {
   /// `Archived all files in one zip file`
   String get sendArchived {
     return Intl.message(
-      'Archived all files in one zip file',
+      'Send as ZIP',
       name: 'sendArchived',
       desc: '',
       args: [],
@@ -3250,7 +3250,7 @@ class Localization {
   /// `Set Passcode to unlock Mixin Messenger`
   String get setPasscodeDesc {
     return Intl.message(
-      'Set Passcode to unlock Mixin Messenger',
+      'Set a passcode to unlock Mixin Messenger',
       name: 'setPasscodeDesc',
       desc: '',
       args: [],
@@ -3270,7 +3270,7 @@ class Localization {
   /// `Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.`
   String get settingBackupTips {
     return Intl.message(
-      'Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.',
+      'Back up your chat history to iCloud. If you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.',
       name: 'settingBackupTips',
       desc: '',
       args: [],
@@ -3280,7 +3280,7 @@ class Localization {
   /// `If you continue, your profile and account details will be delete on {arg0}. read our document to **learn more**.`
   String settingDeleteAccountPinContent(Object arg0) {
     return Intl.message(
-      'If you continue, your profile and account details will be delete on $arg0. read our document to **learn more**.',
+      'If you continue, your profile and account details will be deleted on $arg0. Read our document to **learn more**.',
       name: 'settingDeleteAccountPinContent',
       desc: '',
       args: [arg0],
@@ -3330,7 +3330,7 @@ class Localization {
   /// `Are you sure you want to send a {arg0} from {arg1}?`
   String shareMessageDescription(Object arg0, Object arg1) {
     return Intl.message(
-      'Are you sure you want to send a $arg0 from $arg1?',
+      'Are you sure you want to send $arg0 from $arg1?',
       name: 'shareMessageDescription',
       desc: '',
       args: [arg0, arg1],
@@ -3445,7 +3445,7 @@ class Localization {
   /// `Requires stickers file size larger than 1KB and less than 1MB, width and height between 128px and 1024px.`
   String get stickerAddInvalidSize {
     return Intl.message(
-      'Requires stickers file size larger than 1KB and less than 1MB, width and height between 128px and 1024px.',
+      'Sticker files must be larger than 1 KB and smaller than 1 MB, with width and height between 128 px and 1024 px.',
       name: 'stickerAddInvalidSize',
       desc: '',
       args: [],
@@ -3455,7 +3455,7 @@ class Localization {
   /// `Sticker album detail`
   String get stickerAlbumDetail {
     return Intl.message(
-      'Sticker album detail',
+      'Sticker Album Details',
       name: 'stickerAlbumDetail',
       desc: '',
       args: [],
@@ -3475,7 +3475,7 @@ class Localization {
   /// `Change auto-download settings for medias.`
   String get storageAutoDownloadDescription {
     return Intl.message(
-      'Change auto-download settings for medias.',
+      'Change auto-download settings for media.',
       name: 'storageAutoDownloadDescription',
       desc: '',
       args: [],
@@ -3620,7 +3620,7 @@ class Localization {
   /// `Transactions CANNOT be deleted`
   String get transactionsCannotBeDeleted {
     return Intl.message(
-      'Transactions CANNOT be deleted',
+      'Transactions cannot be deleted',
       name: 'transactionsCannotBeDeleted',
       desc: '',
       args: [],
@@ -3660,7 +3660,7 @@ class Localization {
   /// `Transferring Chat`
   String get transferringChats {
     return Intl.message(
-      'Transferring Chat',
+      'Transferring Chats',
       name: 'transferringChats',
       desc: '',
       args: [],
@@ -3773,10 +3773,10 @@ class Localization {
   }
 
   /// `Unknow error`
-  String get unknowError {
+  String get unknownError {
     return Intl.message(
-      'Unknow error',
-      name: 'unknowError',
+      'Unknown error',
+      name: 'unknownError',
       desc: '',
       args: [],
     );
@@ -3793,10 +3793,10 @@ class Localization {
   }
 
   /// `Enter Passcode to unlock Mixin Messenger`
-  String get unlockWithWasscode {
+  String get unlockWithPasscode {
     return Intl.message(
-      'Enter Passcode to unlock Mixin Messenger',
-      name: 'unlockWithWasscode',
+      'Enter a passcode to unlock Mixin Messenger',
+      name: 'unlockWithPasscode',
       desc: '',
       args: [],
     );
@@ -3885,7 +3885,7 @@ class Localization {
   /// `The user has deleted his own account.`
   String get userDeleteHint {
     return Intl.message(
-      'The user has deleted his own account.',
+      'This user has deleted their account.',
       name: 'userDeleteHint',
       desc: '',
       args: [],

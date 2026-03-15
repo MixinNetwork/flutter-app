@@ -269,7 +269,7 @@
 "notFound" : "Extraviado",
 "notificationPermissionManually" : "Las notificaciones no están permitidas, ve a Configuración de notificaciones para activarlas.",
 "notifications" : "Notificaciones",
-"nowAnAddmin" : "{arg0} ahora es administrador",
+"nowAnAdmin" : "{arg0} ahora es administrador",
 "objects" : "Objetos",
 "oneByOneForward" : "Adelante uno por uno",
 "oneHour" : "1 hora",

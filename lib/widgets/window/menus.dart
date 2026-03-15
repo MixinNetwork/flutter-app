@@ -273,7 +273,7 @@ class _Menus extends HookConsumerWidget {
                 PlatformMenuItemGroup(
                   members: [
                     PlatformMenuItem(
-                      label: 'chat backup and restore',
+                      label: 'Chat Backup and Restore',
                       onSelected: signed
                           ? () {
                               showDeviceTransferDialog(context);

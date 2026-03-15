@@ -87,7 +87,7 @@ class _LoginApp extends HookConsumerWidget {
       } else {
         return _App(
           home: LandingFailedPage(
-            title: context.l10n.unknowError,
+            title: context.l10n.unknownError,
             message: error.toString(),
             actions: [
               ElevatedButton(onPressed: () {}, child: Text(context.l10n.exit)),
