@@ -614,7 +614,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Уведомления запрещены. Чтобы включить их, перейдите в настройки уведомлений.",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("Уведомления"),
-    "nowAnAddmin": m34,
+    "nowAnAdmin": m34,
     "oneByOneForward": MessageLookupByLibrary.simpleMessage(
       "Один за другим вперед",
     ),

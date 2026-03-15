@@ -110,7 +110,7 @@ String generateSystemText({
         senderIsCurrentUser ? Localization.current.you : senderFullName!,
       );
     case MessageAction.role:
-      text = Localization.current.nowAnAddmin(
+      text = Localization.current.nowAnAdmin(
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName!,

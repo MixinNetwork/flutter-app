@@ -74,7 +74,7 @@ class _LoginFailed extends HookConsumerWidget {
       child: Column(
         children: [
           Text(
-            context.l10n.unknowError,
+            context.l10n.unknownError,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.theme.red,

@@ -649,7 +649,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Las notificaciones no están permitidas, ve a Configuración de notificaciones para activarlas.",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("Notificaciones"),
-    "nowAnAddmin": m34,
+    "nowAnAdmin": m34,
     "objects": MessageLookupByLibrary.simpleMessage("Objetos"),
     "oneByOneForward": MessageLookupByLibrary.simpleMessage(
       "Adelante uno por uno",

@@ -252,7 +252,7 @@
 "notFound" : "見つかりません",
 "notificationPermissionManually" : "通知は許可されていませんので、通知設定から許可してください。",
 "notifications" : "通知",
-"nowAnAddmin" : "{arg0}は管理者です",
+"nowAnAdmin" : "{arg0}は管理者です",
 "oneByOneForward" : "それぞれ転送する",
 "oneHour" : "1時間",
 "oneWeek" : "1週間",

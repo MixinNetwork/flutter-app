@@ -515,7 +515,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "通知は許可されていませんので、通知設定から許可してください。",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("通知"),
-    "nowAnAddmin": m34,
+    "nowAnAdmin": m34,
     "oneByOneForward": MessageLookupByLibrary.simpleMessage("それぞれ転送する"),
     "oneHour": MessageLookupByLibrary.simpleMessage("1時間"),
     "oneWeek": MessageLookupByLibrary.simpleMessage("1週間"),

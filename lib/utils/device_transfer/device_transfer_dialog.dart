@@ -109,7 +109,7 @@ class _DeviceTransferPage extends StatelessWidget {
       CellGroup(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: CellItem(
-          title: const Text('sync from other device'),
+          title: const Text('Sync from Another Device'),
           onTap: () {
             context.read<_NavigatorCubit>().push(
               _DeviceTransferPageType.restore,
@@ -121,7 +121,7 @@ class _DeviceTransferPage extends StatelessWidget {
       CellGroup(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: CellItem(
-          title: const Text('sync to other device'),
+          title: const Text('Sync to Another Device'),
           onTap: () {
             context.read<_NavigatorCubit>().push(
               _DeviceTransferPageType.backup,
@@ -167,7 +167,7 @@ class _RestorePage extends StatelessWidget {
     children: [
       MixinAppBar(
         backgroundColor: Colors.transparent,
-        title: const Text('sync from other device'),
+        title: const Text('Sync from Another Device'),
         leading: const _DialogBackButton(),
         actions: [
           MixinCloseButton(
@@ -181,7 +181,7 @@ class _RestorePage extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36),
         child: Text(
-          'restore chat tip',
+          'Restore your chat history from another device.',
           style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
           textAlign: TextAlign.center,
         ),
@@ -190,7 +190,7 @@ class _RestorePage extends StatelessWidget {
       CellGroup(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: CellItem(
-          title: const Text('restore chat'),
+          title: const Text('Restore Chat History'),
           color: context.theme.accent,
           trailing: null,
           onTap: () {
@@ -220,7 +220,7 @@ class _RestoreWaitingConnectPage extends HookConsumerWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('restore from other device'),
+          title: const Text('Restore from Another Device'),
           leading: _DialogBackButton(
             onTapped: () {
               EventBus.instance.fire(DeviceTransferCommand.cancelRestore);
@@ -241,7 +241,7 @@ class _RestoreWaitingConnectPage extends HookConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Text(
-            'waiting other device connection',
+            'Waiting for another device to connect.',
             style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
             textAlign: TextAlign.center,
           ),
@@ -269,7 +269,7 @@ class _BackupPage extends StatelessWidget {
     children: [
       MixinAppBar(
         backgroundColor: Colors.transparent,
-        title: const Text('backup to other device'),
+        title: const Text('Backup to Another Device'),
         leading: const _DialogBackButton(),
         actions: [
           MixinCloseButton(
@@ -289,7 +289,7 @@ class _BackupPage extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36),
         child: Text(
-          'tips for backup to other device',
+          'Back up your chat history to another device.',
           style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
           textAlign: TextAlign.center,
         ),
@@ -298,7 +298,7 @@ class _BackupPage extends StatelessWidget {
       CellGroup(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: CellItem(
-          title: const Text('backup chat'),
+          title: const Text('Back Up Chat History'),
           color: context.theme.accent,
           trailing: null,
           onTap: () {
@@ -328,7 +328,7 @@ class _BackupWaitingConnectPage extends HookConsumerWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('backup to other device'),
+          title: const Text('Backup to Another Device'),
           leading: _DialogBackButton(
             onTapped: () {
               EventBus.instance.fire(DeviceTransferCommand.cancelBackup);
@@ -349,7 +349,7 @@ class _BackupWaitingConnectPage extends HookConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: Text(
-            'restore waiting other device',
+            'Waiting for another device to connect.',
             style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
             textAlign: TextAlign.center,
           ),

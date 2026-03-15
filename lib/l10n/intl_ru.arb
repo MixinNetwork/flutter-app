@@ -251,7 +251,7 @@
 "notFound" : "Не найден",
 "notificationPermissionManually" : "Уведомления запрещены. Чтобы включить их, перейдите в настройки уведомлений.",
 "notifications" : "Уведомления",
-"nowAnAddmin" : "{arg0} теперь администратор",
+"nowAnAdmin" : "{arg0} теперь администратор",
 "oneByOneForward" : "Один за другим вперед",
 "oneHour" : "1 час",
 "oneWeek" : "1 неделя",
