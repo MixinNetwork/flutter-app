@@ -93,7 +93,7 @@ dependencies:
   isolate: ^2.1.0
   json_annotation: ^4.11.0
   libsignal_protocol_dart: ^0.7.4
-  local_auth: ^3.0.0
+  local_auth: ^3.0.1
   lottie: ^3.3.2
   map: ^2.0.2
   markdown_widget: ^2.3.2+2
