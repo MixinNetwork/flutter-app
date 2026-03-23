@@ -1393,7 +1393,7 @@ class SendMessageHelper {
       conversationId,
       messageId,
       null,
-      mimeType: defaultMimeType,
+      mimeType: type.mimeType,
     );
     attachment = await attachment.create(recursive: true);
     await attachment.writeAsBytes(data);
