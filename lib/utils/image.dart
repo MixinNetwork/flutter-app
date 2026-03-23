@@ -7,12 +7,20 @@ import 'load_balancer_utils.dart';
 const _kMaxDimension = 1920;
 const _kQuality = 85;
 
-enum ImageType { gif, jpeg }
+enum ImageType { gif, jpeg, png }
 
 extension ImageTypeExtension on ImageType {
-  String get mimeType => this == ImageType.gif ? 'image/gif' : 'image/jpeg';
+  String get mimeType => switch (this) {
+    ImageType.gif => 'image/gif',
+    ImageType.jpeg => 'image/jpeg',
+    ImageType.png => 'image/png',
+  };
 
-  String get extension => this == ImageType.gif ? 'gif' : 'jpg';
+  String get extension => switch (this) {
+    ImageType.gif => 'gif',
+    ImageType.jpeg => 'jpg',
+    ImageType.png => 'png',
+  };
 }
 
 (Uint8List, ImageType, int, int)? compressImage(Uint8List data) {
@@ -45,6 +53,18 @@ extension ImageTypeExtension on ImageType {
     }
 
     image = copyResize(image, width: targetWidth, height: targetHeight);
+  }
+
+  final maxChannelValue = image.maxChannelValue;
+  final hasTransparency = image.any((pixel) => pixel.a < maxChannelValue);
+
+  if (hasTransparency) {
+    return (
+      Uint8List.fromList(encodePng(image)),
+      ImageType.png,
+      image.width,
+      image.height,
+    );
   }
 
   return (
