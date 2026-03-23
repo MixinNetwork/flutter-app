@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/extension/message.dart';
@@ -6,82 +6,119 @@ import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart';
 import 'conversation_provider.dart';
 
-class MessageSelectionNotifier extends ChangeNotifier {
-  MessageSelectionNotifier();
+class MessageSelectionState extends Equatable {
+  const MessageSelectionState({
+    this.selectedMessageIds = const <String>{},
+    this.messageCannotForward = const <String>{},
+    this.messageCannotRecall = const <String>{},
+    this.messageCannotCombineForward = const <String>{},
+  });
 
-  final Set<String> _selectedMessageIds = {};
-  final Set<String> _messageCannotForward = {};
-  final Set<String> _messageCannotRecall = {};
-  final Set<String> _messageCannotCombineForward = {};
+  final Set<String> selectedMessageIds;
+  final Set<String> messageCannotForward;
+  final Set<String> messageCannotRecall;
+  final Set<String> messageCannotCombineForward;
 
-  bool get hasSelectedMessage => _selectedMessageIds.isNotEmpty;
-
-  Set<String> get selectedMessageIds => _selectedMessageIds.toSet();
+  bool get hasSelectedMessage => selectedMessageIds.isNotEmpty;
 
   bool get canForward =>
-      _messageCannotForward.isEmpty && _selectedMessageIds.length < 100;
+      messageCannotForward.isEmpty && selectedMessageIds.length < 100;
 
   bool get canCombineForward =>
-      _messageCannotCombineForward.isEmpty &&
-      _selectedMessageIds.length >= 2 &&
-      _selectedMessageIds.length < 100;
+      messageCannotCombineForward.isEmpty &&
+      selectedMessageIds.length >= 2 &&
+      selectedMessageIds.length < 100;
 
   bool get canRecall =>
-      _messageCannotRecall.isEmpty && _selectedMessageIds.length < 100;
+      messageCannotRecall.isEmpty && selectedMessageIds.length < 100;
+
+  MessageSelectionState copyWith({
+    Set<String>? selectedMessageIds,
+    Set<String>? messageCannotForward,
+    Set<String>? messageCannotRecall,
+    Set<String>? messageCannotCombineForward,
+  }) => MessageSelectionState(
+    selectedMessageIds: selectedMessageIds ?? this.selectedMessageIds,
+    messageCannotForward: messageCannotForward ?? this.messageCannotForward,
+    messageCannotRecall: messageCannotRecall ?? this.messageCannotRecall,
+    messageCannotCombineForward:
+        messageCannotCombineForward ?? this.messageCannotCombineForward,
+  );
+
+  @override
+  List<Object?> get props => [
+    selectedMessageIds,
+    messageCannotForward,
+    messageCannotRecall,
+    messageCannotCombineForward,
+  ];
+}
+
+class MessageSelectionNotifier extends Notifier<MessageSelectionState> {
+  @override
+  MessageSelectionState build() {
+    ref.watch(currentConversationIdProvider);
+    return const MessageSelectionState();
+  }
 
   void selectMessage(MessageItem message) {
-    _selectedMessageIds.add(message.messageId);
-    if (!message.canForward) {
-      _messageCannotForward.add(message.messageId);
-      _messageCannotCombineForward.add(message.messageId);
-    }
-    if (!message.canRecall) {
-      _messageCannotRecall.add(message.messageId);
-    }
-    if (message.type.isTranscript) {
-      _messageCannotCombineForward.add(message.messageId);
-    }
-    notifyListeners();
+    state = _addMessage(message);
   }
 
   void toggleSelection(MessageItem message) {
     final messageId = message.messageId;
-
-    if (_selectedMessageIds.remove(messageId)) {
-      _messageCannotForward.remove(messageId);
-      _messageCannotRecall.remove(messageId);
-      _messageCannotCombineForward.remove(messageId);
-    } else {
-      _selectedMessageIds.add(messageId);
-      if (!message.canForward) {
-        _messageCannotForward.add(message.messageId);
-        _messageCannotCombineForward.add(messageId);
-      }
-      if (message.type.isTranscript) {
-        _messageCannotCombineForward.add(messageId);
-      }
-      if (!message.canRecall) {
-        _messageCannotRecall.add(message.messageId);
-      }
+    if (state.selectedMessageIds.contains(messageId)) {
+      state = state.copyWith(
+        selectedMessageIds: {...state.selectedMessageIds}..remove(messageId),
+        messageCannotForward: {...state.messageCannotForward}
+          ..remove(messageId),
+        messageCannotRecall: {...state.messageCannotRecall}..remove(messageId),
+        messageCannotCombineForward: {...state.messageCannotCombineForward}
+          ..remove(messageId),
+      );
+      return;
     }
-
-    notifyListeners();
+    state = _addMessage(message);
   }
 
   void clearSelection() {
-    _selectedMessageIds.clear();
-    _messageCannotForward.clear();
-    _messageCannotRecall.clear();
-    _messageCannotCombineForward.clear();
+    state = const MessageSelectionState();
+  }
 
-    notifyListeners();
+  MessageSelectionState _addMessage(MessageItem message) {
+    final selectedMessageIds = {...state.selectedMessageIds}
+      ..add(message.messageId);
+    final messageCannotForward = {...state.messageCannotForward};
+    final messageCannotRecall = {...state.messageCannotRecall};
+    final messageCannotCombineForward = {...state.messageCannotCombineForward};
+
+    if (!message.canForward) {
+      messageCannotForward.add(message.messageId);
+      messageCannotCombineForward.add(message.messageId);
+    }
+    if (!message.canRecall) {
+      messageCannotRecall.add(message.messageId);
+    }
+    if (message.type.isTranscript) {
+      messageCannotCombineForward.add(message.messageId);
+    }
+
+    return state.copyWith(
+      selectedMessageIds: selectedMessageIds,
+      messageCannotForward: messageCannotForward,
+      messageCannotRecall: messageCannotRecall,
+      messageCannotCombineForward: messageCannotCombineForward,
+    );
   }
 }
 
-final messageSelectionProvider = ChangeNotifierProvider.autoDispose((ref) {
-  ref.watch(currentConversationIdProvider);
-  return MessageSelectionNotifier();
-});
+final messageSelectionProvider =
+    NotifierProvider.autoDispose<
+      MessageSelectionNotifier,
+      MessageSelectionState
+    >(
+      MessageSelectionNotifier.new,
+    );
 
 final hasSelectedMessageProvider = messageSelectionProvider.select(
   (value) => value.hasSelectedMessage,

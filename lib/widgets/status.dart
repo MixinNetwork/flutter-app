@@ -3,7 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/resources.dart';
-import '../utils/extension/extension.dart';
+import '../ui/provider/account_server_provider.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/hook.dart';
 import 'message/message.dart';
 
@@ -15,9 +16,14 @@ class StatusPending extends HookConsumerWidget {
     final messageId = useMessageConverter(
       converter: (state) => state.messageId,
     );
+    final attachmentUtil = ref.watch(
+      accountServerProvider.select(
+        (value) => value.requireValue.attachmentUtil,
+      ),
+    );
 
     final value = useListenableConverter(
-      context.accountServer.attachmentUtil,
+      attachmentUtil,
       converter: (attachmentUtil) =>
           attachmentUtil.getAttachmentProgress(messageId),
       keys: [messageId],
@@ -27,120 +33,158 @@ class StatusPending extends HookConsumerWidget {
   }
 }
 
-class _StatusPending extends StatelessWidget {
+class _StatusPending extends ConsumerWidget {
   const _StatusPending({required this.value});
 
   final double value;
 
   @override
-  Widget build(BuildContext context) => _StatusLayout(
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Center(
-          child: SizedBox.fromSize(
-            size: const Size.square(10),
-            child: DecoratedBox(
-              decoration: BoxDecoration(color: context.theme.accent),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return _StatusLayout(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Center(
+            child: SizedBox.fromSize(
+              size: const Size.square(10),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: theme.accent,
+                ),
+              ),
             ),
           ),
-        ),
-        TweenAnimationBuilder<double>(
-          tween: Tween<double>(end: value),
-          duration: const Duration(milliseconds: 100),
-          builder: (context, value, _) => CircularProgressIndicator(
-            value: value,
-            valueColor: AlwaysStoppedAnimation(context.theme.accent),
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: value),
+            duration: const Duration(milliseconds: 100),
+            builder: (context, value, _) => CircularProgressIndicator(
+              value: value,
+              valueColor: AlwaysStoppedAnimation(theme.accent),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
-class StatusWarning extends StatelessWidget {
+class StatusWarning extends ConsumerWidget {
   const StatusWarning({super.key});
 
   @override
-  Widget build(BuildContext context) => _StatusLayout(
-    child: Center(
-      child: SvgPicture.asset(
-        Resources.assetsImagesWarningSvg,
-        colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return _StatusLayout(
+      child: Center(
+        child: SvgPicture.asset(
+          Resources.assetsImagesWarningSvg,
+          colorFilter: ColorFilter.mode(
+            theme.text,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class StatusDownload extends StatelessWidget {
+class StatusDownload extends ConsumerWidget {
   const StatusDownload({super.key});
 
   @override
-  Widget build(BuildContext context) => _StatusLayout(
-    child: Center(
-      child: SvgPicture.asset(
-        Resources.assetsImagesDownloadSvg,
-        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return _StatusLayout(
+      child: Center(
+        child: SvgPicture.asset(
+          Resources.assetsImagesDownloadSvg,
+          colorFilter: ColorFilter.mode(
+            theme.accent,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class StatusUpload extends StatelessWidget {
+class StatusUpload extends ConsumerWidget {
   const StatusUpload({super.key});
 
   @override
-  Widget build(BuildContext context) => _StatusLayout(
-    child: Center(
-      child: SvgPicture.asset(
-        Resources.assetsImagesUploadSvg,
-        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return _StatusLayout(
+      child: Center(
+        child: SvgPicture.asset(
+          Resources.assetsImagesUploadSvg,
+          colorFilter: ColorFilter.mode(
+            theme.accent,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class StatusAudioPlay extends StatelessWidget {
+class StatusAudioPlay extends ConsumerWidget {
   const StatusAudioPlay({super.key});
 
   @override
-  Widget build(BuildContext context) => _StatusLayout(
-    child: Center(
-      child: SvgPicture.asset(
-        Resources.assetsImagesAudioPlaySvg,
-        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return _StatusLayout(
+      child: Center(
+        child: SvgPicture.asset(
+          Resources.assetsImagesAudioPlaySvg,
+          colorFilter: ColorFilter.mode(
+            theme.accent,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class StatusAudioStop extends StatelessWidget {
+class StatusAudioStop extends ConsumerWidget {
   const StatusAudioStop({super.key});
 
   @override
-  Widget build(BuildContext context) => _StatusLayout(
-    child: Center(
-      child: SvgPicture.asset(
-        Resources.assetsImagesAudioStopSvg,
-        colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return _StatusLayout(
+      child: Center(
+        child: SvgPicture.asset(
+          Resources.assetsImagesAudioStopSvg,
+          colorFilter: ColorFilter.mode(
+            theme.accent,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class _StatusLayout extends StatelessWidget {
+class _StatusLayout extends ConsumerWidget {
   const _StatusLayout({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 38,
-    width: 38,
-    decoration: BoxDecoration(
-      color: context.theme.statusBackground,
-      shape: BoxShape.circle,
-    ),
-    child: child,
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Container(
+      height: 38,
+      width: 38,
+      decoration: BoxDecoration(
+        color: theme.statusBackground,
+        shape: BoxShape.circle,
+      ),
+      child: child,
+    );
+  }
 }

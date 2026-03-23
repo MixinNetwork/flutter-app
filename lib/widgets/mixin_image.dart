@@ -8,11 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:http_client_helper/http_client_helper.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../utils/extension/extension.dart';
+import '../ui/provider/database_provider.dart';
 import '../utils/hook.dart';
 import '../utils/logger.dart';
 import '../utils/proxy.dart';
@@ -168,7 +169,7 @@ Future<Uint8List?> downloadImage(String url) async =>
 /// get md5 from key
 String keyToMd5(String key) => md5.convert(utf8.encode(key)).toString();
 
-class MixinImage extends HookWidget {
+class MixinImage extends HookConsumerWidget {
   const MixinImage({
     required this.image,
     super.key,
@@ -245,8 +246,12 @@ class MixinImage extends HookWidget {
   final ValueNotifier<bool>? controller;
 
   @override
-  Widget build(BuildContext context) {
-    final proxyUrl = context.database.settingProperties.activatedProxy;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final proxyUrl = ref
+        .watch(databaseProvider)
+        .requireValue
+        .settingProperties
+        .activatedProxy;
 
     final codecAsync = useMemoizedFuture(
       () async {

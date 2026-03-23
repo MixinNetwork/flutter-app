@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../enum/message_action.dart';
-import '../../../generated/l10n.dart';
+import '../../../ui/provider/account_server_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../high_light_text.dart';
 import '../message.dart';
@@ -13,6 +13,7 @@ class SystemMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
     final actionName = useMessageConverter(
       converter: (state) => state.actionName,
     );
@@ -35,7 +36,8 @@ class SystemMessage extends HookConsumerWidget {
           cursor: SystemMouseCursors.click,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: context.dynamicColor(
+              color: BrightnessData.dynamicColor(
+                context,
                 const Color.fromRGBO(202, 234, 201, 1),
               ),
               borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -47,14 +49,17 @@ class SystemMessage extends HookConsumerWidget {
                   actionName: actionName,
                   participantUserId: participantUserId,
                   senderId: senderId,
-                  currentUserId: context.accountServer.userId,
+                  currentUserId: accountServer.userId,
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
                   expireIn: int.tryParse(content ?? '0'),
                 ),
                 style: TextStyle(
                   fontSize: context.messageStyle.secondaryFontSize,
-                  color: context.dynamicColor(const Color.fromRGBO(0, 0, 0, 1)),
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(0, 0, 0, 1),
+                  ),
                 ),
               ),
             ),

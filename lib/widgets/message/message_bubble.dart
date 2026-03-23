@@ -6,8 +6,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
-import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/providers/home_scope_providers.dart';
+import '../../ui/provider/account_server_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
 import '../toast.dart';
@@ -22,8 +24,16 @@ const darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
   Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
-      ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
-      : dynamicColor(lightOtherBubble, darkColor: darkOtherBubble);
+      ? BrightnessData.dynamicColor(
+          this,
+          _lightCurrentBubble,
+          darkColor: _darkCurrentBubble,
+        )
+      : BrightnessData.dynamicColor(
+          this,
+          lightOtherBubble,
+          darkColor: darkOtherBubble,
+        );
 }
 
 class MessageBubble extends HookConsumerWidget {
@@ -138,8 +148,11 @@ class MessageBubble extends HookConsumerWidget {
         name: Resources.assetsImagesPinArrowSvg,
         onTap: () {
           final message = context.message;
-          context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+          ref
+              .read(blinkControllerProvider.notifier)
+              .blinkByMessageId(message.messageId);
           ConversationStateNotifier.selectConversation(
+            ref.container,
             context,
             message.conversationId,
             initIndexMessageId: message.messageId,
@@ -162,10 +175,11 @@ class MessageBubble extends HookConsumerWidget {
     }
 
     if (isDisappearingMessage) {
+      final brightness = ref.watch(platformBrightnessProvider);
       Widget icon = Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: SvgPicture.asset(
-          context.brightness == Brightness.dark
+          brightness == Brightness.dark
               ? Resources.assetsImagesExpiringDarkSvg
               : Resources.assetsImagesExpiringSvg,
           width: 16,
@@ -174,14 +188,12 @@ class MessageBubble extends HookConsumerWidget {
       );
 
       if (!kReleaseMode) {
+        final accountServer = ref.read(accountServerProvider).requireValue;
         icon = GestureDetector(
           child: icon,
           onTap: () async {
             final message = context.message;
-            final expireAt = await context
-                .accountServer
-                .database
-                .expiredMessageDao
+            final expireAt = await accountServer.database.expiredMessageDao
                 .getMessageExpireAt([message.messageId]);
             final time =
                 (expireAt[message.messageId] ?? 0) -

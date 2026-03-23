@@ -91,12 +91,15 @@ class WorkerSupervisor<T> {
   Timer? _heartbeatTimer;
   DateTime _lastHeartbeatAt = DateTime.now();
   bool _running = false;
+  bool _ready = false;
   bool _disposed = false;
   bool _starting = false;
   bool _shouldRun = false;
   int _restartCount = 0;
+  Completer<void>? _readyCompleter;
 
   bool get isRunning => _running;
+  bool get isReady => _running && _ready;
 
   Future<void> start() async {
     if (_disposed || _running || _starting) return;
@@ -113,11 +116,32 @@ class WorkerSupervisor<T> {
     _eventsController.add(const WorkerStoppedEvent());
   }
 
+  Future<void> waitUntilReady({Duration? timeout}) {
+    if (_disposed) {
+      return Future.error(StateError('worker supervisor already disposed'));
+    }
+    if (isReady) return Future.value();
+
+    final completer = _readyCompleter ??= Completer<void>();
+    final future = completer.future;
+    final guardedFuture = future.then((_) {
+      if (!isReady) {
+        throw StateError('worker stopped before becoming ready');
+      }
+    });
+    if (timeout == null) return guardedFuture;
+    return guardedFuture.timeout(
+      timeout,
+      onTimeout: () => throw TimeoutException(
+        'Worker did not become ready within ${timeout.inMilliseconds}ms',
+      ),
+    );
+  }
+
   void send(Object message) {
     final channel = _channel;
     if (channel == null) {
-      w('worker supervisor send dropped: worker channel is null');
-      return;
+      throw StateError('worker channel is null');
     }
     try {
       channel.sink.add(message);
@@ -145,12 +169,17 @@ class WorkerSupervisor<T> {
       );
       _isolate = isolate;
       _channel = IsolateChannel<dynamic>.connectReceive(_receivePort!);
+      _ready = false;
+      _readyCompleter = Completer<void>();
 
       _messageSubscription = _channel!.stream.listen(
         (message) {
           if (message is IsolateControlWireMessage &&
               message.control.signal == IsolateControlSignal.pong) {
             _lastHeartbeatAt = DateTime.now();
+          } else if (message is IsolateControlWireMessage &&
+              message.control.signal == IsolateControlSignal.ready) {
+            _markReady();
           }
           _messagesController.add(message);
         },
@@ -235,6 +264,7 @@ class WorkerSupervisor<T> {
 
   Future<void> _teardownWorker() async {
     _running = false;
+    _resetReadyState();
     _heartbeatTimer?.cancel();
     _heartbeatTimer = null;
 
@@ -268,5 +298,22 @@ class WorkerSupervisor<T> {
     await stop();
     await _messagesController.close();
     await _eventsController.close();
+  }
+
+  void _markReady() {
+    _ready = true;
+    final completer = _readyCompleter;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  void _resetReadyState() {
+    _ready = false;
+    final completer = _readyCompleter;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+    _readyCompleter = null;
   }
 }

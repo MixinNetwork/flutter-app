@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../account/account_server.dart';
 import '../../../db/dao/conversation_dao.dart';
@@ -9,32 +9,28 @@ import '../../../utils/sort.dart';
 
 part 'conversation_filter_state.dart';
 
-class ConversationFilterCubit extends Cubit<ConversationFilterState> {
-  ConversationFilterCubit(
-    this.accountServer,
-    this.onlyContact,
-    this.filteredIds,
-    this.afterInit,
-  ) : super(const ConversationFilterState()) {
-    _init();
-  }
+class ConversationFilterNotifier extends Notifier<ConversationFilterState> {
+  ConversationFilterNotifier(this._args);
 
-  final AccountServer accountServer;
-  final bool onlyContact;
-  final Function(ConversationFilterState) afterInit;
-  final Iterable<String> filteredIds;
+  final ConversationFilterArgs _args;
 
   late List<ConversationItem> conversations;
   late List<User> friends;
   late List<User> bots;
 
+  @override
+  ConversationFilterState build() {
+    Future<void>.microtask(_init);
+    return const ConversationFilterState();
+  }
+
   Future<void> _init() async {
     var contactConversationIds = <String>{};
     var botConversationIds = <String>{};
-    if (onlyContact) {
+    if (_args.onlyContact) {
       conversations = [];
     } else {
-      conversations = await accountServer.database.conversationDao
+      conversations = await _args.accountServer.database.conversationDao
           .conversationItems()
           .get();
       contactConversationIds = conversations
@@ -55,41 +51,42 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     friends = <User>[];
     bots = <User>[];
 
-    final Iterable<User> users = await accountServer.database.userDao
+    final Iterable<User> users = await _args.accountServer.database.userDao
         .notInFriends([
           ...contactConversationIds,
           ...botConversationIds,
         ])
         .get();
-    users.where((element) => !filteredIds.contains(element.userId)).forEach((
-      e,
-    ) {
-      if (e.isBot) {
-        bots.add(e);
-      } else {
-        friends.add(e);
-      }
-    });
+    users
+        .where((element) => !_args.filteredIds.contains(element.userId))
+        .forEach((
+          e,
+        ) {
+          if (e.isBot) {
+            bots.add(e);
+          } else {
+            friends.add(e);
+          }
+        });
 
     _filterList();
-    afterInit(state);
   }
 
-  set keyword(String keyword) {
-    emit(state.copyWith(keyword: keyword));
+  void setKeyword(String keyword) {
+    state = state.copyWith(keyword: keyword);
     _filterList();
   }
 
   void _filterList() {
     if (state.keyword?.isEmpty ?? true) {
-      return emit(
-        state.copyWith(
-          recentConversations: conversations,
-          friends: friends,
-          bots: bots,
-          keyword: state.keyword,
-        ),
+      state = state.copyWith(
+        recentConversations: conversations,
+        friends: friends,
+        bots: bots,
+        keyword: state.keyword,
+        initialized: true,
       );
+      return;
     }
     final keyword = state.keyword!.toLowerCase();
 
@@ -129,13 +126,34 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     final filterFriends = friends.where(where).toList()..sort(sort);
     final filterBots = bots.where(where).toList()..sort(sort);
 
-    emit(
-      state.copyWith(
-        recentConversations: recentConversations,
-        friends: filterFriends,
-        bots: filterBots,
-        keyword: state.keyword,
-      ),
+    state = state.copyWith(
+      recentConversations: recentConversations,
+      friends: filterFriends,
+      bots: filterBots,
+      keyword: state.keyword,
+      initialized: true,
     );
   }
 }
+
+class ConversationFilterArgs with EquatableMixin {
+  const ConversationFilterArgs({
+    required this.accountServer,
+    required this.onlyContact,
+    required this.filteredIds,
+  });
+
+  final AccountServer accountServer;
+  final bool onlyContact;
+  final List<String> filteredIds;
+
+  @override
+  List<Object?> get props => [accountServer, onlyContact, filteredIds];
+}
+
+final conversationFilterStateProvider = NotifierProvider.autoDispose
+    .family<
+      ConversationFilterNotifier,
+      ConversationFilterState,
+      ConversationFilterArgs
+    >(ConversationFilterNotifier.new);

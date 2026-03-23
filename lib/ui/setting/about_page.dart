@@ -16,6 +16,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/high_light_text.dart';
+import '../provider/ui_context_providers.dart';
 import 'log_page.dart';
 
 class AboutPage extends HookConsumerWidget {
@@ -23,7 +24,9 @@ class AboutPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ref = useRef<(DateTime, int)?>(null);
+    final tapRef = useRef<(DateTime, int)?>(null);
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
 
     final debugMode = useState(false);
 
@@ -32,27 +35,27 @@ class AboutPage extends HookConsumerWidget {
     void onTap() {
       if (debugMode.value) return;
 
-      final value = ref.value;
+      final value = tapRef.value;
       if (value == null) {
-        ref.value = (DateTime.now(), 1);
+        tapRef.value = (DateTime.now(), 1);
       } else {
         final now = DateTime.now();
         final (last, count) = value;
         if (now.difference(last) < 1.seconds) {
-          ref.value = (now, count + 1);
+          tapRef.value = (now, count + 1);
         } else {
-          ref.value = (now, 1);
+          tapRef.value = (now, 1);
         }
       }
 
-      if ((ref.value?.$2 ?? 0) > 6) {
+      if ((tapRef.value?.$2 ?? 0) > 6) {
         debugMode.value = true;
       }
     }
 
     return Scaffold(
-      backgroundColor: context.theme.background,
-      appBar: MixinAppBar(title: Text(context.l10n.about)),
+      backgroundColor: theme.background,
+      appBar: MixinAppBar(title: Text(l10n.about)),
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.topCenter,
@@ -77,8 +80,8 @@ class AboutPage extends HookConsumerWidget {
                     ScaleEffect(duration: 1000.ms),
                   ],
                   child: Text(
-                    context.l10n.mixinMessengerDesktop,
-                    style: TextStyle(color: context.theme.text, fontSize: 18),
+                    l10n.mixinMessengerDesktop,
+                    style: TextStyle(color: theme.text, fontSize: 18),
                   ),
                 ),
               ),
@@ -88,47 +91,60 @@ class AboutPage extends HookConsumerWidget {
               CustomSelectableText(
                 info?.versionAndBuildNumber ?? '',
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: 50),
               CellGroup(
-                cellBackgroundColor: context.theme.settingCellBackgroundColor,
+                cellBackgroundColor: theme.settingCellBackgroundColor,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Text(context.l10n.followUsOnX),
-                      onTap: () =>
-                          openUri(context, 'https://x.com/MixinMessenger'),
+                      title: Text(l10n.followUsOnX),
+                      onTap: () => openUri(
+                        context,
+                        'https://x.com/MixinMessenger',
+                        container: ref.container,
+                      ),
                     ),
                     CellItem(
-                      title: Text(context.l10n.followUsOnFacebook),
-                      onTap: () =>
-                          openUri(context, 'https://fb.com/MixinMessenger'),
+                      title: Text(l10n.followUsOnFacebook),
+                      onTap: () => openUri(
+                        context,
+                        'https://fb.com/MixinMessenger',
+                        container: ref.container,
+                      ),
                     ),
                     CellItem(
-                      title: Text(context.l10n.helpCenter),
-                      onTap: () =>
-                          openUri(context, 'https://support.mixin.one'),
+                      title: Text(l10n.helpCenter),
+                      onTap: () => openUri(
+                        context,
+                        'https://support.mixin.one',
+                        container: ref.container,
+                      ),
                     ),
                     CellItem(
-                      title: Text(context.l10n.termsOfService),
-                      onTap: () =>
-                          openUri(context, 'https://mixin.one/pages/terms'),
+                      title: Text(l10n.termsOfService),
+                      onTap: () => openUri(
+                        context,
+                        'https://mixin.one/pages/terms',
+                        container: ref.container,
+                      ),
                     ),
                     CellItem(
-                      title: Text(context.l10n.privacyPolicy),
+                      title: Text(l10n.privacyPolicy),
                       onTap: () => openUri(
                         context,
                         'https://mixin.one/pages/privacy',
+                        container: ref.container,
                       ),
                     ),
                     if (!Platform.isMacOS)
                       CellItem(
-                        title: Text(context.l10n.checkNewVersion),
-                        onTap: () => openCheckUpdate(context),
+                        title: Text(l10n.checkNewVersion),
+                        onTap: () => openCheckUpdate(context, ref),
                       ),
                   ],
                 ),
@@ -136,9 +152,12 @@ class AboutPage extends HookConsumerWidget {
               if (debugMode.value)
                 CellGroup(
                   child: CellItem(
-                    title: Text(context.l10n.openLogDirectory),
-                    onTap: () =>
-                        openUri(context, mixinLogDirectory.uri.toString()),
+                    title: Text(l10n.openLogDirectory),
+                    onTap: () => openUri(
+                      context,
+                      mixinLogDirectory.uri.toString(),
+                      container: ref.container,
+                    ),
                   ),
                 ),
             ],
@@ -148,19 +167,21 @@ class AboutPage extends HookConsumerWidget {
     );
   }
 
-  void openCheckUpdate(BuildContext context) {
+  void openCheckUpdate(BuildContext context, WidgetRef ref) {
     if (defaultTargetPlatform == TargetPlatform.linux) {
-      openUri(context, 'https://mixin.one/messenger');
+      openUri(context, 'https://mixin.one/messenger', container: ref.container);
     } else if (defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.iOS) {
       openUri(
         context,
         'https://apps.apple.com/app/mixin-messenger/id1571128582',
+        container: ref.container,
       );
     } else if (defaultTargetPlatform == TargetPlatform.windows) {
       openUri(
         context,
         'https://apps.microsoft.com/store/detail/mixin-desktop/9NQ6HF99B8NJ',
+        container: ref.container,
       );
     }
   }

@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../utils/extension/extension.dart';
+import '../ui/provider/ui_context_providers.dart';
 import 'message/message_bubble.dart';
 
 const _nipWidth = 7.0;
 
-class PinMessageBubble extends StatelessWidget {
+class PinMessageBubble extends ConsumerWidget {
   const PinMessageBubble({
     required this.child,
     super.key,
@@ -16,7 +17,8 @@ class PinMessageBubble extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     const clipper = _PinBubbleClipper();
     return CustomPaint(
       painter: BubblePainter(
@@ -27,7 +29,7 @@ class PinMessageBubble extends StatelessWidget {
         padding: padding.add(const EdgeInsets.only(right: _nipWidth)),
         child: SizedBox.expand(
           child: DefaultTextStyle.merge(
-            style: TextStyle(color: context.theme.text),
+            style: TextStyle(color: theme.text),
             child: child,
           ),
         ),

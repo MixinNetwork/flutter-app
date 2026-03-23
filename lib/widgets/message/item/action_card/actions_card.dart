@@ -2,8 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../utils/extension/extension.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../high_light_text.dart';
 import '../../../mixin_image.dart';
 import '../../message.dart';
@@ -14,56 +15,59 @@ import '../action/action_message.dart';
 import '../text/text_message.dart';
 import 'action_card_data.dart';
 
-class ActionsCardMessage extends StatelessWidget {
+class ActionsCardMessage extends ConsumerWidget {
   ActionsCardMessage({required this.data, super.key})
     : assert(data.isActionsCard);
 
   final AppCardData data;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final width = (constraints.maxWidth * 0.5).clamp(320.0, 375.0);
-      return MessageBubble(
-        showBubble: false,
-        padding: EdgeInsets.zero,
-        includeNip: true,
-        child: Column(
-          children: [
-            _Bubble(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: width, minWidth: width),
-                child: MessageSelectionArea(
-                  child: ActionsCardBody(
-                    data: data,
-                    description: MessageTextWidget(
-                      enableSelection: false,
-                      color: context.theme.text,
-                      fontSize: context.messageStyle.primaryFontSize,
-                      content: data.description,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = (constraints.maxWidth * 0.5).clamp(320.0, 375.0);
+        return MessageBubble(
+          showBubble: false,
+          padding: EdgeInsets.zero,
+          includeNip: true,
+          child: Column(
+            children: [
+              _Bubble(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: width, minWidth: width),
+                  child: MessageSelectionArea(
+                    child: ActionsCardBody(
+                      data: data,
+                      description: MessageTextWidget(
+                        enableSelection: false,
+                        color: theme.text,
+                        fontSize: context.messageStyle.primaryFontSize,
+                        content: data.description,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            HookBuilder(
-              builder: (context) => MessageBubbleNipPadding(
-                currentUser: useIsCurrentUser(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: width,
-                    minWidth: width,
+              const SizedBox(height: 8),
+              HookBuilder(
+                builder: (context) => MessageBubbleNipPadding(
+                  currentUser: useIsCurrentUser(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: width,
+                      minWidth: width,
+                    ),
+                    child: _Actions(actions: data.actions),
                   ),
-                  child: _Actions(actions: data.actions),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _Bubble extends HookWidget {
@@ -89,7 +93,7 @@ class _Bubble extends HookWidget {
   }
 }
 
-class ActionsCardBody extends StatelessWidget {
+class ActionsCardBody extends ConsumerWidget {
   const ActionsCardBody({
     required this.description,
     required this.data,
@@ -100,33 +104,36 @@ class ActionsCardBody extends StatelessWidget {
   final Widget description;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      if (data.coverUrl.isNotEmpty)
-        AspectRatio(aspectRatio: 1, child: MixinImage.network(data.coverUrl))
-      else if (data.cover != null)
-        _CoverWidget(cover: data.cover!),
-      const SizedBox(height: 10),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: CustomText(
-          data.title,
-          style: TextStyle(
-            color: context.theme.text,
-            fontSize: context.messageStyle.primaryFontSize,
-            fontWeight: FontWeight.bold,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (data.coverUrl.isNotEmpty)
+          AspectRatio(aspectRatio: 1, child: MixinImage.network(data.coverUrl))
+        else if (data.cover != null)
+          _CoverWidget(cover: data.cover!),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: CustomText(
+            data.title,
+            style: TextStyle(
+              color: theme.text,
+              fontSize: context.messageStyle.primaryFontSize,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      const SizedBox(height: 8),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: description,
-      ),
-      const SizedBox(height: 10),
-    ],
-  );
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: description,
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
 }
 
 class _CoverWidget extends StatelessWidget {

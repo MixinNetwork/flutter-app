@@ -7,6 +7,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../ui/provider/database_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -36,6 +38,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
     final _conversationId = conversation?.conversationId ?? conversationId;
     assert(_conversationId != null);
     final _name = conversation?.name ?? fullName;
@@ -50,7 +53,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
         useMemoizedStream(
           () {
             if (_category == ConversationCategory.group) {
-              return context.database.participantDao
+              return database.participantDao
                   .participantsAvatar(_conversationId!)
                   .watchWithStream(
                     eventStreams: [
@@ -63,7 +66,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
             }
             return const Stream<List<User>>.empty();
           },
-          keys: [_conversationId, _category],
+          keys: [_conversationId, _category, database],
           initialData: <User>[],
         ).data ??
         <User>[];
@@ -149,7 +152,7 @@ class AvatarPuzzlesWidget extends HookConsumerWidget {
   );
 }
 
-class AvatarWidget extends StatelessWidget {
+class AvatarWidget extends ConsumerWidget {
   const AvatarWidget({
     required this.size,
     required this.avatarUrl,
@@ -166,14 +169,15 @@ class AvatarWidget extends StatelessWidget {
   final bool clipOval;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final placeholder = SizedBox.fromSize(
       size: Size.square(size),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: userId != null
               ? getAvatarColorById(userId!)
-              : context.theme.listSelected,
+              : theme.listSelected,
         ),
         child: Center(
           child: Text(

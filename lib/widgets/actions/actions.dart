@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import 'command_palette_action.dart';
 import 'create_circle_action.dart';
 import 'create_conversation_action.dart';
@@ -25,19 +28,41 @@ class ToggleCommandPaletteIntent extends Intent {
   const ToggleCommandPaletteIntent();
 }
 
-class MixinAppActions extends StatelessWidget {
+class MixinAppActions extends ConsumerWidget {
   const MixinAppActions({required this.child, super.key});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Actions(
-    actions: {
-      CreateConversationIntent: CreateConversationAction(context),
-      CreateGroupConversationIntent: CreateGroupConversationAction(context),
-      CreateCircleIntent: CreateCircleAction(context),
-      ToggleCommandPaletteIntent: CommandPaletteAction(context),
-    },
-    child: child,
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).value;
+    final l10n = ref.watch(localizationProvider);
+    if (accountServer == null) {
+      return child;
+    }
+    return Actions(
+      actions: {
+        CreateConversationIntent: CreateConversationAction(
+          context: context,
+          container: ref.container,
+          l10n: l10n,
+        ),
+        CreateGroupConversationIntent: CreateGroupConversationAction(
+          context: context,
+          accountServer: accountServer,
+          l10n: l10n,
+        ),
+        CreateCircleIntent: CreateCircleAction(
+          context: context,
+          accountServer: accountServer,
+          l10n: l10n,
+        ),
+        ToggleCommandPaletteIntent: CommandPaletteAction(
+          context,
+          ref.container,
+        ),
+      },
+      child: child,
+    );
+  }
 }

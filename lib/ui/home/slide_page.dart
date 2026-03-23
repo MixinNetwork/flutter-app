@@ -12,10 +12,8 @@ import '../../constants/resources.dart';
 import '../../db/dao/circle_dao.dart';
 import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
-import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../widgets/animated_visibility.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/dialog.dart';
@@ -24,112 +22,160 @@ import '../../widgets/select_item.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
+import '../provider/account_server_provider.dart';
+import '../provider/database_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
+import '../provider/ui_context_providers.dart';
 
-class SlidePage extends StatelessWidget {
+final _allCirclesProvider =
+    StreamProvider.autoDispose<List<ConversationCircleItem>>((ref) {
+      final database = ref.watch(databaseProvider).value;
+      if (database == null) return const Stream.empty();
+      return database.circleDao.allCircles().watchWithStream(
+        eventStreams: [
+          DataBaseEventBus.instance.updateCircleStream,
+          DataBaseEventBus.instance.updateCircleConversationStream,
+          DataBaseEventBus.instance.updateUserIdsStream,
+          DataBaseEventBus.instance.updateConversationIdStream,
+        ],
+        duration: kDefaultThrottleDuration,
+      );
+    });
+
+final _slideCategoryUnseenCountProvider = StreamProvider.autoDispose
+    .family<BaseUnseenConversationCountResult, SlideCategoryType>((ref, type) {
+      if (type == SlideCategoryType.chats ||
+          type == SlideCategoryType.circle ||
+          type == SlideCategoryType.setting) {
+        return const Stream.empty();
+      }
+      final database = ref.watch(databaseProvider).value;
+      if (database == null) {
+        return const Stream.empty();
+      }
+      return database.conversationDao
+          .unseenConversationCountByCategory(type)
+          .watchSingleWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.updateConversationIdStream,
+            ],
+            duration: kDefaultThrottleDuration,
+          );
+    });
+
+class SlidePage extends ConsumerWidget {
   const SlidePage({required this.showCollapse, super.key});
 
   final bool showCollapse;
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: RepaintBoundary(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: context.brightnessValue == 1.0
-              ? Colors.black.withValues(alpha: 0.03)
-              : Colors.white.withValues(alpha: 0.01),
-          border: Border(right: BorderSide(color: context.theme.divider)),
-        ),
-        child: MoveWindow(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: (defaultTargetPlatform == TargetPlatform.macOS)
-                      ? 64.0
-                      : 16.0,
-                ),
-                const _CurrentUser(),
-                const SizedBox(height: 24),
-                _Item(
-                  asset: Resources.assetsImagesChatSvg,
-                  title: context.l10n.allChats,
-                  type: SlideCategoryType.chats,
-                ),
-                const SizedBox(height: 12),
-                const _Divider(),
-                const SizedBox(height: 12),
-                _CategoryList(
-                  children: [
-                    _Item(
-                      asset: Resources.assetsImagesSlideContactsSvg,
-                      title: context.l10n.contactTitle,
-                      type: SlideCategoryType.contacts,
-                    ),
-                    _Item(
-                      asset: Resources.assetsImagesGroupSvg,
-                      title: context.l10n.groups,
-                      type: SlideCategoryType.groups,
-                    ),
-                    _Item(
-                      asset: Resources.assetsImagesBotSvg,
-                      title: Localization.current.botsTitle,
-                      type: SlideCategoryType.bots,
-                    ),
-                    _Item(
-                      asset: Resources.assetsImagesStrangersSvg,
-                      title: context.l10n.strangers,
-                      type: SlideCategoryType.strangers,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Expanded(child: _CircleList()),
-                AnimatedVisibility(
-                  alignment: Alignment.bottomCenter,
-                  visible: showCollapse,
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      final collapse = ref.watch(
-                        settingProvider.select(
-                          (value) => value.collapsedSidebar,
-                        ),
-                      );
-
-                      return SelectItem(
-                        icon: SvgPicture.asset(
-                          collapse
-                              ? Resources.assetsImagesExpandedSvg
-                              : Resources.assetsImagesCollapseSvg,
-                          width: 24,
-                          height: 24,
-                          colorFilter: ColorFilter.mode(
-                            context.theme.text,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        title: Text(context.l10n.collapse),
-                        onTap: () =>
-                            context.settingChangeNotifier.collapsedSidebar =
-                                !collapse,
-                      );
-                    },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final brightness = ref.watch(brightnessValueProvider);
+    return SafeArea(
+      child: RepaintBoundary(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: brightness == 1.0
+                ? Colors.black.withValues(alpha: 0.03)
+                : Colors.white.withValues(alpha: 0.01),
+            border: Border(
+              right: BorderSide(color: theme.divider),
+            ),
+          ),
+          child: MoveWindow(
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: (defaultTargetPlatform == TargetPlatform.macOS)
+                        ? 64.0
+                        : 16.0,
                   ),
-                ),
-                const SizedBox(height: 4),
-              ],
+                  const _CurrentUser(),
+                  const SizedBox(height: 24),
+                  _Item(
+                    asset: Resources.assetsImagesChatSvg,
+                    title: l10n.allChats,
+                    type: SlideCategoryType.chats,
+                  ),
+                  const SizedBox(height: 12),
+                  const _Divider(),
+                  const SizedBox(height: 12),
+                  _CategoryList(
+                    children: [
+                      _Item(
+                        asset: Resources.assetsImagesSlideContactsSvg,
+                        title: l10n.contactTitle,
+                        type: SlideCategoryType.contacts,
+                      ),
+                      _Item(
+                        asset: Resources.assetsImagesGroupSvg,
+                        title: l10n.groups,
+                        type: SlideCategoryType.groups,
+                      ),
+                      _Item(
+                        asset: Resources.assetsImagesBotSvg,
+                        title: Localization.current.botsTitle,
+                        type: SlideCategoryType.bots,
+                      ),
+                      _Item(
+                        asset: Resources.assetsImagesStrangersSvg,
+                        title: l10n.strangers,
+                        type: SlideCategoryType.strangers,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Expanded(child: _CircleList()),
+                  AnimatedVisibility(
+                    alignment: Alignment.bottomCenter,
+                    visible: showCollapse,
+                    child: Consumer(
+                      builder: (context, ref, child) {
+                        final collapse = ref.watch(
+                          settingProvider.select(
+                            (value) => value.collapsedSidebar,
+                          ),
+                        );
+
+                        return SelectItem(
+                          icon: SvgPicture.asset(
+                            collapse
+                                ? Resources.assetsImagesExpandedSvg
+                                : Resources.assetsImagesCollapseSvg,
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                              theme.text,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          title: Text(l10n.collapse),
+                          onTap: () =>
+                              ref
+                                      .read(settingProvider.notifier)
+                                      .collapsedSidebar =
+                                  !collapse,
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _CurrentUser extends HookConsumerWidget {
@@ -137,9 +183,10 @@ class _CurrentUser extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final account = ref.watch(authAccountProvider);
     final selected = ref.watch(
-      slideCategoryStateProvider.select(
+      slideCategoryProvider.select(
         (value) => value.type == SlideCategoryType.setting,
       ),
     );
@@ -164,7 +211,7 @@ class _CurrentUser extends HookConsumerWidget {
             Text(
               '${account?.identityNumber}',
               style: TextStyle(
-                color: context.theme.secondaryText,
+                color: theme.secondaryText,
                 fontSize: 12,
               ),
             ),
@@ -173,7 +220,7 @@ class _CurrentUser extends HookConsumerWidget {
         selected: selected,
         onTap: () {
           ref
-              .read(slideCategoryStateProvider.notifier)
+              .read(slideCategoryProvider.notifier)
               .select(SlideCategoryType.setting);
 
           if (ModalRoute.of(context)?.canPop == true) {
@@ -190,24 +237,17 @@ class _CircleList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final circles = useMemoizedStream<List<ConversationCircleItem>>(
-      () => context.database.circleDao.allCircles().watchWithStream(
-        eventStreams: [
-          DataBaseEventBus.instance.updateCircleStream,
-          DataBaseEventBus.instance.updateCircleConversationStream,
-          DataBaseEventBus.instance.updateUserIdsStream,
-          DataBaseEventBus.instance.updateConversationIdStream,
-        ],
-        duration: kDefaultThrottleDuration,
-      ),
-      initialData: [],
-    );
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final circles = ref.watch(_allCirclesProvider).value ?? const [];
     final controller = useScrollController();
-    final list = useState(circles.data ?? []);
+    final list = useState(circles);
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
     useEffect(() {
-      list.value = circles.data ?? [];
-    }, [circles.data]);
-    if (circles.data?.isEmpty ?? true) return const SizedBox();
+      list.value = circles;
+    }, [circles]);
+    if (circles.isEmpty) return const SizedBox();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -224,7 +264,7 @@ class _CircleList extends HookConsumerWidget {
               newList.insert(_newIndex, oldItem);
 
               list.value = newList;
-              context.accountServer.updateCircleOrders(list.value);
+              accountServer.updateCircleOrders(list.value);
             },
             itemCount: list.value.length,
             itemBuilder: (context, index) {
@@ -233,7 +273,7 @@ class _CircleList extends HookConsumerWidget {
                 key: Key(circle.circleId),
                 builder: (context, ref, _) {
                   final selected = ref.watch(
-                    slideCategoryStateProvider.select((value) {
+                    slideCategoryProvider.select((value) {
                       final conversationCircleItem = list.value[index];
                       return value.type == SlideCategoryType.circle &&
                           value.id == conversationCircleItem.circleId;
@@ -266,22 +306,22 @@ class _CircleList extends HookConsumerWidget {
                             [
                               MenuAction(
                                 image: MenuImage.icon(IconFonts.edit),
-                                title: context.l10n.editCircleName,
+                                title: l10n.editCircleName,
                                 callback: () async {
                                   final name = await showMixinDialog<String>(
                                     context: context,
                                     child: EditDialog(
                                       editText: circle.name,
-                                      title: Text(context.l10n.circles),
-                                      hintText: context.l10n.editCircleName,
-                                      positiveAction: context.l10n.edit,
+                                      title: Text(l10n.circles),
+                                      hintText: l10n.editCircleName,
+                                      positiveAction: l10n.edit,
                                       maxLength: 64,
                                     ),
                                   );
                                   if (name?.isEmpty ?? true) return;
 
                                   await runFutureWithToast(
-                                    context.accountServer.updateCircle(
+                                    accountServer.updateCircle(
                                       circle.circleId,
                                       name!,
                                     ),
@@ -292,12 +332,10 @@ class _CircleList extends HookConsumerWidget {
                                 image: MenuImage.icon(
                                   IconFonts.manageCircle,
                                 ),
-                                title: context.l10n.editConversations,
+                                title: l10n.editConversations,
                                 callback: () async {
                                   final initSelected =
-                                      (await context
-                                              .database
-                                              .circleConversationDao
+                                      (await database.circleConversationDao
                                               .allCircleConversations(
                                                 circle.circleId,
                                               )
@@ -317,7 +355,7 @@ class _CircleList extends HookConsumerWidget {
                                     onlyContact: false,
                                     initSelected: initSelected,
                                     allowEmpty: true,
-                                    confirmedText: context.l10n.done,
+                                    confirmedText: l10n.done,
                                   );
 
                                   if (result == null || result.isEmpty) {
@@ -357,11 +395,10 @@ class _CircleList extends HookConsumerWidget {
                                         ),
                                       ),
                                     ];
-                                    await context.accountServer
-                                        .editCircleConversation(
-                                          circle.circleId,
-                                          requests,
-                                        );
+                                    await accountServer.editCircleConversation(
+                                      circle.circleId,
+                                      requests,
+                                    );
                                   }());
                                 },
                               ),
@@ -369,22 +406,20 @@ class _CircleList extends HookConsumerWidget {
                             [
                               MenuAction(
                                 image: MenuImage.icon(IconFonts.delete),
-                                title: context.l10n.deleteCircle,
+                                title: l10n.deleteCircle,
                                 callback: () async {
                                   final result = await showConfirmMixinDialog(
                                     context,
-                                    context.l10n.deleteTheCircle(
-                                      circle.name,
-                                    ),
+                                    l10n.deleteTheCircle(circle.name),
                                   );
                                   if (result == null) return;
                                   await runFutureWithToast(() async {
-                                    await context.accountServer.deleteCircle(
+                                    await accountServer.deleteCircle(
                                       circle.circleId,
                                     );
                                     ref
                                         .read(
-                                          slideCategoryStateProvider.notifier,
+                                          slideCategoryProvider.notifier,
                                         )
                                         .select(SlideCategoryType.chats);
                                   }());
@@ -394,7 +429,7 @@ class _CircleList extends HookConsumerWidget {
                           ],
                         ),
                         child: Material(
-                          color: context.theme.primary,
+                          color: theme.primary,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: SelectItem(
@@ -410,7 +445,7 @@ class _CircleList extends HookConsumerWidget {
                               title: Text(circle.name),
                               onTap: () {
                                 ref
-                                    .read(slideCategoryStateProvider.notifier)
+                                    .read(slideCategoryProvider.notifier)
                                     .select(
                                       SlideCategoryType.circle,
                                       circle.circleId,
@@ -467,31 +502,12 @@ class _Item extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final selected = ref.watch(
-      slideCategoryStateProvider.select((value) => value.type == type),
+      slideCategoryProvider.select((value) => value.type == type),
     );
 
-    final result = useMemoizedStream<BaseUnseenConversationCountResult>(() {
-      final dao = context.database.conversationDao;
-      switch (type) {
-        case SlideCategoryType.contacts:
-        case SlideCategoryType.groups:
-        case SlideCategoryType.bots:
-        case SlideCategoryType.strangers:
-          return dao
-              .unseenConversationCountByCategory(type)
-              .watchSingleWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.updateConversationIdStream,
-                ],
-                duration: kDefaultThrottleDuration,
-              );
-        case SlideCategoryType.chats:
-        case SlideCategoryType.circle:
-        case SlideCategoryType.setting:
-          return const Stream.empty();
-      }
-    }, keys: [type]).data;
+    final result = ref.watch(_slideCategoryUnseenCountProvider(type)).value;
 
     return MoveWindowBarrier(
       child: SelectItem(
@@ -499,11 +515,14 @@ class _Item extends HookConsumerWidget {
           asset,
           width: 24,
           height: 24,
-          colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+            theme.text,
+            BlendMode.srcIn,
+          ),
         ),
         title: Text(title),
         onTap: () {
-          ref.read(slideCategoryStateProvider.notifier).select(type, title);
+          ref.read(slideCategoryProvider.notifier).select(type, title);
 
           if (ModalRoute.of(context)?.canPop == true) {
             Navigator.pop(context);
@@ -517,17 +536,19 @@ class _Item extends HookConsumerWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
+class _Divider extends ConsumerWidget {
   const _Divider();
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 1.5,
-    // width: 32,
-    margin: const EdgeInsets.symmetric(horizontal: 8),
-    decoration: ShapeDecoration(
-      color: context.theme.listSelected,
-      shape: const StadiumBorder(),
-    ),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Container(
+      height: 1.5,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: ShapeDecoration(
+        color: theme.listSelected,
+        shape: const StadiumBorder(),
+      ),
+    );
+  }
 }

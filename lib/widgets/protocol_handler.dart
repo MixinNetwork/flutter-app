@@ -37,7 +37,7 @@ class AppProtocolHandler extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       if (_initialUrl != null) {
-        openUri(context, _initialUrl!);
+        openUri(context, _initialUrl!, container: ref.container);
       }
     }, [_initialUrl]);
     if (Platform.isLinux) {
@@ -62,7 +62,7 @@ class _LinuxAppProtocolHandler extends HookConsumerWidget {
           windowManager.show();
           bringWindowToFront();
           if (url != null) {
-            openUri(context, url);
+            openUri(context, url, container: ref.container);
           }
         },
       );
@@ -118,7 +118,7 @@ class _ProtocolHandler extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     useProtocol((url) {
       windowManager.show();
-      openUri(context, url);
+      openUri(context, url, container: ref.container);
     });
     return child;
   }

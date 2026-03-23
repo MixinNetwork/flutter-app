@@ -1,14 +1,21 @@
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../utils/extension/extension.dart';
+import '../ui/provider/ui_context_providers.dart';
 
-class Empty extends StatelessWidget {
+class Empty extends ConsumerWidget {
   const Empty({required this.text, super.key});
 
   final String text;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: Text(text, style: TextStyle(color: context.theme.secondaryText)),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Center(
+      child: Text(
+        text,
+        style: TextStyle(color: theme.secondaryText),
+      ),
+    );
+  }
 }

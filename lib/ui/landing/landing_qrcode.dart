@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
-import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/platform.dart';
 import '../../widgets/qr_code.dart';
-import 'bloc/landing_cubit.dart';
-import 'bloc/landing_state.dart';
+import '../provider/ui_context_providers.dart';
+import 'controllers/landing_state.dart';
 import 'landing.dart';
 
 class LandingQrCodeWidget extends HookConsumerWidget {
@@ -18,31 +14,24 @@ class LandingQrCodeWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = useMemoized(() => Localizations.localeOf(context));
-
-    final landingCubit = useBloc(
-      () => LandingQrCodeCubit(context.multiAuthChangeNotifier, locale),
+    final l10n = ref.watch(localizationProvider);
+    final status = ref.watch(
+      landingQrCodeNotifierProvider.select((value) => value.status),
     );
-
-    final status =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, LandingStatus>(
-          bloc: landingCubit,
-          converter: (state) => state.status,
-        );
 
     final Widget child;
     if (status == LandingStatus.init) {
       child = Center(
         child: _Loading(
-          title: context.l10n.initializing,
-          message: context.l10n.chatHintE2e,
+          title: l10n.initializing,
+          message: l10n.chatHintE2e,
         ),
       );
     } else if (status == LandingStatus.provisioning) {
       child = Center(
         child: _Loading(
-          title: context.l10n.loading,
-          message: context.l10n.chatHintE2e,
+          title: l10n.loading,
+          message: l10n.chatHintE2e,
         ),
       );
     } else {
@@ -61,7 +50,7 @@ class LandingQrCodeWidget extends HookConsumerWidget {
         ],
       );
     }
-    return BlocProvider.value(value: landingCubit, child: child);
+    return child;
   }
 }
 
@@ -70,20 +59,12 @@ class _QrCode extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final url =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-          converter: (state) => state.authUrl,
-        );
-
-    final visible =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, bool>(
-          converter: (state) => state.status == LandingStatus.needReload,
-        );
-
-    final errorMessage =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-          converter: (state) => state.errorMessage,
-        );
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final landingState = ref.watch(landingQrCodeNotifierProvider);
+    final url = landingState.authUrl;
+    final visible = landingState.status == LandingStatus.needReload;
+    final errorMessage = landingState.errorMessage;
 
     Widget? qrCode;
 
@@ -110,8 +91,9 @@ class _QrCode extends HookConsumerWidget {
                   visible: visible,
                   child: _Retry(
                     errorMessage: errorMessage,
-                    onTap: () =>
-                        context.read<LandingQrCodeCubit>().requestAuthUrl(),
+                    onTap: () => ref
+                        .read(landingQrCodeNotifierProvider.notifier)
+                        .requestAuthUrl(),
                   ),
                 ),
               ],
@@ -120,8 +102,8 @@ class _QrCode extends HookConsumerWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          context.l10n.loginByQrcode,
-          style: TextStyle(fontSize: 16, color: context.theme.text),
+          l10n.loginByQrcode,
+          style: TextStyle(fontSize: 16, color: theme.text),
         ),
         const SizedBox(height: 16),
         Padding(
@@ -129,18 +111,20 @@ class _QrCode extends HookConsumerWidget {
           child: DefaultTextStyle.merge(
             style: TextStyle(
               fontSize: 14,
-              color: context.dynamicColor(
-                const Color.fromRGBO(187, 190, 195, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              color: ref.watch(
+                dynamicColorProvider((
+                  color: const Color.fromRGBO(187, 190, 195, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                )),
               ),
             ),
             textAlign: TextAlign.left,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('1. ${context.l10n.loginByQrcodeTips1}'),
+                Text('1. ${l10n.loginByQrcodeTips1}'),
                 const SizedBox(height: 4),
-                Text('2. ${context.l10n.loginByQrcodeTips2}'),
+                Text('2. ${l10n.loginByQrcodeTips2}'),
               ],
             ),
           ),
@@ -150,15 +134,22 @@ class _QrCode extends HookConsumerWidget {
   }
 }
 
-class _Loading extends StatelessWidget {
+class _Loading extends ConsumerWidget {
   const _Loading({required this.title, required this.message});
 
   final String title;
   final String message;
 
   @override
-  Widget build(BuildContext context) {
-    final primaryColor = context.theme.text;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final secondaryColor = ref.watch(
+      dynamicColorProvider((
+        color: const Color.fromRGBO(188, 190, 195, 1),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+      )),
+    );
+    final primaryColor = theme.text;
     return SizedBox(
       width: 375,
       child: Column(
@@ -181,10 +172,7 @@ class _Loading extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: context.dynamicColor(
-                const Color.fromRGBO(188, 190, 195, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-              ),
+              color: secondaryColor,
               fontSize: 16,
             ),
           ),
@@ -194,7 +182,7 @@ class _Loading extends StatelessWidget {
   }
 }
 
-class _Retry extends StatelessWidget {
+class _Retry extends ConsumerWidget {
   const _Retry({required this.onTap, this.errorMessage});
 
   final VoidCallback onTap;
@@ -202,39 +190,42 @@ class _Retry extends StatelessWidget {
   final String? errorMessage;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 0.86)),
-    child: GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Tooltip(
-        message: errorMessage ?? '',
-        excludeFromSemantics: true,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                Resources.assetsImagesIcRetrySvg,
-                width: 40,
-                height: 40,
-              ),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  context.l10n.clickToReloadQrcode,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(255, 255, 255, 0.9),
-                    fontSize: 14,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color.fromRGBO(0, 0, 0, 0.86)),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Tooltip(
+          message: errorMessage ?? '',
+          excludeFromSemantics: true,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(
+                  Resources.assetsImagesIcRetrySvg,
+                  width: 40,
+                  height: 40,
+                ),
+                const SizedBox(height: 14),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    l10n.clickToReloadQrcode,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color.fromRGBO(255, 255, 255, 0.9),
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

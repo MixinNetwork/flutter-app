@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/constants.dart';
 import '../constants/resources.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'high_light_text.dart';
@@ -41,11 +42,16 @@ class SearchTextField extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final _focusNode = useMemoized(() => focusNode ?? FocusNode());
-    final backgroundColor = context.dynamicColor(
-      const Color.fromRGBO(245, 247, 250, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+    final backgroundColor = ref.watch(
+      dynamicColorProvider(
+        (
+          color: const Color.fromRGBO(245, 247, 250, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+        ),
+      ),
     );
-    final hintColor = context.theme.secondaryText;
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final hintColor = theme.secondaryText;
 
     useEffect(() {
       void notifyChanged() {
@@ -98,7 +104,7 @@ class SearchTextField extends HookConsumerWidget {
                       autofocus: autofocus,
                       controller: controller,
                       style: TextStyle(
-                        color: context.theme.text,
+                        color: theme.text,
                         fontSize: fontSize,
                       ),
                       scrollPadding: EdgeInsets.zero,
@@ -162,12 +168,19 @@ class _SearchClearIcon extends HookConsumerWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => InteractiveDecoratedBox(
-    cursor: SystemMouseCursors.basic,
-    onTap: onTap,
-    child: Padding(
-      padding: const EdgeInsets.only(right: 16, left: 8),
-      child: Icon(Icons.close, color: context.theme.secondaryText, size: 16),
-    ),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return InteractiveDecoratedBox(
+      cursor: SystemMouseCursors.basic,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 16, left: 8),
+        child: Icon(
+          Icons.close,
+          color: theme.secondaryText,
+          size: 16,
+        ),
+      ),
+    );
+  }
 }

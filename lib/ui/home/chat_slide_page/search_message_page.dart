@@ -8,11 +8,11 @@ import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/database.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/system/text_input.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
@@ -22,11 +22,12 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/blink_cubit.dart';
-import '../bloc/conversation_list_bloc.dart';
-import '../bloc/search_message_cubit.dart';
-import '../chat/chat_page.dart';
+import '../../provider/database_provider.dart';
+import '../../provider/multi_auth_provider.dart';
+import '../../provider/ui_context_providers.dart';
+import '../controllers/search_message_controller.dart';
 import '../conversation/search_list.dart';
+import '../providers/home_scope_providers.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
   const SearchMessagePage(this.conversationState, {super.key});
@@ -35,14 +36,16 @@ class SearchMessagePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final categories = useMemoized(
       () => [
-        _Category(context.l10n.text, const [
+        _Category(l10n.text, const [
           MessageCategory.plainText,
           MessageCategory.signalText,
           MessageCategory.encryptedText,
         ]),
-        _Category(context.l10n.post, const [
+        _Category(l10n.post, const [
           MessageCategory.plainPost,
           MessageCategory.signalPost,
           MessageCategory.encryptedPost,
@@ -56,13 +59,8 @@ class SearchMessagePage extends HookConsumerWidget {
     final editingController = useMemoized(EmojiTextEditingController.new);
     final userMode = useState(false);
     final selectedUser = useState<User?>(null);
-
-    final keywordStream = useValueNotifierConvertSteam(editingController);
-    final keywordIsEmpty =
-        useMemoizedStream(
-          () => keywordStream.map((event) => event.text.isEmpty).distinct(),
-        ).data ??
-        editingController.text.isEmpty;
+    final editingValue = useValueListenable(editingController);
+    final keywordIsEmpty = editingValue.text.isEmpty;
 
     useEffect(() {
       if (keywordIsEmpty) selectedCategories.value = null;
@@ -77,22 +75,23 @@ class SearchMessagePage extends HookConsumerWidget {
     }, [userMode.value, selectedUser.value]);
 
     useEffect(() {
-      SearchConversationKeywordCubit.updateSelectedUser(
-        context,
-        selectedUser.value?.userId,
-      );
+      ref
+          .read(searchConversationKeywordControllerProvider.notifier)
+          .setSelectedUser(selectedUser.value?.userId);
+      return null;
     }, [selectedUser.value]);
 
     return Scaffold(
-      backgroundColor: context.theme.primary,
+      backgroundColor: theme.primary,
       appBar: MixinAppBar(
-        title: Text(context.l10n.searchConversation),
+        title: Text(l10n.searchConversation),
         actions: [
           if (!Navigator.of(context).canPop())
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
-              color: context.theme.icon,
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              color: theme.icon,
+              onTap: () =>
+                  ref.read(chatSideControllerProvider.notifier).onPopPage(),
             ),
         ],
       ),
@@ -125,17 +124,17 @@ class SearchMessagePage extends HookConsumerWidget {
                       fontSize: 16,
                       focusNode: focusNode,
                       controller: editingController,
-                      hintText: context.l10n.search,
+                      hintText: l10n.search,
                       showClear: userMode.value,
                       leading: userMode.value
                           ? Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  context.l10n.fromWithColon,
+                                  l10n.fromWithColon,
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: context.theme.text,
+                                    color: theme.text,
                                   ),
                                 ),
                                 if (selectedUser.value != null)
@@ -159,10 +158,12 @@ class SearchMessagePage extends HookConsumerWidget {
                         if (userMode.value && selectedUser.value == null) {
                           return;
                         }
-                        SearchConversationKeywordCubit.updateKeyword(
-                          context,
-                          keyword,
-                        );
+                        ref
+                            .read(
+                              searchConversationKeywordControllerProvider
+                                  .notifier,
+                            )
+                            .setKeyword(keyword);
                       },
                     ),
                   ),
@@ -177,7 +178,7 @@ class SearchMessagePage extends HookConsumerWidget {
                         height: 36,
                         child: ActionButton(
                           name: Resources.assetsImagesUserSearchSvg,
-                          color: context.theme.icon,
+                          color: theme.icon,
                           onTap: () {
                             editingController.text = '';
                             userMode.value = true;
@@ -268,37 +269,24 @@ class _SearchMessageList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (_, initKeyword) = useMemoized(
-      () => context.read<SearchConversationKeywordCubit>().state,
-    );
     final keyword =
-        useMemoizedStream(
-          () => context
-              .read<SearchConversationKeywordCubit>()
-              .stream
-              .map((event) => event.$2.trim())
-              .debounceTime(const Duration(milliseconds: 150)),
-        ).data ??
-        initKeyword.trim();
-
-    final searchMessageCubit = useBloc(
-      () => SearchMessageCubit.conversation(
-        database: context.database,
-        keyword: keyword,
-        limit: context.read<ConversationListBloc>().limit,
-        categories: categories,
-        userId: selectedUserId,
-        conversationId: conversationId,
-      ),
-      keys: [keyword, categories, selectedUserId, conversationId],
+        ref.watch(searchConversationKeywordDebouncedProvider).value ?? '';
+    final database = ref.watch(databaseProvider).requireValue;
+    final args = ConversationSearchMessageArgs(
+      database: database,
+      keyword: keyword,
+      limit: ref.read(conversationListControllerProvider.notifier).limit,
+      categories: categories,
+      userId: selectedUserId,
+      conversationId: conversationId,
     );
-
-    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-      bloc: searchMessageCubit,
+    final searchMessageNotifier = ref.watch(
+      conversationSearchMessageStateProvider(args).notifier,
     );
+    final pageState = ref.watch(conversationSearchMessageStateProvider(args));
 
     return ScrollablePositionedList.builder(
-      itemPositionsListener: searchMessageCubit.itemPositionsListener,
+      itemPositionsListener: searchMessageNotifier.itemPositionsListener,
       itemCount: pageState.items.length,
       itemBuilder: (context, index) {
         final message = pageState.items[index];
@@ -308,12 +296,15 @@ class _SearchMessageList extends HookConsumerWidget {
           showSender: true,
           onTap: () {
             ConversationStateNotifier.selectConversation(
+              ref.container,
               context,
               message.conversationId,
               initIndexMessageId: message.messageId,
             );
-            context.read<BlinkCubit>().blinkByMessageId(message.messageId);
-            final chatSideCubit = context.read<ChatSideCubit>();
+            ref
+                .read(blinkControllerProvider.notifier)
+                .blinkByMessageId(message.messageId);
+            final chatSideCubit = ref.read(chatSideControllerProvider.notifier);
             if (chatSideCubit.state.routeMode) {
               chatSideCubit.clear();
             }
@@ -339,77 +330,22 @@ class _SearchParticipantList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final keywordStream = useValueNotifierConvertSteam(editingController);
-
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final editingValue = useValueListenable(editingController);
+    final database = ref.watch(databaseProvider).requireValue;
+    final currentUserId =
+        ref.watch(authAccountProvider)?.userId ??
+        ref.watch(multiAuthNotifierProvider).current?.userId ??
+        '';
+    final args = _SearchParticipantsArgs(
+      database: database,
+      conversationId: conversationId,
+      currentUserId: currentUserId,
+      isBot: isBot,
+      keyword: editingValue.text,
+    );
     final filteredUser =
-        useMemoizedStream(
-          () => keywordStream
-              .throttleTime(const Duration(milliseconds: 100))
-              .map((event) => event.text)
-              .switchMap((value) {
-                final userDao = context.database.userDao;
-
-                if (isBot) {
-                  return value.isEmpty
-                      ? userDao.friends().watchWithStream(
-                          eventStreams: [
-                            DataBaseEventBus.instance.updateUserIdsStream,
-                          ],
-                          duration: kSlowThrottleDuration,
-                        )
-                      : userDao
-                            .fuzzySearchBotGroupUser(
-                              currentUserId:
-                                  context
-                                      .multiAuthChangeNotifier
-                                      .current
-                                      ?.userId ??
-                                  '',
-                              conversationId: conversationId,
-                              keyword: value,
-                            )
-                            .watchWithStream(
-                              eventStreams: [
-                                DataBaseEventBus
-                                    .instance
-                                    .insertOrReplaceMessageIdsStream,
-                                DataBaseEventBus.instance.deleteMessageIdStream,
-                                DataBaseEventBus.instance.updateUserIdsStream,
-                              ],
-                              duration: kVerySlowThrottleDuration,
-                            );
-                }
-
-                if (value.isEmpty) {
-                  return userDao
-                      .groupParticipants(conversationId)
-                      .watchWithStream(
-                        eventStreams: [
-                          DataBaseEventBus.instance
-                              .watchUpdateParticipantStream(
-                                conversationIds: [conversationId],
-                              ),
-                        ],
-                        duration: kSlowThrottleDuration,
-                      );
-                }
-                return userDao
-                    .fuzzySearchGroupUser(
-                      context.account?.userId ?? '',
-                      conversationId,
-                      value,
-                    )
-                    .watchWithStream(
-                      eventStreams: [
-                        DataBaseEventBus.instance.watchUpdateParticipantStream(
-                          conversationIds: [conversationId],
-                        ),
-                      ],
-                      duration: kSlowThrottleDuration,
-                    );
-              }),
-        ).data ??
-        [];
+        ref.watch(_searchParticipantsProvider(args)).value ?? [];
 
     return ListView.builder(
       itemCount: filteredUser.length,
@@ -436,7 +372,7 @@ class _SearchParticipantList extends HookConsumerWidget {
                           user.fullName ?? '',
                           style: TextStyle(
                             fontSize: 16,
-                            color: context.theme.text,
+                            color: theme.text,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -459,7 +395,95 @@ class _SearchParticipantList extends HookConsumerWidget {
   }
 }
 
-class _CategoryItem extends StatelessWidget {
+class _SearchParticipantsArgs with EquatableMixin {
+  const _SearchParticipantsArgs({
+    required this.database,
+    required this.conversationId,
+    required this.currentUserId,
+    required this.isBot,
+    required this.keyword,
+  });
+
+  final Database database;
+  final String conversationId;
+  final String currentUserId;
+  final bool isBot;
+  final String keyword;
+
+  @override
+  List<Object?> get props => [
+    database,
+    conversationId,
+    currentUserId,
+    isBot,
+    keyword,
+  ];
+}
+
+final _searchParticipantsProvider = StreamProvider.autoDispose
+    .family<List<User>, _SearchParticipantsArgs>((ref, args) async* {
+      final userDao = args.database.userDao;
+      final keyword = args.keyword.trim();
+
+      Stream<List<User>> buildStream() {
+        if (args.isBot) {
+          return keyword.isEmpty
+              ? userDao.friends().watchWithStream(
+                  eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
+                  duration: kSlowThrottleDuration,
+                )
+              : userDao
+                    .fuzzySearchBotGroupUser(
+                      currentUserId: args.currentUserId,
+                      conversationId: args.conversationId,
+                      keyword: keyword,
+                    )
+                    .watchWithStream(
+                      eventStreams: [
+                        DataBaseEventBus
+                            .instance
+                            .insertOrReplaceMessageIdsStream,
+                        DataBaseEventBus.instance.deleteMessageIdStream,
+                        DataBaseEventBus.instance.updateUserIdsStream,
+                      ],
+                      duration: kVerySlowThrottleDuration,
+                    );
+        }
+
+        if (keyword.isEmpty) {
+          return userDao
+              .groupParticipants(args.conversationId)
+              .watchWithStream(
+                eventStreams: [
+                  DataBaseEventBus.instance.watchUpdateParticipantStream(
+                    conversationIds: [args.conversationId],
+                  ),
+                ],
+                duration: kSlowThrottleDuration,
+              );
+        }
+        return userDao
+            .fuzzySearchGroupUser(
+              args.currentUserId,
+              args.conversationId,
+              keyword,
+            )
+            .watchWithStream(
+              eventStreams: [
+                DataBaseEventBus.instance.watchUpdateParticipantStream(
+                  conversationIds: [args.conversationId],
+                ),
+              ],
+              duration: kSlowThrottleDuration,
+            );
+      }
+
+      yield* buildStream()
+          .debounceTime(const Duration(milliseconds: 100))
+          .distinct(listEquals);
+    });
+
+class _CategoryItem extends ConsumerWidget {
   const _CategoryItem({
     required this.name,
     required this.categories,
@@ -473,7 +497,8 @@ class _CategoryItem extends StatelessWidget {
   final ValueChanged<List<String>> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final selected = listEquals(categories, selectedCategories);
     return InteractiveDecoratedBox(
       onTap: () {
@@ -482,7 +507,7 @@ class _CategoryItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: ShapeDecoration(
-          color: selected ? context.theme.accent : context.theme.listSelected,
+          color: selected ? theme.accent : theme.listSelected,
           shape: const StadiumBorder(),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -491,7 +516,7 @@ class _CategoryItem extends StatelessWidget {
         child: Text(
           name,
           style: TextStyle(
-            color: selected ? Colors.white : context.theme.text,
+            color: selected ? Colors.white : theme.text,
             fontSize: 16,
             height: 1,
           ),

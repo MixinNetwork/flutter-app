@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../../constants/brightness_theme_data.dart';
 import '../../../../../db/vo/inscription.dart';
 import '../../../../../ui/provider/database_provider.dart';
+import '../../../../../ui/provider/ui_context_providers.dart';
 import '../../../../../utils/extension/extension.dart';
 import '../../../../buttons.dart';
 import '../../../../dialog.dart';
@@ -39,10 +40,9 @@ class _InscriptionDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inscription = ref
-        .watch(_inscriptionProvider(inscriptionHash))
-        .valueOrNull;
-    const theme = darkBrightnessThemeData;
+    final inscription = ref.watch(_inscriptionProvider(inscriptionHash)).value;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     return SizedBox(
       width: 400,
       child: Stack(
@@ -67,14 +67,17 @@ class _InscriptionDialog extends ConsumerWidget {
                   height: 200,
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: context.theme.secondaryText,
+                      color: theme.secondaryText,
                     ),
                   ),
                 )
               else
                 Flexible(
                   child: SingleChildScrollView(
-                    child: _InscriptionDetailLayout(inscription: inscription),
+                    child: _InscriptionDetailLayout(
+                      inscription: inscription,
+                      l10n: l10n,
+                    ),
                   ),
                 ),
             ],
@@ -109,9 +112,13 @@ class _BlurBackground extends StatelessWidget {
 }
 
 class _InscriptionDetailLayout extends StatelessWidget {
-  const _InscriptionDetailLayout({required this.inscription});
+  const _InscriptionDetailLayout({
+    required this.inscription,
+    required this.l10n,
+  });
 
   final Inscription inscription;
+  final Localization l10n;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -129,7 +136,7 @@ class _InscriptionDetailLayout extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         _ItemInfoTile(
-          title: Text(context.l10n.hash),
+          title: Text(l10n.hash),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -148,12 +155,12 @@ class _InscriptionDetailLayout extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         _ItemInfoTile(
-          title: Text(context.l10n.id),
+          title: Text(l10n.id),
           subtitle: Text('#${inscription.sequence}'),
         ),
         const SizedBox(height: 20),
         _ItemInfoTile(
-          title: Text(context.l10n.collection),
+          title: Text(l10n.collection),
           subtitle: Text(inscription.name ?? ''),
         ),
         const SizedBox(height: 20),

@@ -18,8 +18,6 @@ import 'abstract_responsive_navigator.dart';
 
 class ResponsiveNavigatorStateNotifier
     extends AbstractResponsiveNavigatorStateNotifier {
-  ResponsiveNavigatorStateNotifier() : super(const ResponsiveNavigatorState());
-
   final _chatPageKey = GlobalKey();
 
   static const chatPage = 'chatPage';
@@ -148,10 +146,10 @@ class ResponsiveNavigatorStateNotifier
 }
 
 final responsiveNavigatorProvider =
-    StateNotifierProvider.autoDispose<
+    NotifierProvider.autoDispose<
       ResponsiveNavigatorStateNotifier,
       ResponsiveNavigatorState
-    >((ref) => ResponsiveNavigatorStateNotifier());
+    >(ResponsiveNavigatorStateNotifier.new);
 
 final navigatorRouteModeProvider = responsiveNavigatorProvider.select(
   (value) => value.routeMode,

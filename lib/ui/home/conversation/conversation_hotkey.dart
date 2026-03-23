@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../utils/extension/extension.dart';
 import '../../../utils/platform.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/slide_category_provider.dart';
-
 import '../../provider/unseen_conversations_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
+import '../providers/home_scope_providers.dart';
 
-class ConversationHotKey extends StatelessWidget {
+class ConversationHotKey extends ConsumerWidget {
   const ConversationHotKey({required this.child, super.key});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => FocusableActionDetector(
+  Widget build(BuildContext context, WidgetRef ref) => FocusableActionDetector(
     shortcuts: {
       SingleActivator(
         LogicalKeyboardKey.arrowDown,
@@ -31,10 +30,10 @@ class ConversationHotKey extends StatelessWidget {
     },
     actions: {
       NextConversationIntent: CallbackAction<NextConversationIntent>(
-        onInvoke: (_) => _navigationConversation(context, forward: true),
+        onInvoke: (_) => _navigationConversation(context, ref, forward: true),
       ),
       PreviousConversationIntent: CallbackAction<PreviousConversationIntent>(
-        onInvoke: (_) => _navigationConversation(context, forward: false),
+        onInvoke: (_) => _navigationConversation(context, ref, forward: false),
       ),
     },
     child: child,
@@ -49,25 +48,34 @@ class PreviousConversationIntent extends Intent {
   const PreviousConversationIntent();
 }
 
-void _navigationConversation(BuildContext context, {required bool forward}) {
-  final category = context.providerContainer.read(slideCategoryStateProvider);
-  final conversationListBloc = context.read<ConversationListBloc>();
+void _navigationConversation(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool forward,
+}) {
+  final category = ref.read(slideCategoryProvider);
+  final conversationListBloc = ref.read(
+    conversationListControllerProvider.notifier,
+  );
+  final pagingState = ref.read(
+    conversationListControllerProvider,
+  );
 
   if (category.type == SlideCategoryType.setting) return;
 
-  final currentConversationId = context.providerContainer.read(
+  final currentConversationId = ref.read(
     currentConversationIdProvider,
   );
   if (currentConversationId == null) return;
 
-  final conversationUnseenFilterEnabled = context.providerContainer.read(
+  final conversationUnseenFilterEnabled = ref.read(
     conversationUnseenFilterEnabledProvider,
   );
 
   String nextConversationId;
   int? nextConversationIndex;
   if (conversationUnseenFilterEnabled) {
-    final unseenConversations = context.providerContainer.read(
+    final unseenConversations = ref.read(
       unseenConversationsProvider,
     );
     final index = unseenConversations?.indexWhere(
@@ -83,7 +91,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
     nextConversationId = unseenConversations[nextIndex].conversationId;
   } else {
     var currentConversationIndex = -1;
-    conversationListBloc.state.map.forEach((key, value) {
+    pagingState.map.forEach((key, value) {
       if (value.conversationId == currentConversationId) {
         currentConversationIndex = key;
       }
@@ -95,13 +103,16 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
         ? currentConversationIndex + 1
         : currentConversationIndex - 1;
 
-    final nextConversation =
-        conversationListBloc.state.map[nextConversationIndex];
+    final nextConversation = pagingState.map[nextConversationIndex];
     if (nextConversation == null) return;
     nextConversationId = nextConversation.conversationId;
   }
 
-  ConversationStateNotifier.selectConversation(context, nextConversationId);
+  ConversationStateNotifier.selectConversation(
+    ref.container,
+    context,
+    nextConversationId,
+  );
 
   if (nextConversationIndex == null) return;
 

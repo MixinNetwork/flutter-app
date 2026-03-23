@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 import '../constants/resources.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 
@@ -91,10 +93,12 @@ class ToastWidget extends StatelessWidget {
 
 void showToastSuccessful({BuildContext? context}) => Toast.createView(
   context: context,
-  builder: (context) => ToastWidget(
-    barrierColor: Colors.transparent,
-    icon: const _Successful(),
-    text: context.l10n.successful,
+  builder: (context) => Consumer(
+    builder: (context, ref, _) => ToastWidget(
+      barrierColor: Colors.transparent,
+      icon: const _Successful(),
+      text: ref.watch(localizationProvider).successful,
+    ),
   ),
 );
 
@@ -107,13 +111,14 @@ class ToastError extends Error {
   ToastError._internal({this.message, this.messageBuilder});
 
   static String errorToString(BuildContext context, Object? error) {
+    final l10n = Localization.current;
     if (error is ToastError) {
       if (error.message != null) {
         return error.message!;
       } else if (error.messageBuilder != null) {
         return error.messageBuilder!(context);
       } else {
-        return context.l10n.failed;
+        return l10n.failed;
       }
     } else if (error is MixinApiError) {
       return (error.error! as MixinError).toDisplayString(context);
@@ -122,7 +127,7 @@ class ToastError extends Error {
     } else if (error is String) {
       return error;
     } else {
-      return error?.toString() ?? context.l10n.failed;
+      return error?.toString() ?? l10n.failed;
     }
   }
 
@@ -148,10 +153,12 @@ void showToast(String message, {BuildContext? context}) => Toast.createView(
 
 void showToastLoading({BuildContext? context}) => Toast.createView(
   context: context,
-  builder: (context) => ToastWidget(
-    icon: const _Loading(),
-    text: context.l10n.loading,
-    ignoring: false,
+  builder: (context) => Consumer(
+    builder: (context, ref, _) => ToastWidget(
+      icon: const _Loading(),
+      text: ref.watch(localizationProvider).loading,
+      ignoring: false,
+    ),
   ),
   duration: null,
 );

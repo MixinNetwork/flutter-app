@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/extension/extension.dart';
 import 'interactive_decorated_box.dart';
 import 'unread_text.dart';
@@ -31,6 +32,15 @@ class SelectItem extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showed = useState(false);
     final showedTooltip = useState(false);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final dynamicColor = ref.watch(
+      dynamicColorProvider(
+        (
+          color: const Color.fromRGBO(51, 51, 51, 0.16),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+        ),
+      ),
+    );
 
     const boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -40,10 +50,12 @@ class SelectItem extends HookConsumerWidget {
       onExit: (_) => showed.value = false,
       onTap: onTap,
       decoration: selected
-          ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
+          ? boxDecoration.copyWith(
+              color: theme.sidebarSelected,
+            )
           : boxDecoration,
-      hoveringColor: context.theme.sidebarSelected.withValues(
-        alpha: context.theme.sidebarSelected.a / 2,
+      hoveringColor: theme.sidebarSelected.withValues(
+        alpha: theme.sidebarSelected.a / 2,
       ),
       child: LayoutBuilder(
         builder: (context, boxConstraints) {
@@ -51,17 +63,16 @@ class SelectItem extends HookConsumerWidget {
           final hideUnreadText = boxConstraints.maxWidth < 100;
           final titleWidget = DefaultTextStyle.merge(
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: context.theme.text, fontSize: 14),
+            style: TextStyle(
+              color: theme.text,
+              fontSize: 14,
+            ),
             child: title,
-          );
-          final dynamicColor = context.dynamicColor(
-            const Color.fromRGBO(51, 51, 51, 0.16),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
           );
           final unreadTextWidget = UnreadText(
             data: '$count',
             backgroundColor: dynamicColor,
-            textColor: context.theme.text,
+            textColor: theme.text,
           );
           return PortalTarget(
             visible:
@@ -85,7 +96,7 @@ class SelectItem extends HookConsumerWidget {
                     vertical: 14,
                   ),
                   decoration: boxDecoration.copyWith(
-                    color: context.theme.background,
+                    color: theme.background,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -121,7 +132,7 @@ class SelectItem extends HookConsumerWidget {
                       color: count > 0 && hideUnreadText
                           ? count == mutedCount
                                 ? dynamicColor
-                                : context.theme.red
+                                : theme.red
                           : Colors.transparent,
                     ),
                     duration: const Duration(milliseconds: 100),

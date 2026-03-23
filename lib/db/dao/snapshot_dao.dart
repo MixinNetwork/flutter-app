@@ -1,8 +1,7 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 
-import '../../utils/extension/extension.dart';
+import '../../generated/l10n.dart';
 import '../database_event_bus.dart';
 import '../extension/db.dart';
 import '../mixin_database.dart';
@@ -28,14 +27,14 @@ extension SnapshotConverter on sdk.Snapshot {
 }
 
 extension SnapshotItemExtension on SnapshotItem {
-  String l10nType(BuildContext context) {
-    if (type == sdk.SnapshotType.transfer) return context.l10n.transfer;
-    if (type == sdk.SnapshotType.deposit) return context.l10n.deposit;
-    if (type == sdk.SnapshotType.withdrawal) return context.l10n.withdrawal;
-    if (type == sdk.SnapshotType.fee) return context.l10n.fee;
-    if (type == sdk.SnapshotType.rebate) return context.l10n.rebate;
-    if (type == sdk.SnapshotType.raw) return context.l10n.raw;
-    return context.l10n.na;
+  String l10nType(Localization l10n) {
+    if (type == sdk.SnapshotType.transfer) return l10n.transfer;
+    if (type == sdk.SnapshotType.deposit) return l10n.deposit;
+    if (type == sdk.SnapshotType.withdrawal) return l10n.withdrawal;
+    if (type == sdk.SnapshotType.fee) return l10n.fee;
+    if (type == sdk.SnapshotType.rebate) return l10n.rebate;
+    if (type == sdk.SnapshotType.raw) return l10n.raw;
+    return l10n.na;
   }
 }
 

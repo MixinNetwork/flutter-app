@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import '../dialog.dart';
@@ -36,7 +37,7 @@ typedef RequestVerification = Future<VerificationResponse> Function();
 typedef VerifyPhoneCode<T> =
     Future<T> Function(String code, VerificationResponse response);
 
-class _VerificationCodeDialog<T> extends StatelessWidget {
+class _VerificationCodeDialog<T> extends ConsumerWidget {
   const _VerificationCodeDialog({
     required this.phoneNumber,
     required this.initialVerificationResponse,
@@ -51,44 +52,47 @@ class _VerificationCodeDialog<T> extends StatelessWidget {
   final VerifyPhoneCode<T> onVerification;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 520,
-    height: 326,
-    child: Column(
-      children: [
-        const SizedBox(height: 56),
-        Material(
-          color: context.theme.popUp,
-          child: VerificationCodeInputLayout(
-            phoneNumber: phoneNumber,
-            initialVerificationResponse: initialVerificationResponse,
-            reRequestVerification: reRequestVerification,
-            onVerification: (code, response) async {
-              showToastLoading();
-              try {
-                final result = await onVerification(code, response);
-                d('_VerificationCodeDialog: result: $result');
-                Navigator.pop(context, result);
-                Toast.dismiss();
-              } catch (error, stacktrace) {
-                e('_VerificationCodeDialog error: $error $stacktrace');
-                showToastFailed(error);
-              }
-            },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
+    return SizedBox(
+      width: 520,
+      height: 326,
+      child: Column(
+        children: [
+          const SizedBox(height: 56),
+          Material(
+            color: brightnessTheme.popUp,
+            child: VerificationCodeInputLayout(
+              phoneNumber: phoneNumber,
+              initialVerificationResponse: initialVerificationResponse,
+              reRequestVerification: reRequestVerification,
+              onVerification: (code, response) async {
+                showToastLoading();
+                try {
+                  final result = await onVerification(code, response);
+                  d('_VerificationCodeDialog: result: $result');
+                  Navigator.pop(context, result);
+                  Toast.dismiss();
+                } catch (error, stacktrace) {
+                  e('_VerificationCodeDialog error: $error $stacktrace');
+                  showToastFailed(error);
+                }
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 77),
-      ],
-    ),
-  );
+          const SizedBox(height: 77),
+        ],
+      ),
+    );
+  }
 }
 
 Future<VerificationResponse> requestVerificationCode({
   required String phone,
   required BuildContext context,
   required VerificationPurpose purpose,
+  required AccountApi accountApi,
   (CaptchaType, String)? captcha,
-  AccountApi? accountApi,
 }) async {
   final request = VerificationRequest(
     phone: phone,
@@ -99,7 +103,7 @@ Future<VerificationResponse> requestVerificationCode({
         : null,
     hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
-  final api = accountApi ?? context.accountServer.client.accountApi;
+  final api = accountApi;
   try {
     final response = await api.verification(request);
     return response.data;
@@ -146,6 +150,8 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final codeInputController = useTextEditingController();
     final verification = useRef<VerificationResponse>(
       initialVerificationResponse,
@@ -156,12 +162,12 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 125),
           child: Text(
-            context.l10n.landingValidationTitle(phoneNumber),
+            l10n.landingValidationTitle(phoneNumber),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: context.theme.text,
+              color: brightnessTheme.text,
             ),
           ),
         ),
@@ -179,12 +185,15 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
             onCompleted: (code) => onVerification(code, verification.value),
             useHapticFeedback: true,
             pinTheme: PinTheme(
-              activeColor: context.theme.accent,
-              inactiveColor: context.theme.secondaryText,
+              activeColor: brightnessTheme.accent,
+              inactiveColor: brightnessTheme.secondaryText,
               fieldWidth: 15,
               borderWidth: 2,
             ),
-            textStyle: TextStyle(fontSize: 18, color: context.theme.text),
+            textStyle: TextStyle(
+              fontSize: 18,
+              color: brightnessTheme.text,
+            ),
             onChanged: (value) {},
           ),
         ),
@@ -221,6 +230,8 @@ class ResendCodeWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final nextDuration = useState(60);
     useEffect(() {
       final timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -235,10 +246,10 @@ class ResendCodeWidget extends HookConsumerWidget {
         ? Padding(
             padding: const EdgeInsets.all(8),
             child: Text(
-              context.l10n.resendCodeIn(nextDuration.value),
+              l10n.resendCodeIn(nextDuration.value),
               style: TextStyle(
                 fontSize: 14,
-                color: context.theme.secondaryText,
+                color: brightnessTheme.secondaryText,
               ),
             ),
           )
@@ -251,8 +262,11 @@ class ResendCodeWidget extends HookConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                context.l10n.resendCode,
-                style: TextStyle(fontSize: 14, color: context.theme.accent),
+                l10n.resendCode,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: brightnessTheme.accent,
+                ),
               ),
             ),
           );

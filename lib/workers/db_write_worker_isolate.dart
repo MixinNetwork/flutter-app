@@ -123,14 +123,14 @@ class _DbWriteRunner {
         return null;
       case DbWriteMethod.updateJobRunState:
         final payload = request.payload! as DbWriteUpdateJobRunStatePayload;
-        await (database.mixinDatabase.update(database.mixinDatabase.jobs)
-              ..where((tbl) => tbl.jobId.equals(payload.jobId)))
-            .write(
-              db.JobsCompanion(
-                createdAt: Value(payload.createdAt),
-                runCount: Value(payload.runCount),
-              ),
-            );
+        await (database.mixinDatabase.update(
+          database.mixinDatabase.jobs,
+        )..where((tbl) => tbl.jobId.equals(payload.jobId))).write(
+          db.JobsCompanion(
+            createdAt: Value(payload.createdAt),
+            runCount: Value(payload.runCount),
+          ),
+        );
         return null;
       case DbWriteMethod.upsertConversation:
         final conversation = request.payload! as db.Conversation;
@@ -327,8 +327,7 @@ class _DbWriteRunner {
           payload.quoteContentJson == null
               ? null
               : mapToQuoteMessage(
-                  jsonDecode(payload.quoteContentJson!)
-                      as Map<String, dynamic>,
+                  jsonDecode(payload.quoteContentJson!) as Map<String, dynamic>,
                 ),
           payload.currentUserId,
           payload.currentUserIdentityNumber,
@@ -817,7 +816,9 @@ class _DbWriteRunner {
         final payload = request.payload! as DbWriteReplaceMigrateFtsJobPayload;
         await database.jobDao.transaction(() async {
           await database.jobDao.deleteJobByAction(kMigrateFts);
-          await database.jobDao.insert(createMigrationFtsJob(payload.messageRowId));
+          await database.jobDao.insert(
+            createMigrationFtsJob(payload.messageRowId),
+          );
         });
         return null;
       case DbWriteMethod.insertCleanupQuoteContentJob:

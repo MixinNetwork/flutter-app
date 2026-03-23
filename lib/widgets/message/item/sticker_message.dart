@@ -5,6 +5,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
+import '../../../ui/provider/account_server_provider.dart';
+import '../../../ui/provider/database_provider.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/sticker_watch.dart';
@@ -37,6 +40,9 @@ class StickerMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final mediaQuery = ref.watch(mediaQueryDataProvider);
+    final database = ref.read(databaseProvider).requireValue;
     final stickerId = useMessageConverter(
       converter: (state) => state.stickerId,
     );
@@ -77,7 +83,7 @@ class StickerMessageWidget extends HookConsumerWidget {
 
             d('stickerData watch: $stickerId, ${context.message.messageId}');
             yield* watchStickerById(
-              context.database,
+              database,
               stickerId,
             ).whereNotNull().map(
               (event) => _StickerData(
@@ -95,7 +101,7 @@ class StickerMessageWidget extends HookConsumerWidget {
     final assetType = stickerData?.assetType;
 
     final stickerSize = _calculateSize(
-      context,
+      mediaQuery,
       stickerData?.assetWidth?.toDouble(),
       stickerData?.assetHeight?.toDouble(),
       assetType,
@@ -104,7 +110,7 @@ class StickerMessageWidget extends HookConsumerWidget {
     final errorWidget = Container(
       width: stickerSize.width,
       height: stickerSize.height,
-      color: context.theme.stickerPlaceholderColor,
+      color: theme.stickerPlaceholderColor,
     );
     return MessageBubble(
       showBubble: false,
@@ -119,7 +125,12 @@ class StickerMessageWidget extends HookConsumerWidget {
             onTap: () {
               if (stickerId == null) return;
 
-              showStickerPageDialog(context, stickerId);
+              showStickerPageDialog(
+                context,
+                stickerId,
+                database: ref.read(databaseProvider).requireValue,
+                accountServer: ref.read(accountServerProvider).requireValue,
+              );
             },
             child: StickerItem(
               stickerId: stickerId,
@@ -139,12 +150,12 @@ class StickerMessageWidget extends HookConsumerWidget {
 const kMaxWidth = 140.0;
 
 Size _calculateSize(
-  BuildContext context,
+  MediaQueryData mediaQuery,
   double? assetWidth,
   double? assetHeight,
   String? assetType,
 ) {
-  final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+  final devicePixelRatio = mediaQuery.devicePixelRatio;
 
   double width;
   double height;
@@ -197,9 +208,7 @@ Size _calculateSize(
 
   var size = Size(width, height) / devicePixelRatio;
   final isJson = assetType == 'json';
-  if (!isJson &&
-      scale <= 0.5 &&
-      MediaQuery.of(context).devicePixelRatio <= 1.5) {
+  if (!isJson && scale <= 0.5 && mediaQuery.devicePixelRatio <= 1.5) {
     d('scale: $scale, devicePixelRatio: $devicePixelRatio');
     if (size.longestSide >= kMaxWidth) {
       // scale up max to 200px for less than 1.5x device. eg. Windows 1920 * 1080

@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hexagon/hexagon.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../../../constants/resources.dart';
 import '../../../../../db/vo/inscription.dart';
+import '../../../../../ui/provider/account_server_provider.dart';
+import '../../../../../ui/provider/ui_context_providers.dart';
 import '../../../../../utils/extension/extension.dart';
 import '../../../../interactive_decorated_box.dart';
 import '../../../../mixin_image.dart';
@@ -20,11 +23,14 @@ import 'colored_hash_widget.dart';
 import 'inscription_content.dart';
 import 'inscription_dialog.dart';
 
-class InscriptionMessage extends HookWidget {
+class InscriptionMessage extends HookConsumerWidget {
   const InscriptionMessage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final content = useMessageConverter(converter: (m) => m.content);
     final inscription = useMemoized(() {
       if (content == null) {
@@ -38,7 +44,7 @@ class InscriptionMessage extends HookWidget {
         e('InscriptionMessage: errored to parse content: $content', error);
         try {
           hex.decode(content);
-          context.accountServer.addSyncInscriptionMessageJob(
+          accountServer.addSyncInscriptionMessageJob(
             context.message.messageId,
           );
         } catch (_) {}
@@ -57,21 +63,22 @@ class InscriptionMessage extends HookWidget {
       child: InteractiveDecoratedBox(
         onTap: () {
           if (inscription == null) {
-            showToastFailed(context.l10n.dataLoading);
+            showToastFailed(l10n.dataLoading);
             return;
           }
           showInscriptionDialog(context, inscription.inscriptionHash);
         },
-        child: _InscriptionLayout(inscription: inscription),
+        child: _InscriptionLayout(inscription: inscription, theme: theme),
       ),
     );
   }
 }
 
 class _InscriptionLayout extends StatelessWidget {
-  const _InscriptionLayout({required this.inscription});
+  const _InscriptionLayout({required this.inscription, required this.theme});
 
   final Inscription? inscription;
+  final BrightnessThemeData theme;
 
   @override
   Widget build(BuildContext context) {
@@ -95,14 +102,17 @@ class _InscriptionLayout extends StatelessWidget {
                 children: [
                   Text(
                     inscription?.name ?? '',
-                    style: TextStyle(color: context.theme.text, fontSize: 14),
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     inscription == null ? '' : '#${inscription!.sequence}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: context.theme.secondaryText,
+                      color: theme.secondaryText,
                     ),
                   ),
                   const Spacer(),

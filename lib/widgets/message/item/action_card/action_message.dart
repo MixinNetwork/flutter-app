@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/provider/conversation_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
@@ -46,10 +47,11 @@ class ActionCardMessage extends HookConsumerWidget {
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: InteractiveDecoratedBox(
         onTap: () {
-          if (context.openAction(appCardData.action)) return;
+          if (context.openAction(ref, appCardData.action)) return;
           openUriWithWebView(
             context,
             appCardData.action,
+            container: ref.container,
             title: appCardData.title,
             appCardData: appCardData,
             conversationId: ref.read(currentConversationIdProvider),
@@ -68,6 +70,7 @@ class AppCardItem extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final description = useMemoized(
       () => const LineSplitter().convert(data.description).firstOrNull ?? '',
       [data.description],
@@ -88,7 +91,7 @@ class AppCardItem extends HookConsumerWidget {
               Text(
                 data.title,
                 style: TextStyle(
-                  color: context.theme.text,
+                  color: theme.text,
                   fontSize: context.messageStyle.secondaryFontSize,
                 ),
                 maxLines: 1,
@@ -98,7 +101,7 @@ class AppCardItem extends HookConsumerWidget {
                 description,
                 maxLines: 1,
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: context.messageStyle.tertiaryFontSize,
                 ),
               ),

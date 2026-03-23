@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -11,11 +10,9 @@ import '../../account/security_key_value.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
 import '../../ui/provider/account_server_provider.dart';
 import '../../ui/provider/slide_category_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/device_transfer/device_transfer_dialog.dart';
 import '../../utils/event_bus.dart';
-import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
-import '../../utils/rivepod.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
 import '../auth.dart';
@@ -40,9 +37,9 @@ abstract class ConversationMenuHandle {
   void delete();
 }
 
-class MacMenuBarStateNotifier
-    extends DistinctStateNotifier<ConversationMenuHandle?> {
-  MacMenuBarStateNotifier(super.state);
+class MacMenuBarStateNotifier extends Notifier<ConversationMenuHandle?> {
+  @override
+  ConversationMenuHandle? build() => null;
 
   void attach(ConversationMenuHandle handle) {
     if (!Platform.isMacOS) return;
@@ -57,11 +54,11 @@ class MacMenuBarStateNotifier
 }
 
 final macMenuBarProvider =
-    StateNotifierProvider<MacMenuBarStateNotifier, ConversationMenuHandle?>(
-      (ref) => MacMenuBarStateNotifier(null),
+    NotifierProvider<MacMenuBarStateNotifier, ConversationMenuHandle?>(
+      MacMenuBarStateNotifier.new,
     );
 
-class MacosMenuBar extends HookConsumerWidget {
+class MacosMenuBar extends ConsumerWidget {
   const MacosMenuBar({required this.child, super.key});
 
   final Widget child;
@@ -75,68 +72,49 @@ class MacosMenuBar extends HookConsumerWidget {
   }
 }
 
-class _Menus extends HookConsumerWidget {
+class _Menus extends ConsumerWidget {
   const _Menus({required this.child});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     final signed = ref.watch(
       accountServerProvider.select((value) => value.hasValue),
     );
 
     final handle = ref.watch(macMenuBarProvider);
 
-    final muted =
-        useMemoizedStream(
-          () => handle?.isMuted ?? const Stream<bool>.empty(),
-          keys: [handle],
-        ).data ??
-        false;
-
-    final pinned =
-        useMemoizedStream(
-          () => handle?.isPinned ?? const Stream<bool>.empty(),
-          keys: [handle],
-        ).data ??
-        false;
-
+    final muted = ref.watch(_macMenuMutedProvider).value ?? false;
+    final pinned = ref.watch(_macMenuPinnedProvider).value ?? false;
     final hasPasscode =
-        useMemoizedStream(
-          signed
-              ? SecurityKeyValue.instance.watchHasPasscode
-              : () => Stream.value(false),
-        ).data ??
-        false;
+        ref.watch(_macMenuHasPasscodeProvider(signed)).value ?? false;
 
     PlatformMenu buildConversationMenu() => PlatformMenu(
-      label: context.l10n.conversation,
+      label: l10n.conversation,
       menus: [
         if (muted)
           PlatformMenuItem(
-            label: context.l10n.unmute,
+            label: l10n.unmute,
             onSelected: handle?.unmute,
           )
         else
-          PlatformMenuItem(label: context.l10n.mute, onSelected: handle?.mute),
+          PlatformMenuItem(label: l10n.mute, onSelected: handle?.mute),
         PlatformMenuItem(
-          label: context.l10n.search,
+          label: l10n.search,
           onSelected: handle?.showSearch,
         ),
         PlatformMenuItem(
-          label: context.l10n.deleteChat,
+          label: l10n.deleteChat,
           onSelected: handle?.delete,
         ),
         if (pinned)
-          PlatformMenuItem(label: context.l10n.unpin, onSelected: handle?.unPin)
+          PlatformMenuItem(label: l10n.unpin, onSelected: handle?.unPin)
         else
-          PlatformMenuItem(
-            label: context.l10n.pinTitle,
-            onSelected: handle?.pin,
-          ),
+          PlatformMenuItem(label: l10n.pinTitle, onSelected: handle?.pin),
         PlatformMenuItem(
-          label: context.l10n.toggleChatInfo,
+          label: l10n.toggleChatInfo,
           onSelected: handle?.toggleSideBar,
         ),
       ],
@@ -151,7 +129,7 @@ class _Menus extends HookConsumerWidget {
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: '${context.l10n.about} Mixin',
+                label: '${l10n.about} Mixin',
                 onSelected: () => methodChannel.invokeMethod('showAbout'),
               ),
             ],
@@ -159,7 +137,7 @@ class _Menus extends HookConsumerWidget {
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: context.l10n.preferences,
+                label: l10n.preferences,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.comma,
                   meta: true,
@@ -168,7 +146,7 @@ class _Menus extends HookConsumerWidget {
                     ? () {
                         windowManager.show();
                         ref
-                            .read(slideCategoryStateProvider.notifier)
+                            .read(slideCategoryProvider.notifier)
                             .select(SlideCategoryType.setting);
                       }
                     : null,
@@ -178,7 +156,7 @@ class _Menus extends HookConsumerWidget {
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: context.l10n.lock,
+                label: l10n.lock,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.keyL,
                   meta: true,
@@ -193,7 +171,7 @@ class _Menus extends HookConsumerWidget {
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: context.l10n.quickSearch,
+                label: l10n.quickSearch,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.keyK,
                   meta: true,
@@ -208,7 +186,7 @@ class _Menus extends HookConsumerWidget {
                     : null,
               ),
               PlatformMenuItem(
-                label: context.l10n.hideMixin,
+                label: l10n.hideMixin,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.keyH,
                   meta: true,
@@ -216,13 +194,13 @@ class _Menus extends HookConsumerWidget {
                 onSelected: windowManager.hide,
               ),
               PlatformMenuItem(
-                label: context.l10n.showMixin,
+                label: l10n.showMixin,
                 onSelected: windowManager.show,
               ),
             ],
           ),
           PlatformMenuItem(
-            label: context.l10n.quitMixin,
+            label: l10n.quitMixin,
             shortcut: const SingleActivator(
               LogicalKeyboardKey.keyQ,
               meta: true,
@@ -232,12 +210,12 @@ class _Menus extends HookConsumerWidget {
         ],
       ),
       PlatformMenu(
-        label: context.l10n.file,
+        label: l10n.file,
         menus: [
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: context.l10n.createConversation,
+                label: l10n.createConversation,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.keyN,
                   meta: true,
@@ -253,7 +231,7 @@ class _Menus extends HookConsumerWidget {
                     : null,
               ),
               PlatformMenuItem(
-                label: context.l10n.createGroup,
+                label: l10n.createGroup,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.keyN,
                   shift: true,
@@ -283,7 +261,7 @@ class _Menus extends HookConsumerWidget {
                   ],
                 ),
               PlatformMenuItem(
-                label: context.l10n.createCircle,
+                label: l10n.createCircle,
                 onSelected: signed
                     ? () {
                         windowManager.show();
@@ -297,7 +275,7 @@ class _Menus extends HookConsumerWidget {
               PlatformMenuItemGroup(
                 members: [
                   PlatformMenuItem(
-                    label: context.l10n.closeWindow,
+                    label: l10n.closeWindow,
                     onSelected: windowManager.close,
                   ),
                 ],
@@ -308,10 +286,10 @@ class _Menus extends HookConsumerWidget {
       ),
       buildConversationMenu(),
       PlatformMenu(
-        label: context.l10n.window,
+        label: l10n.window,
         menus: [
           PlatformMenuItem(
-            label: context.l10n.minimize,
+            label: l10n.minimize,
             shortcut: const SingleActivator(
               LogicalKeyboardKey.keyM,
               meta: true,
@@ -319,7 +297,7 @@ class _Menus extends HookConsumerWidget {
             onSelected: windowManager.minimize,
           ),
           PlatformMenuItem(
-            label: context.l10n.zoom,
+            label: l10n.zoom,
             onSelected: () async => !await windowManager.isMaximized()
                 ? windowManager.maximize()
                 : windowManager.restore(),
@@ -327,7 +305,7 @@ class _Menus extends HookConsumerWidget {
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: context.l10n.previousConversation,
+                label: l10n.previousConversation,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.arrowUp,
                   meta: true,
@@ -342,7 +320,7 @@ class _Menus extends HookConsumerWidget {
                     : null,
               ),
               PlatformMenuItem(
-                label: context.l10n.nextConversation,
+                label: l10n.nextConversation,
                 shortcut: const SingleActivator(
                   LogicalKeyboardKey.arrowDown,
                   meta: true,
@@ -373,7 +351,7 @@ class _Menus extends HookConsumerWidget {
           PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
-                label: context.l10n.bringAllToFront,
+                label: l10n.bringAllToFront,
                 onSelected: windowManager.show,
               ),
             ],
@@ -382,29 +360,56 @@ class _Menus extends HookConsumerWidget {
         ],
       ),
       PlatformMenu(
-        label: context.l10n.help,
+        label: l10n.help,
         menus: [
           PlatformMenuItem(
-            label: context.l10n.helpCenter,
-            onSelected: () => openUri(context, 'https://support.mixin.one/'),
+            label: l10n.helpCenter,
+            onSelected: () => openUri(
+              context,
+              'https://support.mixin.one/',
+              container: ref.container,
+            ),
           ),
           PlatformMenuItem(
-            label: context.l10n.termsOfService,
-            onSelected: () => openUri(context, 'https://mixin.one/pages/terms'),
+            label: l10n.termsOfService,
+            onSelected: () => openUri(
+              context,
+              'https://mixin.one/pages/terms',
+              container: ref.container,
+            ),
           ),
           PlatformMenuItem(
-            label: context.l10n.privacyPolicy,
-            onSelected: () =>
-                openUri(context, 'https://mixin.one/pages/privacy'),
+            label: l10n.privacyPolicy,
+            onSelected: () => openUri(
+              context,
+              'https://mixin.one/pages/privacy',
+              container: ref.container,
+            ),
           ),
         ],
       ),
     ];
 
-    useEffect(() {
-      WidgetsBinding.instance.platformMenuDelegate.setMenus(menus);
-    }, [menus]);
+    WidgetsBinding.instance.platformMenuDelegate.setMenus(menus);
 
     return child;
   }
 }
+
+final _macMenuMutedProvider = StreamProvider.autoDispose<bool>((ref) {
+  final handle = ref.watch(macMenuBarProvider);
+  return handle?.isMuted ?? Stream.value(false);
+});
+
+final _macMenuPinnedProvider = StreamProvider.autoDispose<bool>((ref) {
+  final handle = ref.watch(macMenuBarProvider);
+  return handle?.isPinned ?? Stream.value(false);
+});
+
+final _macMenuHasPasscodeProvider = StreamProvider.autoDispose
+    .family<bool, bool>((ref, signed) {
+      if (!signed) {
+        return Stream.value(false);
+      }
+      return SecurityKeyValue.instance.watchHasPasscode();
+    });

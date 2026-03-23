@@ -424,7 +424,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       w('upload failed error: $error, $s');
       showToastFailed(
         ToastError.builder(
-          (context) => context.l10n.errorUploadAttachmentFailed,
+          (context) => Localization.current.errorUploadAttachmentFailed,
         ),
       );
       await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);

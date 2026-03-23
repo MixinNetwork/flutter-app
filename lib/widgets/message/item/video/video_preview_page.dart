@@ -13,6 +13,8 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
+import '../../../../ui/provider/account_server_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/system/clipboard.dart';
 import '../../../action_button.dart';
@@ -37,11 +39,19 @@ Future<void> showVideoPreviewPage(
   barrierDismissible: false,
 );
 
-final videoPlayerProvider = ChangeNotifierProvider<VideoPlayerController>((
-  ref,
-) {
-  throw UnimplementedError();
-});
+class _VideoPlayerScope extends InheritedNotifier<VideoPlayerController> {
+  const _VideoPlayerScope({
+    required VideoPlayerController controller,
+    required super.child,
+  }) : super(notifier: controller);
+
+  static VideoPlayerController of(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_VideoPlayerScope>();
+    assert(scope?.notifier != null, '_VideoPlayerScope is missing');
+    return scope!.notifier!;
+  }
+}
 
 class _CupertinoVideoPlayerStyle extends InheritedWidget {
   const _CupertinoVideoPlayerStyle({
@@ -68,20 +78,21 @@ class _CupertinoVideoPlayerStyle extends InheritedWidget {
 extension on BuildContext {
   _CupertinoVideoPlayerStyle get playerStyle =>
       _CupertinoVideoPlayerStyle.of(this);
+
+  VideoPlayerController get videoPlayerController => _VideoPlayerScope.of(this);
 }
 
-final videoPlayerValueProvider = videoPlayerProvider.select(
-  (value) => value.value,
-);
-
 final shouldShowVideoControlProvider =
-    StateNotifierProvider.autoDispose<_VideoControlShowHideNotifier, bool>(
-      (ref) => _VideoControlShowHideNotifier(true),
+    NotifierProvider.autoDispose<_VideoControlShowHideNotifier, bool>(
+      _VideoControlShowHideNotifier.new,
     );
 
-class _VideoControlShowHideNotifier extends StateNotifier<bool> {
-  _VideoControlShowHideNotifier(super.state) {
+class _VideoControlShowHideNotifier extends Notifier<bool> {
+  @override
+  bool build() {
     _autoHide();
+    ref.onDispose(() => _timer?.cancel());
+    return true;
   }
 
   Timer? _timer;
@@ -101,12 +112,6 @@ class _VideoControlShowHideNotifier extends StateNotifier<bool> {
     _timer = null;
     _autoHide();
   }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 }
 
 class _VideoPreviewPage extends HookConsumerWidget {
@@ -122,6 +127,7 @@ class _VideoPreviewPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final controller = useMemoized(() {
       final controller = VideoPlayerController.file(File(path));
       return controller
@@ -131,8 +137,8 @@ class _VideoPreviewPage extends HookConsumerWidget {
 
     useEffect(() => controller.dispose, [controller]);
 
-    return ProviderScope(
-      overrides: [videoPlayerProvider.overrideWith((ref) => controller)],
+    return _VideoPlayerScope(
+      controller: controller,
       child: _CupertinoVideoPlayerStyle(
         background: const Color.fromRGBO(41, 41, 41, 0.7),
         foreground: const Color.fromARGB(255, 200, 200, 200),
@@ -145,7 +151,7 @@ class _VideoPreviewPage extends HookConsumerWidget {
                 child: Stack(
                   children: [
                     ColoredBox(
-                      color: context.theme.background,
+                      color: theme.background,
                       child: const SizedBox.expand(),
                     ),
                     const VideoFrame(),
@@ -206,24 +212,24 @@ class _PlayerShortcuts extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final node = useFocusScopeNode();
     final volumeBeforeMuted = useRef<double?>(null);
+    final controller = context.videoPlayerController;
+    final videoValue = useValueListenable(controller);
     return FocusableActionDetector(
       actions: {
         _MuteOrUnMuteIntent: CallbackAction<_MuteOrUnMuteIntent>(
           onInvoke: (intent) {
-            final controller = ref.read(videoPlayerProvider);
-            if (controller.value.volume == 0) {
+            if (videoValue.volume == 0) {
               final target = volumeBeforeMuted.value ?? 0.5;
               controller.setVolume(target);
             } else {
-              volumeBeforeMuted.value = controller.value.volume;
+              volumeBeforeMuted.value = videoValue.volume;
               controller.setVolume(0);
             }
           },
         ),
         _PlayPauseIntent: CallbackAction<_PlayPauseIntent>(
           onInvoke: (intent) {
-            final controller = ref.read(videoPlayerProvider);
-            if (controller.value.isPlaying) {
+            if (videoValue.isPlaying) {
               controller.pause();
             } else {
               controller.play();
@@ -233,15 +239,12 @@ class _PlayerShortcuts extends HookConsumerWidget {
         ),
         _ForwardIntent: CallbackAction<_ForwardIntent>(
           onInvoke: (intent) {
-            final position = ref
-                .read(videoPlayerValueProvider)
-                .position
-                .inMilliseconds;
+            final position = videoValue.position.inMilliseconds;
             final target = math.min(
-              ref.read(videoPlayerValueProvider).duration.inMilliseconds,
+              videoValue.duration.inMilliseconds,
               position + 15 * 1000,
             );
-            ref.read(videoPlayerProvider).seekTo(target.milliseconds);
+            controller.seekTo(target.milliseconds);
           },
         ),
         _CopyIntent: CallbackAction<_CopyIntent>(
@@ -249,33 +252,26 @@ class _PlayerShortcuts extends HookConsumerWidget {
         ),
         _BackwardIntent: CallbackAction<_BackwardIntent>(
           onInvoke: (intent) {
-            final position = ref
-                .read(videoPlayerValueProvider)
-                .position
-                .inMilliseconds;
+            final position = videoValue.position.inMilliseconds;
             final target = math.max(0, position - 15 * 1000);
-            ref.read(videoPlayerProvider).seekTo(target.milliseconds);
+            controller.seekTo(target.milliseconds);
           },
         ),
         _UpVolumeIntent: CallbackAction<_UpVolumeIntent>(
           onInvoke: (intent) {
-            final controller = ref.read(videoPlayerProvider);
-            final volume = controller.value.volume.clamp(0.0, 1.0);
+            final volume = videoValue.volume.clamp(0.0, 1.0);
             controller.setVolume(volume + 0.1);
           },
         ),
         _DownVolumeIntent: CallbackAction<_DownVolumeIntent>(
           onInvoke: (intent) {
-            final controller = ref.read(videoPlayerProvider);
-            final volume = controller.value.volume.clamp(0.0, 1.0);
+            final volume = videoValue.volume.clamp(0.0, 1.0);
             controller.setVolume(volume - 0.1);
           },
         ),
         _CloseIntent: CallbackAction<_CloseIntent>(
           onInvoke: (intent) {
-            ref.read(videoPlayerProvider)
-              ..pause()
-              ..dispose();
+            controller.pause();
             Navigator.pop(context);
           },
         ),
@@ -303,118 +299,127 @@ class _Bar extends ConsumerWidget {
   final bool isTranscriptPage;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Container(
-    color: context.theme.primary,
-    height: 70,
-    child: Row(
-      children: [
-        const SizedBox(width: 100),
-        AvatarWidget(
-          name: message.userFullName,
-          size: 36,
-          avatarUrl: message.avatarUrl,
-          userId: message.userId,
-        ),
-        const SizedBox(width: 10),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 200),
-              child: Text(
-                message.userFullName!,
-                style: TextStyle(
-                  fontSize: MessageItemWidget.primaryFontSize,
-                  color: context.theme.text,
-                  overflow: TextOverflow.ellipsis,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    return Container(
+      color: theme.primary,
+      height: 70,
+      child: Row(
+        children: [
+          const SizedBox(width: 100),
+          AvatarWidget(
+            name: message.userFullName,
+            size: 36,
+            avatarUrl: message.avatarUrl,
+            userId: message.userId,
+          ),
+          const SizedBox(width: 10),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: Text(
+                  message.userFullName!,
+                  style: TextStyle(
+                    fontSize: MessageItemWidget.primaryFontSize,
+                    color: theme.text,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
-            ),
-            Text(
-              message.userIdentityNumber,
-              style: TextStyle(
-                fontSize: MessageItemWidget.secondaryFontSize,
-                color: context.theme.secondaryText,
+              Text(
+                message.userIdentityNumber,
+                style: TextStyle(
+                  fontSize: MessageItemWidget.secondaryFontSize,
+                  color: theme.secondaryText,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(width: 14),
+          const Spacer(),
+          if (!isTranscriptPage)
+            ActionButton(
+              name: Resources.assetsImagesShareSvg,
+              size: 20,
+              color: theme.icon,
+              onTap: () async {
+                final accountServer = ref
+                    .read(accountServerProvider)
+                    .requireValue;
+                final result = await showConversationSelector(
+                  context: context,
+                  singleSelect: true,
+                  title: l10n.forward,
+                  onlyContact: false,
+                );
+                if (result == null || result.isEmpty) return;
+                await accountServer.forwardMessage(
+                  message.messageId,
+                  result.first.encryptCategory!,
+                  conversationId: result.first.conversationId,
+                  recipientId: result.first.userId,
+                );
+              },
             ),
-          ],
-        ),
-        const SizedBox(width: 14),
-        const Spacer(),
-        if (!isTranscriptPage)
+          const SizedBox(width: 14),
           ActionButton(
-            name: Resources.assetsImagesShareSvg,
+            name: Resources.assetsImagesCopySvg,
+            color: theme.icon,
             size: 20,
-            color: context.theme.icon,
+            onTap: () => copyFile(
+              ref
+                  .read(accountServerProvider)
+                  .requireValue
+                  .convertMessageAbsolutePath(
+                    message,
+                    isTranscriptPage,
+                  ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesAttachmentDownloadSvg,
+            color: theme.icon,
+            size: 20,
             onTap: () async {
-              final accountServer = context.accountServer;
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: true,
-                title: context.l10n.forward,
-                onlyContact: false,
-              );
-              if (result == null || result.isEmpty) return;
-              await accountServer.forwardMessage(
-                message.messageId,
-                result.first.encryptCategory!,
-                conversationId: result.first.conversationId,
-                recipientId: result.first.userId,
+              if (message.mediaUrl?.isEmpty ?? true) return;
+              await saveAs(
+                context,
+                ref.read(accountServerProvider).requireValue,
+                message,
+                isTranscriptPage,
+                confirmButtonText: l10n.save,
               );
             },
           ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesCopySvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () => copyFile(
-            context.accountServer.convertMessageAbsolutePath(
-              message,
-              isTranscriptPage,
-            ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesIcCloseBigSvg,
+            color: theme.icon,
+            size: 20,
+            onTap: () {
+              Actions.invoke(context, const _CloseIntent());
+            },
           ),
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesAttachmentDownloadSvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () async {
-            if (message.mediaUrl?.isEmpty ?? true) return;
-            await saveAs(
-              context,
-              context.accountServer,
-              message,
-              isTranscriptPage,
-            );
-          },
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesIcCloseBigSvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () {
-            Actions.invoke(context, const _CloseIntent());
-          },
-        ),
-        const SizedBox(width: 24),
-      ],
-    ),
-  );
+          const SizedBox(width: 24),
+        ],
+      ),
+    );
+  }
 }
 
-class VideoFrame extends ConsumerWidget {
+class VideoFrame extends HookWidget {
   const VideoFrame({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final aspect = ref.watch(
-      videoPlayerProvider.select((value) => value.value.aspectRatio),
-    );
-    final controller = ref.watch(videoPlayerProvider.select((value) => value));
+  Widget build(BuildContext context) {
+    final controller = context.videoPlayerController;
+    final value = useValueListenable(controller);
+    final aspect = value.aspectRatio == 0 ? 1.0 : value.aspectRatio;
     return Center(
       child: AspectRatio(aspectRatio: aspect, child: VideoPlayer(controller)),
     );
@@ -455,83 +460,75 @@ class _Controls extends ConsumerWidget {
   }
 }
 
-class _OperationBar extends ConsumerWidget {
+class _OperationBar extends HookWidget {
   const _OperationBar({required this.message, required this.isTranscriptPage});
 
   final MessageItem message;
   final bool isTranscriptPage;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ClipRRect(
-    borderRadius: BorderRadius.circular(10),
-    child: Material(
-      color: context.playerStyle.background,
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500, minWidth: 300),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(child: _PlayerVolumeBar()),
-                    ActionButton(
-                      child: Icon(
-                        CupertinoIcons.gobackward_15,
-                        color: context.playerStyle.foreground,
+  Widget build(BuildContext context) {
+    final controller = context.videoPlayerController;
+    final value = useValueListenable(controller);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Material(
+        color: context.playerStyle.background,
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500, minWidth: 300),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(child: _PlayerVolumeBar()),
+                      ActionButton(
+                        child: Icon(
+                          CupertinoIcons.gobackward_15,
+                          color: context.playerStyle.foreground,
+                        ),
+                        onTap: () {
+                          final target = math.max(
+                            0,
+                            value.position.inMilliseconds - 15 * 1000,
+                          );
+                          controller.seekTo(target.milliseconds);
+                        },
                       ),
-                      onTap: () {
-                        final position = ref
-                            .read(videoPlayerValueProvider)
-                            .position
-                            .inMilliseconds;
-                        final target = math.max(0, position - 15 * 1000);
-                        ref
-                            .read(videoPlayerProvider)
-                            .seekTo(target.milliseconds);
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    const _PlayPause(),
-                    const SizedBox(width: 8),
-                    ActionButton(
-                      child: Icon(
-                        CupertinoIcons.goforward_15,
-                        color: context.playerStyle.foreground,
+                      const SizedBox(width: 8),
+                      const _PlayPause(),
+                      const SizedBox(width: 8),
+                      ActionButton(
+                        child: Icon(
+                          CupertinoIcons.goforward_15,
+                          color: context.playerStyle.foreground,
+                        ),
+                        onTap: () {
+                          final target = math.min(
+                            value.duration.inMilliseconds,
+                            value.position.inMilliseconds + 15 * 1000,
+                          );
+                          controller.seekTo(target.milliseconds);
+                        },
                       ),
-                      onTap: () {
-                        final position = ref
-                            .read(videoPlayerValueProvider)
-                            .position
-                            .inMilliseconds;
-                        final target = math.min(
-                          ref
-                              .read(videoPlayerValueProvider)
-                              .duration
-                              .inMilliseconds,
-                          position + 15 * 1000,
-                        );
-                        ref
-                            .read(videoPlayerProvider)
-                            .seekTo(target.milliseconds);
-                      },
-                    ),
-                    const Spacer(),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const _PlayerProgressBar(),
-                const SizedBox(height: 8),
-              ],
+                      const Spacer(),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const _PlayerProgressBar(),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _PlayerVolumeBar extends HookConsumerWidget {
@@ -539,9 +536,9 @@ class _PlayerVolumeBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final volume = ref.watch(
-      videoPlayerValueProvider.select((value) => value.volume.clamp(0.0, 1.0)),
-    );
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final controller = context.videoPlayerController;
+    final volume = useValueListenable(controller).volume.clamp(0.0, 1.0);
     return Row(
       children: [
         ActionButton(
@@ -574,14 +571,12 @@ class _PlayerVolumeBar extends HookConsumerWidget {
             child: Slider(
               value: volume,
               allowedInteraction: SliderInteraction.tapAndSlide,
-              activeColor: context.theme.accent,
+              activeColor: theme.accent,
               inactiveColor: context.playerStyle.foreground.withValues(
                 alpha: 0.6,
               ),
               thumbColor: context.playerStyle.foreground,
-              onChanged: (value) {
-                ref.read(videoPlayerProvider).setVolume(value);
-              },
+              onChanged: controller.setVolume,
             ),
           ),
         ),
@@ -595,16 +590,10 @@ class _PlayerProgressBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final durationText = ref.watch(
-      videoPlayerValueProvider.select(
-        (value) => value.duration.asMinutesSeconds,
-      ),
-    );
-    final positionText = ref.watch(
-      videoPlayerValueProvider.select(
-        (value) => value.position.asMinutesSeconds,
-      ),
-    );
+    final controller = context.videoPlayerController;
+    final value = useValueListenable(controller);
+    final durationText = value.duration.asMinutesSeconds;
+    final positionText = value.position.asMinutesSeconds;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -613,11 +602,7 @@ class _PlayerProgressBar extends HookConsumerWidget {
           style: TextStyle(fontSize: 12, color: context.playerStyle.foreground),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: CupertinoVideoProgressBar(
-            ref.watch(videoPlayerProvider.select((value) => value)),
-          ),
-        ),
+        Expanded(child: CupertinoVideoProgressBar(controller)),
         const SizedBox(width: 12),
         Text(
           durationText,
@@ -628,14 +613,12 @@ class _PlayerProgressBar extends HookConsumerWidget {
   }
 }
 
-class _PlayPause extends ConsumerWidget {
+class _PlayPause extends HookWidget {
   const _PlayPause();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final playing = ref.watch(
-      videoPlayerValueProvider.select((value) => value.isPlaying),
-    );
+  Widget build(BuildContext context) {
+    final playing = useValueListenable(context.videoPlayerController).isPlaying;
     return ActionButton(
       size: 32,
       color: context.playerStyle.foreground,

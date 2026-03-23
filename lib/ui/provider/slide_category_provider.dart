@@ -1,7 +1,7 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-import '../../utils/rivepod.dart';
 
 enum SlideCategoryType {
   chats,
@@ -25,13 +25,22 @@ class SlideCategoryState extends Equatable {
   List<Object?> get props => [type, id];
 }
 
-class SlideCategoryStateNotifier
-    extends DistinctStateNotifier<SlideCategoryState> {
-  SlideCategoryStateNotifier()
-    : super(const SlideCategoryState(type: SlideCategoryType.chats));
+class SlideCategoryStateNotifier extends Notifier<SlideCategoryState> {
+  late final StreamController<SlideCategoryState> _streamController =
+      StreamController<SlideCategoryState>.broadcast();
 
-  void select(SlideCategoryType type, [String? id]) =>
-      state = SlideCategoryState(type: type, id: id);
+  Stream<SlideCategoryState> get stream => _streamController.stream;
+
+  @override
+  SlideCategoryState build() {
+    ref.onDispose(_streamController.close);
+    return const SlideCategoryState(type: SlideCategoryType.chats);
+  }
+
+  void select(SlideCategoryType type, [String? id]) {
+    state = SlideCategoryState(type: type, id: id);
+    _streamController.add(state);
+  }
 
   void switchToChatsIfSettings() {
     if (state.type != SlideCategoryType.setting) return;
@@ -39,7 +48,7 @@ class SlideCategoryStateNotifier
   }
 }
 
-final slideCategoryStateProvider =
-    StateNotifierProvider<SlideCategoryStateNotifier, SlideCategoryState>(
-      (ref) => SlideCategoryStateNotifier(),
+final slideCategoryProvider =
+    NotifierProvider<SlideCategoryStateNotifier, SlideCategoryState>(
+      SlideCategoryStateNotifier.new,
     );

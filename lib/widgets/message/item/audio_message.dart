@@ -8,7 +8,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../db/mixin_database.dart' hide Message, Offset;
 import '../../../enum/media_status.dart';
-import '../../../utils/audio_message_player/audio_message_service.dart';
+import '../../../ui/home/providers/home_scope_providers.dart';
+import '../../../ui/provider/account_server_provider.dart';
+import '../../../ui/provider/conversation_provider.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../interactive_decorated_box.dart';
 import '../../status.dart';
@@ -19,12 +22,14 @@ import '../message_datetime_and_status.dart';
 import '../message_style.dart';
 import 'transcript_message.dart';
 
-class AudioMessage extends HookConsumerWidget {
+class AudioMessage extends ConsumerWidget {
   const AudioMessage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final isTranscriptPage = useIsTranscriptPage();
+    final isPinnedPage = useIsPinnedPage();
     final messageId = useMessageConverter(
       converter: (state) => state.messageId,
     );
@@ -36,9 +41,11 @@ class AudioMessage extends HookConsumerWidget {
     );
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
-    final playing = useAudioMessagePlaying(
-      messageId,
-      isMediaList: isTranscriptPage,
+    final playing = ref.watch(
+      audioMessagePlayingProvider((
+        messageId: messageId,
+        isMediaList: isTranscriptPage,
+      )),
     );
 
     final duration = useMessageConverter(
@@ -51,6 +58,23 @@ class AudioMessage extends HookConsumerWidget {
         (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
+    final audioService = ref.read(audioMessagePlayServiceProvider);
+    AudioMessagesPlayAgent? audioMessagesPlayAgent;
+    if (isTranscriptPage) {
+      final transcriptMessageId = TranscriptPage.of(context)?.messageId;
+      if (transcriptMessageId != null) {
+        audioMessagesPlayAgent = ref.read(
+          transcriptAudioMessagesPlayAgentProvider(transcriptMessageId),
+        );
+      }
+    } else if (isPinnedPage) {
+      final conversationId = ref.read(currentConversationIdProvider);
+      if (conversationId != null) {
+        audioMessagesPlayAgent = ref.read(
+          pinnedAudioMessagesPlayAgentProvider(conversationId),
+        );
+      }
+    }
 
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
@@ -62,39 +86,46 @@ class AudioMessage extends HookConsumerWidget {
             case MediaStatus.read:
             case MediaStatus.done:
               if (playing) {
-                context.audioMessageService.stop();
+                audioService.stop();
                 return;
               }
 
-              if (context.audioMessagesPlayAgent != null) {
-                context.audioMessageService.playMessages(
-                  context.audioMessagesPlayAgent!.getMessages(
+              if (audioMessagesPlayAgent != null) {
+                audioService.playMessages(
+                  audioMessagesPlayAgent.getMessages(
                     message.messageId,
                   ),
-                  context.audioMessagesPlayAgent!.convertMessageAbsolutePath,
+                  audioMessagesPlayAgent.convertMessageAbsolutePath,
                 );
                 return;
               }
-              context.audioMessageService.playAudioMessage(message);
+              audioService.playAudioMessage(message);
             case MediaStatus.canceled:
               if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
+                final accountServer = ref
+                    .read(accountServerProvider)
+                    .requireValue;
                 if (isTranscriptPage) {
                   final transcriptMessageId = TranscriptPage.of(
                     context,
                   )?.messageId;
-                  context.accountServer.reUploadTranscriptAttachment(
+                  accountServer.reUploadTranscriptAttachment(
                     transcriptMessageId!,
                   );
                 } else {
-                  context.accountServer.reUploadAttachment(message);
+                  accountServer.reUploadAttachment(message);
                 }
               } else {
-                context.accountServer.downloadAttachment(message.messageId);
+                ref
+                    .read(accountServerProvider)
+                    .requireValue
+                    .downloadAttachment(message.messageId);
               }
             case MediaStatus.pending:
-              context.accountServer.cancelProgressAttachmentJob(
-                message.messageId,
-              );
+              ref
+                  .read(accountServerProvider)
+                  .requireValue
+                  .cancelProgressAttachmentJob(message.messageId);
             case MediaStatus.expired:
             case null:
               break;
@@ -138,7 +169,7 @@ class AudioMessage extends HookConsumerWidget {
                     duration.asMinutesSeconds,
                     style: TextStyle(
                       fontSize: context.messageStyle.tertiaryFontSize,
-                      color: context.theme.secondaryText,
+                      color: theme.secondaryText,
                     ),
                   ),
                 ],
@@ -158,6 +189,7 @@ class _AnimatedWave extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final mediaWaveform = useMessageConverter(
       converter: (state) => state.mediaWaveform ?? '',
     );
@@ -168,37 +200,36 @@ class _AnimatedWave extends HookConsumerWidget {
       converter: (state) => state.messageId,
     );
 
-    final waveform = useMemoized(() => base64Decode(mediaWaveform), [
-      mediaWaveform,
-    ]);
+    final waveform = useMemoized(
+      () => base64Decode(mediaWaveform),
+      [mediaWaveform],
+    );
 
     final read = mediaStatus == MediaStatus.read;
     final isTranscriptPage = useIsTranscriptPage();
-    final playing = useAudioMessagePlaying(
-      messageId,
-      isMediaList: isTranscriptPage,
+    final playing = ref.watch(
+      audioMessagePlayingProvider((
+        messageId: messageId,
+        isMediaList: isTranscriptPage,
+      )),
     );
 
     final isMe = useMessageConverter(
       converter: (state) => state.relationship == UserRelationship.me,
     );
 
-    final position = (useAudioPlayerPosition() / duration.inMilliseconds).clamp(
-      0.0,
-      1.0,
-    );
+    final position =
+        ((ref.watch(audioPlayerPositionProvider).value ?? 0) /
+                duration.inMilliseconds)
+            .clamp(0.0, 1.0);
 
     return SizedBox(
       height: 12,
       child: WaveformWidget(
         value: playing ? position : 0,
         waveform: waveform,
-        backgroundColor: isMe || read
-            ? context.theme.waveformBackground
-            : context.theme.accent,
-        foregroundColor: isMe || read
-            ? context.theme.waveformForeground
-            : context.theme.accent,
+        backgroundColor: isMe || read ? theme.waveformBackground : theme.accent,
+        foregroundColor: isMe || read ? theme.waveformForeground : theme.accent,
       ),
     );
   }
@@ -220,12 +251,20 @@ class AudioMessagesPlayAgent {
   }
 }
 
-extension _AudioMessagesPlayAgentExtension on BuildContext {
-  AudioMessagesPlayAgent? get audioMessagesPlayAgent {
-    try {
-      return read<AudioMessagesPlayAgent>();
-    } catch (e) {
-      return null;
-    }
-  }
-}
+final transcriptAudioMessagesPlayAgentProvider = Provider.autoDispose
+    .family<AudioMessagesPlayAgent?, String>((
+      ref,
+      transcriptMessageId,
+    ) {
+      final list =
+          ref.watch(transcriptMessagesProvider(transcriptMessageId)).value ??
+          const <MessageItem>[];
+      final accountServer = ref.watch(accountServerProvider).value;
+      if (accountServer == null) {
+        return null;
+      }
+      return AudioMessagesPlayAgent(
+        list,
+        (message) => accountServer.convertMessageAbsolutePath(message, true),
+      );
+    });

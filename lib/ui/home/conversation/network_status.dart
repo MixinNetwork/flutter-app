@@ -8,7 +8,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
 import '../../../ui/provider/account_server_provider.dart';
-import '../../../utils/extension/extension.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/file.dart';
 import '../../../utils/uri_utils.dart';
 import '../../../widgets/menu.dart';
@@ -18,6 +18,8 @@ class NetworkStatus extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final connectedState = ref.watch(
       appRuntimeHubProvider.select(
         (value) => value.connectedState ?? ConnectedState.connecting,
@@ -39,9 +41,12 @@ class NetworkStatus extends HookConsumerWidget {
           menuProvider: (request) => Menu(
             children: [
               MenuAction(
-                title: context.l10n.openLogDirectory,
-                callback: () =>
-                    openUri(context, mixinLogDirectory.uri.toString()),
+                title: l10n.openLogDirectory,
+                callback: () => openUri(
+                  context,
+                  mixinLogDirectory.uri.toString(),
+                  container: ref.container,
+                ),
               ),
             ],
           ),
@@ -58,7 +63,7 @@ class NetworkStatus extends HookConsumerWidget {
                   connectedState == ConnectedState.reconnecting
               ? LinearProgressIndicator(
                   backgroundColor: Colors.transparent,
-                  color: context.theme.accent,
+                  color: theme.accent,
                   minHeight: 2,
                 )
               : const SizedBox(),
@@ -68,23 +73,25 @@ class NetworkStatus extends HookConsumerWidget {
   }
 }
 
-class _NetworkNotConnect extends StatelessWidget {
+class _NetworkNotConnect extends ConsumerWidget {
   const _NetworkNotConnect({required this.visible});
 
   final bool visible;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     Widget child;
     child = visible
         ? Container(
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
-            color: context.theme.warning.withValues(alpha: 0.2),
+            color: theme.warning.withValues(alpha: 0.2),
             child: Row(
               children: [
                 ClipOval(
                   child: Container(
-                    color: context.theme.warning,
+                    color: theme.warning,
                     width: 20,
                     height: 20,
                     alignment: Alignment.center,
@@ -106,21 +113,29 @@ class _NetworkNotConnect extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DefaultTextStyle.merge(
-                    style: TextStyle(color: context.theme.text, fontSize: 14),
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: 14,
+                    ),
                     child: Row(
                       children: [
-                        Text(context.l10n.networkConnectionFailed),
+                        Text(l10n.networkConnectionFailed),
                         const Spacer(),
                         MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: GestureDetector(
                             onTap: () {
                               i('ui: click reconnect');
-                              context.accountServer.reconnectBlaze();
+                              ref
+                                  .read(accountServerProvider)
+                                  .requireValue
+                                  .reconnectBlaze();
                             },
                             child: Text(
-                              context.l10n.retry,
-                              style: TextStyle(color: context.theme.accent),
+                              l10n.retry,
+                              style: TextStyle(
+                                color: theme.accent,
+                              ),
                             ),
                           ),
                         ),

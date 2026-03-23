@@ -6,6 +6,8 @@ import 'package:watcher/watcher.dart';
 
 import '../../db/dao/conversation_dao.dart';
 import '../../db/extension/conversation.dart';
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
@@ -17,11 +19,15 @@ class StorageUsageListPage extends HookConsumerWidget {
   const StorageUsageListPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    backgroundColor: context.theme.background,
-    appBar: MixinAppBar(title: Text(context.l10n.storageUsage)),
-    body: const _Content(),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Scaffold(
+      backgroundColor: theme.background,
+      appBar: MixinAppBar(title: Text(l10n.storageUsage)),
+      body: const _Content(),
+    );
+  }
 }
 
 class _Content extends HookConsumerWidget {
@@ -29,16 +35,17 @@ class _Content extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final accountServer = ref.read(accountServerProvider).requireValue;
     final watchEvent = useMemoizedStream(
       () => DirectoryWatcher(
-        context.accountServer.getMediaFilePath(),
+        accountServer.getMediaFilePath(),
       ).events.throttleTime(const Duration(milliseconds: 400)),
     ).data;
 
     final list = useMemoizedFuture<List<(ConversationStorageUsage, int)>?>(
       () async {
         try {
-          final accountServer = context.accountServer;
           final list = await accountServer.database.conversationDao
               .conversationStorageUsage()
               .get();
@@ -65,7 +72,7 @@ class _Content extends HookConsumerWidget {
     if (list == null) {
       return Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(context.theme.accent),
+          valueColor: AlwaysStoppedAnimation(theme.accent),
         ),
       );
     }
@@ -90,11 +97,12 @@ class _Item extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final sizeString = useMemoized(() => filesize(size), [item, size]);
     return Align(
       child: CellGroup(
         padding: EdgeInsets.zero,
-        cellBackgroundColor: context.theme.settingCellBackgroundColor,
+        cellBackgroundColor: theme.settingCellBackgroundColor,
         child: CellItem(
           leading: ConversationAvatarWidget(
             conversationId: item.conversationId,
@@ -113,7 +121,7 @@ class _Item extends HookConsumerWidget {
               Text(
                 sizeString,
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: 14,
                 ),
               ),

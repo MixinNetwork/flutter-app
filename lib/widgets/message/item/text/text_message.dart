@@ -2,11 +2,11 @@ import 'package:flutter/material.dart' hide SelectableRegion;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../ui/home/chat/chat_page.dart';
+import '../../../../ui/home/providers/home_scope_providers.dart';
 import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../ui/provider/keyword_provider.dart';
 import '../../../../ui/provider/mention_cache_provider.dart';
-import '../../../../utils/extension/extension.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/platform.dart';
 import '../../../high_light_text.dart';
@@ -22,13 +22,14 @@ class TextMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final content = useMessageConverter(
       converter: (state) => state.content ?? '',
     );
     return MessageBubble(
       child: MessageTextWidget(
         fontSize: context.messageStyle.primaryFontSize,
-        color: context.theme.text,
+        color: theme.text,
         content: content,
       ),
     );
@@ -51,20 +52,9 @@ class MessageTextWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final userId = useMessageConverter(converter: (state) => state.userId);
-
-    var keyword =
-        useBlocStateConverter<
-          SearchConversationKeywordCubit,
-          (String?, String),
-          String
-        >(
-          converter: (state) {
-            if (state.$1 == null || state.$1 == userId) return state.$2;
-            return '';
-          },
-          keys: [userId],
-        );
+    var keyword = ref.watch(searchConversationKeywordForUserProvider(userId));
 
     final globalKeyword = ref.watch(trimmedKeywordProvider);
     final conversationKeyword = ref.watch(
@@ -78,6 +68,7 @@ class MessageTextWidget extends HookConsumerWidget {
     }
 
     final mentionCache = ref.read(mentionCacheProvider);
+    final app = ref.watch(conversationProvider.select((value) => value?.app));
 
     final mentionMap = useMemoizedFuture(
       () => mentionCache.checkMentionCache({content}),
@@ -93,16 +84,30 @@ class MessageTextWidget extends HookConsumerWidget {
         content,
         style: TextStyle(fontSize: fontSize, color: color),
         textMatchers: [
-          UrlTextMatcher(context),
-          MailTextMatcher(context),
-          MentionTextMatcher(context, mentionMap),
-          BotNumberTextMatcher(context),
+          UrlTextMatcher(
+            context,
+            container: ref.container,
+            accent: theme.accent,
+            app: app,
+          ),
+          MailTextMatcher(accent: theme.accent),
+          MentionTextMatcher(
+            context,
+            mentionMap,
+            container: ref.container,
+            accent: theme.accent,
+          ),
+          BotNumberTextMatcher(
+            context,
+            container: ref.container,
+            accent: theme.accent,
+          ),
           EmojiTextMatcher(),
           KeyWordTextMatcher(
             keyword,
             style: TextStyle(
-              backgroundColor: context.theme.highlight,
-              color: context.theme.text,
+              backgroundColor: theme.highlight,
+              color: theme.text,
             ),
           ),
         ],

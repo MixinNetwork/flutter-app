@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:html/dom.dart' as h;
 import 'package:html/dom_parsing.dart';
 import 'package:html/parser.dart';
@@ -6,18 +7,20 @@ import 'package:markdown/markdown.dart' as m;
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../utils/extension/extension.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/uri_utils.dart';
 import 'high_light_text.dart';
 import 'mixin_image.dart';
 
-class MarkdownColumn extends StatelessWidget {
+class MarkdownColumn extends ConsumerWidget {
   const MarkdownColumn({required this.data, super.key});
 
   final String data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final darkMode = ref.watch(platformBrightnessProvider) == Brightness.dark;
     final widgets =
         MarkdownGenerator(
           textGenerator: (node, config, visitor) =>
@@ -28,12 +31,14 @@ class MarkdownColumn extends StatelessWidget {
           data,
           config: _createMarkdownConfig(
             context: context,
-            darkMode: context.brightness == Brightness.dark,
+            darkMode: darkMode,
+            textColor: theme.text,
+            accentColor: theme.accent,
           ),
         );
     return ClipRect(
       child: DefaultTextStyle.merge(
-        style: TextStyle(color: context.theme.text),
+        style: TextStyle(color: theme.text),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: widgets,
@@ -43,7 +48,7 @@ class MarkdownColumn extends StatelessWidget {
   }
 }
 
-class Markdown extends StatelessWidget {
+class Markdown extends ConsumerWidget {
   const Markdown({
     required this.data,
     super.key,
@@ -56,29 +61,37 @@ class Markdown extends StatelessWidget {
   final ScrollPhysics? physics;
 
   @override
-  Widget build(BuildContext context) => DefaultTextStyle.merge(
-    style: TextStyle(color: context.theme.text),
-    child: MarkdownWidget(
-      data: data,
-      padding: padding,
-      physics: physics,
-      config: _createMarkdownConfig(
-        context: context,
-        darkMode: context.brightness == Brightness.dark,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final darkMode = ref.watch(platformBrightnessProvider) == Brightness.dark;
+    return DefaultTextStyle.merge(
+      style: TextStyle(color: theme.text),
+      child: MarkdownWidget(
+        data: data,
+        padding: padding,
+        physics: physics,
+        config: _createMarkdownConfig(
+          context: context,
+          darkMode: darkMode,
+          textColor: theme.text,
+          accentColor: theme.accent,
+        ),
+        markdownGenerator: MarkdownGenerator(
+          textGenerator: (node, config, visitor) =>
+              CustomTextNode(node.textContent, config, visitor),
+          generators: _kMixinGenerators,
+          richTextBuilder: CustomText.rich,
+        ),
       ),
-      markdownGenerator: MarkdownGenerator(
-        textGenerator: (node, config, visitor) =>
-            CustomTextNode(node.textContent, config, visitor),
-        generators: _kMixinGenerators,
-        richTextBuilder: CustomText.rich,
-      ),
-    ),
-  );
+    );
+  }
 }
 
 MarkdownConfig _createMarkdownConfig({
   required BuildContext context,
   required bool darkMode,
+  required Color textColor,
+  required Color accentColor,
 }) => MarkdownConfig(
   configs: [
     if (darkMode) ...[
@@ -111,7 +124,7 @@ MarkdownConfig _createMarkdownConfig({
       },
     ),
     LinkConfig(
-      style: TextStyle(color: context.theme.accent),
+      style: TextStyle(color: accentColor),
       onTap: (href) {
         if (href.isEmpty) return;
         openUri(context, href);
@@ -124,7 +137,7 @@ MarkdownConfig _createMarkdownConfig({
         return getDefaultMarker(
           isOrdered,
           depth,
-          context.theme.text,
+          textColor,
           index,
           height / 2 + 1,
           MarkdownConfig(),

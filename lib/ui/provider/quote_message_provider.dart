@@ -1,44 +1,57 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart';
 
 import '../../db/mixin_database.dart';
-import '../../utils/rivepod.dart';
 import 'conversation_provider.dart';
 
-final quoteMessageProvider = StateProvider.autoDispose<MessageItem?>((ref) {
-  final keepAlive = ref.keepAlive();
+class QuoteMessageNotifier extends Notifier<MessageItem?> {
+  KeepAliveLink? _keepAlive;
 
-  ref.listen(currentConversationIdProvider, (previous, next) {
-    keepAlive.close();
-    ref.invalidateSelf();
-  });
+  @override
+  MessageItem? build() {
+    ref.listen(currentConversationIdProvider, (previous, next) {
+      _keepAlive?.close();
+      _keepAlive = null;
+      state = null;
+    });
+    return null;
+  }
 
-  return null;
-});
+  void set(MessageItem? value) {
+    if (value == null) {
+      _keepAlive?.close();
+      _keepAlive = null;
+    } else {
+      _keepAlive ??= ref.keepAlive();
+    }
+    state = value;
+  }
+
+  void clear() => set(null);
+}
+
+final quoteMessageProvider =
+    NotifierProvider.autoDispose<QuoteMessageNotifier, MessageItem?>(
+      QuoteMessageNotifier.new,
+    );
 
 final quoteMessageIdProvider = quoteMessageProvider.select(
   (message) => message?.messageId,
 );
 
-class LastQuoteMessageStateNotifier
-    extends DistinctStateNotifier<MessageItem?> {
-  LastQuoteMessageStateNotifier(super.state);
-
-  set _state(MessageItem? value) => super.state = value;
+class LastQuoteMessageNotifier extends Notifier<MessageItem?> {
+  @override
+  MessageItem? build() {
+    ref.listen<MessageItem?>(quoteMessageProvider, (previous, next) {
+      if (next != null) {
+        state = next;
+      }
+    });
+    return ref.read(quoteMessageProvider);
+  }
 }
 
 final lastQuoteMessageProvider =
-    StateNotifierProvider.autoDispose<
-      LastQuoteMessageStateNotifier,
-      MessageItem?
-    >((ref) {
-      final lastQuoteMessageStateNotifier = LastQuoteMessageStateNotifier(
-        ref.read(quoteMessageProvider),
-      );
-
-      ref.listen(quoteMessageProvider, (previous, next) {
-        if (next == null) return;
-        lastQuoteMessageStateNotifier._state = next;
-      });
-
-      return lastQuoteMessageStateNotifier;
-    });
+    NotifierProvider.autoDispose<LastQuoteMessageNotifier, MessageItem?>(
+      LastQuoteMessageNotifier.new,
+    );

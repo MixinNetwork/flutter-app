@@ -12,14 +12,20 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
+import '../../provider/account_server_provider.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/database_provider.dart';
 import '../../provider/message_selection_provider.dart';
+import '../../provider/ui_context_providers.dart';
 
 class SelectionBottomBar extends HookConsumerWidget {
   const SelectionBottomBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
     final canForward = ref.watch(
       messageSelectionProvider.select((value) => value.canForward),
     );
@@ -34,51 +40,51 @@ class SelectionBottomBar extends HookConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _Button(
-            label: context.l10n.combineAndForward,
+            label: l10n.combineAndForward,
             iconAssetName: Resources.assetsImagesMessageTranscriptForwardSvg,
             enable: canCombineForward,
             onTap: () async {
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: true,
-                title: context.l10n.forward,
+                title: l10n.forward,
                 onlyContact: false,
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = ref.read(messageSelectionProvider);
-              final messageIds = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messageIds = selection.selectedMessageIds;
 
               await runWithLoading(
-                () => context.accountServer.sendTranscriptMessage(
+                () => accountServer.sendTranscriptMessage(
                   messageIds.toList(),
                   result.first.encryptCategory!,
                   conversationId: result.first.conversationId,
                   recipientId: result.first.userId,
                 ),
               );
-              cubit.clearSelection();
+              ref.read(messageSelectionProvider.notifier).clearSelection();
             },
           ),
           _Button(
-            label: context.l10n.oneByOneForward,
+            label: l10n.oneByOneForward,
             iconAssetName: Resources.assetsImagesContextMenuForwardSvg,
             enable: canForward,
             onTap: () async {
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: true,
-                title: context.l10n.forward,
+                title: l10n.forward,
                 onlyContact: false,
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = ref.read(messageSelectionProvider);
-              final messageIds = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messageIds = selection.selectedMessageIds;
 
               await runWithLoading(() async {
                 for (final id in messageIds) {
-                  await context.accountServer.forwardMessage(
+                  await accountServer.forwardMessage(
                     id,
                     result.first.encryptCategory!,
                     conversationId: result.first.conversationId,
@@ -86,21 +92,18 @@ class SelectionBottomBar extends HookConsumerWidget {
                   );
                 }
               });
-              cubit.clearSelection();
+              ref.read(messageSelectionProvider.notifier).clearSelection();
             },
           ),
           _Button(
-            label: context.l10n.copy,
+            label: l10n.copy,
             iconAssetName: Resources.assetsImagesCopySvg,
             onTap: () async => runFutureWithToast(
               (() async {
-                final messageSelectionNotifier = ref.read(
-                  messageSelectionProvider,
-                );
+                final messageSelection = ref.read(messageSelectionProvider);
 
-                final selectedMessageIds =
-                    messageSelectionNotifier.selectedMessageIds;
-                final messages = await context.database.messageDao
+                final selectedMessageIds = messageSelection.selectedMessageIds;
+                final messages = await database.messageDao
                     .messageItemByMessageIds(
                       selectedMessageIds.toList(),
                     )
@@ -123,12 +126,12 @@ class SelectionBottomBar extends HookConsumerWidget {
 
                 await Clipboard.setData(ClipboardData(text: text));
 
-                messageSelectionNotifier.clearSelection();
+                ref.read(messageSelectionProvider.notifier).clearSelection();
               })(),
             ),
           ),
           _Button(
-            label: context.l10n.delete,
+            label: l10n.delete,
             iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
             onTap: () async {
               final selection = ref.read(messageSelectionProvider);
@@ -138,31 +141,31 @@ class SelectionBottomBar extends HookConsumerWidget {
 
               final confirm = await showConfirmMixinDialog(
                 context,
-                context.l10n.chatDeleteMessage(
+                l10n.chatDeleteMessage(
                   messagesToDelete.length,
                   messagesToDelete.length,
                 ),
-                positiveText: context.l10n.delete,
-                neutralText: canRecall ? context.l10n.deleteForEveryone : null,
+                positiveText: l10n.delete,
+                neutralText: canRecall ? l10n.deleteForEveryone : null,
               );
               if (confirm == null) return;
               d('messagesToDelete: $messagesToDelete');
               await runWithLoading(() async {
                 if (confirm == DialogEvent.positive) {
                   for (final id in messagesToDelete) {
-                    await context.accountServer.deleteMessage(id);
+                    await accountServer.deleteMessage(id);
                   }
                   return;
                 }
 
                 if (confirm == DialogEvent.neutral) {
-                  await context.accountServer.sendRecallMessage(
+                  await accountServer.sendRecallMessage(
                     messagesToDelete.toList(),
                     conversationId: ref.read(currentConversationIdProvider),
                   );
                 }
               });
-              selection.clearSelection();
+              ref.read(messageSelectionProvider.notifier).clearSelection();
             },
           ),
         ],
@@ -171,7 +174,7 @@ class SelectionBottomBar extends HookConsumerWidget {
   }
 }
 
-class _Button extends StatelessWidget {
+class _Button extends ConsumerWidget {
   const _Button({
     required this.label,
     required this.iconAssetName,
@@ -185,7 +188,16 @@ class _Button extends StatelessWidget {
   final bool enable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final hoverColor = ref.watch(
+      dynamicColorProvider(
+        (
+          color: const Color.fromRGBO(0, 0, 0, 0.03),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
+        ),
+      ),
+    );
     Widget child = Center(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -197,14 +209,17 @@ class _Button extends StatelessWidget {
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(
-                context.theme.icon,
+                theme.icon,
                 BlendMode.srcIn,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(color: context.theme.text, fontSize: 14),
+              style: TextStyle(
+                color: theme.text,
+                fontSize: 14,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -215,10 +230,7 @@ class _Button extends StatelessWidget {
     if (enable) {
       child = InteractiveDecoratedBox.color(
         decoration: const BoxDecoration(),
-        hoveringColor: context.dynamicColor(
-          const Color.fromRGBO(0, 0, 0, 0.03),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
-        ),
+        hoveringColor: hoverColor,
         onTap: onTap,
         child: child,
       );

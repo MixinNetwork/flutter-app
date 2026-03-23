@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../constants/resources.dart';
 import '../../../../enum/media_status.dart';
+import '../../../../ui/provider/account_server_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../../utils/uri_utils.dart';
@@ -89,6 +90,7 @@ class MessageVideo extends HookConsumerWidget {
         (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
+    final accountServer = ref.read(accountServerProvider).requireValue;
 
     return InteractiveDecoratedBox(
       onTap: () {
@@ -97,18 +99,16 @@ class MessageVideo extends HookConsumerWidget {
           if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
             if (isTranscriptPage) {
               final transcriptMessageId = TranscriptPage.of(context)!.messageId;
-              context.accountServer.reUploadTranscriptAttachment(
-                transcriptMessageId,
-              );
+              accountServer.reUploadTranscriptAttachment(transcriptMessageId);
             } else {
-              context.accountServer.reUploadAttachment(message);
+              accountServer.reUploadAttachment(message);
             }
           } else {
-            context.accountServer.downloadAttachment(message.messageId);
+            accountServer.downloadAttachment(message.messageId);
           }
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
-          final path = context.accountServer.convertMessageAbsolutePath(
+          final path = accountServer.convertMessageAbsolutePath(
             message,
             isTranscriptPage,
           );
@@ -122,10 +122,14 @@ class MessageVideo extends HookConsumerWidget {
           } else if (Platform.isIOS || Platform.isAndroid) {
             OpenFile.open(path);
           } else {
-            openUri(context, Uri.file(path).toString());
+            openUri(
+              context,
+              Uri.file(path).toString(),
+              container: ref.container,
+            );
           }
         } else if (message.mediaStatus == MediaStatus.pending) {
-          context.accountServer.cancelProgressAttachmentJob(message.messageId);
+          accountServer.cancelProgressAttachmentJob(message.messageId);
         } else if (message.type.isLive && message.mediaUrl != null) {
           launchUrlString(message.mediaUrl!);
         }

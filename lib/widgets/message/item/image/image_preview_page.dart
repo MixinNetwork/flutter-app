@@ -6,12 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../../account/account_server.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
+import '../../../../ui/provider/account_server_provider.dart';
+import '../../../../ui/provider/database_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../../utils/system/clipboard.dart';
@@ -41,12 +44,14 @@ class ImagePreviewPage extends HookConsumerWidget {
     BuildContext context, {
     required String conversationId,
     required String messageId,
+    required ProviderContainer container,
+    required String barrierLabel,
     bool isTranscriptPage = false,
   }) => showGeneralDialog(
     context: context,
     barrierColor: Colors.transparent,
     barrierDismissible: true,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierLabel: barrierLabel,
     pageBuilder:
         (
           buildContext,
@@ -58,20 +63,15 @@ class ImagePreviewPage extends HookConsumerWidget {
             messageId: messageId,
             isTranscriptPage: isTranscriptPage,
           );
-
-          try {
-            return Provider.value(
-              value: context.read<TranscriptMessagesWatcher>(),
-              child: child,
-            );
-          } catch (_) {}
-
           return child;
         },
   );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
     final _messageId = useState(messageId);
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
@@ -81,13 +81,12 @@ class ImagePreviewPage extends HookConsumerWidget {
       current.value?.messageId,
     ]);
 
-    final transcriptMessagesWatcher = useMemoized(() {
-      try {
-        return context.read<TranscriptMessagesWatcher>();
-      } catch (_) {
-        return null;
-      }
-    });
+    final transcriptMessageId = isTranscriptPage
+        ? TranscriptPage.of(context)?.messageId
+        : null;
+    final transcriptMessagesWatcher = transcriptMessageId == null
+        ? null
+        : ref.watch(transcriptMessagesWatcherProvider(transcriptMessageId));
 
     useEffect(() {
       if (transcriptMessagesWatcher != null) return;
@@ -97,7 +96,7 @@ class ImagePreviewPage extends HookConsumerWidget {
       } else if (next.value?.messageId == _messageId.value) {
         current.value = next.value;
       } else {
-        context.database.messageDao
+        database.messageDao
             .messageItemByMessageId(_messageId.value)
             .getSingleOrNull()
             .then((value) => current.value = value);
@@ -107,7 +106,7 @@ class ImagePreviewPage extends HookConsumerWidget {
     useEffect(() {
       if (transcriptMessagesWatcher != null) return;
 
-      final messageDao = context.database.messageDao;
+      final messageDao = database.messageDao;
       () async {
         final info = await messageDao.messageOrderInfo(_messageId.value);
         if (info == null) return;
@@ -146,7 +145,7 @@ class ImagePreviewPage extends HookConsumerWidget {
     }, [_messageId.value]);
 
     useEffect(
-      () => context.database.messageDao
+      () => database.messageDao
           .watchInsertOrReplaceMessageStream(conversationId)
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
@@ -208,7 +207,7 @@ class ImagePreviewPage extends HookConsumerWidget {
       actions: {
         _CopyIntent: CallbackAction<Intent>(
           onInvoke: (intent) => copyFile(
-            context.accountServer.convertMessageAbsolutePath(
+            accountServer.convertMessageAbsolutePath(
               current.value,
               isTranscriptPage,
             ),
@@ -250,7 +249,9 @@ class ImagePreviewPage extends HookConsumerWidget {
             children: [
               Container(
                 height: 70,
-                decoration: BoxDecoration(color: context.theme.primary),
+                decoration: BoxDecoration(
+                  color: theme.primary,
+                ),
                 child: Builder(
                   builder: (context) {
                     if (current.value == null) return const SizedBox();
@@ -323,7 +324,7 @@ class ImagePreviewPage extends HookConsumerWidget {
   }
 }
 
-class _Bar extends StatelessWidget {
+class _Bar extends ConsumerWidget {
   const _Bar({
     required this.message,
     required this.controller,
@@ -335,71 +336,78 @@ class _Bar extends StatelessWidget {
   final bool isTranscriptPage;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      AvatarWidget(
-        name: message.userFullName,
-        size: 36,
-        avatarUrl: message.avatarUrl,
-        userId: message.userId,
-      ),
-      const SizedBox(width: 10),
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            message.userFullName!,
-            style: TextStyle(
-              fontSize: MessageItemWidget.primaryFontSize,
-              color: context.theme.text,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Row(
+      children: [
+        AvatarWidget(
+          name: message.userFullName,
+          size: 36,
+          avatarUrl: message.avatarUrl,
+          userId: message.userId,
+        ),
+        const SizedBox(width: 10),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              message.userFullName!,
+              style: TextStyle(
+                fontSize: MessageItemWidget.primaryFontSize,
+                color: theme.text,
+              ),
             ),
-          ),
-          Text(
-            message.userIdentityNumber,
-            style: TextStyle(
-              fontSize: MessageItemWidget.secondaryFontSize,
-              color: context.theme.secondaryText,
+            Text(
+              message.userIdentityNumber,
+              style: TextStyle(
+                fontSize: MessageItemWidget.secondaryFontSize,
+                color: theme.secondaryText,
+              ),
             ),
-          ),
-        ],
-      ),
-      const SizedBox(width: 14),
-      _Action(
-        controller: controller,
-        isTranscriptPage: isTranscriptPage,
-        message: message,
-      ),
-      const SizedBox(width: 24),
-    ],
-  );
+          ],
+        ),
+        const SizedBox(width: 14),
+        _Action(
+          controller: controller,
+          isTranscriptPage: isTranscriptPage,
+          message: message,
+          accountServer: ref.read(accountServerProvider).requireValue,
+        ),
+        const SizedBox(width: 24),
+      ],
+    );
+  }
 }
 
 enum _ActionType { share, copy, download }
 
-class _Action extends StatelessWidget {
+class _Action extends ConsumerWidget {
   const _Action({
     required this.controller,
     required this.isTranscriptPage,
     required this.message,
+    required this.accountServer,
   });
 
   final TransformImageController controller;
   final bool isTranscriptPage;
   final MessageItem message;
+  final AccountServer accountServer;
 
   static const _dividerWidth = 14.0;
   static const _divider = SizedBox(width: _dividerWidth);
   static const _width = 36;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     Future<void> share() async {
-      final accountServer = context.accountServer;
       final result = await showConversationSelector(
         context: context,
         singleSelect: true,
-        title: context.l10n.forward,
+        title: l10n.forward,
         onlyContact: false,
       );
       if (result == null || result.isEmpty) return;
@@ -412,7 +420,7 @@ class _Action extends StatelessWidget {
     }
 
     Future<void> copy() => copyFile(
-      context.accountServer.convertMessageAbsolutePath(
+      accountServer.convertMessageAbsolutePath(
         message,
         isTranscriptPage,
       ),
@@ -420,7 +428,13 @@ class _Action extends StatelessWidget {
 
     Future<void> download() async {
       if (message.mediaUrl?.isEmpty ?? true) return;
-      await saveAs(context, context.accountServer, message, isTranscriptPage);
+      await saveAs(
+        context,
+        accountServer,
+        message,
+        isTranscriptPage,
+        confirmButtonText: l10n.save,
+      );
     }
 
     final collapsible = [
@@ -428,18 +442,18 @@ class _Action extends StatelessWidget {
         ActionButton(
           name: Resources.assetsImagesShareSvg,
           size: 20,
-          color: context.theme.icon,
+          color: theme.icon,
           onTap: share,
         ),
       ActionButton(
         name: Resources.assetsImagesCopySvg,
-        color: context.theme.icon,
+        color: theme.icon,
         size: 20,
         onTap: copy,
       ),
       ActionButton(
         name: Resources.assetsImagesAttachmentDownloadSvg,
-        color: context.theme.icon,
+        color: theme.icon,
         size: 20,
         onTap: download,
       ),
@@ -447,7 +461,7 @@ class _Action extends StatelessWidget {
 
     final close = ActionButton(
       name: Resources.assetsImagesIcCloseBigSvg,
-      color: context.theme.icon,
+      color: theme.icon,
       size: 20,
       onTap: () => Navigator.pop(context),
     );
@@ -455,19 +469,19 @@ class _Action extends StatelessWidget {
     final common = [
       ActionButton(
         name: Resources.assetsImagesZoomInSvg,
-        color: context.theme.icon,
+        color: theme.icon,
         size: 20,
         onTap: controller.zoomIn,
       ),
       ActionButton(
         name: Resources.assetsImagesZoomOutSvg,
         size: 20,
-        color: context.theme.icon,
+        color: theme.icon,
         onTap: controller.zoomOut,
       ),
       ActionButton(
         name: Resources.assetsImagesRotatoSvg,
-        color: context.theme.icon,
+        color: theme.icon,
         size: 20,
         onTap: controller.rotate,
       ),
@@ -477,17 +491,17 @@ class _Action extends StatelessWidget {
       itemBuilder: (context) => [
         CustomPopupMenuItem(
           icon: Resources.assetsImagesShareSvg,
-          title: context.l10n.forward,
+          title: l10n.forward,
           value: _ActionType.share,
         ),
         CustomPopupMenuItem(
           icon: Resources.assetsImagesCopySvg,
-          title: context.l10n.copy,
+          title: l10n.copy,
           value: _ActionType.copy,
         ),
         CustomPopupMenuItem(
           icon: Resources.assetsImagesAttachmentDownloadSvg,
-          title: context.l10n.download,
+          title: l10n.download,
           value: _ActionType.download,
         ),
       ],
@@ -545,6 +559,7 @@ class _Item extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
     // scale image to fit viewport on first show.
     final initialScale = useMemoized(() {
       final imageSize = Size(
@@ -581,7 +596,7 @@ class _Item extends HookConsumerWidget {
             },
             image: Image.file(
               File(
-                context.accountServer.convertMessageAbsolutePath(
+                accountServer.convertMessageAbsolutePath(
                   message,
                   isTranscriptPage,
                 ),

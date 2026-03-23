@@ -9,6 +9,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 import '../../../../db/dao/snapshot_dao.dart';
 import '../../../../db/database_event_bus.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
+import '../../../../ui/provider/account_server_provider.dart';
+import '../../../../ui/provider/database_provider.dart';
+import '../../../../ui/provider/multi_auth_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../buttons.dart';
@@ -26,13 +30,18 @@ class _TransferPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
+    final account = ref.watch(authAccountProvider);
     useEffect(() {
-      context.accountServer.updateFiats();
+      accountServer.updateFiats();
+      return null;
     }, []);
 
     final snapshotItem = useMemoizedStream(
-      () => context.database.snapshotDao
-          .snapshotItemById(snapshotId, context.account!.fiatCurrency)
+      () => database.snapshotDao
+          .snapshotItemById(snapshotId, account!.fiatCurrency)
           .watchSingleOrNullWithStream(
             eventStreams: [
               DataBaseEventBus.instance.updateSnapshotStream.where(
@@ -47,7 +56,7 @@ class _TransferPage extends HookConsumerWidget {
     final opponentFullName = useMemoizedStream<User?>(() {
       final opponentId = snapshotItem?.opponentId;
       if (opponentId != null && opponentId.trim().isNotEmpty) {
-        final stream = context.database.userDao
+        final stream = database.userDao
             .userById(opponentId)
             .watchSingleOrNullWithStream(
               eventStreams: [
@@ -59,7 +68,7 @@ class _TransferPage extends HookConsumerWidget {
             );
         return stream.map((event) {
           if (event == null) {
-            context.accountServer.refreshUsers([opponentId]);
+            accountServer.refreshUsers([opponentId]);
           }
           return event;
         });
@@ -68,13 +77,15 @@ class _TransferPage extends HookConsumerWidget {
     }, keys: [snapshotItem?.opponentId]).data?.fullName;
 
     useEffect(() {
-      context.accountServer.updateSnapshotById(snapshotId: snapshotId);
+      accountServer.updateSnapshotById(snapshotId: snapshotId);
+      return null;
     }, [snapshotId]);
 
     useEffect(() {
       final assetId = snapshotItem?.assetId;
-      if (assetId == null) return;
-      context.accountServer.updateAssetById(assetId: assetId);
+      if (assetId == null) return null;
+      accountServer.updateAssetById(assetId: assetId);
+      return null;
     }, [snapshotItem?.assetId]);
 
     if (snapshotItem == null) return const SizedBox();
@@ -118,10 +129,14 @@ class _TransferPage extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Container(color: context.theme.divider, height: 10),
+                  Container(
+                    color: theme.divider,
+                    height: 10,
+                  ),
                   TransactionDetailInfo(
                     snapshot: snapshotItem,
                     opponentFullName: opponentFullName,
+                    currentUserFullName: account?.fullName,
                   ),
                 ],
               ),
@@ -152,48 +167,54 @@ class SnapshotDetailHeader extends HookConsumerWidget {
   final String snapshotType;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Column(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      const SizedBox(height: 20),
-      SymbolIconWithBorder(
-        symbolUrl: symbolIconUrl,
-        chainUrl: chainIconUrl,
-        size: 58,
-        chainSize: 16,
-      ),
-      const SizedBox(height: 16),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: CustomSelectableText.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: amount.numberFormat(),
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'MixinCondensed',
-                  color: snapshotType == SnapshotType.pending
-                      ? context.theme.text
-                      : _isPositive(amount)
-                      ? context.theme.green
-                      : context.theme.red,
-                ),
-              ),
-              const TextSpan(text: ' '),
-              TextSpan(
-                text: symbol.overflow,
-                style: TextStyle(fontSize: 14, color: context.theme.text),
-              ),
-            ],
-          ),
-          textAlign: TextAlign.center,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 20),
+        SymbolIconWithBorder(
+          symbolUrl: symbolIconUrl,
+          chainUrl: chainIconUrl,
+          size: 58,
+          chainSize: 16,
         ),
-      ),
-      const SizedBox(height: 4),
-    ],
-  );
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: CustomSelectableText.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: amount.numberFormat(),
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'MixinCondensed',
+                    color: snapshotType == SnapshotType.pending
+                        ? theme.text
+                        : _isPositive(amount)
+                        ? theme.green
+                        : theme.red,
+                  ),
+                ),
+                const TextSpan(text: ' '),
+                TextSpan(
+                  text: symbol.overflow,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.text,
+                  ),
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
 }
 
 class _ValuesDescription extends HookConsumerWidget {
@@ -203,8 +224,12 @@ class _ValuesDescription extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final fiatCurrency = ref.watch(authAccountProvider)?.fiatCurrency;
+    final accountServer = ref.read(accountServerProvider).requireValue;
     final ticker = useMemoizedFuture(
-      () => context.accountServer.client.snapshotApi.getTicker(
+      () => accountServer.client.snapshotApi.getTicker(
         snapshot.assetId,
         offset: snapshot.createdAt.toIso8601String(),
       ),
@@ -215,34 +240,36 @@ class _ValuesDescription extends HookConsumerWidget {
     final String? thatTimeValue;
 
     final current = snapshot.amountOfCurrentCurrency().abs();
-    final unitValue = context.currencyFormat(
+    final unitValue = currencyFormat(
       (current / snapshot.amount.asDecimal.abs()).toDouble(),
+      fiatCurrency: fiatCurrency,
     );
     final symbol = snapshot.symbol?.overflow ?? '';
     final currentValue =
-        '${context.l10n.valueNow(context.currencyFormat(current))}($unitValue/$symbol)';
+        '${l10n.valueNow(currencyFormat(current, fiatCurrency: fiatCurrency))}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
-      thatTimeValue = context.l10n.valueThen(context.l10n.na);
+      thatTimeValue = l10n.valueThen(l10n.na);
     } else {
       final past =
           (snapshot.amount.asDecimal *
                   ticker.priceUsd.asDecimal *
                   snapshot.fiatRate!.asDecimal)
               .abs();
-      final unitValue = context.currencyFormat(
+      final unitValue = currencyFormat(
         (past / snapshot.amount.asDecimal.abs()).toDouble(),
+        fiatCurrency: fiatCurrency,
       );
       thatTimeValue =
-          '${context.l10n.valueThen(context.currencyFormat(past))}($unitValue/$symbol)';
+          '${l10n.valueThen(currencyFormat(past, fiatCurrency: fiatCurrency))}($unitValue/$symbol)';
     }
     return DefaultTextStyle.merge(
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: context.theme.secondaryText,
+        color: theme.secondaryText,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -262,18 +289,21 @@ class _ValuesDescription extends HookConsumerWidget {
   }
 }
 
-class TransactionDetailInfo extends StatelessWidget {
+class TransactionDetailInfo extends ConsumerWidget {
   const TransactionDetailInfo({
     required this.snapshot,
     required this.opponentFullName,
+    required this.currentUserFullName,
     super.key,
   });
 
   final SnapshotItem snapshot;
   final String? opponentFullName;
+  final String? currentUserFullName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     final createdAt = snapshot.createdAt.toLocal();
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 20),
@@ -282,36 +312,36 @@ class TransactionDetailInfo extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TransactionInfoTile(
-            title: Text(context.l10n.transactionId),
+            title: Text(l10n.transactionId),
             subtitle: CustomSelectableText(snapshot.snapshotId),
           ),
           if (snapshot.snapshotHash?.isNotEmpty ?? false)
             TransactionInfoTile(
-              title: Text(context.l10n.snapshotHash),
+              title: Text(l10n.snapshotHash),
               subtitle: CustomSelectableText(snapshot.snapshotHash!),
             ),
           TransactionInfoTile(
-            title: Text(context.l10n.assetType),
+            title: Text(l10n.assetType),
             subtitle: CustomSelectableText(snapshot.symbolName ?? ''),
           ),
           TransactionInfoTile(
-            title: Text(context.l10n.transactionType),
-            subtitle: CustomSelectableText(snapshot.l10nType(context)),
+            title: Text(l10n.transactionType),
+            subtitle: CustomSelectableText(snapshot.l10nType(l10n)),
           ),
           if (snapshot.type == SnapshotType.deposit) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.from),
+              title: Text(l10n.from),
               subtitle: CustomSelectableText(snapshot.sender ?? ''),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.transactionHash),
+              title: Text(l10n.transactionHash),
               subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
           ] else if (snapshot.type == SnapshotType.pending) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.status),
+              title: Text(l10n.status),
               subtitle: CustomSelectableText(
-                context.l10n.pendingConfirmation(
+                l10n.pendingConfirmation(
                   snapshot.confirmations ?? 0,
                   snapshot.confirmations ?? 0,
                   snapshot.assetConfirmations ?? 0,
@@ -319,60 +349,60 @@ class TransactionDetailInfo extends StatelessWidget {
               ),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.from),
+              title: Text(l10n.from),
               subtitle: CustomSelectableText(snapshot.sender ?? ''),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.transactionHash),
+              title: Text(l10n.transactionHash),
               subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
           ] else if (snapshot.type == SnapshotType.transfer) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.from),
+              title: Text(l10n.from),
               subtitle: CustomSelectableText(
                 (snapshot.isPositive
                         ? opponentFullName
-                        : context.account?.fullName) ??
+                        : currentUserFullName) ??
                     '',
               ),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.receiver),
+              title: Text(l10n.receiver),
               subtitle: CustomSelectableText(
                 (!snapshot.isPositive
                         ? opponentFullName
-                        : context.account?.fullName) ??
+                        : currentUserFullName) ??
                     '',
               ),
             ),
           ] else if (snapshot.tag?.isNotEmpty ?? false) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.transactionHash),
+              title: Text(l10n.transactionHash),
               subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.address),
+              title: Text(l10n.address),
               subtitle: CustomSelectableText(snapshot.receiver ?? ''),
             ),
           ] else ...[
             TransactionInfoTile(
-              title: Text(context.l10n.transactionHash),
+              title: Text(l10n.transactionHash),
               subtitle: CustomSelectableText(snapshot.transactionHash ?? ''),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.receiver),
+              title: Text(l10n.receiver),
               subtitle: CustomSelectableText(snapshot.receiver ?? ''),
             ),
           ],
           if (snapshot.memo?.isNotEmpty ?? false)
             TransactionInfoTile(
-              title: Text(context.l10n.memo),
+              title: Text(l10n.memo),
               subtitle: CustomSelectableText(snapshot.memo!),
             ),
           if ((snapshot.openingBalance?.isNotEmpty ?? false) &&
               (snapshot.symbol?.isNotEmpty ?? false))
             TransactionInfoTile(
-              title: Text(context.l10n.openingBalance),
+              title: Text(l10n.openingBalance),
               subtitle: CustomSelectableText(
                 '${snapshot.openingBalance!} ${snapshot.symbol!}',
               ),
@@ -380,13 +410,13 @@ class TransactionDetailInfo extends StatelessWidget {
           if ((snapshot.closingBalance?.isNotEmpty ?? false) &&
               (snapshot.symbol?.isNotEmpty ?? false))
             TransactionInfoTile(
-              title: Text(context.l10n.closingBalance),
+              title: Text(l10n.closingBalance),
               subtitle: CustomSelectableText(
                 '${snapshot.closingBalance ?? ''} ${snapshot.symbol ?? ''}',
               ),
             ),
           TransactionInfoTile(
-            title: Text(context.l10n.time),
+            title: Text(l10n.time),
             subtitle: CustomSelectableText(
               '${DateFormat.yMMMMd().format(createdAt)}'
               '${DateFormat.Hms().format(createdAt)}',
@@ -396,7 +426,7 @@ class TransactionDetailInfo extends StatelessWidget {
               snapshot.traceId != null &&
               snapshot.traceId!.isNotEmpty)
             TransactionInfoTile(
-              title: Text(context.l10n.trace),
+              title: Text(l10n.trace),
               subtitle: CustomSelectableText(snapshot.traceId ?? ''),
             ),
         ],
@@ -405,7 +435,7 @@ class TransactionDetailInfo extends StatelessWidget {
   }
 }
 
-class TransactionInfoTile extends StatelessWidget {
+class TransactionInfoTile extends ConsumerWidget {
   const TransactionInfoTile({
     required this.title,
     required this.subtitle,
@@ -418,31 +448,34 @@ class TransactionInfoTile extends StatelessWidget {
   final Color? subtitleColor;
 
   @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const SizedBox(height: 12),
-      DefaultTextStyle.merge(
-        style: TextStyle(
-          fontSize: 16,
-          height: 1,
-          color: context.theme.secondaryText,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        DefaultTextStyle.merge(
+          style: TextStyle(
+            fontSize: 16,
+            height: 1,
+            color: theme.secondaryText,
+          ),
+          child: title,
         ),
-        child: title,
-      ),
-      const SizedBox(height: 8),
-      DefaultTextStyle.merge(
-        style: TextStyle(
-          fontSize: 16,
-          height: 1,
-          color: subtitleColor ?? context.theme.text,
+        const SizedBox(height: 8),
+        DefaultTextStyle.merge(
+          style: TextStyle(
+            fontSize: 16,
+            height: 1,
+            color: subtitleColor ?? theme.text,
+          ),
+          child: subtitle,
         ),
-        child: subtitle,
-      ),
-      const SizedBox(height: 12),
-    ],
-  );
+        const SizedBox(height: 12),
+      ],
+    );
+  }
 }
 
 class SymbolIconWithBorder extends StatelessWidget {

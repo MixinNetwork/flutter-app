@@ -25,7 +25,8 @@ class BrightnessObserver extends HookConsumerWidget {
   final Brightness? forceBrightness;
 
   Brightness _getBrightness(BuildContext context) =>
-      forceBrightness ?? MediaQuery.platformBrightnessOf(context);
+      forceBrightness ??
+      WidgetsBinding.instance.platformDispatcher.platformBrightness;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

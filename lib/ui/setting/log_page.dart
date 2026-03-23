@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../widgets/action_button.dart';
@@ -16,7 +18,7 @@ Future<void> showLogPage(BuildContext context) => showGeneralDialog(
   context: context,
   barrierColor: Colors.transparent,
   barrierDismissible: true,
-  barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+  barrierLabel: Localization.current.close,
   pageBuilder:
       (
         buildContext,
@@ -28,21 +30,22 @@ Future<void> showLogPage(BuildContext context) => showGeneralDialog(
       ).wrap(const _LogPage()),
 );
 
-class _LogPage extends HookWidget {
+class _LogPage extends HookConsumerWidget {
   const _LogPage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     useListenable(_logChangeNotifier);
     return Material(
-      color: context.theme.background,
+      color: theme.background,
       child: Column(
         children: [
           MixinAppBar(
             leading: const SizedBox(),
             actions: [
               ActionButton(
-                color: context.theme.icon,
+                color: theme.icon,
                 onTap: () {
                   scheduleMicrotask(() {
                     i(

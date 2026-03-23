@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Message, Offset;
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
@@ -124,7 +125,7 @@ class PostDetailIcon extends StatelessWidget {
   );
 }
 
-class PostPreview extends StatelessWidget {
+class PostPreview extends ConsumerWidget {
   const PostPreview({required this.message, super.key});
 
   static Future<void> push(
@@ -134,7 +135,7 @@ class PostPreview extends StatelessWidget {
     context: context,
     barrierColor: Colors.transparent,
     barrierDismissible: true,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierLabel: Localization.current.close,
     pageBuilder:
         (
           buildContext,
@@ -149,24 +150,30 @@ class PostPreview extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: context.theme.background,
-    child: Column(
-      children: [
-        MixinAppBar(
-          leading: const SizedBox(),
-          actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
-        ),
-        Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Markdown(
-              data: message.content ?? '',
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Material(
+      color: theme.background,
+      child: Column(
+        children: [
+          MixinAppBar(
+            leading: const SizedBox(),
+            actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
+          ),
+          Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Markdown(
+                data: message.content ?? '',
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 32,
+                ),
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }

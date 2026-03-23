@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../account/account_server.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
@@ -17,125 +18,141 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/account_server_provider.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/ui_context_providers.dart';
 
-class DisappearMessagePage extends StatelessWidget {
+class DisappearMessagePage extends ConsumerWidget {
   const DisappearMessagePage(this.conversationState, {super.key});
 
   final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.theme.primary,
-    appBar: MixinAppBar(title: Text(context.l10n.disappearingMessage)),
-    body: SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          SvgPicture.asset(
-            Resources.assetsImagesDisappearingMessageSvg,
-            width: 70,
-            height: 70,
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: HighlightStarLinkText(
-              context.l10n.disappearingMessageHint,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                height: 1.5,
-                fontSize: 14,
-              ),
-              highlightStyle: TextStyle(color: context.theme.accent),
-              links: const [mixinDisappearingMessageHelpUrl],
-              onLinkClick: (url) => openUri(context, url),
-            ),
-          ),
-          const SizedBox(height: 40),
-          _Options(
-            conversationId: conversationState.conversationId,
-            expireDuration:
-                conversationState.conversation?.expireDuration ?? Duration.zero,
-          ),
-        ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    return Scaffold(
+      backgroundColor: theme.primary,
+      appBar: MixinAppBar(
+        title: Text(l10n.disappearingMessage),
       ),
-    ),
-  );
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            SvgPicture.asset(
+              Resources.assetsImagesDisappearingMessageSvg,
+              width: 70,
+              height: 70,
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: HighlightStarLinkText(
+                l10n.disappearingMessageHint,
+                style: TextStyle(
+                  color: theme.secondaryText,
+                  height: 1.5,
+                  fontSize: 14,
+                ),
+                highlightStyle: TextStyle(
+                  color: theme.accent,
+                ),
+                links: const [mixinDisappearingMessageHelpUrl],
+                onLinkClick: (url) =>
+                    openUri(context, url, container: ref.container),
+              ),
+            ),
+            const SizedBox(height: 40),
+            _Options(
+              conversationId: conversationState.conversationId,
+              expireDuration:
+                  conversationState.conversation?.expireDuration ??
+                  Duration.zero,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _Options extends StatelessWidget {
+class _Options extends ConsumerWidget {
   const _Options({required this.conversationId, required this.expireDuration});
 
   final String conversationId;
   final Duration expireDuration;
 
   @override
-  Widget build(BuildContext context) => CellGroup(
-    child: Column(
-      children: [
-        CellItem(
-          title: Text(context.l10n.close),
-          trailing: expireDuration < const Duration(seconds: 1)
-              ? SvgPicture.asset(
-                  Resources.assetsImagesCheckedSvg,
-                  width: 24,
-                  height: 24,
-                )
-              : null,
-          onTap: () {
-            if (expireDuration < const Duration(seconds: 1)) return;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    return CellGroup(
+      child: Column(
+        children: [
+          CellItem(
+            title: Text(l10n.close),
+            trailing: expireDuration < const Duration(seconds: 1)
+                ? SvgPicture.asset(
+                    Resources.assetsImagesCheckedSvg,
+                    width: 24,
+                    height: 24,
+                  )
+                : null,
+            onTap: () {
+              if (expireDuration < const Duration(seconds: 1)) return;
 
-            _updateConversationExpireDuration(
-              context,
-              duration: Duration.zero,
-              conversationId: conversationId,
-            );
-          },
-        ),
-        _DurationOptionItem(
-          conversationId: conversationId,
-          label: '30 ${context.l10n.unitSecond(30)}',
-          duration: const Duration(seconds: 30),
-          current: expireDuration,
-        ),
-        _DurationOptionItem(
-          conversationId: conversationId,
-          label: '10 ${context.l10n.unitMinute(10)}',
-          duration: const Duration(minutes: 10),
-          current: expireDuration,
-        ),
-        _DurationOptionItem(
-          conversationId: conversationId,
-          label: '2 ${context.l10n.unitHour(2)}',
-          duration: const Duration(hours: 2),
-          current: expireDuration,
-        ),
-        _DurationOptionItem(
-          conversationId: conversationId,
-          label: '1 ${context.l10n.unitDay(1)}',
-          duration: const Duration(days: 1),
-          current: expireDuration,
-        ),
-        _DurationOptionItem(
-          conversationId: conversationId,
-          label: '1 ${context.l10n.unitWeek(1)}',
-          duration: const Duration(days: 7),
-          current: expireDuration,
-        ),
-        CellItem(
-          title: Text(context.l10n.customTime),
-          onTap: () => showMixinDialog(
-            context: context,
-            child: _CustomExpireTimeDialog(conversationId: conversationId),
+              _updateConversationExpireDuration(
+                context,
+                duration: Duration.zero,
+                conversationId: conversationId,
+                accountServer: ref.read(accountServerProvider).requireValue,
+              );
+            },
           ),
-        ),
-      ],
-    ),
-  );
+          _DurationOptionItem(
+            conversationId: conversationId,
+            label: '30 ${l10n.unitSecond(30)}',
+            duration: const Duration(seconds: 30),
+            current: expireDuration,
+          ),
+          _DurationOptionItem(
+            conversationId: conversationId,
+            label: '10 ${l10n.unitMinute(10)}',
+            duration: const Duration(minutes: 10),
+            current: expireDuration,
+          ),
+          _DurationOptionItem(
+            conversationId: conversationId,
+            label: '2 ${l10n.unitHour(2)}',
+            duration: const Duration(hours: 2),
+            current: expireDuration,
+          ),
+          _DurationOptionItem(
+            conversationId: conversationId,
+            label: '1 ${l10n.unitDay(1)}',
+            duration: const Duration(days: 1),
+            current: expireDuration,
+          ),
+          _DurationOptionItem(
+            conversationId: conversationId,
+            label: '1 ${l10n.unitWeek(1)}',
+            duration: const Duration(days: 7),
+            current: expireDuration,
+          ),
+          CellItem(
+            title: Text(l10n.customTime),
+            onTap: () => showMixinDialog(
+              context: context,
+              child: _CustomExpireTimeDialog(conversationId: conversationId),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _DurationOptionItem extends StatelessWidget {
+class _DurationOptionItem extends ConsumerWidget {
   const _DurationOptionItem({
     required this.duration,
     required this.current,
@@ -149,7 +166,7 @@ class _DurationOptionItem extends StatelessWidget {
   final String conversationId;
 
   @override
-  Widget build(BuildContext context) => CellItem(
+  Widget build(BuildContext context, WidgetRef ref) => CellItem(
     title: Text(label),
     trailing: duration == current
         ? SvgPicture.asset(
@@ -166,6 +183,7 @@ class _DurationOptionItem extends StatelessWidget {
         context,
         duration: duration,
         conversationId: conversationId,
+        accountServer: ref.read(accountServerProvider).requireValue,
       );
     },
   );
@@ -176,16 +194,15 @@ Future<void> _updateConversationExpireDuration(
   BuildContext context, {
   required Duration duration,
   required String conversationId,
+  required AccountServer accountServer,
 }) async {
-  final api = context.accountServer.client.conversationApi;
+  final api = accountServer.client.conversationApi;
   try {
     final response = await api.disappear(
       conversationId,
       DisappearRequest(duration: duration.inSeconds),
     );
-    await context.accountServer.updateConversationFromResponse(
-      response.data,
-    );
+    await accountServer.updateConversationFromResponse(response.data);
   } catch (error, stackTrace) {
     e('update conversation expire duration failed $error $stackTrace');
     showToastFailed(error);
@@ -233,6 +250,8 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final inputController = useTextEditingController();
     final unit = useState(_CustomExpireTimeUnit.second);
     return SizedBox(
@@ -242,7 +261,7 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
         children: [
           MixinAppBar(
             leading: const SizedBox(),
-            title: Text(context.l10n.customTime),
+            title: Text(l10n.customTime),
             actions: const [MixinCloseButton()],
           ),
           const SizedBox(height: 16),
@@ -257,7 +276,10 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   textAlign: TextAlign.center,
                   maxLength: 2,
-                  style: TextStyle(color: context.theme.text, fontSize: 16),
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: 16,
+                  ),
                   buildCounter:
                       (
                         context, {
@@ -266,11 +288,11 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
                         required isFocused,
                       }) => null,
                   decoration: InputDecoration(
-                    fillColor: context.theme.sidebarSelected,
+                    fillColor: theme.sidebarSelected,
                     filled: true,
                     hintStyle: TextStyle(
                       fontSize: 16,
-                      color: context.theme.secondaryText,
+                      color: theme.secondaryText,
                     ),
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -295,7 +317,7 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
           ),
           const SizedBox(height: 28),
           MixinButton(
-            child: Text(context.l10n.set),
+            child: Text(l10n.set),
             onTap: () async {
               if (inputController.text.isEmpty) {
                 return;
@@ -311,11 +333,11 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
               if (value > unit.value.maxValue) {
                 showToastFailed(
                   ToastError(
-                    context.l10n.disappearingCustomTimeMaxWarning(
+                    l10n.disappearingCustomTimeMaxWarning(
                       unit.value
                           .toDuration(unit.value.maxValue)
                           .formatAsConversationExpireIn(
-                            localization: context.l10n,
+                            localization: l10n,
                           ),
                     ),
                   ),
@@ -327,6 +349,7 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
                 context,
                 duration: duration,
                 conversationId: conversationId,
+                accountServer: ref.read(accountServerProvider).requireValue,
               );
               Toast.dismiss();
               await Navigator.of(context).maybePop();
@@ -339,53 +362,55 @@ class _CustomExpireTimeDialog extends HookConsumerWidget {
   }
 }
 
-class _CustomExpireUnitSelection extends StatelessWidget {
+class _CustomExpireUnitSelection extends ConsumerWidget {
   const _CustomExpireUnitSelection({required this.unit});
 
   final ValueNotifier<_CustomExpireTimeUnit> unit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final String text;
     switch (unit.value) {
       case _CustomExpireTimeUnit.second:
-        text = context.l10n.unitSecond(1);
+        text = l10n.unitSecond(1);
       case _CustomExpireTimeUnit.minute:
-        text = context.l10n.unitMinute(1);
+        text = l10n.unitMinute(1);
       case _CustomExpireTimeUnit.hour:
-        text = context.l10n.unitHour(1);
+        text = l10n.unitHour(1);
       case _CustomExpireTimeUnit.day:
-        text = context.l10n.unitDay(1);
+        text = l10n.unitDay(1);
       case _CustomExpireTimeUnit.week:
-        text = context.l10n.unitWeek(1);
+        text = l10n.unitWeek(1);
     }
     return CustomPopupMenuButton(
       itemBuilder: (context) => [
         CustomPopupMenuItem(
-          title: context.l10n.unitSecond(1),
+          title: l10n.unitSecond(1),
           value: _CustomExpireTimeUnit.second,
         ),
         CustomPopupMenuItem(
-          title: context.l10n.unitMinute(1),
+          title: l10n.unitMinute(1),
           value: _CustomExpireTimeUnit.minute,
         ),
         CustomPopupMenuItem(
-          title: context.l10n.unitHour(1),
+          title: l10n.unitHour(1),
           value: _CustomExpireTimeUnit.hour,
         ),
         CustomPopupMenuItem(
-          title: context.l10n.unitDay(1),
+          title: l10n.unitDay(1),
           value: _CustomExpireTimeUnit.day,
         ),
         CustomPopupMenuItem(
-          title: context.l10n.unitWeek(1),
+          title: l10n.unitWeek(1),
           value: _CustomExpireTimeUnit.week,
         ),
       ],
       onSelected: (value) => unit.value = value,
       child: Builder(
         builder: (context) => Material(
-          color: context.theme.sidebarSelected,
+          color: theme.sidebarSelected,
           borderRadius: const BorderRadius.all(Radius.circular(8)),
           child: SizedBox(
             height: 46,
@@ -396,7 +421,7 @@ class _CustomExpireUnitSelection extends StatelessWidget {
                     text,
                     style: TextStyle(
                       fontSize: 16,
-                      color: context.theme.text,
+                      color: theme.text,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -408,7 +433,7 @@ class _CustomExpireUnitSelection extends StatelessWidget {
                     width: 30,
                     height: 30,
                     colorFilter: ColorFilter.mode(
-                      context.theme.secondaryText,
+                      theme.secondaryText,
                       BlendMode.srcIn,
                     ),
                   ),

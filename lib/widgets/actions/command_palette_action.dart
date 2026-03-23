@@ -8,12 +8,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../constants/resources.dart';
+import '../../db/database.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
+import '../../ui/provider/account_server_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/database_provider.dart';
 import '../../ui/provider/recent_conversation_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/platform.dart';
@@ -74,17 +78,18 @@ class _SearchState {
 }
 
 _SearchState _useSearchState({
-  required BuildContext context,
   required WidgetRef ref,
   required String keyword,
+  required Database database,
+  required String selfUserId,
 }) {
   final users =
       useMemoizedStream<List<SearchItem>>(() {
         if (keyword.trim().isEmpty) {
           return Stream.value([]);
         }
-        return context.database.userDao
-            .fuzzySearchUserItem(keyword, context.accountServer.userId)
+        return database.userDao
+            .fuzzySearchUserItem(keyword, selfUserId)
             .watchWithStream(
               eventStreams: [DataBaseEventBus.instance.updateUserIdsStream],
               duration: kVerySlowThrottleDuration,
@@ -101,7 +106,7 @@ _SearchState _useSearchState({
             return Stream.value([]);
           }
 
-          return context.database.conversationDao
+          return database.conversationDao
               .fuzzySearchConversationItemByIds(recentConversationIds)
               .watchWithStream(
                 eventStreams: [
@@ -112,7 +117,7 @@ _SearchState _useSearchState({
                 duration: kSlowThrottleDuration,
               );
         }
-        return context.database.conversationDao
+        return database.conversationDao
             .fuzzySearchConversationItem(keyword)
             .watchWithStream(
               eventStreams: [
@@ -149,6 +154,7 @@ _NavigationState _useNavigationState({
   required ScrollController scrollController,
   required List<SearchItem> items,
   required BuildContext context,
+  required ProviderContainer container,
 }) {
   final selectedIndex = useState<int>(0);
 
@@ -179,9 +185,9 @@ _NavigationState _useNavigationState({
 
     final item = items[selectedIndex.value];
     if (item.type == 'GROUP' || item.type == 'CONTACT') {
-      ConversationStateNotifier.selectConversation(context, item.id);
+      ConversationStateNotifier.selectConversation(container, context, item.id);
     } else {
-      ConversationStateNotifier.selectUser(context, item.id);
+      ConversationStateNotifier.selectUser(container, context, item.id);
     }
     Navigator.pop(context);
   }, [items]);
@@ -195,9 +201,10 @@ _NavigationState _useNavigationState({
 }
 
 class CommandPaletteAction extends Action<ToggleCommandPaletteIntent> {
-  CommandPaletteAction(this.context);
+  CommandPaletteAction(this.context, this.container);
 
   final BuildContext context;
+  final ProviderContainer container;
   static bool _commandPaletteShowing = false;
 
   @override
@@ -220,6 +227,10 @@ class CommandPalettePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
+    final selfUserId = ref.read(accountServerProvider).requireValue.userId;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final scrollController = useScrollController();
     final textEditingController = useTextEditingController();
     final stream = useValueNotifierConvertSteam(textEditingController);
@@ -233,15 +244,17 @@ class CommandPalettePage extends HookConsumerWidget {
         '';
 
     final searchState = _useSearchState(
-      context: context,
       ref: ref,
       keyword: keyword,
+      database: database,
+      selfUserId: selfUserId,
     );
 
     final navigationState = _useNavigationState(
       scrollController: scrollController,
       items: searchState.items,
       context: context,
+      container: ref.container,
     );
 
     return FocusableActionDetector(
@@ -314,14 +327,16 @@ class CommandPalettePage extends HookConsumerWidget {
                           height: 80,
                           width: 80,
                           colorFilter: ColorFilter.mode(
-                            context.theme.secondaryText,
+                            theme.secondaryText,
                             BlendMode.srcIn,
                           ),
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          context.l10n.noResults,
-                          style: TextStyle(color: context.theme.secondaryText),
+                          l10n.noResults,
+                          style: TextStyle(
+                            color: theme.secondaryText,
+                          ),
                         ),
                       ],
                     ),

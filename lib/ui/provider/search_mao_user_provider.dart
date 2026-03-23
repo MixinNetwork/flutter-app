@@ -18,7 +18,7 @@ class MaoUser with EquatableMixin {
 
 final searchMaoUserProvider = FutureProvider.autoDispose
     .family<MaoUser?, String>((ref, keyword) async {
-      final client = ref.read(accountServerProvider).valueOrNull?.client;
+      final client = ref.read(accountServerProvider).value?.client;
       if (client == null) {
         return null;
       }
@@ -27,7 +27,7 @@ final searchMaoUserProvider = FutureProvider.autoDispose
       }
       try {
         final user = (await client.userApi.search(keyword)).data.asDbUser;
-        await ref.read(accountServerProvider).valueOrNull?.upsertDbUser(user);
+        await ref.read(accountServerProvider).value?.upsertDbUser(user);
         return MaoUser(user: user, mao: keyword.completeMao());
       } catch (error, stackTrace) {
         e('searchMaoUserProvider error: $error, $stackTrace');

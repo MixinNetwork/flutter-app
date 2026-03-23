@@ -3,13 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import '../../../constants/icon_fonts.dart';
-import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/blink_cubit.dart';
-
-import '../bloc/message_bloc.dart';
+import '../../provider/ui_context_providers.dart';
+import '../providers/home_scope_providers.dart';
 import 'share_media/file_page.dart';
 import 'share_media/media_page.dart';
 import 'share_media/post_page.dart';
@@ -22,11 +20,13 @@ class SharedMediaPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final conversationId = conversationState.conversationId;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
 
     final selectedIndex = useState(0);
     return Scaffold(
-      backgroundColor: context.theme.primary,
-      appBar: MixinAppBar(title: Text(context.l10n.sharedMedia)),
+      backgroundColor: theme.primary,
+      appBar: MixinAppBar(title: Text(l10n.sharedMedia)),
       body: Column(
         children: [
           Expanded(
@@ -51,31 +51,36 @@ class SharedMediaPage extends HookConsumerWidget {
             ),
           ),
           Row(
-            children: [context.l10n.media, context.l10n.post, context.l10n.file]
-                .asMap()
-                .entries
-                .map(
-                  (e) => Expanded(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => selectedIndex.value = e.key,
-                      child: Container(
-                        height: 56,
-                        alignment: Alignment.center,
-                        child: Text(
-                          e.value,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: e.key == selectedIndex.value
-                                ? context.theme.accent
-                                : context.theme.secondaryText,
+            children:
+                [
+                      l10n.media,
+                      l10n.post,
+                      l10n.file,
+                    ]
+                    .asMap()
+                    .entries
+                    .map(
+                      (e) => Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => selectedIndex.value = e.key,
+                          child: Container(
+                            height: 56,
+                            alignment: Alignment.center,
+                            child: Text(
+                              e.value,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: e.key == selectedIndex.value
+                                    ? theme.accent
+                                    : theme.secondaryText,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                )
-                .toList(),
+                    )
+                    .toList(),
           ),
         ],
       ),
@@ -83,7 +88,7 @@ class SharedMediaPage extends HookConsumerWidget {
   }
 }
 
-class ShareMediaItemMenuWrapper extends StatelessWidget {
+class ShareMediaItemMenuWrapper extends ConsumerWidget {
   const ShareMediaItemMenuWrapper({
     required this.child,
     required this.messageId,
@@ -94,20 +99,25 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
   final String messageId;
 
   @override
-  Widget build(BuildContext context) => CustomContextMenuWidget(
-    desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-    menuProvider: (request) => Menu(
-      children: [
-        MenuAction(
-          image: MenuImage.icon(IconFonts.positionToChat),
-          title: context.l10n.locateToChat,
-          callback: () {
-            context.read<BlinkCubit>().blinkByMessageId(messageId);
-            context.read<MessageBloc>().scrollTo(messageId);
-          },
-        ),
-      ],
-    ),
-    child: child,
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    return CustomContextMenuWidget(
+      desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+      menuProvider: (request) => Menu(
+        children: [
+          MenuAction(
+            image: MenuImage.icon(IconFonts.positionToChat),
+            title: l10n.locateToChat,
+            callback: () {
+              ref
+                  .read(blinkControllerProvider.notifier)
+                  .blinkByMessageId(messageId);
+              ref.read(messageControllerProvider.notifier).scrollTo(messageId);
+            },
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
 }

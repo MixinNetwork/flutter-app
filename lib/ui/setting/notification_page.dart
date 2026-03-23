@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../utils/app_lifecycle.dart';
-import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/local_notification_center.dart';
 import '../../utils/uri_utils.dart';
@@ -14,12 +13,15 @@ import '../../widgets/animated_visibility.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../provider/setting_provider.dart';
+import '../provider/ui_context_providers.dart';
 
 class NotificationPage extends HookConsumerWidget {
   const NotificationPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final currentMessagePreview = ref.watch(
       settingProvider.select((value) => value.messagePreview),
     );
@@ -32,8 +34,8 @@ class NotificationPage extends HookConsumerWidget {
     ).data;
 
     return Scaffold(
-      backgroundColor: context.theme.background,
-      appBar: MixinAppBar(title: Text(context.l10n.notifications)),
+      backgroundColor: theme.background,
+      appBar: MixinAppBar(title: Text(l10n.notifications)),
       body: Container(
         alignment: Alignment.topCenter,
         padding: const EdgeInsets.only(top: 40),
@@ -42,16 +44,17 @@ class NotificationPage extends HookConsumerWidget {
           children: [
             CellGroup(
               padding: const EdgeInsets.only(right: 10, left: 10),
-              cellBackgroundColor: context.theme.settingCellBackgroundColor,
+              cellBackgroundColor: theme.settingCellBackgroundColor,
               child: CellItem(
-                title: Text(context.l10n.messagePreview),
+                title: Text(l10n.messagePreview),
                 trailing: Transform.scale(
                   scale: 0.7,
                   child: CupertinoSwitch(
-                    activeTrackColor: context.theme.accent,
+                    activeTrackColor: theme.accent,
                     value: currentMessagePreview,
                     onChanged: (value) =>
-                        context.settingChangeNotifier.messagePreview = value,
+                        ref.read(settingProvider.notifier).messagePreview =
+                            value,
                   ),
                 ),
               ),
@@ -59,9 +62,9 @@ class NotificationPage extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
               child: Text(
-                context.l10n.messagePreviewDescription,
+                l10n.messagePreviewDescription,
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: 14,
                 ),
               ),
@@ -75,13 +78,13 @@ class NotificationPage extends HookConsumerWidget {
                   children: [
                     CellGroup(
                       padding: const EdgeInsets.only(right: 10, left: 10),
-                      cellBackgroundColor:
-                          context.theme.settingCellBackgroundColor,
+                      cellBackgroundColor: theme.settingCellBackgroundColor,
                       child: CellItem(
-                        title: Text(context.l10n.enablePushNotification),
+                        title: Text(l10n.enablePushNotification),
                         onTap: () => openUri(
                           context,
                           'x-apple.systempreferences:com.apple.preference.notifications',
+                          container: ref.container,
                         ),
                       ),
                     ),
@@ -92,9 +95,9 @@ class NotificationPage extends HookConsumerWidget {
                         top: 10,
                       ),
                       child: Text(
-                        context.l10n.notificationContent,
+                        l10n.notificationContent,
                         style: TextStyle(
-                          color: context.theme.secondaryText,
+                          color: theme.secondaryText,
                           fontSize: 14,
                         ),
                       ),
@@ -108,9 +111,9 @@ class NotificationPage extends HookConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 20, bottom: 14),
                   child: Text(
-                    '${context.l10n.notificationPermissionManually}${context.l10n.notificationContent}',
+                    '${l10n.notificationPermissionManually}${l10n.notificationContent}',
                     style: TextStyle(
-                      color: context.theme.secondaryText,
+                      color: theme.secondaryText,
                       fontSize: 14,
                     ),
                   ),

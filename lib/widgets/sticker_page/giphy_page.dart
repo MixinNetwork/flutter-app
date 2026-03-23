@@ -7,8 +7,9 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../api/giphy_api.dart';
 import '../../api/giphy_vo/giphy_gif.dart';
+import '../../ui/provider/account_server_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
-import '../../utils/extension/extension.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import '../interactive_decorated_box.dart';
@@ -20,6 +21,7 @@ class GiphyPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final textEditingController = useTextEditingController();
 
     final searchKeywordController = useStreamController<String>();
@@ -44,7 +46,7 @@ class GiphyPage extends HookConsumerWidget {
     return Column(
       children: [
         _SearchBar(controller: textEditingController),
-        Divider(color: context.theme.divider, height: 1),
+        Divider(color: brightnessTheme.divider, height: 1),
         const SizedBox(height: 12),
         Expanded(child: _GiphyGifsLoader(query: keyword ?? '')),
       ],
@@ -52,22 +54,22 @@ class GiphyPage extends HookConsumerWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends ConsumerWidget {
   const _SearchBar({required this.controller});
 
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 48,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: SearchTextField(
-        controller: controller,
-        hintText: context.l10n.search,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    return SizedBox(
+      height: 48,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: SearchTextField(controller: controller, hintText: l10n.search),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _GiphyGifsLoader extends HookConsumerWidget {
@@ -164,12 +166,13 @@ class _GifItem extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final previewImage = gif.images.fixedWidthDownsampled;
     final sendImage = gif.images.fixedWidth;
 
     return InteractiveDecoratedBox(
       onTap: () async {
-        final accountServer = context.accountServer;
+        final accountServer = ref.read(accountServerProvider).requireValue;
         final conversationItem = ref.read(conversationProvider);
         if (conversationItem == null) return;
 
@@ -185,7 +188,7 @@ class _GifItem extends HookConsumerWidget {
       },
       child: MixinImage.network(
         previewImage.url,
-        placeholder: () => ColoredBox(color: context.theme.secondaryText),
+        placeholder: () => ColoredBox(color: brightnessTheme.secondaryText),
       ),
     );
   }

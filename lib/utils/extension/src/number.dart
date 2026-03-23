@@ -1,18 +1,22 @@
 part of '../extension.dart';
 
-extension CurrencyExtension on BuildContext {
-  String currencyFormat(dynamic value) =>
-      currentCurrencyNumberFormat.format(num.tryParse('$value'));
+NumberFormat currentCurrencyNumberFormat([String? fiatCurrency]) =>
+    NumberFormat.simpleCurrency(name: fiatCurrency);
 
-  String currencyFormatWithoutSymbol(dynamic value) => currencyFormat(
-    value,
-  ).replaceAll(currentCurrencyNumberFormat.currencySymbol, '');
+String currencyFormat(
+  dynamic value, {
+  String? fiatCurrency,
+}) => currentCurrencyNumberFormat(
+  fiatCurrency,
+).format(num.tryParse('$value'));
 
-  String get currencyFormatCoin => NumberFormat().format(num.tryParse('$this'));
-
-  NumberFormat get currentCurrencyNumberFormat =>
-      NumberFormat.simpleCurrency(name: account?.fiatCurrency);
-}
+String currencyFormatWithoutSymbol(
+  dynamic value, {
+  String? fiatCurrency,
+}) => currencyFormat(
+  value,
+  fiatCurrency: fiatCurrency,
+).replaceAll(currentCurrencyNumberFormat(fiatCurrency).currencySymbol, '');
 
 extension StringCurrencyExtension on String {
   bool get isZero => (double.tryParse(this) ?? 0.0) == 0;
@@ -20,6 +24,8 @@ extension StringCurrencyExtension on String {
   Decimal get asDecimal => Decimal.parse(this);
 
   Decimal get asDecimalOrZero => Decimal.tryParse(this) ?? Decimal.zero;
+
+  String get currencyFormatCoin => NumberFormat().format(num.tryParse(this));
 
   String numberFormat() {
     if (isEmpty) return this;
@@ -64,50 +70,9 @@ extension DoubleCurrencyExtension on num {
   Decimal get asDecimal => Decimal.parse('$this');
 }
 
-// extension AssetResultExtension on AssetResult {
-//   Decimal get amountOfUsd => balance.asDecimal * priceUsd.asDecimal;
-//
-//   Decimal get amountOfBtc => balance.asDecimal * priceBtc.asDecimal;
-//
-//   Decimal get amountOfCurrentCurrency =>
-//       balance.asDecimal * priceUsd.asDecimal * fiatRate.asDecimal;
-//
-//   Decimal get usdUnitPrice => priceUsd.asDecimal * fiatRate.asDecimal;
-//
-//   bool get needShowMemo => tag?.isNotEmpty == true;
-//
-//   bool get needShowReserve => (int.tryParse(reserve ?? '0') ?? 0) > 0;
-//
-//   String getTip(BuildContext context) {
-//     switch (chainId) {
-//       case bitcoin:
-//         return context.l10n.depositTipBtc;
-//       case ethereum:
-//         return context.l10n.depositTipEth;
-//       case eos:
-//         return context.l10n.depositTipEos;
-//       case tron:
-//         return context.l10n.depositTipTron;
-//       default:
-//         return context.l10n.depositTip(symbol);
-//     }
-//   }
-// }
-//
 extension SnapshotItemExtension on SnapshotItem {
   Decimal amountOfCurrentCurrency() =>
       amount.asDecimal * priceUsd!.asDecimal * fiatRate!.asDecimal;
 
   bool get isPositive => (double.tryParse(amount) ?? 0) > 0;
 }
-
-//
-// extension AddressExtension on Addresse {
-//   String displayAddress() {
-//     if (tag == null || tag?.isEmpty == true) {
-//       return '$destination$tag';
-//     } else {
-//       return destination;
-//     }
-//   }
-// }

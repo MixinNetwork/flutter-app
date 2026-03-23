@@ -11,6 +11,7 @@ import '../db/mixin_database.dart' hide Offset;
 import '../ui/home/intent.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_provider.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/extension/extension.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
@@ -32,7 +33,7 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
   final BoxConstraints constraints;
   final TextEditingController textEditingController;
   final Widget child;
-  final AutoDisposeStateNotifierProvider<MentionStateNotifier, MentionState>
+  final NotifierProvider<MentionStateNotifier, MentionState>
   mentionProviderInstance;
 
   @override
@@ -142,7 +143,7 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
   }
 }
 
-class _MentionPanel extends StatelessWidget {
+class _MentionPanel extends ConsumerWidget {
   const _MentionPanel({
     required this.mentionState,
     required this.onSelect,
@@ -154,23 +155,26 @@ class _MentionPanel extends StatelessWidget {
   final ScrollController scrollController;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(color: context.theme.popUp),
-    child: ListView.builder(
-      controller: scrollController,
-      itemCount: mentionState.users.length,
-      shrinkWrap: true,
-      itemBuilder: (context, index) => _MentionItem(
-        user: mentionState.users[index],
-        keyword: mentionState.text,
-        selected: mentionState.index == index,
-        onSelect: onSelect,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: theme.popUp),
+      child: ListView.builder(
+        controller: scrollController,
+        itemCount: mentionState.users.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) => _MentionItem(
+          user: mentionState.users[index],
+          keyword: mentionState.text,
+          selected: mentionState.index == index,
+          onSelect: onSelect,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class _MentionItem extends StatelessWidget {
+class _MentionItem extends ConsumerWidget {
   const _MentionItem({
     required this.user,
     this.keyword,
@@ -184,67 +188,72 @@ class _MentionItem extends StatelessWidget {
   final Function(User user)? onSelect;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox.color(
-    decoration: selected
-        ? BoxDecoration(color: context.theme.listSelected)
-        : null,
-    onTap: () => onSelect?.call(user),
-    child: Container(
-      height: kMentionItemHeight,
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        children: [
-          AvatarWidget(
-            userId: user.userId,
-            name: user.fullName,
-            avatarUrl: user.avatarUrl,
-            size: 32,
-          ),
-          const SizedBox(width: 6),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                user.fullName ?? '',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.theme.text,
-                  height: 1,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return InteractiveDecoratedBox.color(
+      decoration: selected ? BoxDecoration(color: theme.listSelected) : null,
+      onTap: () => onSelect?.call(user),
+      child: Container(
+        height: kMentionItemHeight,
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            AvatarWidget(
+              userId: user.userId,
+              name: user.fullName,
+              avatarUrl: user.avatarUrl,
+              size: 32,
+            ),
+            const SizedBox(width: 6),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  user.fullName ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.text,
+                    height: 1,
+                  ),
+                  textMatchers: [
+                    EmojiTextMatcher(),
+                    if (keyword != null && keyword!.trim().isNotEmpty)
+                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                        keyword: keyword!,
+                        style: TextStyle(
+                          color: theme.accent,
+                        ),
+                        caseSensitive: false,
+                      ),
+                  ],
+                  maxLines: 1,
                 ),
-                textMatchers: [
-                  EmojiTextMatcher(),
-                  if (keyword != null && keyword!.trim().isNotEmpty)
-                    MultiKeyWordTextMatcher.createKeywordMatcher(
-                      keyword: keyword!,
-                      style: TextStyle(color: context.theme.accent),
-                      caseSensitive: false,
-                    ),
-                ],
-                maxLines: 1,
-              ),
-              const SizedBox(height: 2),
-              CustomText(
-                user.identityNumber,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.theme.secondaryText,
+                const SizedBox(height: 2),
+                CustomText(
+                  user.identityNumber,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.secondaryText,
+                  ),
+                  textMatchers: [
+                    EmojiTextMatcher(),
+                    if (keyword != null && keyword!.trim().isNotEmpty)
+                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                        keyword: keyword!,
+                        style: TextStyle(
+                          color: theme.accent,
+                        ),
+                        caseSensitive: false,
+                      ),
+                  ],
+                  maxLines: 1,
                 ),
-                textMatchers: [
-                  EmojiTextMatcher(),
-                  if (keyword != null && keyword!.trim().isNotEmpty)
-                    MultiKeyWordTextMatcher.createKeywordMatcher(
-                      keyword: keyword!,
-                      style: TextStyle(color: context.theme.accent),
-                      caseSensitive: false,
-                    ),
-                ],
-                maxLines: 1,
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

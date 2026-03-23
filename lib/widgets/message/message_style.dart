@@ -1,10 +1,48 @@
 import 'package:flutter/cupertino.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../utils/extension/extension.dart';
+import '../../ui/provider/setting_provider.dart';
+
+final messageStyleProvider = Provider<MessageStyle>(
+  (ref) =>
+      MessageStyle.defaultStyle +
+      ref.watch(settingProvider.notifier).chatFontSizeDelta,
+);
+
+class MessageStyleScope extends ConsumerWidget {
+  const MessageStyleScope({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final style = ref.watch(messageStyleProvider);
+    return _MessageStyleInherited(style: style, child: child);
+  }
+}
+
+class _MessageStyleInherited extends InheritedWidget {
+  const _MessageStyleInherited({
+    required this.style,
+    required super.child,
+  });
+
+  final MessageStyle style;
+
+  static MessageStyle of(BuildContext context) {
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<_MessageStyleInherited>();
+    assert(inherited != null, 'MessageStyleScope is missing');
+    return inherited!.style;
+  }
+
+  @override
+  bool updateShouldNotify(_MessageStyleInherited oldWidget) =>
+      style != oldWidget.style;
+}
 
 extension MessageStyleExt on BuildContext {
-  MessageStyle get messageStyle =>
-      MessageStyle.defaultStyle + settingChangeNotifier.chatFontSizeDelta;
+  MessageStyle get messageStyle => _MessageStyleInherited.of(this);
 }
 
 class MessageStyle {

@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_catching_errors
 
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'hydration_storage.dart';
 
 T? fromHydratedJson<T>(
   dynamic json,

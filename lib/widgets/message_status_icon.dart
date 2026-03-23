@@ -9,10 +9,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../constants/resources.dart';
-import '../utils/extension/extension.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/hook.dart';
 
-class MessageStatusIcon extends StatelessWidget {
+class MessageStatusIcon extends ConsumerWidget {
   const MessageStatusIcon({required this.status, super.key, this.color});
 
   final MessageStatus? status;
@@ -20,8 +20,9 @@ class MessageStatusIcon extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) {
-    var color = this.color ?? context.theme.secondaryText;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    var color = this.color ?? theme.secondaryText;
     String icon;
     switch (status) {
       case MessageStatus.sent:
@@ -30,7 +31,7 @@ class MessageStatusIcon extends StatelessWidget {
         icon = Resources.assetsImagesDeliveredSvg;
       case MessageStatus.read:
         icon = Resources.assetsImagesReadSvg;
-        color = context.theme.accent;
+        color = theme.accent;
       case MessageStatus.sending:
       case MessageStatus.failed:
       case MessageStatus.unknown:

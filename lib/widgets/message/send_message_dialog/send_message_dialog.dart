@@ -9,7 +9,10 @@ import '../../../crypto/uuid/uuid.dart';
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
+import '../../../ui/provider/account_server_provider.dart';
 import '../../../ui/provider/conversation_provider.dart';
+import '../../../ui/provider/database_provider.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
@@ -52,6 +55,7 @@ Future<bool> showSendDialog(
   String? data,
   App? app,
   String? user,
+  ProviderContainer container,
 ) async {
   final _category = category?.category;
   if (_category == null || data == null || data.isEmpty) return false;
@@ -100,15 +104,13 @@ Future<bool> showSendDialog(
   }
 
   if (user != null) {
-    return _sendMessageToUserId(context, user, _category, result);
+    return _sendMessageToUserId(context, user, _category, result, container);
   }
   if (conversationId == null) {
-    final currentConversation = context.providerContainer.read(
-      conversationProvider,
-    );
+    final currentConversation = container.read(conversationProvider);
     if (currentConversation != null) {
       await _sendMessage(
-        context,
+        container,
         currentConversation.conversationId,
         currentConversation.encryptCategory,
         _category,
@@ -131,14 +133,16 @@ Future<bool> _sendMessageToUserId(
   String userId,
   _Category category,
   dynamic data,
+  ProviderContainer container,
 ) async {
+  final accountServer = container.read(accountServerProvider).requireValue;
   if (!Uuid.isValidUUID(fromString: userId)) {
     return false;
   }
 
   showToastLoading();
   try {
-    final users = await context.accountServer.refreshUsers([userId]);
+    final users = await accountServer.refreshUsers([userId]);
     if (users == null || users.isEmpty) {
       return false;
     }
@@ -147,16 +151,16 @@ Future<bool> _sendMessageToUserId(
   }
 
   final conversationId = generateConversationId(
-    context.accountServer.userId,
+    accountServer.userId,
     userId,
   );
-  await ConversationStateNotifier.selectUser(context, userId);
-  final conversation = context.providerContainer.read(conversationProvider);
+  await ConversationStateNotifier.selectUser(container, context, userId);
+  final conversation = container.read(conversationProvider);
   if (conversation == null) {
     return false;
   }
   await _sendMessage(
-    context,
+    container,
     conversationId,
     conversation.encryptCategory,
     category,
@@ -176,30 +180,41 @@ class _SendPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    final dynamicSurface = ref.watch(
+      dynamicColorProvider(
+        const (
+          color: Color.fromRGBO(245, 247, 250, 1),
+          darkColor: Color.fromRGBO(255, 255, 255, 0.08),
+        ),
+      ),
+    );
     final title = useMemoized(() {
       String _category;
       switch (category) {
         case _Category.text:
-          _category = context.l10n.text;
+          _category = l10n.text;
         case _Category.image:
-          _category = context.l10n.image;
+          _category = l10n.image;
         case _Category.sticker:
-          _category = context.l10n.sticker;
+          _category = l10n.sticker;
         case _Category.contact:
-          _category = context.l10n.contact;
+          _category = l10n.contact;
         case _Category.post:
-          _category = context.l10n.post;
+          _category = l10n.post;
         case _Category.app_card:
-          _category = context.l10n.card;
+          _category = l10n.card;
       }
       if (app != null) {
-        return context.l10n.shareMessageDescription(
+        return l10n.shareMessageDescription(
           '${app?.name}(${app?.appNumber})',
           _category,
         );
       }
-      return context.l10n.shareMessageDescriptionEmpty(_category);
-    }, [category, app]);
+      return l10n.shareMessageDescriptionEmpty(_category);
+    }, [category, app, l10n]);
 
     final child = useMemoized(() {
       if (category == _Category.text) return _Text(data as String);
@@ -219,27 +234,29 @@ class _SendPage extends HookConsumerWidget {
         final result = await showConversationSelector(
           context: context,
           singleSelect: true,
-          title: context.l10n.forward,
+          title: l10n.forward,
           onlyContact: false,
         );
         _conversationId = result?.firstOrNull?.conversationId;
         encryptCategory = result?.firstOrNull?.encryptCategory;
       }
       if (encryptCategory == null && _conversationId != null) {
-        final conversation = await context.database.conversationDao
+        final conversation = await database.conversationDao
             .conversationItem(_conversationId)
             .getSingleOrNull();
         final ownerId = conversation?.ownerId;
         final isBotConversation = conversation?.isBotConversation;
         if (ownerId == null || isBotConversation == null) return;
-        encryptCategory = await context.database.conversationDao
-            .getEncryptCategory(ownerId, isBotConversation);
+        encryptCategory = await database.conversationDao.getEncryptCategory(
+          ownerId,
+          isBotConversation,
+        );
       }
 
       if (_conversationId == null || encryptCategory == null) return;
 
       await _sendMessage(
-        context,
+        ref.container,
         _conversationId,
         encryptCategory,
         category,
@@ -248,60 +265,58 @@ class _SendPage extends HookConsumerWidget {
       Navigator.pop(context);
     }
 
-    return SizedBox(
-      width: 480,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MixinAppBar(
-            title: Text(title),
-            actions: const [MixinCloseButton()],
-            leading: const SizedBox(),
-            backgroundColor: context.theme.popUp,
-          ),
-          const SizedBox(height: 12),
-          Container(
-            width: 340,
-            height: 340,
-            decoration: BoxDecoration(
-              color: context.dynamicColor(
-                const Color.fromRGBO(245, 247, 250, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+    return MessageStyleScope(
+      child: SizedBox(
+        width: 480,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            MixinAppBar(
+              title: Text(title),
+              actions: const [MixinCloseButton()],
+              leading: const SizedBox(),
+              backgroundColor: theme.popUp,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: 340,
+              height: 340,
+              decoration: BoxDecoration(
+                color: dynamicSurface,
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              alignment: Alignment.center,
+              padding: category == _Category.app_card
+                  ? null
+                  : const EdgeInsets.all(34),
+              child: child,
             ),
-            alignment: Alignment.center,
-            padding: category == _Category.app_card
-                ? null
-                : const EdgeInsets.all(34),
-            child: child,
-          ),
-          const SizedBox(height: 54),
-          MixinButton(
-            onTap: sendMessage,
-            child: Text(
-              (conversationId != null)
-                  ? context.l10n.send
-                  : context.l10n.forward,
+            const SizedBox(height: 54),
+            MixinButton(
+              onTap: sendMessage,
+              child: Text(
+                (conversationId != null) ? l10n.send : l10n.forward,
+              ),
             ),
-          ),
-          const SizedBox(height: 56),
-        ],
+            const SizedBox(height: 56),
+          ],
+        ),
       ),
     );
   }
 }
 
 Future<void> _sendMessage(
-  BuildContext context,
+  ProviderContainer container,
   String conversationId,
   EncryptCategory encryptCategory,
   _Category category,
   dynamic data, {
   String? recipientId,
 }) async {
+  final accountServer = container.read(accountServerProvider).requireValue;
   if (category == _Category.text) {
-    return context.accountServer.sendTextMessage(
+    return accountServer.sendTextMessage(
       data as String,
       encryptCategory,
       conversationId: conversationId,
@@ -309,7 +324,7 @@ Future<void> _sendMessage(
     );
   }
   if (category == _Category.post) {
-    return context.accountServer.sendPostMessage(
+    return accountServer.sendPostMessage(
       data as String,
       encryptCategory,
       conversationId: conversationId,
@@ -317,7 +332,7 @@ Future<void> _sendMessage(
     );
   }
   if (category == _Category.sticker) {
-    return context.accountServer.sendStickerMessage(
+    return accountServer.sendStickerMessage(
       data as String,
       null,
       encryptCategory,
@@ -326,7 +341,7 @@ Future<void> _sendMessage(
     );
   }
   if (category == _Category.contact) {
-    return context.accountServer.sendContactMessage(
+    return accountServer.sendContactMessage(
       data as String,
       null,
       encryptCategory,
@@ -335,7 +350,7 @@ Future<void> _sendMessage(
     );
   }
   if (category == _Category.app_card) {
-    return context.accountServer.sendAppCardMessage(
+    return accountServer.sendAppCardMessage(
       data: data as AppCardData,
       conversationId: conversationId,
       recipientId: recipientId,
@@ -344,7 +359,7 @@ Future<void> _sendMessage(
   if (category == _Category.image) {
     final sendImageData = data as SendImageData;
     await runWithLoading(
-      () => context.accountServer.sendImageMessageByUrl(
+      () => accountServer.sendImageMessageByUrl(
         encryptCategory,
         sendImageData.url,
         sendImageData.url,
@@ -362,7 +377,7 @@ final _bubbleClipper = BubbleClipper(
   nipPadding: false,
 );
 
-class _MessageBubble extends StatelessWidget {
+class _MessageBubble extends ConsumerWidget {
   const _MessageBubble({
     required this.child,
     this.padding = const EdgeInsets.all(8),
@@ -374,7 +389,7 @@ class _MessageBubble extends StatelessWidget {
   final bool clip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     Widget child = Padding(padding: padding, child: this.child);
     if (clip) {
       child = ClipPath(
@@ -384,9 +399,11 @@ class _MessageBubble extends StatelessWidget {
     }
     return CustomPaint(
       painter: BubblePainter(
-        color: context.dynamicColor(
-          lightOtherBubble,
-          darkColor: darkOtherBubble,
+        color: ref.watch(
+          dynamicColorProvider((
+            color: lightOtherBubble,
+            darkColor: darkOtherBubble,
+          )),
         ),
         clipper: _bubbleClipper,
       ),
@@ -395,18 +412,18 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
-class _Text extends StatelessWidget {
+class _Text extends ConsumerWidget {
   const _Text(this.text);
 
   final String text;
 
   @override
-  Widget build(BuildContext context) => _MessageBubble(
+  Widget build(BuildContext context, WidgetRef ref) => _MessageBubble(
     child: Text(
       text,
       style: TextStyle(
         fontSize: MessageItemWidget.primaryFontSize,
-        color: context.theme.text,
+        color: ref.watch(brightnessThemeDataProvider).text,
       ),
     ),
   );
@@ -418,10 +435,13 @@ class _Image extends HookConsumerWidget {
   final SendImageData image;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => MixinImage.network(
-    image.url,
-    placeholder: () => ColoredBox(color: context.theme.secondaryText),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return MixinImage.network(
+      image.url,
+      placeholder: () => ColoredBox(color: theme.secondaryText),
+    );
+  }
 }
 
 class _Sticker extends HookConsumerWidget {
@@ -431,20 +451,22 @@ class _Sticker extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
     final sticker = useMemoizedFuture(
       () async {
-        final sticker = await context.database.stickerDao
+        final sticker = await database.stickerDao
             .sticker(stickerId)
             .getSingleOrNull();
 
         if (sticker != null) return sticker;
 
-        final s = await context.accountServer.client.accountApi.getStickerById(
+        final s = await accountServer.client.accountApi.getStickerById(
           stickerId,
         );
-        await context.accountServer.upsertSticker(s.data.asStickersCompanion);
+        await accountServer.upsertSticker(s.data.asStickersCompanion);
 
-        return context.database.stickerDao.sticker(stickerId).getSingle();
+        return database.stickerDao.sticker(stickerId).getSingle();
       },
       null,
       keys: [stickerId],
@@ -470,9 +492,10 @@ class _Contact extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
     final user = useMemoizedFuture(
       () async {
-        final list = await context.accountServer.refreshUsers([userId]);
+        final list = await accountServer.refreshUsers([userId]);
         return (list != null && list.isNotEmpty) ? list.first : null;
       },
       null,
@@ -511,13 +534,13 @@ class _Post extends StatelessWidget {
   );
 }
 
-class _AppCard extends StatelessWidget {
+class _AppCard extends ConsumerWidget {
   const _AppCard(this.data);
 
   final AppCardData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (!data.isActionsCard) {
       return _MessageBubble(
         child: Padding(
@@ -536,7 +559,7 @@ class _AppCard extends StatelessWidget {
             description: Text(
               data.description,
               style: TextStyle(
-                color: context.theme.text,
+                color: ref.watch(brightnessThemeDataProvider).text,
                 fontSize: context.messageStyle.primaryFontSize,
               ),
             ),

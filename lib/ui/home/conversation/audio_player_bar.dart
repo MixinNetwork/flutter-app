@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -7,40 +6,53 @@ import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/database_provider.dart';
+import '../providers/home_scope_providers.dart';
 
-class AudioPlayerBar extends HookConsumerWidget {
-  const AudioPlayerBar({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final message = useCurrentPlayingMessage();
-
-    final state = useAudioMessagePlayerState();
-
-    final conversationItem = useMemoizedStream(() {
-      if (message == null) {
+final _audioPlayerConversationProvider = StreamProvider.autoDispose
+    .family<ConversationItem?, String>((ref, conversationId) {
+      final database = ref.watch(databaseProvider).value;
+      if (database == null) {
         return Stream.value(null);
       }
-      return context.database.conversationDao
-          .conversationItem(message.conversationId)
+      return database.conversationDao
+          .conversationItem(conversationId)
           .watchSingleOrNullWithStream(
             eventStreams: [
               DataBaseEventBus.instance.watchUpdateConversationStream([
-                message.conversationId,
+                conversationId,
               ]),
             ],
             duration: kSlowThrottleDuration,
           );
-    }, keys: [message?.conversationId]).data;
+    });
+
+class AudioPlayerBar extends ConsumerWidget {
+  const AudioPlayerBar({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final message = ref.watch(currentPlayingAudioMessageProvider).value;
+    final state =
+        ref.watch(audioPlayerPlaybackStateProvider).value ?? PlaybackState.idle;
+    final conversationItem = message == null
+        ? null
+        : ref
+              .watch(
+                _audioPlayerConversationProvider(message.conversationId),
+              )
+              .value;
 
     final selectedConversationId = ref.watch(currentConversationIdProvider);
+    final audioService = ref.read(audioMessagePlayServiceProvider);
 
     if (state == PlaybackState.idle ||
         state == PlaybackState.completed ||
@@ -54,6 +66,7 @@ class AudioPlayerBar extends HookConsumerWidget {
           return;
         }
         ConversationStateNotifier.selectConversation(
+          ref.container,
           context,
           conversationItem.conversationId,
           conversation: conversationItem,
@@ -71,12 +84,12 @@ class AudioPlayerBar extends HookConsumerWidget {
                   name: state.isPlaying
                       ? Resources.assetsImagesPlayerPauseSvg
                       : Resources.assetsImagesPlayerPlaySvg,
-                  color: context.theme.icon,
+                  color: theme.icon,
                   onTap: () {
                     if (state.isPlaying) {
-                      context.audioMessageService.pause();
+                      audioService.pause();
                     } else {
-                      context.audioMessageService.resume();
+                      audioService.resume();
                     }
                   },
                 ),
@@ -93,7 +106,7 @@ class AudioPlayerBar extends HookConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: context.theme.text,
+                            color: theme.text,
                             fontSize: 14,
                           ),
                         ),
@@ -104,10 +117,8 @@ class AudioPlayerBar extends HookConsumerWidget {
                 const SizedBox(width: 8),
                 ActionButton(
                   name: Resources.assetsImagesIcCloseSvg,
-                  color: context.theme.icon,
-                  onTap: () {
-                    context.audioMessageService.stop();
-                  },
+                  color: theme.icon,
+                  onTap: audioService.stop,
                 ),
               ],
             ),
@@ -119,20 +130,20 @@ class AudioPlayerBar extends HookConsumerWidget {
   }
 }
 
-class _PlaybackSpeedButton extends HookConsumerWidget {
+class _PlaybackSpeedButton extends ConsumerWidget {
   const _PlaybackSpeedButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final speed = useAudioPlayerSpeed();
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final speed = ref.watch(audioPlayerSpeedProvider).value ?? 1;
+    final audioService = ref.read(audioMessagePlayServiceProvider);
     return ActionButton(
       child: Center(
         child: Text(
           '2X',
           style: TextStyle(
-            color: speed == 2
-                ? context.theme.accent
-                : context.theme.secondaryText,
+            color: speed == 2 ? theme.accent : theme.secondaryText,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -140,65 +151,68 @@ class _PlaybackSpeedButton extends HookConsumerWidget {
       ),
       onTap: () {
         if (speed == 1) {
-          context.audioMessageService.setPlaySpeed(2);
+          audioService.setPlaySpeed(2);
         } else {
-          context.audioMessageService.setPlaySpeed(1);
+          audioService.setPlaySpeed(1);
         }
       },
     );
   }
 }
 
-class _Icon extends StatelessWidget {
+class _Icon extends ConsumerWidget {
   const _Icon({required this.conversation});
 
   final ConversationItem? conversation;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 32,
-    width: 40,
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: conversation == null
-              ? const SizedBox.square(dimension: 32)
-              : ConversationAvatarWidget(
-                  conversation: conversation,
-                  size: 32,
-                ),
-        ),
-        Align(
-          alignment: Alignment.bottomRight,
-          child: SvgPicture.asset(
-            Resources.assetsImagesAudioSvg,
-            colorFilter: ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
-            width: 16,
-            height: 16,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return SizedBox(
+      height: 32,
+      width: 40,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: conversation == null
+                ? const SizedBox.square(dimension: 32)
+                : ConversationAvatarWidget(
+                    conversation: conversation,
+                    size: 32,
+                  ),
           ),
-        ),
-      ],
-    ),
-  );
+          Align(
+            alignment: Alignment.bottomRight,
+            child: SvgPicture.asset(
+              Resources.assetsImagesAudioSvg,
+              colorFilter: ColorFilter.mode(
+                theme.icon,
+                BlendMode.srcIn,
+              ),
+              width: 16,
+              height: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _ProgressBar extends HookConsumerWidget {
+class _ProgressBar extends ConsumerWidget {
   const _ProgressBar({required this.message});
 
   final MessageItem? message;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final position = useAudioPlayerPosition();
-
-    final duration = useMemoized<int>(() {
-      if (message == null) {
-        return 0;
-      }
-      return int.tryParse(message!.mediaDuration ?? '') ?? 0;
-    }, [message]);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final position = ref.watch(audioPlayerPositionProvider).value ?? 0;
+    final duration = message == null
+        ? 0
+        : int.tryParse(message!.mediaDuration ?? '') ?? 0;
 
     final progress = (position / duration).clamp(0.0, 1.0);
     return SizedBox(
@@ -206,7 +220,9 @@ class _ProgressBar extends HookConsumerWidget {
       child: LinearProgressIndicator(
         value: progress,
         backgroundColor: Colors.transparent,
-        valueColor: AlwaysStoppedAnimation(context.theme.accent),
+        valueColor: AlwaysStoppedAnimation(
+          theme.accent,
+        ),
       ),
     );
   }

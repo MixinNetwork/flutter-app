@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import '../utils/system/text_input.dart';
@@ -36,7 +37,7 @@ Future<T?> _showDialog<T>({
             ),
           ),
   barrierDismissible: barrierDismissible,
-  barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+  barrierLabel: Localization.current.close,
   barrierColor: barrierColor,
   transitionDuration: const Duration(milliseconds: 80),
   useRootNavigator: useRootNavigator,
@@ -76,7 +77,7 @@ Future<T?> showMixinDialog<T>({
           ),
 );
 
-class AlertDialogLayout extends StatelessWidget {
+class AlertDialogLayout extends ConsumerWidget {
   const AlertDialogLayout({
     required this.content,
     super.key,
@@ -99,50 +100,56 @@ class AlertDialogLayout extends StatelessWidget {
   final double? maxWidth;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.transparent,
-    child: ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: minWidth,
-        minHeight: minHeight,
-        maxWidth: maxWidth ?? double.infinity,
-      ),
-      child: Padding(
-        padding: padding,
-        child: IntrinsicWidth(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (title != null)
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Material(
+      color: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: minWidth,
+          minHeight: minHeight,
+          maxWidth: maxWidth ?? double.infinity,
+        ),
+        child: Padding(
+          padding: padding,
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (title != null)
+                  DefaultTextStyle.merge(
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.text,
+                    ),
+                    child: title!,
+                  ),
+                if (title != null) SizedBox(height: titleMarginBottom),
                 DefaultTextStyle.merge(
-                  style: TextStyle(fontSize: 16, color: context.theme.text),
-                  child: title!,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: theme.text,
+                  ),
+                  child: content,
                 ),
-              if (title != null) SizedBox(height: titleMarginBottom),
-              DefaultTextStyle.merge(
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: context.theme.text,
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: actions.joinList(const SizedBox(width: 4)),
                 ),
-                child: content,
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: actions.joinList(const SizedBox(width: 4)),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
-class _DialogPage extends StatelessWidget {
+class _DialogPage extends ConsumerWidget {
   const _DialogPage({
     required this.child,
     this.padding,
@@ -156,7 +163,9 @@ class _DialogPage extends StatelessWidget {
   final Color? backgroundColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final brightness = ref.watch(brightnessValueProvider);
     final effectivePadding =
         MediaQuery.viewInsetsOf(context) + (padding ?? EdgeInsets.zero);
     return Padding(
@@ -175,12 +184,12 @@ class _DialogPage extends StatelessWidget {
               BoxShadow(
                 color: const Color.fromRGBO(0, 0, 0, 0.07),
                 offset: const Offset(0, 4),
-                blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
+                blurRadius: lerpDouble(16, 6, brightness)!,
               ),
             ],
           ),
           child: Material(
-            color: backgroundColor ?? context.theme.popUp,
+            color: backgroundColor ?? theme.popUp,
             borderRadius: const BorderRadius.all(Radius.circular(11)),
             child: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(11)),
@@ -203,11 +212,11 @@ abstract class DialogInteracterEntry<T> extends StatelessWidget {
 }
 
 /// default onTap is Navigator.pop
-class MixinButton<T> extends DialogInteracterEntry<T> {
+class MixinButton<T> extends ConsumerWidget {
   const MixinButton({
     required this.child,
     super.key,
-    super.value,
+    this.value,
     this.backgroundTransparent = false,
     this.onTap,
     this.padding = const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -221,23 +230,30 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
   final EdgeInsetsGeometry padding;
   final bool disable;
   final Color? backgroundColor;
+  final T? value;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final dynamicWhite = ref.watch(
+      dynamicColorProvider((
+        color: const Color.fromRGBO(255, 255, 255, 1),
+        darkColor: null,
+      )),
+    );
     final boxDecoration = backgroundTransparent
         ? const BoxDecoration()
         : BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(5)),
-            color: backgroundColor ?? context.theme.accent,
+            color: backgroundColor ?? theme.accent,
           );
-    final textColor = backgroundTransparent
-        ? context.theme.accent
-        : context.dynamicColor(const Color.fromRGBO(255, 255, 255, 1));
+    final textColor = backgroundTransparent ? theme.accent : dynamicWhite;
     return Disable(
       disable: disable,
       child: InteractiveDecoratedBox.color(
         decoration: boxDecoration,
-        onTap: () => onTap != null ? onTap?.call() : handleTap(context),
+        onTap: () =>
+            onTap != null ? onTap?.call() : Navigator.pop<T>(context, value),
         child: DefaultTextStyle.merge(
           style: TextStyle(
             fontWeight: FontWeight.w500,
@@ -270,6 +286,7 @@ class DialogTextField extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final textStream = useValueNotifierConvertSteam(textEditingController);
     final hasText =
         useMemoizedStream(
@@ -280,7 +297,7 @@ class DialogTextField extends HookConsumerWidget {
       constraints: const BoxConstraints(minHeight: 48),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: context.theme.background,
+        color: theme.background,
         borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
       alignment: Alignment.center,
@@ -289,7 +306,7 @@ class DialogTextField extends HookConsumerWidget {
           TextField(
             autofocus: true,
             controller: textEditingController,
-            style: TextStyle(color: context.theme.text),
+            style: TextStyle(color: theme.text),
             maxLines: maxLines ?? 1,
             minLines: 1,
             maxLength: maxLength,
@@ -301,7 +318,7 @@ class DialogTextField extends HookConsumerWidget {
               enabledBorder: InputBorder.none,
               counterStyle: TextStyle(
                 fontSize: 14,
-                color: context.theme.secondaryText,
+                color: theme.secondaryText,
               ),
             ),
             inputFormatters: inputFormatters,
@@ -341,47 +358,51 @@ Future<DialogEvent?> showConfirmMixinDialog(
 }) => showMixinDialog<DialogEvent>(
   context: context,
   barrierDismissible: barrierDismissible,
-  child: Builder(
-    builder: (context) => AlertDialogLayout(
-      maxWidth: maxWidth,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(content),
-          if (description != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Text(
-                description,
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 14,
-                  fontWeight: FontWeight.normal,
+  child: Consumer(
+    builder: (context, ref, child) {
+      final l10n = ref.watch(localizationProvider);
+      final theme = ref.watch(brightnessThemeDataProvider);
+      return AlertDialogLayout(
+        maxWidth: maxWidth,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(content),
+            if (description != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(
+                  description,
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
               ),
+          ],
+        ),
+        actions: [
+          if (neutralText != null) ...[
+            MixinButton(
+              onTap: () => Navigator.pop(context, DialogEvent.neutral),
+              child: Text(neutralText),
             ),
-        ],
-      ),
-      actions: [
-        if (neutralText != null) ...[
+            const Spacer(),
+          ],
           MixinButton(
-            onTap: () => Navigator.pop(context, DialogEvent.neutral),
-            child: Text(neutralText),
+            backgroundTransparent: true,
+            onTap: () => Navigator.pop(context),
+            child: Text(negativeText ?? l10n.cancel),
           ),
-          const Spacer(),
+          MixinButton(
+            onTap: () => Navigator.pop(context, DialogEvent.positive),
+            child: Text(positiveText ?? l10n.confirm),
+          ),
         ],
-        MixinButton(
-          backgroundTransparent: true,
-          onTap: () => Navigator.pop(context),
-          child: Text(negativeText ?? context.l10n.cancel),
-        ),
-        MixinButton(
-          onTap: () => Navigator.pop(context, DialogEvent.positive),
-          child: Text(positiveText ?? context.l10n.confirm),
-        ),
-      ],
-    ),
+      );
+    },
   ),
 );
 
@@ -409,6 +430,7 @@ class EditDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     final textEditingController = useMemoized(
       () => EmojiTextEditingController(text: editText),
     );
@@ -425,19 +447,19 @@ class EditDialog extends HookConsumerWidget {
         MixinButton(
           backgroundTransparent: true,
           onTap: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
+          child: Text(l10n.cancel),
         ),
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
-          child: Text(positiveAction ?? context.l10n.create),
+          child: Text(positiveAction ?? l10n.create),
         ),
       ],
     );
   }
 }
 
-class DialogAddOrJoinButton extends StatelessWidget {
+class DialogAddOrJoinButton extends ConsumerWidget {
   const DialogAddOrJoinButton({
     required this.onTap,
     required this.title,
@@ -448,18 +470,24 @@ class DialogAddOrJoinButton extends StatelessWidget {
   final Widget title;
 
   @override
-  Widget build(BuildContext context) => TextButton(
-    style: TextButton.styleFrom(
-      backgroundColor: context.theme.statusBackground,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(15)),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return TextButton(
+      style: TextButton.styleFrom(
+        backgroundColor: theme.statusBackground,
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+        ),
       ),
-    ),
-    onPressed: onTap,
-    child: DefaultTextStyle.merge(
-      style: TextStyle(fontSize: 12, color: context.theme.accent),
-      child: title,
-    ),
-  );
+      onPressed: onTap,
+      child: DefaultTextStyle.merge(
+        style: TextStyle(
+          fontSize: 12,
+          color: theme.accent,
+        ),
+        child: title,
+      ),
+    );
+  }
 }

@@ -13,9 +13,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../db/dao/user_dao.dart';
-import '../ui/provider/conversation_provider.dart';
+import '../db/mixin_database.dart' show App;
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/emoji.dart';
-import '../utils/extension/extension.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
@@ -514,32 +514,39 @@ class _MatchedSpans {
 }
 
 class UrlTextMatcher extends TextMatcher implements EquatableMixin {
-  UrlTextMatcher(BuildContext context)
-    : super.textRangesFromText(
-        textRangesFromText: (text) {
-          if (kPlatformIsDarwin) {
-            final dataDetector = DataDetector(
-              NSTextCheckingType.NSTextCheckingTypeLink,
-            );
-            return dataDetector.matchesInString(text).map((e) => e.range);
-          } else {
-            return TextMatcher._textRangesFromText(text, uriRegExp);
-          }
-        },
-        matchBuilder: (span, displayString, linkString) => TextSpan(
-          text: displayString,
-          style: TextStyle(color: context.theme.accent),
-          mouseCursor: SystemMouseCursors.click,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () => openUri(
-              context,
-              linkString,
-              app: context.providerContainer.read(
-                conversationProvider.select((value) => value?.app),
-              ),
-            ),
-        ),
-      );
+  UrlTextMatcher(
+    BuildContext context, {
+    required this.container,
+    required this.accent,
+    required this.app,
+  }) : super.textRangesFromText(
+         textRangesFromText: (text) {
+           if (kPlatformIsDarwin) {
+             final dataDetector = DataDetector(
+               NSTextCheckingType.NSTextCheckingTypeLink,
+             );
+             return dataDetector.matchesInString(text).map((e) => e.range);
+           } else {
+             return TextMatcher._textRangesFromText(text, uriRegExp);
+           }
+         },
+         matchBuilder: (span, displayString, linkString) => TextSpan(
+           text: displayString,
+           style: TextStyle(color: accent),
+           mouseCursor: SystemMouseCursors.click,
+           recognizer: TapGestureRecognizer()
+             ..onTap = () => openUri(
+               context,
+               linkString,
+               container: container,
+               app: app,
+             ),
+         ),
+       );
+
+  final ProviderContainer container;
+  final Color accent;
+  final App? app;
 
   @override
   List<Object?> get props => [];
@@ -549,17 +556,19 @@ class UrlTextMatcher extends TextMatcher implements EquatableMixin {
 }
 
 class MailTextMatcher extends TextMatcher implements EquatableMixin {
-  MailTextMatcher(BuildContext context)
+  MailTextMatcher({required this.accent})
     : super.regExp(
         regExp: mailRegExp,
         matchBuilder: (span, displayString, linkString) => TextSpan(
           text: displayString,
-          style: TextStyle(color: context.theme.accent),
+          style: TextStyle(color: accent),
           mouseCursor: SystemMouseCursors.click,
           recognizer: TapGestureRecognizer()
             ..onTap = () => launchUrlString(linkString),
         ),
       );
+
+  final Color accent;
 
   @override
   List<Object?> get props => [];
@@ -700,17 +709,28 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
 }
 
 class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
-  BotNumberTextMatcher(BuildContext context)
-    : super.regExp(
-        regExp: botNumberRegExp,
-        matchBuilder: (span, displayString, linkString) => TextSpan(
-          text: displayString,
-          style: TextStyle(color: context.theme.accent),
-          mouseCursor: SystemMouseCursors.click,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () => showUserDialog(context, null, linkString),
-        ),
-      );
+  BotNumberTextMatcher(
+    BuildContext context, {
+    required this.container,
+    required this.accent,
+  }) : super.regExp(
+         regExp: botNumberRegExp,
+         matchBuilder: (span, displayString, linkString) => TextSpan(
+           text: displayString,
+           style: TextStyle(color: accent),
+           mouseCursor: SystemMouseCursors.click,
+           recognizer: TapGestureRecognizer()
+             ..onTap = () => showUserDialog(
+               context,
+               container,
+               null,
+               linkString,
+             ),
+         ),
+       );
+
+  final ProviderContainer container;
+  final Color accent;
 
   @override
   List<Object?> get props => [];
@@ -720,30 +740,37 @@ class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
 }
 
 class MentionTextMatcher extends TextMatcher implements EquatableMixin {
-  MentionTextMatcher(BuildContext context, this.map)
-    : super.regExp(
-        regExp: mentionNumberRegExp,
-        matchBuilder: (span, displayString, linkString) {
-          final mentionUser = map[linkString.substring(1)];
-          if (displayString != linkString || mentionUser == null) {
-            return TextSpan(text: linkString);
-          }
+  MentionTextMatcher(
+    BuildContext context,
+    this.map, {
+    required this.container,
+    required this.accent,
+  }) : super.regExp(
+         regExp: mentionNumberRegExp,
+         matchBuilder: (span, displayString, linkString) {
+           final mentionUser = map[linkString.substring(1)];
+           if (displayString != linkString || mentionUser == null) {
+             return TextSpan(text: linkString);
+           }
 
-          return TextSpan(
-            text: '@${mentionUser.fullName ?? mentionUser.identityNumber}',
-            style: TextStyle(color: context.theme.accent),
-            mouseCursor: SystemMouseCursors.click,
-            recognizer: TapGestureRecognizer()
-              ..onTap = () => showUserDialog(
-                context,
-                null,
-                mentionUser.identityNumber,
-              ),
-          );
-        },
-      );
+           return TextSpan(
+             text: '@${mentionUser.fullName ?? mentionUser.identityNumber}',
+             style: TextStyle(color: accent),
+             mouseCursor: SystemMouseCursors.click,
+             recognizer: TapGestureRecognizer()
+               ..onTap = () => showUserDialog(
+                 context,
+                 container,
+                 null,
+                 mentionUser.identityNumber,
+               ),
+           );
+         },
+       );
 
   final Map<String, MentionUser> map;
+  final ProviderContainer container;
+  final Color accent;
 
   @override
   List<Object?> get props => [map];
@@ -839,13 +866,14 @@ class CustomSelectableArea extends StatelessWidget {
   );
 }
 
-class _SelectionAreaToolbar extends StatelessWidget {
+class _SelectionAreaToolbar extends ConsumerWidget {
   const _SelectionAreaToolbar({required this.state});
 
   final SelectableRegionState state;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final materialL10n = ref.watch(materialLocalizationsProvider);
     if (!kPlatformIsDesktop) {
       return AdaptiveTextSelectionToolbar.selectableRegion(
         selectableRegionState: state,
@@ -855,7 +883,7 @@ class _SelectionAreaToolbar extends StatelessWidget {
       menus: [
         if (state.copyEnabled)
           ContextMenu(
-            title: MaterialLocalizations.of(context).copyButtonLabel,
+            title: materialL10n.copyButtonLabel,
             onTap: () {
               // ignore: deprecated_member_use
               state.copySelection(SelectionChangedCause.toolbar);
@@ -863,7 +891,7 @@ class _SelectionAreaToolbar extends StatelessWidget {
           ),
         if (state.selectAllEnabled)
           ContextMenu(
-            title: MaterialLocalizations.of(context).selectAllButtonLabel,
+            title: materialL10n.selectAllButtonLabel,
             onTap: state.selectAll,
           ),
       ],
@@ -872,7 +900,7 @@ class _SelectionAreaToolbar extends StatelessWidget {
   }
 }
 
-class MixinAdaptiveSelectionToolbar extends StatelessWidget {
+class MixinAdaptiveSelectionToolbar extends ConsumerWidget {
   const MixinAdaptiveSelectionToolbar({
     required this.editableTextState,
     super.key,
@@ -881,34 +909,35 @@ class MixinAdaptiveSelectionToolbar extends StatelessWidget {
   final EditableTextState editableTextState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final materialL10n = ref.watch(materialLocalizationsProvider);
     if (kPlatformIsDesktop) {
       return _SelectionToolbar(
         menus: [
           if (editableTextState.copyEnabled)
             ContextMenu(
-              title: MaterialLocalizations.of(context).copyButtonLabel,
+              title: materialL10n.copyButtonLabel,
               onTap: () {
                 editableTextState.copySelection(SelectionChangedCause.toolbar);
               },
             ),
           if (editableTextState.cutEnabled)
             ContextMenu(
-              title: MaterialLocalizations.of(context).cutButtonLabel,
+              title: materialL10n.cutButtonLabel,
               onTap: () {
                 editableTextState.cutSelection(SelectionChangedCause.toolbar);
               },
             ),
           if (editableTextState.selectAllEnabled)
             ContextMenu(
-              title: MaterialLocalizations.of(context).selectAllButtonLabel,
+              title: materialL10n.selectAllButtonLabel,
               onTap: () {
                 editableTextState.selectAll(SelectionChangedCause.toolbar);
               },
             ),
           if (editableTextState.pasteEnabled)
             ContextMenu(
-              title: MaterialLocalizations.of(context).pasteButtonLabel,
+              title: materialL10n.pasteButtonLabel,
               onTap: () {
                 editableTextState.pasteText(SelectionChangedCause.toolbar);
               },

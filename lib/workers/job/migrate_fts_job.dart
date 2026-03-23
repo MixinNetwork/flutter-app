@@ -19,10 +19,9 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
   MigrateFtsJob({
     required super.database,
     required super.requestDbWrite,
-  })
-    : messageDao = database.messageDao,
-      ftsDatabase = database.ftsDatabase,
-      transcriptMessageDao = database.transcriptMessageDao;
+  }) : messageDao = database.messageDao,
+       ftsDatabase = database.ftsDatabase,
+       transcriptMessageDao = database.transcriptMessageDao;
 
   final MessageDao messageDao;
   final FtsDatabase ftsDatabase;
@@ -97,7 +96,10 @@ class MigrateFtsJob extends JobQueue<Job, List<Job>> {
       final messages = await messageDao.getMessages(lastMessageRowId, 1000);
       if (messages.isEmpty) {
         d('migrateFtsDatabase done');
-        await requestDbWrite(DbWriteMethod.deleteJobByAction, payload: kMigrateFts);
+        await requestDbWrite(
+          DbWriteMethod.deleteJobByAction,
+          payload: kMigrateFts,
+        );
         break;
       }
       try {

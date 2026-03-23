@@ -4,7 +4,7 @@ import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../utils/extension/extension.dart';
+
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
@@ -13,6 +13,8 @@ import '../../widgets/dialog.dart';
 import '../../widgets/disable.dart';
 import '../../widgets/radio.dart';
 import '../../widgets/toast.dart';
+import '../provider/account_server_provider.dart';
+import '../provider/ui_context_providers.dart';
 
 class StorageUsageDetailPage extends HookConsumerWidget {
   const StorageUsageDetailPage({
@@ -26,16 +28,19 @@ class StorageUsageDetailPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final accountServer = ref.read(accountServerProvider).requireValue;
     final watchEvent = useMemoizedStream(
       () => File(
-        context.accountServer.getMediaFilePath(),
+        accountServer.getMediaFilePath(),
       ).watch(recursive: true),
     ).data;
 
     final photosSize = useMemoizedFuture(
       () async => filesize(
         await getTotalSizeOfFile(
-          context.accountServer.getImagesPath(conversationId),
+          accountServer.getImagesPath(conversationId),
         ),
       ),
       '0 B',
@@ -44,7 +49,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
     final videosSize = useMemoizedFuture(
       () async => filesize(
         await getTotalSizeOfFile(
-          context.accountServer.getVideosPath(conversationId),
+          accountServer.getVideosPath(conversationId),
         ),
       ),
       '0 B',
@@ -53,7 +58,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
     final audiosSize = useMemoizedFuture(
       () async => filesize(
         await getTotalSizeOfFile(
-          context.accountServer.getAudiosPath(conversationId),
+          accountServer.getAudiosPath(conversationId),
         ),
       ),
       '0 B',
@@ -62,7 +67,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
     final filesSize = useMemoizedFuture(
       () async => filesize(
         await getTotalSizeOfFile(
-          context.accountServer.getFilesPath(conversationId),
+          accountServer.getFilesPath(conversationId),
         ),
       ),
       '0 B',
@@ -77,7 +82,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
     ));
 
     return Scaffold(
-      backgroundColor: context.theme.background,
+      backgroundColor: theme.background,
       appBar: MixinAppBar(
         title: Text(name),
         actions: [
@@ -91,7 +96,6 @@ class StorageUsageDetailPage extends HookConsumerWidget {
             child: MixinButton(
               backgroundTransparent: true,
               onTap: () => runFutureWithToast(() async {
-                final accountServer = context.accountServer;
                 if (selected.value.$1) {
                   await _clear(accountServer.getImagesPath(conversationId));
                 }
@@ -105,7 +109,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                   await _clear(accountServer.getFilesPath(conversationId));
                 }
               }()),
-              child: Center(child: Text(context.l10n.clear)),
+              child: Center(child: Text(l10n.clear)),
             ),
           ),
         ],
@@ -117,14 +121,14 @@ class StorageUsageDetailPage extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CellGroup(
-              cellBackgroundColor: context.theme.settingCellBackgroundColor,
+              cellBackgroundColor: theme.settingCellBackgroundColor,
               child: Column(
                 children: [
                   CellItem(
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.$1,
-                      title: Text(context.l10n.photos),
+                      title: Text(l10n.photos),
                       onChanged: (value) {
                         final (_, item2, item3, item4) = selected.value;
 
@@ -134,7 +138,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     description: Text(
                       photosSize,
                       style: TextStyle(
-                        color: context.theme.secondaryText,
+                        color: theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -143,7 +147,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.$2,
-                      title: Text(context.l10n.videos),
+                      title: Text(l10n.videos),
                       onChanged: (value) {
                         final (item1, _, item3, item4) = selected.value;
 
@@ -153,7 +157,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     description: Text(
                       videosSize,
                       style: TextStyle(
-                        color: context.theme.secondaryText,
+                        color: theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -162,7 +166,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.$3,
-                      title: Text(context.l10n.audio),
+                      title: Text(l10n.audio),
                       onChanged: (value) {
                         final (item1, item2, _, item4) = selected.value;
 
@@ -172,7 +176,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     description: Text(
                       audiosSize,
                       style: TextStyle(
-                        color: context.theme.secondaryText,
+                        color: theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -181,7 +185,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.$4,
-                      title: Text(context.l10n.files),
+                      title: Text(l10n.files),
                       onChanged: (value) {
                         final (item1, item2, item3, _) = selected.value;
 
@@ -191,7 +195,7 @@ class StorageUsageDetailPage extends HookConsumerWidget {
                     description: Text(
                       filesSize,
                       style: TextStyle(
-                        color: context.theme.secondaryText,
+                        color: theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),

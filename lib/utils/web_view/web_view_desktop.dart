@@ -4,11 +4,14 @@ import 'dart:io';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../constants/brightness_theme_data.dart';
 import '../../db/mixin_database.dart';
-import '../../widgets/brightness_observer.dart';
+import '../../ui/provider/multi_auth_provider.dart';
+import '../../ui/provider/setting_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
@@ -37,14 +40,15 @@ class DesktopMixinWebView extends MixinWebView {
       !Platform.isWindows || await WebviewWindow.isWebviewAvailable();
 
   Future<Map<String, dynamic>> _mixinContext(
-    BuildContext context,
+    ProviderContainer container,
     String? conversationId,
   ) async {
-    assert(context.auth != null);
+    final auth = container.read(authProvider);
+    final settings = container.read(settingProvider.notifier);
+    assert(auth != null);
 
     final mode =
-        context.settingChangeNotifier.brightness ??
-        MediaQuery.platformBrightnessOf(context);
+        settings.brightness ?? container.read(platformBrightnessProvider);
     final info = await getPackageInfo();
     debugPrint(
       'info: appName: ${info.appName} packageName: ${info.packageName} version: ${info.version} buildNumber: ${info.buildNumber} buildSignature: ${info.buildSignature} ',
@@ -54,9 +58,9 @@ class DesktopMixinWebView extends MixinWebView {
       'immersive': false,
       'appearance': mode == Brightness.light ? 'light' : 'dark',
       'platform': 'Desktop',
-      'locale': Localizations.localeOf(context).toLanguageTag(),
+      'locale': container.read(localeProvider).toLanguageTag(),
       'conversation_id': conversationId ?? '',
-      'currency': context.account?.fiatCurrency,
+      'currency': auth?.account.fiatCurrency,
     };
   }
 
@@ -73,12 +77,13 @@ class DesktopMixinWebView extends MixinWebView {
   Future<void> openWebViewWindowWithUrl(
     BuildContext context,
     String url, {
+    required ProviderContainer container,
     String? conversationId,
     String? title,
     App? app,
     AppCardData? appCardData,
   }) async {
-    final brightness = context.settingChangeNotifier.brightness;
+    final brightness = container.read(settingProvider.notifier).brightness;
     final packageInfo = await getPackageInfo();
     final webView = await WebviewWindow.create(
       configuration: CreateConfiguration(
@@ -90,7 +95,7 @@ class DesktopMixinWebView extends MixinWebView {
       ),
     );
     final mixinContext = jsonEncode(
-      await _mixinContext(context, conversationId),
+      await _mixinContext(container, conversationId),
     );
     webView
       ..setBrightness(brightness)
@@ -121,34 +126,38 @@ bool runWebViewNavigationBar(List<String> args) => runWebViewTitleBarWidget(
   backgroundColor: const Color(0xFFF0E7EA),
 );
 
-class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
+class _BotWebViewRuntimeInstallDialog extends ConsumerWidget {
   const _BotWebViewRuntimeInstallDialog();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     const runtimeDownloadLink =
         'https://go.microsoft.com/fwlink/p/?LinkId=2124703';
     return SizedBox(
       width: 400,
       child: AlertDialogLayout(
-        title: Text(context.l10n.webviewRuntimeUnavailable),
+        title: Text(l10n.webviewRuntimeUnavailable),
         content: DefaultTextStyle.merge(
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.normal,
-            color: context.theme.text,
+            color: theme.text,
           ),
           child: Column(
             children: [
-              Text(context.l10n.webview2RuntimeInstallDescription),
+              Text(l10n.webview2RuntimeInstallDescription),
               const SizedBox(height: 10),
               CustomSelectableText.rich(
                 TextSpan(
                   children: [
-                    TextSpan(text: context.l10n.downloadLink),
+                    TextSpan(text: l10n.downloadLink),
                     TextSpan(
                       text: runtimeDownloadLink.overflow,
-                      style: TextStyle(color: context.theme.accent),
+                      style: TextStyle(
+                        color: theme.accent,
+                      ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () => openUri(context, runtimeDownloadLink),
                     ),
@@ -162,7 +171,7 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
         actions: <Widget>[
           MixinButton(
             onTap: () => Navigator.pop(context, true),
-            child: Text(context.l10n.confirm),
+            child: Text(l10n.confirm),
           ),
         ],
       ),

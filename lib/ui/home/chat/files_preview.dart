@@ -44,8 +44,10 @@ import '../../../widgets/image.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/mixin_image.dart';
+import '../../provider/account_server_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
+import '../../provider/ui_context_providers.dart';
 import 'image_caption_input.dart';
 import 'image_editor.dart';
 
@@ -189,6 +191,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     final files = useState(initialFiles);
     final quoteMessageCubit = ref.watch(quoteMessageProvider.notifier);
 
@@ -243,13 +246,14 @@ class _FilesPreviewDialog extends HookConsumerWidget {
     }, [isOneImage]);
 
     Future<void> send(bool silent) async {
+      final quoteMessageId = ref.read(quoteMessageIdProvider);
       if (currentTab.value != _TabType.zip) {
         for (final file in files.value) {
           unawaited(
             _sendFile(
-              context,
+              ref,
               file,
-              quoteMessageCubit.state?.messageId,
+              quoteMessageId,
               silent: silent,
               compress: currentTab.value == _TabType.image,
               imageCaption: isOneImage
@@ -258,7 +262,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             ),
           );
         }
-        quoteMessageCubit.state = null;
+        quoteMessageCubit.clear();
         Navigator.pop(context);
       } else {
         final zipFilePath = await runLoadBalancer(_archiveFiles, (
@@ -268,14 +272,14 @@ class _FilesPreviewDialog extends HookConsumerWidget {
         ));
         unawaited(
           _sendFile(
-            context,
+            ref,
             _File.normal(zipFilePath),
-            quoteMessageCubit.state?.messageId,
+            quoteMessageId,
             silent: silent,
             compress: false,
           ),
         );
-        quoteMessageCubit.state = null;
+        quoteMessageCubit.clear();
         Navigator.pop(context);
       }
     }
@@ -317,20 +321,20 @@ class _FilesPreviewDialog extends HookConsumerWidget {
                     children: [
                       _Tab(
                         assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                        tooltip: context.l10n.sendQuickly,
+                        tooltip: l10n.sendQuickly,
                         onTap: () => currentTab.value = _TabType.image,
                         selected: currentTab.value == _TabType.image,
                         show: hasMedia,
                       ),
                       _Tab(
                         assetName: Resources.assetsImagesFilePreviewFilesSvg,
-                        tooltip: context.l10n.sendWithoutCompression,
+                        tooltip: l10n.sendWithoutCompression,
                         onTap: () => currentTab.value = _TabType.files,
                         selected: currentTab.value == _TabType.files,
                       ),
                       _Tab(
                         assetName: Resources.assetsImagesFilePreviewZipSvg,
-                        tooltip: context.l10n.sendArchived,
+                        tooltip: l10n.sendArchived,
                         onTap: () => currentTab.value = _TabType.zip,
                         selected: currentTab.value == _TabType.zip,
                         show: showZipTab,
@@ -398,7 +402,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
   }
 }
 
-class _BottomActionWidget extends StatelessWidget {
+class _BottomActionWidget extends ConsumerWidget {
   const _BottomActionWidget({
     required this.send,
     required this.imageCaptionController,
@@ -410,56 +414,60 @@ class _BottomActionWidget extends StatelessWidget {
   final bool showImageCaption;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    constraints: const BoxConstraints(minWidth: double.infinity),
-    child: Column(
-      children: [
-        const SizedBox(height: 16),
-        if (showImageCaption)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: ImageCaptionInputWidget(
-              textEditingController: imageCaptionController,
-            ),
-          ),
-        const SizedBox(height: 16),
-        CustomContextMenuWidget(
-          desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          menuProvider: (_) => Menu(
-            children: [
-              MenuAction(
-                image: MenuImage.icon(IconFonts.mute),
-                title: context.l10n.sendWithoutSound,
-                callback: () => send(true),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: double.infinity),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          if (showImageCaption)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: ImageCaptionInputWidget(
+                textEditingController: imageCaptionController,
               ),
-            ],
-          ),
-          child: ElevatedButton(
-            onPressed: () => send(false),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.only(
-                left: 32,
-                top: 18,
-                bottom: 18,
-                right: 32,
+            ),
+          const SizedBox(height: 16),
+          CustomContextMenuWidget(
+            desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+            menuProvider: (_) => Menu(
+              children: [
+                MenuAction(
+                  image: MenuImage.icon(IconFonts.mute),
+                  title: l10n.sendWithoutSound,
+                  callback: () => send(true),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () => send(false),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.only(
+                  left: 32,
+                  top: 18,
+                  bottom: 18,
+                  right: 32,
+                ),
+                backgroundColor: theme.accent,
               ),
-              backgroundColor: context.theme.accent,
-            ),
-            child: Text(
-              context.l10n.send.toUpperCase(),
-              style: const TextStyle(color: Colors.white),
+              child: Text(
+                l10n.send.toUpperCase(),
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          context.l10n.enterToSend,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-        const SizedBox(height: 24),
-      ],
-    ),
-  );
+          const SizedBox(height: 24),
+          Text(
+            l10n.enterToSend,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
 }
 
 class _FileListViewportProvider extends StatelessWidget {
@@ -503,16 +511,16 @@ Future<String> _archiveFiles(
 }
 
 Future<void> _sendFile(
-  BuildContext context,
+  WidgetRef ref,
   _File file,
   String? quoteMessageId, {
   required bool silent,
   required bool compress,
   String? imageCaption,
 }) async {
-  final conversationItem = context.providerContainer.read(conversationProvider);
+  final conversationItem = ref.read(conversationProvider);
   if (conversationItem == null) return;
-  final accountServer = context.accountServer;
+  final accountServer = ref.read(accountServerProvider).requireValue;
   final xFile = file.file;
   switch (file) {
     case _ImageFile():
@@ -638,7 +646,7 @@ class _AnimatedFileTile extends HookConsumerWidget {
   }
 }
 
-class _Tab extends StatelessWidget {
+class _Tab extends ConsumerWidget {
   const _Tab({
     required this.assetName,
     required this.tooltip,
@@ -658,94 +666,103 @@ class _Tab extends StatelessWidget {
   final bool show;
 
   @override
-  Widget build(BuildContext context) => AnimatedSize(
-    duration: const Duration(milliseconds: 300),
-    curve: Curves.easeInOut,
-    child: show
-        ? GestureDetector(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Tooltip(
-                message: tooltip,
-                textStyle: const TextStyle(color: Colors.white),
-                child: SvgPicture.asset(
-                  assetName,
-                  colorFilter: ColorFilter.mode(
-                    selected ? context.theme.accent : context.theme.icon,
-                    BlendMode.srcIn,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: show
+          ? GestureDetector(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Tooltip(
+                  message: tooltip,
+                  textStyle: const TextStyle(color: Colors.white),
+                  child: SvgPicture.asset(
+                    assetName,
+                    colorFilter: ColorFilter.mode(
+                      selected ? theme.accent : theme.icon,
+                      BlendMode.srcIn,
+                    ),
+                    width: 24,
+                    height: 24,
                   ),
-                  width: 24,
-                  height: 24,
                 ),
               ),
-            ),
-          )
-        : const SizedBox(),
-  );
+            )
+          : const SizedBox(),
+    );
+  }
 }
 
-class _PageZip extends StatelessWidget {
+class _PageZip extends ConsumerWidget {
   const _PageZip(this.zipPasswordController);
 
   final TextEditingController zipPasswordController;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Row(
-        children: [
-          const SizedBox(width: 30),
-          const _FileIcon(extension: 'ZIP'),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _kDefaultArchiveName,
-                  style: TextStyle(
-                    color: context.theme.text,
-                    fontSize: 16,
-                    height: 1.5,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Column(
+      children: [
+        Row(
+          children: [
+            const SizedBox(width: 30),
+            const _FileIcon(extension: 'ZIP'),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _kDefaultArchiveName,
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  context.l10n.archivedFolder,
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    fontSize: 14,
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.archivedFolder,
+                    style: TextStyle(
+                      color: theme.secondaryText,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 30),
-        ],
-      ),
-      const Spacer(),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: SizedBox(
-          width: 300,
-          child: _ZipPasswordInputEditText(controller: zipPasswordController),
+            const SizedBox(width: 30),
+          ],
         ),
-      ),
-    ],
-  );
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: SizedBox(
+            width: 300,
+            child: _ZipPasswordInputEditText(controller: zipPasswordController),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _ZipPasswordInputEditText extends HookWidget {
+class _ZipPasswordInputEditText extends HookConsumerWidget {
   const _ZipPasswordInputEditText({required this.controller});
 
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final focusNode = useFocusNode();
 
     final hasText = useListenable(controller).text.isNotEmpty;
@@ -754,9 +771,11 @@ class _ZipPasswordInputEditText extends HookWidget {
 
     return InteractiveDecoratedBox(
       decoration: ShapeDecoration(
-        color: context.dynamicColor(
-          const Color.fromRGBO(245, 247, 250, 1),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+        color: ref.watch(
+          dynamicColorProvider((
+            color: const Color.fromRGBO(245, 247, 250, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+          )),
         ),
         shape: const StadiumBorder(),
       ),
@@ -773,7 +792,7 @@ class _ZipPasswordInputEditText extends HookWidget {
                 width: 18,
                 height: 18,
                 colorFilter: ColorFilter.mode(
-                  hasText ? context.theme.text : context.theme.secondaryText,
+                  hasText ? theme.text : theme.secondaryText,
                   BlendMode.srcIn,
                 ),
               ),
@@ -783,7 +802,10 @@ class _ZipPasswordInputEditText extends HookWidget {
                   focusNode: focusNode,
                   autofocus: true,
                   controller: controller,
-                  style: TextStyle(color: context.theme.text, fontSize: 14),
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: 14,
+                  ),
                   obscureText: obscureText.value,
                   scrollPadding: EdgeInsets.zero,
                   decoration: InputDecoration(
@@ -794,9 +816,9 @@ class _ZipPasswordInputEditText extends HookWidget {
                     hoverColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     contentPadding: EdgeInsets.zero,
-                    hintText: context.l10n.encryptZipFileWithPassword,
+                    hintText: l10n.encryptZipFileWithPassword,
                     hintStyle: TextStyle(
-                      color: context.theme.secondaryText,
+                      color: theme.secondaryText,
                       fontSize: 14,
                     ),
                   ),
@@ -820,9 +842,7 @@ class _ZipPasswordInputEditText extends HookWidget {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 20,
-                    color: hasText
-                        ? context.theme.text
-                        : context.theme.secondaryText,
+                    color: hasText ? theme.text : theme.secondaryText,
                   ),
                 ),
               ),
@@ -888,13 +908,37 @@ class _AnimatedListBuilder extends HookConsumerWidget {
   }
 }
 
-final _videoControllerProvider = ChangeNotifierProvider.autoDispose
-    .family<VideoPlayerController, _VideoFile>(
-      (ref, file) => VideoPlayerController.file(File(file.path))
-        ..initialize()
-        ..setVolume(0)
-        ..setLooping(true),
-    );
+final _videoControllerProvider = Provider.autoDispose
+    .family<VideoPlayerController, _VideoFile>((ref, file) {
+      final controller = VideoPlayerController.file(File(file.path));
+      unawaited(controller.initialize());
+      unawaited(controller.setVolume(0));
+      unawaited(controller.setLooping(true));
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
+
+final _videoValueProvider = StreamProvider.autoDispose
+    .family<VideoPlayerValue, _VideoFile>((ref, file) {
+      final controller = ref.watch(_videoControllerProvider(file));
+      final streamController = StreamController<VideoPlayerValue>();
+
+      void listener() {
+        if (!streamController.isClosed) {
+          streamController.add(controller.value);
+        }
+      }
+
+      controller.addListener(listener);
+      streamController.add(controller.value);
+
+      ref.onDispose(() {
+        controller.removeListener(listener);
+        unawaited(streamController.close());
+      });
+
+      return streamController.stream;
+    });
 
 final _videoBlurHashProvider = FutureProvider.autoDispose
     .family<String?, _VideoFile>((ref, file) => file._blurHashCompleter.future);
@@ -907,10 +951,10 @@ class _TileBigVideo extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(
-      _videoControllerProvider(file).select((value) => value),
-    );
-    final blurHash = ref.watch(_videoBlurHashProvider(file)).valueOrNull;
+    final controller = ref.watch(_videoControllerProvider(file));
+    final blurHash = ref.watch(_videoBlurHashProvider(file)).value;
+    final videoValue =
+        ref.watch(_videoValueProvider(file)).value ?? controller.value;
     useEffect(() {
       Future(controller.play);
       return () => Future(controller.pause);
@@ -924,9 +968,9 @@ class _TileBigVideo extends HookConsumerWidget {
       }
     });
 
-    final aspectRatio = ref.watch(
-      _videoControllerProvider(file).select((value) => value.value.aspectRatio),
-    );
+    final aspectRatio = videoValue.aspectRatio == 0
+        ? 1.0
+        : videoValue.aspectRatio;
     return SizedBox(
       height: 200,
       child: Padding(
@@ -992,12 +1036,11 @@ class _VideoPositionText extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final duration = ref.watch(
-      _videoControllerProvider(file).select((value) => value.value.duration),
-    );
-    final position = ref.watch(
-      _videoControllerProvider(file).select((value) => value.value.position),
-    );
+    final controller = ref.watch(_videoControllerProvider(file));
+    final value =
+        ref.watch(_videoValueProvider(file)).value ?? controller.value;
+    final duration = value.duration;
+    final position = value.position;
     final left = duration - position;
     return DecoratedBox(
       decoration: const BoxDecoration(
@@ -1100,30 +1143,33 @@ class _TileBigImage extends HookConsumerWidget {
   }
 }
 
-class _FileIcon extends StatelessWidget {
+class _FileIcon extends ConsumerWidget {
   const _FileIcon({required this.extension});
 
   final String extension;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 50,
-    width: 50,
-    decoration: BoxDecoration(
-      color: context.theme.statusBackground,
-      shape: BoxShape.circle,
-    ),
-    child: Center(
-      child: Text(
-        extension,
-        style: TextStyle(
-          fontSize: 16,
-          // force light style
-          color: lightBrightnessThemeData.secondaryText,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Container(
+      height: 50,
+      width: 50,
+      decoration: BoxDecoration(
+        color: theme.statusBackground,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          extension,
+          style: TextStyle(
+            fontSize: 16,
+            // force light style
+            color: lightBrightnessThemeData.secondaryText,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 final _fileSizeProvider = FutureProvider.autoDispose.family<int, XFile>(
@@ -1148,49 +1194,52 @@ class _TileNormalFile extends HookConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Row(
-    children: [
-      const SizedBox(width: 30),
-      _FileIcon(extension: _getFileExtension(file)),
-      const SizedBox(width: 16),
-      Expanded(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              path.basename(file.path).overflow,
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: 16,
-                height: 1.5,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Row(
+      children: [
+        const SizedBox(width: 30),
+        _FileIcon(extension: _getFileExtension(file)),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                path.basename(file.path).overflow,
+                style: TextStyle(
+                  color: theme.text,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              filesize(
-                ref.watch(_fileSizeProvider(file.file)).valueOrNull ?? 0,
-                0,
+              const SizedBox(height: 4),
+              Text(
+                filesize(
+                  ref.watch(_fileSizeProvider(file.file)).value ?? 0,
+                  0,
+                ),
+                style: TextStyle(
+                  color: theme.secondaryText,
+                  fontSize: 14,
+                ),
               ),
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: 14,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      ActionButton(
-        color: context.theme.secondaryText,
-        name: Resources.assetsImagesDeleteSvg,
-        padding: const EdgeInsets.all(10),
-        onTap: onDelete,
-      ),
-      const SizedBox(width: 10),
-    ],
-  );
+        ActionButton(
+          color: theme.secondaryText,
+          name: Resources.assetsImagesDeleteSvg,
+          padding: const EdgeInsets.all(10),
+          onTap: onDelete,
+        ),
+        const SizedBox(width: 10),
+      ],
+    );
+  }
 }
 
 class _Actions extends HookWidget {
@@ -1276,30 +1325,37 @@ class _SendFilesIntent extends Intent {
   const _SendFilesIntent();
 }
 
-class _ChatDragIndicator extends StatelessWidget {
+class _ChatDragIndicator extends ConsumerWidget {
   const _ChatDragIndicator();
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(color: context.theme.popUp),
-    child: Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.theme.listSelected,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        border: DashPathBorder.all(
-          borderSide: BorderSide(color: context.theme.accent),
-          dashArray: CircularIntervalList([4, 4]),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: theme.popUp),
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.listSelected,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          border: DashPathBorder.all(
+            borderSide: BorderSide(color: theme.accent),
+            dashArray: CircularIntervalList([4, 4]),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            l10n.addFile,
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.text,
+            ),
+          ),
         ),
       ),
-      child: Center(
-        child: Text(
-          context.l10n.addFile,
-          style: TextStyle(fontSize: 14, color: context.theme.text),
-        ),
-      ),
-    ),
-  );
+    );
+  }
 }
 
 class _PasteContextAction extends Action<PasteTextIntent> {

@@ -5,6 +5,7 @@ import '../extension.dart';
 
 extension GetErrorStringByCode on BuildContext {
   String getMixinErrorStringByCode(int code, String message) {
+    final l10n = Localization.of(this);
     switch (code) {
       case transaction:
         return '$code TRANSACTION';

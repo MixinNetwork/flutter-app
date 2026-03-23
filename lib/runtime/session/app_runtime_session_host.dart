@@ -131,6 +131,7 @@ class AppRuntimeSessionHost {
     DbWriteMethod method, {
     Object? payload,
   }) async {
+    await _waitForDbWriteWorkerReady(method.name);
     final rpcClient = _dbWriteRpcClient;
     if (rpcClient == null) {
       throw StateError('db write rpc client not ready: ${method.name}');
@@ -218,6 +219,7 @@ class AppRuntimeSessionHost {
             _kWorkerDbWriteRpcPrefix.length,
           );
           try {
+            await _waitForDbWriteWorkerReady(dbWriteMethodName);
             final dbRpcClient = _dbWriteRpcClient;
             if (dbRpcClient == null) {
               throw StateError('db write rpc client not ready');
@@ -299,6 +301,7 @@ class AppRuntimeSessionHost {
         }),
       );
     await _dbWriteWorkerSupervisor!.start();
+    await _waitForDbWriteWorkerReady('startup');
   }
 
   void _handleSyncWorkerEvent(WorkerEvent event) {
@@ -354,5 +357,13 @@ class AppRuntimeSessionHost {
     } catch (error, stackTrace) {
       e('sendCommandToDbWriteWorker failed: $error, $stackTrace');
     }
+  }
+
+  Future<void> _waitForDbWriteWorkerReady(String reason) async {
+    final supervisor = _dbWriteWorkerSupervisor;
+    if (supervisor == null) {
+      throw StateError('db write worker supervisor not ready: $reason');
+    }
+    await supervisor.waitUntilReady(timeout: const Duration(seconds: 20));
   }
 }

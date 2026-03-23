@@ -1,9 +1,8 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../utils/rivepod.dart';
 
-class ConversationUnseenFilterEnabledNotifier
-    extends DistinctStateNotifier<bool> {
-  ConversationUnseenFilterEnabledNotifier() : super(false);
+class ConversationUnseenFilterEnabledNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
 
   void toggle() => state = !state;
 
@@ -11,6 +10,6 @@ class ConversationUnseenFilterEnabledNotifier
 }
 
 final conversationUnseenFilterEnabledProvider =
-    StateNotifierProvider<ConversationUnseenFilterEnabledNotifier, bool>(
-      (ref) => ConversationUnseenFilterEnabledNotifier(),
+    NotifierProvider<ConversationUnseenFilterEnabledNotifier, bool>(
+      ConversationUnseenFilterEnabledNotifier.new,
     );

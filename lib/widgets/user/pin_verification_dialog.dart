@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../account/session_key_value.dart';
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import '../buttons.dart';
@@ -18,60 +21,69 @@ Future<String?> showPinVerificationDialog(
   barrierDismissible: false,
 );
 
-class _PinVerificationDialog extends StatelessWidget {
+class _PinVerificationDialog extends ConsumerWidget {
   const _PinVerificationDialog({required this.title});
 
   final String title;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 400,
-    height: 210,
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Column(
-          children: [
-            const SizedBox(height: 40),
-            Text(
-              title,
-              style: TextStyle(color: context.theme.text, fontSize: 18),
-            ),
-            const SizedBox(height: 20),
-            PinInputLayout(
-              doVerify: (pin) async {
-                await context.accountServer.client.accountApi.verifyPin(
-                  encryptPin(pin)!,
-                );
-                Navigator.pop(context, pin);
-              },
-            ),
-          ],
-        ),
-        const Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: EdgeInsets.all(22),
-            child: MixinCloseButton(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return SizedBox(
+      width: 400,
+      height: 210,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Column(
+            children: [
+              const SizedBox(height: 40),
+              Text(
+                title,
+                style: TextStyle(
+                  color: theme.text,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 20),
+              PinInputLayout(
+                doVerify: (pin) async {
+                  final accountServer = ref
+                      .read(accountServerProvider)
+                      .requireValue;
+                  await accountServer.client.accountApi.verifyPin(
+                    encryptPin(pin)!,
+                  );
+                  Navigator.pop(context, pin);
+                },
+              ),
+            ],
           ),
-        ),
-      ],
-    ),
-  );
+          const Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: EdgeInsets.all(22),
+              child: MixinCloseButton(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 const _kPinCodeLength = 6;
 
-class PinInputLayout extends StatefulWidget {
+class PinInputLayout extends ConsumerStatefulWidget {
   const PinInputLayout({required this.doVerify, super.key});
 
   final Future<void> Function(String pinCode) doVerify;
 
   @override
-  State<PinInputLayout> createState() => _PinInputLayoutState();
+  ConsumerState<PinInputLayout> createState() => _PinInputLayoutState();
 }
 
-class _PinInputLayoutState extends State<PinInputLayout>
+class _PinInputLayoutState extends ConsumerState<PinInputLayout>
     implements TextInputClient {
   final focusNode = FocusNode(debugLabel: '_PinInputLayoutState');
 
@@ -142,6 +154,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
 
   void _openInputConnection() {
     if (!_hasInputConnection) {
+      final platformBrightness = ref.read(platformBrightnessProvider);
       _textInputConnection =
           TextInput.attach(
               this,
@@ -152,7 +165,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
                 smartDashesType: SmartDashesType.disabled,
                 enableSuggestions: false,
                 enableInteractiveSelection: false,
-                keyboardAppearance: MediaQuery.platformBrightnessOf(context),
+                keyboardAppearance: platformBrightness,
                 enableIMEPersonalizedLearning: false,
               ),
             )
@@ -181,6 +194,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final inputPinLength = _controller.text.length;
     return Focus(
       focusNode: focusNode,
@@ -198,7 +212,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: context.theme.text,
+                    color: theme.text,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -208,7 +222,9 @@ class _PinInputLayoutState extends State<PinInputLayout>
                   height: 10,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: context.theme.secondaryText),
+                    border: Border.all(
+                      color: theme.secondaryText,
+                    ),
                   ),
                 ),
             ].joinList(const SizedBox(width: 20)),

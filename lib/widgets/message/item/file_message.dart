@@ -9,6 +9,8 @@ import 'package:path/path.dart' as p;
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../enum/media_status.dart';
+import '../../../ui/provider/account_server_provider.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../interactive_decorated_box.dart';
@@ -36,6 +38,9 @@ class MessageFile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final mediaStatus = useMessageConverter(
       converter: (state) => state.mediaStatus,
     );
@@ -78,20 +83,20 @@ class MessageFile extends HookConsumerWidget {
           if (isMessageSentOut && message.mediaUrl?.isNotEmpty == true) {
             if (isTranscriptPage) {
               final transcriptMessageId = TranscriptPage.of(context)?.messageId;
-              await context.accountServer.reUploadTranscriptAttachment(
+              await accountServer.reUploadTranscriptAttachment(
                 transcriptMessageId!,
               );
             } else {
-              await context.accountServer.reUploadAttachment(message);
+              await accountServer.reUploadAttachment(message);
             }
           } else {
-            await context.accountServer.downloadAttachment(message.messageId);
+            await accountServer.downloadAttachment(message.messageId);
           }
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
           if (message.mediaUrl?.isEmpty ?? true) return;
           if (_shouldOpenDirectly(mediaName)) {
-            final path = context.accountServer.convertMessageAbsolutePath(
+            final path = accountServer.convertMessageAbsolutePath(
               message,
               isTranscriptPage,
             );
@@ -101,21 +106,22 @@ class MessageFile extends HookConsumerWidget {
                 'open file result: $mediaName ${openResult.type} ${openResult.message}',
               );
               showToastFailed(
-                ToastError(context.l10n.unableToOpenFile(mediaName)),
+                ToastError(
+                  l10n.unableToOpenFile(mediaName),
+                ),
               );
             }
           } else {
             await saveAs(
               context,
-              context.accountServer,
+              accountServer,
               message,
               isTranscriptPage,
+              confirmButtonText: l10n.save,
             );
           }
         } else if (message.mediaStatus == MediaStatus.pending) {
-          await context.accountServer.cancelProgressAttachmentJob(
-            message.messageId,
-          );
+          await accountServer.cancelProgressAttachmentJob(message.messageId);
         }
       },
       child: Row(
@@ -142,7 +148,7 @@ class MessageFile extends HookConsumerWidget {
                 height: 38,
                 width: 38,
                 decoration: BoxDecoration(
-                  color: context.theme.statusBackground,
+                  color: theme.statusBackground,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -167,7 +173,7 @@ class MessageFile extends HookConsumerWidget {
                   mediaName.overflow,
                   style: TextStyle(
                     fontSize: context.messageStyle.secondaryFontSize,
-                    color: context.theme.text,
+                    color: theme.text,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -176,7 +182,7 @@ class MessageFile extends HookConsumerWidget {
                   mediaSizeText,
                   style: TextStyle(
                     fontSize: context.messageStyle.tertiaryFontSize,
-                    color: context.theme.secondaryText,
+                    color: theme.secondaryText,
                   ),
                   maxLines: 1,
                 ),

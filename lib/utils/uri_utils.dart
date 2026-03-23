@@ -1,12 +1,19 @@
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../account/account_server.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/database.dart';
 import '../db/mixin_database.dart' hide User;
 import '../enum/encrypt_category.dart';
+import '../ui/provider/account_server_provider.dart';
 import '../ui/provider/conversation_provider.dart';
+import '../ui/provider/database_provider.dart';
+import '../ui/provider/multi_auth_provider.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
@@ -24,17 +31,21 @@ import 'web_view/web_view_interface.dart';
 Future<bool> openUriWithWebView(
   BuildContext context,
   String text, {
+  ProviderContainer? container,
   String? title,
   String? conversationId,
   AppCardData? appCardData,
 }) async => openUri(
   context,
   text,
+  container: container,
   fallbackHandler: (uri) async {
-    if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
+    if (container != null &&
+        await MixinWebView.instance.isWebViewRuntimeAvailable()) {
       await MixinWebView.instance.openWebViewWindowWithUrl(
         context,
         uri.toString(),
+        container: container,
         conversationId: conversationId,
         title: title,
         appCardData: appCardData,
@@ -48,27 +59,49 @@ Future<bool> openUriWithWebView(
 Future<bool> openUri(
   BuildContext context,
   String text, {
+  ProviderContainer? container,
   Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
   App? app,
 }) async {
+  final accountServer = container?.read(accountServerProvider).value;
+  final database = container?.read(databaseProvider).value;
+  final l10n = container?.read(localizationProvider) ?? Localization.current;
+  final account = container?.read(authAccountProvider);
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
 
   if (uri.isMixin) {
+    if (container == null) {
+      return fallbackHandler(uri);
+    }
     final userId = uri.userId;
     if (userId != null && userId.trim().isNotEmpty) {
-      await showUserDialog(context, userId);
+      await showUserDialog(context, container, userId);
       return true;
     }
 
     final code = uri.code;
     if (code != null && code.trim().isNotEmpty) {
-      return _showCodeDialog(context, code, uri);
+      return _showCodeDialog(
+        context,
+        code,
+        uri,
+        container: container,
+        accountServer: accountServer,
+        database: database,
+        account: account,
+        l10n: l10n,
+      );
     }
 
     final snapshotTraceId = uri.snapshotTraceId;
     if (snapshotTraceId != null && snapshotTraceId.trim().isNotEmpty) {
-      return _showTransferDialog(context, snapshotTraceId);
+      return _showTransferDialog(
+        context,
+        snapshotTraceId,
+        accountServer: accountServer,
+        database: database,
+      );
     }
 
     final conversationId = uri.conversationId;
@@ -76,7 +109,11 @@ Future<bool> openUri(
     if (conversationId != null && conversationId.trim().isNotEmpty) {
       if (startText?.trim().isNotEmpty == true) {
         try {
-          final conversation = await context.database.conversationDao
+          if (database == null || accountServer == null) {
+            showToastFailed(null);
+            return false;
+          }
+          final conversation = await database.conversationDao
               .conversationItem(conversationId)
               .getSingleOrNull();
 
@@ -86,12 +123,13 @@ Future<bool> openUri(
           }
 
           await ConversationStateNotifier.selectConversation(
+            container,
             context,
             conversation.conversationId,
             conversation: conversation,
           );
 
-          await context.accountServer.sendTextMessage(
+          await accountServer.sendTextMessage(
             startText ?? '',
             EncryptCategory.plain,
             conversationId: conversationId,
@@ -104,7 +142,13 @@ Future<bool> openUri(
         }
       }
 
-      return _selectConversation(uri, context, conversationId);
+      return _selectConversation(
+        uri,
+        context,
+        conversationId,
+        container: container,
+        accountServer: accountServer,
+      );
     }
 
     if (uri.isSend) {
@@ -115,6 +159,7 @@ Future<bool> openUri(
         uri.dataOfSend,
         app,
         uri.userOfSend,
+        container,
       );
     }
 
@@ -134,8 +179,12 @@ Future<bool> openUri(
         try {
           showToastLoading();
 
-          await context.accountServer.refreshUsers([uri.appId!]);
-          app = await context.database.appDao.findAppById(uri.appId!);
+          if (database == null || accountServer == null) {
+            showToastFailed(null);
+            return false;
+          }
+          await accountServer.refreshUsers([uri.appId!]);
+          app = await database.appDao.findAppById(uri.appId!);
         } finally {
           Toast.dismiss();
         }
@@ -143,7 +192,7 @@ Future<bool> openUri(
         var homeUri = Uri.tryParse(app?.homeUri ?? '');
 
         if (app == null || homeUri == null) {
-          showToastFailed(ToastError(context.l10n.botNotFound));
+          showToastFailed(ToastError(l10n.botNotFound));
           return true;
         }
 
@@ -155,13 +204,14 @@ Future<bool> openUri(
           await MixinWebView.instance.openWebViewWindowWithUrl(
             context,
             homeUri.toString(),
+            container: container,
             conversationId: conversationId,
           );
           return true;
         }
         return fallbackHandler(homeUri);
       } else {
-        await showUserDialog(context, uri.appId);
+        await showUserDialog(context, container, uri.appId);
         return true;
       }
     }
@@ -176,24 +226,46 @@ Future<bool> openUri(
   return fallbackHandler(uri);
 }
 
-Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
+Future<bool> _showCodeDialog(
+  BuildContext context,
+  String code,
+  Uri uri, {
+  required ProviderContainer container,
+  required AccountServer? accountServer,
+  required Database? database,
+  required Account? account,
+  required Localization l10n,
+}) async {
+  if (accountServer == null) {
+    showToastFailed(null);
+    return false;
+  }
   showToastLoading();
   try {
-    final mixinResponse = await context.accountServer.client.accountApi.code(
-      code,
-    );
+    final mixinResponse = await accountServer.client.accountApi.code(code);
     final data = mixinResponse.data;
     Toast.dismiss();
     if (data is User) {
-      await showUserDialog(context, data.userId);
+      await showUserDialog(context, container, data.userId);
       return true;
     } else if (data is ConversationResponse) {
-      await showConversationDialog(context, data, code);
+      if (database == null) {
+        showToastFailed(ToastError(l10n.groupAlreadyIn));
+        return false;
+      }
+      await showConversationDialog(
+        context,
+        container,
+        data,
+        code,
+        database: database,
+        accountServer: accountServer,
+        account: account,
+        l10n: l10n,
+      );
       return true;
     } else if (data is PaymentCodeResponse) {
-      final asset = await context.accountServer.checkAsset(
-        assetId: data.assetId,
-      );
+      final asset = await accountServer.checkAsset(assetId: data.assetId);
       if (asset == null) {
         await showUnknownMixinUrlDialog(context, uri);
         return false;
@@ -201,7 +273,7 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
       await showMultisigsPaymentDialog(
         context,
         item: MultisigsPaymentItem(
-          senders: [context.accountServer.userId],
+          senders: [accountServer.userId],
           receivers: data.receivers,
           threshold: data.threshold,
           asset: asset,
@@ -213,9 +285,7 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
       return true;
     } else if (data is MultisigsResponse) {
       debugPrint('PaymentCodeResponse: ${data.toJson()}');
-      final asset = await context.accountServer.checkAsset(
-        assetId: data.assetId,
-      );
+      final asset = await accountServer.checkAsset(assetId: data.assetId);
       if (asset == null) {
         await showUnknownMixinUrlDialog(context, uri);
         return false;
@@ -246,12 +316,19 @@ Future<bool> _showCodeDialog(BuildContext context, String code, Uri uri) async {
 
 Future<bool> _showTransferDialog(
   BuildContext context,
-  String snapshotTraceId,
-) async {
+  String snapshotTraceId, {
+  required AccountServer? accountServer,
+  required Database? database,
+}) async {
   try {
     showToastLoading();
 
-    final snapshotId = await context.database.snapshotDao
+    if (database == null || accountServer == null) {
+      showToastFailed(null);
+      return false;
+    }
+
+    final snapshotId = await database.snapshotDao
         .snapshotIdByTraceId(snapshotTraceId)
         .getSingleOrNull();
 
@@ -261,7 +338,7 @@ Future<bool> _showTransferDialog(
       return true;
     }
 
-    final snapshot = await context.accountServer.updateSnapshotByTraceId(
+    final snapshot = await accountServer.updateSnapshotByTraceId(
       traceId: snapshotTraceId,
     );
 
@@ -278,25 +355,32 @@ Future<bool> _showTransferDialog(
 Future<bool> _selectConversation(
   Uri uri,
   BuildContext context,
-  String conversationId,
-) async {
+  String conversationId, {
+  required ProviderContainer container,
+  required AccountServer? accountServer,
+}) async {
   final userId = uri.queryParameters['user'];
   if (userId != null && userId.trim().isNotEmpty) {
+    if (accountServer == null) {
+      showToastFailed(null);
+      return false;
+    }
     showToastLoading();
-    await context.accountServer.refreshUsers([userId]);
+    await accountServer.refreshUsers([userId]);
     Toast.dismiss();
 
     if (conversationId !=
-        generateConversationId(context.accountServer.userId, userId)) {
+        generateConversationId(accountServer.userId, userId)) {
       showToastFailed(null);
       return false;
     } else {
-      await ConversationStateNotifier.selectUser(context, userId);
+      await ConversationStateNotifier.selectUser(container, context, userId);
       return true;
     }
   }
 
   await ConversationStateNotifier.selectConversation(
+    container,
     context,
     conversationId,
     sync: true,

@@ -8,7 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
-import '../../utils/extension/extension.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/logger.dart';
 import '../dialog.dart';
 import '../toast.dart';
@@ -29,6 +29,7 @@ class CaptchaWebViewDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     final timer = useRef<Timer?>(null);
     final captcha = useRef<CaptchaType>(CaptchaType.gCaptcha);
 
@@ -49,7 +50,7 @@ class CaptchaWebViewDialog extends HookConsumerWidget {
           _loadCaptcha(controller, CaptchaType.hCaptcha);
         } else {
           controller.loadRequest(Uri.parse('about:blank'));
-          showToastFailed(ToastError(context.l10n.recaptchaTimeout));
+          showToastFailed(ToastError(l10n.recaptchaTimeout));
           Navigator.pop(context);
         }
       }

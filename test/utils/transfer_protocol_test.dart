@@ -269,12 +269,14 @@ class _BytesStreamSink implements IOSink {
   }
 
   @override
-  Future addStream(Stream<List<int>> stream) {
-    throw UnimplementedError();
+  Future<void> addStream(Stream<List<int>> stream) async {
+    await for (final chunk in stream) {
+      add(chunk);
+    }
   }
 
   @override
-  Future get done => throw UnimplementedError();
+  Future<void> get done async {}
 
   @override
   Future flush() async {}

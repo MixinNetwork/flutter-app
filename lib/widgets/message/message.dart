@@ -11,30 +11,31 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gal/gal.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key;
 import 'package:open_file/open_file.dart';
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
-import '../../bloc/simple_cubit.dart';
 import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
-import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/controllers/blink_controller.dart';
+import '../../ui/provider/account_server_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../ui/provider/database_provider.dart';
 import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../ui/provider/setting_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
@@ -79,10 +80,6 @@ import 'message_day_time.dart';
 import 'message_name.dart';
 import 'message_style.dart';
 
-class _MessageContextCubit extends SimpleCubit<_MessageContext> {
-  _MessageContextCubit(super.initialState);
-}
-
 class _MessageContext with EquatableMixin {
   _MessageContext({
     required this.isTranscriptPage,
@@ -108,54 +105,61 @@ class _MessageContext with EquatableMixin {
   ];
 }
 
+class _MessageContextScope extends InheritedWidget {
+  const _MessageContextScope({
+    required this.value,
+    required super.child,
+  });
+
+  final _MessageContext value;
+
+  static _MessageContext of(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_MessageContextScope>();
+    assert(scope != null, '_MessageContextScope is missing');
+    return scope!.value;
+  }
+
+  @override
+  bool updateShouldNotify(_MessageContextScope oldWidget) =>
+      oldWidget.value != value;
+}
+
 bool useIsTranscriptPage() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.isTranscriptPage,
-    );
+    _MessageContextScope.of(useContext()).isTranscriptPage;
 
-bool useIsPinnedPage() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.isPinnedPage,
-    );
+bool useIsPinnedPage() => _MessageContextScope.of(useContext()).isPinnedPage;
 
-bool useShowNip() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.showNip,
-    );
+bool useShowNip() => _MessageContextScope.of(useContext()).showNip;
 
-bool useIsCurrentUser() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.isCurrentUser,
-    );
+bool useIsCurrentUser() => _MessageContextScope.of(useContext()).isCurrentUser;
 
 MessageItem useMessage() =>
     useMessageConverter<MessageItem>(converter: (state) => state);
 
 T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, T>(
-      converter: (state) => converter(state.message),
-    );
+    converter(_MessageContextScope.of(useContext()).message);
 
 extension MessageContextExtension on BuildContext {
-  MessageItem get message => read<_MessageContextCubit>().state.message;
+  MessageItem get message => _MessageContextScope.of(this).message;
 
-  bool get isPinnedPage => read<_MessageContextCubit>().state.isPinnedPage;
+  bool get isPinnedPage => _MessageContextScope.of(this).isPinnedPage;
 
-  bool get isTranscriptPage =>
-      read<_MessageContextCubit>().state.isTranscriptPage;
+  bool get isTranscriptPage => _MessageContextScope.of(this).isTranscriptPage;
 }
 
 const _pinArrowWidth = 32.0;
 
-void _quickReply(BuildContext context) {
+void _quickReply(BuildContext context, WidgetRef ref) {
   if (context.isPinnedPage) return;
   if (context.isTranscriptPage) return;
   if (!context.message.type.canReply) return;
 
   doubleTap('_quickReply', const Duration(milliseconds: 300), () {
-    context.read<BlinkCubit>().blinkByMessageId(context.message.messageId);
-    context.providerContainer.read(quoteMessageProvider.notifier).state =
-        context.message;
+    ref
+        .read(blinkControllerProvider.notifier)
+        .blinkByMessageId(context.message.messageId);
+    ref.read(quoteMessageProvider.notifier).set(context.message);
   });
 }
 
@@ -196,6 +200,7 @@ class MessageItemWidget extends HookConsumerWidget {
     super.key,
     this.prev,
     this.next,
+    this.bodyKey,
     this.lastReadMessageId,
     this.isTranscriptPage = false,
     this.blink = true,
@@ -205,6 +210,7 @@ class MessageItemWidget extends HookConsumerWidget {
   final MessageItem message;
   final MessageItem? prev;
   final MessageItem? next;
+  final Key? bodyKey;
   final String? lastReadMessageId;
   final bool isTranscriptPage;
   final bool blink;
@@ -218,6 +224,8 @@ class MessageItemWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final isCurrentUser = message.relationship == UserRelationship.me;
 
     final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
@@ -254,481 +262,495 @@ class MessageItemWidget extends HookConsumerWidget {
       userAvatarUrl = message.avatarUrl;
     }
 
-    final showedMenuCubit = useBloc(() => SimpleCubit(false));
+    final showedMenuController = useState(false);
     final focusNode = useFocusScopeNode(
       debugLabel: 'message_item_${message.messageId}',
     );
 
-    final blinkCubit = context.read<BlinkCubit>();
-
-    final blinkColor =
-        useMemoizedStream(
-          () => Rx.combineLatest2(
-            blinkCubit.stream.startWith(blinkCubit.state),
-            showedMenuCubit.stream.startWith(showedMenuCubit.state),
-            (blinkState, showedMenu) {
-              if (showedMenu) return context.theme.listSelected;
-              if (blinkState.messageId == message.messageId && blink) {
-                return blinkState.color;
-              }
-              return Colors.transparent;
-            },
-          ),
-          keys: [message.messageId],
-        ).data ??
-        Colors.transparent;
+    final showedMenu = useValueListenable(showedMenuController);
+    final currentBlinkColor = ref.watch(
+      blinkControllerProvider.select((blinkState) {
+        if (!blink || blinkState.messageId != message.messageId) {
+          return Colors.transparent;
+        }
+        return blinkState.color;
+      }),
+    );
+    final blinkColor = showedMenu ? theme.listSelected : currentBlinkColor;
 
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (datetime != null) MessageDayTime(dateTime: datetime),
-        ColoredBox(
-          color: blinkColor,
-          child: Builder(
-            builder: (context) {
-              if (message.type == MessageCategory.systemConversation) {
-                return const SystemMessage();
-              }
+        KeyedSubtree(
+          key: bodyKey,
+          child: ColoredBox(
+            color: blinkColor,
+            child: Builder(
+              builder: (context) {
+                if (message.type == MessageCategory.systemConversation) {
+                  return const SystemMessage();
+                }
 
-              if (message.type.isPin) {
-                return const PinMessageWidget();
-              }
+                if (message.type.isPin) {
+                  return const PinMessageWidget();
+                }
 
-              if (message.type == MessageCategory.secret) {
-                return const SecretMessage();
-              }
+                if (message.type == MessageCategory.secret) {
+                  return const SecretMessage();
+                }
 
-              if (message.type == MessageCategory.stranger) {
-                return const StrangerMessage();
-              }
+                if (message.type == MessageCategory.stranger) {
+                  return const StrangerMessage();
+                }
 
-              return _MessageSelectionWrapper(
-                message: message,
-                child: _MessageBubbleMargin(
-                  userName: userName,
-                  userId: userId,
-                  userAvatarUrl: userAvatarUrl,
-                  showAvatar: showAvatar,
-                  isCurrentUser: isCurrentUser,
-                  pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
-                  isBot: message.isBot,
-                  isVerified: message.isVerified,
-                  buildMenus: (request) {
-                    request.onShowMenu.addListener(() {
-                      showedMenuCubit.emit(true);
-                      focusNode.requestFocus();
-                    });
-                    request.onHideMenu.addListener(() {
-                      showedMenuCubit.emit(false);
-                    });
+                return _MessageSelectionWrapper(
+                  message: message,
+                  child: _MessageBubbleMargin(
+                    userName: userName,
+                    userId: userId,
+                    userAvatarUrl: userAvatarUrl,
+                    showAvatar: showAvatar,
+                    isCurrentUser: isCurrentUser,
+                    pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
+                    isBot: message.isBot,
+                    isVerified: message.isVerified,
+                    buildMenus: (request) {
+                      request.onShowMenu.addListener(() {
+                        showedMenuController.value = true;
+                        focusNode.requestFocus();
+                      });
+                      request.onHideMenu.addListener(() {
+                        showedMenuController.value = false;
+                      });
 
-                    final enable = !ref.read(hasSelectedMessageProvider);
+                      final enable = !ref.read(hasSelectedMessageProvider);
 
-                    if (!enable) return null;
+                      if (!enable) return null;
 
-                    final role = ref.read(
-                      conversationProvider.select((value) => value?.role),
-                    );
-
-                    final pinEnabled =
-                        !isTranscriptPage &&
-                        message.type.canReply &&
-                        const [
-                          MessageStatus.delivered,
-                          MessageStatus.read,
-                          MessageStatus.sent,
-                        ].contains(message.status) &&
-                        role != null;
-                    final enableReply =
-                        !isTranscriptPage &&
-                        message.type.canReply &&
-                        !isPinnedPage;
-                    final enableForward =
-                        !isTranscriptPage && message.canForward;
-                    final enableSelect = !isTranscriptPage;
-                    final enableSaveMobile =
-                        kPlatformIsMobile &&
-                        (message.type.isImage || message.type.isVideo);
-                    final enableSaveDesktop =
-                        kPlatformIsDesktop &&
-                        message.mediaStatus == MediaStatus.done &&
-                        message.mediaUrl?.isNotEmpty == true &&
-                        (message.type.isData ||
-                            message.type.isImage ||
-                            message.type.isVideo ||
-                            message.type.isAudio);
-                    final enableRecall = !isTranscriptPage && message.canRecall;
-
-                    final enableDelete = !isTranscriptPage && !isPinnedPage;
-
-                    final addStickerMenuAction = [
-                      if (message.type.isSticker)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.sticker),
-                          title: context.l10n.addSticker,
-                          callback: () => _onAddSticker(context),
-                        ),
-                      if (message.type.isImage && message.canForward)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.sticker),
-                          title: context.l10n.addSticker,
-                          callback: () => _onAddImageAsSticker(context),
-                        ),
-                    ];
-
-                    final replayAction = [
-                      if (enableReply)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.reply),
-                          title: context.l10n.reply,
-                          callback: () =>
-                              context.providerContainer
-                                      .read(quoteMessageProvider.notifier)
-                                      .state =
-                                  message,
-                        ),
-                    ];
-
-                    final messageActions = [
-                      if (enableForward)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.forward),
-                          title: context.l10n.forward,
-                          callback: () async {
-                            final result = await showConversationSelector(
-                              context: context,
-                              singleSelect: true,
-                              title: context.l10n.forward,
-                              onlyContact: false,
-                            );
-                            if (result == null || result.isEmpty) return;
-                            await context.accountServer.forwardMessage(
-                              message.messageId,
-                              result.first.encryptCategory!,
-                              conversationId: result.first.conversationId,
-                              recipientId: result.first.userId,
-                            );
-                          },
-                        ),
-                      if (enableSelect)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.select),
-                          title: context.l10n.select,
-                          callback: () => ref
-                              .read(messageSelectionProvider)
-                              .selectMessage(message),
-                        ),
-                      if (pinEnabled)
-                        MenuAction(
-                          image: MenuImage.icon(
-                            message.pinned ? IconFonts.unPin : IconFonts.pin,
-                          ),
-                          title: message.pinned
-                              ? context.l10n.unpin
-                              : context.l10n.pinTitle,
-                          callback: () async {
-                            final pinMessageMinimal = PinMessageMinimal(
-                              messageId: message.messageId,
-                              type: message.type,
-                              content: message.type.isText
-                                  ? message.content
-                                  : null,
-                            );
-                            if (message.pinned) {
-                              await context.accountServer.unpinMessage(
-                                conversationId: message.conversationId,
-                                pinMessageMinimals: [pinMessageMinimal],
-                              );
-                              return;
-                            }
-                            await context.accountServer.pinMessage(
-                              conversationId: message.conversationId,
-                              pinMessageMinimals: [pinMessageMinimal],
-                            );
-                          },
-                        ),
-                    ];
-
-                    final copyActions = <MenuAction>[];
-                    if (message.type.isPost) {
-                      copyActions.add(
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.copy),
-                          title: context.l10n.copy,
-                          callback: () {
-                            Clipboard.setData(
-                              ClipboardData(text: message.content ?? ''),
-                            );
-                          },
-                        ),
+                      final role = ref.read(
+                        conversationProvider.select((value) => value?.role),
                       );
-                    } else if (message.type.isImage) {
-                      copyActions.add(
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.copy),
-                          title: context.l10n.copyImage,
-                          callback: () {
-                            copyFile(
-                              context.accountServer.convertMessageAbsolutePath(
-                                message,
-                                isTranscriptPage,
+
+                      final pinEnabled =
+                          !isTranscriptPage &&
+                          message.type.canReply &&
+                          const [
+                            MessageStatus.delivered,
+                            MessageStatus.read,
+                            MessageStatus.sent,
+                          ].contains(message.status) &&
+                          role != null;
+                      final enableReply =
+                          !isTranscriptPage &&
+                          message.type.canReply &&
+                          !isPinnedPage;
+                      final enableForward =
+                          !isTranscriptPage && message.canForward;
+                      final enableSelect = !isTranscriptPage;
+                      final enableSaveMobile =
+                          kPlatformIsMobile &&
+                          (message.type.isImage || message.type.isVideo);
+                      final enableSaveDesktop =
+                          kPlatformIsDesktop &&
+                          message.mediaStatus == MediaStatus.done &&
+                          message.mediaUrl?.isNotEmpty == true &&
+                          (message.type.isData ||
+                              message.type.isImage ||
+                              message.type.isVideo ||
+                              message.type.isAudio);
+                      final enableRecall =
+                          !isTranscriptPage && message.canRecall;
+
+                      final enableDelete = !isTranscriptPage && !isPinnedPage;
+
+                      final addStickerMenuAction = [
+                        if (message.type.isSticker)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.sticker),
+                            title: l10n.addSticker,
+                            callback: () => _onAddSticker(context, ref),
+                          ),
+                        if (message.type.isImage && message.canForward)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.sticker),
+                            title: l10n.addSticker,
+                            callback: () => _onAddImageAsSticker(ref),
+                          ),
+                      ];
+
+                      final replayAction = [
+                        if (enableReply)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.reply),
+                            title: l10n.reply,
+                            callback: () => ref
+                                .read(quoteMessageProvider.notifier)
+                                .set(
+                                  message,
+                                ),
+                          ),
+                      ];
+
+                      final messageActions = [
+                        if (enableForward)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.forward),
+                            title: l10n.forward,
+                            callback: () async {
+                              final result = await showConversationSelector(
+                                context: context,
+                                singleSelect: true,
+                                title: l10n.forward,
+                                onlyContact: false,
+                              );
+                              if (result == null || result.isEmpty) return;
+                              final accountServer = ref
+                                  .read(accountServerProvider)
+                                  .requireValue;
+                              await accountServer.forwardMessage(
+                                message.messageId,
+                                result.first.encryptCategory!,
+                                conversationId: result.first.conversationId,
+                                recipientId: result.first.userId,
+                              );
+                            },
+                          ),
+                        if (enableSelect)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.select),
+                            title: l10n.select,
+                            callback: () => ref
+                                .read(messageSelectionProvider.notifier)
+                                .selectMessage(message),
+                          ),
+                        if (pinEnabled)
+                          MenuAction(
+                            image: MenuImage.icon(
+                              message.pinned ? IconFonts.unPin : IconFonts.pin,
+                            ),
+                            title: message.pinned ? l10n.unpin : l10n.pinTitle,
+                            callback: () async {
+                              final pinMessageMinimal = PinMessageMinimal(
+                                messageId: message.messageId,
+                                type: message.type,
+                                content: message.type.isText
+                                    ? message.content
+                                    : null,
+                              );
+                              if (message.pinned) {
+                                await ref
+                                    .read(accountServerProvider)
+                                    .requireValue
+                                    .unpinMessage(
+                                      conversationId: message.conversationId,
+                                      pinMessageMinimals: [pinMessageMinimal],
+                                    );
+                                return;
+                              }
+                              await ref
+                                  .read(accountServerProvider)
+                                  .requireValue
+                                  .pinMessage(
+                                    conversationId: message.conversationId,
+                                    pinMessageMinimals: [pinMessageMinimal],
+                                  );
+                            },
+                          ),
+                      ];
+
+                      final copyActions = <MenuAction>[];
+                      if (message.type.isPost) {
+                        copyActions.add(
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.copy),
+                            title: l10n.copy,
+                            callback: () {
+                              Clipboard.setData(
+                                ClipboardData(text: message.content ?? ''),
+                              );
+                            },
+                          ),
+                        );
+                      } else if (message.type.isImage) {
+                        copyActions.add(
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.copy),
+                            title: l10n.copyImage,
+                            callback: () {
+                              final accountServer = ref
+                                  .read(accountServerProvider)
+                                  .requireValue;
+                              copyFile(
+                                accountServer.convertMessageAbsolutePath(
+                                  message,
+                                  isTranscriptPage,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                        if (!message.caption.isNullOrBlank()) {
+                          final selectedContent = _findSelectedContent(context);
+                          if (selectedContent != null) {
+                            copyActions.add(
+                              MenuAction(
+                                image: MenuImage.icon(IconFonts.copy),
+                                title: l10n.copySelectedText,
+                                callback: () {
+                                  Clipboard.setData(
+                                    ClipboardData(
+                                      text: selectedContent.plainText,
+                                    ),
+                                  );
+                                },
                               ),
                             );
-                          },
-                        ),
-                      );
-                      if (!message.caption.isNullOrBlank()) {
+                          } else {
+                            copyActions.add(
+                              MenuAction(
+                                image: MenuImage.icon(IconFonts.copy),
+                                title: l10n.copyText,
+                                callback: () {
+                                  Clipboard.setData(
+                                    ClipboardData(text: message.caption ?? ''),
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                        }
+                      } else if (message.type.isText) {
+                        final selectedContent = _findSelectedContent(context);
+                        copyActions
+                          ..add(
+                            MenuAction(
+                              image: MenuImage.icon(IconFonts.copy),
+                              title: selectedContent == null
+                                  ? l10n.copy
+                                  : l10n.copySelectedText,
+                              callback: () {
+                                if (selectedContent != null) {
+                                  Clipboard.setData(
+                                    ClipboardData(
+                                      text: selectedContent.plainText,
+                                    ),
+                                  );
+                                } else {
+                                  Clipboard.setData(
+                                    ClipboardData(text: message.content ?? ''),
+                                  );
+                                }
+                              },
+                            ),
+                          )
+                          ..add(
+                            MenuAction(
+                              image: MenuImage.icon(Icons.qr_code),
+                              title: l10n.generateQrcode,
+                              callback: () {
+                                final content =
+                                    selectedContent?.plainText ??
+                                    message.content ??
+                                    '';
+                                showQrCodeDialog(context, content);
+                              },
+                            ),
+                          );
+                      } else if (message.type.isAppCard) {
                         final selectedContent = _findSelectedContent(context);
                         if (selectedContent != null) {
                           copyActions.add(
                             MenuAction(
                               image: MenuImage.icon(IconFonts.copy),
-                              title: context.l10n.copySelectedText,
+                              title: l10n.copySelectedText,
                               callback: () {
-                                Clipboard.setData(
-                                  ClipboardData(
-                                    text: selectedContent.plainText,
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        } else {
-                          copyActions.add(
-                            MenuAction(
-                              image: MenuImage.icon(IconFonts.copy),
-                              title: context.l10n.copyText,
-                              callback: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: message.caption ?? ''),
-                                );
+                                String text;
+                                try {
+                                  final data = AppCardData.fromJson(
+                                    jsonDecode(message.content!)
+                                        as Map<String, dynamic>,
+                                  );
+                                  text = data.generateCopyTextWithBreakLine(
+                                    selectedContent.plainText,
+                                  );
+                                } catch (error) {
+                                  e('ActionCard decode error: $error');
+                                  text = selectedContent.plainText;
+                                }
+                                Clipboard.setData(ClipboardData(text: text));
                               },
                             ),
                           );
                         }
                       }
-                    } else if (message.type.isText) {
-                      final selectedContent = _findSelectedContent(context);
-                      copyActions
-                        ..add(
+
+                      final saveActions = [
+                        if (enableSaveMobile)
                           MenuAction(
-                            image: MenuImage.icon(IconFonts.copy),
-                            title: selectedContent == null
-                                ? context.l10n.copy
-                                : context.l10n.copySelectedText,
-                            callback: () {
-                              if (selectedContent != null) {
-                                Clipboard.setData(
-                                  ClipboardData(
-                                    text: selectedContent.plainText,
-                                  ),
-                                );
-                              } else {
-                                Clipboard.setData(
-                                  ClipboardData(text: message.content ?? ''),
-                                );
+                            image: MenuImage.icon(IconFonts.download),
+                            title: l10n.saveToCameraRoll,
+                            callback: () => saveAs(
+                              context,
+                              ref.read(accountServerProvider).requireValue,
+                              message,
+                              isTranscriptPage,
+                              confirmButtonText: l10n.save,
+                            ),
+                          ),
+                        if (enableSaveDesktop)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.download),
+                            title: l10n.saveAs,
+                            callback: () => saveAs(
+                              context,
+                              ref.read(accountServerProvider).requireValue,
+                              message,
+                              isTranscriptPage,
+                              confirmButtonText: l10n.save,
+                            ),
+                          ),
+                      ];
+                      final deleteActions = [
+                        if (enableRecall)
+                          MenuAction(
+                            image: MenuImage.icon(IconFonts.recall),
+                            title: l10n.deleteForEveryone,
+                            callback: () async {
+                              String? content;
+                              if (message.type.isText) {
+                                content = message.content;
+                              }
+                              await ref
+                                  .read(accountServerProvider)
+                                  .requireValue
+                                  .sendRecallMessage([
+                                    message.messageId,
+                                  ], conversationId: message.conversationId);
+                              if (content != null) {
+                                ref
+                                    .read(recallMessageNotifierProvider)
+                                    .onRecalled(message.messageId, content);
                               }
                             },
                           ),
-                        )
-                        ..add(
+                        if (enableDelete)
                           MenuAction(
-                            image: MenuImage.icon(Icons.qr_code),
-                            title: context.l10n.generateQrcode,
-                            callback: () {
-                              final content =
-                                  selectedContent?.plainText ??
-                                  message.content ??
-                                  '';
-                              showQrCodeDialog(context, content);
-                            },
+                            image: MenuImage.icon(IconFonts.delete),
+                            title: l10n.deleteForMe,
+                            callback: () => ref
+                                .read(accountServerProvider)
+                                .requireValue
+                                .deleteMessage(message.messageId),
                           ),
-                        );
-                    } else if (message.type.isAppCard) {
-                      final selectedContent = _findSelectedContent(context);
-                      if (selectedContent != null) {
-                        copyActions.add(
+                      ];
+
+                      final devActions = [
+                        if (!kReleaseMode)
                           MenuAction(
                             image: MenuImage.icon(IconFonts.copy),
-                            title: context.l10n.copySelectedText,
-                            callback: () {
-                              String text;
-                              try {
-                                final data = AppCardData.fromJson(
-                                  jsonDecode(message.content!)
-                                      as Map<String, dynamic>,
-                                );
-                                text = data.generateCopyTextWithBreakLine(
-                                  selectedContent.plainText,
-                                );
-                              } catch (error) {
-                                e('ActionCard decode error: $error');
-                                text = selectedContent.plainText;
-                              }
-                              Clipboard.setData(ClipboardData(text: text));
-                            },
+                            title: 'Copy message',
+                            callback: () => Clipboard.setData(
+                              ClipboardData(text: message.toString()),
+                            ),
                           ),
-                        );
+                      ];
+
+                      return MenusWithSeparator(
+                        childrens: [
+                          replayAction,
+                          copyActions,
+                          messageActions,
+                          saveActions,
+                          addStickerMenuAction,
+                          deleteActions,
+                          devActions,
+                        ],
+                      );
+                    },
+                    builder: (context) {
+                      if (message.type.isIllegalMessageCategory ||
+                          message.status == MessageStatus.unknown) {
+                        return const UnknownMessage();
                       }
-                    }
 
-                    final saveActions = [
-                      if (enableSaveMobile)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.download),
-                          title: context.l10n.saveToCameraRoll,
-                          callback: () => saveAs(
-                            context,
-                            context.accountServer,
-                            message,
-                            isTranscriptPage,
-                          ),
-                        ),
-                      if (enableSaveDesktop)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.download),
-                          title: context.l10n.saveAs,
-                          callback: () => saveAs(
-                            context,
-                            context.accountServer,
-                            message,
-                            isTranscriptPage,
-                          ),
-                        ),
-                    ];
-                    final deleteActions = [
-                      if (enableRecall)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.recall),
-                          title: context.l10n.deleteForEveryone,
-                          callback: () async {
-                            String? content;
-                            if (message.type.isText) {
-                              content = message.content;
-                            }
-                            await context.accountServer.sendRecallMessage([
-                              message.messageId,
-                            ], conversationId: message.conversationId);
-                            if (content != null) {
-                              context.providerContainer
-                                  .read(recallMessageNotifierProvider)
-                                  .onRecalled(message.messageId, content);
-                            }
-                          },
-                        ),
-                      if (enableDelete)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.delete),
-                          title: context.l10n.deleteForMe,
-                          callback: () => context.accountServer.deleteMessage(
-                            message.messageId,
-                          ),
-                        ),
-                    ];
+                      if (message.status == MessageStatus.failed) {
+                        return const WaitingMessage();
+                      }
 
-                    final devActions = [
-                      if (!kReleaseMode)
-                        MenuAction(
-                          image: MenuImage.icon(IconFonts.copy),
-                          title: 'Copy message',
-                          callback: () => Clipboard.setData(
-                            ClipboardData(text: message.toString()),
-                          ),
-                        ),
-                    ];
+                      if (message.type.isTranscript) {
+                        return const TranscriptMessageWidget();
+                      }
 
-                    return MenusWithSeparator(
-                      childrens: [
-                        replayAction,
-                        copyActions,
-                        messageActions,
-                        saveActions,
-                        addStickerMenuAction,
-                        deleteActions,
-                        devActions,
-                      ],
-                    );
-                  },
-                  builder: (context) {
-                    if (message.type.isIllegalMessageCategory ||
-                        message.status == MessageStatus.unknown) {
+                      if (message.type.isLocation) {
+                        return const LocationMessageWidget();
+                      }
+
+                      if (message.type.isPost) {
+                        return const PostMessage();
+                      }
+
+                      if (message.type ==
+                          MessageCategory.systemAccountSnapshot) {
+                        return const TransferMessage();
+                      }
+
+                      if (message.type == MessageCategory.systemSafeSnapshot) {
+                        return const SafeTransferMessage();
+                      }
+
+                      if (message.type.isContact) {
+                        return const ContactMessageWidget();
+                      }
+
+                      if (message.type == MessageCategory.appButtonGroup) {
+                        return const ActionMessage();
+                      }
+
+                      if (message.type == MessageCategory.appCard) {
+                        return const ActionCardMessage();
+                      }
+
+                      if (message.type.isData) {
+                        return const FileMessage();
+                      }
+
+                      if (message.type.isText) {
+                        return const TextMessage();
+                      }
+
+                      if (message.type.isSticker) {
+                        return const StickerMessageWidget();
+                      }
+
+                      if (message.type.isImage) {
+                        return const ImageMessageWidget();
+                      }
+
+                      if (message.type.isVideo || message.type.isLive) {
+                        return const VideoMessageWidget();
+                      }
+
+                      if (message.type.isAudio) {
+                        return const AudioMessage();
+                      }
+
+                      if (message.type.isRecall) {
+                        return const RecallMessage();
+                      }
+
+                      if (message.type ==
+                          MessageCategory.systemSafeInscription) {
+                        return const InscriptionMessage();
+                      }
+
                       return const UnknownMessage();
-                    }
-
-                    if (message.status == MessageStatus.failed) {
-                      return const WaitingMessage();
-                    }
-
-                    if (message.type.isTranscript) {
-                      return const TranscriptMessageWidget();
-                    }
-
-                    if (message.type.isLocation) {
-                      return const LocationMessageWidget();
-                    }
-
-                    if (message.type.isPost) {
-                      return const PostMessage();
-                    }
-
-                    if (message.type == MessageCategory.systemAccountSnapshot) {
-                      return const TransferMessage();
-                    }
-
-                    if (message.type == MessageCategory.systemSafeSnapshot) {
-                      return const SafeTransferMessage();
-                    }
-
-                    if (message.type.isContact) {
-                      return const ContactMessageWidget();
-                    }
-
-                    if (message.type == MessageCategory.appButtonGroup) {
-                      return const ActionMessage();
-                    }
-
-                    if (message.type == MessageCategory.appCard) {
-                      return const ActionCardMessage();
-                    }
-
-                    if (message.type.isData) {
-                      return const FileMessage();
-                    }
-
-                    if (message.type.isText) {
-                      return const TextMessage();
-                    }
-
-                    if (message.type.isSticker) {
-                      return const StickerMessageWidget();
-                    }
-
-                    if (message.type.isImage) {
-                      return const ImageMessageWidget();
-                    }
-
-                    if (message.type.isVideo || message.type.isLive) {
-                      return const VideoMessageWidget();
-                    }
-
-                    if (message.type.isAudio) {
-                      return const AudioMessage();
-                    }
-
-                    if (message.type.isRecall) {
-                      return const RecallMessage();
-                    }
-
-                    if (message.type == MessageCategory.systemSafeInscription) {
-                      return const InscriptionMessage();
-                    }
-
-                    return const UnknownMessage();
-                  },
-                ),
-              );
-            },
+                    },
+                  ),
+                );
+              },
+            ),
           ),
         ),
         if (message.messageId == lastReadMessageId && next != null)
@@ -740,32 +762,37 @@ class MessageItemWidget extends HookConsumerWidget {
       child = VisibilityDetector(
         onVisibilityChanged: (info) {
           if (info.visibleFraction < 1) return;
-          context.accountServer.markMentionRead(
-            message.messageId,
-            message.conversationId,
-          );
+          ref
+              .read(accountServerProvider)
+              .requireValue
+              .markMentionRead(
+                message.messageId,
+                message.conversationId,
+              );
         },
         key: ValueKey(message.messageId),
         child: child,
       );
     }
 
-    return FocusScope(
-      node: focusNode,
-      child: MessageContext(
-        isTranscriptPage: isTranscriptPage,
-        isPinnedPage: isPinnedPage,
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        message: message,
-        child: Builder(
-          builder: (context) => GestureDetector(
-            onTap: () => _quickReply(context),
-            child: Padding(
-              padding: sameUserPrev
-                  ? EdgeInsets.zero
-                  : const EdgeInsets.only(top: 8),
-              child: child,
+    return MessageStyleScope(
+      child: FocusScope(
+        node: focusNode,
+        child: MessageContext(
+          isTranscriptPage: isTranscriptPage,
+          isPinnedPage: isPinnedPage,
+          showNip: showNip,
+          isCurrentUser: isCurrentUser,
+          message: message,
+          child: Builder(
+            builder: (context) => GestureDetector(
+              onTap: () => _quickReply(context, ref),
+              child: Padding(
+                padding: sameUserPrev
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.only(top: 8),
+                child: child,
+              ),
             ),
           ),
         ),
@@ -773,26 +800,26 @@ class MessageItemWidget extends HookConsumerWidget {
     );
   }
 
-  Future<void> _onAddImageAsSticker(BuildContext context) async {
+  Future<void> _onAddImageAsSticker(WidgetRef ref) async {
     await showAddStickerDialog(
-      context,
-      filepath: context.accountServer.convertMessageAbsolutePath(
-        message,
-        isTranscriptPage,
-      ),
+      ref.context,
+      filepath: ref
+          .read(accountServerProvider)
+          .requireValue
+          .convertMessageAbsolutePath(message, isTranscriptPage),
     );
   }
 
-  Future<void> _onAddSticker(BuildContext context) async {
+  Future<void> _onAddSticker(BuildContext context, WidgetRef ref) async {
     showToastLoading();
     try {
-      final accountServer = context.accountServer;
+      final accountServer = ref.read(accountServerProvider).requireValue;
 
       final mixinResponse = await accountServer.client.accountApi.addSticker(
         StickerRequest(stickerId: message.stickerId),
       );
 
-      final database = context.database;
+      final database = ref.read(databaseProvider).requireValue;
 
       final personalAlbum = await database.stickerAlbumDao
           .personalAlbum()
@@ -811,7 +838,8 @@ class MessageItemWidget extends HookConsumerWidget {
       }
       showToastSuccessful();
     } catch (_) {
-      showToastFailed(ToastError(context.l10n.addStickerFailed));
+      final l10n = ref.read(localizationProvider);
+      showToastFailed(ToastError(l10n.addStickerFailed));
     }
   }
 }
@@ -845,23 +873,14 @@ class MessageContext extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    _MessageContext newMessageContext() => _MessageContext(
+    final messageContext = _MessageContext(
       isTranscriptPage: isTranscriptPage,
       isPinnedPage: isPinnedPage,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       message: message,
     );
-
-    final messageContextCubit = useBloc(
-      () => _MessageContextCubit(newMessageContext()),
-    );
-
-    useEffect(() {
-      messageContextCubit.emit(newMessageContext());
-    }, [isTranscriptPage, isPinnedPage, showNip, isCurrentUser, message]);
-
-    return Provider.value(value: messageContextCubit, child: child);
+    return _MessageContextScope(value: messageContext, child: child);
   }
 }
 
@@ -869,8 +888,9 @@ Future<void> saveAs(
   BuildContext context,
   AccountServer accountServer,
   MessageItem message,
-  bool isTranscriptPage,
-) async {
+  bool isTranscriptPage, {
+  required String confirmButtonText,
+}) async {
   final path = accountServer.convertMessageAbsolutePath(
     message,
     isTranscriptPage,
@@ -894,9 +914,9 @@ Future<void> saveAs(
   } else {
     try {
       final result = await saveFileToSystem(
-        context,
         path,
         suggestName: message.mediaName,
+        confirmButtonText: confirmButtonText,
       );
       if (result) return showToastSuccessful();
     } catch (error, s) {
@@ -963,7 +983,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
           menuProvider: buildMenus,
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
           child: GestureDetector(
-            onTap: () => _quickReply(context),
+            onTap: () => _quickReply(context, ref),
             child: Builder(builder: builder),
           ),
         ),
@@ -988,7 +1008,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       children: [
         const SizedBox(width: 8),
         InteractiveDecoratedBox(
-          onTap: () => showUserDialog(context, userId),
+          onTap: () => showUserDialog(context, ref.container, userId),
           cursor: SystemMouseCursors.click,
           child: AvatarWidget(
             userId: userId,
@@ -1009,23 +1029,27 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   }
 }
 
-class _UnreadMessageBar extends StatelessWidget {
+class _UnreadMessageBar extends ConsumerWidget {
   const _UnreadMessageBar();
 
   @override
-  Widget build(BuildContext context) => Container(
-    color: context.theme.background,
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    margin: const EdgeInsets.symmetric(vertical: 6),
-    alignment: Alignment.center,
-    child: Text(
-      context.l10n.unreadMessages,
-      style: TextStyle(
-        color: context.theme.secondaryText,
-        fontSize: context.messageStyle.secondaryFontSize,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    return Container(
+      color: theme.background,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      alignment: Alignment.center,
+      child: Text(
+        l10n.unreadMessages,
+        style: TextStyle(
+          color: theme.secondaryText,
+          fontSize: context.messageStyle.secondaryFontSize,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _MessageSelectionWrapper extends HookConsumerWidget {
@@ -1048,7 +1072,9 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: inMultiSelectMode
-          ? () => ref.read(messageSelectionProvider).toggleSelection(message)
+          ? () => ref
+                .read(messageSelectionProvider.notifier)
+                .toggleSelection(message)
           : null,
       child: Row(
         children: [
@@ -1077,6 +1103,7 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final animationController = useAnimationController(
       duration: const Duration(milliseconds: 300),
     );
@@ -1110,9 +1137,7 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
       child: Center(
         child: ClipOval(
           child: Container(
-            color: selected
-                ? context.theme.accent
-                : context.theme.secondaryText,
+            color: selected ? theme.accent : theme.secondaryText,
             height: 16,
             width: 16,
             alignment: const Alignment(0, -0.2),

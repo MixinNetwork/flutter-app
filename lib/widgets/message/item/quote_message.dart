@@ -12,11 +12,13 @@ import '../../../db/dao/message_dao.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
-import '../../../ui/home/bloc/blink_cubit.dart';
-import '../../../ui/home/bloc/message_bloc.dart';
+import '../../../ui/home/providers/home_scope_providers.dart';
+import '../../../ui/provider/account_server_provider.dart';
 import '../../../ui/provider/conversation_provider.dart';
+import '../../../ui/provider/database_provider.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../ui/provider/pending_jump_message_provider.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../ui/provider/user_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
@@ -53,6 +55,8 @@ class QuoteMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final decodeMap = useMemoized(() {
       if (quoteContent == null) return null;
       return jsonDecode(quoteContent!);
@@ -61,7 +65,7 @@ class QuoteMessage extends HookConsumerWidget {
     if (quoteMessageId?.isEmpty ?? true) return const SizedBox();
     var inputMode = false;
 
-    final iconColor = context.theme.secondaryText;
+    final iconColor = theme.secondaryText;
 
     try {
       dynamic quote;
@@ -123,7 +127,11 @@ class QuoteMessage extends HookConsumerWidget {
             return const Stream<Sticker?>.empty();
           }
 
-          return watchStickerById(context.database, stickerId);
+          final database = ref.read(databaseProvider).value;
+          if (database == null) {
+            return const Stream<Sticker?>.empty();
+          }
+          return watchStickerById(database, stickerId);
         },
         keys: [type, stickerId],
       ).data;
@@ -134,7 +142,7 @@ class QuoteMessage extends HookConsumerWidget {
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: null,
-          description: context.l10n.messageNotSupport,
+          description: l10n.messageNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
@@ -187,7 +195,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesImageSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.image,
+          description: l10n.image,
           inputMode: inputMode,
         );
       }
@@ -202,7 +210,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesVideoSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.video,
+          description: l10n.video,
           inputMode: inputMode,
         );
       }
@@ -225,7 +233,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesLiveSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.live,
+          description: l10n.live,
           inputMode: inputMode,
         );
       }
@@ -239,7 +247,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesFileSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: mediaName ?? context.l10n.file,
+          description: mediaName ?? l10n.file,
           inputMode: inputMode,
         );
       }
@@ -253,7 +261,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesFileSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.transcript,
+          description: l10n.transcript,
           inputMode: inputMode,
         );
       }
@@ -281,7 +289,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesLocationSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.location,
+          description: l10n.location,
           inputMode: inputMode,
         );
       }
@@ -295,7 +303,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesAudioSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.audio,
+          description: l10n.audio,
           inputMode: inputMode,
         );
       }
@@ -316,7 +324,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesStickerSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: context.l10n.sticker,
+          description: l10n.sticker,
           inputMode: inputMode,
         );
       }
@@ -370,7 +378,7 @@ class QuoteMessage extends HookConsumerWidget {
             Resources.assetsImagesAppButtonSvg,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
-          description: description ?? context.l10n.bots,
+          description: description ?? l10n.bots,
           inputMode: inputMode,
         );
       }
@@ -382,7 +390,7 @@ class QuoteMessage extends HookConsumerWidget {
       messageId: messageId,
       quoteMessageId: quoteMessageId!,
       userId: null,
-      description: context.l10n.messageNotFound,
+      description: l10n.messageNotFound,
       icon: SvgPicture.asset(
         Resources.assetsImagesRecallSvg,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
@@ -393,7 +401,7 @@ class QuoteMessage extends HookConsumerWidget {
   }
 }
 
-class _QuoteImage extends HookWidget {
+class _QuoteImage extends HookConsumerWidget {
   const _QuoteImage({
     required this.quote,
     required this.type,
@@ -409,7 +417,7 @@ class _QuoteImage extends HookWidget {
   final String? messageId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final thumbImage = quote?.thumbImage as String?;
     final mediaUrl = quote?.mediaUrl as String?;
 
@@ -420,7 +428,8 @@ class _QuoteImage extends HookWidget {
       }
       if (mediaUrl == null) {
         scheduleMicrotask(() async {
-          final messageDao = context.database.messageDao;
+          final database = ref.read(databaseProvider).requireValue;
+          final messageDao = database.messageDao;
           final messageItem = await messageDao.findMessageItemByMessageId(
             quoteMessageId,
           );
@@ -437,12 +446,15 @@ class _QuoteImage extends HookWidget {
 
     return MixinImage.file(
       File(
-        context.accountServer.convertAbsolutePath(
-          type,
-          quote.conversationId as String,
-          mediaUrl,
-          isTranscriptPage,
-        ),
+        ref
+            .read(accountServerProvider)
+            .requireValue
+            .convertAbsolutePath(
+              type,
+              quote.conversationId as String,
+              mediaUrl,
+              isTranscriptPage,
+            ),
       ),
       errorBuilder: (_, _, _) =>
           ImageByBlurHashOrBase64(imageData: thumbImage!),
@@ -475,12 +487,13 @@ class _QuoteMessageBase extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
     final color = userId?.isNotEmpty == true
         ? getNameColorById(userId!)
-        : context.theme.accent;
+        : theme.accent;
 
     final user = userId != null ? ref.watch(userCacheProvider(userId!)) : null;
 
@@ -494,11 +507,14 @@ class _QuoteMessageBase extends HookConsumerWidget {
             onTap!();
             return;
           }
-          context.read<BlinkCubit>().blinkByMessageId(quoteMessageId);
+          ref
+              .read(blinkControllerProvider.notifier)
+              .blinkByMessageId(quoteMessageId);
 
           try {
             if (context.isPinnedPage) {
               ConversationStateNotifier.selectConversation(
+                ref.container,
                 context,
                 context.message.conversationId,
                 initIndexMessageId: quoteMessageId,
@@ -507,11 +523,8 @@ class _QuoteMessageBase extends HookConsumerWidget {
             }
           } catch (_) {}
 
-          context.providerContainer
-                  .read(pendingJumpMessageProvider.notifier)
-                  .state =
-              messageId;
-          context.read<MessageBloc>().scrollTo(quoteMessageId);
+          ref.read(pendingJumpMessageProvider.notifier).set(messageId);
+          ref.read(messageControllerProvider.notifier).scrollTo(quoteMessageId);
         },
         behavior: HitTestBehavior.opaque,
         child: Container(
@@ -577,7 +590,7 @@ class _QuoteMessageBase extends HookConsumerWidget {
                                     style: TextStyle(
                                       fontSize:
                                           context.messageStyle.tertiaryFontSize,
-                                      color: context.theme.secondaryText,
+                                      color: theme.secondaryText,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,

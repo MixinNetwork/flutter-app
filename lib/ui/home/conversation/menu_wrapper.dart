@@ -6,13 +6,15 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/extension/conversation.dart';
-import '../../../utils/extension/extension.dart';
 import '../../../widgets/conversation/mute_dialog.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/account_server_provider.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/database_provider.dart';
 import '../../provider/slide_category_provider.dart';
+import '../../provider/ui_context_providers.dart';
 
 class ConversationMenuWrapper extends HookConsumerWidget {
   const ConversationMenuWrapper({
@@ -41,17 +43,21 @@ class ConversationMenuWrapper extends HookConsumerWidget {
         conversation?.isGroupConversation ??
         searchConversation!.isGroupConversation;
 
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+
     return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
       menuProvider: (request) async {
         final circleId = ref.read(
-          slideCategoryStateProvider.select((value) {
+          slideCategoryProvider.select((value) {
             if (value.type != SlideCategoryType.circle) return null;
             return value.id;
           }),
         );
 
-        final circles = await context.database.circleDao
+        final circles = await database.circleDao
             .otherCircleByConversationId(conversationId)
             .get();
 
@@ -61,25 +67,23 @@ class ConversationMenuWrapper extends HookConsumerWidget {
               if (pinTime != null)
                 MenuAction(
                   image: MenuImage.icon(IconFonts.unPin),
-                  title: context.l10n.unpin,
-                  callback: () => runFutureWithToast(
-                    context.accountServer.unpin(conversationId),
-                  ),
+                  title: l10n.unpin,
+                  callback: () =>
+                      runFutureWithToast(accountServer.unpin(conversationId)),
                 )
               else
                 MenuAction(
                   image: MenuImage.icon(IconFonts.pin),
-                  title: context.l10n.pinTitle,
-                  callback: () => runFutureWithToast(
-                    context.accountServer.pin(conversationId),
-                  ),
+                  title: l10n.pinTitle,
+                  callback: () =>
+                      runFutureWithToast(accountServer.pin(conversationId)),
                 ),
               if (isMute)
                 MenuAction(
                   image: MenuImage.icon(IconFonts.unMute),
-                  title: context.l10n.unmute,
+                  title: l10n.unmute,
                   callback: () => runFutureWithToast(
-                    context.accountServer.unMuteConversation(
+                    accountServer.unMuteConversation(
                       conversationId: isGroupConversation
                           ? conversationId
                           : null,
@@ -90,7 +94,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
               else
                 MenuAction(
                   image: MenuImage.icon(IconFonts.mute),
-                  title: context.l10n.mute,
+                  title: l10n.mute,
                   callback: () async {
                     final result = await showMixinDialog<int?>(
                       context: context,
@@ -98,7 +102,7 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                     );
                     if (result == null) return;
                     await runFutureWithToast(
-                      context.accountServer.muteConversation(
+                      accountServer.muteConversation(
                         result,
                         conversationId: isGroupConversation
                             ? conversationId
@@ -114,23 +118,25 @@ class ConversationMenuWrapper extends HookConsumerWidget {
               if (circles.isNotEmpty)
                 Menu(
                   image: MenuImage.icon(IconFonts.circle),
-                  title: context.l10n.addToCircle,
+                  title: l10n.addToCircle,
                   children: circles
                       .map(
                         (e) => MenuAction(
                           title: e.name,
                           callback: () async {
                             await runFutureWithToast(() async {
-                              await context.accountServer
-                                  .editCircleConversation(e.circleId, [
-                                    CircleConversationRequest(
-                                      action: CircleConversationAction.add,
-                                      conversationId: conversationId,
-                                      userId: isGroupConversation
-                                          ? null
-                                          : ownerId,
-                                    ),
-                                  ]);
+                              await accountServer.editCircleConversation(
+                                e.circleId,
+                                [
+                                  CircleConversationRequest(
+                                    action: CircleConversationAction.add,
+                                    conversationId: conversationId,
+                                    userId: isGroupConversation
+                                        ? null
+                                        : ownerId,
+                                  ),
+                                ],
+                              );
                             }());
                           },
                         ),
@@ -141,22 +147,20 @@ class ConversationMenuWrapper extends HookConsumerWidget {
             [
               MenuAction(
                 image: MenuImage.icon(IconFonts.delete),
-                title: context.l10n.deleteChat,
+                title: l10n.deleteChat,
                 callback: () async {
                   final name =
                       conversation?.validName ?? searchConversation!.validName;
                   final ret = await showConfirmMixinDialog(
                     context,
-                    context.l10n.conversationDeleteTitle(name),
-                    description: context.l10n.deleteChatDescription,
+                    l10n.conversationDeleteTitle(name),
+                    description: l10n.deleteChatDescription,
                   );
                   if (ret == null) return;
-                  await context.accountServer.deleteMessagesByConversationId(
+                  await accountServer.deleteMessagesByConversationId(
                     conversationId,
                   );
-                  await context.accountServer.deleteConversation(
-                    conversationId,
-                  );
+                  await accountServer.deleteConversation(conversationId);
                   if (ref.read(conversationProvider)?.conversationId ==
                       conversationId) {
                     ref.read(conversationProvider.notifier).unselected();
@@ -168,9 +172,9 @@ class ConversationMenuWrapper extends HookConsumerWidget {
                   circleId.isNotEmpty)
                 MenuAction(
                   image: MenuImage.icon(IconFonts.delete),
-                  title: context.l10n.removeChatFromCircle,
+                  title: l10n.removeChatFromCircle,
                   callback: () => runFutureWithToast(
-                    context.accountServer.editCircleConversation(circleId, [
+                    accountServer.editCircleConversation(circleId, [
                       CircleConversationRequest(
                         action: CircleConversationAction.remove,
                         conversationId: conversationId,

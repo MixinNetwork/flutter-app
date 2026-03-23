@@ -8,14 +8,42 @@ import '../account/account_server.dart';
 import '../blaze/blaze.dart';
 import '../db/database.dart';
 import '../runtime/session/app_runtime_session_host.dart';
+import '../ui/provider/conversation_provider.dart';
+import '../ui/provider/database_provider.dart';
 import '../ui/provider/multi_auth_provider.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
 import '../utils/platform.dart';
-import '../utils/rivepod.dart';
 
 typedef GetCurrentConversationId = String? Function();
+
+final Provider<GetCurrentConversationId> _currentConversationIdProvider =
+    Provider<GetCurrentConversationId>(
+      (ref) =>
+          () => ref.read(currentConversationIdProvider),
+    );
+
+final _runtimeArgsProvider = Provider.autoDispose<AppRuntimeArgs>((ref) {
+  final database = ref.watch(
+    databaseProvider.select((value) => value.value),
+  );
+  final authState = ref.watch(authProvider);
+  final multiAuthNotifier = ref.read(multiAuthNotifierProvider.notifier);
+  final settingChangeNotifier = ref.read(settingProvider.notifier);
+  final currentConversationId = ref.read(_currentConversationIdProvider);
+
+  return AppRuntimeArgs(
+    database: database,
+    userId: authState?.account.userId,
+    sessionId: authState?.account.sessionId,
+    identityNumber: authState?.account.identityNumber,
+    privateKey: authState?.privateKey,
+    multiAuthNotifier: multiAuthNotifier,
+    settingChangeNotifier: settingChangeNotifier,
+    currentConversationId: currentConversationId,
+  );
+});
 
 enum AppRuntimePhase {
   idle,
@@ -112,9 +140,7 @@ class AppRuntimeArgs extends Equatable {
   ];
 }
 
-class AppRuntimeHub extends DistinctStateNotifier<AppRuntimeState> {
-  AppRuntimeHub() : super(const AppRuntimeState.idle());
-
+class AppRuntimeHub extends Notifier<AppRuntimeState> {
   final _authCoordinator = _AuthRuntimeCoordinator();
   final _connectionCoordinator = _ConnectionRuntimeCoordinator();
   final _syncCoordinator = _SyncRuntimeCoordinator();
@@ -124,18 +150,71 @@ class AppRuntimeHub extends DistinctStateNotifier<AppRuntimeState> {
   int _epoch = 0;
   bool _disposed = false;
 
+  @override
+  AppRuntimeState build() {
+    i('[RuntimeHub] build() called, hashCode=$hashCode');
+    ref.keepAlive();
+    ref.listen<AppRuntimeArgs>(_runtimeArgsProvider, (previous, next) {
+      i('[RuntimeHub] listener fired, about to call updateArgs');
+      unawaited(updateArgs(next));
+    });
+    // Schedule the initial updateArgs after build() returns,
+    // so that `state` is initialized and accessible.
+    Future.microtask(() {
+      final args = ref.read(_runtimeArgsProvider);
+      i('[RuntimeHub] initial updateArgs via microtask');
+      unawaited(updateArgs(args));
+    });
+    ref.onDispose(() {
+      i('[RuntimeHub] onDispose called, hashCode=$hashCode');
+      unawaited(_disposeAsync());
+    });
+    return const AppRuntimeState.idle();
+  }
+
   Future<void> updateArgs(AppRuntimeArgs args) async {
-    if (_disposed) return;
+    if (_disposed) {
+      i('[RuntimeHub] updateArgs SKIPPED: _disposed=true, hashCode=$hashCode');
+      return;
+    }
 
     final snapshot = _authCoordinator.resolve(args);
+    i(
+      '[RuntimeHub] updateArgs called: '
+      'database=${args.database != null}, '
+      'isReady=${snapshot.isReady}, '
+      'epoch=$_epoch, '
+      'activeSessionKey=$_activeSessionKey, '
+      'hasValue=${state.accountServer.hasValue}, '
+      'phase=${state.phase}',
+    );
     if (!snapshot.isReady) {
+      i('[RuntimeHub] snapshot not ready, going idle');
       await _teardownCurrentSession();
       state = const AppRuntimeState.idle();
       return;
     }
 
+    if (args.database == null) {
+      i('[RuntimeHub] database not ready yet, waiting');
+      if (_activeSessionKey != null &&
+          _activeSessionKey != snapshot.sessionKey) {
+        await _teardownCurrentSession();
+      }
+      state = state.copyWith(
+        phase: AppRuntimePhase.initializing,
+        accountServer: const AsyncValue.loading(),
+        sessionKey: snapshot.sessionKey,
+        connectedState: ConnectedState.disconnected,
+        error: null,
+        stackTrace: null,
+      );
+      return;
+    }
+
     if (_activeSessionKey == snapshot.sessionKey &&
         state.accountServer.hasValue) {
+      i('[RuntimeHub] session already active, skipping');
       return;
     }
 
@@ -199,20 +278,19 @@ class AppRuntimeHub extends DistinctStateNotifier<AppRuntimeState> {
     _connectionSubscription = null;
     _syncCoordinator.reset();
 
-    final current = state.accountServer.valueOrNull;
+    final current = state.accountServer.value;
     if (current != null) {
       await _connectionCoordinator.disconnect(current);
     }
     _activeSessionKey = null;
   }
 
-  @override
-  Future<void> dispose() async {
+  Future<void> _disposeAsync() async {
+    i('[RuntimeHub] _disposeAsync called, hashCode=$hashCode');
     _disposed = true;
     _epoch += 1;
     await _teardownCurrentSession();
     _syncCoordinator.dispose();
-    super.dispose();
   }
 }
 
@@ -254,7 +332,13 @@ class _ConnectionRuntimeCoordinator {
     required AppRuntimeArgs args,
   }) async {
     final database = args.database;
+    i(
+      '[RuntimeHub] connect: database=${database != null}, isReady=${snapshot.isReady}',
+    );
     if (!snapshot.isReady || database == null) {
+      i(
+        '[RuntimeHub] connect FAILED: isReady=${snapshot.isReady}, database=${database != null}',
+      );
       throw StateError('runtime args are not ready');
     }
     await initKeyValues(snapshot.identityNumber!);

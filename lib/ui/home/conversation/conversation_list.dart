@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key, User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
-import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/badges_widget.dart';
@@ -21,30 +18,91 @@ import '../../../widgets/message/item/pin_message.dart';
 import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
+import '../../provider/account_server_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
+import '../../provider/multi_auth_provider.dart';
 import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
+import '../../provider/ui_context_providers.dart';
+import '../providers/home_scope_providers.dart';
 import 'audio_player_bar.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'network_status.dart';
 
-class ConversationList extends HookConsumerWidget {
+final _conversationPreviewTextProvider = FutureProvider.autoDispose
+    .family<String?, ConversationItem>((ref, conversation) async {
+      final hasDraft =
+          conversation.status != ConversationStatus.quit &&
+          (conversation.draft?.isNotEmpty ?? false);
+      if (hasDraft) return conversation.draft;
+
+      final isGroup =
+          conversation.category == ConversationCategory.group ||
+          conversation.senderId != conversation.ownerId;
+
+      final mentionCache = ref.read(mentionCacheProvider);
+
+      if (conversation.contentType == MessageCategory.systemConversation) {
+        return generateSystemText(
+          actionName: conversation.actionName,
+          participantUserId: conversation.participantUserId,
+          senderId: conversation.senderId,
+          currentUserId: ref.read(accountServerProvider).value?.userId ?? '',
+          participantFullName: conversation.participantFullName,
+          senderFullName: conversation.senderFullName,
+          expireIn: int.tryParse(conversation.content ?? '0'),
+        );
+      }
+      if (conversation.contentType.isPin) {
+        final pinMessageMinimal = PinMessageMinimal.fromJsonString(
+          conversation.content ?? '',
+        );
+        final localization = ref.read(localizationProvider);
+        if (pinMessageMinimal == null) {
+          return localization.chatPinMessage(
+            conversation.senderFullName ?? '',
+            localization.aMessage,
+          );
+        }
+        final preview = await generatePinPreviewText(
+          pinMessageMinimal: pinMessageMinimal,
+          mentionCache: mentionCache,
+        );
+        return localization.chatPinMessage(
+          conversation.senderFullName ?? '',
+          preview,
+        );
+      }
+
+      return messagePreviewOptimize(
+        conversation.messageStatus,
+        conversation.contentType,
+        mentionCache.replaceMention(
+          conversation.content,
+          await mentionCache.checkMentionCache({conversation.content}),
+        ),
+        conversation.senderId == ref.read(accountServerProvider).value?.userId,
+        isGroup,
+        conversation.senderFullName,
+      );
+    });
+
+class ConversationList extends ConsumerWidget {
   const ConversationList({required Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final slideCategoryState =
         (key! as PageStorageKey<SlideCategoryState>).value;
 
-    final conversationListBloc = context.read<ConversationListBloc>();
-    final pagingState =
-        useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
-          bloc: conversationListBloc,
-        );
+    final conversationListBloc = ref.read(
+      conversationListControllerProvider.notifier,
+    );
+    final pagingState = ref.watch(conversationListControllerProvider);
     final conversationId = ref.watch(currentConversationIdProvider);
 
     final routeMode = ref.watch(navigatorRouteModeProvider);
@@ -67,7 +125,7 @@ class ConversationList extends HookConsumerWidget {
               ? Center(
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(context.theme.accent),
+                    valueColor: AlwaysStoppedAnimation(theme.accent),
                   ),
                 )
               : const _Empty()
@@ -89,6 +147,7 @@ class ConversationList extends HookConsumerWidget {
                   conversation: conversation,
                   onTap: () {
                     ConversationStateNotifier.selectConversation(
+                      ref.container,
                       context,
                       conversation.conversationId,
                       conversation: conversation,
@@ -112,14 +171,18 @@ class ConversationList extends HookConsumerWidget {
   }
 }
 
-class _Empty extends StatelessWidget {
+class _Empty extends ConsumerWidget {
   const _Empty();
 
   @override
-  Widget build(BuildContext context) {
-    final dynamicColor = context.dynamicColor(
-      const Color.fromRGBO(229, 233, 240, 1),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dynamicColor = ref.watch(
+      dynamicColorProvider((
+        color: const Color.fromRGBO(229, 233, 240, 1),
+        darkColor: null,
+      )),
     );
+    final l10n = ref.watch(localizationProvider);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -132,7 +195,7 @@ class _Empty extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            context.l10n.noData,
+            l10n.noData,
             style: TextStyle(color: dynamicColor, fontSize: 14),
           ),
         ],
@@ -141,7 +204,7 @@ class _Empty extends StatelessWidget {
   }
 }
 
-class ConversationItemWidget extends StatelessWidget {
+class ConversationItemWidget extends ConsumerWidget {
   const ConversationItemWidget({
     required this.conversation,
     required this.onTap,
@@ -154,20 +217,22 @@ class ConversationItemWidget extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final messageColor = context.theme.secondaryText;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    final messageColor = theme.secondaryText;
     return SizedBox(
       height: ConversationPage.conversationItemHeight,
       child: InteractiveDecoratedBox(
         onTap: onTap,
-        decoration: BoxDecoration(color: context.theme.primary),
+        decoration: BoxDecoration(color: theme.primary),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: DecoratedBox(
             decoration: selected
                 ? BoxDecoration(
                     borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    color: context.theme.listSelected,
+                    color: theme.listSelected,
                   )
                 : const BoxDecoration(),
             child: Padding(
@@ -194,7 +259,7 @@ class ConversationItemWidget extends StatelessWidget {
                                       child: CustomText(
                                         conversation.validName,
                                         style: TextStyle(
-                                          color: context.theme.text,
+                                          color: theme.text,
                                           fontSize: 16,
                                         ),
                                         maxLines: 1,
@@ -243,46 +308,49 @@ class ConversationItemWidget extends StatelessWidget {
   }
 }
 
-class _ItemConversationSubtitle extends StatelessWidget {
+class _ItemConversationSubtitle extends ConsumerWidget {
   const _ItemConversationSubtitle({required this.conversation});
 
   final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 20,
-    child: Row(
-      children: [
-        Expanded(
-          child: _MessagePreview(
-            messageColor: context.theme.secondaryText,
-            conversation: conversation,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return SizedBox(
+      height: 20,
+      child: Row(
+        children: [
+          Expanded(
+            child: _MessagePreview(
+              messageColor: theme.secondaryText,
+              conversation: conversation,
+            ),
           ),
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (conversation.mentionCount > 0)
-              UnreadText(
-                data: '@',
-                textColor: const Color.fromRGBO(255, 255, 255, 1),
-                backgroundColor: context.theme.accent,
-              ),
-            if ((conversation.unseenMessageCount ?? 0) > 0)
-              UnreadText(
-                data: '${conversation.unseenMessageCount}',
-                textColor: const Color.fromRGBO(255, 255, 255, 1),
-                backgroundColor: conversation.isMute
-                    ? context.theme.secondaryText
-                    : context.theme.accent,
-              ),
-            if ((conversation.unseenMessageCount ?? 0) <= 0)
-              _StatusRow(conversation: conversation),
-          ].joinList(const SizedBox(width: 8)),
-        ),
-      ],
-    ),
-  );
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (conversation.mentionCount > 0)
+                UnreadText(
+                  data: '@',
+                  textColor: const Color.fromRGBO(255, 255, 255, 1),
+                  backgroundColor: theme.accent,
+                ),
+              if ((conversation.unseenMessageCount ?? 0) > 0)
+                UnreadText(
+                  data: '${conversation.unseenMessageCount}',
+                  textColor: const Color.fromRGBO(255, 255, 255, 1),
+                  backgroundColor: conversation.isMute
+                      ? theme.secondaryText
+                      : theme.accent,
+                ),
+              if ((conversation.unseenMessageCount ?? 0) <= 0)
+                _StatusRow(conversation: conversation),
+            ].joinList(const SizedBox(width: 8)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MessagePreview extends StatelessWidget {
@@ -314,7 +382,7 @@ class _MessagePreview extends StatelessWidget {
   }
 }
 
-class _MessageContent extends HookConsumerWidget {
+class _MessageContent extends ConsumerWidget {
   const _MessageContent({required this.conversation, required this.hasDraft});
 
   final ConversationItem conversation;
@@ -322,85 +390,20 @@ class _MessageContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = useMemoizedFuture(
-      () async {
-        if (hasDraft) return conversation.draft;
-        final isGroup =
-            conversation.category == ConversationCategory.group ||
-            conversation.senderId != conversation.ownerId;
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    final text = ref
+        .watch(_conversationPreviewTextProvider(conversation))
+        .value;
 
-        final mentionCache = ref.read(mentionCacheProvider);
-
-        if (conversation.contentType == MessageCategory.systemConversation) {
-          return generateSystemText(
-            actionName: conversation.actionName,
-            participantUserId: conversation.participantUserId,
-            senderId: conversation.senderId,
-            currentUserId: context.accountServer.userId,
-            participantFullName: conversation.participantFullName,
-            senderFullName: conversation.senderFullName,
-            expireIn: int.tryParse(conversation.content ?? '0'),
-          );
-        } else if (conversation.contentType.isPin) {
-          final pinMessageMinimal = PinMessageMinimal.fromJsonString(
-            conversation.content ?? '',
-          );
-          if (pinMessageMinimal == null) {
-            return context.l10n.chatPinMessage(
-              conversation.senderFullName ?? '',
-              context.l10n.aMessage,
-            );
-          }
-          final preview = await generatePinPreviewText(
-            pinMessageMinimal: pinMessageMinimal,
-            mentionCache: mentionCache,
-          );
-          return context.l10n.chatPinMessage(
-            conversation.senderFullName ?? '',
-            preview,
-          );
-        }
-
-        return messagePreviewOptimize(
-          conversation.messageStatus,
-          conversation.contentType,
-          mentionCache.replaceMention(
-            conversation.content,
-            await mentionCache.checkMentionCache({conversation.content}),
-          ),
-          conversation.senderId == context.accountServer.userId,
-          isGroup,
-          conversation.senderFullName,
-        );
-      },
-      null,
-      keys: [
-        conversation.actionName,
-        conversation.messageStatus,
-        conversation.contentType,
-        conversation.content,
-        conversation.senderId,
-        conversation.ownerId,
-        conversation.relationship,
-        conversation.participantFullName,
-        conversation.senderFullName,
-        conversation.groupName,
-        conversation.draft,
-        hasDraft,
-      ],
-    ).data;
-
-    final icon = useMemoized(
-      () => messagePreviewIcon(
-        conversation.messageStatus,
-        conversation.contentType,
-      ),
-      [conversation.messageStatus, conversation.contentType],
+    final icon = messagePreviewIcon(
+      conversation.messageStatus,
+      conversation.contentType,
     );
 
     if (conversation.contentType == null && !hasDraft) return const SizedBox();
 
-    final dynamicColor = context.theme.secondaryText;
+    final dynamicColor = theme.secondaryText;
 
     return Row(
       children: [
@@ -411,8 +414,8 @@ class _MessageContent extends HookConsumerWidget {
           ),
         if (hasDraft)
           Text(
-            '${context.l10n.draft}:',
-            style: TextStyle(color: context.theme.red, fontSize: 14),
+            '${l10n.draft}:',
+            style: TextStyle(color: theme.red, fontSize: 14),
           ),
         if (text != null)
           Expanded(
@@ -428,14 +431,15 @@ class _MessageContent extends HookConsumerWidget {
   }
 }
 
-class _MessageStatusIcon extends StatelessWidget {
+class _MessageStatusIcon extends ConsumerWidget {
   const _MessageStatusIcon({required this.conversation});
 
   final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) {
-    if (context.account?.userId == conversation.senderId &&
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selfUserId = ref.watch(authAccountProvider)?.userId;
+    if (selfUserId == conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
         !conversation.contentType.isCallMessage &&
@@ -448,31 +452,28 @@ class _MessageStatusIcon extends StatelessWidget {
   }
 }
 
-class _StatusRow extends StatelessWidget {
+class _StatusRow extends ConsumerWidget {
   const _StatusRow({required this.conversation});
 
   final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: <Widget>[
-      if (conversation.isMute)
-        SvgPicture.asset(
-          Resources.assetsImagesMuteSvg,
-          colorFilter: ColorFilter.mode(
-            context.theme.secondaryText,
-            BlendMode.srcIn,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (conversation.isMute)
+          SvgPicture.asset(
+            Resources.assetsImagesMuteSvg,
+            colorFilter: ColorFilter.mode(theme.secondaryText, BlendMode.srcIn),
           ),
-        ),
-      if (conversation.pinTime != null)
-        SvgPicture.asset(
-          Resources.assetsImagesPinSvg,
-          colorFilter: ColorFilter.mode(
-            context.theme.secondaryText,
-            BlendMode.srcIn,
+        if (conversation.pinTime != null)
+          SvgPicture.asset(
+            Resources.assetsImagesPinSvg,
+            colorFilter: ColorFilter.mode(theme.secondaryText, BlendMode.srcIn),
           ),
-        ),
-    ].joinList(const SizedBox(width: 4)),
-  );
+      ].joinList(const SizedBox(width: 4)),
+    );
+  }
 }

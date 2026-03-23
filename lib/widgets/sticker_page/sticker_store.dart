@@ -4,10 +4,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../account/account_server.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_album_dao.dart';
+import '../../db/database.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/database_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../action_button.dart';
@@ -53,9 +58,11 @@ Future<bool> showStickerStorePageDialog(BuildContext context) async {
 
 Future<void> showStickerPageDialog(
   BuildContext context,
-  String stickerId,
-) async {
-  final a = await context.database.stickerRelationshipDao
+  String stickerId, {
+  required Database database,
+  required AccountServer accountServer,
+}) async {
+  final a = await database.stickerRelationshipDao
       .stickerSystemAlbum(stickerId)
       .getSingleOrNull();
 
@@ -72,7 +79,7 @@ Future<void> showStickerPageDialog(
           builder: (context) {
             final album =
                 useMemoizedStream(
-                  () => context.database.stickerRelationshipDao
+                  () => database.stickerRelationshipDao
                       .stickerSystemAlbum(stickerId)
                       .watchSingleOrNullWithStream(
                         eventStreams: [
@@ -89,7 +96,6 @@ Future<void> showStickerPageDialog(
               Future<void> effect() async {
                 var albumId = album?.albumId;
 
-                final accountServer = context.accountServer;
                 final client = accountServer.client;
 
                 albumId ??= (await client.accountApi.getStickerById(
@@ -129,23 +135,26 @@ class _StickerStorePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     useEffect(() {
-      context.accountServer.refreshSticker(force: true);
+      ref.read(accountServerProvider).requireValue.refreshSticker(force: true);
+      return null;
     }, []);
     return Column(
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.stickerStore),
+          title: Text(l10n.stickerStore),
           leading: Center(
             child: ActionButton(
               name: Resources.assetsImagesSettingSvg,
-              color: context.theme.icon,
+              color: theme.icon,
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => ColoredBox(
-                    color: context.theme.popUp,
+                    color: theme.popUp,
                     child: const _StickerAlbumManagePage(),
                   ),
                 ),
@@ -170,6 +179,7 @@ class _List extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
     final albums =
         useMemoizedStream(
           () =>
@@ -178,11 +188,11 @@ class _List extends HookConsumerWidget {
                 List<Sticker>,
                 List<(StickerAlbum, List<Sticker>)>
               >(
-                context.database.stickerAlbumDao.systemAlbums().watchWithStream(
+                database.stickerAlbumDao.systemAlbums().watchWithStream(
                   eventStreams: [DataBaseEventBus.instance.updateStickerStream],
                   duration: kSlowThrottleDuration,
                 ),
-                context.database.stickerDao.systemStickers().watchWithStream(
+                database.stickerDao.systemStickers().watchWithStream(
                   eventStreams: [DataBaseEventBus.instance.updateStickerStream],
                   duration: kSlowThrottleDuration,
                 ),
@@ -217,76 +227,79 @@ class _Item extends HookConsumerWidget {
   final List<Sticker> stickers;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => SizedBox(
-    height: 104,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            album.name,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: context.theme.text,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return SizedBox(
+      height: 104,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              album.name,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.text,
+              ),
             ),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                for (final sticker in stickers.take(4))
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InteractiveDecoratedBox(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ColoredBox(
-                            color: context.theme.popUp,
-                            child: StickerAlbumPage(
-                              album: album,
-                              stickers: stickers,
-                              albumId: album.albumId,
+            Expanded(
+              child: Row(
+                children: [
+                  for (final sticker in stickers.take(4))
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InteractiveDecoratedBox(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ColoredBox(
+                              color: theme.popUp,
+                              child: StickerAlbumPage(
+                                album: album,
+                                stickers: stickers,
+                                albumId: album.albumId,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      child: SizedBox(
-                        width: 72,
-                        height: 72,
-                        child: StickerItem(
-                          stickerId: sticker.stickerId,
-                          assetUrl: sticker.assetUrl,
-                          assetType: sticker.assetType,
+                        child: SizedBox(
+                          width: 72,
+                          height: 72,
+                          child: StickerItem(
+                            stickerId: sticker.stickerId,
+                            assetUrl: sticker.assetUrl,
+                            assetType: sticker.assetType,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                const Spacer(),
-                AnimatedOpacity(
-                  opacity: album.added == true ? 0.4 : 1,
-                  duration: const Duration(milliseconds: 200),
-                  child: MixinButton(
-                    onTap: () => context.accountServer.updateStickerAlbumAdded(
-                      album.albumId,
-                      !(album.added == true),
-                    ),
-                    child: Text(
-                      album.added == true
-                          ? context.l10n.added
-                          : context.l10n.add,
-                      style: const TextStyle(fontSize: 14),
+                  const Spacer(),
+                  AnimatedOpacity(
+                    opacity: album.added == true ? 0.4 : 1,
+                    duration: const Duration(milliseconds: 200),
+                    child: MixinButton(
+                      onTap: () => accountServer.updateStickerAlbumAdded(
+                        album.albumId,
+                        !(album.added == true),
+                      ),
+                      child: Text(
+                        album.added == true ? l10n.added : l10n.add,
+                        style: const TextStyle(fontSize: 14),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _StickerAlbumManagePage extends HookConsumerWidget {
@@ -295,13 +308,16 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useScrollController();
+    final database = ref.read(databaseProvider).requireValue;
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
 
     final albums = useMemoizedStream(
-      () =>
-          context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
-            eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-            duration: kSlowThrottleDuration,
-          ),
+      () => database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
+        eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+        duration: kSlowThrottleDuration,
+      ),
     ).data;
     final list = useState(albums ?? []);
     useEffect(() {
@@ -313,7 +329,7 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
       children: [
         MixinAppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.l10n.myStickers),
+          title: Text(l10n.myStickers),
           actions: [
             MixinCloseButton(
               onTap: () =>
@@ -333,7 +349,7 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
               newList.insert(_newIndex, oldItem);
 
               list.value = newList;
-              context.accountServer.updateStickerAlbumOrders(list.value);
+              accountServer.updateStickerAlbumOrders(list.value);
             },
             itemBuilder: (context, index) {
               final album = list.value[index];
@@ -369,7 +385,7 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
                         child: Text(
                           album.name,
                           style: TextStyle(
-                            color: context.theme.text,
+                            color: theme.text,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -377,9 +393,11 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
                       ),
                       ActionButton(
                         name: Resources.assetsImagesDeleteSvg,
-                        color: context.theme.secondaryText,
-                        onTap: () => context.accountServer
-                            .updateStickerAlbumAdded(album.albumId, false),
+                        color: theme.secondaryText,
+                        onTap: () => accountServer.updateStickerAlbumAdded(
+                          album.albumId,
+                          false,
+                        ),
                       ),
                     ],
                   ),
@@ -401,10 +419,22 @@ class _StickerPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final tabIndicatorColor = ref.watch(
+      dynamicColorProvider(
+        (
+          color: const Color.fromRGBO(229, 231, 235, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
+      ),
+    );
     final sticker = useState<Sticker?>(null);
     useEffect(() {
       Future<void> effect() async {
-        final s = await context.database.stickerDao
+        final s = await database.stickerDao
             .sticker(stickerId)
             .getSingleOrNull();
         sticker.value = s;
@@ -416,7 +446,7 @@ class _StickerPage extends HookConsumerWidget {
 
     final album = useMemoizedStream(() {
       if (albumId == null) return Stream.value(null);
-      return context.database.stickerAlbumDao
+      return database.stickerAlbumDao
           .album(albumId!)
           .watchSingleWithStream(
             eventStreams: [
@@ -431,7 +461,7 @@ class _StickerPage extends HookConsumerWidget {
     final stickers =
         useMemoizedStream(() {
           if (album == null) return Stream.value(<Sticker>[]);
-          return context.database.stickerDao
+          return database.stickerDao
               .stickerByAlbumId(album.albumId)
               .watchWithStream(
                 eventStreams: [
@@ -482,7 +512,7 @@ class _StickerPage extends HookConsumerWidget {
                   aspectRatio: 1,
                   child: Container(
                     margin: const EdgeInsets.all(56).copyWith(top: 0),
-                    color: context.theme.background,
+                    color: theme.background,
                     alignment: Alignment.center,
                     child: SizedBox(
                       height: 256,
@@ -510,7 +540,7 @@ class _StickerPage extends HookConsumerWidget {
                           child: Text(
                             album.name,
                             style: TextStyle(
-                              color: context.theme.text,
+                              color: theme.text,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -518,17 +548,16 @@ class _StickerPage extends HookConsumerWidget {
                         ),
                         MixinButton(
                           backgroundColor: album.added == true
-                              ? context.theme.red
-                              : context.theme.accent,
-                          onTap: () =>
-                              context.accountServer.updateStickerAlbumAdded(
-                                album.albumId,
-                                !(album.added == true),
-                              ),
+                              ? theme.red
+                              : theme.accent,
+                          onTap: () => accountServer.updateStickerAlbumAdded(
+                            album.albumId,
+                            !(album.added == true),
+                          ),
                           child: Text(
                             album.added == true
-                                ? context.l10n.removeStickers
-                                : context.l10n.addStickers,
+                                ? l10n.removeStickers
+                                : l10n.addStickers,
                           ),
                         ),
                       ],
@@ -539,10 +568,7 @@ class _StickerPage extends HookConsumerWidget {
                     isScrollable: true,
                     overlayColor: WidgetStateProperty.all(Colors.transparent),
                     indicator: BoxDecoration(
-                      color: context.dynamicColor(
-                        const Color.fromRGBO(229, 231, 235, 1),
-                        darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                      ),
+                      color: tabIndicatorColor,
                       borderRadius: const BorderRadius.all(Radius.circular(8)),
                     ),
                     labelPadding: EdgeInsets.zero,

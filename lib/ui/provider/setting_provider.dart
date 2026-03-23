@@ -1,18 +1,16 @@
-// ignore_for_file: deprecated_consistency
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-import '../../utils/hydrated_bloc.dart';
+import '../../utils/hydration_codec.dart';
+import '../../utils/hydration_storage.dart';
 import '../../utils/logger.dart';
 
-@Deprecated('Use settingProvider instead')
-class _SettingState extends Equatable {
-  const _SettingState({
-    int? brightness,
+const _kSettingStorageKey = 'SettingCubit';
+
+class SettingState extends Equatable {
+  const SettingState({
+    int? brightnessValue,
     bool? messageShowAvatar,
     bool? messagePreview,
     bool? photoAutoDownload,
@@ -21,7 +19,7 @@ class _SettingState extends Equatable {
     bool? collapsedSidebar,
     double? chatFontSizeDelta,
     bool? messageShowIdentityNumber,
-  }) : _brightness = brightness,
+  }) : _brightnessValue = brightnessValue,
        _messageShowAvatar = messageShowAvatar,
        _messagePreview = messagePreview,
        _photoAutoDownload = photoAutoDownload,
@@ -31,8 +29,8 @@ class _SettingState extends Equatable {
        _chatFontSizeDelta = chatFontSizeDelta,
        _messageShowIdentityNumber = messageShowIdentityNumber;
 
-  factory _SettingState.fromMap(Map<String, dynamic> map) => _SettingState(
-    brightness: map['brightness'] as int?,
+  factory SettingState.fromMap(Map<String, dynamic> map) => SettingState(
+    brightnessValue: map['brightness'] as int?,
     messageShowAvatar: map['messageShowAvatar'] as bool?,
     messagePreview: map['messagePreview'] as bool?,
     photoAutoDownload: map['photoAutoDownload'] as bool?,
@@ -43,7 +41,7 @@ class _SettingState extends Equatable {
     messageShowIdentityNumber: map['messageShowIdentityNumber'] as bool?,
   );
 
-  final int? _brightness;
+  final int? _brightnessValue;
   final bool? _messageShowAvatar;
   final bool? _messagePreview;
   final bool? _photoAutoDownload;
@@ -53,129 +51,8 @@ class _SettingState extends Equatable {
   final double? _chatFontSizeDelta;
   final bool? _messageShowIdentityNumber;
 
-  int get brightness => _brightness ?? 0;
-
-  bool get messageShowAvatar => _messageShowAvatar ?? true;
-
-  bool get messagePreview => _messagePreview ?? true;
-
-  bool get photoAutoDownload => _photoAutoDownload ?? true;
-
-  bool get videoAutoDownload => _videoAutoDownload ?? true;
-
-  bool get fileAutoDownload => _fileAutoDownload ?? true;
-
-  bool get collapsedSidebar => _collapsedSidebar ?? false;
-
-  double get chatFontSizeDelta => _chatFontSizeDelta ?? 0;
-
-  bool get messageShowIdentityNumber => _messageShowIdentityNumber ?? false;
-
-  @override
-  List<Object?> get props => [
-    _brightness,
-    _messageShowAvatar,
-    _messagePreview,
-    _photoAutoDownload,
-    _videoAutoDownload,
-    _fileAutoDownload,
-    _collapsedSidebar,
-    _chatFontSizeDelta,
-    _messageShowIdentityNumber,
-  ];
-
-  Map<String, dynamic> toMap() => {
-    'brightness': _brightness,
-    'messageShowAvatar': _messageShowAvatar,
-    'messagePreview': _messagePreview,
-    'photoAutoDownload': _photoAutoDownload,
-    'videoAutoDownload': _videoAutoDownload,
-    'fileAutoDownload': _fileAutoDownload,
-    'collapsedSidebar': _collapsedSidebar,
-    'chatFontSizeDelta': _chatFontSizeDelta,
-    'messageShowIdentityNumber': _messageShowIdentityNumber,
-  };
-
-  _SettingState copyWith({
-    int? brightness,
-    bool? messageShowAvatar,
-    bool? messagePreview,
-    bool? photoAutoDownload,
-    bool? videoAutoDownload,
-    bool? fileAutoDownload,
-    bool? collapsedSidebar,
-    double? chatFontSizeDelta,
-    bool? messageShowIdentityNumber,
-  }) => _SettingState(
-    brightness: brightness ?? _brightness,
-    messageShowAvatar: messageShowAvatar ?? _messageShowAvatar,
-    messagePreview: messagePreview ?? _messagePreview,
-    photoAutoDownload: photoAutoDownload ?? _photoAutoDownload,
-    videoAutoDownload: videoAutoDownload ?? _videoAutoDownload,
-    fileAutoDownload: fileAutoDownload ?? _fileAutoDownload,
-    collapsedSidebar: collapsedSidebar ?? _collapsedSidebar,
-    chatFontSizeDelta: chatFontSizeDelta ?? _chatFontSizeDelta,
-    messageShowIdentityNumber:
-        messageShowIdentityNumber ?? _messageShowIdentityNumber,
-  );
-}
-
-class SettingChangeNotifier extends ChangeNotifier {
-  SettingChangeNotifier({
-    int? brightness,
-    bool? messageShowAvatar,
-    bool? messagePreview,
-    bool? photoAutoDownload,
-    bool? videoAutoDownload,
-    bool? fileAutoDownload,
-    bool? collapsedSidebar,
-    double? chatFontSizeDelta,
-    bool? messageShowIdentityNumber,
-  }) : _brightness = brightness,
-       _messageShowAvatar = messageShowAvatar,
-       _messagePreview = messagePreview,
-       _photoAutoDownload = photoAutoDownload,
-       _videoAutoDownload = videoAutoDownload,
-       _fileAutoDownload = fileAutoDownload,
-       _collapsedSidebar = collapsedSidebar,
-       _chatFontSizeDelta = chatFontSizeDelta,
-       _messageShowIdentityNumber = messageShowIdentityNumber;
-
-  /// The brightness of theme.
-  /// 0 : follow system
-  /// 1 : dark
-  /// 2 : light
-  ///
-  /// The reason [int] instead of [Brightness] enum is that Hive has limited
-  /// support for custom data class.
-  /// https://docs.hivedb.dev/#/custom-objects/type_adapters?id=register-adapter
-  /// https://github.com/hivedb/hive/issues/525
-  /// https://github.com/hivedb/hive/issues/518
-  int? _brightness;
-  bool? _messageShowAvatar;
-  bool? _messageShowIdentityNumber;
-  bool? _messagePreview;
-  bool? _photoAutoDownload;
-  bool? _videoAutoDownload;
-  bool? _fileAutoDownload;
-  bool? _collapsedSidebar;
-  double? _chatFontSizeDelta;
-
-  /// [brightness] null to follow system.
-  set brightness(Brightness? value) {
-    switch (value) {
-      case Brightness.dark:
-        _brightness = 1;
-      case Brightness.light:
-        _brightness = 2;
-      case null:
-        _brightness = 0;
-    }
-    notifyListeners();
-  }
-
   Brightness? get brightness {
-    switch (_brightness) {
+    switch (_brightnessValue) {
       case 0:
       case null:
         return null;
@@ -184,7 +61,7 @@ class SettingChangeNotifier extends ChangeNotifier {
       case 2:
         return Brightness.light;
       default:
-        w('invalid value for brightness. $_brightness');
+        w('invalid value for brightness. $_brightnessValue');
         return null;
     }
   }
@@ -200,122 +77,162 @@ class SettingChangeNotifier extends ChangeNotifier {
     }
   }
 
-  set messageShowAvatar(bool value) {
-    if (_messageShowAvatar == value) return;
-
-    _messageShowAvatar = value;
-    notifyListeners();
-  }
+  int? get brightnessValue => _brightnessValue;
 
   bool get messageShowAvatar => _messageShowAvatar ?? true;
 
-  set messageShowIdentityNumber(bool value) {
-    if (_messageShowIdentityNumber == value) return;
-
-    _messageShowIdentityNumber = value;
-    notifyListeners();
-  }
-
-  bool get messageShowIdentityNumber => _messageShowIdentityNumber ?? false;
-
-  set messagePreview(bool value) {
-    if (_messagePreview == value) return;
-
-    _messagePreview = value;
-    notifyListeners();
-  }
-
   bool get messagePreview => _messagePreview ?? true;
-
-  set photoAutoDownload(bool value) {
-    if (_photoAutoDownload == value) return;
-
-    _photoAutoDownload = value;
-    notifyListeners();
-  }
 
   bool get photoAutoDownload => _photoAutoDownload ?? true;
 
-  set videoAutoDownload(bool value) {
-    if (_videoAutoDownload == value) return;
-
-    _videoAutoDownload = value;
-    notifyListeners();
-  }
-
   bool get videoAutoDownload => _videoAutoDownload ?? true;
-
-  set fileAutoDownload(bool value) {
-    if (_fileAutoDownload == value) return;
-
-    _fileAutoDownload = value;
-    notifyListeners();
-  }
 
   bool get fileAutoDownload => _fileAutoDownload ?? true;
 
-  set collapsedSidebar(bool value) {
-    if (_collapsedSidebar == value) return;
-
-    _collapsedSidebar = value;
-    notifyListeners();
-  }
-
   bool get collapsedSidebar => _collapsedSidebar ?? false;
-
-  set chatFontSizeDelta(double value) {
-    if (_chatFontSizeDelta == value) return;
-
-    _chatFontSizeDelta = value;
-    notifyListeners();
-  }
 
   double get chatFontSizeDelta => _chatFontSizeDelta ?? 0;
 
+  bool get messageShowIdentityNumber => _messageShowIdentityNumber ?? false;
+
+  Map<String, dynamic> toMap() => {
+    'brightness': brightnessValue,
+    'messageShowAvatar': _messageShowAvatar,
+    'messagePreview': _messagePreview,
+    'photoAutoDownload': _photoAutoDownload,
+    'videoAutoDownload': _videoAutoDownload,
+    'fileAutoDownload': _fileAutoDownload,
+    'collapsedSidebar': _collapsedSidebar,
+    'chatFontSizeDelta': _chatFontSizeDelta,
+    'messageShowIdentityNumber': _messageShowIdentityNumber,
+  };
+
+  SettingState copyWith({
+    int? brightnessValue,
+    bool? messageShowAvatar,
+    bool? messagePreview,
+    bool? photoAutoDownload,
+    bool? videoAutoDownload,
+    bool? fileAutoDownload,
+    bool? collapsedSidebar,
+    double? chatFontSizeDelta,
+    bool? messageShowIdentityNumber,
+  }) => SettingState(
+    brightnessValue: brightnessValue ?? _brightnessValue,
+    messageShowAvatar: messageShowAvatar ?? _messageShowAvatar,
+    messagePreview: messagePreview ?? _messagePreview,
+    photoAutoDownload: photoAutoDownload ?? _photoAutoDownload,
+    videoAutoDownload: videoAutoDownload ?? _videoAutoDownload,
+    fileAutoDownload: fileAutoDownload ?? _fileAutoDownload,
+    collapsedSidebar: collapsedSidebar ?? _collapsedSidebar,
+    chatFontSizeDelta: chatFontSizeDelta ?? _chatFontSizeDelta,
+    messageShowIdentityNumber:
+        messageShowIdentityNumber ?? _messageShowIdentityNumber,
+  );
+
   @override
-  void notifyListeners() {
-    HydratedBloc.storage.write(
-      _kSettingCubitKey,
-      _SettingState(
-        brightness: _brightness,
-        messageShowAvatar: _messageShowAvatar,
-        messagePreview: _messagePreview,
-        photoAutoDownload: _photoAutoDownload,
-        videoAutoDownload: _videoAutoDownload,
-        fileAutoDownload: _fileAutoDownload,
-        collapsedSidebar: _collapsedSidebar,
-        chatFontSizeDelta: _chatFontSizeDelta,
-        messageShowIdentityNumber: _messageShowIdentityNumber,
-      ).toMap(),
-    );
-    super.notifyListeners();
+  List<Object?> get props => [
+    brightnessValue,
+    _messageShowAvatar,
+    _messagePreview,
+    _photoAutoDownload,
+    _videoAutoDownload,
+    _fileAutoDownload,
+    _collapsedSidebar,
+    _chatFontSizeDelta,
+    _messageShowIdentityNumber,
+  ];
+}
+
+class SettingChangeNotifier extends Notifier<SettingState> {
+  @override
+  SettingState build() {
+    ref.keepAlive();
+    final oldJson = HydrationStorageRegistry.storage.read(_kSettingStorageKey);
+    if (oldJson == null) {
+      return const SettingState();
+    }
+
+    return fromHydratedJson(oldJson, SettingState.fromMap) ??
+        const SettingState();
+  }
+
+  set brightness(Brightness? value) {
+    final brightnessValue = switch (value) {
+      Brightness.dark => 1,
+      Brightness.light => 2,
+      null => 0,
+    };
+    _update(state.copyWith(brightnessValue: brightnessValue));
+  }
+
+  Brightness? get brightness => state.brightness;
+
+  ThemeMode get themeMode => state.themeMode;
+
+  set messageShowAvatar(bool value) {
+    if (state.messageShowAvatar == value) return;
+    _update(state.copyWith(messageShowAvatar: value));
+  }
+
+  bool get messageShowAvatar => state.messageShowAvatar;
+
+  set messageShowIdentityNumber(bool value) {
+    if (state.messageShowIdentityNumber == value) return;
+    _update(state.copyWith(messageShowIdentityNumber: value));
+  }
+
+  bool get messageShowIdentityNumber => state.messageShowIdentityNumber;
+
+  set messagePreview(bool value) {
+    if (state.messagePreview == value) return;
+    _update(state.copyWith(messagePreview: value));
+  }
+
+  bool get messagePreview => state.messagePreview;
+
+  set photoAutoDownload(bool value) {
+    if (state.photoAutoDownload == value) return;
+    _update(state.copyWith(photoAutoDownload: value));
+  }
+
+  bool get photoAutoDownload => state.photoAutoDownload;
+
+  set videoAutoDownload(bool value) {
+    if (state.videoAutoDownload == value) return;
+    _update(state.copyWith(videoAutoDownload: value));
+  }
+
+  bool get videoAutoDownload => state.videoAutoDownload;
+
+  set fileAutoDownload(bool value) {
+    if (state.fileAutoDownload == value) return;
+    _update(state.copyWith(fileAutoDownload: value));
+  }
+
+  bool get fileAutoDownload => state.fileAutoDownload;
+
+  set collapsedSidebar(bool value) {
+    if (state.collapsedSidebar == value) return;
+    _update(state.copyWith(collapsedSidebar: value));
+  }
+
+  bool get collapsedSidebar => state.collapsedSidebar;
+
+  set chatFontSizeDelta(double value) {
+    if (state.chatFontSizeDelta == value) return;
+    _update(state.copyWith(chatFontSizeDelta: value));
+  }
+
+  double get chatFontSizeDelta => state.chatFontSizeDelta;
+
+  void _update(SettingState next) {
+    HydrationStorageRegistry.storage.write(_kSettingStorageKey, next.toMap());
+    state = next;
   }
 }
 
-@Deprecated('Use SettingChangeNotifier instead')
-const _kSettingCubitKey = 'SettingCubit';
-
 final settingProvider =
-    ChangeNotifierProvider.autoDispose<SettingChangeNotifier>((ref) {
-      ref.keepAlive();
-
-      //migrate
-      final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
-      if (oldJson != null) {
-        final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
-        if (settingState == null) return SettingChangeNotifier();
-        return SettingChangeNotifier(
-          brightness: settingState.brightness,
-          messageShowAvatar: settingState.messageShowAvatar,
-          messagePreview: settingState.messagePreview,
-          photoAutoDownload: settingState.photoAutoDownload,
-          videoAutoDownload: settingState.videoAutoDownload,
-          fileAutoDownload: settingState.fileAutoDownload,
-          collapsedSidebar: settingState.collapsedSidebar,
-          chatFontSizeDelta: settingState.chatFontSizeDelta,
-          messageShowIdentityNumber: settingState.messageShowIdentityNumber,
-        );
-      }
-
-      return SettingChangeNotifier();
-    });
+    NotifierProvider.autoDispose<SettingChangeNotifier, SettingState>(
+      SettingChangeNotifier.new,
+    );

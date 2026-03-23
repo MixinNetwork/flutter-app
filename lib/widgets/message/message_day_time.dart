@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/mixin_database.dart' as db;
 import '../../ui/provider/minute_timer_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import 'message.dart';
 import 'message_style.dart';
+
+class _HiddenMessageDayTimeScope
+    extends InheritedNotifier<HiddenMessageDayTimeController> {
+  const _HiddenMessageDayTimeScope({
+    required HiddenMessageDayTimeController controller,
+    required super.child,
+  }) : super(notifier: controller);
+
+  static HiddenMessageDayTimeController of(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_HiddenMessageDayTimeScope>();
+    assert(scope?.notifier != null, '_HiddenMessageDayTimeScope is missing');
+    return scope!.notifier!;
+  }
+}
 
 class MessageDayTime extends HookConsumerWidget {
   const MessageDayTime({required this.dateTime, super.key});
@@ -19,11 +33,9 @@ class MessageDayTime extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hide =
-        useBlocStateConverter<HiddenMessageDayTimeBloc, DateTime?, bool>(
-          converter: (state) => isSameDay(state, dateTime),
-          keys: [dateTime],
-        );
+    final controller = _HiddenMessageDayTimeScope.of(context);
+    final hiddenDateTime = useValueListenable(controller);
+    final hide = isSameDay(hiddenDateTime, dateTime);
     return Center(
       child: Opacity(
         opacity: hide ? 0 : 1,
@@ -40,6 +52,7 @@ class _MessageDayTimeWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final dateTimeString = ref.watch(formattedDayProvider(dateTime));
 
     return Padding(
@@ -47,7 +60,7 @@ class _MessageDayTimeWidget extends HookConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
-          color: context.theme.dateTime,
+          color: theme.dateTime,
         ),
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
         child: ConstrainedBox(
@@ -66,10 +79,10 @@ class _MessageDayTimeWidget extends HookConsumerWidget {
   }
 }
 
-class HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
-  HiddenMessageDayTimeBloc() : super(null);
+class HiddenMessageDayTimeController extends ValueNotifier<DateTime?> {
+  HiddenMessageDayTimeController() : super(null);
 
-  void update(DateTime? dateTime) => emit(dateTime);
+  void update(DateTime? dateTime) => value = dateTime;
 }
 
 class _CurrentShowingMessages {
@@ -180,9 +193,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
     final dateTime = useState<DateTime?>(null);
     final dateTimeTopOffset = useState<double>(0);
 
-    final bloc = useBloc<HiddenMessageDayTimeBloc>(
-      HiddenMessageDayTimeBloc.new,
-    );
+    final controller = useMemoized(HiddenMessageDayTimeController.new);
 
     void doTraversal() {
       final result = _traversalCurrentShowingMessageElements();
@@ -262,7 +273,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
         if (offset.dy < render.size.height / 2) {
           // up
           firstInScreenIndex = closestToTopDayTimeIndex;
-          bloc.update(items[closestToTopDayTimeIndex].createdAt);
+          controller.update(items[closestToTopDayTimeIndex].createdAt);
           dateTimeTopOffset.value = 0;
         } else {
           // down
@@ -282,16 +293,16 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
               }
               return true;
             }());
-            bloc.update(null);
+            controller.update(null);
             dateTimeTopOffset.value = offset.dy - render.size.height * 1.5;
           } else {
             firstInScreenIndex = -1;
             dateTimeTopOffset.value = 0;
-            bloc.update(null);
+            controller.update(null);
           }
         }
       } else {
-        bloc.update(null);
+        controller.update(null);
         dateTimeTopOffset.value = 0;
       }
 
@@ -311,6 +322,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
       });
     }, [reTraversalKey]);
 
+    useEffect(() => controller.dispose, [controller]);
+
     return LayoutBuilder(
       builder: (context, constraints) => HookBuilder(
         builder: (context) {
@@ -319,8 +332,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
               doTraversal();
             });
           }, [constraints]);
-          return BlocProvider.value(
-            value: bloc,
+          return _HiddenMessageDayTimeScope(
+            controller: controller,
             child: ClipRect(
               child: Stack(
                 fit: StackFit.expand,
@@ -334,8 +347,10 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
                       ),
                       child: Align(
                         alignment: Alignment.topCenter,
-                        child: _MessageDayTimeWidget(
-                          dateTime: dateTime.value!,
+                        child: MessageStyleScope(
+                          child: _MessageDayTimeWidget(
+                            dateTime: dateTime.value!,
+                          ),
                         ),
                       ),
                     ),

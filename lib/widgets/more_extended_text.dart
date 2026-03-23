@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../utils/extension/extension.dart';
+import '../ui/provider/conversation_provider.dart';
+import '../ui/provider/ui_context_providers.dart';
 import 'high_light_text.dart';
 
 class MoreExtendedText extends HookConsumerWidget {
@@ -29,13 +30,18 @@ class _MoreExtendedText extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expand = useState(false);
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final app = ref.watch(conversationProvider.select((value) => value?.app));
     final style = useMemoized(
       () => this.style?.merge(const TextStyle(height: 1)),
     );
 
     final overflowTextSpan = TextSpan(
-      text: '...${context.l10n.more}',
-      style: style?.merge(TextStyle(color: context.theme.accent)),
+      text: '...${l10n.more}',
+      style: style?.merge(
+        TextStyle(color: theme.accent),
+      ),
       recognizer: TapGestureRecognizer()
         ..onTap = () {
           expand.value = true;
@@ -85,7 +91,15 @@ class _MoreExtendedText extends HookConsumerWidget {
 
     return CustomSelectableText.rich(
       TextSpan(children: [textSpan, if (endIndex != -1) overflowTextSpan]),
-      textMatchers: [UrlTextMatcher(context), EmojiTextMatcher()],
+      textMatchers: [
+        UrlTextMatcher(
+          context,
+          container: ref.container,
+          accent: theme.accent,
+          app: app,
+        ),
+        EmojiTextMatcher(),
+      ],
       textAlign: TextAlign.center,
     );
   }

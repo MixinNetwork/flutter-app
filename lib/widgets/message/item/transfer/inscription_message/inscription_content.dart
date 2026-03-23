@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hexagon/hexagon.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../../constants/resources.dart';
 import '../../../../../db/vo/inscription.dart';
+import '../../../../../ui/provider/database_provider.dart';
+import '../../../../../ui/provider/ui_context_providers.dart';
 import '../../../../../utils/cache_client.dart';
-import '../../../../../utils/extension/extension.dart';
 import '../../../../../utils/hook.dart';
 import '../../../../mixin_image.dart';
 import 'inscription_message.dart';
@@ -64,7 +66,7 @@ String inscriptionDisplayContent(String content) => content.replaceAll(
   '■',
 );
 
-class _TextInscriptionContent extends HookWidget {
+class _TextInscriptionContent extends HookConsumerWidget {
   const _TextInscriptionContent({
     required this.contentUrl,
     required this.iconUrl,
@@ -76,17 +78,18 @@ class _TextInscriptionContent extends HookWidget {
   final InscriptionContentMode mode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
     final defaultCollectionImage = SvgPicture.asset(
       Resources.assetsImagesCollectionPlaceholderSvg,
     );
 
     final client = useMemoized(
       () => CacheClient(
-        context.database.settingProperties.activatedProxy,
+        database.settingProperties.activatedProxy,
         cacheInscriptionTextFolderName,
       ),
-      [],
+      [database.settingProperties.activatedProxy],
     );
 
     final text = useMemoizedFuture(
@@ -161,7 +164,7 @@ class _TextInscriptionContent extends HookWidget {
   }
 }
 
-class _MinLinesWrapper extends HookWidget {
+class _MinLinesWrapper extends HookConsumerWidget {
   const _MinLinesWrapper({
     required this.text,
     required this.style,
@@ -175,16 +178,17 @@ class _MinLinesWrapper extends HookWidget {
   final int minLines;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaQuery = ref.watch(mediaQueryDataProvider);
     final minHeight = useMemoized(() {
       final textPainter = TextPainter(
         text: TextSpan(text: text, style: style),
         textDirection: TextDirection.ltr,
         maxLines: minLines,
-      )..layout(maxWidth: MediaQuery.of(context).size.width);
+      )..layout(maxWidth: mediaQuery.size.width);
 
       return textPainter.preferredLineHeight * minLines;
-    }, [text, style, minLines]);
+    }, [text, style, minLines, mediaQuery.size.width]);
 
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: minHeight),

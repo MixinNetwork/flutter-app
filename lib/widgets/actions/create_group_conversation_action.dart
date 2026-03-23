@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../account/account_server.dart';
 import '../../db/mixin_database.dart';
+import '../../ui/provider/database_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../avatar_view/avatar_view.dart';
@@ -15,16 +18,22 @@ import 'actions.dart';
 
 class CreateGroupConversationAction
     extends Action<CreateGroupConversationIntent> {
-  CreateGroupConversationAction(this.context);
+  CreateGroupConversationAction({
+    required this.context,
+    required this.accountServer,
+    required this.l10n,
+  });
 
   final BuildContext context;
+  final AccountServer accountServer;
+  final Localization l10n;
 
   @override
   Future<void> invoke(CreateGroupConversationIntent intent) async {
     final result = await showConversationSelector(
       context: context,
       singleSelect: false,
-      title: context.l10n.createGroup,
+      title: l10n.createGroup,
       onlyContact: true,
     );
     if (result == null || result.isEmpty) return;
@@ -36,14 +45,14 @@ class CreateGroupConversationAction
     final name = await showMixinDialog<String>(
       context: context,
       child: _NewConversationConfirm([
-        context.accountServer.userId,
+        accountServer.userId,
         ...userIds,
       ]),
     );
     if (name?.isEmpty ?? true) return;
 
     await runFutureWithToast(
-      context.accountServer.createGroupConversation(name!, userIds),
+      accountServer.createGroupConversation(name!, userIds),
     );
   }
 }
@@ -55,8 +64,11 @@ class _NewConversationConfirm extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
+    final database = ref.read(databaseProvider).requireValue;
     final users = useMemoizedFuture(
-      () => context.database.userDao
+      () => database.userDao
           .usersByIn(userIds.sublist(0, math.min(4, userIds.length)))
           .get(),
       <User>[],
@@ -65,7 +77,7 @@ class _NewConversationConfirm extends HookConsumerWidget {
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
-      title: Text(context.l10n.groups),
+      title: Text(l10n.groups),
       titleMarginBottom: 24,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -79,13 +91,16 @@ class _NewConversationConfirm extends HookConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            context.l10n.participantsCount(userIds.length),
-            style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
+            l10n.participantsCount(userIds.length),
+            style: TextStyle(
+              fontSize: 14,
+              color: brightnessTheme.secondaryText,
+            ),
           ),
           const SizedBox(height: 48),
           DialogTextField(
             textEditingController: textEditingController,
-            hintText: context.l10n.groupName,
+            hintText: l10n.groupName,
             maxLength: 40,
           ),
         ],
@@ -94,12 +109,12 @@ class _NewConversationConfirm extends HookConsumerWidget {
         MixinButton(
           backgroundTransparent: true,
           onTap: () => Navigator.pop(context),
-          child: Text(context.l10n.cancel),
+          child: Text(l10n.cancel),
         ),
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
-          child: Text(context.l10n.create),
+          child: Text(l10n.create),
         ),
       ],
     );

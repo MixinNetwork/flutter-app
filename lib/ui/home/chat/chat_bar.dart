@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/action_button.dart';
@@ -15,10 +14,12 @@ import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/database_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../../provider/responsive_navigator_provider.dart';
+import '../../provider/ui_context_providers.dart';
+import '../providers/home_scope_providers.dart';
 import 'chat_page.dart';
 
 class ChatBar extends HookConsumerWidget {
@@ -26,14 +27,13 @@ class ChatBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final actionColor = context.theme.icon;
-    final chatSideCubit = context.read<ChatSideCubit>();
-
-    final chatSideRouteMode =
-        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
-          bloc: chatSideCubit,
-          converter: (state) => state.routeMode,
-        );
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    final actionColor = theme.icon;
+    final chatSideCubit = ref.read(chatSideControllerProvider.notifier);
+    final chatSideRouteMode = ref.watch(
+      chatSideControllerProvider.select((state) => state.routeMode),
+    );
 
     final routeMode = ref.watch(navigatorRouteModeProvider);
 
@@ -132,8 +132,8 @@ class ChatBar extends HookConsumerWidget {
           MoveWindowBarrier(
             child: TextButton(
               onPressed: () =>
-                  ref.read(messageSelectionProvider).clearSelection(),
-              child: Text(context.l10n.cancel),
+                  ref.read(messageSelectionProvider.notifier).clearSelection(),
+              child: Text(l10n.cancel),
             ),
           )
         else ...[
@@ -142,12 +142,12 @@ class ChatBar extends HookConsumerWidget {
               name: Resources.assetsImagesIcSearchSvg,
               color: actionColor,
               onTap: () {
-                final cubit = context.read<ChatSideCubit>();
+                final cubit = ref.read(chatSideControllerProvider.notifier);
                 if (cubit.state.pages.lastOrNull?.name ==
-                    ChatSideCubit.searchMessageHistory) {
+                    ChatSideController.searchMessageHistory) {
                   return cubit.pop();
                 }
-                cubit.replace(ChatSideCubit.searchMessageHistory);
+                cubit.replace(ChatSideController.searchMessageHistory);
               },
             ),
           ),
@@ -183,11 +183,14 @@ class ConversationIDOrCount extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final isGroup = conversationState?.isGroup ?? false;
+    final database = ref.read(databaseProvider).requireValue;
 
     final countStream = useMemoized(() {
       if (isGroup) {
-        return context.database.participantDao
+        return database.participantDao
             .conversationParticipantsCount(conversationState!.conversationId)
             .watchSingleWithStream(
               eventStreams: [
@@ -200,10 +203,10 @@ class ConversationIDOrCount extends HookConsumerWidget {
       }
 
       return const Stream<int>.empty();
-    }, [conversationState?.conversationId, isGroup]);
+    }, [conversationState?.conversationId, isGroup, database]);
 
     final textStyle = TextStyle(
-      color: context.theme.secondaryText,
+      color: theme.secondaryText,
       fontSize: fontSize,
       height: 1,
     );
@@ -220,7 +223,7 @@ class ConversationIDOrCount extends HookConsumerWidget {
       builder: (context, snapshot) {
         final count = snapshot.data;
         return CustomSelectableText(
-          count != null ? context.l10n.participantsCount(count) : '',
+          count != null ? l10n.participantsCount(count) : '',
           style: textStyle,
         );
       },
@@ -228,7 +231,7 @@ class ConversationIDOrCount extends HookConsumerWidget {
   }
 }
 
-class ConversationName extends StatelessWidget {
+class ConversationName extends ConsumerWidget {
   const ConversationName({
     required this.conversationState,
     super.key,
@@ -239,31 +242,34 @@ class ConversationName extends StatelessWidget {
   final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Flexible(
-        child: CustomSelectableArea(
-          child: CustomText(
-            conversationState.name?.overflow ?? '',
-            style: TextStyle(
-              color: context.theme.text,
-              fontSize: fontSize,
-              height: 1,
-              overflow: TextOverflow.ellipsis,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: CustomSelectableArea(
+            child: CustomText(
+              conversationState.name?.overflow ?? '',
+              style: TextStyle(
+                color: theme.text,
+                fontSize: fontSize,
+                height: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
           ),
         ),
-      ),
-      BadgesWidget(
-        verified: conversationState.isVerified,
-        isBot: conversationState.isBot,
-        membership: conversationState.membership,
-      ),
-    ],
-  );
+        BadgesWidget(
+          verified: conversationState.isVerified,
+          isBot: conversationState.isBot,
+          membership: conversationState.membership,
+        ),
+      ],
+    );
+  }
 }
 
 class ConversationAvatar extends StatelessWidget {
@@ -310,16 +316,18 @@ class _BotIcon extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     if (!conversation.isBot) {
       return const SizedBox();
     }
 
     return ActionButton(
       name: Resources.assetsImagesBotSvg,
-      color: context.theme.icon,
+      color: theme.icon,
       onTap: () {
         MixinWebView.instance.openBotWebViewWindow(
           context,
+          ref.container,
           conversation.app!,
           conversationId: conversation.conversationId,
         );

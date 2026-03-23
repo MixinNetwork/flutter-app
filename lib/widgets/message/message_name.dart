@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../ui/provider/setting_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/color_utils.dart';
-import '../../utils/extension/extension.dart';
 import '../conversation/badges_widget.dart';
 import '../high_light_text.dart';
 import '../interactive_decorated_box.dart';
@@ -34,6 +34,7 @@ class MessageName extends ConsumerWidget {
     final showIdentityNumber = ref.watch(
       settingProvider.select((value) => value.messageShowIdentityNumber),
     );
+    final theme = ref.watch(brightnessThemeDataProvider);
     final children = <Widget>[
       CustomText(
         userName,
@@ -54,7 +55,7 @@ class MessageName extends ConsumerWidget {
               '@$userIdentityNumber',
               style: TextStyle(
                 fontSize: context.messageStyle.statusFontSize,
-                color: context.theme.text.withValues(alpha: 0.5),
+                color: theme.text.withValues(alpha: 0.5),
               ),
             ),
           ),
@@ -75,7 +76,7 @@ class MessageName extends ConsumerWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: InteractiveDecoratedBox(
-        onTap: () => showUserDialog(context, userId),
+        onTap: () => showUserDialog(context, ref.container, userId),
         cursor: SystemMouseCursors.click,
         child: Padding(
           padding: const EdgeInsets.only(left: 10, bottom: 2),

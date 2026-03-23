@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart' as file_selector;
-import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -34,8 +33,8 @@ Future<List<XFile>> selectFiles() async {
 /// Copy [file] to user file system.
 /// TODO: support Android/iOS.
 Future<bool> saveFileToSystem(
-  BuildContext context,
   String file, {
+  required String confirmButtonText,
   String? suggestName,
 }) async {
   final targetName = (suggestName ?? file).pathBasename;
@@ -46,7 +45,7 @@ Future<bool> saveFileToSystem(
   final extension = p.extension(targetName);
 
   var path = (await file_selector.getSaveLocation(
-    confirmButtonText: context.l10n.save,
+    confirmButtonText: confirmButtonText,
     suggestedName: targetName,
     acceptedTypeGroups: [
       if (Platform.isWindows)

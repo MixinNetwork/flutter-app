@@ -9,7 +9,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/app_lifecycle.dart';
-import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/local_notification_center.dart';
 import '../../widgets/action_button.dart';
@@ -19,22 +18,32 @@ import '../../widgets/cell.dart';
 import '../../widgets/conversation/badges_widget.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
-import '../home/home.dart';
+import '../provider/account_server_provider.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/responsive_navigator_provider.dart';
+import '../provider/ui_context_providers.dart';
 
 class SettingPage extends HookConsumerWidget {
-  const SettingPage({super.key});
+  const SettingPage({
+    required this.hasDrawer,
+    super.key,
+  });
+
+  final bool hasDrawer;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasDrawer = context.watch<HasDrawerValueNotifier>();
-
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     Widget? leading;
-    if (hasDrawer.value) {
+    if (hasDrawer) {
       leading = ActionButton(
         onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        child: Icon(Icons.menu, size: 20, color: context.theme.icon),
+        child: Icon(
+          Icons.menu,
+          size: 20,
+          color: theme.icon,
+        ),
       );
     }
 
@@ -72,7 +81,7 @@ class SettingPage extends HookConsumerWidget {
                         leadingAssetName: Resources.assetsImagesIcProfileSvg,
                         pageName:
                             ResponsiveNavigatorStateNotifier.editProfilePage,
-                        title: context.l10n.editProfile,
+                        title: l10n.editProfile,
                       ),
                     ),
                     CellGroup(
@@ -86,21 +95,21 @@ class SettingPage extends HookConsumerWidget {
                                   Resources.assetsImagesAccountSvg,
                               pageName:
                                   ResponsiveNavigatorStateNotifier.accountPage,
-                              title: context.l10n.account,
+                              title: l10n.account,
                             ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcNotificationSvg,
                             pageName: ResponsiveNavigatorStateNotifier
                                 .notificationPage,
-                            title: context.l10n.notifications,
+                            title: l10n.notifications,
                             trailing: hasNotificationPermission == false
                                 ? Padding(
                                     padding: const EdgeInsets.all(4),
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesTriangleWarningSvg,
                                       colorFilter: ColorFilter.mode(
-                                        context.theme.red,
+                                        theme.red,
                                         BlendMode.srcIn,
                                       ),
                                       width: 22,
@@ -109,40 +118,40 @@ class SettingPage extends HookConsumerWidget {
                                   )
                                 : const Arrow(),
                             color: hasNotificationPermission == false
-                                ? context.theme.red
-                                : context.theme.text,
+                                ? theme.red
+                                : theme.text,
                           ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcStorageUsageSvg,
                             pageName: ResponsiveNavigatorStateNotifier
                                 .dataAndStorageUsagePage,
-                            title: context.l10n.dataAndStorageUsage,
+                            title: l10n.dataAndStorageUsage,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesShieldSvg,
                             pageName:
                                 ResponsiveNavigatorStateNotifier.securityPage,
-                            title: context.l10n.security,
+                            title: l10n.security,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesProxySvg,
                             pageName:
                                 ResponsiveNavigatorStateNotifier.proxyPage,
-                            title: context.l10n.proxy,
+                            title: l10n.proxy,
                           ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcAppearanceSvg,
                             pageName:
                                 ResponsiveNavigatorStateNotifier.appearancePage,
-                            title: context.l10n.appearance,
+                            title: l10n.appearance,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesIcAboutSvg,
                             pageName:
                                 ResponsiveNavigatorStateNotifier.aboutPage,
-                            title: context.l10n.about,
+                            title: l10n.about,
                           ),
                         ],
                       ),
@@ -152,15 +161,18 @@ class SettingPage extends HookConsumerWidget {
                 CellGroup(
                   child: _Item(
                     leadingAssetName: Resources.assetsImagesIcSignOutSvg,
-                    title: context.l10n.signOut,
+                    title: l10n.signOut,
                     onTap: () async {
+                      final accountServer = ref
+                          .read(accountServerProvider)
+                          .requireValue;
                       final succeed = await runFutureWithToast(
-                        context.accountServer.signOutAndClear(),
+                        accountServer.signOutAndClear(),
                       );
                       if (!succeed) return;
-                      context.multiAuthChangeNotifier.signOut();
+                      ref.read(multiAuthNotifierProvider.notifier).signOut();
                     },
-                    color: context.theme.red,
+                    color: theme.red,
                     trailing: const SizedBox(),
                   ),
                 ),
@@ -192,6 +204,7 @@ class _Item extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final selected = ref.watch(
       responsiveNavigatorProvider.select(
         (value) =>
@@ -207,17 +220,17 @@ class _Item extends HookConsumerWidget {
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(
-                color ?? context.theme.text,
+                color ?? theme.text,
                 BlendMode.srcIn,
               ),
             )
           : null),
       title: AutoSizeText(title, maxLines: 1),
-      color: color ?? context.theme.text,
+      color: color ?? theme.text,
       selected: selected,
       onTap: () {
         if (onTap == null && pageName != null) {
-          context.providerContainer.read(responsiveNavigatorProvider.notifier)
+          ref.read(responsiveNavigatorProvider.notifier)
             ..popWhere(
               (page) => ResponsiveNavigatorStateNotifier.settingPageNameSet
                   .contains(page.name),
@@ -238,6 +251,7 @@ class _UserProfile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final (fullName, identityNumber, membership, isVerified) = ref.watch(
       authAccountProvider.select(
         (value) => (
@@ -252,16 +266,15 @@ class _UserProfile extends HookConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Builder(
-          builder: (context) {
-            final account = context.account!;
-            return AvatarWidget(
-              userId: account.userId,
-              name: account.fullName,
-              avatarUrl: account.avatarUrl,
-              size: 90,
-            );
-          },
+        AvatarWidget(
+          userId: ref.watch(
+            authAccountProvider.select((value) => value?.userId),
+          ),
+          name: fullName,
+          avatarUrl: ref.watch(
+            authAccountProvider.select((value) => value?.avatarUrl),
+          ),
+          size: 90,
         ),
         const SizedBox(height: 10),
         Padding(
@@ -276,7 +289,7 @@ class _UserProfile extends HookConsumerWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 18,
-                  color: context.theme.text,
+                  color: theme.text,
                 ),
               ),
               BadgesWidget(
@@ -292,9 +305,11 @@ class _UserProfile extends HookConsumerWidget {
           'Mixin ID: $identityNumber',
           style: TextStyle(
             fontSize: 14,
-            color: context.dynamicColor(
-              const Color.fromRGBO(188, 190, 195, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+            color: ref.watch(
+              dynamicColorProvider((
+                color: const Color.fromRGBO(188, 190, 195, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              )),
             ),
           ),
         ),

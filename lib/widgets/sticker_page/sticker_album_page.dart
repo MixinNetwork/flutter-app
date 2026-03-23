@@ -3,6 +3,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/database_provider.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../app_bar.dart';
@@ -25,9 +28,10 @@ class StickerAlbumPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
     final album =
         useMemoizedStream(
-          () => context.database.stickerAlbumDao
+          () => database.stickerAlbumDao
               .album(albumId)
               .watchSingleWithStream(
                 eventStreams: [
@@ -61,26 +65,29 @@ class StickerAlbumPage extends HookConsumerWidget {
   }
 }
 
-class _StickerAlbumHeader extends StatelessWidget {
+class _StickerAlbumHeader extends ConsumerWidget {
   const _StickerAlbumHeader({this.album});
 
   final StickerAlbum? album;
 
   @override
-  Widget build(BuildContext context) => MixinAppBar(
-    backgroundColor: Colors.transparent,
-    title: Text(
-      album == null ? context.l10n.stickerAlbumDetail : (album?.name ?? ''),
-    ),
-    leading: navigatorKey.currentState?.canPop() == true
-        ? null
-        : const SizedBox(),
-    actions: [
-      MixinCloseButton(
-        onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    return MixinAppBar(
+      backgroundColor: Colors.transparent,
+      title: Text(
+        album == null ? l10n.stickerAlbumDetail : (album?.name ?? ''),
       ),
-    ],
-  );
+      leading: navigatorKey.currentState?.canPop() == true
+          ? null
+          : const SizedBox(),
+      actions: [
+        MixinCloseButton(
+          onTap: () => Navigator.maybeOf(context, rootNavigator: true)?.pop(),
+        ),
+      ],
+    );
+  }
 }
 
 class _StickerAlbumDetail extends HookConsumerWidget {
@@ -91,13 +98,15 @@ class _StickerAlbumDetail extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.read(databaseProvider).requireValue;
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final stickers =
         useMemoizedFuture(
           () async {
             if (this.stickers != null) return this.stickers;
-            return context.database.stickerDao
-                .stickerByAlbumId(album.albumId)
-                .get();
+            return database.stickerDao.stickerByAlbumId(album.albumId).get();
           },
           <Sticker>[],
           keys: [album.albumId],
@@ -123,9 +132,9 @@ class _StickerAlbumDetail extends HookConsumerWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  context.theme.popUp.withValues(alpha: 0),
-                  context.theme.popUp.withValues(alpha: 0.36),
-                  context.theme.popUp.withValues(alpha: 1),
+                  theme.popUp.withValues(alpha: 0),
+                  theme.popUp.withValues(alpha: 0.36),
+                  theme.popUp.withValues(alpha: 1),
                 ],
               ),
             ),
@@ -134,14 +143,14 @@ class _StickerAlbumDetail extends HookConsumerWidget {
                 const Spacer(),
                 MixinButton(
                   backgroundColor: album.added == true
-                      ? context.theme.red
-                      : context.theme.accent,
+                      ? theme.red
+                      : theme.accent,
                   child: Text(
                     album.added == true
-                        ? context.l10n.removeStickers
-                        : context.l10n.addStickers,
+                        ? l10n.removeStickers
+                        : l10n.addStickers,
                   ),
-                  onTap: () => context.accountServer.updateStickerAlbumAdded(
+                  onTap: () => accountServer.updateStickerAlbumAdded(
                     album.albumId,
                     !(album.added == true),
                   ),

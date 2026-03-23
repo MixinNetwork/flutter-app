@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../account/account_server.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/media_status.dart';
-import '../extension/extension.dart';
-import '../hook.dart';
 import '../system/audio_session.dart';
 import 'audio_message_player.dart';
 
@@ -26,8 +23,27 @@ class AudioMessagePlayService {
   bool _isMediaList = false;
 
   bool get playing => _player.playbackState.isPlaying;
+  bool get isMediaList => _isMediaList;
 
   Duration get currentPosition => _player.currentPosition();
+  Stream<PlaybackState> get playbackStateStream =>
+      _player.playbackStream.distinct();
+  Stream<MessageItem?> get currentMessageStream =>
+      _player.currentStream.map((e) => e?.messageItem).distinct();
+  Stream<double> get playbackSpeedStream =>
+      _player.playbackSpeedStream.distinct();
+  Stream<double> get positionStream => playbackStateStream.switchMap((event) {
+    if (event == PlaybackState.idle || event == PlaybackState.completed) {
+      return Stream<double>.value(0);
+    }
+    if (event == PlaybackState.paused) {
+      return Stream<double>.value(currentPosition.inMilliseconds.toDouble());
+    }
+    return Stream<double>.periodic(
+      const Duration(milliseconds: 200),
+      (_) => currentPosition.inMilliseconds.toDouble(),
+    ).startWith(currentPosition.inMilliseconds.toDouble());
+  }).distinct();
 
   final _subscriptions = <StreamSubscription>[];
 
@@ -136,100 +152,4 @@ class AudioMessagePlayService {
   void setPlaySpeed(double speed) {
     _player.setPlaybackSpeed(speed);
   }
-}
-
-bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
-  final context = useContext();
-
-  final result = useMemoizedStream(() {
-    final ams = context.audioMessageService;
-
-    return CombineLatestStream.combine2<
-          MessageMedia?,
-          bool,
-          (MessageMedia?, bool)
-        >(
-          ams._player.currentStream,
-          ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
-          (a, b) => (a, b),
-        )
-        .map((event) {
-          if (!event.$2) return false;
-
-          final message = event.$1?.messageItem;
-
-          return message?.messageId == messageId &&
-              isMediaList == ams._isMediaList;
-        })
-        .distinct();
-  }, keys: [messageId, isMediaList, context]);
-  return result.data ?? false;
-}
-
-PlaybackState useAudioMessagePlayerState() {
-  final context = useContext();
-
-  final result = useMemoizedStream(() {
-    final ams = context.audioMessageService;
-    return ams._player.playbackStream.distinct();
-  }, keys: [context]);
-  return result.data ?? PlaybackState.idle;
-}
-
-MessageItem? useCurrentPlayingMessage() {
-  final context = useContext();
-
-  final result = useMemoizedStream(() {
-    final ams = context.audioMessageService;
-    return ams._player.currentStream.map((e) => e?.messageItem).distinct();
-  }, keys: [context]);
-  return result.data;
-}
-
-double useAudioPlayerPosition() {
-  final context = useContext();
-  final ams = context.audioMessageService;
-  final position = useState<double>(0);
-  final isImagePlay = useValueListenable(useImagePlaying(context));
-  useEffect(() {
-    Timer? timer;
-    final subscription = ams._player.playbackStream.listen((event) {
-      timer?.cancel();
-      if (event == PlaybackState.idle || event == PlaybackState.completed) {
-        position.value = 0;
-        return;
-      }
-      if (event == PlaybackState.paused) {
-        position.value = ams.currentPosition.inMilliseconds.toDouble();
-        return;
-      }
-      // Avoid update too often. since there is performance issue in Flutter.
-      // https://github.com/flutter/flutter/issues/85781
-      timer = Timer.periodic(Duration(milliseconds: isImagePlay ? 40 : 200), (
-        timer,
-      ) {
-        position.value = ams.currentPosition.inMilliseconds.toDouble();
-      });
-    });
-    return () {
-      subscription.cancel();
-      timer?.cancel();
-    };
-  }, [ams, isImagePlay]);
-
-  return position.value;
-}
-
-double useAudioPlayerSpeed() {
-  final context = useContext();
-  final ams = context.audioMessageService;
-  final speed = useState<double>(1);
-  useEffect(() {
-    final subscription = ams._player.playbackSpeedStream.listen((event) {
-      speed.value = event;
-    });
-    return subscription.cancel;
-  }, [ams]);
-
-  return speed.value;
 }

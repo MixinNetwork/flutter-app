@@ -4,7 +4,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../constants/resources.dart';
 import '../enum/message_category.dart';
-import '../generated/l10n.dart';
 import '../widgets/message/item/action/action_data.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import 'extension/extension.dart';

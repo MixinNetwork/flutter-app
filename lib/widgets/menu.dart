@@ -5,13 +5,12 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
-import 'package:provider/provider.dart';
 import 'package:super_context_menu/src/default_builder/group_intrinsic_width.dart';
 import 'package:super_context_menu/src/desktop.dart';
 import 'package:super_context_menu/src/mobile.dart';
@@ -19,10 +18,9 @@ import 'package:super_context_menu/src/scaffold/desktop/menu_widget_builder.dart
 import 'package:super_context_menu/src/scaffold/mobile/menu_widget_builder.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
-import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
 import '../utils/platform.dart';
 import 'action_button.dart';
 import 'hover_overlay.dart';
@@ -43,14 +41,18 @@ class MenusWithSeparator extends Menu {
        );
 }
 
-class _OffsetCubit extends SimpleCubit<Offset?> {
-  _OffsetCubit(super.state);
-}
+class MenuPortalController {
+  MenuPortalController();
 
-extension ContextMenuPortalEntrySender on BuildContext {
-  void sendMenuPosition(Offset offset) => read<_OffsetCubit>().emit(offset);
+  final ValueNotifier<Offset?> offset = ValueNotifier<Offset?>(null);
 
-  void closeMenu() => read<_OffsetCubit?>()?.emit(null);
+  bool get visible => offset.value != null;
+
+  void show(Offset value) => offset.value = value;
+
+  void close() => offset.value = null;
+
+  void dispose() => offset.dispose();
 }
 
 typedef CustomPopupMenuItemBuilder<T> =
@@ -75,41 +77,47 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
   final Alignment? alignment;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
-    interactive: false,
-    buildMenus: () => itemBuilder(context)
-        .map(
-          (e) => ContextMenu(
-            title: e.title,
-            onTap: () => onSelected?.call(e.value),
-            isDestructiveAction: e.isDestructiveAction,
-            icon: e.icon,
-          ),
-        )
-        .toList(),
-    child: Builder(
-      builder: (context) => ActionButton(
-        name: icon,
-        color: color ?? context.theme.icon,
-        onTapUp: (details) {
-          d('onTapUp: $alignment');
-          if (alignment == null) {
-            context.sendMenuPosition(details.globalPosition);
-            return;
-          }
-          final renderBox = context.findRenderObject() as RenderBox?;
-          if (renderBox != null) {
-            var position = alignment!.withinRect(renderBox.paintBounds);
-            position = renderBox.localToGlobal(position);
-            context.sendMenuPosition(position);
-          } else {
-            context.sendMenuPosition(details.globalPosition);
-          }
-        },
-        child: child,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final controller = useMemoized(MenuPortalController.new);
+    useEffect(() => controller.dispose, [controller]);
+    return ContextMenuPortalEntry(
+      controller: controller,
+      interactive: false,
+      buildMenus: () => itemBuilder(context)
+          .map(
+            (e) => ContextMenu(
+              title: e.title,
+              onTap: () => onSelected?.call(e.value),
+              isDestructiveAction: e.isDestructiveAction,
+              icon: e.icon,
+            ),
+          )
+          .toList(),
+      child: Builder(
+        builder: (context) => ActionButton(
+          name: icon,
+          color: color ?? theme.icon,
+          onTapUp: (details) {
+            d('onTapUp: $alignment');
+            if (alignment == null) {
+              controller.show(details.globalPosition);
+              return;
+            }
+            final renderBox = context.findRenderObject() as RenderBox?;
+            if (renderBox != null) {
+              var position = alignment!.withinRect(renderBox.paintBounds);
+              position = renderBox.localToGlobal(position);
+              controller.show(position);
+            } else {
+              controller.show(details.globalPosition);
+            }
+          },
+          child: child,
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class CustomPopupMenuItem<T> {
@@ -131,6 +139,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
     required this.child,
     required this.buildMenus,
     super.key,
+    this.controller,
     this.showedMenu,
     this.enable = true,
     this.onTap,
@@ -139,6 +148,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
 
   final Widget child;
   final List<Widget> Function() buildMenus;
+  final MenuPortalController? controller;
   final ValueChanged<bool>? showedMenu;
   final bool enable;
   final VoidCallback? onTap;
@@ -148,80 +158,98 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final offsetCubit = useBloc(() => _OffsetCubit(null));
-    final offset = useBlocState<_OffsetCubit, Offset?>(
-      bloc: offsetCubit,
-      when: (state) => state != null,
-    );
-    final visible = useBlocStateConverter<_OffsetCubit, Offset?, bool>(
-      bloc: offsetCubit,
-      converter: (state) => state != null,
-    );
+    final localController = useMemoized(MenuPortalController.new);
+    final effectiveController = controller ?? localController;
+    final ownsController = controller == null;
+    final offset = useValueListenable(effectiveController.offset);
+    final visible = offset != null;
 
     useEffect(() {
       showedMenu?.call(visible);
-    }, [visible]);
+      return null;
+    }, [visible, showedMenu]);
 
     useEffect(() {
-      if (!enable) {
-        offsetCubit.emit(null);
-      }
-    }, [enable]);
+      if (!ownsController) return null;
+      return localController.dispose;
+    }, [ownsController, localController]);
 
     if (!enable) {
+      Future.microtask(effectiveController.close);
       return child;
     }
-    return Provider.value(
-      value: offsetCubit,
-      child: Barrier(
+
+    return Barrier(
+      visible: visible,
+      onClose: effectiveController.close,
+      child: PortalTarget(
         visible: visible,
-        onClose: () => offsetCubit.emit(null),
-        child: PortalTarget(
-          visible: visible,
-          portalFollower: Builder(
-            builder: (context) {
-              final show = offset != null && visible;
-              if (show) {
-                return CustomSingleChildLayout(
-                  delegate: PositionedLayoutDelegate(position: offset),
+        portalFollower: Builder(
+          builder: (context) {
+            final show = offset != null && visible;
+            if (show) {
+              return CustomSingleChildLayout(
+                delegate: PositionedLayoutDelegate(position: offset),
+                child: _MenuPortalControllerScope(
+                  controller: effectiveController,
                   child: ContextMenuPage(menus: buildMenus()),
-                );
+                ),
+              );
+            }
+            return const SizedBox();
+          },
+        ),
+        child: InteractiveDecoratedBox(
+          onRightClick: (event) {
+            if (!interactive) {
+              return;
+            }
+            effectiveController.show(event.globalPosition);
+          },
+          onLongPress: (details) {
+            if (!interactive) {
+              return;
+            }
+            if (Platform.isAndroid || Platform.isIOS) {
+              effectiveController.show(details.globalPosition);
+            }
+          },
+          onTap: onTap,
+          child: Focus(
+            onKeyEvent: (node, key) {
+              final show = offset != null && visible;
+              if (show && key.logicalKey == LogicalKeyboardKey.escape) {
+                effectiveController.close();
+                return KeyEventResult.handled;
               }
-              return const SizedBox();
+              return KeyEventResult.ignored;
             },
-          ),
-          child: InteractiveDecoratedBox(
-            onRightClick: (event) {
-              if (!interactive) {
-                return;
-              }
-              offsetCubit.emit(event.globalPosition);
-            },
-            onLongPress: (details) {
-              if (!interactive) {
-                return;
-              }
-              if (Platform.isAndroid || Platform.isIOS) {
-                offsetCubit.emit(details.globalPosition);
-              }
-            },
-            onTap: onTap,
-            child: Focus(
-              onKeyEvent: (node, key) {
-                final show = offset != null && visible;
-                if (show && key.logicalKey == LogicalKeyboardKey.escape) {
-                  offsetCubit.emit(null);
-                  return KeyEventResult.handled;
-                }
-                return KeyEventResult.ignored;
-              },
-              child: child,
-            ),
+            child: child,
           ),
         ),
       ),
     );
   }
+}
+
+class _MenuPortalControllerScope extends InheritedWidget {
+  const _MenuPortalControllerScope({
+    required this.controller,
+    required super.child,
+  });
+
+  final MenuPortalController controller;
+
+  static MenuPortalController of(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_MenuPortalControllerScope>();
+    assert(scope != null, '_MenuPortalControllerScope is missing');
+    return scope!.controller;
+  }
+
+  @override
+  bool updateShouldNotify(_MenuPortalControllerScope oldWidget) =>
+      controller != oldWidget.controller;
 }
 
 class Barrier extends StatelessWidget {
@@ -297,14 +325,22 @@ class ContextMenuPage extends StatelessWidget {
   );
 }
 
-class _ContextMenuContainerLayout extends StatelessWidget {
+class _ContextMenuContainerLayout extends ConsumerWidget {
   const _ContextMenuContainerLayout({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final brightnessData = context.brightnessValue;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessData = ref.watch(brightnessValueProvider);
+    final backgroundColor = ref.watch(
+      dynamicColorProvider(
+        const (
+          color: Color.fromRGBO(255, 255, 255, 1),
+          darkColor: Color.fromRGBO(62, 65, 72, 1),
+        ),
+      ),
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(11)),
@@ -327,10 +363,7 @@ class _ContextMenuContainerLayout extends StatelessWidget {
             blurRadius: lerpDouble(6, 12, brightnessData)!,
           ),
         ],
-        color: context.dynamicColor(
-          const Color.fromRGBO(255, 255, 255, 1),
-          darkColor: const Color.fromRGBO(62, 65, 72, 1),
-        ),
+        color: backgroundColor,
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(11)),
@@ -343,7 +376,7 @@ class _ContextMenuContainerLayout extends StatelessWidget {
   }
 }
 
-class ContextMenu extends StatelessWidget {
+class ContextMenu extends ConsumerWidget {
   const ContextMenu({
     required this.title,
     super.key,
@@ -366,28 +399,39 @@ class ContextMenu extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final backgroundColor = context.dynamicColor(
-      const Color.fromRGBO(255, 255, 255, 1),
-      darkColor: const Color.fromRGBO(62, 65, 72, 1),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final backgroundColor = ref.watch(
+      dynamicColorProvider(
+        const (
+          color: Color.fromRGBO(255, 255, 255, 1),
+          darkColor: Color.fromRGBO(62, 65, 72, 1),
+        ),
+      ),
     );
     final color = isDestructiveAction
-        ? context.theme.red
-        : context.dynamicColor(
-            const Color.fromRGBO(0, 0, 0, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+        ? theme.red
+        : ref.watch(
+            dynamicColorProvider(
+              const (
+                color: Color.fromRGBO(0, 0, 0, 1),
+                darkColor: Color.fromRGBO(255, 255, 255, 0.9),
+              ),
+            ),
           );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
       child: InteractiveDecoratedBox.color(
         decoration: BoxDecoration(color: backgroundColor),
         tapDowningColor: Color.alphaBlend(
-          context.theme.listSelected,
+          theme.listSelected,
           backgroundColor,
         ),
         onTap: () {
           onTap?.call();
-          if (!_subMenuMode) context.closeMenu();
+          if (!_subMenuMode) {
+            _MenuPortalControllerScope.of(context).close();
+          }
         },
         onTapUp: (details) {
           if (_subMenuMode && details.kind == PointerDeviceKind.touch) {
@@ -420,7 +464,7 @@ class ContextMenu extends StatelessWidget {
                   width: 20,
                   height: 20,
                   colorFilter: ColorFilter.mode(
-                    context.theme.secondaryText,
+                    theme.secondaryText,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -472,48 +516,49 @@ class SubMenuClickedByTouchNotification extends Notification {
 class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
   CustomDesktopMenuWidgetBuilder();
 
-  static DefaultDesktopMenuTheme _themeForContext(BuildContext context) =>
-      DefaultDesktopMenuTheme.themeForBrightness(context.brightness);
-
   @override
   Widget buildMenuContainer(
     BuildContext context,
     DesktopMenuInfo menuInfo,
     Widget child,
-  ) {
-    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    final theme = _themeForContext(context);
-    return Container(
-      decoration: theme.decorationOuter.copyWith(
-        borderRadius: BorderRadius.circular(6.0 + 1.0 / pixelRatio),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Padding(
-          padding: EdgeInsets.all(1.0 / pixelRatio),
-          child: Container(
-            decoration: theme.decorationInner,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: DefaultTextStyle.merge(
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                decoration: TextDecoration.none,
-                fontWeight: FontWeight.w500,
-                fontFamilyFallback: Platform.isWindows
-                    ? ['Microsoft Yahei']
-                    : null,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: GroupIntrinsicWidthContainer(child: child),
+  ) => Consumer(
+    builder: (context, ref, _) {
+      final pixelRatio = ref.watch(mediaQueryDataProvider).devicePixelRatio;
+      final theme = DefaultDesktopMenuTheme.themeForBrightness(
+        ref.watch(platformBrightnessProvider),
+      );
+      return Container(
+        decoration: theme.decorationOuter.copyWith(
+          borderRadius: BorderRadius.circular(6.0 + 1.0 / pixelRatio),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: EdgeInsets.all(1.0 / pixelRatio),
+            child: Container(
+              decoration: theme.decorationInner,
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w500,
+                  fontFamilyFallback: Platform.isWindows
+                      ? ['Microsoft Yahei']
+                      : null,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: GroupIntrinsicWidthContainer(child: child),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
 
   @override
   Widget buildSeparator(
@@ -521,7 +566,9 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
     DesktopMenuInfo menuInfo,
     MenuSeparator separator,
   ) {
-    final theme = _themeForContext(context);
+    final theme = DefaultDesktopMenuTheme.themeForBrightness(
+      MediaQuery.platformBrightnessOf(context),
+    );
     final paddingLeft = 10.0 + (menuInfo.hasAnyCheckedItems ? (16 + 6) : 0);
     const paddingRight = 10.0;
     return Container(
@@ -561,7 +608,9 @@ class CustomDesktopMenuWidgetBuilder extends DefaultDesktopMenuWidgetBuilder {
     DesktopMenuButtonState state,
     MenuElement element,
   ) {
-    final theme = _themeForContext(context);
+    final theme = DefaultDesktopMenuTheme.themeForBrightness(
+      MediaQuery.platformBrightnessOf(context),
+    );
     final itemInfo = DesktopMenuItemInfo(
       destructive: element is MenuAction && element.attributes.destructive,
       disabled: element is MenuAction && element.attributes.disabled,

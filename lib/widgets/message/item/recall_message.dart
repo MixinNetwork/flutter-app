@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
 import '../../../ui/provider/recall_message_reedit_provider.dart';
-import '../../../utils/extension/extension.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_style.dart';
@@ -16,6 +16,8 @@ class RecallMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final isCurrentUser = useIsCurrentUser();
     final messageId = useMessageConverter(
       converter: (state) => state.messageId,
@@ -28,10 +30,7 @@ class RecallMessage extends HookConsumerWidget {
       children: [
         SvgPicture.asset(
           Resources.assetsImagesRecallSvg,
-          colorFilter: ColorFilter.mode(
-            context.theme.secondaryText,
-            BlendMode.srcIn,
-          ),
+          colorFilter: ColorFilter.mode(theme.secondaryText, BlendMode.srcIn),
           width: 16,
           height: 16,
         ),
@@ -42,13 +41,13 @@ class RecallMessage extends HookConsumerWidget {
               children: [
                 TextSpan(
                   text: isCurrentUser
-                      ? context.l10n.youDeletedThisMessage
-                      : context.l10n.thisMessageWasDeleted,
+                      ? l10n.youDeletedThisMessage
+                      : l10n.thisMessageWasDeleted,
                 ),
                 if (recalledText != null)
                   TextSpan(
-                    text: ' ${context.l10n.reedit}',
-                    style: TextStyle(color: context.theme.accent),
+                    text: ' ${l10n.reedit}',
+                    style: TextStyle(color: theme.accent),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () => ref
                           .read(recallMessageNotifierProvider)
@@ -58,7 +57,7 @@ class RecallMessage extends HookConsumerWidget {
             ),
             style: TextStyle(
               fontSize: context.messageStyle.primaryFontSize,
-              color: context.theme.text,
+              color: theme.text,
             ),
           ),
         ),

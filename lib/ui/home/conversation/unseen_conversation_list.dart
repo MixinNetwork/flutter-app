@@ -24,7 +24,7 @@ class UnseenConversationList extends HookConsumerWidget {
       return const SizedBox();
     }
     if (unseenConversations.isEmpty) {
-      return const SearchEmptyWidget();
+      return const SearchEmptyWidget(onClear: _noop);
     }
     return ScrollablePositionedList.builder(
       itemBuilder: (context, index) {
@@ -38,6 +38,7 @@ class UnseenConversationList extends HookConsumerWidget {
                 conversation.conversationId == currentConversationId &&
                 !routeMode,
             onTap: () => ConversationStateNotifier.selectConversation(
+              ref.container,
               context,
               conversation.conversationId,
               conversation: conversation,
@@ -49,3 +50,5 @@ class UnseenConversationList extends HookConsumerWidget {
     );
   }
 }
+
+void _noop() {}

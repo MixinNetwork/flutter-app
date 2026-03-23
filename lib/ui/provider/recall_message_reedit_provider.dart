@@ -1,17 +1,23 @@
 import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../utils/rivepod.dart';
 
 // Duration to keep reedit available after message recalled.
 const _kReeditOutdatedDuration = Duration(minutes: 6);
 
-class RecallMessageNotifier extends DistinctStateNotifier<Map<String, String>> {
-  RecallMessageNotifier(this._onReEditStreamController) : super({});
-
-  final StreamController<String> _onReEditStreamController;
-
+class RecallMessageNotifier extends Notifier<Map<String, String>> {
   final Set<Timer> _timers = {};
+
+  @override
+  Map<String, String> build() {
+    ref.onDispose(() {
+      for (final timer in _timers) {
+        timer.cancel();
+      }
+      _timers.clear();
+    });
+    return const {};
+  }
 
   void _updateMessage(String messageId, String? content) {
     if (content == null) {
@@ -31,15 +37,8 @@ class RecallMessageNotifier extends DistinctStateNotifier<Map<String, String>> {
     _timers.add(timer);
   }
 
-  void onReedit(String content) => _onReEditStreamController.add(content);
-
-  @override
-  void dispose() {
-    for (final timer in _timers) {
-      timer.cancel();
-    }
-    super.dispose();
-  }
+  void onReedit(String content) =>
+      ref.read(_onReEditStreamControllerProvider).add(content);
 }
 
 final _onReEditStreamControllerProvider = Provider(
@@ -51,9 +50,8 @@ final onReEditStreamProvider = _onReEditStreamControllerProvider.select(
 );
 
 final _recallMessageProvider =
-    StateNotifierProvider<RecallMessageNotifier, Map<String, String>>(
-      (ref) =>
-          RecallMessageNotifier(ref.watch(_onReEditStreamControllerProvider)),
+    NotifierProvider<RecallMessageNotifier, Map<String, String>>(
+      RecallMessageNotifier.new,
     );
 
 final recalledTextProvider = Provider.family<String?, String>(

@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../constants/resources.dart';
 import '../../../../ui/provider/conversation_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
@@ -62,6 +63,7 @@ class ActionMessageButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final bubbleClipper = BubbleClipper(
       currentUser: false,
       showNip: false,
@@ -70,17 +72,18 @@ class ActionMessageButton extends ConsumerWidget {
     return InteractiveDecoratedBox.color(
       cursor: SystemMouseCursors.click,
       onTap: () {
-        if (context.openAction(action.action)) return;
+        if (context.openAction(ref, action.action)) return;
         openUriWithWebView(
           context,
           action.action,
+          container: ref.container,
           title: action.label,
           conversationId: ref.read(currentConversationIdProvider),
         );
       },
       child: CustomPaint(
         painter: BubblePainter(
-          color: context.theme.primary,
+          color: theme.primary,
           clipper: bubbleClipper,
         ),
         child: IntrinsicWidth(

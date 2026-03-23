@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
@@ -20,6 +21,7 @@ class PinMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     final mentionCache = ref.read(mentionCacheProvider);
 
     final content = useMessageConverter(
@@ -36,7 +38,7 @@ class PinMessageWidget extends HookConsumerWidget {
 
     final cachePreview = useMemoized(() {
       if (pinMessageMinimal == null) {
-        return context.l10n.chatPinMessage(userFullName, context.l10n.aMessage);
+        return l10n.chatPinMessage(userFullName, l10n.aMessage);
       }
       final preview = cachePinPreviewText(
         pinMessageMinimal: pinMessageMinimal,
@@ -48,8 +50,8 @@ class PinMessageWidget extends HookConsumerWidget {
           ? '${lines.first}...'
           : lines.firstOrNull ?? '';
 
-      return context.l10n.chatPinMessage(userFullName, singleLinePreview);
-    }, [userFullName, content, mentionCache]);
+      return l10n.chatPinMessage(userFullName, singleLinePreview);
+    }, [userFullName, content, mentionCache, l10n]);
 
     final text = useMemoizedFuture(
       () async {
@@ -64,12 +66,10 @@ class PinMessageWidget extends HookConsumerWidget {
         final singleLinePreview = lines.length > 1
             ? '${lines.first}...'
             : lines.firstOrNull ?? '';
-        return context.l10n
-            .chatPinMessage(userFullName, singleLinePreview)
-            .overflow;
+        return l10n.chatPinMessage(userFullName, singleLinePreview).overflow;
       },
       cachePreview,
-      keys: [userFullName, content, mentionCache],
+      keys: [userFullName, content, mentionCache, l10n],
     ).requireData;
 
     return Center(
@@ -79,8 +79,11 @@ class PinMessageWidget extends HookConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 400),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: context.dynamicColor(
-                const Color.fromRGBO(202, 234, 201, 1),
+              color: ref.watch(
+                dynamicColorProvider((
+                  color: const Color.fromRGBO(202, 234, 201, 1),
+                  darkColor: null,
+                )),
               ),
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
@@ -90,7 +93,12 @@ class PinMessageWidget extends HookConsumerWidget {
                 text,
                 style: TextStyle(
                   fontSize: context.messageStyle.secondaryFontSize,
-                  color: context.dynamicColor(const Color.fromRGBO(0, 0, 0, 1)),
+                  color: ref.watch(
+                    dynamicColorProvider((
+                      color: const Color.fromRGBO(0, 0, 0, 1),
+                      darkColor: null,
+                    )),
+                  ),
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,

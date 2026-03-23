@@ -3,14 +3,12 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../utils/hydrated_bloc.dart';
-import '../../utils/rivepod.dart';
+import '../../utils/hydration_codec.dart';
+import '../../utils/hydration_storage.dart';
 
 class AuthState extends Equatable {
   const AuthState({required this.account, required this.privateKey});
@@ -78,19 +76,39 @@ class MultiAuthState extends Equatable {
   String toJson() => json.encode(toMap());
 }
 
-class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
-  MultiAuthStateNotifier(super.state);
+class MultiAuthStateNotifier extends Notifier<MultiAuthState> {
+  @override
+  MultiAuthState build() {
+    ref.keepAlive();
+
+    final oldJson = HydrationStorageRegistry.storage.read(_kMultiAuthCubitKey);
+    if (oldJson != null) {
+      final multiAuthState = fromHydratedJson(oldJson, MultiAuthState.fromMap);
+      if (multiAuthState != null) {
+        return multiAuthState;
+      }
+    }
+    return const MultiAuthState();
+  }
 
   AuthState? get current => state.current;
 
+  void _update(MultiAuthState value) {
+    final hydratedJson = toHydratedJson(value.toMap());
+    HydrationStorageRegistry.storage.write(_kMultiAuthCubitKey, hydratedJson);
+    state = value;
+  }
+
   void signIn(AuthState authState) {
-    state = MultiAuthState(
-      auths: {
-        ...state._auths.where(
-          (element) => element.account.userId != authState.account.userId,
-        ),
-        authState,
-      },
+    _update(
+      MultiAuthState(
+        auths: {
+          ...state._auths.where(
+            (element) => element.account.userId != authState.account.userId,
+          ),
+          authState,
+        },
+      ),
     );
   }
 
@@ -103,58 +121,37 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
       return;
     }
     authState = AuthState(account: account, privateKey: authState.privateKey);
-    state = MultiAuthState(
-      auths: {
-        ...state._auths.where(
-          (element) => element.account.userId != authState?.account.userId,
-        ),
-        authState,
-      },
+    _update(
+      MultiAuthState(
+        auths: {
+          ...state._auths.where(
+            (element) => element.account.userId != authState?.account.userId,
+          ),
+          authState,
+        },
+      ),
     );
   }
 
   void signOut() {
     if (state._auths.isEmpty) return;
-    state = MultiAuthState(
-      auths: state._auths.toSet()..remove(state._auths.last),
+    _update(
+      MultiAuthState(
+        auths: state._auths.toSet()..remove(state._auths.last),
+      ),
     );
-  }
-
-  @override
-  @protected
-  set state(MultiAuthState value) {
-    final hydratedJson = toHydratedJson(state.toMap());
-    HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
-    super.state = value;
   }
 }
 
 @Deprecated('Use multiAuthNotifierProvider instead')
 const _kMultiAuthCubitKey = 'MultiAuthCubit';
 
-final multiAuthStateNotifierProvider =
-    StateNotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>((
-      ref,
-    ) {
-      ref.keepAlive();
+final multiAuthNotifierProvider =
+    NotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>(
+      MultiAuthStateNotifier.new,
+    );
 
-      final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
-      if (oldJson != null) {
-        final multiAuthState = fromHydratedJson(
-          oldJson,
-          MultiAuthState.fromMap,
-        );
-        if (multiAuthState == null) {
-          return MultiAuthStateNotifier(const MultiAuthState());
-        }
-
-        return MultiAuthStateNotifier(multiAuthState);
-      }
-
-      return MultiAuthStateNotifier(const MultiAuthState());
-    });
-
-final authProvider = multiAuthStateNotifierProvider.select(
+final authProvider = multiAuthNotifierProvider.select(
   (value) => value.current,
 );
 

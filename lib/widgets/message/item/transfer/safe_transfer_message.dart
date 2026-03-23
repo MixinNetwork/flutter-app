@@ -12,7 +12,9 @@ import 'package:mixin_logger/mixin_logger.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/extension/job.dart';
 import '../../../../db/mixin_database.dart';
+import '../../../../ui/provider/account_server_provider.dart';
 import '../../../../ui/provider/transfer_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../high_light_text.dart';
 import '../../../interactive_decorated_box.dart';
@@ -41,6 +43,8 @@ class SafeTransferMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final theme = ref.watch(brightnessThemeDataProvider);
     final assetId = useMessageConverter(converter: (state) => state.assetId);
 
     var assetIcon = useMessageConverter(converter: (state) => state.assetIcon);
@@ -57,8 +61,8 @@ class SafeTransferMessage extends HookConsumerWidget {
 
     final token = ref.watch(tokenProvider(assetId));
 
-    assetIcon = assetIcon ?? token.valueOrNull?.iconUrl;
-    assetSymbol = assetSymbol ?? token.valueOrNull?.symbol;
+    assetIcon = assetIcon ?? token.value?.iconUrl;
+    assetSymbol = assetSymbol ?? token.value?.symbol;
 
     useEffect(() {
       if (assetId == null) {
@@ -67,7 +71,7 @@ class SafeTransferMessage extends HookConsumerWidget {
       }
       if (token.hasValue && token.value == null) {
         i('${context.message.snapshotId}: token is null');
-        context.accountServer.updateTokenById(assetId: assetId);
+        accountServer.updateTokenById(assetId: assetId);
       }
     }, [token]);
 
@@ -90,11 +94,11 @@ class SafeTransferMessage extends HookConsumerWidget {
             jsonDecode(utf8.decode(base64Decode(content), allowMalformed: true))
                 as Map<String, dynamic>,
           );
-          context.accountServer.addUpdateTokenJob(
+          accountServer.addUpdateTokenJob(
             createUpdateTokenJob(snapshot.assetId),
           );
-          await context.accountServer.upsertDbSafeSnapshot(snapshot);
-          await context.accountServer.updateSafeSnapshotMessage(
+          await accountServer.upsertDbSafeSnapshot(snapshot);
+          await accountServer.updateSafeSnapshotMessage(
             messageId,
             snapshot.snapshotId,
           );
@@ -132,6 +136,7 @@ class SafeTransferMessage extends HookConsumerWidget {
             assetIcon: assetIcon,
             snapshotAmount: snapshotAmount,
             memo: memo,
+            theme: theme,
           ),
         ),
       ),
@@ -143,6 +148,7 @@ class _SnapshotLayout extends StatelessWidget {
   const _SnapshotLayout({
     required this.assetSymbol,
     required this.memo,
+    required this.theme,
     this.assetIcon,
     this.snapshotAmount,
   });
@@ -151,6 +157,7 @@ class _SnapshotLayout extends StatelessWidget {
   final String? snapshotAmount;
   final String assetSymbol;
   final String memo;
+  final BrightnessThemeData theme;
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -179,7 +186,10 @@ class _SnapshotLayout extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   assetSymbol,
-                  style: TextStyle(color: context.theme.text, fontSize: 13),
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -189,7 +199,7 @@ class _SnapshotLayout extends StatelessWidget {
               maxFontSize: 36,
               minFontSize: 24,
               style: TextStyle(
-                color: context.theme.text,
+                color: theme.text,
                 fontFamily: 'MixinCondensed',
                 fontSize: 36,
                 height: 1,
@@ -202,7 +212,7 @@ class _SnapshotLayout extends StatelessWidget {
               CustomText(
                 memo,
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: 12,
                 ),
                 maxLines: 1,

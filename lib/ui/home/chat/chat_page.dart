@@ -1,24 +1,21 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
-import 'package:provider/provider.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../../account/account_server.dart';
 import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
-import '../../../bloc/simple_cubit.dart';
-import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
 import '../../../widgets/animated_visibility.dart';
@@ -36,12 +33,12 @@ import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/window/menus.dart';
 import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/account_server_provider.dart';
 import '../../provider/conversation_provider.dart';
-import '../../provider/mention_cache_provider.dart';
+import '../../provider/database_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
-import '../bloc/blink_cubit.dart';
-import '../bloc/message_bloc.dart';
+import '../../provider/ui_context_providers.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
 import '../chat_slide_page/disappear_message_page.dart';
@@ -51,17 +48,46 @@ import '../chat_slide_page/pin_messages_page.dart';
 import '../chat_slide_page/search_message_page.dart';
 import '../chat_slide_page/shared_apps_page.dart';
 import '../chat_slide_page/shared_media_page.dart';
+import '../controllers/message_controller.dart';
 import '../home.dart';
-import '../hook/pin_message.dart';
-import '../route/responsive_navigator.dart';
+import '../providers/home_scope_providers.dart';
 import 'chat_bar.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
 import 'selection_bottom_bar.dart';
 
-class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
-  ChatSideCubit() : super(const ResponsiveNavigatorState());
+final _showScamWarningProvider = StreamProvider.autoDispose<bool>((ref) {
+  final (userId, isScam) = ref.watch(
+    conversationProvider.select(
+      (value) => (value?.userId, (value?.user?.isScam ?? 0) > 0),
+    ),
+  );
+  if (userId == null || !isScam) {
+    return Stream.value(false);
+  }
+  return ScamWarningKeyValue.instance.watch(userId);
+});
 
+final _unreadMentionsProvider =
+    StreamProvider.autoDispose<List<MessageMention>>((ref) {
+      final conversationId = ref.watch(currentConversationIdProvider);
+      final database = ref.watch(databaseProvider).value;
+      if (conversationId == null || database == null) {
+        return Stream.value(const <MessageMention>[]);
+      }
+      return database.messageMentionDao
+          .unreadMentionMessageByConversationId(conversationId)
+          .watchWithStream(
+            eventStreams: [
+              DataBaseEventBus.instance.watchUpdateMessageMention(
+                conversationIds: [conversationId],
+              ),
+            ],
+            duration: kSlowThrottleDuration,
+          );
+    });
+
+class ChatSideController extends AbstractResponsiveNavigatorStateNotifier {
   static const infoPage = 'infoPage';
   static const circles = 'circles';
   static const searchMessageHistory = 'searchMessageHistory';
@@ -136,36 +162,58 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
 
   void toggleInfoPage() {
     if (state.pages.isEmpty) {
-      return emit(state.copyWith(pages: [route(ChatSideCubit.infoPage, null)]));
+      state = state.copyWith(pages: [route(ChatSideController.infoPage, null)]);
+      return;
     }
-    return clear();
+    clear();
   }
 }
 
-class SearchConversationKeywordCubit extends SimpleCubit<(String?, String)>
-    with SubscribeMixin {
-  SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
-    : super(const (null, '')) {
-    addSubscription(
-      chatSideCubit.stream
-          .map(
-            (event) => event.pages.any(
-              (element) => element.name == ChatSideCubit.searchMessageHistory,
-            ),
-          )
-          .distinct()
-          .listen((event) => emit(const (null, ''))),
-    );
+class SearchConversationKeywordController extends Notifier<(String?, String)> {
+  SearchConversationKeywordController({
+    ChatSideController? chatSideController,
+  }) : _chatSideControllerOverride = chatSideController;
+
+  final ChatSideController? _chatSideControllerOverride;
+  late final StreamController<(String?, String)> _stateController =
+      StreamController<(String?, String)>.broadcast();
+
+  Stream<(String?, String)> get stream => _stateController.stream;
+
+  @override
+  (String?, String) build() {
+    final chatSideController =
+        _chatSideControllerOverride ??
+        ref.read(chatSideControllerProvider.notifier);
+    final subscription = chatSideController?.stream
+        .map(
+          (event) => event.pages.any(
+            (element) =>
+                element.name == ChatSideController.searchMessageHistory,
+          ),
+        )
+        .distinct()
+        .listen((event) => _updateState(const (null, '')));
+    ref.onDispose(() async {
+      await subscription?.cancel();
+      await _stateController.close();
+    });
+    return const (null, '');
   }
 
-  static void updateKeyword(BuildContext context, String keyword) {
-    final cubit = context.read<SearchConversationKeywordCubit>();
-    cubit.emit((cubit.state.$1, keyword));
+  void _updateState((String?, String) value) {
+    state = value;
+    if (!_stateController.isClosed) {
+      _stateController.add(value);
+    }
   }
 
-  static void updateSelectedUser(BuildContext context, String? userId) {
-    final cubit = context.read<SearchConversationKeywordCubit>();
-    cubit.emit((userId, cubit.state.$2));
+  void setKeyword(String keyword) {
+    _updateState((state.$1, keyword));
+  }
+
+  void setSelectedUser(String? userId) {
+    _updateState((userId, state.$2));
   }
 }
 
@@ -201,35 +249,55 @@ class ChatPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chatContainerPageKey = useMemoized(GlobalKey.new);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final (conversationId, initialSidePage) = ref.watch(
       conversationProvider.select(
         (value) => (value?.conversationId, value?.initialSidePage),
       ),
     );
 
-    final chatSideCubit = useBloc(ChatSideCubit.new, keys: [conversationId]);
-
-    final searchConversationKeywordCubit = useBloc(
-      () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
-      keys: [conversationId],
+    return KeyedSubtree(
+      key: ValueKey(conversationId),
+      child: TickerMode(
+        enabled: ModalRoute.of(context)?.isCurrent ?? true,
+        child: _ChatPageScope(
+          conversationId: conversationId,
+          initialSidePage: initialSidePage,
+        ),
+      ),
     );
+  }
+}
 
-    useEffect(() {
-      if (initialSidePage != null) {
-        chatSideCubit.pushPage(initialSidePage);
-      }
-    }, [initialSidePage, chatSideCubit]);
+class _ChatPageScope extends HookConsumerWidget {
+  const _ChatPageScope({
+    required this.conversationId,
+    required this.initialSidePage,
+  });
 
-    final navigatorState =
-        useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
-          bloc: chatSideCubit,
-        );
+  final String? conversationId;
+  final String? initialSidePage;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final chatContainerPageKey = useMemoized(GlobalKey.new);
+    final chatSideController = ref.read(chatSideControllerProvider.notifier);
+    final navigatorState = ref.watch(chatSideControllerProvider);
 
     ref.listen(hasSelectedMessageProvider, (previous, hasSelectedMessage) {
       if (!hasSelectedMessage) return;
-      chatSideCubit.clear();
+      chatSideController.clear();
     });
+
+    useEffect(() {
+      final sidePage = initialSidePage;
+      if (sidePage == null) return null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        chatSideController.pushPage(sidePage);
+      });
+      return null;
+    }, [initialSidePage, chatSideController, conversationId]);
 
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
@@ -237,77 +305,45 @@ class ChatPage extends HookConsumerWidget {
       child: ChatContainer(key: chatContainerPageKey),
     );
 
-    final windowHeight = MediaQuery.sizeOf(context).height;
+    return DecoratedBox(
+      decoration: BoxDecoration(color: theme.primary),
+      child: LayoutBuilder(
+        builder: (context, boxConstraints) {
+          final routeMode =
+              boxConstraints.maxWidth <
+              (kResponsiveNavigationMinWidth + kChatSidePageWidth);
+          chatSideController.updateRouteMode(routeMode);
 
-    final tickerProvider = useSingleTickerProvider();
-    final blinkCubit = useBloc(
-      () => BlinkCubit(
-        tickerProvider,
-        context.theme.accent.withValues(alpha: 0.5),
-      ),
-    );
-    final pinMessageState = usePinMessageState(conversationId);
-
-    return MultiProvider(
-      providers: [
-        BlocProvider.value(value: blinkCubit),
-        BlocProvider.value(value: chatSideCubit),
-        BlocProvider.value(value: searchConversationKeywordCubit),
-        BlocProvider(
-          create: (context) => MessageBloc(
-            accountServer: context.accountServer,
-            database: context.database,
-            conversationNotifier: ref.read(conversationProvider.notifier),
-            mentionCache: context.providerContainer.read(
-              mentionCacheProvider,
-            ),
-            limit: windowHeight ~/ 20,
-          ),
-        ),
-        Provider.value(value: pinMessageState),
-      ],
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: context.theme.primary),
-        child: LayoutBuilder(
-          builder: (context, boxConstraints) {
-            final routeMode =
-                boxConstraints.maxWidth <
-                (kResponsiveNavigationMinWidth + kChatSidePageWidth);
-            chatSideCubit.updateRouteMode(routeMode);
-
-            return _ChatMenuHandler(
-              child: Row(
-                children: [
-                  if (!routeMode) Expanded(child: chatContainerPage.child),
-                  if (!routeMode)
-                    Container(width: 1, color: context.theme.divider),
-                  FocusableActionDetector(
-                    shortcuts: const {
-                      SingleActivator(LogicalKeyboardKey.escape):
-                          EscapeIntent(),
-                    },
-                    actions: {
-                      EscapeIntent: CallbackAction<EscapeIntent>(
-                        onInvoke: (intent) => chatSideCubit.pop(),
-                      ),
-                    },
-                    child: _SideRouter(
-                      chatSideCubit: chatSideCubit,
-                      constraints: boxConstraints,
-                      onDidRemovePage: (page) {
-                        chatSideCubit.onPopPage();
-                      },
-                      pages: [
-                        if (routeMode) chatContainerPage,
-                        ...navigatorState.pages,
-                      ],
+          return _ChatMenuHandler(
+            child: Row(
+              children: [
+                if (!routeMode) Expanded(child: chatContainerPage.child),
+                if (!routeMode) Container(width: 1, color: theme.divider),
+                FocusableActionDetector(
+                  shortcuts: const {
+                    SingleActivator(LogicalKeyboardKey.escape): EscapeIntent(),
+                  },
+                  actions: {
+                    EscapeIntent: CallbackAction<EscapeIntent>(
+                      onInvoke: (intent) => chatSideController.pop(),
                     ),
+                  },
+                  child: _SideRouter(
+                    chatSideController: chatSideController,
+                    constraints: boxConstraints,
+                    onDidRemovePage: (page) {
+                      chatSideController.onPopPage();
+                    },
+                    pages: [
+                      if (routeMode) chatContainerPage,
+                      ...navigatorState.pages,
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -315,13 +351,13 @@ class ChatPage extends HookConsumerWidget {
 
 class _SideRouter extends StatelessWidget {
   const _SideRouter({
-    required this.chatSideCubit,
+    required this.chatSideController,
     required this.pages,
     required this.constraints,
     this.onDidRemovePage,
   });
 
-  final ChatSideCubit chatSideCubit;
+  final ChatSideController chatSideController;
 
   final List<Page<dynamic>> pages;
 
@@ -331,7 +367,7 @@ class _SideRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final routeMode = chatSideCubit.state.routeMode;
+    final routeMode = chatSideController.state.routeMode;
     return routeMode
         ? SizedBox(
             width: constraints.maxWidth,
@@ -407,7 +443,9 @@ class ChatContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    BlocProvider.of<MessageBloc>(context).limit =
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final brightnessValue = ref.watch(brightnessValueProvider);
+    ref.read(messageControllerProvider.notifier).limit =
         MediaQuery.sizeOf(context).height ~/ 20;
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
@@ -423,7 +461,7 @@ class ChatContainer extends HookConsumerWidget {
         actions: {
           EscapeIntent: CallbackAction<EscapeIntent>(
             onInvoke: (intent) {
-              ref.read(messageSelectionProvider).clearSelection();
+              ref.read(messageSelectionProvider.notifier).clearSelection();
             },
           ),
         },
@@ -432,23 +470,21 @@ class ChatContainer extends HookConsumerWidget {
             Container(
               height: 64,
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: context.theme.divider),
-                ),
+                border: Border(bottom: BorderSide(color: theme.divider)),
               ),
               child: const ChatBar(),
             ),
             Expanded(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: context.theme.chatBackground,
+                  color: theme.chatBackground,
                   image: DecorationImage(
                     image: const ExactAssetImage(
                       Resources.assetsImagesChatBackgroundPng,
                     ),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
-                      context.brightnessValue == 1.0
+                      brightnessValue == 1.0
                           ? Colors.white.withValues(alpha: 0.02)
                           : Colors.black.withValues(alpha: 0.03),
                       BlendMode.srcIn,
@@ -467,9 +503,7 @@ class ChatContainer extends HookConsumerWidget {
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    bottom: BorderSide(
-                                      color: context.theme.divider,
-                                    ),
+                                    bottom: BorderSide(color: theme.divider),
                                   ),
                                 ),
                                 child: const Stack(
@@ -524,26 +558,27 @@ class ChatContainer extends HookConsumerWidget {
   }
 }
 
-class _NotificationListener extends StatelessWidget {
+class _NotificationListener extends ConsumerWidget {
   const _NotificationListener({required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) =>
+  Widget build(BuildContext context, WidgetRef ref) =>
       NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           final dimension = notification.metrics.viewportDimension / 2;
 
           if (notification is ScrollUpdateNotification) {
             if (notification.scrollDelta == null) return false;
+            final notifier = ref.read(messageControllerProvider.notifier);
 
             if (notification.scrollDelta! > 0) {
               // down
               if (notification.metrics.maxScrollExtent -
                       notification.metrics.pixels <
                   dimension) {
-                BlocProvider.of<MessageBloc>(context).after();
+                notifier.after();
               }
             } else if (notification.scrollDelta! < 0) {
               // up
@@ -551,7 +586,7 @@ class _NotificationListener extends StatelessWidget {
                           notification.metrics.pixels)
                       .abs() <
                   dimension) {
-                BlocProvider.of<MessageBloc>(context).before();
+                notifier.before();
               }
             }
           }
@@ -565,10 +600,18 @@ class _NotificationListener extends StatelessWidget {
 class _List extends HookConsumerWidget {
   const _List();
 
+  static const _alignmentEpsilon = 1.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = useBlocState<MessageBloc, MessageState>(
-      when: (state) => state.conversationId != null,
+    final messageController = ref.read(messageControllerProvider.notifier);
+    final state = ref.watch(
+      messageControllerProvider.select((state) {
+        if (state.conversationId == null) {
+          return MessageState();
+        }
+        return state;
+      }),
     );
 
     final key = ValueKey((state.conversationId, state.refreshKey));
@@ -576,14 +619,18 @@ class _List extends HookConsumerWidget {
     final center = state.center;
     final bottom = state.bottom;
 
-    final ref = useRef<Map<String, Key>>({});
+    final keyRef = useRef<Map<String, Key>>({});
+    final bodyKeyRef = useRef<Map<String, Key>>({});
 
     final ids = state.list.map((e) => e.messageId);
 
     useMemoized(() {
-      ref.value.removeWhere((key, value) => !ids.contains(key));
+      keyRef.value.removeWhere((key, value) => !ids.contains(key));
+      bodyKeyRef.value.removeWhere((key, value) => !ids.contains(key));
       ids.forEach((id) {
-        ref.value[id] = ref.value[id] ?? GlobalKey(debugLabel: id);
+        keyRef.value[id] = keyRef.value[id] ?? GlobalKey(debugLabel: id);
+        bodyKeyRef.value[id] =
+            bodyKeyRef.value[id] ?? GlobalKey(debugLabel: 'body_$id');
       });
     }, [ids]);
 
@@ -592,9 +639,47 @@ class _List extends HookConsumerWidget {
       () => GlobalKey(debugLabel: 'chat list bottom'),
     );
 
-    final scrollController = BlocProvider.of<MessageBloc>(
-      context,
-    ).scrollController;
+    final scrollController = messageController.scrollController;
+    final centerItemKey = center == null
+        ? null
+        : keyRef.value[center.messageId] as GlobalKey?;
+    final centerBodyKey = center == null
+        ? null
+        : bodyKeyRef.value[center.messageId] as GlobalKey?;
+
+    Future<void> adjustCenterBodyAlignment() async {
+      if (centerItemKey == null || centerBodyKey == null) return;
+      if (!scrollController.hasClients) return;
+
+      final itemContext = centerItemKey.currentContext;
+      final bodyContext = centerBodyKey.currentContext;
+      if (itemContext == null || bodyContext == null) return;
+
+      final itemRender = itemContext.findRenderObject() as RenderBox?;
+      final bodyRender = bodyContext.findRenderObject() as RenderBox?;
+      if (itemRender == null || bodyRender == null) return;
+
+      final delta =
+          bodyRender.localToGlobal(Offset.zero).dy -
+          itemRender.localToGlobal(Offset.zero).dy;
+      if (delta.abs() <= _alignmentEpsilon) return;
+
+      final position = scrollController.position;
+      final target = (position.pixels + delta).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+      if ((target - position.pixels).abs() <= _alignmentEpsilon) return;
+      scrollController.jumpTo(target);
+    }
+
+    useEffect(() {
+      if (center == null) return null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(adjustCenterBodyAlignment());
+      });
+      return null;
+    }, [state.refreshKey, center?.messageId]);
 
     return MessageDayTimeViewportWidget.chatPage(
       key: key,
@@ -602,9 +687,7 @@ class _List extends HookConsumerWidget {
       center: center,
       topKey: topKey,
       scrollController: scrollController,
-      centerKey: center == null
-          ? null
-          : ref.value[center.messageId] as GlobalKey?,
+      centerKey: centerItemKey,
       child: ClampingCustomScrollView(
         key: key,
         center: key,
@@ -621,7 +704,8 @@ class _List extends HookConsumerWidget {
               final actualIndex = top.length - index - 1;
               final messageItem = top[actualIndex];
               return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
+                key: keyRef.value[messageItem.messageId],
+                bodyKey: bodyKeyRef.value[messageItem.messageId],
                 prev: top.getOrNull(actualIndex - 1),
                 message: messageItem,
                 next:
@@ -638,7 +722,8 @@ class _List extends HookConsumerWidget {
               builder: (context) {
                 if (center == null) return const SizedBox();
                 return MessageItemWidget(
-                  key: ref.value[center.messageId],
+                  key: keyRef.value[center.messageId],
+                  bodyKey: bodyKeyRef.value[center.messageId],
                   prev: top.lastOrNull,
                   message: center,
                   next: bottom.firstOrNull,
@@ -655,7 +740,8 @@ class _List extends HookConsumerWidget {
             ) {
               final messageItem = bottom[index];
               return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
+                key: keyRef.value[messageItem.messageId],
+                bodyKey: bodyKeyRef.value[messageItem.messageId],
                 prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
                 message: messageItem,
                 next: bottom.getOrNull(index + 1),
@@ -675,11 +761,11 @@ class _JumpCurrentButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messageBloc = context.read<MessageBloc>();
+    final messageController = ref.read(messageControllerProvider.notifier);
     final conversationId = ref.watch(currentConversationIdProvider);
-
-    final state = useBlocState<MessageBloc, MessageState>();
-    final scrollController = useListenable(messageBloc.scrollController);
+    final state = ref.watch(messageControllerProvider);
+    final scrollController = messageController.scrollController;
+    useListenable(scrollController);
 
     final listPositionIsLatest = useState(false);
 
@@ -704,9 +790,10 @@ class _JumpCurrentButton extends HookConsumerWidget {
     final pendingJumpMessageController = ref.read(
       pendingJumpMessageProvider.notifier,
     );
+    final theme = ref.watch(brightnessThemeDataProvider);
 
     if (!enable) {
-      Future(() => pendingJumpMessageController.state = null);
+      Future(pendingJumpMessageController.clear);
       return const SizedBox();
     }
 
@@ -716,12 +803,16 @@ class _JumpCurrentButton extends HookConsumerWidget {
         onTap: () {
           final messageId = pendingJumpMessageController.state;
           if (messageId != null) {
-            messageBloc.scrollTo(messageId);
-            context.read<BlinkCubit>().blinkByMessageId(messageId);
-            pendingJumpMessageController.state = null;
+            messageController.scrollTo(messageId);
+            ref
+                .read(blinkControllerProvider.notifier)
+                .blinkByMessageId(
+                  messageId,
+                );
+            pendingJumpMessageController.clear();
             return;
           }
-          messageBloc.jumpToCurrent();
+          messageController.jumpToCurrent();
         },
         child: Container(
           height: 40,
@@ -740,7 +831,10 @@ class _JumpCurrentButton extends HookConsumerWidget {
           alignment: Alignment.center,
           child: SvgPicture.asset(
             Resources.assetsImagesJumpCurrentArrowSvg,
-            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(
+              theme.text,
+              BlendMode.srcIn,
+            ),
           ),
         ),
       ),
@@ -753,22 +847,12 @@ class _BottomBanner extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final (userId, isScam) = ref.watch(
-      conversationProvider.select(
-        (value) => (value?.userId, (value?.user?.isScam ?? 0) > 0),
-      ),
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    final userId = ref.watch(
+      conversationProvider.select((value) => value?.userId),
     );
-
-    final showScamWarning =
-        useMemoizedStream(
-          () {
-            if (userId == null || !isScam) return Stream.value(false);
-            return ScamWarningKeyValue.instance.watch(userId);
-          },
-          initialData: false,
-          keys: [userId],
-        ).data ??
-        false;
+    final showScamWarning = ref.watch(_showScamWarningProvider).value ?? false;
 
     return AnimatedVisibility(
       visible: showScamWarning,
@@ -797,7 +881,7 @@ class _BottomBanner extends HookConsumerWidget {
               child: SvgPicture.asset(
                 Resources.assetsImagesTriangleWarningSvg,
                 colorFilter: ColorFilter.mode(
-                  context.theme.red,
+                  theme.red,
                   BlendMode.srcIn,
                 ),
                 width: 26,
@@ -806,13 +890,13 @@ class _BottomBanner extends HookConsumerWidget {
             ),
             Expanded(
               child: Text(
-                context.l10n.scamWarning,
-                style: TextStyle(color: context.theme.text, fontSize: 14),
+                l10n.scamWarning,
+                style: TextStyle(color: theme.text, fontSize: 14),
               ),
             ),
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
-              color: context.theme.icon,
+              color: theme.icon,
               size: 20,
               onTap: () {
                 if (userId == null) return;
@@ -831,10 +915,13 @@ class _PinMessagesBanner extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentPinMessageIds = context.watchCurrentPinMessageIds;
-    final lastMessage = context.lastMessage;
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    final pinMessageState = ref.watch(pinMessageStateProvider);
+    final currentPinMessageIds = pinMessageState.messageIds;
+    final lastMessage = pinMessageState.lastMessage;
 
-    final showLastPinMessage = lastMessage?.isNotEmpty ?? false;
+    final showLastPinMessage = lastMessage != null;
 
     return Positioned(
       top: 12,
@@ -853,7 +940,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                     children: [
                       ActionButton(
                         name: Resources.assetsImagesIcCloseSvg,
-                        color: context.theme.icon,
+                        color: theme.icon,
                         size: 20,
                         onTap: () {
                           final conversationId = ref.read(
@@ -868,7 +955,12 @@ class _PinMessagesBanner extends HookConsumerWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: CustomText(
-                          (lastMessage ?? '').overflow,
+                          l10n
+                              .chatPinMessage(
+                                lastMessage?.senderFullName ?? '',
+                                lastMessage?.preview ?? '',
+                              )
+                              .overflow,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -883,13 +975,15 @@ class _PinMessagesBanner extends HookConsumerWidget {
               visible: currentPinMessageIds.isNotEmpty,
               child: InteractiveDecoratedBox(
                 onTap: () {
-                  final cubit = context.read<ChatSideCubit>();
-                  if (cubit.state.pages.lastOrNull?.name ==
-                      ChatSideCubit.pinMessages) {
-                    return cubit.pop();
+                  final controller = ref.read(
+                    chatSideControllerProvider.notifier,
+                  );
+                  if (controller.state.pages.lastOrNull?.name ==
+                      ChatSideController.pinMessages) {
+                    return controller.pop();
                   }
 
-                  cubit.replace(ChatSideCubit.pinMessages);
+                  controller.replace(ChatSideController.pinMessages);
                 },
                 child: Container(
                   height: 34,
@@ -911,7 +1005,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                     width: 34,
                     height: 34,
                     colorFilter: ColorFilter.mode(
-                      context.theme.text,
+                      theme.text,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -930,22 +1024,10 @@ class _JumpMentionButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conversationId = ref.watch(currentConversationIdProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final messageMentions =
-        useMemoizedStream(() {
-          if (conversationId == null) return Stream.value(<MessageMention>[]);
-          return context.database.messageMentionDao
-              .unreadMentionMessageByConversationId(conversationId)
-              .watchWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.watchUpdateMessageMention(
-                    conversationIds: [conversationId],
-                  ),
-                ],
-                duration: kSlowThrottleDuration,
-              );
-        }, keys: [conversationId]).data ??
-        [];
+        ref.watch(_unreadMentionsProvider).value ?? const <MessageMention>[];
 
     if (messageMentions.isEmpty) return const SizedBox();
 
@@ -955,10 +1037,13 @@ class _JumpMentionButton extends HookConsumerWidget {
       menuProvider: (request) => Menu(
         children: [
           MenuAction(
-            title: context.l10n.clear,
+            title: l10n.clear,
             callback: () {
+              final accountServer = ref
+                  .read(accountServerProvider)
+                  .requireValue;
               for (final mention in messageMentions) {
-                context.accountServer.markMentionRead(
+                accountServer.markMentionRead(
                   mention.messageId,
                   mention.conversationId,
                 );
@@ -972,8 +1057,11 @@ class _JumpMentionButton extends HookConsumerWidget {
           if (messageMentions.isEmpty) return;
 
           final mention = messageMentions.first;
-          context.read<MessageBloc>().scrollTo(mention.messageId);
-          context.accountServer.markMentionRead(
+          final accountServer = ref.read(accountServerProvider).requireValue;
+          ref
+              .read(messageControllerProvider.notifier)
+              .scrollTo(mention.messageId);
+          accountServer.markMentionRead(
             mention.messageId,
             mention.conversationId,
           );
@@ -1005,7 +1093,7 @@ class _JumpMentionButton extends HookConsumerWidget {
                     style: TextStyle(
                       fontSize: 17,
                       height: 1,
-                      color: context.theme.text,
+                      color: theme.text,
                     ),
                   ),
                 ),
@@ -1021,7 +1109,7 @@ class _JumpMentionButton extends HookConsumerWidget {
                     minHeight: 20,
                   ),
                   decoration: BoxDecoration(
-                    color: context.theme.accent,
+                    color: theme.accent,
                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -1092,30 +1180,39 @@ class _ChatDropOverlay extends HookConsumerWidget {
   }
 }
 
-class _ChatDragIndicator extends StatelessWidget {
+class _ChatDragIndicator extends ConsumerWidget {
   const _ChatDragIndicator();
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(color: context.theme.popUp),
-    child: Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.theme.listSelected,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        border: DashPathBorder.all(
-          borderSide: BorderSide(color: context.theme.divider),
-          dashArray: CircularIntervalList([4, 4]),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: theme.popUp),
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.listSelected,
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          border: DashPathBorder.all(
+            borderSide: BorderSide(
+              color: theme.divider,
+            ),
+            dashArray: CircularIntervalList([4, 4]),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            l10n.dragAndDropFileHere,
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.text,
+            ),
+          ),
         ),
       ),
-      child: Center(
-        child: Text(
-          context.l10n.dragAndDropFileHere,
-          style: TextStyle(fontSize: 14, color: context.theme.text),
-        ),
-      ),
-    ),
-  );
+    );
+  }
 }
 
 class _ChatMenuHandler extends HookConsumerWidget {
@@ -1131,7 +1228,12 @@ class _ChatMenuHandler extends HookConsumerWidget {
       final cubit = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
-      final handle = _ConversationHandle(context, conversationId);
+      final handle = _ConversationHandle(
+        context: context,
+        conversationId: conversationId,
+        container: ref.container,
+        accountServer: ref.read(accountServerProvider).requireValue,
+      );
       Future(() => cubit.attach(handle));
       return () => Future(() => cubit.unAttach(handle));
     }, [conversationId]);
@@ -1141,40 +1243,44 @@ class _ChatMenuHandler extends HookConsumerWidget {
 }
 
 class _ConversationHandle extends ConversationMenuHandle {
-  _ConversationHandle(this.context, this.conversationId);
+  _ConversationHandle({
+    required this.context,
+    required this.conversationId,
+    required this.container,
+    required this.accountServer,
+  });
 
   final BuildContext context;
   final String conversationId;
+  final ProviderContainer container;
+  final AccountServer accountServer;
 
   @override
   Future<void> delete() async {
-    final name =
-        context.providerContainer.read(currentConversationNameProvider) ?? '';
+    final name = container.read(currentConversationNameProvider) ?? '';
+    final l10n = container.read(localizationProvider);
     assert(name.isNotEmpty, 'name is empty');
     final ret = await showConfirmMixinDialog(
       context,
-      context.l10n.conversationDeleteTitle(name),
-      description: context.l10n.deleteChatDescription,
+      l10n.conversationDeleteTitle(name),
+      description: l10n.deleteChatDescription,
     );
     if (ret == null) return;
-    await context.accountServer.deleteMessagesByConversationId(conversationId);
-    await context.accountServer.deleteConversation(conversationId);
-    if (context.providerContainer.read(currentConversationIdProvider) ==
-        conversationId) {
-      context.providerContainer
-          .read(conversationProvider.notifier)
-          .unselected();
+    await accountServer.deleteMessagesByConversationId(conversationId);
+    await accountServer.deleteConversation(conversationId);
+    if (container.read(currentConversationIdProvider) == conversationId) {
+      container.read(conversationProvider.notifier).unselected();
     }
   }
 
   @override
-  Stream<bool> get isMuted => context.providerContainer
+  Stream<bool> get isMuted => container
       .read(conversationProvider.notifier)
       .stream
       .map((event) => event?.conversation?.isMute == true);
 
   @override
-  Stream<bool> get isPinned => context.providerContainer
+  Stream<bool> get isPinned => container
       .read(conversationProvider.notifier)
       .stream
       .map((event) => event?.conversation?.pinTime != null);
@@ -1186,14 +1292,12 @@ class _ConversationHandle extends ConversationMenuHandle {
       child: const MuteDialog(),
     );
     if (result == null) return;
-    final conversationState = context.providerContainer.read(
-      conversationProvider,
-    );
+    final conversationState = container.read(conversationProvider);
     if (conversationState == null) return;
 
     final isGroupConversation = conversationState.isGroup == true;
     await runFutureWithToast(
-      context.accountServer.muteConversation(
+      accountServer.muteConversation(
         result,
         conversationId: isGroupConversation ? conversationId : null,
         userId: isGroupConversation
@@ -1205,40 +1309,39 @@ class _ConversationHandle extends ConversationMenuHandle {
 
   @override
   void pin() {
-    runFutureWithToast(context.accountServer.pin(conversationId));
+    runFutureWithToast(accountServer.pin(conversationId));
   }
 
   @override
   void showSearch() {
-    final cubit = context.read<ChatSideCubit>();
-    if (cubit.state.pages.lastOrNull?.name ==
-        ChatSideCubit.searchMessageHistory) {
-      return cubit.pop();
+    final controller = container.read(chatSideControllerProvider.notifier);
+    final state = container.read(chatSideControllerProvider);
+    if (state.pages.lastOrNull?.name ==
+        ChatSideController.searchMessageHistory) {
+      return controller.pop();
     }
 
-    cubit.replace(ChatSideCubit.searchMessageHistory);
+    controller.replace(ChatSideController.searchMessageHistory);
   }
 
   @override
   void toggleSideBar() {
-    context.read<ChatSideCubit>().toggleInfoPage();
+    container.read(chatSideControllerProvider.notifier).toggleInfoPage();
   }
 
   @override
   void unPin() {
-    runFutureWithToast(context.accountServer.unpin(conversationId));
+    runFutureWithToast(accountServer.unpin(conversationId));
   }
 
   @override
   void unmute() {
-    final conversationState = context.providerContainer.read(
-      conversationProvider,
-    );
+    final conversationState = container.read(conversationProvider);
     if (conversationState == null) return;
 
     final isGroup = conversationState.isGroup == true;
     runFutureWithToast(
-      context.accountServer.unMuteConversation(
+      accountServer.unMuteConversation(
         conversationId: isGroup ? conversationId : null,
         userId: isGroup ? null : conversationState.conversation?.ownerId,
       ),

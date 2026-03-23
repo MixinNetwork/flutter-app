@@ -3,14 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../blaze/blaze.dart';
-import '../../utils/audio_message_player/audio_message_service.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../utils/system/text_input.dart';
@@ -26,11 +23,13 @@ import '../provider/multi_auth_provider.dart';
 import '../provider/responsive_navigator_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
+import '../provider/ui_context_providers.dart';
 import '../setting/setting_page.dart';
 
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
+import 'providers/home_scope_providers.dart';
 import 'route/responsive_navigator.dart';
 import 'slide_page.dart';
 
@@ -46,6 +45,17 @@ const kConversationListWidth = 300.0;
 const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
+final _updateRequiredProvider = StreamProvider.autoDispose<bool>((ref) {
+  final accountServer = ref.watch(accountServerProvider).value;
+  if (accountServer == null) {
+    return Stream.value(false);
+  }
+  return accountServer.isUpdateRequired;
+});
+
+final _packageInfoProvider = FutureProvider.autoDispose(
+  (ref) => getPackageInfo(),
+);
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -62,12 +72,7 @@ class HomePage extends HookConsumerWidget {
       authAccountProvider.select((value) => value?.fullName?.isEmpty ?? true),
     );
 
-    final updateRequired =
-        useMemoizedStream(
-          () => context.accountServer.isUpdateRequired,
-          keys: [context.accountServer],
-        ).data ??
-        false;
+    final updateRequired = ref.watch(_updateRequiredProvider).value ?? false;
 
     return DeviceTransferHandlerWidget(
       child: CommandPaletteWrapper(
@@ -90,14 +95,16 @@ class HomePage extends HookConsumerWidget {
   }
 }
 
-class _RequiredUpdateWidget extends HookWidget {
+class _RequiredUpdateWidget extends HookConsumerWidget {
   const _RequiredUpdateWidget();
 
   @override
-  Widget build(BuildContext context) {
-    final info = useMemoizedFuture(getPackageInfo, null).data;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final info = ref.watch(_packageInfoProvider).value;
     return Material(
-      color: context.theme.background,
+      color: theme.background,
       child: Stack(
         children: [
           Center(
@@ -105,21 +112,21 @@ class _RequiredUpdateWidget extends HookWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  context.l10n.updateMixin,
-                  style: TextStyle(color: context.theme.text, fontSize: 16),
+                  l10n.updateMixin,
+                  style: TextStyle(color: theme.text, fontSize: 16),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  context.l10n.updateMixinDescription(info?.version ?? ''),
+                  l10n.updateMixinDescription(info?.version ?? ''),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: context.theme.text, fontSize: 14),
+                  style: TextStyle(color: theme.text, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
                 MixinButton(
                   onTap: () async {
                     await launchUrlString('https://mixin.one/messenger');
                   },
-                  child: Text(context.l10n.upgrade),
+                  child: Text(l10n.upgrade),
                 ),
               ],
             ),
@@ -131,44 +138,46 @@ class _RequiredUpdateWidget extends HookWidget {
   }
 }
 
-class _LocalTimeError extends StatelessWidget {
+class _LocalTimeError extends HookConsumerWidget {
   const _LocalTimeError();
 
   @override
-  Widget build(BuildContext context) => HookBuilder(
-    builder: (context) {
-      final loading = useState(false);
-      return Material(
-        color: context.theme.background,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                context.l10n.loadingTime,
-                style: TextStyle(color: context.theme.text, fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              if (loading.value)
-                CircularProgressIndicator(color: context.theme.accent),
-              if (!loading.value)
-                MixinButton(
-                  onTap: () async {
-                    loading.value = true;
-                    try {
-                      await context.accountServer.reconnectBlaze();
-                    } catch (_) {}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final loading = useState(false);
+    return Material(
+      color: theme.background,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.loadingTime,
+              style: TextStyle(color: theme.text, fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            if (loading.value) CircularProgressIndicator(color: theme.accent),
+            if (!loading.value)
+              MixinButton(
+                onTap: () async {
+                  loading.value = true;
+                  try {
+                    await ref
+                        .read(accountServerProvider)
+                        .requireValue
+                        .reconnectBlaze();
+                  } catch (_) {}
 
-                    loading.value = false;
-                  },
-                  child: Text(context.l10n.continueText),
-                ),
-            ],
-          ),
+                  loading.value = false;
+                },
+                child: Text(l10n.continueText),
+              ),
+          ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
 }
 
 class _SetupNameWidget extends HookConsumerWidget {
@@ -176,16 +185,18 @@ class _SetupNameWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final textEditingController = useMemoized(EmojiTextEditingController.new);
     final textEditingValue = useValueListenable(textEditingController);
     return Scaffold(
-      backgroundColor: context.theme.background,
+      backgroundColor: theme.background,
       body: Center(
         child: AlertDialogLayout(
-          title: Text(context.l10n.whatsYourName),
+          title: Text(l10n.whatsYourName),
           content: DialogTextField(
             textEditingController: textEditingController,
-            hintText: context.l10n.name,
+            hintText: l10n.name,
             maxLength: 40,
           ),
           actions: [
@@ -194,9 +205,12 @@ class _SetupNameWidget extends HookConsumerWidget {
               onTap: () async {
                 showToastLoading();
                 try {
-                  await context.accountServer.updateAccount(
-                    fullName: textEditingController.text.trim(),
-                  );
+                  await ref
+                      .read(accountServerProvider)
+                      .requireValue
+                      .updateAccount(
+                        fullName: textEditingController.text.trim(),
+                      );
                 } on MixinApiError catch (error) {
                   final mixinError = error.error! as MixinError;
                   showToastFailed(
@@ -209,17 +223,13 @@ class _SetupNameWidget extends HookConsumerWidget {
                 }
                 showToastSuccessful();
               },
-              child: Text(context.l10n.confirm),
+              child: Text(l10n.confirm),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class HasDrawerValueNotifier extends ValueNotifier<bool> {
-  HasDrawerValueNotifier(super.value);
 }
 
 class _HomePage extends HookConsumerWidget {
@@ -229,6 +239,8 @@ class _HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final l10n = ref.watch(localizationProvider);
     final maxWidth = constraints.maxWidth;
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth).clamp(
       kSlidePageMinWidth,
@@ -247,78 +259,64 @@ class _HomePage extends HookConsumerWidget {
       targetWidth = 0;
     }
 
-    final hasDrawerValueNotifier = useMemoized(
-      () => HasDrawerValueNotifier(targetWidth == 0),
-    );
+    final hasDrawer = targetWidth == 0;
 
-    final hasDrawer = useListenable(hasDrawerValueNotifier);
-
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: hasDrawerValueNotifier),
-        Provider(
-          create: (context) => AudioMessagePlayService(context.accountServer),
-          dispose: (context, service) => service.dispose(),
-        ),
-      ],
-      child: Scaffold(
-        backgroundColor: context.theme.primary,
-        drawerEnableOpenDragGesture: false,
-        drawer: hasDrawer.value && targetWidth == 0
-            ? Drawer(
-                child: Container(
-                  width: kSlidePageMaxWidth,
-                  color: context.theme.primary,
-                  child: const SlidePage(showCollapse: false),
+    return Scaffold(
+      backgroundColor: theme.primary,
+      drawerEnableOpenDragGesture: false,
+      drawer: hasDrawer
+          ? Drawer(
+              child: Container(
+                width: kSlidePageMaxWidth,
+                color: theme.primary,
+                child: const SlidePage(showCollapse: false),
+              ),
+            )
+          : null,
+      body: SafeArea(
+        child: AppProtocolHandler(
+          child: Row(
+            children: [
+              TweenAnimationBuilder(
+                tween: Tween<double>(end: targetWidth),
+                duration: const Duration(milliseconds: 200),
+                builder: (context, value, child) => SizedBox(
+                  width: value,
+                  child: value == 0 ? null : child,
                 ),
-              )
-            : null,
-        body: SafeArea(
-          child: AppProtocolHandler(
-            child: Row(
-              children: [
-                TweenAnimationBuilder(
-                  tween: Tween<double>(end: targetWidth),
-                  duration: const Duration(milliseconds: 200),
-                  onEnd: () => hasDrawerValueNotifier.value = targetWidth == 0,
-                  builder: (context, value, child) => SizedBox(
-                    width: value,
-                    child: value == 0 ? null : child,
-                  ),
-                  child: OverflowBox(
-                    alignment: Alignment.centerLeft,
-                    minWidth: kSlidePageMinWidth,
-                    maxWidth: collapse ? kSlidePageMinWidth : clampSlideWidth,
-                    child: SlidePage(showCollapse: !autoCollapse),
-                  ),
+                child: OverflowBox(
+                  alignment: Alignment.centerLeft,
+                  minWidth: kSlidePageMinWidth,
+                  maxWidth: collapse ? kSlidePageMinWidth : clampSlideWidth,
+                  child: SlidePage(showCollapse: !autoCollapse),
                 ),
-                Expanded(
-                  child: ResponsiveNavigator(
-                    switchWidth:
-                        kResponsiveNavigationMinWidth + kConversationListWidth,
-                    leftPage: MaterialPage(
-                      key: const ValueKey('center'),
-                      name: 'center',
-                      child: SizedBox(
-                        key: _conversationPageKey,
-                        width: kConversationListWidth,
-                        child: const _CenterPage(),
-                      ),
+              ),
+              Expanded(
+                child: ResponsiveNavigator(
+                  switchWidth:
+                      kResponsiveNavigationMinWidth + kConversationListWidth,
+                  leftPage: MaterialPage(
+                    key: const ValueKey('center'),
+                    name: 'center',
+                    child: SizedBox(
+                      key: _conversationPageKey,
+                      width: kConversationListWidth,
+                      child: _CenterPage(hasDrawer: hasDrawer),
                     ),
-                    rightEmptyPage: MaterialPage(
-                      key: const ValueKey('empty'),
-                      name: 'empty',
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: context.theme.chatBackground,
-                        ),
-                        child: Empty(text: context.l10n.pickAConversation),
+                  ),
+                  rightEmptyPage: MaterialPage(
+                    key: const ValueKey('empty'),
+                    name: 'empty',
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: theme.chatBackground,
                       ),
+                      child: Empty(text: l10n.pickAConversation),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -327,20 +325,25 @@ class _HomePage extends HookConsumerWidget {
 }
 
 class _CenterPage extends HookConsumerWidget {
-  const _CenterPage();
+  const _CenterPage({
+    required this.hasDrawer,
+  });
+
+  final bool hasDrawer;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final isSetting = ref.watch(
-      slideCategoryStateProvider.select(
+      slideCategoryProvider.select(
         (value) => value.type == SlideCategoryType.setting,
       ),
     );
 
-    ref.listen(slideCategoryStateProvider, (previous, next) {
+    ref.listen(slideCategoryProvider, (previous, next) {
       final isSetting = next.type == SlideCategoryType.setting;
 
-      final responsiveNavigatorNotifier = context.providerContainer.read(
+      final responsiveNavigatorNotifier = ref.read(
         responsiveNavigatorProvider.notifier,
       );
 
@@ -363,15 +366,19 @@ class _CenterPage extends HookConsumerWidget {
     return RepaintBoundary(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: context.theme.primary,
-          border: Border(right: BorderSide(color: context.theme.divider)),
+          color: theme.primary,
+          border: Border(right: BorderSide(color: theme.divider)),
         ),
         child: IndexedStack(
           index: isSetting ? 1 : 0,
           sizing: StackFit.expand,
-          children: const [
-            AutomaticKeepAliveClientWidget(child: ConversationPage()),
-            AutomaticKeepAliveClientWidget(child: SettingPage()),
+          children: [
+            AutomaticKeepAliveClientWidget(
+              child: ConversationPage(hasDrawer: hasDrawer),
+            ),
+            AutomaticKeepAliveClientWidget(
+              child: SettingPage(hasDrawer: hasDrawer),
+            ),
           ],
         ),
       ),

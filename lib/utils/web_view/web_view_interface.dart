@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../db/mixin_database.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
@@ -25,6 +26,7 @@ abstract class MixinWebView {
   Future<void> openWebViewWindowWithUrl(
     BuildContext context,
     String url, {
+    required ProviderContainer container,
     String? conversationId,
     String? title,
     App? app,
@@ -33,6 +35,7 @@ abstract class MixinWebView {
 
   Future<void> openBotWebViewWindow(
     BuildContext context,
+    ProviderContainer container,
     App app, {
     String? conversationId,
   }) async {
@@ -43,6 +46,7 @@ abstract class MixinWebView {
     return openWebViewWindowWithUrl(
       context,
       app.homeUri,
+      container: container,
       conversationId: conversationId,
       title: app.name,
       app: app,

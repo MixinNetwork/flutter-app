@@ -7,7 +7,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../../enum/media_status.dart';
-import '../../../../utils/extension/extension.dart';
+import '../../../../ui/provider/account_server_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../../mixin_image.dart';
@@ -27,6 +28,7 @@ class ImageMessageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final mediaWidth = useMessageConverter(
       converter: (state) => state.mediaWidth,
     );
@@ -74,6 +76,7 @@ class MessageImage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
     final isTranscriptPage = useIsTranscriptPage();
     final type = useMessageConverter(converter: (state) => state.type);
     final conversationId = useMessageConverter(
@@ -96,7 +99,7 @@ class MessageImage extends HookConsumerWidget {
       // un-downloaded giphy gif image.
       thumbWidget = MixinImage.network(
         thumbImage,
-        placeholder: () => ColoredBox(color: context.theme.secondaryText),
+        placeholder: () => ColoredBox(color: theme.secondaryText),
       );
     } else {
       thumbWidget = ImageByBlurHashOrBase64(imageData: thumbImage);
@@ -110,6 +113,7 @@ class MessageImage extends HookConsumerWidget {
         (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
         (!isTranscriptPage && relationship == UserRelationship.me);
+    final accountServer = ref.read(accountServerProvider).requireValue;
 
     final mediaSize = useMessageConverter(
       converter: (state) => (state.mediaWidth, state.mediaHeight),
@@ -140,6 +144,10 @@ class MessageImage extends HookConsumerWidget {
               context,
               conversationId: message.conversationId,
               messageId: message.messageId,
+              container: ref.container,
+              barrierLabel: ref
+                  .watch(materialLocalizationsProvider)
+                  .modalBarrierDismissLabel,
               isTranscriptPage: isTranscriptPage,
             );
           case MediaStatus.canceled:
@@ -153,22 +161,20 @@ class MessageImage extends HookConsumerWidget {
                   'transcriptMessageId is null',
                 );
                 if (transcriptMessageId != null) {
-                  context.accountServer.reUploadTranscriptAttachment(
+                  accountServer.reUploadTranscriptAttachment(
                     transcriptMessageId,
                   );
                 }
               } else if (isUnDownloadGiphyGif) {
-                context.accountServer.reUploadGiphyGif(message);
+                accountServer.reUploadGiphyGif(message);
               } else {
-                context.accountServer.reUploadAttachment(message);
+                accountServer.reUploadAttachment(message);
               }
             } else {
-              context.accountServer.downloadAttachment(message.messageId);
+              accountServer.downloadAttachment(message.messageId);
             }
           case MediaStatus.pending:
-            context.accountServer.cancelProgressAttachmentJob(
-              message.messageId,
-            );
+            accountServer.cancelProgressAttachmentJob(message.messageId);
           case null:
           case MediaStatus.expired:
           case MediaStatus.read:
@@ -182,7 +188,7 @@ class MessageImage extends HookConsumerWidget {
           children: [
             MixinImage.file(
               File(
-                context.accountServer.convertAbsolutePath(
+                accountServer.convertAbsolutePath(
                   type,
                   conversationId,
                   mediaUrl,
@@ -289,16 +295,16 @@ class ImageMessageLayout extends StatelessWidget {
   );
 }
 
-class ImageCaption extends StatelessWidget {
+class ImageCaption extends ConsumerWidget {
   const ImageCaption({required this.caption, super.key});
 
   final String caption;
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context, WidgetRef ref) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     child: MessageTextWidget(
-      color: context.theme.text,
+      color: ref.watch(brightnessThemeDataProvider).text,
       fontSize: context.messageStyle.primaryFontSize,
       content: caption,
     ),

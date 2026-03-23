@@ -47,7 +47,7 @@ class LocationMessageWidget extends HookConsumerWidget {
               url =
                   'https://www.google.com/maps/search/${Uri.encodeComponent(location.address!)}/@${location.latitude},${location.longitude},17z?hl=zh-CN';
             }
-            openUri(context, url);
+            openUri(context, url, container: ref.container);
           },
           child: Stack(
             children: [

@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-
-import '../../utils/rivepod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ResponsiveNavigatorState extends Equatable {
   const ResponsiveNavigatorState({
@@ -30,16 +30,34 @@ class ResponsiveNavigatorState extends Equatable {
 }
 
 abstract class AbstractResponsiveNavigatorStateNotifier
-    extends DistinctStateNotifier<ResponsiveNavigatorState> {
-  AbstractResponsiveNavigatorStateNotifier(super.initialState);
+    extends Notifier<ResponsiveNavigatorState> {
+  late final StreamController<ResponsiveNavigatorState> _streamController =
+      StreamController<ResponsiveNavigatorState>.broadcast();
+
+  Stream<ResponsiveNavigatorState> get stream => _streamController.stream;
+
+  @override
+  ResponsiveNavigatorState build() {
+    ref.onDispose(() async {
+      await _streamController.close();
+    });
+    return const ResponsiveNavigatorState();
+  }
+
+  void updateState(ResponsiveNavigatorState next) {
+    state = next;
+    if (!_streamController.isClosed) {
+      _streamController.add(next);
+    }
+  }
 
   void updateRouteMode(bool routeMode) =>
-      Future(() => state = state.copyWith(routeMode: routeMode));
+      Future(() => updateState(state.copyWith(routeMode: routeMode)));
 
   void onPopPage() {
     final bool = state.pages.isNotEmpty;
     if (bool) {
-      state = state.copyWith(pages: state.pages.toList()..removeLast());
+      updateState(state.copyWith(pages: state.pages.toList()..removeLast()));
     }
   }
 
@@ -54,7 +72,7 @@ abstract class AbstractResponsiveNavigatorStateNotifier
     );
     if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
     if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
-    state = state.copyWith(pages: state.pages.toList()..add(page));
+    updateState(state.copyWith(pages: state.pages.toList()..add(page)));
   }
 
   void popUntil(bool Function(MaterialPage page) test) {
@@ -64,14 +82,17 @@ abstract class AbstractResponsiveNavigatorStateNotifier
     List<MaterialPage>? list;
     list = index == 0 ? [] : state.pages.toList()
       ..sublist(0, index);
-    state = state.copyWith(pages: list);
+    updateState(state.copyWith(pages: list));
   }
 
-  void popWhere(bool Function(MaterialPage page) test) =>
-      state = state.copyWith(pages: state.pages.toList()..removeWhere(test));
+  void popWhere(bool Function(MaterialPage page) test) => updateState(
+    state.copyWith(pages: state.pages.toList()..removeWhere(test)),
+  );
 
-  void pop() => state = state.copyWith(
-    pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList(),
+  void pop() => updateState(
+    state.copyWith(
+      pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList(),
+    ),
   );
 
   Future<void> replace(String name, {Object? arguments}) async {
@@ -80,5 +101,5 @@ abstract class AbstractResponsiveNavigatorStateNotifier
     pushPage(name, arguments: arguments);
   }
 
-  void clear() => state = state.copyWith(pages: []);
+  void clear() => updateState(state.copyWith(pages: []));
 }

@@ -152,6 +152,6 @@ class MentionCache {
 
 final mentionCacheProvider = Provider.autoDispose(
   (ref) => MentionCache(
-    ref.watch(databaseProvider.select((value) => value.valueOrNull?.userDao)),
+    ref.watch(databaseProvider.select((value) => value.value?.userDao)),
   ),
 );

@@ -96,14 +96,16 @@ class SendMessageHelper {
     ),
   );
 
-  Future<void> _updateMessageMediaStatus(String messageId, MediaStatus status) =>
-      _requestDbWrite(
-        DbWriteMethod.updateMessageMediaStatus,
-        payload: DbWriteUpdateMessageMediaStatusPayload(
-          messageId: messageId,
-          status: status,
-        ),
-      );
+  Future<void> _updateMessageMediaStatus(
+    String messageId,
+    MediaStatus status,
+  ) => _requestDbWrite(
+    DbWriteMethod.updateMessageMediaStatus,
+    payload: DbWriteUpdateMessageMediaStatusPayload(
+      messageId: messageId,
+      status: status,
+    ),
+  );
 
   Future<void> sendTextMessage(
     String conversationId,
@@ -746,7 +748,10 @@ class SendMessageHelper {
         );
 
         unawaited(
-          _requestDbWrite(DbWriteMethod.deleteFtsByMessageId, payload: messageId),
+          _requestDbWrite(
+            DbWriteMethod.deleteFtsByMessageId,
+            payload: messageId,
+          ),
         );
 
         await Future.wait([
@@ -1529,7 +1534,10 @@ class SendMessageHelper {
         e(
           'reUploadGiphyGif: failed to get send image bytes. ${message.mediaUrl}',
         );
-        await _updateMessageMediaStatus(message.messageId, MediaStatus.canceled);
+        await _updateMessageMediaStatus(
+          message.messageId,
+          MediaStatus.canceled,
+        );
         return;
       }
       await attachment.writeAsBytes(sendImageBytes);

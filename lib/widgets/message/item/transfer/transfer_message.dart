@@ -7,6 +7,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../../../db/database_event_bus.dart';
+import '../../../../ui/provider/account_server_provider.dart';
+import '../../../../ui/provider/database_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../interactive_decorated_box.dart';
@@ -21,6 +24,9 @@ class TransferMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
+    final database = ref.read(databaseProvider).requireValue;
+    final theme = ref.watch(brightnessThemeDataProvider);
     final assetId = useMessageConverter(converter: (state) => state.assetId);
 
     var assetIcon = useMessageConverter(converter: (state) => state.assetIcon);
@@ -36,7 +42,7 @@ class TransferMessage extends HookConsumerWidget {
       if (assetId == null || assetIcon != null) {
         return Stream.value(null);
       }
-      return context.database.assetDao
+      return database.assetDao
           .assetItem(assetId)
           .watchSingleOrNullWithStream(
             eventStreams: [
@@ -57,7 +63,7 @@ class TransferMessage extends HookConsumerWidget {
         e('${context.message.snapshotId}: assetId is null');
         return;
       }
-      context.accountServer.updateAssetById(assetId: assetId);
+      accountServer.updateAssetById(assetId: assetId);
     }, [chainIcon, assetId]);
 
     return MessageBubble(
@@ -99,7 +105,7 @@ class TransferMessage extends HookConsumerWidget {
                           return Text(
                             snapshotAmount!.numberFormat(),
                             style: TextStyle(
-                              color: context.theme.text,
+                              color: theme.text,
                               fontSize: context.messageStyle.secondaryFontSize,
                             ),
                           );
@@ -111,7 +117,7 @@ class TransferMessage extends HookConsumerWidget {
                 Text(
                   assetSymbol,
                   style: TextStyle(
-                    color: context.theme.secondaryText,
+                    color: theme.secondaryText,
                     fontSize: context.messageStyle.tertiaryFontSize,
                   ),
                 ),

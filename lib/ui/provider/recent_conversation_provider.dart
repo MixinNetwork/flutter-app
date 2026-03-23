@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../utils/rivepod.dart';
 
-class RecentConversationIDsNotifier
-    extends DistinctStateNotifier<List<String>> {
-  RecentConversationIDsNotifier() : super([]);
+class RecentConversationIDsNotifier extends Notifier<List<String>> {
+  @override
+  List<String> build() {
+    ref.keepAlive();
+    return const [];
+  }
 
   void add(String conversationId) {
     final newList = ([...state]
@@ -20,10 +22,6 @@ class RecentConversationIDsNotifier
 }
 
 final recentConversationIDsProvider =
-    StateNotifierProvider.autoDispose<
-      RecentConversationIDsNotifier,
-      List<String>
-    >((ref) {
-      ref.keepAlive();
-      return RecentConversationIDsNotifier();
-    });
+    NotifierProvider.autoDispose<RecentConversationIDsNotifier, List<String>>(
+      RecentConversationIDsNotifier.new,
+    );

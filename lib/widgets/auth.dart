@@ -12,16 +12,23 @@ import 'package:rxdart/rxdart.dart';
 import '../account/security_key_value.dart';
 import '../constants/resources.dart';
 import '../ui/provider/account_server_provider.dart';
+import '../ui/provider/ui_context_providers.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/authentication.dart';
 import '../utils/event_bus.dart';
-import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
 import 'dialog.dart';
 
 const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
+
+final _hasPasscodeProvider = StreamProvider.autoDispose<bool>(
+  (ref) => SecurityKeyValue.instance.watchHasPasscode(),
+);
+
+final _biometricEnabledProvider = StreamProvider.autoDispose<bool>(
+  (ref) => SecurityKeyValue.instance.watchBiometric(),
+);
 
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({required this.child, super.key});
@@ -47,15 +54,17 @@ class _AuthGuard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
 
     final hasPasscode =
-        useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
+        ref.watch(_hasPasscodeProvider).value ??
         SecurityKeyValue.instance.hasPasscode;
 
     final enableBiometric =
-        useMemoizedStream(SecurityKeyValue.instance.watchBiometric).data ??
+        ref.watch(_biometricEnabledProvider).value ??
         SecurityKeyValue.instance.biometric;
 
     final hasError = useState(false);
@@ -154,16 +163,16 @@ class _AuthGuard extends HookConsumerWidget {
                           width: 68,
                           height: 68,
                           colorFilter: ColorFilter.mode(
-                            context.theme.icon,
+                            brightnessTheme.icon,
                             BlendMode.srcIn,
                           ),
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          context.l10n.unlockWithWasscode,
+                          l10n.unlockWithWasscode,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: context.theme.text,
+                            color: brightnessTheme.text,
                             fontSize: 20,
                             fontWeight: FontWeight.w600,
                           ),
@@ -180,9 +189,9 @@ class _AuthGuard extends HookConsumerWidget {
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             pinTheme: PinTheme(
-                              activeColor: context.theme.text,
-                              inactiveColor: context.theme.text,
-                              selectedColor: context.theme.text,
+                              activeColor: brightnessTheme.text,
+                              inactiveColor: brightnessTheme.text,
+                              selectedColor: brightnessTheme.text,
                               fieldWidth: 15,
                               borderWidth: 1,
                               shape: PinCodeFieldShape.circle,
@@ -191,7 +200,7 @@ class _AuthGuard extends HookConsumerWidget {
                             autoDisposeControllers: false,
                             obscuringWidget: Container(
                               decoration: BoxDecoration(
-                                color: context.theme.text,
+                                color: brightnessTheme.text,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -218,10 +227,10 @@ class _AuthGuard extends HookConsumerWidget {
                           maintainAnimation: true,
                           maintainState: true,
                           child: Text(
-                            context.l10n.passcodeIncorrect,
+                            l10n.passcodeIncorrect,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: context.theme.red,
+                              color: brightnessTheme.red,
                               fontSize: 16,
                               fontWeight: FontWeight.w400,
                             ),
@@ -240,8 +249,10 @@ class _AuthGuard extends HookConsumerWidget {
                                 }
                               },
                               child: Text(
-                                context.l10n.useBiometric,
-                                style: TextStyle(color: context.theme.accent),
+                                l10n.useBiometric,
+                                style: TextStyle(
+                                  color: brightnessTheme.accent,
+                                ),
                               ),
                             ),
                           ),

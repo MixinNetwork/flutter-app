@@ -7,28 +7,32 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../account/security_key_value.dart';
 import '../../utils/authentication.dart';
-import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
+import '../provider/ui_context_providers.dart';
 
-class SecurityPage extends StatelessWidget {
+class SecurityPage extends ConsumerWidget {
   const SecurityPage({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.theme.background,
-    appBar: MixinAppBar(title: Text(context.l10n.security)),
-    body: ConstrainedBox(
-      constraints: const BoxConstraints.expand(),
-      child: const SingleChildScrollView(
-        child: Column(children: [SizedBox(height: 40), _Passcode()]),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Scaffold(
+      backgroundColor: theme.background,
+      appBar: MixinAppBar(title: Text(l10n.security)),
+      body: ConstrainedBox(
+        constraints: const BoxConstraints.expand(),
+        child: const SingleChildScrollView(
+          child: Column(children: [SizedBox(height: 40), _Passcode()]),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _Passcode extends HookConsumerWidget {
@@ -36,6 +40,8 @@ class _Passcode extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final globalKey = useMemoized(
       GlobalKey<PopupMenuButtonState<Duration>>.new,
       [],
@@ -59,16 +65,16 @@ class _Passcode extends HookConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         CellGroup(
-          cellBackgroundColor: context.theme.settingCellBackgroundColor,
+          cellBackgroundColor: theme.settingCellBackgroundColor,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               CellItem(
-                title: Text(context.l10n.screenPasscode),
+                title: Text(l10n.screenPasscode),
                 trailing: Transform.scale(
                   scale: 0.7,
                   child: CupertinoSwitch(
-                    activeTrackColor: context.theme.accent,
+                    activeTrackColor: theme.accent,
                     value: hasPasscode,
                     onChanged: (value) {
                       if (!value) {
@@ -88,30 +94,30 @@ class _Passcode extends HookConsumerWidget {
                   description: PopupMenuButton(
                     key: globalKey,
                     color: Color.alphaBlend(
-                      context.theme.listSelected,
-                      context.theme.background,
+                      theme.listSelected,
+                      theme.background,
                     ),
                     itemBuilder: (context) =>
                         [
                               PopupMenuItem(
                                 value: Duration.zero,
-                                child: Text(context.l10n.disabled),
+                                child: Text(l10n.disabled),
                               ),
                               PopupMenuItem(
                                 value: const Duration(minutes: 1),
-                                child: Text(context.l10n.minute(1, 1)),
+                                child: Text(l10n.minute(1, 1)),
                               ),
                               PopupMenuItem(
                                 value: const Duration(minutes: 5),
-                                child: Text(context.l10n.minute(5, 5)),
+                                child: Text(l10n.minute(5, 5)),
                               ),
                               PopupMenuItem(
                                 value: const Duration(hours: 1),
-                                child: Text(context.l10n.hour(1, 1)),
+                                child: Text(l10n.hour(1, 1)),
                               ),
                               PopupMenuItem(
                                 value: const Duration(hours: 5),
-                                child: Text(context.l10n.hour(5, 5)),
+                                child: Text(l10n.hour(5, 5)),
                               ),
                             ]
                             .map(
@@ -119,9 +125,7 @@ class _Passcode extends HookConsumerWidget {
                                 value: e.value,
                                 child: DefaultTextStyle.merge(
                                   child: e.child ?? const SizedBox(),
-                                  style: TextStyle(
-                                    color: context.theme.text,
-                                  ),
+                                  style: TextStyle(color: theme.text),
                                 ),
                               ),
                             )
@@ -130,13 +134,13 @@ class _Passcode extends HookConsumerWidget {
                         SecurityKeyValue.instance.lockDuration = value,
                     child: Text(
                       (minutes == null || minutes == 0)
-                          ? context.l10n.disabled
+                          ? l10n.disabled
                           : minutes < 60
-                          ? context.l10n.minute(minutes, minutes)
-                          : context.l10n.hour(minutes ~/ 60, minutes ~/ 60),
+                          ? l10n.minute(minutes, minutes)
+                          : l10n.hour(minutes ~/ 60, minutes ~/ 60),
                     ),
                   ),
-                  title: Text(context.l10n.autoLock),
+                  title: Text(l10n.autoLock),
                   onTap: () => globalKey.currentState?.showButtonMenu(),
                 ),
             ],
@@ -144,17 +148,17 @@ class _Passcode extends HookConsumerWidget {
         ),
         if (hasPasscode)
           CellGroup(
-            cellBackgroundColor: context.theme.settingCellBackgroundColor,
+            cellBackgroundColor: theme.settingCellBackgroundColor,
             child: CellItem(
-              title: Text(context.l10n.biometric),
+              title: Text(l10n.biometric),
               trailing: Transform.scale(
                 scale: 0.7,
                 child: CupertinoSwitch(
-                  activeTrackColor: context.theme.accent,
+                  activeTrackColor: theme.accent,
                   value: enableBiometric,
                   onChanged: (value) async {
                     if (!await checkAuthenticateAvailable()) {
-                      showToastFailed(context.l10n.notSupportBiometric);
+                      showToastFailed(l10n.notSupportBiometric);
                       return;
                     }
 
@@ -174,6 +178,8 @@ class _InputPasscode extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final focusNode = useFocusNode();
     useEffect(() {
       focusNode.requestFocus();
@@ -199,7 +205,7 @@ class _InputPasscode extends HookConsumerWidget {
 
       if (passcode.value != confirmPasscode.value) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          showToastFailed(context.l10n.passcodeIncorrect);
+          showToastFailed(l10n.passcodeIncorrect);
         });
 
         passcode.value = null;
@@ -228,11 +234,11 @@ class _InputPasscode extends HookConsumerWidget {
           ),
           Text(
             passcode.value != null
-                ? context.l10n.confirmPasscodeDesc
-                : context.l10n.setPasscodeDesc,
+                ? l10n.confirmPasscodeDesc
+                : l10n.setPasscodeDesc,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: context.theme.text,
+              color: theme.text,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -248,13 +254,13 @@ class _InputPasscode extends HookConsumerWidget {
               keyboardType: TextInputType.number,
               useHapticFeedback: true,
               pinTheme: PinTheme(
-                activeColor: context.theme.text,
-                inactiveColor: context.theme.text,
-                selectedColor: context.theme.text,
+                activeColor: theme.text,
+                inactiveColor: theme.text,
+                selectedColor: theme.text,
                 fieldWidth: 15,
                 borderWidth: 2,
               ),
-              textStyle: TextStyle(fontSize: 18, color: context.theme.text),
+              textStyle: TextStyle(fontSize: 18, color: theme.text),
               autoDisposeControllers: false,
               focusNode: focusNode,
               controller: textEditingController,

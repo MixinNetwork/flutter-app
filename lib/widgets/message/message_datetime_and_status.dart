@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
+import '../../ui/provider/account_server_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../message_status_icon.dart';
@@ -35,6 +36,7 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final accountServer = ref.read(accountServerProvider).requireValue;
     final isTranscriptPage = useIsTranscriptPage();
     final isPinnedPage = useIsPinnedPage();
     final isCurrentUser = useIsCurrentUser();
@@ -44,7 +46,7 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
       converter: (state) => _isRepresentative(
         state,
         ref.read(conversationProvider),
-        context.accountServer.userId,
+        accountServer.userId,
       ),
     );
     final createdAt = useMessageConverter(
@@ -117,7 +119,8 @@ class _ChatIcon extends StatelessWidget {
     height: 8,
     colorFilter: ColorFilter.mode(
       color ??
-          context.dynamicColor(
+          BrightnessData.dynamicColor(
+            context,
             const Color.fromRGBO(131, 145, 158, 1),
             darkColor: const Color.fromRGBO(128, 131, 134, 1),
           ),
@@ -144,7 +147,8 @@ class _MessageDatetime extends HookConsumerWidget {
         fontSize: context.messageStyle.statusFontSize,
         color:
             color ??
-            context.dynamicColor(
+            BrightnessData.dynamicColor(
+              context,
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),
             ),

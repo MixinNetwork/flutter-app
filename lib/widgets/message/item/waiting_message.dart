@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../../utils/extension/extension.dart';
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/uri_utils.dart';
 import '../message.dart';
 import '../message_bubble.dart';
@@ -17,6 +17,8 @@ class WaitingMessage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final relationship = useMessageConverter(
       converter: (state) => state.relationship,
     );
@@ -26,25 +28,29 @@ class WaitingMessage extends HookConsumerWidget {
 
     final content = RichText(
       text: TextSpan(
-        text: context.l10n.chatDecryptionFailedHint(
+        text: l10n.chatDecryptionFailedHint(
           relationship == UserRelationship.me
-              ? context.l10n.linkedDevice
+              ? l10n.linkedDevice
               : userFullName!,
         ),
         style: TextStyle(
           fontSize: context.messageStyle.primaryFontSize,
-          color: context.theme.text,
+          color: theme.text,
         ),
         children: [
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            text: context.l10n.learnMore,
+            text: l10n.learnMore,
             style: TextStyle(
               fontSize: context.messageStyle.primaryFontSize,
-              color: context.theme.accent,
+              color: theme.accent,
             ),
             recognizer: TapGestureRecognizer()
-              ..onTap = () => openUri(context, context.l10n.chatNotSupportUrl),
+              ..onTap = () => openUri(
+                context,
+                l10n.chatNotSupportUrl,
+                container: ref.container,
+              ),
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../ui/provider/ui_context_providers.dart';
 import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../conversation/badges_widget.dart';
@@ -43,7 +44,7 @@ class ContactMessageWidget extends HookConsumerWidget {
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: InteractiveDecoratedBox(
-        onTap: () => showUserDialog(context, sharedUserId),
+        onTap: () => showUserDialog(context, ref.container, sharedUserId),
         child: ContactItem(
           avatarUrl: sharedUserAvatarUrl,
           userId: sharedUserId,
@@ -58,7 +59,7 @@ class ContactMessageWidget extends HookConsumerWidget {
   }
 }
 
-class ContactItem extends StatelessWidget {
+class ContactItem extends ConsumerWidget {
   const ContactItem({
     required this.avatarUrl,
     required this.userId,
@@ -79,52 +80,55 @@ class ContactItem extends StatelessWidget {
   final Membership? membership;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      AvatarWidget(
-        size: 40,
-        avatarUrl: avatarUrl,
-        userId: userId,
-        name: fullName,
-      ),
-      const SizedBox(width: 8),
-      Flexible(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    fullName?.overflow ?? '',
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: context.messageStyle.primaryFontSize,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                BadgesWidget(
-                  verified: isVerified,
-                  isBot: appId != null,
-                  membership: membership,
-                ),
-              ],
-            ),
-            Text(
-              identityNumber,
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: context.messageStyle.secondaryFontSize,
-              ),
-            ),
-          ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AvatarWidget(
+          size: 40,
+          avatarUrl: avatarUrl,
+          userId: userId,
+          name: fullName,
         ),
-      ),
-    ],
-  );
+        const SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      fullName?.overflow ?? '',
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: context.messageStyle.primaryFontSize,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  BadgesWidget(
+                    verified: isVerified,
+                    isBot: appId != null,
+                    membership: membership,
+                  ),
+                ],
+              ),
+              Text(
+                identityNumber,
+                style: TextStyle(
+                  color: theme.secondaryText,
+                  fontSize: context.messageStyle.secondaryFontSize,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

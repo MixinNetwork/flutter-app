@@ -9,7 +9,7 @@ import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../constants/resources.dart';
-import '../extension/extension.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../logger.dart';
 
 final SystemTray _systemTray = SystemTray();
@@ -23,8 +23,9 @@ class SystemTrayWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final show = context.l10n.show;
-    final exitStr = context.l10n.exit;
+    final l10n = ref.watch(localizationProvider);
+    final show = l10n.show;
+    final exitStr = l10n.exit;
 
     useMemoized(() {
       if (!_enableTray) {

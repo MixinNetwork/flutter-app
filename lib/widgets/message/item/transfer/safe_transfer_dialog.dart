@@ -10,6 +10,7 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../ui/provider/account_server_provider.dart';
 import '../../../../ui/provider/multi_auth_provider.dart';
 import '../../../../ui/provider/transfer_provider.dart';
+import '../../../../ui/provider/ui_context_providers.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../buttons.dart';
 import '../../../dialog.dart';
@@ -65,29 +66,34 @@ class _SafeTransferDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final accountServer = ref.read(accountServerProvider).requireValue;
     useEffect(() {
-      context.accountServer.updateFiats();
+      accountServer.updateFiats();
+      return null;
     }, []);
 
     final snapshot = ref.watch(safeSnapshotProvider(snapshotId));
     useEffect(() {
-      context.accountServer.updateSafeSnapshotById(snapshotId: snapshotId);
+      accountServer.updateSafeSnapshotById(snapshotId: snapshotId);
+      return null;
     }, [snapshotId]);
 
     var token = const AsyncValue<Token?>.loading();
-    final tokenId = snapshot.valueOrNull?.assetId;
+    final tokenId = snapshot.value?.assetId;
     if (tokenId != null) {
       token = ref.watch(tokenProvider(tokenId));
     }
     useEffect(() {
       if (tokenId == null) {
-        return;
+        return null;
       }
-      context.accountServer.updateTokenById(assetId: tokenId);
+      accountServer.updateTokenById(assetId: tokenId);
+      return null;
     }, [tokenId]);
 
-    final snapshotValue = snapshot.valueOrNull;
-    final tokenValue = token.valueOrNull;
+    final snapshotValue = snapshot.value;
+    final tokenValue = token.value;
     final chain = ref.watch(assetChainProvider(tokenValue?.chainId));
 
     if (snapshotValue == null) {
@@ -97,7 +103,7 @@ class _SafeTransferDialog extends HookConsumerWidget {
     final isPositive = (double.tryParse(snapshotValue.amount) ?? 0) > 0;
     final type = ref.watch(_snapshotTypeProvider(snapshotValue));
 
-    final fiatRate = ref.watch(_fiatRateProvider).unwrapPrevious().valueOrNull;
+    final fiatRate = ref.watch(_fiatRateProvider).unwrapPrevious().value;
 
     return SizedBox(
       width: 400,
@@ -120,7 +126,7 @@ class _SafeTransferDialog extends HookConsumerWidget {
                 children: [
                   SnapshotDetailHeader(
                     symbolIconUrl: tokenValue?.iconUrl ?? '',
-                    chainIconUrl: chain.valueOrNull?.iconUrl ?? '',
+                    chainIconUrl: chain.value?.iconUrl ?? '',
                     amount: snapshotValue.amount,
                     symbol: tokenValue?.symbol ?? '',
                     snapshotType: type,
@@ -142,7 +148,10 @@ class _SafeTransferDialog extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Container(color: context.theme.divider, height: 10),
+                  Container(
+                    color: theme.divider,
+                    height: 10,
+                  ),
                   _SafeTransactionDetailInfo(
                     snapshot: snapshotValue,
                     token: tokenValue,
@@ -160,7 +169,7 @@ class _SafeTransferDialog extends HookConsumerWidget {
 }
 
 final _fiatRateProvider = StreamProvider.autoDispose<double?>((ref) {
-  final accountServer = ref.watch(accountServerProvider).valueOrNull;
+  final accountServer = ref.watch(accountServerProvider).value;
   if (accountServer == null) {
     return const Stream.empty();
   }
@@ -183,7 +192,7 @@ final _tickerProvider = FutureProvider.family
       ref,
       snapshot,
     ) async {
-      final accountServer = ref.watch(accountServerProvider).valueOrNull;
+      final accountServer = ref.watch(accountServerProvider).value;
       if (accountServer == null) {
         return null;
       }
@@ -208,9 +217,12 @@ class _ValuesDescription extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    final fiatCurrency = ref.watch(authAccountProvider)?.fiatCurrency;
     final ticker = ref
         .watch(_tickerProvider((snapshot.assetId, snapshot.createdAt)))
-        .valueOrNull;
+        .value;
 
     final String? thatTimeValue;
 
@@ -219,34 +231,36 @@ class _ValuesDescription extends HookConsumerWidget {
                 token.priceUsd.asDecimal *
                 fiatRate.asDecimal)
             .abs();
-    final unitValue = context.currencyFormat(
+    final unitValue = currencyFormat(
       (current / snapshot.amount.asDecimal.abs()).toDouble(),
+      fiatCurrency: fiatCurrency,
     );
     final symbol = token.symbol.overflow;
     final currentValue =
-        '${context.l10n.valueNow(context.currencyFormat(current))}($unitValue/$symbol)';
+        '${l10n.valueNow(currencyFormat(current, fiatCurrency: fiatCurrency))}($unitValue/$symbol)';
 
     if (ticker == null) {
       thatTimeValue = null;
     } else if (ticker.priceUsd == '0') {
-      thatTimeValue = context.l10n.valueThen(context.l10n.na);
+      thatTimeValue = l10n.valueThen(l10n.na);
     } else {
       final past =
           (snapshot.amount.asDecimal *
                   ticker.priceUsd.asDecimal *
                   fiatRate.asDecimal)
               .abs();
-      final unitValue = context.currencyFormat(
+      final unitValue = currencyFormat(
         (past / snapshot.amount.asDecimal.abs()).toDouble(),
+        fiatCurrency: fiatCurrency,
       );
       thatTimeValue =
-          '${context.l10n.valueThen(context.currencyFormat(past))}($unitValue/$symbol)';
+          '${l10n.valueThen(currencyFormat(past, fiatCurrency: fiatCurrency))}($unitValue/$symbol)';
     }
     return DefaultTextStyle.merge(
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: context.theme.secondaryText,
+        color: theme.secondaryText,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -281,6 +295,8 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final createdAt = DateTime.parse(snapshot.createdAt).toLocal();
     final memo = parseSafeSnapshotMemo(snapshot.memo);
     return Padding(
@@ -291,9 +307,9 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
         children: [
           if (type == SnapshotType.pending) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.status),
+              title: Text(l10n.status),
               subtitle: CustomSelectableText(
-                context.l10n.pendingConfirmation(
+                l10n.pendingConfirmation(
                   snapshot.confirmations ?? 0,
                   snapshot.confirmations ?? 0,
                   token?.confirmations ?? '',
@@ -302,73 +318,75 @@ class _SafeTransactionDetailInfo extends ConsumerWidget {
             ),
             if (snapshot.deposit != null)
               TransactionInfoTile(
-                title: Text(context.l10n.depositHash),
+                title: Text(l10n.depositHash),
                 subtitle: CustomSelectableText(snapshot.deposit!.depositHash),
               ),
           ] else ...[
             TransactionInfoTile(
-              title: Text(context.l10n.transactionId),
+              title: Text(l10n.transactionId),
               subtitle: CustomSelectableText(snapshot.snapshotId),
             ),
             TransactionInfoTile(
-              title: Text(context.l10n.transactionHash),
+              title: Text(l10n.transactionHash),
               subtitle: CustomSelectableText(snapshot.transactionHash),
             ),
           ],
           if (type == SnapshotType.transfer) ...[
             TransactionInfoTile(
-              title: Text(isPositive ? context.l10n.from : context.l10n.to),
+              title: Text(
+                isPositive ? l10n.from : l10n.to,
+              ),
               subtitle: CustomSelectableText(
                 snapshot.opponentId.isNullOrBlank()
                     ? 'N/A'
                     : (ref
                               .watch(_userProvider(snapshot.opponentId))
-                              .valueOrNull
+                              .value
                               ?.fullName ??
                           ''),
               ),
             ),
             if (!memo.isNullOrBlank())
               TransactionInfoTile(
-                title: Text(context.l10n.memo),
+                title: Text(l10n.memo),
                 subtitle: CustomSelectableText(memo),
               ),
           ] else if (type == SnapshotType.deposit &&
               snapshot.deposit != null) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.depositHash),
+              title: Text(l10n.depositHash),
               subtitle: CustomSelectableText(
                 snapshot.deposit?.depositHash ?? '',
               ),
             ),
           ] else if (type == SnapshotType.withdrawal) ...[
             TransactionInfoTile(
-              title: Text(context.l10n.to),
+              title: Text(l10n.to),
               subtitle: CustomSelectableText(
                 snapshot.withdrawal?.receiver ?? '',
               ),
             ),
             if ((snapshot.withdrawal?.withdrawalHash).isNullOrBlank())
               TransactionInfoTile(
-                title: Text(context.l10n.withdrawalHash),
+                title: Text(l10n.withdrawalHash),
                 subtitle: SizedBox.square(
                   dimension: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: context.theme.secondaryText,
+                    color: theme.secondaryText,
                   ),
                 ),
               )
             else
               TransactionInfoTile(
-                title: Text(context.l10n.withdrawalHash),
+                title: Text(l10n.withdrawalHash),
                 subtitle: CustomSelectableText(
                   snapshot.withdrawal?.withdrawalHash ?? '',
                 ),
               ),
           ],
           TransactionInfoTile(
-            title: Text(context.l10n.time),
+            title: Text(l10n.time),
             subtitle: CustomSelectableText(
               '${DateFormat.yMMMMd().format(createdAt)} '
               '${DateFormat.Hms().format(createdAt)}',

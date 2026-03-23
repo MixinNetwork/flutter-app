@@ -17,6 +17,7 @@ import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util
 
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
@@ -30,13 +31,16 @@ class PhoneNumberInputLayout extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final countries = useMemoizedFuture(
       () => compute(_getCountries, null),
       null,
     ).data;
     if (countries == null || countries.isEmpty) {
       return Center(
-        child: CircularProgressIndicator(color: context.theme.accent),
+        child: CircularProgressIndicator(
+          color: brightnessTheme.accent,
+        ),
       );
     }
     return _PhoneNumberInputScene(countries: countries, onNextStep: onNextStep);
@@ -54,6 +58,9 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
+    final locale = ref.watch(localeProvider);
     final phoneInputController = useTextEditingController();
     final countryMap = useMemoized(
       () => Map.fromEntries(countries.map((e) => MapEntry(e.alpha2Code, e))),
@@ -99,11 +106,11 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
         child: Column(
           children: [
             Text(
-              context.l10n.enterYourPhoneNumber,
+              l10n.enterYourPhoneNumber,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: context.theme.text,
+                color: brightnessTheme.text,
               ),
             ),
             const SizedBox(height: 24),
@@ -112,7 +119,7 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
               portalFollower: ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 child: Material(
-                  color: context.theme.chatBackground,
+                  color: brightnessTheme.chatBackground,
                   elevation: 2,
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                   child: SizedBox(
@@ -122,6 +129,7 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
                       size: const Size(360, 400),
                       child: _CountryPickPortal(
                         countries: countries,
+                        locale: locale,
                         selected: selectedCountry.value,
                         onSelected: (country) {
                           selectedCountry.value = country;
@@ -167,7 +175,7 @@ class _PhoneNumberInputScene extends HookConsumerWidget {
                 onNextStep(phoneNumber);
               },
               child: Text(
-                context.l10n.next,
+                l10n.next,
                 style: const TextStyle(fontWeight: FontWeight.normal),
               ),
             ),
@@ -192,57 +200,63 @@ class _MobileInput extends HookConsumerWidget {
   final bool countryPortalExpand;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => TextField(
-    controller: controller,
-    style: TextStyle(fontSize: 16, color: context.theme.text),
-    textInputAction: TextInputAction.next,
-    inputFormatters: [
-      FilteringTextInputFormatter.digitsOnly,
-      LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
-    ],
-    autofillHints: const [AutofillHints.telephoneNumber],
-    keyboardType: TextInputType.phone,
-    decoration: InputDecoration(
-      fillColor: context.theme.sidebarSelected,
-      filled: true,
-      hintStyle: TextStyle(fontSize: 16, color: context.theme.secondaryText),
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-        borderSide: BorderSide.none,
-      ),
-      prefixIcon: InkWell(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        onTap: onCountryDiaClick,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(width: 20),
-            Text(
-              country.dialCode ?? '',
-              style: TextStyle(fontSize: 16, color: context.theme.text),
-            ),
-            const SizedBox(width: 8),
-            AnimatedRotation(
-              turns: countryPortalExpand ? -0.25 : 0.25,
-              duration: const Duration(milliseconds: 200),
-              child: SvgPicture.asset(
-                Resources.assetsImagesIcArrowRightSvg,
-                width: 30,
-                height: 30,
-                colorFilter: ColorFilter.mode(
-                  context.theme.secondaryText,
-                  BlendMode.srcIn,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
+    return TextField(
+      controller: controller,
+      style: TextStyle(fontSize: 16, color: brightnessTheme.text),
+      textInputAction: TextInputAction.next,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
+      ],
+      autofillHints: const [AutofillHints.telephoneNumber],
+      keyboardType: TextInputType.phone,
+      decoration: InputDecoration(
+        fillColor: brightnessTheme.sidebarSelected,
+        filled: true,
+        hintStyle: TextStyle(
+          fontSize: 16,
+          color: brightnessTheme.secondaryText,
+        ),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderSide: BorderSide.none,
+        ),
+        prefixIcon: InkWell(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          onTap: onCountryDiaClick,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(width: 20),
+              Text(
+                country.dialCode ?? '',
+                style: TextStyle(fontSize: 16, color: brightnessTheme.text),
+              ),
+              const SizedBox(width: 8),
+              AnimatedRotation(
+                turns: countryPortalExpand ? -0.25 : 0.25,
+                duration: const Duration(milliseconds: 200),
+                child: SvgPicture.asset(
+                  Resources.assetsImagesIcArrowRightSvg,
+                  width: 30,
+                  height: 30,
+                  colorFilter: ColorFilter.mode(
+                    brightnessTheme.secondaryText,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 20),
-          ],
+              const SizedBox(width: 20),
+            ],
+          ),
         ),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 20),
       ),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(vertical: 20),
-    ),
-  );
+    );
+  }
 }
 
 // for compute
@@ -255,14 +269,17 @@ class _CountryPickPortal extends HookConsumerWidget {
     required this.onSelected,
     required this.countries,
     required this.selected,
+    required this.locale,
   });
 
   final void Function(Country country) onSelected;
   final List<Country> countries;
   final Country selected;
+  final Locale locale;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
     final groupedCountries = useMemoized(
       () => countries.groupListsBy(
         (country) => country.alpha2Code?.substring(0, 1),
@@ -316,6 +333,7 @@ class _CountryPickPortal extends HookConsumerWidget {
               if (item is Country) {
                 return _CountryItem(
                   country: item,
+                  locale: locale,
                   onTap: () => onSelected(item),
                   isSelected: item == selected,
                 );
@@ -336,7 +354,7 @@ class _CountryPickPortal extends HookConsumerWidget {
           child: AZSelection(
             textStyle: TextStyle(
               fontSize: 10,
-              color: context.theme.secondaryText,
+              color: brightnessTheme.secondaryText,
             ),
             onSelection: animatedTarget.add,
           ),
@@ -346,62 +364,71 @@ class _CountryPickPortal extends HookConsumerWidget {
   }
 }
 
-class _CharIndexItem extends StatelessWidget {
+class _CharIndexItem extends ConsumerWidget {
   const _CharIndexItem({required this.char});
 
   final String char;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 40,
-    child: Row(
-      children: [
-        const SizedBox(width: 20),
-        Text(
-          char,
-          style: TextStyle(fontSize: 14, color: context.theme.secondaryText),
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
+    return SizedBox(
+      height: 40,
+      child: Row(
+        children: [
+          const SizedBox(width: 20),
+          Text(
+            char,
+            style: TextStyle(
+              fontSize: 14,
+              color: brightnessTheme.secondaryText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _CountryItem extends StatelessWidget {
+class _CountryItem extends ConsumerWidget {
   const _CountryItem({
     required this.country,
     required this.onTap,
     required this.isSelected,
+    required this.locale,
   });
 
   final Country country;
   final VoidCallback onTap;
   final bool isSelected;
+  final Locale locale;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: DefaultTextStyle.merge(
-      style: TextStyle(
-        fontSize: 14,
-        color: isSelected ? context.theme.accent : context.theme.text,
-      ),
-      child: SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            const SizedBox(width: 20),
-            SizedBox(width: 80, child: Text(country.dialCode ?? '')),
-            Text(
-              country.nameTranslations?[Localizations.localeOf(
-                    context,
-                  ).languageCode] ??
-                  country.name ??
-                  '',
-            ),
-            const SizedBox(width: 20),
-          ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightnessTheme = ref.watch(brightnessThemeDataProvider);
+    return InkWell(
+      onTap: onTap,
+      child: DefaultTextStyle.merge(
+        style: TextStyle(
+          fontSize: 14,
+          color: isSelected ? brightnessTheme.accent : brightnessTheme.text,
+        ),
+        child: SizedBox(
+          height: 40,
+          child: Row(
+            children: [
+              const SizedBox(width: 20),
+              SizedBox(width: 80, child: Text(country.dialCode ?? '')),
+              Text(
+                country.nameTranslations?[locale.languageCode] ??
+                    country.name ??
+                    '',
+              ),
+              const SizedBox(width: 20),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

@@ -66,9 +66,17 @@ class IsolateRpcClient {
       timer: timer,
     );
 
-    _router.sendRpcRequest(
-      RpcRequest(requestId: requestId, method: method, payload: payload),
-    );
+    try {
+      _router.sendRpcRequest(
+        RpcRequest(requestId: requestId, method: method, payload: payload),
+      );
+    } catch (error) {
+      final pending = _pending.remove(requestId);
+      pending?.timer.cancel();
+      if (pending != null && !pending.completer.isCompleted) {
+        pending.completer.completeError(error);
+      }
+    }
 
     return completer.future;
   }

@@ -3,27 +3,23 @@ import 'dart:io';
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
-    hide Consumer, FutureProvider, Provider;
-import 'package:provider/provider.dart';
+    hide FutureProvider, Provider;
 
-import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
+import 'ui/home/providers/home_scope_providers.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
 import 'ui/provider/database_provider.dart';
-import 'ui/provider/mention_cache_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
-import 'ui/provider/slide_category_provider.dart';
+import 'ui/provider/ui_context_providers.dart';
 import 'utils/extension/extension.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/text_input.dart';
@@ -82,12 +78,17 @@ class _LoginApp extends HookConsumerWidget {
         return _App(home: DatabaseOpenFailedPage(error: error));
       } else {
         return _App(
-          home: LandingFailedPage(
-            title: context.l10n.unknowError,
-            message: error.toString(),
-            actions: [
-              ElevatedButton(onPressed: () {}, child: Text(context.l10n.exit)),
-            ],
+          home: Consumer(
+            builder: (context, ref, child) {
+              final l10n = ref.watch(localizationProvider);
+              return LandingFailedPage(
+                title: l10n.unknowError,
+                message: error.toString(),
+                actions: [
+                  ElevatedButton(onPressed: () {}, child: Text(l10n.exit)),
+                ],
+              );
+            },
           ),
         );
       }
@@ -97,7 +98,7 @@ class _LoginApp extends HookConsumerWidget {
   }
 }
 
-class _Providers extends HookConsumerWidget {
+class _Providers extends ConsumerWidget {
   const _Providers({required this.app});
 
   final Widget app;
@@ -106,25 +107,7 @@ class _Providers extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncAccountServer = ref.watch(accountServerProvider);
     if (!asyncAccountServer.hasValue) return app;
-    final accountServer = asyncAccountServer.requireValue;
-
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => ConversationListBloc(
-            ref.read(slideCategoryStateProvider.notifier),
-            accountServer.database,
-            ref.read(mentionCacheProvider),
-          ),
-        ),
-      ],
-      child: Provider<NotificationService>(
-        create: (context) => NotificationService(context: context),
-        lazy: false,
-        dispose: (_, notificationService) => notificationService.close(),
-        child: PortalProviders(child: app),
-      ),
-    );
+    return PortalProviders(child: app);
   }
 }
 
@@ -166,30 +149,36 @@ class _App extends HookConsumerWidget {
           useMaterial3: true,
         ).withFallbackFonts(),
         themeMode: ref.watch(settingProvider).themeMode,
-        builder: (context, child) {
-          try {
-            context.accountServer.language = Localizations.localeOf(
-              context,
-            ).languageCode;
-          } catch (_) {}
-          final mediaQueryData = MediaQuery.of(context);
-          return BrightnessObserver(
-            lightThemeData: lightBrightnessThemeData,
-            darkThemeData: darkBrightnessThemeData,
-            forceBrightness: ref.watch(settingProvider).brightness,
-            child: MediaQuery(
-              data: mediaQueryData.copyWith(
-                // Different linux distro change the value, e.g. 1.2
-                textScaler: Platform.isLinux
-                    ? TextScaler.noScaling
-                    : mediaQueryData.textScaler,
-              ),
-              child: SystemTrayWidget(
-                child: TextInputActionHandler(child: AuthGuard(child: child!)),
-              ),
+        builder: (context, child) => BrightnessObserver(
+          lightThemeData: lightBrightnessThemeData,
+          darkThemeData: darkBrightnessThemeData,
+          forceBrightness: ref.watch(settingProvider).brightness,
+          child: UiContextScope(
+            child: Consumer(
+              builder: (context, ref, _) {
+                try {
+                  ref.read(accountServerProvider).value?.language = ref
+                      .read(localeProvider)
+                      .languageCode;
+                } catch (_) {}
+                final mediaQueryData = ref.watch(mediaQueryDataProvider);
+                return MediaQuery(
+                  data: mediaQueryData.copyWith(
+                    // Different linux distro change the value, e.g. 1.2
+                    textScaler: Platform.isLinux
+                        ? TextScaler.noScaling
+                        : mediaQueryData.textScaler,
+                  ),
+                  child: SystemTrayWidget(
+                    child: TextInputActionHandler(
+                      child: AuthGuard(child: child!),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ),
         home: MixinAppActions(child: MacosMenuBar(child: home)),
       ),
     ),
@@ -202,15 +191,20 @@ class _Home extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountServer = ref.watch(
-      accountServerProvider.select((value) => value.valueOrNull),
+      accountServerProvider.select((value) => value.value),
     );
 
     if (accountServer != null) {
-      BlocProvider.of<ConversationListBloc>(context)
-        ..limit =
-            MediaQuery.sizeOf(context).height ~/
-            (ConversationPage.conversationItemHeight / 1.75)
-        ..init();
+      final mediaQueryData = ref.watch(mediaQueryDataProvider);
+      final notifier = ref.read(conversationListControllerProvider.notifier);
+      // Defer state modifications to after widget build completes.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifier
+          ..limit =
+              mediaQueryData.size.height ~/
+              (ConversationPage.conversationItemHeight / 1.75)
+          ..init();
+      });
       return const PortalProviders(child: HomePage());
     }
     return const LandingPage();

@@ -8,9 +8,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../constants/resources.dart';
+import '../../ui/provider/ui_context_providers.dart';
 import '../../widgets/dialog.dart';
 import '../event_bus.dart';
-import '../extension/extension.dart';
 import '../logger.dart';
 
 enum DeviceTransferCommand {
@@ -225,21 +225,24 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
     _useTransferStatus(
       () => _restoreBehavior.stream,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
       succeedBuilder: (context) =>
-          _ConfirmDialog(message: context.l10n.transferCompleted),
-      failedBuilder: (context) =>
-          _ConfirmDialog(message: context.l10n.deviceTransferFailed),
+          _ConfirmDialog(message: l10n.transferCompleted),
+      failedBuilder: (context) => _ConfirmDialog(
+        message: l10n.deviceTransferFailed,
+      ),
     );
     _useTransferStatus(
       () => _backupBehavior.stream,
       progressBuilder: (context) => const _BackupProcessingDialog(),
       succeedBuilder: (context) =>
-          _ConfirmDialog(message: context.l10n.transferCompleted),
-      failedBuilder: (context) =>
-          _ConfirmDialog(message: context.l10n.deviceTransferFailed),
+          _ConfirmDialog(message: l10n.transferCompleted),
+      failedBuilder: (context) => _ConfirmDialog(
+        message: l10n.deviceTransferFailed,
+      ),
     );
     useOnTransferEventType(
       DeviceTransferCallbackType.onBackupRequestReceived,
@@ -247,7 +250,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
         final approved = await showMixinDialog<bool>(
           context: context,
           child: _ApproveDialog(
-            message: context.l10n.confirmSyncChatsFromPhone,
+            message: l10n.confirmSyncChatsFromPhone,
           ),
         );
         if (approved == true) {
@@ -262,7 +265,9 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
       () async {
         final approved = await showMixinDialog<bool>(
           context: context,
-          child: _ApproveDialog(message: context.l10n.confirmSyncChatsToPhone),
+          child: _ApproveDialog(
+            message: l10n.confirmSyncChatsToPhone,
+          ),
         );
         if (approved == true) {
           EventBus.instance.fire(DeviceTransferCommand.confirmBackup);
@@ -278,9 +283,9 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
         final String message;
         switch (reason) {
           case ConnectionFailedReason.versionNotMatched:
-            message = context.l10n.transferProtocolVersionNotMatched;
+            message = l10n.transferProtocolVersionNotMatched;
           case ConnectionFailedReason.unknown:
-            message = context.l10n.deviceTransferFailed;
+            message = l10n.deviceTransferFailed;
         }
         showMixinDialog(
           context: context,
@@ -293,57 +298,66 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
   }
 }
 
-class _ConfirmDialog extends StatelessWidget {
+class _ConfirmDialog extends ConsumerWidget {
   const _ConfirmDialog({required this.message});
 
   final String message;
 
   @override
-  Widget build(BuildContext context) => AlertDialogLayout(
-    content: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 420),
-      child: Text(message),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop(false);
-        },
-        child: Text(context.l10n.confirm),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    return AlertDialogLayout(
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Text(message),
       ),
-    ],
-  );
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+          child: Text(l10n.confirm),
+        ),
+      ],
+    );
+  }
 }
 
-class _ApproveDialog extends StatelessWidget {
+class _ApproveDialog extends ConsumerWidget {
   const _ApproveDialog({required this.message});
 
   final String message;
 
   @override
-  Widget build(BuildContext context) => AlertDialogLayout(
-    content: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 420),
-      child: Text(message),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop(false);
-        },
-        child: Text(
-          context.l10n.cancel,
-          style: TextStyle(color: context.theme.secondaryText),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
+    return AlertDialogLayout(
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Text(message),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+          child: Text(
+            l10n.cancel,
+            style: TextStyle(
+              color: theme.secondaryText,
+            ),
+          ),
         ),
-      ),
-      MixinButton(
-        onTap: () {
-          Navigator.of(context).pop(true);
-        },
-        child: Text(context.l10n.confirm),
-      ),
-    ],
-  );
+        MixinButton(
+          onTap: () {
+            Navigator.of(context).pop(true);
+          },
+          child: Text(l10n.confirm),
+        ),
+      ],
+    );
+  }
 }
 
 class _RestoreProcessingDialog extends StatelessWidget {
@@ -392,6 +406,8 @@ class _TransferProcessDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(localizationProvider);
+    final theme = ref.watch(brightnessThemeDataProvider);
     final progress = useStream<double>(progressBehavior, initialData: 0);
     useEffect(() {
       DesktopKeepScreenOn.setPreventSleep(true);
@@ -416,17 +432,20 @@ class _TransferProcessDialog extends HookConsumerWidget {
                 width: 72,
                 height: 72,
                 colorFilter: ColorFilter.mode(
-                  context.theme.secondaryText,
+                  theme.secondaryText,
                   BlendMode.srcIn,
                 ),
               ),
               const SizedBox(height: 38),
               DefaultTextStyle.merge(
-                style: TextStyle(color: context.theme.text, fontSize: 18),
+                style: TextStyle(
+                  color: theme.text,
+                  fontSize: 18,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(context.l10n.transferringChats),
+                    Text(l10n.transferringChats),
                     const SizedBox(width: 2),
                     if (progress.data != null && progress.data! > 0)
                       Text('(${progress.data!.toStringAsFixed(2)}%)'),
@@ -436,17 +455,17 @@ class _TransferProcessDialog extends HookConsumerWidget {
               const SizedBox(height: 16),
               DefaultTextStyle.merge(
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
-                child: Text(context.l10n.transferringChatsTips),
+                child: Text(l10n.transferringChatsTips),
               ),
               const SizedBox(height: 18),
               Text(
                 _formatNetworkSpeed(networkSpeed.data ?? 0),
                 style: TextStyle(
-                  color: context.theme.secondaryText,
+                  color: theme.secondaryText,
                   fontSize: 14,
                 ),
               ),
@@ -454,11 +473,11 @@ class _TransferProcessDialog extends HookConsumerWidget {
               TextButton(
                 onPressed: onCancelTapped,
                 child: Text(
-                  context.l10n.cancel,
+                  l10n.cancel,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.normal,
-                    color: context.theme.accent,
+                    color: theme.accent,
                   ),
                 ),
               ),

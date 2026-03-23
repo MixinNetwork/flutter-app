@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
@@ -6,14 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../db/dao/user_dao.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
-import '../../utils/rivepod.dart';
 import '../../widgets/mention_panel.dart';
-import '../home/bloc/subscriber_mixin.dart';
 import 'conversation_provider.dart';
 import 'database_provider.dart';
 import 'multi_auth_provider.dart';
@@ -36,16 +34,50 @@ class MentionState extends Equatable {
       );
 }
 
-class MentionStateNotifier extends DistinctStateNotifier<MentionState>
-    with SubscriberMixin {
-  MentionStateNotifier({
-    required this.userDao,
-    required this.multiAuthChangeNotifier,
-    required this.textEditingValueStream,
-    required String conversationId,
-    required bool? isGroup,
-    required bool isBot,
-  }) : super(const MentionState()) {
+class MentionStateNotifier extends Notifier<MentionState> {
+  MentionStateNotifier(this.textEditingValueStream);
+
+  final Stream<TextEditingValue> textEditingValueStream;
+  final scrollController = ScrollController();
+  final _subscriptions = <StreamSubscription<dynamic>>[];
+  late final StreamController<MentionState> _stateController =
+      StreamController<MentionState>.broadcast();
+
+  Stream<MentionState> get stream => _stateController.stream;
+
+  @override
+  MentionState build() {
+    final userDao = ref.watch(
+      databaseProvider.select((value) => value.requireValue.userDao),
+    );
+    final multiAuthChangeNotifier = ref.watch(
+      multiAuthNotifierProvider.notifier,
+    );
+    final (conversationId, isGroup, isBot) = ref.watch(
+      conversationProvider.select(
+        (value) =>
+            (value?.conversationId, value?.isGroup, value?.isBot ?? false),
+      ),
+    );
+
+    ref.onDispose(() async {
+      for (final subscription in _subscriptions) {
+        await subscription.cancel();
+      }
+      _subscriptions.clear();
+      scrollController.dispose();
+      await _stateController.close();
+    });
+
+    for (final subscription in _subscriptions) {
+      unawaited(subscription.cancel());
+    }
+    _subscriptions.clear();
+
+    if (conversationId == null) {
+      return stateOrNull ?? const MentionState();
+    }
+
     final mentionTextStream = textEditingValueStream.map((event) {
       final text = event.text.substring(
         0,
@@ -54,14 +86,14 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
       return mentionRegExp.firstMatch(text)?[1];
     }).asBroadcastStream();
 
-    addSubscription(
+    _subscriptions.add(
       mentionTextStream.distinct().listen((index) {
         if (!scrollController.hasClients) return;
         scrollController.jumpTo(0);
       }),
     );
 
-    addSubscription(
+    _subscriptions.add(
       mentionTextStream
           .switchMap((keyword) {
             if (keyword == null) {
@@ -140,15 +172,11 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
             }
             return Stream.value(MentionState(text: keyword));
           })
-          .listen((value) => state = value),
+          .listen(_setState),
     );
-  }
 
-  MentionStateNotifier.idle({
-    required this.userDao,
-    required this.multiAuthChangeNotifier,
-    required this.textEditingValueStream,
-  }) : super(const MentionState());
+    return stateOrNull ?? const MentionState();
+  }
 
   MentionState _resultToMentionState(String? keyword, List<User> users) =>
       MentionState(
@@ -202,16 +230,11 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
     }
   }
 
-  final UserDao userDao;
-  final MultiAuthStateNotifier multiAuthChangeNotifier;
-  final Stream<TextEditingValue> textEditingValueStream;
-
-  final scrollController = ScrollController();
-
-  @override
-  Future<void> dispose() async {
-    scrollController.dispose();
-    super.dispose();
+  void _setState(MentionState value) {
+    state = value;
+    if (!_stateController.isClosed) {
+      _stateController.add(value);
+    }
   }
 
   void next() {
@@ -227,38 +250,7 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
   }
 }
 
-final mentionProvider = StateNotifierProvider.autoDispose
-    .family<MentionStateNotifier, MentionState, Stream<TextEditingValue>>((
-      ref,
-      stream,
-    ) {
-      final userDao = ref.watch(
-        databaseProvider.select((value) => value.requireValue.userDao),
-      );
-      final authStateNotifier = ref.watch(
-        multiAuthStateNotifierProvider.notifier,
-      );
-      final (conversationId, isGroup, isBot) = ref.watch(
-        conversationProvider.select(
-          (value) =>
-              (value?.conversationId, value?.isGroup, value?.isBot ?? false),
-        ),
-      );
-
-      if (conversationId == null) {
-        return MentionStateNotifier.idle(
-          userDao: userDao,
-          multiAuthChangeNotifier: authStateNotifier,
-          textEditingValueStream: stream,
-        );
-      }
-
-      return MentionStateNotifier(
-        userDao: userDao,
-        multiAuthChangeNotifier: authStateNotifier,
-        textEditingValueStream: stream,
-        conversationId: conversationId,
-        isGroup: isGroup,
-        isBot: isBot,
-      );
-    });
+final mentionProvider = NotifierProvider.autoDispose
+    .family<MentionStateNotifier, MentionState, Stream<TextEditingValue>>(
+      MentionStateNotifier.new,
+    );

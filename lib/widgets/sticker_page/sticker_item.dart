@@ -7,20 +7,23 @@ import 'package:lottie/lottie.dart';
 
 import '../../app.dart';
 import '../../db/extension/job.dart';
+import '../../ui/provider/account_server_provider.dart';
+import '../../ui/provider/database_provider.dart';
 import '../../utils/app_lifecycle.dart';
-import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../cache_lottie.dart';
 import '../mixin_image.dart';
 
-void _triggerRefreshJob(BuildContext context, String? stickerId) {
+void _triggerRefreshJob(WidgetRef ref, String? stickerId) {
   if (stickerId == null || stickerId.isEmpty) return;
 
   scheduleMicrotask(() {
-    if (!context.mounted) return;
-    context.accountServer.addUpdateStickerJob(
-      createUpdateStickerJob(stickerId),
-    );
+    ref
+        .read(accountServerProvider)
+        .requireValue
+        .addUpdateStickerJob(
+          createUpdateStickerJob(stickerId),
+        );
   });
 }
 
@@ -45,6 +48,7 @@ class StickerItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isJson = useMemoized(() => assetType == 'json', [assetType]);
+    final database = ref.read(databaseProvider).requireValue;
 
     final playing = useState(true);
     final controller = useAnimationController();
@@ -86,7 +90,7 @@ class StickerItem extends HookConsumerWidget {
         ? LottieBuilder(
             lottie: CachedNetworkLottie(
               assetUrl,
-              proxyConfig: context.database.settingProperties.activatedProxy,
+              proxyConfig: database.settingProperties.activatedProxy,
             ),
             controller: controller,
             height: height,
@@ -97,7 +101,7 @@ class StickerItem extends HookConsumerWidget {
               listener();
             },
             errorBuilder: (context, error, stackTrace) {
-              _triggerRefreshJob(context, stickerId);
+              _triggerRefreshJob(ref, stickerId);
               return errorWidget ?? const SizedBox();
             },
           )
@@ -107,7 +111,7 @@ class StickerItem extends HookConsumerWidget {
             width: width,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              _triggerRefreshJob(context, stickerId);
+              _triggerRefreshJob(ref, stickerId);
               return errorWidget ?? const SizedBox();
             },
           );
