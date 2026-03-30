@@ -22,7 +22,7 @@ dependencies:
   android_id: ^0.5.1
   ansicolor: ^2.0.3
   archive: ^4.0.9
-  async: ^2.13.0
+  async: ^2.13.1
   audio_session: ^0.2.3
   auto_size_text: ^3.0.0
   bloc: ^9.2.0
