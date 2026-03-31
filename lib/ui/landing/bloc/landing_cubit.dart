@@ -42,28 +42,66 @@ class LandingCubit<T> extends Cubit<T> {
   final MultiAuthStateNotifier multiAuthChangeNotifier;
 }
 
+typedef ProvisioningIdLoader = Future<MixinResponse<ProvisioningId>> Function();
+typedef ProvisioningLoader =
+    Future<MixinResponse<Provisioning>> Function(String deviceId);
+typedef ProvisioningVerifier =
+    FutureOr<(Account, String)> Function(
+      String secret,
+      signal.ECKeyPair keyPair,
+    );
+
 class LandingQrCodeCubit extends LandingCubit<LandingState> {
   LandingQrCodeCubit(
     MultiAuthStateNotifier multiAuthChangeNotifier,
-    Locale locale,
-  ) : super(
-        multiAuthChangeNotifier,
-        locale,
-        LandingState(
-          status: multiAuthChangeNotifier.current != null
-              ? LandingStatus.provisioning
-              : LandingStatus.init,
-        ),
-      ) {
-    if (multiAuthChangeNotifier.current != null) return;
+    Locale locale, {
+    this.autoStart = true,
+    ProvisioningIdLoader? provisioningIdLoader,
+    ProvisioningLoader? provisioningLoader,
+    ProvisioningVerifier? provisioningVerifier,
+    Stream<int> Function()? pollingStreamFactory,
+    this.expirationTickLimit = 60,
+    this.pollingFailureLimit = 3,
+    String Function()? expiredMessageBuilder,
+  }) : super(
+         multiAuthChangeNotifier,
+         locale,
+         LandingState(
+           status: multiAuthChangeNotifier.current != null
+               ? LandingStatus.provisioning
+               : LandingStatus.init,
+         ),
+       ) {
+    _provisioningIdLoader =
+        provisioningIdLoader ??
+        (() => client.provisioningApi.getProvisioningId(
+          Platform.operatingSystem,
+        ));
+    _provisioningLoader =
+        provisioningLoader ??
+        ((deviceId) => client.provisioningApi.getProvisioning(deviceId));
+    _provisioningVerifier = provisioningVerifier;
+    _pollingStreamFactory =
+        pollingStreamFactory ??
+        (() => Stream.periodic(const Duration(seconds: 1), (i) => i));
+    _expiredMessageBuilder =
+        expiredMessageBuilder ?? (() => Localization.current.qrCodeExpiredDesc);
+    if (!autoStart || multiAuthChangeNotifier.current != null) return;
     requestAuthUrl();
   }
 
-  final StreamController<(int, String, signal.ECKeyPair)>
-  periodicStreamController =
-      StreamController<(int, String, signal.ECKeyPair)>();
+  final bool autoStart;
+  late final ProvisioningIdLoader _provisioningIdLoader;
+  late final ProvisioningLoader _provisioningLoader;
+  late final ProvisioningVerifier? _provisioningVerifier;
+  late final Stream<int> Function() _pollingStreamFactory;
+  late final String Function() _expiredMessageBuilder;
+  final int expirationTickLimit;
+  final int pollingFailureLimit;
 
   StreamSubscription? _periodicSubscription;
+  int _requestVersion = 0;
+  int _pollingFailureCount = 0;
 
   void _cancelPeriodicSubscription() {
     final periodicSubscription = _periodicSubscription;
@@ -71,12 +109,32 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
     unawaited(periodicSubscription?.cancel());
   }
 
-  Future<void> requestAuthUrl() async {
+  Future<void> requestAuthUrl({bool isAutoRefresh = false}) async {
     _cancelPeriodicSubscription();
-    try {
-      final rsp = await client.provisioningApi.getProvisioningId(
-        Platform.operatingSystem,
+    final requestVersion = ++_requestVersion;
+    _pollingFailureCount = 0;
+    if (state.authUrl == null) {
+      emit(
+        state.copyWith(
+          status: LandingStatus.init,
+          clearErrorMessage: true,
+        ),
       );
+    } else if (state.status == LandingStatus.needReload) {
+      emit(
+        state.copyWith(
+          status: LandingStatus.ready,
+          clearErrorMessage: true,
+        ),
+      );
+    }
+    try {
+      final rsp = await _provisioningIdLoader();
+      if (requestVersion != _requestVersion) return;
+      if (isAutoRefresh) {
+        i('landing qr auto refresh succeeded');
+      }
+
       final keyPair = signal.Curve.generateKeyPair();
       final pubKey = Uri.encodeComponent(
         base64Encode(keyPair.publicKey.serialize()),
@@ -87,57 +145,78 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
           authUrl:
               'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
           status: LandingStatus.ready,
+          clearErrorMessage: true,
         ),
       );
 
-      _periodicSubscription =
-          Stream.periodic(
-                const Duration(seconds: 1),
-                (i) => i,
-              )
-              .asyncBufferMap(
-                (event) =>
-                    _checkLanding(event.last, rsp.data.deviceId, keyPair),
-              )
-              .listen((event) {});
+      _periodicSubscription = _pollingStreamFactory()
+          .asyncBufferMap(
+            (event) => _checkLanding(
+              requestVersion,
+              event.last,
+              rsp.data.deviceId,
+              keyPair,
+            ),
+          )
+          .listen((event) {});
     } catch (error, stack) {
+      if (requestVersion != _requestVersion) return;
       e('requestAuthUrl failed: $error $stack');
-      emit(state.needReload('Failed to request auth: $error'));
+      emit(
+        state.needReload(
+          isAutoRefresh
+              ? 'Failed to refresh QR code: $error'
+              : 'Failed to request auth: $error',
+        ),
+      );
     }
   }
 
   Future<void> _checkLanding(
+    int requestVersion,
     int count,
     String deviceId,
     signal.ECKeyPair keyPair,
   ) async {
-    if (_periodicSubscription == null) return;
+    if (_periodicSubscription == null || requestVersion != _requestVersion) {
+      return;
+    }
 
-    if (count > 60) {
+    if (count > expirationTickLimit) {
       _cancelPeriodicSubscription();
-      emit(state.needReload(Localization.current.qrCodeExpiredDesc));
+      i('landing qr expired, auto refreshing');
+      unawaited(requestAuthUrl(isAutoRefresh: true));
       return;
     }
 
     String secret;
     try {
-      secret = (await client.provisioningApi.getProvisioning(
-        deviceId,
-      )).data.secret;
+      secret = (await _provisioningLoader(deviceId)).data.secret;
     } catch (e) {
+      if (requestVersion != _requestVersion) return;
+      _pollingFailureCount += 1;
+      if (_pollingFailureCount >= pollingFailureLimit) {
+        _cancelPeriodicSubscription();
+        w('landing qr polling failed, entering retry state');
+        emit(state.needReload(_expiredMessageBuilder()));
+      }
       return;
     }
+    _pollingFailureCount = 0;
     if (secret.isEmpty) return;
 
     _cancelPeriodicSubscription();
+    if (requestVersion != _requestVersion) return;
     emit(state.copyWith(status: LandingStatus.provisioning));
 
     try {
       final (acount, privateKey) = await _verify(secret, keyPair);
+      if (requestVersion != _requestVersion) return;
       multiAuthChangeNotifier.signIn(
         AuthState(account: acount, privateKey: privateKey),
       );
     } catch (error, stack) {
+      if (requestVersion != _requestVersion) return;
       emit(state.needReload('Failed to verify: $error'));
       e('_verify: $error $stack');
     }
@@ -147,6 +226,11 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
     String secret,
     signal.ECKeyPair keyPair,
   ) async {
+    final provisioningVerifier = _provisioningVerifier;
+    if (provisioningVerifier != null) {
+      return provisioningVerifier(secret, keyPair);
+    }
+
     final result = signal.decrypt(
       base64Encode(keyPair.privateKey.serialize()),
       secret,
@@ -189,7 +273,6 @@ class LandingQrCodeCubit extends LandingCubit<LandingState> {
   @override
   Future<void> close() async {
     await _periodicSubscription?.cancel();
-    await periodicStreamController.close();
     await super.close();
   }
 }

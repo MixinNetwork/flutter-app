@@ -89,6 +89,7 @@ class _QrCode extends HookConsumerWidget {
 
     if (url != null) {
       qrCode = QrCode(
+        key: ValueKey(url),
         image: const AssetImage(Resources.assetsImagesLogoPng),
         data: url,
       );
