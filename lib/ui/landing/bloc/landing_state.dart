@@ -23,9 +23,14 @@ class LandingState extends Equatable {
     authUrl: authUrl,
   );
 
-  LandingState copyWith({String? authUrl, LandingStatus? status}) =>
-      LandingState(
-        authUrl: authUrl ?? this.authUrl,
-        status: status ?? this.status,
-      );
+  LandingState copyWith({
+    String? authUrl,
+    LandingStatus? status,
+    String? errorMessage,
+    bool clearErrorMessage = false,
+  }) => LandingState(
+    authUrl: authUrl ?? this.authUrl,
+    status: status ?? this.status,
+    errorMessage: clearErrorMessage ? null : errorMessage ?? this.errorMessage,
+  );
 }
