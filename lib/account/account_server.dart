@@ -33,6 +33,7 @@ import '../ui/provider/setting_provider.dart';
 import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/attachment/download_key_value.dart';
+import '../utils/auth_token_utils.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -93,7 +94,13 @@ class AccountServer {
 
     checkSignalKeyTimer = Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
-      checkSignalKey(client);
+      unawaited(() async {
+        try {
+          await checkSignalKey(client);
+        } catch (e, s) {
+          w('refreshSignalKeys periodic failed: $e, $s');
+        }
+      }());
     });
 
     try {
@@ -127,6 +134,17 @@ class AccountServer {
     if (e is MixinApiError) {
       final mixinError = e.error! as MixinError;
       if (mixinError.code == authentication) {
+        final authorizationHeaderValue =
+            e.requestOptions.headers['Authorization'];
+        final authorizationHeader = authorizationHeaderValue is String
+            ? authorizationHeaderValue
+            : authorizationHeaderValue is Iterable
+            ? authorizationHeaderValue.whereType<String>().firstOrNull
+            : null;
+        if (isBearerTokenDelayed(authorizationHeader)) {
+          i('ignore authentication error for delayed auth token');
+          return;
+        }
         final serverTime = int.tryParse(
           e.response?.headers.value('x-server-time') ?? '',
         );
