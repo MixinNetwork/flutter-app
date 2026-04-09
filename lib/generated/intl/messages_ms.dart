@@ -138,7 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatGroupJoin": m5,
     "chatGroupRemove": m6,
     "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+      "https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p",
     ),
     "circleSubtitle": m8,
     "circleTitle": m9,

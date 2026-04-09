@@ -28,7 +28,7 @@
 "chatGroupExit" : "Tinggal {arg0}",
 "chatGroupJoin" : "{arg0} menyertai kumpulan melalui pautan jemputan",
 "chatGroupRemove" : "{arg0} mengalih keluar {arg1}",
-"chatNotSupportUrl" : "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+"chatNotSupportUrl" : "https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p",
 "circleSubtitle" : "{count, plural, one{null} other{{arg0} Perbualan}}",
 "circleTitle" : "Lingkaran {arg0}",
 "circles" : "Lingkaran",

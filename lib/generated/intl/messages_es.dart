@@ -31,7 +31,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m3(arg0, arg1) => "${arg0} ha añadido ${arg1}";
 
-  static String m4(arg0) => "quedan ${arg0}";
+  static String m4(arg0) => "${arg0} salió";
 
   static String m5(arg0) =>
       "${arg0} se ha unido al grupo mediante un enlace de invitación";
@@ -53,7 +53,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(arg0) => "¿Quieres eliminar el círculo ${arg0}?";
 
-  static String m15(arg0) => "${arg0} mensaje de desaparición inhabilitado";
+  static String m15(arg0) =>
+      "${arg0} ha desactivado los mensajes que desaparecen";
 
   static String m16(arg0) => "El tiempo máximo es ${arg0}.";
 
@@ -171,7 +172,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "addSticker": MessageLookupByLibrary.simpleMessage("Añadir pegatina"),
     "addStickerFailed": MessageLookupByLibrary.simpleMessage(
-      "No se ha podido añadir la etiqueta",
+      "No se ha podido añadir la pegatina",
     ),
     "addStickers": MessageLookupByLibrary.simpleMessage("Añadir pegatinas"),
     "addToCircle": MessageLookupByLibrary.simpleMessage("Añadir al círculo"),
@@ -186,10 +187,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Animales y Naturaleza",
     ),
     "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
-      "No permitir compartir esta URL",
+      "No se puede compartir esta URL",
     ),
     "appearance": MessageLookupByLibrary.simpleMessage("Apariencia"),
-    "archivedFolder": MessageLookupByLibrary.simpleMessage("carpeta archivada"),
+    "archivedFolder": MessageLookupByLibrary.simpleMessage("Carpeta archivada"),
     "assetType": MessageLookupByLibrary.simpleMessage("Tipo de activo"),
     "audio": MessageLookupByLibrary.simpleMessage("Audio"),
     "audios": MessageLookupByLibrary.simpleMessage("Audios"),
@@ -219,14 +220,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Traer todo al frente",
     ),
     "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
-      "No puedo reconocer el código QR",
+      "No se puede reconocer el código QR",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
     "card": MessageLookupByLibrary.simpleMessage("Tarjeta"),
     "change": MessageLookupByLibrary.simpleMessage("Cambiar"),
-    "changeNumber": MessageLookupByLibrary.simpleMessage("Cambie el número"),
+    "changeNumber": MessageLookupByLibrary.simpleMessage("Cambiar número"),
     "changeNumberInstead": MessageLookupByLibrary.simpleMessage(
-      "Cambiar número en su lugar",
+      "Cambiar número",
     ),
     "changedDisappearingMessageSettings": m0,
     "chatBackup": MessageLookupByLibrary.simpleMessage(
@@ -248,13 +249,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Cifrado de extremo a extremo",
     ),
     "chatNotSupportUriOnPhone": MessageLookupByLibrary.simpleMessage(
-      "Este tipo de URL no es compatible, verifícalo en su teléfono.",
+      "Este tipo de URL no es compatible. Revísalo en tu teléfono.",
     ),
     "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+      "https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p",
     ),
     "chatNotSupportViewOnPhone": MessageLookupByLibrary.simpleMessage(
-      "Este tipo de mensaje no es compatible, verifícalo en su teléfono.",
+      "Este tipo de mensaje no es compatible. Revísalo en tu teléfono.",
     ),
     "chatPinMessage": m7,
     "chatTextSize": MessageLookupByLibrary.simpleMessage(
@@ -276,7 +277,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeWindow": MessageLookupByLibrary.simpleMessage("Cerrar ventana"),
     "collapse": MessageLookupByLibrary.simpleMessage("Colapsar"),
     "combineAndForward": MessageLookupByLibrary.simpleMessage(
-      "Combinar y avanzar",
+      "Combinar y reenviar",
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirmar"),
     "contact": MessageLookupByLibrary.simpleMessage("Contacto"),
@@ -304,7 +305,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "createGroup": MessageLookupByLibrary.simpleMessage("Nuevo grupo"),
     "createdThisGroup": m13,
-    "customTime": MessageLookupByLibrary.simpleMessage("Hora personalizada"),
+    "customTime": MessageLookupByLibrary.simpleMessage("Tiempo personalizado"),
     "dark": MessageLookupByLibrary.simpleMessage("Oscuro"),
     "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage(
       "Uso de datos y almacenamiento",
@@ -350,7 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "¿Estás seguro de que deseas detener la grabación y descartar tu mensaje de voz?",
     ),
     "dismissAsAdmin": MessageLookupByLibrary.simpleMessage(
-      "Descartar como administrador",
+      "Quitar como administrador",
     ),
     "done": MessageLookupByLibrary.simpleMessage("Hecho"),
     "download": MessageLookupByLibrary.simpleMessage("Descargar"),
@@ -425,7 +426,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ERROR 30102: formato de dirección no válido.",
     ),
     "errorInvalidCodeTooFrequent": MessageLookupByLibrary.simpleMessage(
-      "ERROR 20129: enviar el código de verificación con demasiada frecuencia, inténtalo de nuevo más tarde.",
+      "ERROR 20129: Los códigos de verificación se envían con demasiada frecuencia. Inténtalo de nuevo más tarde.",
     ),
     "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
       "ERROR 20118: Formato de PIN no válido.",
@@ -434,10 +435,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "La conexión de red ha fallado. Comprueba o cambia tu red e inténtalo de nuevo",
     ),
     "errorNoPinToken": MessageLookupByLibrary.simpleMessage(
-      "Sin token, vuelva a iniciar sesión e intenta esta función de nuevo.",
+      "Sin token. Vuelve a iniciar sesión e inténtalo de nuevo.",
     ),
     "errorNotFound": MessageLookupByLibrary.simpleMessage(
-      "Error 404 no encontrado",
+      "ERROR 404: No encontrado",
     ),
     "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
       "Formato de audio no compatible, ábrelo con otra aplicación.",
@@ -502,7 +503,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ERROR 20122: Este número de teléfono ya está asociado a otra cuenta.",
     ),
     "errorUserInvalidFormat": MessageLookupByLibrary.simpleMessage(
-      "ID de usuario invalido",
+      "ID de usuario inválido",
     ),
     "errorWithdrawalMemoFormatIncorrect": MessageLookupByLibrary.simpleMessage(
       "ERROR 20131: Formato de nota de retiro incorrecto.",
@@ -530,11 +531,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "formatNotSupported": MessageLookupByLibrary.simpleMessage(
       "Formato no compatible",
     ),
-    "forward": MessageLookupByLibrary.simpleMessage("Adelante"),
+    "forward": MessageLookupByLibrary.simpleMessage("Reenviar"),
     "from": MessageLookupByLibrary.simpleMessage("De"),
     "fromWithColon": MessageLookupByLibrary.simpleMessage("De:"),
     "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
-      "Ya estas en el grupo",
+      "Ya estás en el grupo",
     ),
     "groupCantSend": MessageLookupByLibrary.simpleMessage(
       "No puedes enviar mensajes a este grupo porque ya no eres un participante.",
@@ -549,7 +550,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "helpCenter": MessageLookupByLibrary.simpleMessage("Centro de ayuda"),
     "hideMixin": MessageLookupByLibrary.simpleMessage("Ocultar Mixin"),
     "hour": m26,
-    "howAreYou": MessageLookupByLibrary.simpleMessage("¿Hola, cómo estás?"),
+    "howAreYou": MessageLookupByLibrary.simpleMessage("Hola, ¿cómo estás?"),
     "iAmGood": MessageLookupByLibrary.simpleMessage("Estoy bien."),
     "ignoreThisVersion": MessageLookupByLibrary.simpleMessage(
       "Ignorar la nueva versión",
@@ -568,7 +569,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Invitar al grupo a través de un enlace",
     ),
     "joinGroupWithPlus": MessageLookupByLibrary.simpleMessage(
-      "+ Únete al grupo",
+      "+ Unirse al grupo",
     ),
     "joinedIn": m27,
     "landingInvitationDialogContent": m29,
@@ -586,7 +587,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loadingTime": MessageLookupByLibrary.simpleMessage(
       "La hora del sistema es inusual, continúa usándola nuevamente después de la corrección",
     ),
-    "locateToChat": MessageLookupByLibrary.simpleMessage("ubicar para chatear"),
+    "locateToChat": MessageLookupByLibrary.simpleMessage("Ir al chat"),
     "location": MessageLookupByLibrary.simpleMessage("Localización"),
     "logIn": MessageLookupByLibrary.simpleMessage("Iniciar sesión"),
     "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
@@ -613,7 +614,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mensaje no encontrado",
     ),
     "messageNotSupport": MessageLookupByLibrary.simpleMessage(
-      "Este tipo de mensaje no es compatible, actualice Mixin a la última versión.",
+      "Este tipo de mensaje no es compatible. Actualiza Mixin a la última versión.",
     ),
     "messagePreview": MessageLookupByLibrary.simpleMessage(
       "Vista previa del mensaje",
@@ -624,7 +625,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages": MessageLookupByLibrary.simpleMessage("Mensajes"),
     "minimize": MessageLookupByLibrary.simpleMessage("Minimizar"),
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Mixin de Escritorio",
+      "Mixin Messenger de Escritorio",
     ),
     "more": MessageLookupByLibrary.simpleMessage("Más"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -788,11 +789,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "ID de Mixin, nombre",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "Haz una copia de seguridad de tu historial de chat en iCloud. si pierdes tu iPhone o cambias a uno nuevo, puedes restaurar tu historial de chat cuando reinstales Mixin. Los mensajes de los que realizas una copia de seguridad no están protegidos por el cifrado de extremo a extremo de Mixin mientras estás en iCloud.",
+      "Haz una copia de seguridad de tu historial de chat en iCloud. si pierdes tu iPhone o cambias a uno nuevo, puedes restaurar tu historial de chat cuando reinstales Mixin Messenger. Los mensajes de los que realizas una copia de seguridad no están protegidos por el cifrado de extremo a extremo de Mixin Messenger mientras estás en iCloud.",
     ),
     "settingDeleteAccountPinContent": m42,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/4414170627988",
+      "https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl",
     ),
     "share": MessageLookupByLibrary.simpleMessage("Compartir"),
     "shareApps": MessageLookupByLibrary.simpleMessage(

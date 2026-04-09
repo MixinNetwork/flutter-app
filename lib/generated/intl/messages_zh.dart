@@ -25,7 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m1(arg0) => "等待${arg0}上线后建立加密会话。";
 
   static String m2(count, arg0) =>
-      "${Intl.plural(count, one: 'null', other: '删除 ${arg0} 条消息吗？')}";
+      "${Intl.plural(count, one: '删除 ${arg0} 条消息吗？', other: '删除 ${arg0} 条消息吗？')}";
 
   static String m3(arg0, arg1) => "${arg0}添加了${arg1}";
 
@@ -79,10 +79,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m26(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 小时', other: '${arg0} 小时')}";
 
-  static String m27(arg0) => "${arg0} 加入";
+  static String m27(arg0) => "加入于 ${arg0}";
 
   static String m28(arg0, arg1) =>
-      "您在 ${arg0} 申请了删除账号，账号将于 ${arg1} 被删除，如果您继续登录，删除您账号的请求将被取消。";
+      "您在 ${arg0} 申请了删除账号，账号将于 ${arg1} 被删除，如果您继续登录，删除您账户的请求将被取消。";
 
   static String m29(arg0) => "我们将发送4位验证码到手机 ${arg0}, 请在下一个页面输入";
 
@@ -103,7 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m36(arg0) => "${arg0} 位群组成员";
 
   static String m37(count, arg0, arg1) =>
-      "${Intl.plural(count, one: '${arg0}/${arg1} 区块确认数', other: '${arg0}/${arg1} 区块确认数')}";
+      "${Intl.plural(count, one: '${arg0}/${arg1} 确认', other: '${arg0}/${arg1} 确认')}";
 
   static String m38(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} 条置顶消息', other: '${arg0} 条置顶消息')}";
@@ -111,11 +111,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m39(arg0) => "${arg0} 秒后重新发送验证码";
 
   static String m40(count, arg0) =>
-      "${Intl.plural(count, one: '${arg0} 条相关的消息', other: '${arg0} 条相关的消息')}";
+      "${Intl.plural(count, one: '${arg0} 条相关消息', other: '${arg0} 条相关消息')}";
 
   static String m41(arg0, arg1) => "${arg0}将限时消息设置为 ${arg1}";
 
-  static String m42(arg0) => "如果您继续，您的个人资料和账号信息将在${arg0}被删除。阅读我们的文档以**了解更多**。";
+  static String m42(arg0) => "如果您继续，您的个人资料和账户信息将在${arg0}被删除。阅读我们的文档以**了解更多**。";
 
   static String m43(arg0, arg1) => "你确定要发送来自${arg0}的${arg1}？";
 
@@ -171,9 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "animalsAndNature": MessageLookupByLibrary.simpleMessage("动物与自然"),
     "anonymous": MessageLookupByLibrary.simpleMessage("匿名"),
     "anonymousNumber": MessageLookupByLibrary.simpleMessage("匿名号码"),
-    "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
-      "该链接已被设置为不允许分享",
-    ),
+    "appCardShareDisallow": MessageLookupByLibrary.simpleMessage("此链接无法分享"),
     "appearance": MessageLookupByLibrary.simpleMessage("外观"),
     "archivedFolder": MessageLookupByLibrary.simpleMessage("存档文件夹"),
     "assetType": MessageLookupByLibrary.simpleMessage("资产类型"),
@@ -231,7 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "circleSubtitle": m8,
     "circleTitle": m9,
     "circles": MessageLookupByLibrary.simpleMessage("圈子"),
-    "clear": MessageLookupByLibrary.simpleMessage("清理"),
+    "clear": MessageLookupByLibrary.simpleMessage("清除"),
     "clearChat": MessageLookupByLibrary.simpleMessage("清除聊天记录"),
     "clearFilter": MessageLookupByLibrary.simpleMessage("清除筛选条件"),
     "clickToReloadQrcode": MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
@@ -297,7 +295,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
       "本地消息和 iCloud 备份不会被自动删除",
     ),
-    "deleteAccountHint": MessageLookupByLibrary.simpleMessage("删除你的账号和个人照片"),
+    "deleteAccountHint": MessageLookupByLibrary.simpleMessage("删除你的账户和个人照片"),
     "deleteChat": MessageLookupByLibrary.simpleMessage("删除聊天"),
     "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
       "删除会话只会删除此设备的聊天记录，不会影响其他设备。",
@@ -345,7 +343,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "使用密码来加密 zip 文件",
     ),
     "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
-      "输入你的 PIN 以注销你的账号",
+      "输入你的 PIN 以注销你的账户",
     ),
     "enterToSend": MessageLookupByLibrary.simpleMessage("按下回车 ⏎ 发送"),
     "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage("输入你的手机号码"),
@@ -531,12 +529,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "live": MessageLookupByLibrary.simpleMessage("直播"),
     "loading": MessageLookupByLibrary.simpleMessage("正在加载..."),
     "loadingTime": MessageLookupByLibrary.simpleMessage("检测到系统时间异常，请校正后再继续使用"),
-    "locateToChat": MessageLookupByLibrary.simpleMessage("定位到聊天"),
+    "locateToChat": MessageLookupByLibrary.simpleMessage("前往聊天"),
     "location": MessageLookupByLibrary.simpleMessage("位置"),
     "lock": MessageLookupByLibrary.simpleMessage("锁定"),
     "logIn": MessageLookupByLibrary.simpleMessage("登录"),
     "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
-      "继续登录并放弃删除账号",
+      "继续登录并放弃删除账户",
     ),
     "loginByQrcode": MessageLookupByLibrary.simpleMessage(
       "通过二维码登录 Mixin Messenger",
@@ -555,7 +553,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageNotFound": MessageLookupByLibrary.simpleMessage("找不到该消息"),
     "messageNotSupport": MessageLookupByLibrary.simpleMessage(
-      "不支持此类型消息。请升级 Mixin 查看。",
+      "不支持此类消息，请升级 Mixin 到最新版本。",
     ),
     "messagePreview": MessageLookupByLibrary.simpleMessage("消息预览"),
     "messagePreviewDescription": MessageLookupByLibrary.simpleMessage(
@@ -564,7 +562,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages": MessageLookupByLibrary.simpleMessage("消息"),
     "minimize": MessageLookupByLibrary.simpleMessage("最小化"),
     "minute": m31,
-    "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage("Mixin 桌面端"),
+    "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
+      "Mixin Messenger 桌面",
+    ),
     "more": MessageLookupByLibrary.simpleMessage("更多"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage("多重签名交易"),
     "mute": MessageLookupByLibrary.simpleMessage("静音"),
@@ -691,7 +691,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mixin ID, 昵称",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "备份你的聊天记录到 iCloud。如果你丢失或者更换手机，你可以在重新安装 Mixin 时恢复你的聊天记录。注意备份到 iCloud 中的聊天记录不受端对端加密保护！",
+      "备份你的聊天记录到 iCloud。如果你丢失或者更换手机，你可以在重新安装 Mixin Messenger 时恢复你的聊天记录。注意备份到 iCloud 中的聊天记录不受端对端加密保护！",
     ),
     "settingDeleteAccountPinContent": m42,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
@@ -743,9 +743,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "transactionHash": MessageLookupByLibrary.simpleMessage("交易哈希"),
     "transactionId": MessageLookupByLibrary.simpleMessage("交易编号"),
     "transactionType": MessageLookupByLibrary.simpleMessage("交易类型"),
-    "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
+    "transactions": MessageLookupByLibrary.simpleMessage("交易记录"),
     "transactionsCannotBeDeleted": MessageLookupByLibrary.simpleMessage(
-      "转账记录不会被删除",
+      "交易记录不会被删除",
     ),
     "transcript": MessageLookupByLibrary.simpleMessage("聊天记录"),
     "transfer": MessageLookupByLibrary.simpleMessage("转账"),

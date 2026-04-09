@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'in';
 
   static String m2(count, arg0) =>
-      "${Intl.plural(count, one: 'null', other: 'Hapus ${arg0} pesan?')}";
+      "${Intl.plural(count, one: 'Hapus ${arg0} pesan?', other: 'Hapus ${arg0} pesan?')}";
 
   static String m3(arg0, arg1) => "${arg0} menambahkan ${arg1}";
 
@@ -33,7 +33,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m6(arg0, arg1) => "${arg0} menghapus ${arg1}";
 
   static String m8(count, arg0) =>
-      "${Intl.plural(count, one: 'null', other: '${arg0} Percakapan')}";
+      "${Intl.plural(count, one: '${arg0} Percakapan', other: '${arg0} Percakapan')}";
 
   static String m9(arg0) => "Lingkaran ${arg0}";
 
@@ -43,7 +43,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "KESALAHAN 10006: Harap perbarui Mixin(${arg0}) untuk terus menggunakan layanan.";
 
   static String m20(count, arg0) =>
-      "${Intl.plural(count, one: 'null', other: 'KESALAHAN 20119: PIN salah. Anda masih memiliki ${arg0} kesempatan. Harap tunggu 24 jam untuk mencoba lagi nanti.')}";
+      "${Intl.plural(count, one: 'KESALAHAN 20119: PIN salah. Anda masih memiliki ${arg0} kesempatan. Harap tunggu 24 jam untuk mencoba lagi nanti.', other: 'KESALAHAN 20119: PIN salah. Anda masih memiliki ${arg0} kesempatan. Harap tunggu 24 jam untuk mencoba lagi nanti.')}";
 
   static String m21(arg0) => "Server sedang dalam pemeliharaan: ${arg0}";
 
@@ -58,7 +58,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m26(count, arg0) =>
       "${Intl.plural(count, one: 'null', other: '${arg0} Jam')}";
 
-  static String m27(arg0) => "Bergabung di ${arg0}";
+  static String m27(arg0) => "Bergabung pada ${arg0}";
 
   static String m29(arg0) =>
       "Kami akan mengirim kode 4 digit ke nomor telepon Anda ${arg0}, harap masukkan kode tersebut pada layar berikutnya.";
@@ -69,12 +69,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m32(arg0) => "ID Mixin saya: ${arg0}";
 
   static String m37(count, arg0, arg1) =>
-      "${Intl.plural(count, one: 'null', other: '${arg0}/${arg1} konfirmasi')}";
+      "${Intl.plural(count, one: '${arg0}/${arg1} konfirmasi', other: '${arg0}/${arg1} konfirmasi')}";
 
-  static String m39(arg0) => "Kirim ulang kode dalam ${arg0} d";
+  static String m39(arg0) => "Kirim ulang kode dalam ${arg0} dtk";
 
   static String m40(count, arg0) =>
-      "${Intl.plural(count, one: 'null', other: '${arg0} pesan terkait')}";
+      "${Intl.plural(count, one: '${arg0} pesan terkait', other: '${arg0} pesan terkait')}";
 
   static String m43(arg0, arg1) => "Yakin ingin mengirim ${arg0} dari ${arg1}?";
 
@@ -87,18 +87,16 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("Tentang"),
     "account": MessageLookupByLibrary.simpleMessage("Akun"),
-    "addContact": MessageLookupByLibrary.simpleMessage("Tambahkan Kontak"),
+    "addContact": MessageLookupByLibrary.simpleMessage("Tambah Kontak"),
     "addGroupDescription": MessageLookupByLibrary.simpleMessage(
       "Tambahkan deskripsi grup",
     ),
-    "addParticipants": MessageLookupByLibrary.simpleMessage(
-      "Tambahkan Peserta",
-    ),
+    "addParticipants": MessageLookupByLibrary.simpleMessage("Tambah Peserta"),
     "addStickerFailed": MessageLookupByLibrary.simpleMessage(
       "Gagal menambahkan stiker",
     ),
     "address": MessageLookupByLibrary.simpleMessage("Alamat"),
-    "admin": MessageLookupByLibrary.simpleMessage("admin"),
+    "admin": MessageLookupByLibrary.simpleMessage("Admin"),
     "alertKeyContactContactMessage": MessageLookupByLibrary.simpleMessage(
       "berbagi kontak",
     ),
@@ -115,13 +113,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Buka Mixin di perangkat lain Anda dan mulai pemulihan di sana.",
     ),
     "block": MessageLookupByLibrary.simpleMessage("Blokir"),
-    "botNotFound": MessageLookupByLibrary.simpleMessage(
-      "Aplikasi tidak ditemukan",
-    ),
+    "botNotFound": MessageLookupByLibrary.simpleMessage("Bot tidak ditemukan"),
     "bots": MessageLookupByLibrary.simpleMessage("BOT"),
     "botsTitle": MessageLookupByLibrary.simpleMessage("Bot"),
     "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
-      "Tidak dapat mengenal kode QR",
+      "Kode QR tidak dapat dikenali",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
     "card": MessageLookupByLibrary.simpleMessage("Kartu"),
@@ -135,7 +131,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatGroupJoin": m5,
     "chatGroupRemove": m6,
     "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+      "https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p",
     ),
     "circleSubtitle": m8,
     "circleTitle": m9,
@@ -146,7 +142,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "contact": MessageLookupByLibrary.simpleMessage("Kontak"),
     "contactMixinId": m10,
     "contactMuteTitle": MessageLookupByLibrary.simpleMessage(
-      "Matikan notifikasi selama…",
+      "Bisukan notifikasi untuk…",
     ),
     "contentTooLong": MessageLookupByLibrary.simpleMessage(
       "Konten terlalu panjang",
@@ -171,7 +167,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteGroup": MessageLookupByLibrary.simpleMessage("Hapus Grup"),
     "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
     "developer": MessageLookupByLibrary.simpleMessage("Pengembang"),
-    "dismissAsAdmin": MessageLookupByLibrary.simpleMessage("Singkirkan admin"),
+    "dismissAsAdmin": MessageLookupByLibrary.simpleMessage(
+      "Hapus sebagai admin",
+    ),
     "done": MessageLookupByLibrary.simpleMessage("Selesai"),
     "durationIsTooShort": MessageLookupByLibrary.simpleMessage(
       "Durasi terlalu pendek",
@@ -203,7 +201,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "KESALAHAN 30100: Blockchain tidak sinkron, coba lagi nanti.",
     ),
     "errorConnectionTimeout": MessageLookupByLibrary.simpleMessage(
-      "Batas waktu sambungan jaringan",
+      "Waktu koneksi jaringan habis",
     ),
     "errorFullGroup": MessageLookupByLibrary.simpleMessage(
       "KESALAHAN 20116: Obrolan grup sudah penuh.",
@@ -260,7 +258,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "errorServer5xxCode": m21,
     "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
-      "KESALAHAN 429: Batas nilai terlampaui",
+      "KESALAHAN 429: Batas permintaan terlampaui",
     ),
     "errorTooManyStickers": MessageLookupByLibrary.simpleMessage(
       "KESALAHAN 20126: Terlalu banyak stiker",
@@ -295,7 +293,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileDoesNotExist": MessageLookupByLibrary.simpleMessage("File tidak ada"),
     "fileError": MessageLookupByLibrary.simpleMessage("Kesalahan file"),
     "files": MessageLookupByLibrary.simpleMessage("File"),
-    "followSystem": MessageLookupByLibrary.simpleMessage("Otomatis"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Ikuti Sistem"),
     "followUsOnFacebook": MessageLookupByLibrary.simpleMessage(
       "Ikuti kami di Facebook",
     ),
@@ -341,7 +339,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "media": MessageLookupByLibrary.simpleMessage("Media"),
     "memo": MessageLookupByLibrary.simpleMessage("Memo"),
     "messageE2ee": MessageLookupByLibrary.simpleMessage(
-      "Pesan ke percakapan ini dienkripsi end-to-end, ketuk untuk info selengkapnya.",
+      "Pesan di percakapan ini terenkripsi end-to-end, ketuk untuk info selengkapnya.",
     ),
     "messageNotFound": MessageLookupByLibrary.simpleMessage(
       "Pesan tidak ditemukan",
@@ -350,7 +348,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Jenis pesan ini tidak didukung, harap tingkatkan Mixin ke versi terbaru.",
     ),
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Mixin Desktop",
+      "Mixin Messenger Desktop",
     ),
     "more": MessageLookupByLibrary.simpleMessage("Lebih banyak"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -388,7 +386,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Batas waktu recaptcha",
     ),
     "receiver": MessageLookupByLibrary.simpleMessage("Penerima"),
-    "recentChats": MessageLookupByLibrary.simpleMessage("OBROLAN"),
+    "recentChats": MessageLookupByLibrary.simpleMessage("CHAT TERBARU"),
     "refresh": MessageLookupByLibrary.simpleMessage("Muat ulang"),
     "removeBot": MessageLookupByLibrary.simpleMessage("Hapus Bot"),
     "removeContact": MessageLookupByLibrary.simpleMessage("Hapus kontak"),
@@ -474,7 +472,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "userNotFound": MessageLookupByLibrary.simpleMessage(
       "Pengguna tidak ditemukan",
     ),
-    "verifyPin": MessageLookupByLibrary.simpleMessage("Verifikasikan PIN"),
+    "verifyPin": MessageLookupByLibrary.simpleMessage("Verifikasi PIN"),
     "video": MessageLookupByLibrary.simpleMessage("Video"),
     "videos": MessageLookupByLibrary.simpleMessage("Video"),
     "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
