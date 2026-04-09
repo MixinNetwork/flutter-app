@@ -102,7 +102,7 @@ Future<bool> showSendDialog(
   if (user != null) {
     return _sendMessageToUserId(context, user, _category, result);
   }
-  if (conversationId == null) {
+  if (conversationId == null && _category == _Category.text) {
     final currentConversation = context.providerContainer.read(
       conversationProvider,
     );
