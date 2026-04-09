@@ -21,7 +21,7 @@ Future<List<XFile>> selectFiles() async {
     if (files.isEmpty) return const [];
     return files.map((xFile) => xFile.withMineType()).toList();
   } else {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    final result = await FilePicker.pickFiles(allowMultiple: true);
     if (result == null) {
       return const [];
     }
