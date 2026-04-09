@@ -30,7 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m3(arg0, arg1) => "${arg0} добавил ${arg1}";
 
-  static String m4(arg0) => "${arg0} ушло";
+  static String m4(arg0) => "${arg0} покинул(а) группу";
 
   static String m5(arg0) =>
       "${arg0} присоединился к группе по ссылке-приглашению";
@@ -90,7 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m32(arg0) => "Мой Mixin ID: ${arg0}";
 
   static String m33(arg0, arg1) =>
-      "Mixin Messenger ${arg0} теперь доступен, у вас есть ${arg1}. Вы хотите загрузить его сейчас?";
+      "Доступен Mixin Messenger ${arg0}; у вас установлена ${arg1}. Загрузить сейчас?";
 
   static String m34(arg0) => "${arg0} теперь администратор";
 
@@ -147,7 +147,7 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "aMessage": MessageLookupByLibrary.simpleMessage("сообщение"),
-    "about": MessageLookupByLibrary.simpleMessage("Про"),
+    "about": MessageLookupByLibrary.simpleMessage("О приложении"),
     "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
     "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ Добавить бота"),
@@ -178,12 +178,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "allChats": MessageLookupByLibrary.simpleMessage("Чаты"),
     "appCardShareDisallow": MessageLookupByLibrary.simpleMessage(
-      "Запретить совместное использование этого URL",
+      "Этим URL нельзя поделиться",
     ),
     "appearance": MessageLookupByLibrary.simpleMessage("Вид"),
-    "archivedFolder": MessageLookupByLibrary.simpleMessage(
-      "заархивированная папка",
-    ),
+    "archivedFolder": MessageLookupByLibrary.simpleMessage("Архивная папка"),
     "assetType": MessageLookupByLibrary.simpleMessage("Тип актива"),
     "audio": MessageLookupByLibrary.simpleMessage("Аудио"),
     "audios": MessageLookupByLibrary.simpleMessage("Аудио"),
@@ -210,7 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bots": MessageLookupByLibrary.simpleMessage("БОТЫ"),
     "botsTitle": MessageLookupByLibrary.simpleMessage("Боты"),
     "canNotRecognizeQrCode": MessageLookupByLibrary.simpleMessage(
-      "Не могу распознать QR-код",
+      "Не удается распознать QR-код",
     ),
     "cancel": MessageLookupByLibrary.simpleMessage("Отменить"),
     "card": MessageLookupByLibrary.simpleMessage("Карта"),
@@ -237,13 +235,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatGroupRemove": m6,
     "chatHintE2e": MessageLookupByLibrary.simpleMessage("Сквозное шифрование"),
     "chatNotSupportUriOnPhone": MessageLookupByLibrary.simpleMessage(
-      "Этот тип URL не поддерживается, проверьте на своем телефоне.",
+      "Этот тип URL не поддерживается. Проверьте его на телефоне.",
     ),
     "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+      "https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p",
     ),
     "chatNotSupportViewOnPhone": MessageLookupByLibrary.simpleMessage(
-      "Этот тип сообщений не поддерживается, проверьте на своем телефоне.",
+      "Этот тип сообщений не поддерживается. Проверьте его на телефоне.",
     ),
     "chatPinMessage": m7,
     "checkNewVersion": MessageLookupByLibrary.simpleMessage(
@@ -261,7 +259,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeWindow": MessageLookupByLibrary.simpleMessage("Закрыть окно"),
     "collapse": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "combineAndForward": MessageLookupByLibrary.simpleMessage(
-      "Объединить и вперед",
+      "Объединить и переслать",
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("Подтвердить"),
     "contact": MessageLookupByLibrary.simpleMessage("Контакт"),
@@ -289,9 +287,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "createGroup": MessageLookupByLibrary.simpleMessage("Новая группа"),
     "createdThisGroup": m13,
-    "customTime": MessageLookupByLibrary.simpleMessage(
-      "Пользовательское время",
-    ),
+    "customTime": MessageLookupByLibrary.simpleMessage("Произвольное время"),
     "dark": MessageLookupByLibrary.simpleMessage("Темное"),
     "dataAndStorageUsage": MessageLookupByLibrary.simpleMessage(
       "Использование данных и хранилища",
@@ -334,7 +330,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Если эта функция включена, отправленные и полученные новые сообщения в этом чате исчезнут после того, как они будут просмотрены. Прочтите документ, чтобы **узнать больше**",
     ),
     "dismissAsAdmin": MessageLookupByLibrary.simpleMessage(
-      "Закрыть как администратор",
+      "Снять права администратора",
     ),
     "done": MessageLookupByLibrary.simpleMessage("Сделано"),
     "download": MessageLookupByLibrary.simpleMessage("Скачать"),
@@ -421,7 +417,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Не удалось подключиться к сети. Проверьте или переключите сеть и повторите попытку.",
     ),
     "errorNotFound": MessageLookupByLibrary.simpleMessage(
-      "Ошибка 404: Не найдено",
+      "ОШИБКА 404: Не найдено",
     ),
     "errorNotSupportedAudioFormat": MessageLookupByLibrary.simpleMessage(
       "Аудиоформат не поддерживается, откройте его в другом приложении.",
@@ -509,10 +505,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "formatNotSupported": MessageLookupByLibrary.simpleMessage(
       "Формат не поддерживается",
     ),
-    "forward": MessageLookupByLibrary.simpleMessage("Перенаправить"),
+    "forward": MessageLookupByLibrary.simpleMessage("Переслать"),
     "from": MessageLookupByLibrary.simpleMessage("От"),
     "fromWithColon": MessageLookupByLibrary.simpleMessage("От:"),
-    "groupAlreadyIn": MessageLookupByLibrary.simpleMessage("Вы уже в группе"),
+    "groupAlreadyIn": MessageLookupByLibrary.simpleMessage(
+      "Вы уже в этой группе",
+    ),
     "groupCantSend": MessageLookupByLibrary.simpleMessage(
       "Вы не можете отправлять сообщения в эту группу, потому что вы больше не являетесь ее участником.",
     ),
@@ -558,9 +556,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loadingTime": MessageLookupByLibrary.simpleMessage(
       "Системное время необычно, пожалуйста, продолжайте использовать его снова после исправления",
     ),
-    "locateToChat": MessageLookupByLibrary.simpleMessage(
-      "найти, чтобы пообщаться",
-    ),
+    "locateToChat": MessageLookupByLibrary.simpleMessage("Перейти к чату"),
     "location": MessageLookupByLibrary.simpleMessage("Расположение"),
     "logIn": MessageLookupByLibrary.simpleMessage("Авторизоваться"),
     "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
@@ -581,7 +577,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сообщение не найдено",
     ),
     "messageNotSupport": MessageLookupByLibrary.simpleMessage(
-      "Этот тип сообщений не поддерживается, пожалуйста, обновите Mixin до последней версии.",
+      "Этот тип сообщений не поддерживается. Обновите Mixin до последней версии.",
     ),
     "messagePreview": MessageLookupByLibrary.simpleMessage(
       "Предварительный просмотр сообщения",
@@ -592,7 +588,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages": MessageLookupByLibrary.simpleMessage("Сообщения"),
     "minimize": MessageLookupByLibrary.simpleMessage("Свести к минимуму"),
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Рабочий стол Mixin",
+      "Рабочий стол Mixin Messenger",
     ),
     "more": MessageLookupByLibrary.simpleMessage("Больше"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -747,11 +743,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mixin ID, имя",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "Создайте резервную копию истории чата в iCloud. Если вы потеряете свой iPhone или переключитесь на новый, вы сможете восстановить историю чата при переустановке Mixin. Сообщения, которые вы резервируете, не защищены сквозным шифрованием Mixin в iCloud.",
+      "Создайте резервную копию истории чата в iCloud. Если вы потеряете свой iPhone или переключитесь на новый, вы сможете восстановить историю чата при переустановке Mixin Messenger. Сообщения, которые вы резервируете, не защищены сквозным шифрованием Mixin Messenger в iCloud.",
     ),
     "settingDeleteAccountPinContent": m42,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/4414170627988",
+      "https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl",
     ),
     "share": MessageLookupByLibrary.simpleMessage("Поделиться"),
     "shareApps": MessageLookupByLibrary.simpleMessage("Общие приложения"),
