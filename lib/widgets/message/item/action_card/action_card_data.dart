@@ -25,7 +25,7 @@ class AppCardData {
 
   @JsonKey(name: 'app_id')
   final String? appId;
-  @JsonKey(name: 'icon_url')
+  @JsonKey(name: 'icon_url', defaultValue: '')
   final String iconUrl;
   @JsonKey(name: 'cover_url', defaultValue: '')
   final String coverUrl;
