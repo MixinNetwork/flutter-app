@@ -214,7 +214,7 @@ SPEC CHECKSUMS:
   file_selector_ios: f92e583d43608aebc2e4a18daac30b8902845502
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_app_icon_badge: 44f31cf93bad265c20fe8f13f6e0a1d4e4707fe8
-  flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
+  flutter_local_notifications: 643a3eda1ce1c0599413ca31672536d423dee214
   gal: 44e5b10dbd347c8247a2851acee6c1fbe282c1d3
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
