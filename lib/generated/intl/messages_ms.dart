@@ -91,7 +91,6 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("Mengenai"),
-    "accessDenied": MessageLookupByLibrary.simpleMessage("Akses dinafikan"),
     "account": MessageLookupByLibrary.simpleMessage("Akaun"),
     "addContact": MessageLookupByLibrary.simpleMessage("Tambah Kenalan"),
     "addGroupDescription": MessageLookupByLibrary.simpleMessage(
@@ -108,6 +107,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appearance": MessageLookupByLibrary.simpleMessage("Penampilan"),
     "audio": MessageLookupByLibrary.simpleMessage("Audio"),
+    "backupChat": MessageLookupByLibrary.simpleMessage("Sandarkan Sembang"),
+    "backupToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Sandarkan ke peranti lain",
+    ),
+    "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+      "Sandarkan sejarah sembang anda ke peranti lain. Pastikan kedua-dua peranti disambungkan ke Wi-Fi atau hotspot yang sama.",
+    ),
+    "backupWaitingOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Buka Mixin pada peranti anda yang satu lagi dan mulakan pemulihan di sana.",
+    ),
     "block": MessageLookupByLibrary.simpleMessage("Sekat"),
     "botNotFound": MessageLookupByLibrary.simpleMessage(
       "Aplikasi tidak dijumpai",
@@ -120,6 +129,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
     "card": MessageLookupByLibrary.simpleMessage("Kad"),
     "change": MessageLookupByLibrary.simpleMessage("Ubah"),
+    "chatBackupAndRestore": MessageLookupByLibrary.simpleMessage(
+      "Sandaran dan Pemulihan Sembang",
+    ),
     "chatDeleteMessage": m2,
     "chatGroupAdd": m3,
     "chatGroupExit": m4,
@@ -344,7 +356,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mesej jenis ini tidak disokong, sila tingkatkan Mixin ke versi terkini.",
     ),
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Desktop Mixin Messenger",
+      "Desktop Mixin",
     ),
     "more": MessageLookupByLibrary.simpleMessage("Lebih banyak lagi"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -368,7 +380,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notFound": MessageLookupByLibrary.simpleMessage("Tidak ditemui"),
     "notifications": MessageLookupByLibrary.simpleMessage("Pemberitahuan"),
     "oneHour": MessageLookupByLibrary.simpleMessage("1 jam"),
-    "oneWeek": MessageLookupByLibrary.simpleMessage("1 minggu"),
     "oneYear": MessageLookupByLibrary.simpleMessage("1 tahun"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("Buka laman Utama"),
     "owner": MessageLookupByLibrary.simpleMessage("pemilik"),
@@ -390,6 +401,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "report": MessageLookupByLibrary.simpleMessage("Lapor"),
     "resendCode": MessageLookupByLibrary.simpleMessage("Hantar semula kod"),
     "resendCodeIn": m39,
+    "restoreChat": MessageLookupByLibrary.simpleMessage("Pulihkan Sembang"),
+    "restoreChatTip": MessageLookupByLibrary.simpleMessage(
+      "Pulihkan sejarah sembang anda daripada peranti lain. Pastikan kedua-dua peranti disambungkan ke Wi-Fi atau hotspot yang sama.",
+    ),
+    "restoreFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Pulihkan daripada peranti lain",
+    ),
     "retry": MessageLookupByLibrary.simpleMessage("CUBA SEMULA"),
     "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
       "Gagal memuat naik semula.",
@@ -434,6 +452,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "storageUsage": MessageLookupByLibrary.simpleMessage("Penggunaan Storan"),
     "successful": MessageLookupByLibrary.simpleMessage("Berjaya"),
+    "syncFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Segerakkan daripada peranti lain",
+    ),
+    "syncToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Segerakkan ke peranti lain",
+    ),
     "termsOfService": MessageLookupByLibrary.simpleMessage(
       "Terma Perkhidmatan",
     ),
@@ -465,7 +489,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "verifyPin": MessageLookupByLibrary.simpleMessage("Sahkan PIN"),
     "video": MessageLookupByLibrary.simpleMessage("Video"),
     "videos": MessageLookupByLibrary.simpleMessage("Video"),
-    "whatsYourName": MessageLookupByLibrary.simpleMessage("Siapa nama awak?"),
+    "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
+      "Menunggu peranti lain untuk bersambung.",
+    ),
     "withdrawal": MessageLookupByLibrary.simpleMessage("Pengeluaran"),
     "you": MessageLookupByLibrary.simpleMessage("Anda"),
     "youDeletedThisMessage": MessageLookupByLibrary.simpleMessage(

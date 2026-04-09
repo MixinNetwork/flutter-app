@@ -82,7 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m27(arg0) => "${arg0} 加入";
 
   static String m28(arg0, arg1) =>
-      "您在 ${arg0} 申請了刪除賬號，賬號將於 ${arg1} 被刪除，如果您繼續登入，刪除您賬戶的請求將被取消。";
+      "您在 ${arg0} 申請了刪除賬號，賬號將於 ${arg1} 被刪除，如果您繼續登入，刪除您賬號的請求將被取消。";
 
   static String m29(arg0) => "我們將傳送4位驗證碼到手機 ${arg0}, 請在下一個頁面輸入";
 
@@ -115,7 +115,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m41(arg0, arg1) => "${arg0}將限時訊息設定為 ${arg1}";
 
-  static String m42(arg0) => "如果您繼續，您的個人資料和賬戶資訊將在${arg0}被刪除。閱讀我們的檔案以**瞭解更多**。";
+  static String m42(arg0) => "如果您繼續，您的個人資料和賬號資訊將在${arg0}被刪除。閱讀我們的檔案以**瞭解更多**。";
 
   static String m43(arg0, arg1) => "你確定要傳送來自${arg0}的${arg1}？";
 
@@ -143,7 +143,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "aMessage": MessageLookupByLibrary.simpleMessage("一條訊息"),
     "about": MessageLookupByLibrary.simpleMessage("關於"),
-    "accessDenied": MessageLookupByLibrary.simpleMessage("禁止訪問"),
     "account": MessageLookupByLibrary.simpleMessage("賬號"),
     "activity": MessageLookupByLibrary.simpleMessage("活動"),
     "add": MessageLookupByLibrary.simpleMessage("新增"),
@@ -184,6 +183,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoLock": MessageLookupByLibrary.simpleMessage("自動鎖定"),
     "avatar": MessageLookupByLibrary.simpleMessage("頭像"),
     "backup": MessageLookupByLibrary.simpleMessage("備份"),
+    "backupChat": MessageLookupByLibrary.simpleMessage("備份聊天記錄"),
+    "backupToOtherDevice": MessageLookupByLibrary.simpleMessage("備份到其他裝置"),
+    "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+      "將聊天記錄備份到其他裝置。請確保兩臺裝置連線到同一個 Wi-Fi 或熱點。",
+    ),
+    "backupWaitingOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "請在另一臺裝置上開啟 Mixin，並在那邊開始恢復。",
+    ),
     "biography": MessageLookupByLibrary.simpleMessage("簡介"),
     "biometric": MessageLookupByLibrary.simpleMessage("生物識別"),
     "block": MessageLookupByLibrary.simpleMessage("封鎖使用者"),
@@ -199,6 +206,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeNumberInstead": MessageLookupByLibrary.simpleMessage("僅修改手機號碼"),
     "changedDisappearingMessageSettings": m0,
     "chatBackup": MessageLookupByLibrary.simpleMessage("聊天記錄備份"),
+    "chatBackupAndRestore": MessageLookupByLibrary.simpleMessage("聊天記錄備份與恢復"),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage("點選按鈕使用機器人"),
     "chatDecryptionFailedHint": m1,
     "chatDeleteMessage": m2,
@@ -209,6 +217,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatHintE2e": MessageLookupByLibrary.simpleMessage("端對端加密"),
     "chatNotSupportUriOnPhone": MessageLookupByLibrary.simpleMessage(
       "不支援此連結，請在手機上檢視。",
+    ),
+    "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
+      "https://support.mixin.one/zh/article/5ye6546w4occ6lz5liq57g75z6l55qe5rai5ogv5lin5psv5oyb4ocd5oco5lmi5yqe77yf-h92cxa/",
     ),
     "chatNotSupportViewOnPhone": MessageLookupByLibrary.simpleMessage(
       "不支援此型別訊息，請在手機上檢視。",
@@ -286,7 +297,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteAccountDetailHint": MessageLookupByLibrary.simpleMessage(
       "本地訊息和 iCloud 備份不會被自動刪除",
     ),
-    "deleteAccountHint": MessageLookupByLibrary.simpleMessage("刪除你的賬戶和個人照片"),
+    "deleteAccountHint": MessageLookupByLibrary.simpleMessage("刪除你的賬號和個人照片"),
     "deleteChat": MessageLookupByLibrary.simpleMessage("刪除聊天"),
     "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
       "刪除會話只會刪除此裝置的聊天記錄，不會影響其他裝置。",
@@ -334,17 +345,21 @@ class MessageLookup extends MessageLookupByLibrary {
       "使用密碼來加密 zip 檔案",
     ),
     "enterPinToDeleteAccount": MessageLookupByLibrary.simpleMessage(
-      "輸入你的 PIN 以登出你的賬戶",
+      "輸入你的 PIN 以登出你的賬號",
     ),
     "enterToSend": MessageLookupByLibrary.simpleMessage("按下回車 ⏎ 傳送"),
     "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage("輸入你的手機號碼"),
     "enterYourPinToContinue": MessageLookupByLibrary.simpleMessage(
       "輸入你的 PIN 以繼續",
     ),
+    "errorAccessLimited": MessageLookupByLibrary.simpleMessage("錯誤 403：訪問受限"),
     "errorAddressExists": MessageLookupByLibrary.simpleMessage(
       "地址不存在，請確保地址是否新增成功",
     ),
     "errorAddressNotSync": MessageLookupByLibrary.simpleMessage("地址重新整理失敗，請重試"),
+    "errorAlreadyBondedReferralCode": MessageLookupByLibrary.simpleMessage(
+      "錯誤 10731：當前賬號已繫結邀請碼，無法修改繫結。",
+    ),
     "errorAssetExists": MessageLookupByLibrary.simpleMessage("沒有相關資產"),
     "errorAuthentication": MessageLookupByLibrary.simpleMessage("錯誤 401：請重新登入"),
     "errorBadData": MessageLookupByLibrary.simpleMessage("錯誤 10002：請求資料不合法"),
@@ -369,6 +384,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
       "錯誤 20118：PIN 格式不正確",
+    ),
+    "errorInviterPlanExpired": MessageLookupByLibrary.simpleMessage(
+      "錯誤 10737：邀請人的會員已過期",
     ),
     "errorLegacyPin": MessageLookupByLibrary.simpleMessage(
       "錯誤 20118：為了加強 Mixin 網路的安全，Mixin API 現已暫停 D3M-PIN 升級到 TIP，詳情請檢視檔案並登記等待處理。",
@@ -426,6 +444,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "errorTranscriptForward": MessageLookupByLibrary.simpleMessage(
       "請在所有附件下載完成之後再轉發",
+    ),
+    "errorTransferToDeactivatedUser": MessageLookupByLibrary.simpleMessage(
+      "錯誤 20160：無法給已經刪除的賬號轉賬",
     ),
     "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
       "無法找到能開啟該媒體的應用",
@@ -515,7 +536,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "lock": MessageLookupByLibrary.simpleMessage("鎖定"),
     "logIn": MessageLookupByLibrary.simpleMessage("登入"),
     "loginAndAbortAccountDeletion": MessageLookupByLibrary.simpleMessage(
-      "繼續登入並放棄刪除賬戶",
+      "繼續登入並放棄刪除賬號",
     ),
     "loginByQrcode": MessageLookupByLibrary.simpleMessage(
       "透過二維碼登入 Mixin Messenger",
@@ -543,9 +564,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages": MessageLookupByLibrary.simpleMessage("訊息"),
     "minimize": MessageLookupByLibrary.simpleMessage("最小化"),
     "minute": m31,
-    "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Mixin Messenger 桌面",
-    ),
+    "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage("Mixin 桌面端"),
     "more": MessageLookupByLibrary.simpleMessage("更多"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage("多重簽名交易"),
     "mute": MessageLookupByLibrary.simpleMessage("靜音"),
@@ -581,7 +600,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "objects": MessageLookupByLibrary.simpleMessage("物件"),
     "oneByOneForward": MessageLookupByLibrary.simpleMessage("逐條轉發"),
     "oneHour": MessageLookupByLibrary.simpleMessage("1 小時"),
-    "oneWeek": MessageLookupByLibrary.simpleMessage("1 星期"),
     "oneYear": MessageLookupByLibrary.simpleMessage("1 年"),
     "open": MessageLookupByLibrary.simpleMessage("開啟"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("開啟主頁"),
@@ -631,6 +649,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "resendCodeIn": m39,
     "reset": MessageLookupByLibrary.simpleMessage("重置"),
     "resetLink": MessageLookupByLibrary.simpleMessage("重置邀請連結"),
+    "restoreChat": MessageLookupByLibrary.simpleMessage("恢復聊天記錄"),
+    "restoreChatTip": MessageLookupByLibrary.simpleMessage(
+      "從其他裝置恢復聊天記錄。請確保兩臺裝置連線到同一個 Wi-Fi 或熱點。",
+    ),
+    "restoreFromOtherDevice": MessageLookupByLibrary.simpleMessage("從其他裝置恢復"),
     "retry": MessageLookupByLibrary.simpleMessage("重試"),
     "retryUploadFailed": MessageLookupByLibrary.simpleMessage("重新上傳失敗。"),
     "revokeMultisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -668,9 +691,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mixin ID, 暱稱",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "備份你的聊天記錄到 iCloud。如果你丟失或者更換手機，你可以在重新安裝 Mixin Messenger 時恢復你的聊天記錄。注意備份到 iCloud 中的聊天記錄不受端對端加密保護！",
+      "備份你的聊天記錄到 iCloud。如果你丟失或者更換手機，你可以在重新安裝 Mixin 時恢復你的聊天記錄。注意備份到 iCloud 中的聊天記錄不受端對端加密保護！",
     ),
     "settingDeleteAccountPinContent": m42,
+    "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
+      "https://support.mixin.one/zh/article/5aac5l2v5yig6zmk6lsm5y377yf-1uteq30",
+    ),
     "share": MessageLookupByLibrary.simpleMessage("分享"),
     "shareApps": MessageLookupByLibrary.simpleMessage("分享的應用"),
     "shareContact": MessageLookupByLibrary.simpleMessage("分享聯絡人"),
@@ -704,6 +730,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "strangers": MessageLookupByLibrary.simpleMessage("陌生人"),
     "successful": MessageLookupByLibrary.simpleMessage("成功"),
     "symbols": MessageLookupByLibrary.simpleMessage("符號"),
+    "syncFromOtherDevice": MessageLookupByLibrary.simpleMessage("從其他裝置同步"),
+    "syncToOtherDevice": MessageLookupByLibrary.simpleMessage("同步到其他裝置"),
     "termsOfService": MessageLookupByLibrary.simpleMessage("服務條款"),
     "text": MessageLookupByLibrary.simpleMessage("文字"),
     "theme": MessageLookupByLibrary.simpleMessage("主題"),
@@ -766,13 +794,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "video": MessageLookupByLibrary.simpleMessage("影片"),
     "videos": MessageLookupByLibrary.simpleMessage("影片"),
     "waitingForThisMessage": MessageLookupByLibrary.simpleMessage("正在等待這條訊息。"),
+    "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
+      "等待其他裝置連線。",
+    ),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "該裝置暫未安裝 WebView2 元件，請先下載並安裝 WebView2 Runtime。",
     ),
     "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(
       "WebView2 元件不可用",
     ),
-    "whatsYourName": MessageLookupByLibrary.simpleMessage("你的名字？"),
     "window": MessageLookupByLibrary.simpleMessage("視窗"),
     "withdrawal": MessageLookupByLibrary.simpleMessage("提現"),
     "withdrawalHash": MessageLookupByLibrary.simpleMessage("提現雜湊"),

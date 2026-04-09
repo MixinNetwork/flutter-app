@@ -62,7 +62,7 @@ extension GetErrorStringByCode on BuildContext {
       case circleLimit:
         return l10n.errorNumberReachedLimit;
       case forbidden:
-        return l10n.accessDenied;
+        return l10n.errorAccessLimited;
       case server:
       case insufficientPool:
         return l10n.errorServer5xxCode(message);

@@ -151,7 +151,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "aMessage": MessageLookupByLibrary.simpleMessage("un mensaje"),
     "about": MessageLookupByLibrary.simpleMessage("Acerca de"),
-    "accessDenied": MessageLookupByLibrary.simpleMessage("Acceso denegado"),
     "account": MessageLookupByLibrary.simpleMessage("Cuenta"),
     "activity": MessageLookupByLibrary.simpleMessage("Actividad"),
     "add": MessageLookupByLibrary.simpleMessage("Añadir"),
@@ -199,6 +198,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
     "backup": MessageLookupByLibrary.simpleMessage("Copia de seguridad"),
+    "backupChat": MessageLookupByLibrary.simpleMessage(
+      "Hacer copia de seguridad del chat",
+    ),
+    "backupToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Copia de seguridad a otro dispositivo",
+    ),
+    "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+      "Haz una copia de seguridad de tu historial de chat en otro dispositivo. Asegúrate de que ambos dispositivos estén conectados a la misma red Wi-Fi o punto de acceso.",
+    ),
+    "backupWaitingOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Abre Mixin en tu otro dispositivo y empieza la restauración allí.",
+    ),
     "biography": MessageLookupByLibrary.simpleMessage("Biografía"),
     "block": MessageLookupByLibrary.simpleMessage("Bloquear"),
     "botNotFound": MessageLookupByLibrary.simpleMessage("Bot no encontrado"),
@@ -220,6 +231,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "changedDisappearingMessageSettings": m0,
     "chatBackup": MessageLookupByLibrary.simpleMessage(
       "Copia de seguridad de chat",
+    ),
+    "chatBackupAndRestore": MessageLookupByLibrary.simpleMessage(
+      "Copia de seguridad y restauración de chats",
     ),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
       "Toca el botón para interactuar con el bot",
@@ -610,7 +624,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages": MessageLookupByLibrary.simpleMessage("Mensajes"),
     "minimize": MessageLookupByLibrary.simpleMessage("Minimizar"),
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Mixin Messenger de Escritorio",
+      "Mixin de Escritorio",
     ),
     "more": MessageLookupByLibrary.simpleMessage("Más"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -655,7 +669,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Adelante uno por uno",
     ),
     "oneHour": MessageLookupByLibrary.simpleMessage("1 hora"),
-    "oneWeek": MessageLookupByLibrary.simpleMessage("1 semana"),
     "oneYear": MessageLookupByLibrary.simpleMessage("1 año"),
     "openHomePage": MessageLookupByLibrary.simpleMessage(
       "Abrir página de inicio",
@@ -714,6 +727,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resendCodeIn": m39,
     "reset": MessageLookupByLibrary.simpleMessage("Reiniciar"),
     "resetLink": MessageLookupByLibrary.simpleMessage("Restablecer enlace"),
+    "restoreChat": MessageLookupByLibrary.simpleMessage("Restaurar chat"),
+    "restoreChatTip": MessageLookupByLibrary.simpleMessage(
+      "Restaura tu historial de chat desde otro dispositivo. Asegúrate de que ambos dispositivos estén conectados a la misma red Wi-Fi o punto de acceso.",
+    ),
+    "restoreFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Restaurar desde otro dispositivo",
+    ),
     "retry": MessageLookupByLibrary.simpleMessage("Reintentar"),
     "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
       "Reintentar carga fallida.",
@@ -768,7 +788,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ID de Mixin, nombre",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "Haz una copia de seguridad de tu historial de chat en iCloud. si pierdes tu iPhone o cambias a uno nuevo, puedes restaurar tu historial de chat cuando reinstales Mixin Messenger. Los mensajes de los que realizas una copia de seguridad no están protegidos por el cifrado de extremo a extremo de Mixin Messenger mientras estás en iCloud.",
+      "Haz una copia de seguridad de tu historial de chat en iCloud. si pierdes tu iPhone o cambias a uno nuevo, puedes restaurar tu historial de chat cuando reinstales Mixin. Los mensajes de los que realizas una copia de seguridad no están protegidos por el cifrado de extremo a extremo de Mixin mientras estás en iCloud.",
     ),
     "settingDeleteAccountPinContent": m42,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
@@ -819,6 +839,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "strangers": MessageLookupByLibrary.simpleMessage("Extraños"),
     "successful": MessageLookupByLibrary.simpleMessage("Exitoso"),
     "symbols": MessageLookupByLibrary.simpleMessage("Simbolos"),
+    "syncFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Sincronizar desde otro dispositivo",
+    ),
+    "syncToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Sincronizar a otro dispositivo",
+    ),
     "termsOfService": MessageLookupByLibrary.simpleMessage(
       "Términos de servicio",
     ),
@@ -882,13 +908,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "waitingForThisMessage": MessageLookupByLibrary.simpleMessage(
       "Esperando este mensaje.",
     ),
+    "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
+      "Esperando a que se conecte el otro dispositivo.",
+    ),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "El dispositivo no ha instalado el componente WebView2 Runtime. Primero descarga e instale WebView2 Runtime.",
     ),
     "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(
       "El tiempo de ejecución de WebView no está disponible",
     ),
-    "whatsYourName": MessageLookupByLibrary.simpleMessage("¿Cómo te llamas?"),
     "window": MessageLookupByLibrary.simpleMessage("Ventana"),
     "withdrawal": MessageLookupByLibrary.simpleMessage("Retirar"),
     "you": MessageLookupByLibrary.simpleMessage("Tú"),

@@ -21,7 +21,7 @@ class MuteDialog extends HookConsumerWidget {
               [
                     (context.l10n.oneHour, 1 * 60 * 60),
                     (context.l10n.hour(8, 8), 8 * 60 * 60),
-                    (context.l10n.oneWeek, 7 * 24 * 60 * 60),
+                    ('1 ${context.l10n.unitWeek(1)}', 7 * 24 * 60 * 60),
                     (context.l10n.oneYear, 365 * 24 * 60 * 60),
                   ]
                   .map(
