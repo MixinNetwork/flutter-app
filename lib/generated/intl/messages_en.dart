@@ -88,7 +88,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You requested to delete your account on ${arg0}. The account will be deleted on ${arg1}. If you continue to login, your account deletion will be cancelled.";
 
   static String m29(arg0) =>
-      "We will send a 4-digit code to your phone number ${arg0}, please enter the code in next screen.";
+      "We will send a 4-digit code to your mobile number ${arg0}, please enter the code in next screen.";
 
   static String m30(arg0) => "Enter the 4-digit code sent to you at ${arg0}";
 
@@ -156,7 +156,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "aMessage": MessageLookupByLibrary.simpleMessage("a message"),
     "about": MessageLookupByLibrary.simpleMessage("About"),
-    "accessDenied": MessageLookupByLibrary.simpleMessage("Access denied"),
     "account": MessageLookupByLibrary.simpleMessage("Account"),
     "activity": MessageLookupByLibrary.simpleMessage("Activity"),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
@@ -203,6 +202,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoLock": MessageLookupByLibrary.simpleMessage("Auto Lock"),
     "avatar": MessageLookupByLibrary.simpleMessage("Avatar"),
     "backup": MessageLookupByLibrary.simpleMessage("Backup"),
+    "backupChat": MessageLookupByLibrary.simpleMessage("Backup Chat"),
+    "backupToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Backup to Other Device",
+    ),
+    "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+      "Back up your chat history to another device. Make sure both devices are connected to the same Wi-Fi or hotspot.",
+    ),
+    "backupWaitingOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Open Mixin on your other device and start restore there.",
+    ),
     "biography": MessageLookupByLibrary.simpleMessage("Biography"),
     "biometric": MessageLookupByLibrary.simpleMessage("Biometric"),
     "block": MessageLookupByLibrary.simpleMessage("Block"),
@@ -224,6 +233,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "changedDisappearingMessageSettings": m0,
     "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
+    "chatBackupAndRestore": MessageLookupByLibrary.simpleMessage(
+      "Chat Backup and Restore",
+    ),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
       "Tap the button to interact with the bot",
     ),
@@ -238,7 +250,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "This type of url is not supported, please check on your phone.",
     ),
     "chatNotSupportUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+      "https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p",
     ),
     "chatNotSupportViewOnPhone": MessageLookupByLibrary.simpleMessage(
       "This type of message is not supported, please check on your phone.",
@@ -408,16 +420,22 @@ class MessageLookup extends MessageLookupByLibrary {
       "Return/Enter ⏎ to Send",
     ),
     "enterYourPhoneNumber": MessageLookupByLibrary.simpleMessage(
-      "Enter your phone number",
+      "Enter your mobile number",
     ),
     "enterYourPinToContinue": MessageLookupByLibrary.simpleMessage(
       "Enter your PIN to continue",
+    ),
+    "errorAccessLimited": MessageLookupByLibrary.simpleMessage(
+      "ERROR 403: Access Limited",
     ),
     "errorAddressExists": MessageLookupByLibrary.simpleMessage(
       "The address does not exist, please make sure that the address is added successfully",
     ),
     "errorAddressNotSync": MessageLookupByLibrary.simpleMessage(
       "Address refresh failed, please try again",
+    ),
+    "errorAlreadyBondedReferralCode": MessageLookupByLibrary.simpleMessage(
+      "ERROR 10731: This account has already applied a referral code",
     ),
     "errorAssetExists": MessageLookupByLibrary.simpleMessage(
       "Asset does not exist",
@@ -454,6 +472,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorInvalidPinFormat": MessageLookupByLibrary.simpleMessage(
       "ERROR 20118: Invalid PIN format.",
     ),
+    "errorInviterPlanExpired": MessageLookupByLibrary.simpleMessage(
+      "ERROR 10737: The inviter has no valid plan",
+    ),
     "errorLegacyPin": MessageLookupByLibrary.simpleMessage(
       "ERROR 20118: To enhance the security of the Mixin network, Mixin API has temporarily suspended the upgrading from D3M-PIN to TIP. Please refer to the documentation for details and register for processing.",
     ),
@@ -480,16 +501,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please open the necessary permissions",
     ),
     "errorPhoneInvalidFormat": MessageLookupByLibrary.simpleMessage(
-      "ERROR 20110: Invalid phone number",
+      "ERROR 20110: Invalid mobile number",
     ),
     "errorPhoneSmsDelivery": MessageLookupByLibrary.simpleMessage(
       "ERROR 10003: Failed to deliver SMS",
     ),
     "errorPhoneVerificationCodeExpired": MessageLookupByLibrary.simpleMessage(
-      "ERROR 20114: Expired phone verification code",
+      "ERROR 20114: Expired verification code",
     ),
     "errorPhoneVerificationCodeInvalid": MessageLookupByLibrary.simpleMessage(
-      "ERROR 20113: Invalid phone verification code",
+      "ERROR 20113: Invalid verification code",
     ),
     "errorPinCheckTooManyRequest": MessageLookupByLibrary.simpleMessage(
       "You have tried more than 5 times, please wait at least 24 hours to try again.",
@@ -517,6 +538,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorTranscriptForward": MessageLookupByLibrary.simpleMessage(
       "Please forward all attachments after they have been downloaded",
     ),
+    "errorTransferToDeactivatedUser": MessageLookupByLibrary.simpleMessage(
+      "ERROR 20160: Transfers cannot be made to a deactivated user",
+    ),
     "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
       "Can\'t find an app able to open this media.",
     ),
@@ -526,7 +550,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Failed to upload message attachment",
     ),
     "errorUsedPhone": MessageLookupByLibrary.simpleMessage(
-      "ERROR 20122: This phone number is already associated with another account.",
+      "ERROR 20122: This mobile number is already associated with another account.",
     ),
     "errorUserInvalidFormat": MessageLookupByLibrary.simpleMessage(
       "Invalid user id",
@@ -654,7 +678,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
     "minute": m31,
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Mixin Messenger Desktop",
+      "Mixin Desktop",
     ),
     "more": MessageLookupByLibrary.simpleMessage("More"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -705,7 +729,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "One-by-One Forward",
     ),
     "oneHour": MessageLookupByLibrary.simpleMessage("1 Hour"),
-    "oneWeek": MessageLookupByLibrary.simpleMessage("1 Week"),
     "oneYear": MessageLookupByLibrary.simpleMessage("1 Year"),
     "open": MessageLookupByLibrary.simpleMessage("Open"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("Open Home page"),
@@ -722,7 +745,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "pendingConfirmation": m37,
-    "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone Number"),
+    "phoneNumber": MessageLookupByLibrary.simpleMessage("Mobile Number"),
     "photos": MessageLookupByLibrary.simpleMessage("Photos"),
     "pickAConversation": MessageLookupByLibrary.simpleMessage(
       "Select a conversation and start sending a message",
@@ -775,6 +798,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resendCodeIn": m39,
     "reset": MessageLookupByLibrary.simpleMessage("Reset"),
     "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
+    "restoreChat": MessageLookupByLibrary.simpleMessage("Restore Chat"),
+    "restoreChatTip": MessageLookupByLibrary.simpleMessage(
+      "Restore your chat history from another device. Make sure both devices are connected to the same Wi-Fi or hotspot.",
+    ),
+    "restoreFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Restore from Other Device",
+    ),
     "retry": MessageLookupByLibrary.simpleMessage("Retry"),
     "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
       "Retry upload failed.",
@@ -833,11 +863,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mixin ID, Name",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.",
+      "Back up your chat history to iCloud. If you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin. Messages you back up are not protected by Mixin end-to-end encryption while in iCloud.",
     ),
     "settingDeleteAccountPinContent": m42,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
-      "https://mixinmessenger.zendesk.com/hc/articles/4414170627988",
+      "https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl",
     ),
     "share": MessageLookupByLibrary.simpleMessage("Share"),
     "shareApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
@@ -884,6 +914,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "strangers": MessageLookupByLibrary.simpleMessage("Strangers"),
     "successful": MessageLookupByLibrary.simpleMessage("Successful"),
     "symbols": MessageLookupByLibrary.simpleMessage("Symbols"),
+    "syncFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Sync from Other Device",
+    ),
+    "syncToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Sync to Other Device",
+    ),
     "termsOfService": MessageLookupByLibrary.simpleMessage("Terms of Service"),
     "text": MessageLookupByLibrary.simpleMessage("Text"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
@@ -959,13 +995,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "waitingForThisMessage": MessageLookupByLibrary.simpleMessage(
       "Waiting for this message.",
     ),
+    "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
+      "Waiting for the other device to connect.",
+    ),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first.",
     ),
     "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(
       "WebView runtime is unavailable",
     ),
-    "whatsYourName": MessageLookupByLibrary.simpleMessage("What\'s your name?"),
     "window": MessageLookupByLibrary.simpleMessage("Window"),
     "withdrawal": MessageLookupByLibrary.simpleMessage("Withdraw"),
     "withdrawalHash": MessageLookupByLibrary.simpleMessage("Withdrawal Hash"),

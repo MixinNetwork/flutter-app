@@ -64,16 +64,6 @@ class Localization {
     return Intl.message('About', name: 'about', desc: '', args: []);
   }
 
-  /// `Access denied`
-  String get accessDenied {
-    return Intl.message(
-      'Access denied',
-      name: 'accessDenied',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Account`
   String get account {
     return Intl.message('Account', name: 'account', desc: '', args: []);
@@ -314,6 +304,41 @@ class Localization {
     return Intl.message('Backup', name: 'backup', desc: '', args: []);
   }
 
+  /// `Backup Chat`
+  String get backupChat {
+    return Intl.message('Backup Chat', name: 'backupChat', desc: '', args: []);
+  }
+
+  /// `Backup to Other Device`
+  String get backupToOtherDevice {
+    return Intl.message(
+      'Backup to Other Device',
+      name: 'backupToOtherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back up your chat history to another device. Make sure both devices are connected to the same Wi-Fi or hotspot.`
+  String get backupToOtherDeviceTips {
+    return Intl.message(
+      'Back up your chat history to another device. Make sure both devices are connected to the same Wi-Fi or hotspot.',
+      name: 'backupToOtherDeviceTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Mixin on your other device and start restore there.`
+  String get backupWaitingOtherDevice {
+    return Intl.message(
+      'Open Mixin on your other device and start restore there.',
+      name: 'backupWaitingOtherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Biography`
   String get biography {
     return Intl.message('Biography', name: 'biography', desc: '', args: []);
@@ -419,6 +444,16 @@ class Localization {
     return Intl.message('Chat Backup', name: 'chatBackup', desc: '', args: []);
   }
 
+  /// `Chat Backup and Restore`
+  String get chatBackupAndRestore {
+    return Intl.message(
+      'Chat Backup and Restore',
+      name: 'chatBackupAndRestore',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Tap the button to interact with the bot`
   String get chatBotReceptionTitle {
     return Intl.message(
@@ -511,10 +546,10 @@ class Localization {
     );
   }
 
-  /// `https://mixinmessenger.zendesk.com/hc/articles/360043776071`
+  /// `https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p`
   String get chatNotSupportUrl {
     return Intl.message(
-      'https://mixinmessenger.zendesk.com/hc/articles/360043776071',
+      'https://support.mixin.one/en/article/how-to-do-when-you-receive-a-message-like-this-this-type-of-message-is-not-supported-please-upgrade-mixin-17j1t3p',
       name: 'chatNotSupportUrl',
       desc: '',
       args: [],
@@ -1328,10 +1363,10 @@ class Localization {
     );
   }
 
-  /// `Enter your phone number`
+  /// `Enter your mobile number`
   String get enterYourPhoneNumber {
     return Intl.message(
-      'Enter your phone number',
+      'Enter your mobile number',
       name: 'enterYourPhoneNumber',
       desc: '',
       args: [],
@@ -1343,6 +1378,16 @@ class Localization {
     return Intl.message(
       'Enter your PIN to continue',
       name: 'enterYourPinToContinue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR 403: Access Limited`
+  String get errorAccessLimited {
+    return Intl.message(
+      'ERROR 403: Access Limited',
+      name: 'errorAccessLimited',
       desc: '',
       args: [],
     );
@@ -1363,6 +1408,16 @@ class Localization {
     return Intl.message(
       'Address refresh failed, please try again',
       name: 'errorAddressNotSync',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ERROR 10731: This account has already applied a referral code`
+  String get errorAlreadyBondedReferralCode {
+    return Intl.message(
+      'ERROR 10731: This account has already applied a referral code',
+      name: 'errorAlreadyBondedReferralCode',
       desc: '',
       args: [],
     );
@@ -1498,6 +1553,16 @@ class Localization {
     );
   }
 
+  /// `ERROR 10737: The inviter has no valid plan`
+  String get errorInviterPlanExpired {
+    return Intl.message(
+      'ERROR 10737: The inviter has no valid plan',
+      name: 'errorInviterPlanExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ERROR 20118: To enhance the security of the Mixin network, Mixin API has temporarily suspended the upgrading from D3M-PIN to TIP. Please refer to the documentation for details and register for processing.`
   String get errorLegacyPin {
     return Intl.message(
@@ -1588,10 +1653,10 @@ class Localization {
     );
   }
 
-  /// `ERROR 20110: Invalid phone number`
+  /// `ERROR 20110: Invalid mobile number`
   String get errorPhoneInvalidFormat {
     return Intl.message(
-      'ERROR 20110: Invalid phone number',
+      'ERROR 20110: Invalid mobile number',
       name: 'errorPhoneInvalidFormat',
       desc: '',
       args: [],
@@ -1608,20 +1673,20 @@ class Localization {
     );
   }
 
-  /// `ERROR 20114: Expired phone verification code`
+  /// `ERROR 20114: Expired verification code`
   String get errorPhoneVerificationCodeExpired {
     return Intl.message(
-      'ERROR 20114: Expired phone verification code',
+      'ERROR 20114: Expired verification code',
       name: 'errorPhoneVerificationCodeExpired',
       desc: '',
       args: [],
     );
   }
 
-  /// `ERROR 20113: Invalid phone verification code`
+  /// `ERROR 20113: Invalid verification code`
   String get errorPhoneVerificationCodeInvalid {
     return Intl.message(
-      'ERROR 20113: Invalid phone verification code',
+      'ERROR 20113: Invalid verification code',
       name: 'errorPhoneVerificationCodeInvalid',
       desc: '',
       args: [],
@@ -1732,6 +1797,16 @@ class Localization {
     );
   }
 
+  /// `ERROR 20160: Transfers cannot be made to a deactivated user`
+  String get errorTransferToDeactivatedUser {
+    return Intl.message(
+      'ERROR 20160: Transfers cannot be made to a deactivated user',
+      name: 'errorTransferToDeactivatedUser',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Can't find an app able to open this media.`
   String get errorUnableToOpenMedia {
     return Intl.message(
@@ -1772,10 +1847,10 @@ class Localization {
     );
   }
 
-  /// `ERROR 20122: This phone number is already associated with another account.`
+  /// `ERROR 20122: This mobile number is already associated with another account.`
   String get errorUsedPhone {
     return Intl.message(
-      'ERROR 20122: This phone number is already associated with another account.',
+      'ERROR 20122: This mobile number is already associated with another account.',
       name: 'errorUsedPhone',
       desc: '',
       args: [],
@@ -2189,10 +2264,10 @@ class Localization {
     );
   }
 
-  /// `We will send a 4-digit code to your phone number {arg0}, please enter the code in next screen.`
+  /// `We will send a 4-digit code to your mobile number {arg0}, please enter the code in next screen.`
   String landingInvitationDialogContent(Object arg0) {
     return Intl.message(
-      'We will send a 4-digit code to your phone number $arg0, please enter the code in next screen.',
+      'We will send a 4-digit code to your mobile number $arg0, please enter the code in next screen.',
       name: 'landingInvitationDialogContent',
       desc: '',
       args: [arg0],
@@ -2411,10 +2486,10 @@ class Localization {
     );
   }
 
-  /// `Mixin Messenger Desktop`
+  /// `Mixin Desktop`
   String get mixinMessengerDesktop {
     return Intl.message(
-      'Mixin Messenger Desktop',
+      'Mixin Desktop',
       name: 'mixinMessengerDesktop',
       desc: '',
       args: [],
@@ -2646,11 +2721,6 @@ class Localization {
     return Intl.message('1 Hour', name: 'oneHour', desc: '', args: []);
   }
 
-  /// `1 Week`
-  String get oneWeek {
-    return Intl.message('1 Week', name: 'oneWeek', desc: '', args: []);
-  }
-
   /// `1 Year`
   String get oneYear {
     return Intl.message('1 Year', name: 'oneYear', desc: '', args: []);
@@ -2748,10 +2818,10 @@ class Localization {
     );
   }
 
-  /// `Phone Number`
+  /// `Mobile Number`
   String get phoneNumber {
     return Intl.message(
-      'Phone Number',
+      'Mobile Number',
       name: 'phoneNumber',
       desc: '',
       args: [],
@@ -3020,6 +3090,36 @@ class Localization {
     return Intl.message('Reset Link', name: 'resetLink', desc: '', args: []);
   }
 
+  /// `Restore Chat`
+  String get restoreChat {
+    return Intl.message(
+      'Restore Chat',
+      name: 'restoreChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore your chat history from another device. Make sure both devices are connected to the same Wi-Fi or hotspot.`
+  String get restoreChatTip {
+    return Intl.message(
+      'Restore your chat history from another device. Make sure both devices are connected to the same Wi-Fi or hotspot.',
+      name: 'restoreChatTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore from Other Device`
+  String get restoreFromOtherDevice {
+    return Intl.message(
+      'Restore from Other Device',
+      name: 'restoreFromOtherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Retry`
   String get retry {
     return Intl.message('Retry', name: 'retry', desc: '', args: []);
@@ -3267,10 +3367,10 @@ class Localization {
     );
   }
 
-  /// `Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.`
+  /// `Back up your chat history to iCloud. If you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin. Messages you back up are not protected by Mixin end-to-end encryption while in iCloud.`
   String get settingBackupTips {
     return Intl.message(
-      'Back up your chat history to iCloud. if you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.',
+      'Back up your chat history to iCloud. If you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin. Messages you back up are not protected by Mixin end-to-end encryption while in iCloud.',
       name: 'settingBackupTips',
       desc: '',
       args: [],
@@ -3287,10 +3387,10 @@ class Localization {
     );
   }
 
-  /// `https://mixinmessenger.zendesk.com/hc/articles/4414170627988`
+  /// `https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl`
   String get settingDeleteAccountUrl {
     return Intl.message(
-      'https://mixinmessenger.zendesk.com/hc/articles/4414170627988',
+      'https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl',
       name: 'settingDeleteAccountUrl',
       desc: '',
       args: [],
@@ -3515,6 +3615,26 @@ class Localization {
   /// `Symbols`
   String get symbols {
     return Intl.message('Symbols', name: 'symbols', desc: '', args: []);
+  }
+
+  /// `Sync from Other Device`
+  String get syncFromOtherDevice {
+    return Intl.message(
+      'Sync from Other Device',
+      name: 'syncFromOtherDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync to Other Device`
+  String get syncToOtherDevice {
+    return Intl.message(
+      'Sync to Other Device',
+      name: 'syncToOtherDevice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Terms of Service`
@@ -3952,6 +4072,16 @@ class Localization {
     );
   }
 
+  /// `Waiting for the other device to connect.`
+  String get waitingOtherDeviceConnection {
+    return Intl.message(
+      'Waiting for the other device to connect.',
+      name: 'waitingOtherDeviceConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first.`
   String get webview2RuntimeInstallDescription {
     return Intl.message(
@@ -3967,16 +4097,6 @@ class Localization {
     return Intl.message(
       'WebView runtime is unavailable',
       name: 'webviewRuntimeUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `What's your name?`
-  String get whatsYourName {
-    return Intl.message(
-      'What\'s your name?',
-      name: 'whatsYourName',
       desc: '',
       args: [],
     );

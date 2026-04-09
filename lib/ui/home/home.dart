@@ -184,7 +184,7 @@ class _SetupNameWidget extends HookConsumerWidget {
       backgroundColor: context.theme.background,
       body: Center(
         child: AlertDialogLayout(
-          title: Text(context.l10n.whatsYourName),
+          title: Text(context.l10n.editName),
           content: DialogTextField(
             textEditingController: textEditingController,
             hintText: context.l10n.name,

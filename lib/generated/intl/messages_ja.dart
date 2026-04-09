@@ -136,7 +136,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "aMessage": MessageLookupByLibrary.simpleMessage("メッセージ"),
     "about": MessageLookupByLibrary.simpleMessage("Mixinについて"),
-    "accessDenied": MessageLookupByLibrary.simpleMessage("アクセスが拒否されました"),
     "account": MessageLookupByLibrary.simpleMessage("アカウント"),
     "add": MessageLookupByLibrary.simpleMessage("追加"),
     "addBotWithPlus": MessageLookupByLibrary.simpleMessage("ミニアプリに追加"),
@@ -170,6 +169,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoBackup": MessageLookupByLibrary.simpleMessage("チャット履歴の自動バックアップ"),
     "avatar": MessageLookupByLibrary.simpleMessage("アバター"),
     "backup": MessageLookupByLibrary.simpleMessage("チャット履歴のバックアップ"),
+    "backupChat": MessageLookupByLibrary.simpleMessage("チャットをバックアップ"),
+    "backupToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "別のデバイスへバックアップ",
+    ),
+    "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+      "チャット履歴を別のデバイスにバックアップします。両方のデバイスが同じWi-Fiまたはホットスポットに接続されていることを確認してください。",
+    ),
+    "backupWaitingOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "別のデバイスでMixinを開き、そこで復元を開始してください。",
+    ),
     "biography": MessageLookupByLibrary.simpleMessage("自己紹介文"),
     "block": MessageLookupByLibrary.simpleMessage("ブロック"),
     "botNotFound": MessageLookupByLibrary.simpleMessage("ミニアプリが見つかりません"),
@@ -185,6 +194,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeNumberInstead": MessageLookupByLibrary.simpleMessage("電話番号を変更"),
     "changedDisappearingMessageSettings": m0,
     "chatBackup": MessageLookupByLibrary.simpleMessage("チャットのバックアップ"),
+    "chatBackupAndRestore": MessageLookupByLibrary.simpleMessage(
+      "チャットのバックアップと復元",
+    ),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
       "ミニアプリを使用するためにボタンをタップしてください",
     ),
@@ -518,7 +530,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "nowAnAddmin": m34,
     "oneByOneForward": MessageLookupByLibrary.simpleMessage("それぞれ転送する"),
     "oneHour": MessageLookupByLibrary.simpleMessage("1時間"),
-    "oneWeek": MessageLookupByLibrary.simpleMessage("1週間"),
     "oneYear": MessageLookupByLibrary.simpleMessage("1年間"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("ホームページを開く"),
     "openLink": m35,
@@ -565,6 +576,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resendCodeIn": m39,
     "reset": MessageLookupByLibrary.simpleMessage("リセット"),
     "resetLink": MessageLookupByLibrary.simpleMessage("リンクを取り消す"),
+    "restoreChat": MessageLookupByLibrary.simpleMessage("チャットを復元"),
+    "restoreChatTip": MessageLookupByLibrary.simpleMessage(
+      "別のデバイスからチャット履歴を復元します。両方のデバイスが同じWi-Fiまたはホットスポットに接続されていることを確認してください。",
+    ),
+    "restoreFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "別のデバイスから復元",
+    ),
     "retry": MessageLookupByLibrary.simpleMessage("リトライ"),
     "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
       "アップロードの再試行に失敗しました。",
@@ -638,6 +656,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "strangerHint": MessageLookupByLibrary.simpleMessage("連絡先にない相手からのメッセージです"),
     "strangers": MessageLookupByLibrary.simpleMessage("連絡先にない相手"),
     "successful": MessageLookupByLibrary.simpleMessage("成功"),
+    "syncFromOtherDevice": MessageLookupByLibrary.simpleMessage("別のデバイスから同期"),
+    "syncToOtherDevice": MessageLookupByLibrary.simpleMessage("別のデバイスへ同期"),
     "termsOfService": MessageLookupByLibrary.simpleMessage("利用規約"),
     "text": MessageLookupByLibrary.simpleMessage("テキスト"),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
@@ -687,13 +707,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "waitingForThisMessage": MessageLookupByLibrary.simpleMessage(
       "このメッセージを待っています。",
     ),
+    "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
+      "別のデバイスの接続を待っています。",
+    ),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "このデバイスには、WebView2 Runtimeコンポーネントがインストールされていません。先にWebView2 Runtimeをダウンロードし、インストールしてください。",
     ),
     "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(
       "WebView runtimeは利用できません",
     ),
-    "whatsYourName": MessageLookupByLibrary.simpleMessage("お名前は何ですか？"),
     "window": MessageLookupByLibrary.simpleMessage("Window"),
     "withdrawal": MessageLookupByLibrary.simpleMessage("出金"),
     "you": MessageLookupByLibrary.simpleMessage("自分"),

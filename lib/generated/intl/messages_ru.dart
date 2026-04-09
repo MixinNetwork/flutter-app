@@ -148,7 +148,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "aMessage": MessageLookupByLibrary.simpleMessage("сообщение"),
     "about": MessageLookupByLibrary.simpleMessage("Про"),
-    "accessDenied": MessageLookupByLibrary.simpleMessage("В доступе отказано"),
     "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
     "addBotWithPlus": MessageLookupByLibrary.simpleMessage("+ Добавить бота"),
@@ -193,6 +192,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "avatar": MessageLookupByLibrary.simpleMessage("Аватар"),
     "backup": MessageLookupByLibrary.simpleMessage("Резервное копирование"),
+    "backupChat": MessageLookupByLibrary.simpleMessage(
+      "Создать резервную копию чатов",
+    ),
+    "backupToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Резервное копирование на другое устройство",
+    ),
+    "backupToOtherDeviceTips": MessageLookupByLibrary.simpleMessage(
+      "Сделайте резервную копию истории чатов на другое устройство. Убедитесь, что оба устройства подключены к одной сети Wi-Fi или точке доступа.",
+    ),
+    "backupWaitingOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Откройте Mixin на другом устройстве и начните восстановление там.",
+    ),
     "biography": MessageLookupByLibrary.simpleMessage("Биография"),
     "block": MessageLookupByLibrary.simpleMessage("Блокировать"),
     "botNotFound": MessageLookupByLibrary.simpleMessage("Бот не найден"),
@@ -211,6 +222,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "changedDisappearingMessageSettings": m0,
     "chatBackup": MessageLookupByLibrary.simpleMessage(
       "Резервное копирование чата",
+    ),
+    "chatBackupAndRestore": MessageLookupByLibrary.simpleMessage(
+      "Резервное копирование и восстановление чатов",
     ),
     "chatBotReceptionTitle": MessageLookupByLibrary.simpleMessage(
       "Нажмите кнопку, чтобы взаимодействовать с ботом",
@@ -578,7 +592,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages": MessageLookupByLibrary.simpleMessage("Сообщения"),
     "minimize": MessageLookupByLibrary.simpleMessage("Свести к минимуму"),
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
-      "Рабочий стол Mixin Messenger",
+      "Рабочий стол Mixin",
     ),
     "more": MessageLookupByLibrary.simpleMessage("Больше"),
     "multisigTransaction": MessageLookupByLibrary.simpleMessage(
@@ -619,7 +633,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Один за другим вперед",
     ),
     "oneHour": MessageLookupByLibrary.simpleMessage("1 час"),
-    "oneWeek": MessageLookupByLibrary.simpleMessage("1 неделя"),
     "oneYear": MessageLookupByLibrary.simpleMessage("1 год"),
     "openHomePage": MessageLookupByLibrary.simpleMessage(
       "Открыть домашнюю страницу",
@@ -676,6 +689,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "resendCodeIn": m39,
     "reset": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
     "resetLink": MessageLookupByLibrary.simpleMessage("Сбросить ссылку"),
+    "restoreChat": MessageLookupByLibrary.simpleMessage("Восстановить чаты"),
+    "restoreChatTip": MessageLookupByLibrary.simpleMessage(
+      "Восстановите историю чатов с другого устройства. Убедитесь, что оба устройства подключены к одной сети Wi-Fi или точке доступа.",
+    ),
+    "restoreFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Восстановить с другого устройства",
+    ),
     "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
     "retryUploadFailed": MessageLookupByLibrary.simpleMessage(
       "Повторная загрузка не удалась.",
@@ -727,7 +747,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mixin ID, имя",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
-      "Создайте резервную копию истории чата в iCloud. Если вы потеряете свой iPhone или переключитесь на новый, вы сможете восстановить историю чата при переустановке Mixin Messenger. Сообщения, которые вы резервируете, не защищены сквозным шифрованием Mixin Messenger в iCloud.",
+      "Создайте резервную копию истории чата в iCloud. Если вы потеряете свой iPhone или переключитесь на новый, вы сможете восстановить историю чата при переустановке Mixin. Сообщения, которые вы резервируете, не защищены сквозным шифрованием Mixin в iCloud.",
     ),
     "settingDeleteAccountPinContent": m42,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
@@ -772,6 +792,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "strangers": MessageLookupByLibrary.simpleMessage("Незнакомцы"),
     "successful": MessageLookupByLibrary.simpleMessage("Успешный"),
+    "syncFromOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Синхронизировать с другого устройства",
+    ),
+    "syncToOtherDevice": MessageLookupByLibrary.simpleMessage(
+      "Синхронизировать на другое устройство",
+    ),
     "termsOfService": MessageLookupByLibrary.simpleMessage(
       "Условия обслуживания",
     ),
@@ -829,13 +855,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "waitingForThisMessage": MessageLookupByLibrary.simpleMessage(
       "Ждем этого сообщения.",
     ),
+    "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
+      "Ожидание подключения другого устройства.",
+    ),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "На устройстве не установлен компонент WebView2 Runtime. Сначала загрузите и установите WebView2 Runtime.",
     ),
     "webviewRuntimeUnavailable": MessageLookupByLibrary.simpleMessage(
       "Среда выполнения WebView недоступна",
     ),
-    "whatsYourName": MessageLookupByLibrary.simpleMessage("Как вас зовут?"),
     "window": MessageLookupByLibrary.simpleMessage("Окно"),
     "withdrawal": MessageLookupByLibrary.simpleMessage("Вывести"),
     "you": MessageLookupByLibrary.simpleMessage("Вы"),
