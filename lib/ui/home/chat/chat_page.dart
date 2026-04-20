@@ -636,11 +636,39 @@ class _List extends HookConsumerWidget {
       return null;
     }
 
+    AiChatMessage? prevAiOf(
+      ChatTimelineItem item,
+      List<ChatTimelineItem> items,
+    ) {
+      final index = items.indexOf(item);
+      if (index <= 0) return null;
+      for (var i = index - 1; i >= 0; i--) {
+        final aiMessage = items[i].aiMessage;
+        if (aiMessage != null) return aiMessage;
+      }
+      return null;
+    }
+
+    AiChatMessage? nextAiOf(
+      ChatTimelineItem item,
+      List<ChatTimelineItem> items,
+    ) {
+      final index = items.indexOf(item);
+      if (index == -1 || index >= items.length - 1) return null;
+      for (var i = index + 1; i < items.length; i++) {
+        final aiMessage = items[i].aiMessage;
+        if (aiMessage != null) return aiMessage;
+      }
+      return null;
+    }
+
     Widget buildTimelineChild(ChatTimelineItem item) {
       if (item.isAiMessage) {
         return AiMessageCard(
           key: ValueKey('ai-${item.id}'),
           message: item.aiMessage!,
+          prev: prevAiOf(item, timeline),
+          next: nextAiOf(item, timeline),
         );
       }
       final message = item.message!;

@@ -30,6 +30,7 @@ class MarkdownColumn extends ConsumerWidget {
         data: data,
         useColumn: true,
         selectable: selectable,
+        contextMenuBuilder: (_, _, _, _) => const SizedBox.shrink(),
         padding: EdgeInsets.zero,
         theme: _createMarkdownTheme(context, chatFontSizeDelta),
         imageBuilder: _buildMarkdownImage,

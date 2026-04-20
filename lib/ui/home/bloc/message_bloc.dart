@@ -308,6 +308,9 @@ int _compareAiMessages(AiChatMessage a, AiChatMessage b) {
   final createdAtCompare = a.createdAt.compareTo(b.createdAt);
   if (createdAtCompare != 0) return createdAtCompare;
 
+  final roleCompare = _compareAiRoles(a.role, b.role);
+  if (roleCompare != 0) return roleCompare;
+
   return a.id.compareTo(b.id);
 }
 
@@ -316,6 +319,15 @@ int _compareNullableDateTime(DateTime? a, DateTime? b) {
   if (a == null) return 1;
   if (b == null) return -1;
   return a.compareTo(b);
+}
+
+int _compareAiRoles(String a, String b) {
+  const order = {
+    'user': 0,
+    'assistant': 1,
+  };
+
+  return (order[a] ?? order.length).compareTo(order[b] ?? order.length);
 }
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
