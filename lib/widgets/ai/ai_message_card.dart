@@ -64,7 +64,7 @@ class AiMessageCard extends StatelessWidget {
       children: [
         if (showAssistantMeta)
           Padding(
-            padding: const EdgeInsets.only(left: 2, bottom: 4),
+            padding: const EdgeInsets.only(left: 10, bottom: 2),
             child: Text(
               'AI Assistant',
               style: TextStyle(
@@ -111,7 +111,7 @@ class AiMessageCard extends StatelessWidget {
           ),
           Flexible(
             child: Padding(
-              padding: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.symmetric(vertical: 2),
               child: _AiMessageMenu(
                 message: message,
                 child: content,
