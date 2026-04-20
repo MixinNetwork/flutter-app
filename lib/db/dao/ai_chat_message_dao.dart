@@ -9,6 +9,10 @@ class AiChatMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$AiChatMessageDaoMixin {
   AiChatMessageDao(super.db);
 
+  static const assistantRole = 'assistant';
+  static const pendingStatus = 'pending';
+  static const errorStatus = 'error';
+
   Stream<List<AiChatMessage>> watchConversationMessages(
     String conversationId,
   ) =>
@@ -63,4 +67,51 @@ class AiChatMessageDao extends DatabaseAccessor<MixinDatabase>
   Future<void> deleteConversationMessages(String conversationId) => (delete(
     db.aiChatMessages,
   )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+
+  Future<bool> hasPendingAssistantMessage(
+    String conversationId, {
+    DateTime? updatedAfter,
+  }) async {
+    final query = selectOnly(db.aiChatMessages)
+      ..addColumns([db.aiChatMessages.id.count()])
+      ..where(
+        db.aiChatMessages.conversationId.equals(conversationId) &
+            db.aiChatMessages.role.equals(assistantRole) &
+            db.aiChatMessages.status.equals(pendingStatus) &
+            (updatedAfter == null
+                ? const Constant(true)
+                : db.aiChatMessages.updatedAt.isBiggerOrEqualValue(
+                    updatedAfter.millisecondsSinceEpoch,
+                  )),
+      );
+    final row = await query.getSingleOrNull();
+    final count = row?.read(db.aiChatMessages.id.count()) ?? 0;
+    return count > 0;
+  }
+
+  Future<int> resolveStalePendingAssistantMessages({
+    required DateTime updatedBefore,
+    String? conversationId,
+    String errorText = 'Interrupted by app restart',
+  }) {
+    final query = update(db.aiChatMessages)
+      ..where(
+        (tbl) =>
+            tbl.role.equals(assistantRole) &
+            tbl.status.equals(pendingStatus) &
+            tbl.updatedAt.isSmallerThanValue(
+              updatedBefore.millisecondsSinceEpoch,
+            ) &
+            (conversationId == null
+                ? const Constant(true)
+                : tbl.conversationId.equals(conversationId)),
+      );
+    return query.write(
+      AiChatMessagesCompanion(
+        status: const Value(errorStatus),
+        errorText: Value(errorText),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }

@@ -23,6 +23,12 @@ const _kAiContextMessageLimit = 30;
 const _kAiHistoryLimit = 12;
 const _kAiStreamFlushChars = 32;
 const _kAiStreamFlushInterval = Duration(milliseconds: 80);
+final kAiRuntimeStartedAt = DateTime.now();
+
+bool isActivePendingAiMessage(AiChatMessage message) =>
+    message.role == _kAiRoleAssistant &&
+    message.status == _kAiStatusPending &&
+    !message.updatedAt.isBefore(kAiRuntimeStartedAt);
 
 class AiChatController {
   AiChatController(this.database);
@@ -37,6 +43,19 @@ class AiChatController {
     required String input,
     AiProviderConfig? provider,
   }) async {
+    await database.aiChatMessageDao.resolveStalePendingAssistantMessages(
+      updatedBefore: kAiRuntimeStartedAt,
+      conversationId: conversationId,
+    );
+    final hasPendingAssistant = await database.aiChatMessageDao
+        .hasPendingAssistantMessage(
+          conversationId,
+          updatedAfter: kAiRuntimeStartedAt,
+        );
+    if (hasPendingAssistant) {
+      throw Exception('AI is still responding');
+    }
+
     final config = provider ?? database.settingProperties.selectedAiProvider;
     if (config == null) {
       throw Exception('No AI provider configured');

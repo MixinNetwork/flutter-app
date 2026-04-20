@@ -155,9 +155,18 @@ class _AiMessageBody extends StatelessWidget {
     if (isUser || message.status == 'error') {
       body = _AiSelectableText(text: text, style: textStyle);
     } else {
+      final cacheKey = buildMarkdownCacheKey(
+        namespace: 'ai',
+        id: message.id,
+        data: text,
+      );
       body = DefaultTextStyle.merge(
         style: textStyle,
-        child: MarkdownColumn(data: text, selectable: true),
+        child: MarkdownColumn(
+          data: text,
+          selectable: true,
+          cacheKey: cacheKey,
+        ),
       );
     }
 

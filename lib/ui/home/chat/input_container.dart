@@ -110,17 +110,25 @@ class _InputContainer extends HookConsumerWidget {
         .whereType<AiProviderConfig>()
         .where((element) => element.enabled)
         .toList();
-    final aiProviderId = aiModeState.providerId;
-    var aiProvider = selectedAiProvider;
-    if (aiProviderId != null) {
-      for (final provider in enabledAiProviders) {
-        if (provider.id == aiProviderId) {
-          aiProvider = provider;
-          break;
-        }
-      }
-    }
+    final aiProvider = _resolveAiModeProvider(
+      selectedAiProvider: selectedAiProvider,
+      enabledAiProviders: enabledAiProviders,
+      providerId: aiModeState.providerId,
+      selectedModel: aiModeState.model,
+    );
     final aiModeEnabled = aiModeState.enabled;
+    final aiMessages =
+        useMemoizedStream(
+          () => conversationId == null
+              ? Stream.value(const <AiChatMessage>[])
+              : context.database.aiChatMessageDao.watchConversationMessages(
+                  conversationId,
+                ),
+          keys: [conversationId],
+          initialData: const <AiChatMessage>[],
+        ).data ??
+        const <AiChatMessage>[];
+    final aiRequestInFlight = aiMessages.any(isActivePendingAiMessage);
 
     final quoteMessageId = ref.watch(quoteMessageIdProvider);
 
@@ -143,6 +151,17 @@ class _InputContainer extends HookConsumerWidget {
     );
 
     final mentionProviderInstance = mentionProvider(textEditingValueStream);
+
+    useEffect(() {
+      if (conversationId == null) return null;
+      unawaited(
+        context.database.aiChatMessageDao.resolveStalePendingAssistantMessages(
+          updatedBefore: kAiRuntimeStartedAt,
+          conversationId: conversationId,
+        ),
+      );
+      return null;
+    }, [conversationId]);
 
     useEffect(() {
       final updateDraft = context.database.conversationDao.updateDraft;
@@ -224,7 +243,7 @@ class _InputContainer extends HookConsumerWidget {
                 decoration: BoxDecoration(color: context.theme.primary),
                 padding: EdgeInsets.fromLTRB(
                   16,
-                  aiModeEnabled ? 10 : 8,
+                  aiModeEnabled ? 8 : 8,
                   16,
                   8,
                 ),
@@ -232,7 +251,7 @@ class _InputContainer extends HookConsumerWidget {
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeOutCubic,
                   padding: aiModeEnabled
-                      ? const EdgeInsets.fromLTRB(12, 12, 12, 12)
+                      ? const EdgeInsets.fromLTRB(10, 8, 10, 8)
                       : EdgeInsets.zero,
                   decoration: BoxDecoration(
                     color: aiModeEnabled
@@ -255,7 +274,7 @@ class _InputContainer extends HookConsumerWidget {
                         ),
                         Container(
                           height: 1,
-                          margin: const EdgeInsets.only(top: 10, bottom: 10),
+                          margin: const EdgeInsets.only(top: 8, bottom: 8),
                           color: context.theme.ai.surfaceBorder,
                         ),
                       ],
@@ -277,6 +296,8 @@ class _InputContainer extends HookConsumerWidget {
                               mentionProviderInstance: mentionProviderInstance,
                               aiModeEnabled: aiModeEnabled,
                               providerName: aiProvider?.name,
+                              modelName: aiProvider?.model,
+                              aiRequestInFlight: aiRequestInFlight,
                             ),
                           ),
                           SizedBox(width: aiModeEnabled ? 10 : 16),
@@ -285,6 +306,7 @@ class _InputContainer extends HookConsumerWidget {
                             textEditingController: textEditingController,
                             textEditingValueStream: textEditingValueStream,
                             aiModeEnabled: aiModeEnabled,
+                            aiRequestInFlight: aiRequestInFlight,
                           ),
                         ],
                       ),
@@ -306,12 +328,14 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
     required this.textEditingValueStream,
     required this.textEditingController,
     required this.aiModeEnabled,
+    required this.aiRequestInFlight,
   });
 
   final String? conversationId;
   final Stream<TextEditingValue> textEditingValueStream;
   final TextEditingController textEditingController;
   final bool aiModeEnabled;
+  final bool aiRequestInFlight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -328,12 +352,13 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
     if (aiModeEnabled) {
       final backgroundColor = context.theme.ai.accent;
       final foregroundColor = context.theme.ai.onAccent;
+      final canSend = hasInputText && !aiRequestInFlight;
 
       return AnimatedOpacity(
         duration: const Duration(milliseconds: 180),
-        opacity: hasInputText ? 1 : 0.45,
+        opacity: canSend ? 1 : 0.45,
         child: IgnorePointer(
-          ignoring: !hasInputText,
+          ignoring: !canSend,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: backgroundColor,
@@ -347,10 +372,12 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
                 size: 20,
                 color: foregroundColor,
               ),
-              onTap: () => _sendMessage(
-                context,
-                textEditingController,
-                conversationId: conversationId,
+              onTap: () => unawaited(
+                _sendMessage(
+                  context,
+                  textEditingController,
+                  conversationId: conversationId,
+                ),
               ),
             ),
           ),
@@ -407,11 +434,13 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
                   MenuAction(
                     image: MenuImage.icon(IconFonts.mute),
                     title: context.l10n.sendWithoutSound,
-                    callback: () => _sendMessage(
-                      context,
-                      textEditingController,
-                      conversationId: conversationId,
-                      silent: true,
+                    callback: () => unawaited(
+                      _sendMessage(
+                        context,
+                        textEditingController,
+                        conversationId: conversationId,
+                        silent: true,
+                      ),
                     ),
                   ),
                 ],
@@ -419,10 +448,12 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
               child: ActionButton(
                 name: Resources.assetsImagesIcSendSvg,
                 color: context.theme.icon,
-                onTap: () => _sendMessage(
-                  context,
-                  textEditingController,
-                  conversationId: conversationId,
+                onTap: () => unawaited(
+                  _sendMessage(
+                    context,
+                    textEditingController,
+                    conversationId: conversationId,
+                  ),
                 ),
               ),
             ),
@@ -469,12 +500,12 @@ void _sendPostMessage(
   context.providerContainer.read(quoteMessageProvider.notifier).state = null;
 }
 
-void _sendMessage(
+Future<void> _sendMessage(
   BuildContext context,
   TextEditingController textEditingController, {
   required String? conversationId,
   bool silent = false,
-}) {
+}) async {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
   if (conversationId == null) return;
@@ -499,7 +530,7 @@ void _sendMessage(
       showToastFailed(ToastError('Please add an AI provider first'));
       return;
     }
-    aiModeController.enter(providerId: provider.id);
+    aiModeController.enter(providerId: provider.id, model: provider.model);
     textEditingController.text = '';
     return;
   }
@@ -513,36 +544,46 @@ void _sendMessage(
       showToastFailed(ToastError('Please add an AI provider first'));
       return;
     }
-    aiModeController.enter(providerId: provider.id);
-    textEditingController.text = '';
-    unawaited(
-      AiChatController(context.database)
-          .send(
-            conversationId: conversationId,
-            input: inlineAiInput,
-            provider: provider,
-          )
-          .catchError((Object error, StackTrace _) => showToastFailed(error)),
-    );
+    aiModeController.enter(providerId: provider.id, model: provider.model);
+    try {
+      await AiChatController(context.database).send(
+        conversationId: conversationId,
+        input: inlineAiInput,
+        provider: provider,
+      );
+      textEditingController.text = '';
+    } catch (error, _) {
+      showToastFailed(error);
+    }
     return;
   }
 
   if (aiModeState.enabled) {
-    final provider = context.database.settingProperties.selectedAiProvider;
+    final provider = _resolveAiModeProvider(
+      selectedAiProvider: context.database.settingProperties.selectedAiProvider,
+      enabledAiProviders: context.database.settingProperties.aiProviders
+          .whereType<AiProviderConfig>()
+          .where((element) => element.enabled)
+          .toList(),
+      providerId: aiModeState.providerId,
+      selectedModel: aiModeState.model,
+    );
     if (provider == null) {
       showToastFailed(ToastError('Please add an AI provider first'));
       return;
     }
-    textEditingController.text = '';
-    unawaited(
-      AiChatController(context.database)
-          .send(conversationId: conversationId, input: text, provider: provider)
-          .catchError((Object error, StackTrace _) => showToastFailed(error)),
-    );
+    try {
+      await AiChatController(
+        context.database,
+      ).send(conversationId: conversationId, input: text, provider: provider);
+      textEditingController.text = '';
+    } catch (error, _) {
+      showToastFailed(error);
+    }
     return;
   }
 
-  context.accountServer.sendTextMessage(
+  await context.accountServer.sendTextMessage(
     text,
     conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
@@ -555,6 +596,32 @@ void _sendMessage(
   context.providerContainer.read(quoteMessageProvider.notifier).state = null;
 }
 
+AiProviderConfig? _resolveAiModeProvider({
+  required AiProviderConfig? selectedAiProvider,
+  required List<AiProviderConfig> enabledAiProviders,
+  required String? providerId,
+  required String? selectedModel,
+}) {
+  var provider = selectedAiProvider;
+  if (providerId != null) {
+    for (final item in enabledAiProviders) {
+      if (item.id == providerId) {
+        provider = item;
+        break;
+      }
+    }
+  }
+  if (provider == null) return null;
+
+  final trimmedModel = selectedModel?.trim();
+  if (trimmedModel == null || trimmedModel.isEmpty) return provider;
+  if (provider.models.isNotEmpty && !provider.models.contains(trimmedModel)) {
+    return provider;
+  }
+  if (provider.model == trimmedModel) return provider;
+  return provider.copyWith(defaultModel: trimmedModel, model: trimmedModel);
+}
+
 class _SendTextField extends HookConsumerWidget {
   const _SendTextField({
     required this.focusNode,
@@ -562,6 +629,8 @@ class _SendTextField extends HookConsumerWidget {
     required this.mentionProviderInstance,
     required this.aiModeEnabled,
     required this.providerName,
+    required this.modelName,
+    required this.aiRequestInFlight,
   });
 
   final FocusNode focusNode;
@@ -570,6 +639,8 @@ class _SendTextField extends HookConsumerWidget {
   mentionProviderInstance;
   final bool aiModeEnabled;
   final String? providerName;
+  final String? modelName;
+  final bool aiRequestInFlight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -620,20 +691,39 @@ class _SendTextField extends HookConsumerWidget {
         false;
 
     final placeholder = aiModeEnabled
-        ? 'Ask ${providerName?.trim().isNotEmpty == true ? providerName : 'AI'} anything'
+        ? aiRequestInFlight
+              ? [
+                  if (providerName?.trim().isNotEmpty == true)
+                    providerName!.trim()
+                  else
+                    'AI',
+                  if (modelName?.trim().isNotEmpty == true)
+                    '(${modelName!.trim()})',
+                  'is responding...',
+                ].join(' ')
+              : [
+                  'Ask',
+                  if (providerName?.trim().isNotEmpty == true)
+                    providerName!.trim()
+                  else
+                    'AI',
+                  if (modelName?.trim().isNotEmpty == true)
+                    '(${modelName!.trim()})',
+                ].join(' ')
         : isEncryptConversation
         ? context.l10n.chatHintE2e
         : 'Type message or /ai';
+    final canSubmit = sendable && (!aiModeEnabled || !aiRequestInFlight);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(aiModeEnabled ? 14 : 4)),
+        borderRadius: BorderRadius.all(Radius.circular(aiModeEnabled ? 12 : 4)),
         color: context.dynamicColor(
           aiModeEnabled
-              ? const Color.fromRGBO(255, 255, 255, 0.78)
+              ? const Color.fromRGBO(255, 255, 255, 0.82)
               : const Color.fromRGBO(245, 247, 250, 1),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
@@ -647,7 +737,7 @@ class _SendTextField extends HookConsumerWidget {
       child: FocusableActionDetector(
         autofocus: true,
         shortcuts: {
-          if (sendable)
+          if (canSubmit)
             const SingleActivator(LogicalKeyboardKey.enter):
                 const _SendMessageIntent(),
           SingleActivator(
@@ -661,10 +751,12 @@ class _SendTextField extends HookConsumerWidget {
         },
         actions: {
           _SendMessageIntent: CallbackAction<Intent>(
-            onInvoke: (intent) => _sendMessage(
-              context,
-              textEditingController,
-              conversationId: ref.read(currentConversationIdProvider),
+            onInvoke: (intent) => unawaited(
+              _sendMessage(
+                context,
+                textEditingController,
+                conversationId: ref.read(currentConversationIdProvider),
+              ),
             ),
           ),
           PasteTextIntent: _PasteContextAction(context),
@@ -704,8 +796,8 @@ class _SendTextField extends HookConsumerWidget {
                 contentPadding: EdgeInsets.only(
                   left: 10,
                   right: 10,
-                  top: 10,
-                  bottom: 10,
+                  top: 8,
+                  bottom: 8,
                 ),
               ),
               selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
@@ -752,59 +844,67 @@ class _AiModeBar extends HookConsumerWidget {
     final model = provider?.model.trim();
     final aiColors = context.theme.ai;
     final accentColor = aiColors.accent;
+    final hasProvider = provider != null;
+    final notifier = ref.read(aiInputModeProvider(conversationId).notifier);
+    final enabledAiProviders = context.database.settingProperties.aiProviders
+        .whereType<AiProviderConfig>()
+        .where((element) => element.enabled)
+        .toList();
+    final providerOptions = enabledAiProviders
+        .map(
+          (item) => CustomPopupMenuItem<AiProviderConfig>(
+            title: item.name,
+            value: item,
+          ),
+        )
+        .toList(growable: false);
+    final modelOptions =
+        provider?.models
+            .where((item) => item.trim().isNotEmpty)
+            .map(
+              (item) => CustomPopupMenuItem<String>(title: item, value: item),
+            )
+            .toList(growable: false) ??
+        <CustomPopupMenuItem<String>>[];
 
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: aiColors.surfaceVariant,
-            borderRadius: const BorderRadius.all(Radius.circular(999)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.auto_awesome_rounded, size: 14, color: accentColor),
-              const SizedBox(width: 6),
-              Text(
-                'AI Mode',
-                style: TextStyle(
-                  color: accentColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+        _AiModeChip(
+          icon: Icons.auto_awesome_rounded,
+          label: 'AI',
+          foregroundColor: accentColor,
+          backgroundColor: aiColors.surfaceVariant,
         ),
-        const SizedBox(width: 10),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                providerName,
-                style: TextStyle(
-                  color: context.theme.text,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                _AiModeMenuChip<AiProviderConfig>(
+                  icon: Icons.hub_rounded,
+                  label: providerName,
+                  items: providerOptions,
+                  enabled: providerOptions.length > 1,
+                  onSelected: (value) => notifier.updateProvider(
+                    providerId: value.id,
+                    model: value.model,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                model?.isNotEmpty == true ? model! : 'Next message goes to AI',
-                style: TextStyle(
-                  color: context.theme.secondaryText,
-                  fontSize: 12,
+                const SizedBox(width: 6),
+                _AiModeMenuChip<String>(
+                  icon: Icons.tune_rounded,
+                  label: model?.isNotEmpty == true
+                      ? model!
+                      : (hasProvider ? 'Select Model' : 'No Model'),
+                  items: modelOptions,
+                  enabled: modelOptions.length > 1,
+                  onSelected: notifier.updateModel,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        const SizedBox(width: 8),
         ActionButton(
           name: Resources.assetsImagesIcCloseSvg,
           color: context.theme.icon,
@@ -813,6 +913,114 @@ class _AiModeBar extends HookConsumerWidget {
               ref.read(aiInputModeProvider(conversationId).notifier).exit(),
         ),
       ],
+    );
+  }
+}
+
+class _AiModeChip extends StatelessWidget {
+  const _AiModeChip({
+    required this.icon,
+    required this.label,
+    required this.foregroundColor,
+    required this.backgroundColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color foregroundColor;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 28,
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+    decoration: BoxDecoration(
+      color: backgroundColor,
+      borderRadius: const BorderRadius.all(Radius.circular(999)),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: foregroundColor),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: foregroundColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _AiModeMenuChip<T> extends StatelessWidget {
+  const _AiModeMenuChip({
+    required this.icon,
+    required this.label,
+    required this.items,
+    required this.onSelected,
+    this.enabled = true,
+  });
+
+  final IconData icon;
+  final String label;
+  final List<CustomPopupMenuItem<T>> items;
+  final ValueChanged<T> onSelected;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: context.dynamicColor(
+          const Color.fromRGBO(255, 255, 255, 0.74),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
+        border: Border.all(color: context.theme.ai.surfaceBorder),
+        borderRadius: const BorderRadius.all(Radius.circular(999)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: context.theme.secondaryText),
+          const SizedBox(width: 6),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 160),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: context.theme.text,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          if (enabled) ...[
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: context.theme.secondaryText,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (!enabled || items.isEmpty) return child;
+
+    return CustomPopupMenuButton<T>(
+      itemBuilder: (_) => items,
+      onSelected: onSelected,
+      color: Colors.transparent,
+      child: child,
     );
   }
 }

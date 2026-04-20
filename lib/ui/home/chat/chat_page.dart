@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
+import '../../../widgets/markdown.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
@@ -662,7 +664,53 @@ class _List extends HookConsumerWidget {
       return null;
     }
 
-    Widget buildTimelineChild(ChatTimelineItem item) {
+    ({String key, String data})? markdownWarmupEntryOf(ChatTimelineItem item) {
+      final aiMessage = item.aiMessage;
+      if (aiMessage != null) {
+        if (aiMessage.role == 'user' || aiMessage.status == 'error') {
+          return null;
+        }
+        final content = aiMessage.content.trim();
+        if (content.isEmpty) return null;
+        return (
+          key: buildMarkdownCacheKey(
+            namespace: 'ai',
+            id: aiMessage.id,
+            data: content,
+          ),
+          data: content,
+        );
+      }
+
+      final message = item.message;
+      if (message == null || !message.type.isPost) return null;
+      final content = (message.content ?? '').postOptimize();
+      if (content.isEmpty) return null;
+      return (
+        key: buildMarkdownCacheKey(
+          namespace: 'post',
+          id: message.messageId,
+          data: content,
+        ),
+        data: content,
+      );
+    }
+
+    void warmupMarkdownAround(int index) {
+      final start = math.max(0, index - 6);
+      final end = math.min(timeline.length, index + 7);
+      final entries = <({String key, String data})>[];
+      for (var i = start; i < end; i++) {
+        final entry = markdownWarmupEntryOf(timeline[i]);
+        if (entry != null) {
+          entries.add(entry);
+        }
+      }
+      markdownControllerCache.warmupAll(entries);
+    }
+
+    Widget buildTimelineChild(ChatTimelineItem item, int index) {
+      warmupMarkdownAround(index);
       if (item.isAiMessage) {
         return AiMessageCard(
           key: ValueKey('ai-${item.id}'),
@@ -704,7 +752,7 @@ class _List extends HookConsumerWidget {
               index,
             ) {
               final actualIndex = topTimeline.length - index - 1;
-              return buildTimelineChild(topTimeline[actualIndex]);
+              return buildTimelineChild(topTimeline[actualIndex], actualIndex);
             }, childCount: topTimeline.length),
           ),
           SliverToBoxAdapter(
@@ -712,7 +760,7 @@ class _List extends HookConsumerWidget {
             child: Builder(
               builder: (context) {
                 if (centerTimeline == null) return const SizedBox();
-                return buildTimelineChild(centerTimeline);
+                return buildTimelineChild(centerTimeline, centerTimelineIndex!);
               },
             ),
           ),
@@ -722,7 +770,10 @@ class _List extends HookConsumerWidget {
               (
                 context,
                 index,
-              ) => buildTimelineChild(bottomTimeline[index]),
+              ) => buildTimelineChild(
+                bottomTimeline[index],
+                (centerTimelineIndex ?? -1) + index + 1,
+              ),
               childCount: bottomTimeline.length,
             ),
           ),

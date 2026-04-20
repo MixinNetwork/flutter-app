@@ -70,7 +70,16 @@ class MessagePost extends StatelessWidget {
         children: [
           HookBuilder(
             builder: (context) {
+              final messageId = context.message.messageId;
               final postContent = useMemoized(content.postOptimize, [content]);
+              final cacheKey = useMemoized(
+                () => buildMarkdownCacheKey(
+                  namespace: 'post',
+                  id: messageId,
+                  data: postContent,
+                ),
+                [messageId, postContent],
+              );
 
               return ConstrainedBox(
                 constraints: BoxConstraints(
@@ -84,7 +93,10 @@ class MessagePost extends StatelessWidget {
                   ).copyWith(scrollbars: false),
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
-                    child: MarkdownColumn(data: postContent),
+                    child: MarkdownColumn(
+                      data: postContent,
+                      cacheKey: cacheKey,
+                    ),
                   ),
                 ),
               );
@@ -162,6 +174,11 @@ class PostPreview extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 600),
             child: Markdown(
               data: message.content ?? '',
+              cacheKey: buildMarkdownCacheKey(
+                namespace: 'post-preview',
+                id: message.messageId,
+                data: message.content ?? '',
+              ),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
             ),
           ),
