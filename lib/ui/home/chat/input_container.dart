@@ -19,7 +19,7 @@ import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../ai/ai_chat_controller.dart';
-import '../../../ai/model/ai_mode_state.dart';
+import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
@@ -40,7 +40,6 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
-import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
@@ -107,6 +106,21 @@ class _InputContainer extends HookConsumerWidget {
     final aiModeState = ref.watch(aiInputModeProvider(conversationId ?? ''));
     final selectedAiProvider =
         context.database.settingProperties.selectedAiProvider;
+    final enabledAiProviders = context.database.settingProperties.aiProviders
+        .whereType<AiProviderConfig>()
+        .where((element) => element.enabled)
+        .toList();
+    final aiProviderId = aiModeState.providerId;
+    var aiProvider = selectedAiProvider;
+    if (aiProviderId != null) {
+      for (final provider in enabledAiProviders) {
+        if (provider.id == aiProviderId) {
+          aiProvider = provider;
+          break;
+        }
+      }
+    }
+    final aiModeEnabled = aiModeState.enabled;
 
     final quoteMessageId = ref.watch(quoteMessageIdProvider);
 
@@ -204,43 +218,78 @@ class _InputContainer extends HookConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             const _QuoteMessage(),
-            if (conversationId != null)
-              _AiModeBar(
-                conversationId: conversationId,
-                aiModeState: aiModeState,
-                providerName: selectedAiProvider?.name,
-              ),
             ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 56),
+              constraints: BoxConstraints(minHeight: aiModeEnabled ? 108 : 56),
               child: Container(
                 decoration: BoxDecoration(color: context.theme.primary),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  aiModeEnabled ? 10 : 8,
+                  16,
+                  8,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const _SendActionTypeButton(),
-                    const SizedBox(width: 6),
-                    _StickerButton(
-                      textEditingController: textEditingController,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _SendTextField(
-                        focusNode: focusNode,
-                        textEditingController: textEditingController,
-                        mentionProviderInstance: mentionProviderInstance,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  padding: aiModeEnabled
+                      ? const EdgeInsets.fromLTRB(12, 12, 12, 12)
+                      : EdgeInsets.zero,
+                  decoration: BoxDecoration(
+                    color: aiModeEnabled
+                        ? context.theme.ai.surface
+                        : Colors.transparent,
+                    borderRadius: const BorderRadius.all(Radius.circular(18)),
+                    border: aiModeEnabled
+                        ? Border.all(
+                            color: context.theme.ai.surfaceBorder,
+                          )
+                        : null,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (conversationId != null && aiModeEnabled) ...[
+                        _AiModeBar(
+                          conversationId: conversationId,
+                          provider: aiProvider,
+                        ),
+                        Container(
+                          height: 1,
+                          margin: const EdgeInsets.only(top: 10, bottom: 10),
+                          color: context.theme.ai.surfaceBorder,
+                        ),
+                      ],
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (!aiModeEnabled) ...[
+                            const _SendActionTypeButton(),
+                            const SizedBox(width: 6),
+                            _StickerButton(
+                              textEditingController: textEditingController,
+                            ),
+                            const SizedBox(width: 16),
+                          ],
+                          Expanded(
+                            child: _SendTextField(
+                              focusNode: focusNode,
+                              textEditingController: textEditingController,
+                              mentionProviderInstance: mentionProviderInstance,
+                              aiModeEnabled: aiModeEnabled,
+                              providerName: aiProvider?.name,
+                            ),
+                          ),
+                          SizedBox(width: aiModeEnabled ? 10 : 16),
+                          _AnimatedSendOrVoiceButton(
+                            conversationId: conversationId,
+                            textEditingController: textEditingController,
+                            textEditingValueStream: textEditingValueStream,
+                            aiModeEnabled: aiModeEnabled,
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    _AnimatedSendOrVoiceButton(
-                      conversationId: conversationId,
-                      textEditingController: textEditingController,
-                      textEditingValueStream: textEditingValueStream,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -256,11 +305,13 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
     required this.conversationId,
     required this.textEditingValueStream,
     required this.textEditingController,
+    required this.aiModeEnabled,
   });
 
   final String? conversationId;
   final Stream<TextEditingValue> textEditingValueStream;
   final TextEditingController textEditingController;
+  final bool aiModeEnabled;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -273,6 +324,39 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
           initialData: textEditingController.text.isNotEmpty,
         ).data ??
         false;
+
+    if (aiModeEnabled) {
+      final backgroundColor = context.theme.ai.accent;
+      final foregroundColor = context.theme.ai.onAccent;
+
+      return AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: hasInputText ? 1 : 0.45,
+        child: IgnorePointer(
+          ignoring: !hasInputText,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              shape: BoxShape.circle,
+            ),
+            child: ActionButton(
+              size: 20,
+              color: foregroundColor,
+              child: Icon(
+                Icons.arrow_upward_rounded,
+                size: 20,
+                color: foregroundColor,
+              ),
+              onTap: () => _sendMessage(
+                context,
+                textEditingController,
+                conversationId: conversationId,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     // start -> show voice button
     // end -> show send button
@@ -476,12 +560,16 @@ class _SendTextField extends HookConsumerWidget {
     required this.focusNode,
     required this.textEditingController,
     required this.mentionProviderInstance,
+    required this.aiModeEnabled,
+    required this.providerName,
   });
 
   final FocusNode focusNode;
   final TextEditingController textEditingController;
   final AutoDisposeStateNotifierProvider<MentionStateNotifier, MentionState>
   mentionProviderInstance;
+  final bool aiModeEnabled;
+  final String? providerName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -531,14 +619,29 @@ class _SendTextField extends HookConsumerWidget {
         ).data ??
         false;
 
-    return Container(
+    final placeholder = aiModeEnabled
+        ? 'Ask ${providerName?.trim().isNotEmpty == true ? providerName : 'AI'} anything'
+        : isEncryptConversation
+        ? context.l10n.chatHintE2e
+        : 'Type message or /ai';
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        borderRadius: BorderRadius.all(Radius.circular(aiModeEnabled ? 14 : 4)),
         color: context.dynamicColor(
-          const Color.fromRGBO(245, 247, 250, 1),
+          aiModeEnabled
+              ? const Color.fromRGBO(255, 255, 255, 0.78)
+              : const Color.fromRGBO(245, 247, 250, 1),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
+        border: aiModeEnabled
+            ? Border.all(
+                color: context.theme.ai.surfaceBorder,
+              )
+            : null,
       ),
       alignment: Alignment.center,
       child: FocusableActionDetector(
@@ -569,8 +672,17 @@ class _SendTextField extends HookConsumerWidget {
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
           EscapeIntent: CallbackAction<Intent>(
-            onInvoke: (_) =>
-                ref.read(quoteMessageProvider.notifier).state = null,
+            onInvoke: (_) {
+              if (aiModeEnabled) {
+                final conversationId = ref.read(currentConversationIdProvider);
+                if (conversationId != null) {
+                  ref.read(aiInputModeProvider(conversationId).notifier).exit();
+                  return null;
+                }
+              }
+              ref.read(quoteMessageProvider.notifier).state = null;
+              return null;
+            },
           ),
         },
         child: Stack(
@@ -589,7 +701,12 @@ class _SendTextField extends HookConsumerWidget {
                 isDense: true,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
-                contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
+                contentPadding: EdgeInsets.only(
+                  left: 10,
+                  right: 10,
+                  top: 10,
+                  bottom: 10,
+                ),
               ),
               selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,
               contextMenuBuilder: (context, state) =>
@@ -602,9 +719,7 @@ class _SendTextField extends HookConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: IgnorePointer(
                     child: Text(
-                      isEncryptConversation
-                          ? context.l10n.chatHintE2e
-                          : 'Type message or /ai',
+                      placeholder,
                       style: TextStyle(
                         color: context.theme.secondaryText,
                         fontSize: 14,
@@ -625,45 +740,79 @@ class _SendTextField extends HookConsumerWidget {
 class _AiModeBar extends HookConsumerWidget {
   const _AiModeBar({
     required this.conversationId,
-    required this.aiModeState,
-    required this.providerName,
+    required this.provider,
   });
 
   final String conversationId;
-  final AiModeState aiModeState;
-  final String? providerName;
+  final AiProviderConfig? provider;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!aiModeState.enabled) return const SizedBox();
-    return Container(
-      width: double.infinity,
-      color: context.theme.primary,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: context.messageBubbleColor(false),
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'AI Mode · ${providerName ?? 'No Provider'}',
-                style: TextStyle(color: context.theme.text, fontSize: 14),
+    final providerName = provider?.name ?? 'No Provider';
+    final model = provider?.model.trim();
+    final aiColors = context.theme.ai;
+    final accentColor = aiColors.accent;
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: aiColors.surfaceVariant,
+            borderRadius: const BorderRadius.all(Radius.circular(999)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.auto_awesome_rounded, size: 14, color: accentColor),
+              const SizedBox(width: 6),
+              Text(
+                'AI Mode',
+                style: TextStyle(
+                  color: accentColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            ActionButton(
-              name: Resources.assetsImagesIcCloseSvg,
-              color: context.theme.icon,
-              size: 18,
-              onTap: () =>
-                  ref.read(aiInputModeProvider(conversationId).notifier).exit(),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                providerName,
+                style: TextStyle(
+                  color: context.theme.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                model?.isNotEmpty == true ? model! : 'Next message goes to AI',
+                style: TextStyle(
+                  color: context.theme.secondaryText,
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        ActionButton(
+          name: Resources.assetsImagesIcCloseSvg,
+          color: context.theme.icon,
+          size: 18,
+          onTap: () =>
+              ref.read(aiInputModeProvider(conversationId).notifier).exit(),
+        ),
+      ],
     );
   }
 }

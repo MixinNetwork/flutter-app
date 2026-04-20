@@ -25,6 +25,18 @@ const lightBrightnessThemeData = BrightnessThemeData(
   waveformBackground: Color.fromRGBO(221, 221, 221, 1),
   waveformForeground: Color.fromRGBO(155, 155, 155, 1),
   settingCellBackgroundColor: Colors.white,
+  ai: AiColorScheme(
+    avatarBackground: Color.fromRGBO(227, 237, 213, 1),
+    accent: Color.fromRGBO(54, 87, 35, 1),
+    onAccent: Colors.white,
+    surface: Color.fromRGBO(241, 248, 243, 1),
+    surfaceBorder: Color.fromRGBO(200, 223, 208, 1),
+    surfaceVariant: Color.fromRGBO(223, 236, 214, 1),
+    userBubble: Color.fromRGBO(255, 241, 214, 1),
+    assistantBubble: Color.fromRGBO(228, 245, 239, 1),
+    errorBubble: Color.fromRGBO(255, 235, 235, 1),
+    error: Color.fromRGBO(193, 63, 63, 1),
+  ),
 );
 
 const darkBrightnessThemeData = BrightnessThemeData(
@@ -50,6 +62,18 @@ const darkBrightnessThemeData = BrightnessThemeData(
   waveformBackground: Color.fromRGBO(255, 255, 255, 0.4),
   waveformForeground: Color.fromRGBO(255, 255, 255, 1),
   settingCellBackgroundColor: Color.fromRGBO(255, 255, 255, 0.06),
+  ai: AiColorScheme(
+    avatarBackground: Color.fromRGBO(64, 78, 56, 1),
+    accent: Color.fromRGBO(214, 235, 204, 1),
+    onAccent: Color.fromRGBO(26, 42, 31, 1),
+    surface: Color.fromRGBO(35, 52, 44, 1),
+    surfaceBorder: Color.fromRGBO(72, 101, 88, 1),
+    surfaceVariant: Color.fromRGBO(58, 77, 66, 1),
+    userBubble: Color.fromRGBO(96, 76, 34, 1),
+    assistantBubble: Color.fromRGBO(43, 77, 65, 1),
+    errorBubble: Color.fromRGBO(88, 46, 46, 1),
+    error: Color.fromRGBO(255, 173, 173, 1),
+  ),
 );
 
 final circleColors = [

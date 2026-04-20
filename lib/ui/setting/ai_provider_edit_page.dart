@@ -8,6 +8,7 @@ import '../../ai/model/ai_provider_type.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/database_provider.dart';
 
@@ -19,6 +20,19 @@ class AiProviderEditPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final database = ref.watch(databaseProvider).requireValue;
+    final theme = context.theme;
+    final inputBackgroundColor = context.dynamicColor(
+      Colors.white,
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+    );
+    final inputBorderColor = context.dynamicColor(
+      theme.divider,
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.10),
+    );
+    final inputIconColor = context.dynamicColor(
+      theme.secondaryText,
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.52),
+    );
     final nameController = useTextEditingController(text: initial?.name ?? '');
     final baseUrlController = useTextEditingController(
       text: initial?.baseUrl ?? '',
@@ -26,15 +40,68 @@ class AiProviderEditPage extends HookConsumerWidget {
     final apiKeyController = useTextEditingController(
       text: initial?.apiKey ?? '',
     );
-    final modelController = useTextEditingController(
-      text: initial?.model ?? '',
-    );
     final providerType = useState(
       initial?.type ?? AiProviderType.openaiCompatible,
     );
+    final models = useState(
+      _normalizeModels(initial?.models ?? [initial?.model ?? '']),
+    );
+    final defaultModel = useState(
+      _resolveDefaultModel(
+        models.value,
+        initial?.defaultModel ?? initial?.model,
+      ),
+    );
+    final obscureApiKey = useState(true);
+
+    useEffect(() {
+      final resolved = _resolveDefaultModel(models.value, defaultModel.value);
+      if (resolved != defaultModel.value) {
+        defaultModel.value = resolved;
+      }
+      return null;
+    }, [models.value, defaultModel.value]);
+
+    Future<void> showModelDialog({String? initialValue, int? index}) async {
+      final result = await showMixinDialog<String>(
+        context: context,
+        child: EditDialog(
+          title: Text(index == null ? 'Add Model' : 'Edit Model'),
+          editText: initialValue ?? '',
+          hintText: 'gpt-4.1-mini',
+          positiveAction: index == null ? 'Add' : 'Save',
+        ),
+      );
+      final model = result?.trim();
+      if (model == null || model.isEmpty) return;
+
+      final nextModels = [...models.value];
+      if (index != null && index >= 0 && index < nextModels.length) {
+        nextModels[index] = model;
+      } else {
+        nextModels.add(model);
+      }
+      models.value = _normalizeModels(nextModels);
+      defaultModel.value = _resolveDefaultModel(
+        models.value,
+        index != null && initialValue == defaultModel.value
+            ? model
+            : defaultModel.value,
+      );
+    }
+
+    void removeModelAt(int index) {
+      final nextModels = [...models.value]..removeAt(index);
+      final removed = models.value[index];
+      models.value = nextModels;
+      defaultModel.value = _resolveDefaultModel(
+        nextModels,
+        removed == defaultModel.value ? null : defaultModel.value,
+      );
+    }
 
     return Scaffold(
-      backgroundColor: context.theme.background,
+      backgroundColor: theme.background,
       appBar: MixinAppBar(
         title: Text(initial == null ? 'Add AI Provider' : 'Edit AI Provider'),
         actions: [
@@ -43,11 +110,16 @@ class AiProviderEditPage extends HookConsumerWidget {
               final name = nameController.text.trim();
               final baseUrl = baseUrlController.text.trim();
               final apiKey = apiKeyController.text.trim();
-              final model = modelController.text.trim();
+              final normalizedModels = _normalizeModels(models.value);
+              final resolvedDefaultModel = _resolveDefaultModel(
+                normalizedModels,
+                defaultModel.value,
+              );
               if (name.isEmpty ||
                   baseUrl.isEmpty ||
                   apiKey.isEmpty ||
-                  model.isEmpty) {
+                  normalizedModels.isEmpty ||
+                  resolvedDefaultModel.isEmpty) {
                 showToastFailed(ToastError('Please complete all fields'));
                 return;
               }
@@ -60,21 +132,25 @@ class AiProviderEditPage extends HookConsumerWidget {
                             type: providerType.value,
                             baseUrl: baseUrl,
                             apiKey: apiKey,
-                            model: model,
+                            model: resolvedDefaultModel,
+                            models: normalizedModels,
+                            defaultModel: resolvedDefaultModel,
                           ))
                       .copyWith(
                         name: name,
                         type: providerType.value,
                         baseUrl: baseUrl,
                         apiKey: apiKey,
-                        model: model,
+                        models: normalizedModels,
+                        defaultModel: resolvedDefaultModel,
+                        model: resolvedDefaultModel,
                       );
               database.settingProperties.saveAiProvider(provider);
               Navigator.of(context).pop();
             },
             child: Text(
               'Save',
-              style: TextStyle(color: context.theme.accent, fontSize: 16),
+              style: TextStyle(color: theme.accent, fontSize: 16),
             ),
           ),
         ],
@@ -82,28 +158,211 @@ class AiProviderEditPage extends HookConsumerWidget {
       body: Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
-          child: CellGroup(
-            cellBackgroundColor: context.theme.settingCellBackgroundColor,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 20),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _TextFieldCell(
-                  title: 'Display Name',
-                  controller: nameController,
+                const _SectionLabel(
+                  title: 'Provider',
                 ),
-                _ProviderTypeCell(
-                  value: providerType.value,
-                  onChanged: (value) => providerType.value = value,
+                CellGroup(
+                  padding: const EdgeInsets.only(right: 10, left: 10),
+                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
+                  child: Column(
+                    children: [
+                      _FormFieldCell(
+                        label: 'Display Name',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: inputBorderColor,
+                        child: TextField(
+                          controller: nameController,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: InputBorder.none,
+                            hintText: 'OpenAI / Anthropic / Self-hosted',
+                            hintStyle: TextStyle(color: theme.secondaryText),
+                          ),
+                        ),
+                      ),
+                      _CellDivider(color: theme.divider),
+                      _FormFieldCell(
+                        label: 'Provider Type',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: inputBorderColor,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<AiProviderType>(
+                            value: providerType.value,
+                            isExpanded: true,
+                            dropdownColor: theme.popUp,
+                            style: TextStyle(
+                              color: theme.text,
+                              fontSize: 16,
+                            ),
+                            iconEnabledColor: inputIconColor,
+                            onChanged: (value) {
+                              if (value != null) providerType.value = value;
+                            },
+                            items: AiProviderType.values
+                                .map(
+                                  (type) => DropdownMenuItem<AiProviderType>(
+                                    value: type,
+                                    child: Text(
+                                      type == AiProviderType.anthropic
+                                          ? 'Anthropic'
+                                          : 'OpenAI Compatible',
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                _TextFieldCell(
-                  title: 'Base URL',
-                  controller: baseUrlController,
+                const _SectionLabel(
+                  title: 'Endpoint',
                 ),
-                _TextFieldCell(
-                  title: 'API Key',
-                  controller: apiKeyController,
-                  obscureText: true,
+                CellGroup(
+                  padding: const EdgeInsets.only(right: 10, left: 10),
+                  cellBackgroundColor: theme.settingCellBackgroundColor,
+                  child: _FormFieldCell(
+                    label: 'Base URL',
+                    backgroundColor: inputBackgroundColor,
+                    borderColor: inputBorderColor,
+                    child: TextField(
+                      controller: baseUrlController,
+                      keyboardType: TextInputType.url,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        border: InputBorder.none,
+                        hintText: 'https://api.example.com/v1',
+                        hintStyle: TextStyle(color: theme.secondaryText),
+                      ),
+                    ),
+                  ),
                 ),
-                _TextFieldCell(title: 'Model', controller: modelController),
+                const _SectionLabel(
+                  title: 'Authorization',
+                ),
+                CellGroup(
+                  padding: const EdgeInsets.only(right: 10, left: 10),
+                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
+                  child: Column(
+                    children: [
+                      _FormFieldCell(
+                        label: 'API Key',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: inputBorderColor,
+                        trailing: IconButton(
+                          onPressed: () =>
+                              obscureApiKey.value = !obscureApiKey.value,
+                          icon: Icon(
+                            obscureApiKey.value
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            size: 20,
+                            color: inputIconColor,
+                          ),
+                        ),
+                        child: TextField(
+                          controller: apiKeyController,
+                          obscureText: obscureApiKey.value,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: InputBorder.none,
+                            hintText: 'sk-...',
+                            hintStyle: TextStyle(color: theme.secondaryText),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const _SectionLabel(
+                  title: 'Models',
+                ),
+                CellGroup(
+                  padding: const EdgeInsets.only(right: 10, left: 10),
+                  cellBackgroundColor: theme.settingCellBackgroundColor,
+                  child: Column(
+                    children: [
+                      CellItem(
+                        title: const Text('Default Model'),
+                        description: Text(
+                          defaultModel.value.isEmpty
+                              ? 'No default model yet'
+                              : defaultModel.value,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: null,
+                      ),
+                      _CellDivider(color: context.theme.divider),
+                      CellItem(
+                        title: const Text('Add Model'),
+                        leading: Icon(Icons.add, color: context.theme.icon),
+                        trailing: null,
+                        onTap: showModelDialog,
+                      ),
+                      if (models.value.isEmpty) ...[
+                        _CellDivider(color: context.theme.divider),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 20,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.view_list_outlined,
+                                size: 18,
+                                color: theme.secondaryText,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'No models yet. Add at least one model before saving.',
+                                  style: TextStyle(
+                                    color: theme.secondaryText,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else ...[
+                        for (var i = 0; i < models.value.length; i++) ...[
+                          _CellDivider(color: context.theme.divider),
+                          _ModelItem(
+                            model: models.value[i],
+                            selected: models.value[i] == defaultModel.value,
+                            onTap: () => defaultModel.value = models.value[i],
+                            onEdit: () => showModelDialog(
+                              initialValue: models.value[i],
+                              index: i,
+                            ),
+                            onDelete: () => removeModelAt(i),
+                          ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -111,63 +370,196 @@ class AiProviderEditPage extends HookConsumerWidget {
       ),
     );
   }
+
+  static List<String> _normalizeModels(List<String> models) => models
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty)
+      .toSet()
+      .toList(growable: false);
+
+  static String _resolveDefaultModel(List<String> models, String? candidate) {
+    if (models.isEmpty) return '';
+    final normalized = candidate?.trim();
+    if (normalized != null &&
+        normalized.isNotEmpty &&
+        models.contains(normalized)) {
+      return normalized;
+    }
+    return models.first;
+  }
 }
 
-class _ProviderTypeCell extends StatelessWidget {
-  const _ProviderTypeCell({required this.value, required this.onChanged});
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.title});
 
-  final AiProviderType value;
-  final ValueChanged<AiProviderType> onChanged;
+  final String title;
 
   @override
-  Widget build(BuildContext context) => CellItem(
-    title: const Text('Provider Type'),
-    trailing: DropdownButtonHideUnderline(
-      child: DropdownButton<AiProviderType>(
-        value: value,
-        onChanged: (value) {
-          if (value != null) onChanged(value);
-        },
-        items: AiProviderType.values
-            .map(
-              (type) => DropdownMenuItem<AiProviderType>(
-                value: type,
-                child: Text(
-                  type == AiProviderType.anthropic
-                      ? 'Anthropic'
-                      : 'OpenAI Compatible',
-                ),
-              ),
-            )
-            .toList(),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(left: 20, right: 20, bottom: 6, top: 6),
+    child: Text(
+      title,
+      style: TextStyle(
+        color: context.theme.text,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
       ),
     ),
   );
 }
 
-class _TextFieldCell extends StatelessWidget {
-  const _TextFieldCell({
-    required this.title,
-    required this.controller,
-    this.obscureText = false,
+class _FormFieldCell extends StatelessWidget {
+  const _FormFieldCell({
+    required this.label,
+    required this.child,
+    required this.backgroundColor,
+    required this.borderColor,
+    this.trailing,
   });
 
-  final String title;
-  final TextEditingController controller;
-  final bool obscureText;
+  final String label;
+  final Widget child;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: context.theme.secondaryText,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        _InputSurface(
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          trailing: trailing,
+          child: child,
+        ),
+      ],
+    ),
+  );
+}
+
+class _InputSurface extends StatelessWidget {
+  const _InputSurface({
+    required this.child,
+    required this.backgroundColor,
+    required this.borderColor,
+    this.trailing,
+  });
+
+  final Widget child;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+    decoration: BoxDecoration(
+      color: backgroundColor,
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      border: Border.all(color: borderColor),
+    ),
+    child: Row(
+      children: [
+        Expanded(child: child),
+        if (trailing != null) ...[
+          const SizedBox(width: 8),
+          trailing!,
+        ],
+      ],
+    ),
+  );
+}
+
+class _ModelItem extends StatelessWidget {
+  const _ModelItem({
+    required this.model,
+    required this.selected,
+    required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final String model;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) => CellItem(
-    title: TextField(
-      controller: controller,
-      obscureText: obscureText,
-      style: TextStyle(color: context.theme.text, fontSize: 16),
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        hintText: title,
-        hintStyle: TextStyle(color: context.theme.secondaryText),
-      ),
+    selected: selected,
+    onTap: onTap,
+    title: Row(
+      children: [
+        Expanded(
+          child: Text(
+            model,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (selected)
+          Container(
+            margin: const EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: context.theme.accent.withValues(alpha: 0.12),
+              borderRadius: const BorderRadius.all(Radius.circular(999)),
+            ),
+            child: Text(
+              'Default',
+              style: TextStyle(
+                color: context.theme.accent,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
     ),
-    trailing: const SizedBox.shrink(),
+    description: Text(
+      selected ? 'Used for new AI requests' : 'Tap to set as default',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    ),
+    trailing: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: onEdit,
+          icon: Icon(Icons.edit_outlined, color: context.theme.icon),
+        ),
+        IconButton(
+          onPressed: onDelete,
+          icon: Icon(Icons.delete_outline, color: context.theme.red),
+        ),
+      ],
+    ),
+  );
+}
+
+class _CellDivider extends StatelessWidget {
+  const _CellDivider({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Divider(
+    height: 0.5,
+    indent: 16,
+    endIndent: 16,
+    color: color,
   );
 }

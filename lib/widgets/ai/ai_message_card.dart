@@ -254,14 +254,9 @@ class _AiAvatar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = context.dynamicColor(
-      const Color.fromRGBO(227, 237, 213, 1),
-      darkColor: const Color.fromRGBO(64, 78, 56, 1),
-    );
-    final foreground = context.dynamicColor(
-      const Color.fromRGBO(54, 87, 35, 1),
-      darkColor: const Color.fromRGBO(214, 235, 204, 1),
-    );
+    final aiColors = context.theme.ai;
+    final background = aiColors.avatarBackground;
+    final foreground = aiColors.accent;
     final disableAnimations =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final controller = useAnimationController(
@@ -567,23 +562,14 @@ Color _bubbleColor(
   required String status,
 }) {
   if (status == 'error') {
-    return context.dynamicColor(
-      const Color.fromRGBO(255, 235, 235, 1),
-      darkColor: const Color.fromRGBO(88, 46, 46, 1),
-    );
+    return context.theme.ai.errorBubble;
   }
 
   if (isUser) {
-    return context.dynamicColor(
-      const Color.fromRGBO(255, 241, 214, 1),
-      darkColor: const Color.fromRGBO(96, 76, 34, 1),
-    );
+    return context.theme.ai.userBubble;
   }
 
-  return context.dynamicColor(
-    const Color.fromRGBO(228, 245, 239, 1),
-    darkColor: const Color.fromRGBO(43, 77, 65, 1),
-  );
+  return context.theme.ai.assistantBubble;
 }
 
 Color _statusColor(
@@ -592,30 +578,14 @@ Color _statusColor(
   required String status,
 }) {
   if (status == 'error') {
-    return context.dynamicColor(
-      const Color.fromRGBO(193, 63, 63, 1),
-      darkColor: const Color.fromRGBO(255, 173, 173, 1),
-    );
+    return context.theme.ai.error;
   }
 
   if (isUser) {
-    return context.dynamicColor(
-      const Color.fromRGBO(176, 107, 18, 1),
-      darkColor: const Color.fromRGBO(255, 214, 143, 1),
-    );
+    return context.theme.green;
   }
 
-  if (status == 'pending') {
-    return context.dynamicColor(
-      const Color.fromRGBO(46, 123, 110, 1),
-      darkColor: const Color.fromRGBO(159, 230, 217, 1),
-    );
-  }
-
-  return context.dynamicColor(
-    const Color.fromRGBO(33, 126, 96, 1),
-    darkColor: const Color.fromRGBO(150, 238, 210, 1),
-  );
+  return context.theme.ai.accent;
 }
 
 String _menuCopyText(AiChatMessage message) {
