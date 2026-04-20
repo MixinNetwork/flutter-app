@@ -4,6 +4,7 @@ import '../ui/provider/slide_category_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/property/setting_property.dart';
+import 'dao/ai_chat_message_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
 import 'dao/chain_dao.dart';
@@ -46,6 +47,8 @@ class Database {
   final FtsDatabase ftsDatabase;
 
   AppDao get appDao => mixinDatabase.appDao;
+
+  AiChatMessageDao get aiChatMessageDao => mixinDatabase.aiChatMessageDao;
 
   AssetDao get assetDao => mixinDatabase.assetDao;
 

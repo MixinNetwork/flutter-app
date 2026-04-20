@@ -39,6 +39,7 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Chains get chains => attachedDatabase.chains;
   Properties get properties => attachedDatabase.properties;
+  AiChatMessages get aiChatMessages => attachedDatabase.aiChatMessages;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
   InscriptionCollections get inscriptionCollections =>
@@ -310,6 +311,8 @@ class UserDaoManager {
       $ChainsTableManager(_db.attachedDatabase, _db.chains);
   $PropertiesTableManager get properties =>
       $PropertiesTableManager(_db.attachedDatabase, _db.properties);
+  $AiChatMessagesTableManager get aiChatMessages =>
+      $AiChatMessagesTableManager(_db.attachedDatabase, _db.aiChatMessages);
   $SafeSnapshotsTableManager get safeSnapshots =>
       $SafeSnapshotsTableManager(_db.attachedDatabase, _db.safeSnapshots);
   $TokensTableManager get tokens =>

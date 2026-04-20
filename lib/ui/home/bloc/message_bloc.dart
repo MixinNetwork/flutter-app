@@ -25,6 +25,25 @@ abstract class _MessageEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class ChatTimelineItem extends Equatable {
+  const ChatTimelineItem.message(this.message) : aiMessage = null;
+
+  const ChatTimelineItem.ai(this.aiMessage) : message = null;
+
+  final MessageItem? message;
+  final AiChatMessage? aiMessage;
+
+  bool get isMessage => message != null;
+  bool get isAiMessage => aiMessage != null;
+
+  String get id => message?.messageId ?? aiMessage!.id;
+
+  DateTime get createdAt => message?.createdAt ?? aiMessage!.createdAt;
+
+  @override
+  List<Object?> get props => [message, aiMessage];
+}
+
 class _MessageJumpCurrentEvent extends _MessageEvent {}
 
 class _MessageInitEvent extends _MessageEvent {
@@ -73,11 +92,21 @@ class _MessageDeleteEvent extends _MessageEvent {
   List<Object> get props => [messageId];
 }
 
+class _AiMessagesChangedEvent extends _MessageEvent {
+  _AiMessagesChangedEvent(this.data);
+
+  final List<AiChatMessage> data;
+
+  @override
+  List<Object> get props => [data];
+}
+
 class MessageState extends Equatable {
   MessageState({
     this.top = const [],
     this.center,
     this.bottom = const [],
+    this.aiMessages = const [],
     this.conversationId,
     this.isLatest = false,
     this.isOldest = false,
@@ -101,6 +130,7 @@ class MessageState extends Equatable {
   final List<MessageItem> top;
   final MessageItem? center;
   final List<MessageItem> bottom;
+  final List<AiChatMessage> aiMessages;
   final bool isLatest;
   final bool isOldest;
   final String? lastReadMessageId;
@@ -112,6 +142,7 @@ class MessageState extends Equatable {
     top,
     center,
     bottom,
+    aiMessages,
     isLatest,
     isOldest,
     lastReadMessageId,
@@ -132,11 +163,86 @@ class MessageState extends Equatable {
     ...bottom,
   ];
 
+  List<AiChatMessage> get visibleAiMessages {
+    if (aiMessages.isEmpty) return const [];
+
+    final messages = list;
+    if (messages.isEmpty) {
+      return aiMessages.toList()..sort(_compareAiMessages);
+    }
+
+    final messageIds = messages.map((message) => message.messageId).toSet();
+    final start = topMessage?.createdAt;
+    final end = bottomMessage?.createdAt;
+
+    bool inLoadedRange(DateTime? value) {
+      if (value == null || start == null || end == null) return false;
+      return !value.isBefore(start) && !value.isAfter(end);
+    }
+
+    final visible = aiMessages.where((message) {
+      final anchorMessageId = message.anchorMessageId;
+      if (anchorMessageId != null && messageIds.contains(anchorMessageId)) {
+        return true;
+      }
+      return inLoadedRange(message.anchorCreatedAt) ||
+          inLoadedRange(message.createdAt);
+    }).toList()..sort(_compareAiMessages);
+
+    return visible;
+  }
+
+  List<ChatTimelineItem> get timeline {
+    final messages = list;
+    final visibleAi = visibleAiMessages;
+
+    if (messages.isEmpty) {
+      return visibleAi.map(ChatTimelineItem.ai).toList();
+    }
+
+    final anchored = <String, List<AiChatMessage>>{};
+    final floating = <AiChatMessage>[];
+
+    for (final aiMessage in visibleAi) {
+      final anchorMessageId = aiMessage.anchorMessageId;
+      if (anchorMessageId != null) {
+        anchored.putIfAbsent(anchorMessageId, () => []).add(aiMessage);
+      } else {
+        floating.add(aiMessage);
+      }
+    }
+
+    final result = <ChatTimelineItem>[];
+    var floatingIndex = 0;
+
+    for (final message in messages) {
+      while (floatingIndex < floating.length &&
+          !floating[floatingIndex].createdAt.isAfter(message.createdAt)) {
+        result.add(ChatTimelineItem.ai(floating[floatingIndex]));
+        floatingIndex++;
+      }
+
+      result.add(ChatTimelineItem.message(message));
+      final anchoredMessages = anchored[message.messageId];
+      if (anchoredMessages != null) {
+        result.addAll(anchoredMessages.map(ChatTimelineItem.ai));
+      }
+    }
+
+    while (floatingIndex < floating.length) {
+      result.add(ChatTimelineItem.ai(floating[floatingIndex]));
+      floatingIndex++;
+    }
+
+    return result;
+  }
+
   MessageState copyWith({
     String? conversationId,
     List<MessageItem>? top,
     MessageItem? center,
     List<MessageItem>? bottom,
+    List<AiChatMessage>? aiMessages,
     bool? isLatest,
     bool? isOldest,
     String? lastReadMessageId,
@@ -146,6 +252,7 @@ class MessageState extends Equatable {
     top: top ?? this.top,
     center: center ?? this.center,
     bottom: bottom ?? this.bottom,
+    aiMessages: aiMessages ?? this.aiMessages,
     isLatest: isLatest ?? this.isLatest,
     isOldest: isOldest ?? this.isOldest,
     lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
@@ -154,6 +261,7 @@ class MessageState extends Equatable {
 
   MessageState _copyWithJumpCurrentState() => MessageState(
     top: list.toList(),
+    aiMessages: aiMessages,
     refreshKey: Object(),
     conversationId: conversationId,
     isLatest: isLatest,
@@ -167,6 +275,7 @@ class MessageState extends Equatable {
         conversationId: conversationId,
         top: top,
         bottom: bottom,
+        aiMessages: aiMessages,
         isLatest: isLatest,
         isOldest: isOldest,
         lastReadMessageId: lastReadMessageId,
@@ -187,6 +296,26 @@ class MessageState extends Equatable {
 
     return this;
   }
+}
+
+int _compareAiMessages(AiChatMessage a, AiChatMessage b) {
+  final anchorCompare = _compareNullableDateTime(
+    a.anchorCreatedAt,
+    b.anchorCreatedAt,
+  );
+  if (anchorCompare != 0) return anchorCompare;
+
+  final createdAtCompare = a.createdAt.compareTo(b.createdAt);
+  if (createdAtCompare != 0) return createdAtCompare;
+
+  return a.id.compareTo(b.id);
+}
+
+int _compareNullableDateTime(DateTime? a, DateTime? b) {
+  if (a == null && b == null) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return a.compareTo(b);
 }
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
@@ -217,6 +346,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     on<_MessageDeleteEvent>(
       _onEvent,
       transformer: sequential(),
+    );
+    on<_AiMessagesChangedEvent>(
+      _onEvent,
+      transformer: restartable(),
     );
     on<_MessageScrollEvent>(
       _onEvent,
@@ -266,6 +399,22 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             return messageDao.watchInsertOrReplaceMessageStream(conversationId);
           })
           .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
+    );
+
+    addSubscription(
+      conversationNotifier.stream
+          .startWith(conversationNotifier.state)
+          .map((event) => event?.conversationId)
+          .distinct()
+          .switchMap((conversationId) {
+            if (conversationId == null) {
+              return Stream.value(const <AiChatMessage>[]);
+            }
+            return database.aiChatMessageDao.watchConversationMessages(
+              conversationId,
+            );
+          })
+          .listen((state) => add(_AiMessagesChangedEvent(state))),
     );
 
     addSubscription(
@@ -325,6 +474,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     } else if (event is _MessageDeleteEvent) {
       final messageState = state.removeMessage(event.messageId);
       emit(_pretreatment(messageState));
+    } else if (event is _AiMessagesChangedEvent) {
+      emit(_pretreatment(state.copyWith(aiMessages: event.data)));
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
@@ -408,12 +559,16 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       limit,
       centerMessageId: _centerMessageId,
     );
+    final aiMessages = await database.aiChatMessageDao.conversationMessages(
+      conversationId,
+    );
 
     return state.copyWith(
       conversationId: conversationId,
       center: state.center,
       bottom: state.bottom,
       top: state.top,
+      aiMessages: aiMessages,
     );
   }
 
@@ -429,6 +584,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
       return MessageState(
         top: list.reversed.toList(),
+        aiMessages: state.aiMessages,
         isLatest: true,
         isOldest: list.length < limit,
       );
@@ -468,6 +624,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       top: topList,
       center: center,
       bottom: bottomList,
+      aiMessages: state.aiMessages,
       isLatest: isLatest,
       isOldest: isOldest,
     );

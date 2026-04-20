@@ -10,9 +10,14 @@ import '../utils/uri_utils.dart';
 import 'mixin_image.dart';
 
 class MarkdownColumn extends ConsumerWidget {
-  const MarkdownColumn({required this.data, super.key});
+  const MarkdownColumn({
+    required this.data,
+    super.key,
+    this.selectable = false,
+  });
 
   final String data;
+  final bool selectable;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +29,7 @@ class MarkdownColumn extends ConsumerWidget {
       child: MarkdownWidget(
         data: data,
         useColumn: true,
-        selectable: false,
+        selectable: selectable,
         padding: EdgeInsets.zero,
         theme: _createMarkdownTheme(context, chatFontSizeDelta),
         imageBuilder: _buildMarkdownImage,

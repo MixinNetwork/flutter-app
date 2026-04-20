@@ -18,6 +18,7 @@ import 'converter/safe_deposit_type_converter.dart';
 import 'converter/safe_withdrawal_type_converter.dart';
 import 'converter/user_relationship_converter.dart';
 import 'dao/address_dao.dart';
+import 'dao/ai_chat_message_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
 import 'dao/chain_dao.dart';
@@ -61,6 +62,7 @@ part 'mixin_database.g.dart';
   include: {'moor/mixin.drift', 'moor/dao/common.drift'},
   daos: [
     AddressDao,
+    AiChatMessageDao,
     AppDao,
     AssetDao,
     CircleConversationDao,
@@ -99,7 +101,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 28;
+  int get schemaVersion => 30;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -277,6 +279,22 @@ class MixinDatabase extends _$MixinDatabase {
       }
       if (from <= 27) {
         await _addColumnIfNotExists(m, tokens, tokens.precision);
+      }
+      if (from <= 28) {
+        await m.createTable(aiChatMessages);
+        await m.createIndex(indexAiChatMessagesConversationIdCreatedAt);
+      }
+      if (from <= 29) {
+        await _addColumnIfNotExists(
+          m,
+          aiChatMessages,
+          aiChatMessages.anchorMessageId,
+        );
+        await _addColumnIfNotExists(
+          m,
+          aiChatMessages,
+          aiChatMessages.anchorCreatedAt,
+        );
       }
     },
     beforeOpen: (details) async {

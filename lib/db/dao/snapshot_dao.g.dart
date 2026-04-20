@@ -39,6 +39,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   FavoriteApps get favoriteApps => attachedDatabase.favoriteApps;
   ExpiredMessages get expiredMessages => attachedDatabase.expiredMessages;
   Properties get properties => attachedDatabase.properties;
+  AiChatMessages get aiChatMessages => attachedDatabase.aiChatMessages;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
   InscriptionCollections get inscriptionCollections =>
@@ -230,6 +231,8 @@ class SnapshotDaoManager {
       $ExpiredMessagesTableManager(_db.attachedDatabase, _db.expiredMessages);
   $PropertiesTableManager get properties =>
       $PropertiesTableManager(_db.attachedDatabase, _db.properties);
+  $AiChatMessagesTableManager get aiChatMessages =>
+      $AiChatMessagesTableManager(_db.attachedDatabase, _db.aiChatMessages);
   $SafeSnapshotsTableManager get safeSnapshots =>
       $SafeSnapshotsTableManager(_db.attachedDatabase, _db.safeSnapshots);
   $TokensTableManager get tokens =>

@@ -139,6 +139,13 @@ class SettingPage extends HookConsumerWidget {
                             title: context.l10n.appearance,
                           ),
                           _Item(
+                            leadingAssetName:
+                                Resources.assetsImagesIcAppearanceSvg,
+                            pageName:
+                                ResponsiveNavigatorStateNotifier.aiSettingsPage,
+                            title: 'AI Settings',
+                          ),
+                          _Item(
                             leadingAssetName: Resources.assetsImagesIcAboutSvg,
                             pageName:
                                 ResponsiveNavigatorStateNotifier.aboutPage,

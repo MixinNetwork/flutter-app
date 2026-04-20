@@ -21,6 +21,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../../widgets/ai/ai_message_card.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/conversation/mute_dialog.dart';
@@ -570,20 +571,33 @@ class _List extends HookConsumerWidget {
     final state = useBlocState<MessageBloc, MessageState>(
       when: (state) => state.conversationId != null,
     );
-
     final key = ValueKey((state.conversationId, state.refreshKey));
-    final top = state.top;
     final center = state.center;
-    final bottom = state.bottom;
+    final timeline = state.timeline;
 
-    final ref = useRef<Map<String, Key>>({});
+    final centerTimelineIndex = center == null
+        ? null
+        : timeline.indexWhere(
+            (item) => item.message?.messageId == center.messageId,
+          );
+    final topTimeline = centerTimelineIndex == null
+        ? timeline
+        : timeline.take(centerTimelineIndex).toList();
+    final centerTimeline = centerTimelineIndex == null
+        ? null
+        : timeline[centerTimelineIndex];
+    final bottomTimeline = centerTimelineIndex == null
+        ? const <ChatTimelineItem>[]
+        : timeline.skip(centerTimelineIndex + 1).toList();
+
+    final keyRef = useRef<Map<String, Key>>({});
 
     final ids = state.list.map((e) => e.messageId);
 
     useMemoized(() {
-      ref.value.removeWhere((key, value) => !ids.contains(key));
+      keyRef.value.removeWhere((key, value) => !ids.contains(key));
       ids.forEach((id) {
-        ref.value[id] = ref.value[id] ?? GlobalKey(debugLabel: id);
+        keyRef.value[id] = keyRef.value[id] ?? GlobalKey(debugLabel: id);
       });
     }, [ids]);
 
@@ -596,6 +610,49 @@ class _List extends HookConsumerWidget {
       context,
     ).scrollController;
 
+    MessageItem? prevMessageOf(
+      ChatTimelineItem item,
+      List<ChatTimelineItem> items,
+    ) {
+      final index = items.indexOf(item);
+      if (index <= 0) return null;
+      for (var i = index - 1; i >= 0; i--) {
+        final message = items[i].message;
+        if (message != null) return message;
+      }
+      return null;
+    }
+
+    MessageItem? nextMessageOf(
+      ChatTimelineItem item,
+      List<ChatTimelineItem> items,
+    ) {
+      final index = items.indexOf(item);
+      if (index == -1 || index >= items.length - 1) return null;
+      for (var i = index + 1; i < items.length; i++) {
+        final message = items[i].message;
+        if (message != null) return message;
+      }
+      return null;
+    }
+
+    Widget buildTimelineChild(ChatTimelineItem item) {
+      if (item.isAiMessage) {
+        return AiMessageCard(
+          key: ValueKey('ai-${item.id}'),
+          message: item.aiMessage!,
+        );
+      }
+      final message = item.message!;
+      return MessageItemWidget(
+        key: keyRef.value[message.messageId],
+        prev: prevMessageOf(item, timeline),
+        message: message,
+        next: nextMessageOf(item, timeline),
+        lastReadMessageId: state.lastReadMessageId,
+      );
+    }
+
     return MessageDayTimeViewportWidget.chatPage(
       key: key,
       bottomKey: bottomKey,
@@ -604,7 +661,7 @@ class _List extends HookConsumerWidget {
       scrollController: scrollController,
       centerKey: center == null
           ? null
-          : ref.value[center.messageId] as GlobalKey?,
+          : keyRef.value[center.messageId] as GlobalKey?,
       child: ClampingCustomScrollView(
         key: key,
         center: key,
@@ -618,50 +675,28 @@ class _List extends HookConsumerWidget {
               context,
               index,
             ) {
-              final actualIndex = top.length - index - 1;
-              final messageItem = top[actualIndex];
-              return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
-                prev: top.getOrNull(actualIndex - 1),
-                message: messageItem,
-                next:
-                    top.getOrNull(actualIndex + 1) ??
-                    center ??
-                    bottom.lastOrNull,
-                lastReadMessageId: state.lastReadMessageId,
-              );
-            }, childCount: top.length),
+              final actualIndex = topTimeline.length - index - 1;
+              return buildTimelineChild(topTimeline[actualIndex]);
+            }, childCount: topTimeline.length),
           ),
           SliverToBoxAdapter(
             key: key,
             child: Builder(
               builder: (context) {
-                if (center == null) return const SizedBox();
-                return MessageItemWidget(
-                  key: ref.value[center.messageId],
-                  prev: top.lastOrNull,
-                  message: center,
-                  next: bottom.firstOrNull,
-                  lastReadMessageId: state.lastReadMessageId,
-                );
+                if (centerTimeline == null) return const SizedBox();
+                return buildTimelineChild(centerTimeline);
               },
             ),
           ),
           SliverList(
             key: bottomKey,
-            delegate: SliverChildBuilderDelegate((
-              context,
-              index,
-            ) {
-              final messageItem = bottom[index];
-              return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
-                prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-                message: messageItem,
-                next: bottom.getOrNull(index + 1),
-                lastReadMessageId: state.lastReadMessageId,
-              );
-            }, childCount: bottom.length),
+            delegate: SliverChildBuilderDelegate(
+              (
+                context,
+                index,
+              ) => buildTimelineChild(bottomTimeline[index]),
+              childCount: bottomTimeline.length,
+            ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
         ],

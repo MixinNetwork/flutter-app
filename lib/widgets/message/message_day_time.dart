@@ -80,14 +80,17 @@ class _CurrentShowingMessages {
   final List<Element?> dayTimeElements = [];
 
   void dumpKeyedSubtree(Element element, {bool reverse = false}) {
-    final item = element.descendantFirstOf(
+    final item = element.descendantFirstWhere(
       (e) => e.widget is MessageItemWidget,
     );
+    if (item == null) {
+      return;
+    }
     final widget = item.widget as MessageItemWidget;
 
     final dayTimeElement =
         !isSameDay(widget.message.createdAt, widget.prev?.createdAt)
-        ? element.descendantFirstOf(
+        ? element.descendantFirstWhere(
             (e) => e.widget is _MessageDayTimeWidget,
           )
         : null;
@@ -153,11 +156,11 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   }) => MessageDayTimeViewportWidget._create(
     () {
       final result = _CurrentShowingMessages();
-      (listKey.currentContext! as Element)
-          .descendantFirstOf((e) => e.widget is SliverList)
-          .visitChildElements((e) {
-            result.dumpKeyedSubtree(e, reverse: reverse);
-          });
+      final listElement = (listKey.currentContext! as Element)
+          .descendantFirstWhere((e) => e.widget is SliverList);
+      listElement?.visitChildElements((e) {
+        result.dumpKeyedSubtree(e, reverse: reverse);
+      });
       return result;
     },
     key: key,
@@ -350,7 +353,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
 }
 
 extension _ElementExt on Element {
-  Element descendantFirstOf(bool Function(Element e) predicate) {
+  Element? descendantFirstWhere(bool Function(Element e) predicate) {
     Element? dump(Element element) {
       if (predicate(element)) {
         return element;
@@ -365,6 +368,6 @@ extension _ElementExt on Element {
       return child;
     }
 
-    return dump(this)!;
+    return dump(this);
   }
 }
