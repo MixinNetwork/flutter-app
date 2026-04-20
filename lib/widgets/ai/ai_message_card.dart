@@ -166,6 +166,7 @@ class _AiMessageBody extends StatelessWidget {
       content: body,
       dateAndStatus: _AiFooter(
         isUser: isUser,
+        model: message.model,
         status: message.status,
         color: statusColor,
         dateTime: message.createdAt,
@@ -411,24 +412,44 @@ SelectedContent? _findSelectedContent(BuildContext context) {
 class _AiStatusBadge extends HookWidget {
   const _AiStatusBadge({
     required this.isUser,
+    required this.model,
     required this.status,
     required this.color,
   });
 
   final bool isUser;
+  final String? model;
   final String status;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    if (status == 'pending') {
-      return _AiThinkingIndicator(color: color);
+    final trimmedModel = isUser ? null : model?.trim();
+    final icon = status == 'pending'
+        ? _AiThinkingIndicator(color: color)
+        : Icon(
+            _statusIcon(messageRoleIsUser: isUser, status: status),
+            size: 12,
+            color: color,
+          );
+
+    if (trimmedModel == null || trimmedModel.isEmpty) {
+      return icon;
     }
 
-    return Icon(
-      _statusIcon(messageRoleIsUser: isUser, status: status),
-      size: 12,
-      color: color,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        icon,
+        const SizedBox(width: 4),
+        Text(
+          trimmedModel,
+          style: TextStyle(
+            fontSize: context.messageStyle.statusFontSize,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -436,12 +457,14 @@ class _AiStatusBadge extends HookWidget {
 class _AiFooter extends StatelessWidget {
   const _AiFooter({
     required this.isUser,
+    required this.model,
     required this.status,
     required this.color,
     required this.dateTime,
   });
 
   final bool isUser;
+  final String? model;
   final String status;
   final Color color;
   final DateTime dateTime;
@@ -452,6 +475,7 @@ class _AiFooter extends StatelessWidget {
     trailingSpacing: 4,
     trailing: _AiStatusBadge(
       isUser: isUser,
+      model: model,
       status: status,
       color: color,
     ),
