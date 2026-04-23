@@ -238,7 +238,7 @@ class _InputContainer extends HookConsumerWidget {
           children: [
             const _QuoteMessage(),
             ConstrainedBox(
-              constraints: BoxConstraints(minHeight: aiModeEnabled ? 108 : 56),
+              constraints: BoxConstraints(minHeight: aiModeEnabled ? 92 : 56),
               child: Container(
                 decoration: BoxDecoration(color: context.theme.primary),
                 padding: EdgeInsets.fromLTRB(
@@ -250,19 +250,10 @@ class _InputContainer extends HookConsumerWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeOutCubic,
-                  padding: aiModeEnabled
-                      ? const EdgeInsets.fromLTRB(10, 8, 10, 8)
-                      : EdgeInsets.zero,
-                  decoration: BoxDecoration(
-                    color: aiModeEnabled
-                        ? context.theme.ai.surface
-                        : Colors.transparent,
-                    borderRadius: const BorderRadius.all(Radius.circular(18)),
-                    border: aiModeEnabled
-                        ? Border.all(
-                            color: context.theme.ai.surfaceBorder,
-                          )
-                        : null,
+                  padding: EdgeInsets.zero,
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -272,16 +263,15 @@ class _InputContainer extends HookConsumerWidget {
                           conversationId: conversationId,
                           provider: aiProvider,
                         ),
-                        Container(
-                          height: 1,
-                          margin: const EdgeInsets.only(top: 8, bottom: 8),
-                          color: context.theme.ai.surfaceBorder,
-                        ),
+                        const SizedBox(height: 8),
                       ],
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if (!aiModeEnabled) ...[
+                          if (aiModeEnabled) ...[
+                            _AiModeBadge(color: context.theme.accent),
+                            const SizedBox(width: 16),
+                          ] else ...[
                             const _SendActionTypeButton(),
                             const SizedBox(width: 6),
                             _StickerButton(
@@ -350,8 +340,6 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         false;
 
     if (aiModeEnabled) {
-      final backgroundColor = context.theme.ai.accent;
-      final foregroundColor = context.theme.ai.onAccent;
       final canSend = hasInputText && !aiRequestInFlight;
 
       return AnimatedOpacity(
@@ -359,25 +347,14 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         opacity: canSend ? 1 : 0.45,
         child: IgnorePointer(
           ignoring: !canSend,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              shape: BoxShape.circle,
-            ),
-            child: ActionButton(
-              size: 20,
-              color: foregroundColor,
-              child: Icon(
-                Icons.arrow_upward_rounded,
-                size: 20,
-                color: foregroundColor,
-              ),
-              onTap: () => unawaited(
-                _sendMessage(
-                  context,
-                  textEditingController,
-                  conversationId: conversationId,
-                ),
+          child: ActionButton(
+            name: Resources.assetsImagesIcSendSvg,
+            color: context.theme.accent,
+            onTap: () => unawaited(
+              _sendMessage(
+                context,
+                textEditingController,
+                conversationId: conversationId,
               ),
             ),
           ),
@@ -720,18 +697,11 @@ class _SendTextField extends HookConsumerWidget {
       curve: Curves.easeOutCubic,
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(aiModeEnabled ? 12 : 4)),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
         color: context.dynamicColor(
-          aiModeEnabled
-              ? const Color.fromRGBO(255, 255, 255, 0.82)
-              : const Color.fromRGBO(245, 247, 250, 1),
+          const Color.fromRGBO(245, 247, 250, 1),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
-        border: aiModeEnabled
-            ? Border.all(
-                color: context.theme.ai.surfaceBorder,
-              )
-            : null,
       ),
       alignment: Alignment.center,
       child: FocusableActionDetector(
@@ -840,10 +810,10 @@ class _AiModeBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final providerName = provider?.name ?? 'No Provider';
+    final providerName = provider?.name.trim().isNotEmpty == true
+        ? provider!.name.trim()
+        : 'No Provider';
     final model = provider?.model.trim();
-    final aiColors = context.theme.ai;
-    final accentColor = aiColors.accent;
     final hasProvider = provider != null;
     final notifier = ref.read(aiInputModeProvider(conversationId).notifier);
     final enabledAiProviders = context.database.settingProperties.aiProviders
@@ -862,94 +832,92 @@ class _AiModeBar extends HookConsumerWidget {
         provider?.models
             .where((item) => item.trim().isNotEmpty)
             .map(
-              (item) => CustomPopupMenuItem<String>(title: item, value: item),
+              (item) => CustomPopupMenuItem<String>(
+                title: item.trim(),
+                value: item.trim(),
+              ),
             )
             .toList(growable: false) ??
         <CustomPopupMenuItem<String>>[];
 
-    return Row(
-      children: [
-        _AiModeChip(
-          icon: Icons.auto_awesome_rounded,
-          label: 'AI',
-          foregroundColor: accentColor,
-          backgroundColor: aiColors.surfaceVariant,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+    return SizedBox(
+      width: double.infinity,
+      height: 30,
+      child: Row(
+        children: [
+          Expanded(
             child: Row(
               children: [
-                _AiModeMenuChip<AiProviderConfig>(
-                  icon: Icons.hub_rounded,
-                  label: providerName,
-                  items: providerOptions,
-                  enabled: providerOptions.length > 1,
-                  onSelected: (value) => notifier.updateProvider(
-                    providerId: value.id,
-                    model: value.model,
+                Flexible(
+                  child: _AiModeMenuChip<AiProviderConfig>(
+                    icon: Icons.hub_rounded,
+                    label: providerName,
+                    items: providerOptions,
+                    enabled: providerOptions.length > 1,
+                    onSelected: (value) => notifier.updateProvider(
+                      providerId: value.id,
+                      model: value.model,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                _AiModeMenuChip<String>(
-                  icon: Icons.tune_rounded,
-                  label: model?.isNotEmpty == true
-                      ? model!
-                      : (hasProvider ? 'Select Model' : 'No Model'),
-                  items: modelOptions,
-                  enabled: modelOptions.length > 1,
-                  onSelected: notifier.updateModel,
+                const SizedBox(width: 10),
+                _AiModeDivider(),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: _AiModeMenuChip<String>(
+                    icon: Icons.tune_rounded,
+                    label: model?.isNotEmpty == true
+                        ? model!
+                        : (hasProvider ? 'Select Model' : 'No Model'),
+                    items: modelOptions,
+                    enabled: modelOptions.length > 1,
+                    onSelected: notifier.updateModel,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-        ActionButton(
-          name: Resources.assetsImagesIcCloseSvg,
-          color: context.theme.icon,
-          size: 18,
-          onTap: () =>
-              ref.read(aiInputModeProvider(conversationId).notifier).exit(),
-        ),
-      ],
+          const SizedBox(width: 8),
+          ActionButton(
+            name: Resources.assetsImagesIcCloseSvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: () =>
+                ref.read(aiInputModeProvider(conversationId).notifier).exit(),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _AiModeChip extends StatelessWidget {
-  const _AiModeChip({
-    required this.icon,
-    required this.label,
-    required this.foregroundColor,
-    required this.backgroundColor,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color foregroundColor;
-  final Color backgroundColor;
-
+class _AiModeDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
-    height: 28,
-    padding: const EdgeInsets.symmetric(horizontal: 10),
-    decoration: BoxDecoration(
-      color: backgroundColor,
-      borderRadius: const BorderRadius.all(Radius.circular(999)),
+    width: 1,
+    height: 14,
+    color: context.dynamicColor(
+      const Color.fromRGBO(0, 0, 0, 0.08),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.1),
     ),
+  );
+}
+
+class _AiModeBadge extends StatelessWidget {
+  const _AiModeBadge({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 40,
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: foregroundColor),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(
-            color: foregroundColor,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+        Icon(
+          Icons.auto_awesome_rounded,
+          size: 14,
+          color: color,
         ),
       ],
     ),
@@ -962,6 +930,7 @@ class _AiModeMenuChip<T> extends StatelessWidget {
     required this.label,
     required this.items,
     required this.onSelected,
+    this.maxWidth = 200,
     this.enabled = true,
   });
 
@@ -969,48 +938,40 @@ class _AiModeMenuChip<T> extends StatelessWidget {
   final String label;
   final List<CustomPopupMenuItem<T>> items;
   final ValueChanged<T> onSelected;
+  final double maxWidth;
   final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    final child = Container(
-      height: 28,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: context.dynamicColor(
-          const Color.fromRGBO(255, 255, 255, 0.74),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-        ),
-        border: Border.all(color: context.theme.ai.surfaceBorder),
-        borderRadius: const BorderRadius.all(Radius.circular(999)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: context.theme.secondaryText),
-          const SizedBox(width: 6),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 160),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: context.theme.text,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+    final child = IntrinsicWidth(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Row(
+          children: [
+            Icon(icon, size: 13, color: context.theme.secondaryText),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: context.theme.secondaryText,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
-          if (enabled) ...[
-            const SizedBox(width: 4),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 16,
-              color: context.theme.secondaryText,
-            ),
+            if (enabled) ...[
+              const SizedBox(width: 2),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 14,
+                color: context.theme.secondaryText,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
 
@@ -1020,6 +981,7 @@ class _AiModeMenuChip<T> extends StatelessWidget {
       itemBuilder: (_) => items,
       onSelected: onSelected,
       color: Colors.transparent,
+      useActionButton: false,
       child: child,
     );
   }
