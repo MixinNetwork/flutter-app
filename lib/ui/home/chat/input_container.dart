@@ -339,8 +339,20 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         ).data ??
         false;
 
+    if (aiRequestInFlight) {
+      return ActionButton(
+        name: Resources.assetsImagesRecordStopSvg,
+        color: context.theme.accent,
+        onTap: () {
+          final currentConversationId = conversationId;
+          if (currentConversationId == null) return;
+          AiChatController(context.database).stop(currentConversationId);
+        },
+      );
+    }
+
     if (aiModeEnabled) {
-      final canSend = hasInputText && !aiRequestInFlight;
+      final canSend = hasInputText;
 
       return AnimatedOpacity(
         duration: const Duration(milliseconds: 180),
@@ -527,8 +539,8 @@ Future<void> _sendMessage(
         conversationId: conversationId,
         input: inlineAiInput,
         provider: provider,
+        onInputAccepted: () => textEditingController.text = '',
       );
-      textEditingController.text = '';
     } catch (error, _) {
       showToastFailed(error);
     }
@@ -552,8 +564,12 @@ Future<void> _sendMessage(
     try {
       await AiChatController(
         context.database,
-      ).send(conversationId: conversationId, input: text, provider: provider);
-      textEditingController.text = '';
+      ).send(
+        conversationId: conversationId,
+        input: text,
+        provider: provider,
+        onInputAccepted: () => textEditingController.text = '',
+      );
     } catch (error, _) {
       showToastFailed(error);
     }

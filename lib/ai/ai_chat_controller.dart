@@ -24,6 +24,7 @@ const _kAiHistoryLimit = 12;
 const _kAiStreamFlushChars = 32;
 const _kAiStreamFlushInterval = Duration(milliseconds: 80);
 final kAiRuntimeStartedAt = DateTime.now();
+final _activeAiRequests = <String, CancelToken>{};
 
 bool isActivePendingAiMessage(AiChatMessage message) =>
     message.role == _kAiRoleAssistant &&
@@ -42,6 +43,7 @@ class AiChatController {
     required String conversationId,
     required String input,
     AiProviderConfig? provider,
+    void Function()? onInputAccepted,
   }) async {
     await database.aiChatMessageDao.resolveStalePendingAssistantMessages(
       updatedBefore: kAiRuntimeStartedAt,
@@ -64,6 +66,7 @@ class AiChatController {
     final now = DateTime.now();
     final userMessageId = _uuid.v4();
     final assistantMessageId = _uuid.v4();
+    final cancelToken = CancelToken();
     final anchorMessage = await database.messageDao
         .messagesByConversationId(conversationId, 1)
         .getSingleOrNull();
@@ -100,15 +103,19 @@ class AiChatController {
       ),
     );
 
+    onInputAccepted?.call();
+
+    final updater = _StreamingMessageUpdater(
+      dao: database.aiChatMessageDao,
+      messageId: assistantMessageId,
+    );
+    _activeAiRequests[conversationId] = cancelToken;
     try {
       final messages = await _buildPromptMessages(conversationId, input);
-      final updater = _StreamingMessageUpdater(
-        dao: database.aiChatMessageDao,
-        messageId: assistantMessageId,
-      );
       final result = await _streamRequest(
         config,
         messages,
+        cancelToken: cancelToken,
         onContent: updater.append,
       );
       await updater.flush(contentOverride: result, force: true);
@@ -118,6 +125,15 @@ class AiChatController {
         updatedAt: DateTime.now(),
       );
     } catch (error, stacktrace) {
+      if (cancelToken.isCancelled) {
+        await updater.flush(force: true);
+        await database.aiChatMessageDao.updateMessageStatus(
+          assistantMessageId,
+          _kAiStatusDone,
+          updatedAt: DateTime.now(),
+        );
+        return;
+      }
       e('AI chat error: $error, $stacktrace');
       await database.aiChatMessageDao.updateMessageStatus(
         assistantMessageId,
@@ -126,7 +142,15 @@ class AiChatController {
         errorText: error.toString(),
       );
       rethrow;
+    } finally {
+      if (_activeAiRequests[conversationId] == cancelToken) {
+        _activeAiRequests.remove(conversationId);
+      }
     }
+  }
+
+  void stop(String conversationId) {
+    _activeAiRequests[conversationId]?.cancel('AI generation stopped');
   }
 
   Future<List<AiPromptMessage>> _buildPromptMessages(
@@ -193,6 +217,7 @@ class AiChatController {
   Future<String> _streamRequest(
     AiProviderConfig config,
     List<AiPromptMessage> messages, {
+    required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
   }) async {
     final dio = Dio(
@@ -209,6 +234,7 @@ class AiChatController {
       dio: dio,
       config: config,
       messages: messages,
+      cancelToken: cancelToken,
       onContent: onContent,
     );
   }
@@ -239,6 +265,7 @@ abstract interface class _AiProviderStrategy {
     required Dio dio,
     required AiProviderConfig config,
     required List<AiPromptMessage> messages,
+    required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
   });
 }
@@ -257,6 +284,7 @@ class _OpenAiCompatibleStrategy implements _AiProviderStrategy {
     required Dio dio,
     required AiProviderConfig config,
     required List<AiPromptMessage> messages,
+    required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
   }) async {
     final response = await dio.post<ResponseBody>(
@@ -274,6 +302,7 @@ class _OpenAiCompatibleStrategy implements _AiProviderStrategy {
             .toList(),
       },
       options: Options(responseType: ResponseType.stream),
+      cancelToken: cancelToken,
     );
 
     final body = response.data;
@@ -337,6 +366,7 @@ class _AnthropicStrategy implements _AiProviderStrategy {
     required Dio dio,
     required AiProviderConfig config,
     required List<AiPromptMessage> messages,
+    required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
   }) async {
     final response = await dio.post<ResponseBody>(
@@ -360,6 +390,7 @@ class _AnthropicStrategy implements _AiProviderStrategy {
             .join('\n\n'),
       },
       options: Options(responseType: ResponseType.stream),
+      cancelToken: cancelToken,
     );
 
     final body = response.data;
