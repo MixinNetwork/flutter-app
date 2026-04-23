@@ -158,7 +158,6 @@ class _AiMessageBody extends StatelessWidget {
       final cacheKey = buildMarkdownCacheKey(
         namespace: 'ai',
         id: message.id,
-        data: text,
       );
       body = DefaultTextStyle.merge(
         style: textStyle,
@@ -166,6 +165,7 @@ class _AiMessageBody extends StatelessWidget {
           data: text,
           selectable: true,
           cacheKey: cacheKey,
+          streaming: message.status == 'pending',
         ),
       );
     }

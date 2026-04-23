@@ -76,9 +76,8 @@ class MessagePost extends StatelessWidget {
                 () => buildMarkdownCacheKey(
                   namespace: 'post',
                   id: messageId,
-                  data: postContent,
                 ),
-                [messageId, postContent],
+                [messageId],
               );
 
               return ConstrainedBox(
@@ -177,7 +176,6 @@ class PostPreview extends StatelessWidget {
               cacheKey: buildMarkdownCacheKey(
                 namespace: 'post-preview',
                 id: message.messageId,
-                data: message.content ?? '',
               ),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
             ),

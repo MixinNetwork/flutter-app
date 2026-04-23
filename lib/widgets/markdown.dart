@@ -19,8 +19,7 @@ const _kMarkdownWarmupPerFrame = 2;
 String buildMarkdownCacheKey({
   required String namespace,
   required String id,
-  required String data,
-}) => '$namespace:$id:${data.hashCode}';
+}) => '$namespace:$id';
 
 final markdownControllerCache = MarkdownControllerCache();
 
@@ -32,12 +31,17 @@ class MarkdownControllerCache {
 
   bool _warmupScheduled = false;
 
-  MarkdownController? acquire(String key, String data) {
+  MarkdownController? acquire(
+    String key,
+    String data, {
+    bool streaming = false,
+  }) {
     final entry = _entries[key];
     if (entry == null) return null;
     if (entry.data != data) {
-      _removeEntry(key, entry);
-      return null;
+      _updateEntryData(entry, data, streaming: streaming);
+    } else if (!streaming) {
+      entry.controller.commitStream();
     }
     _touch(key, entry);
     entry.retainCount += 1;
@@ -57,9 +61,12 @@ class MarkdownControllerCache {
     if (entry != null) {
       if (entry.data == data) {
         _touch(key, entry);
+        entry.controller.commitStream();
         return Future.value();
       }
-      _removeEntry(key, entry);
+      _updateEntryData(entry, data, streaming: false);
+      _touch(key, entry);
+      return Future.value();
     }
 
     final pending = _pending[key];
@@ -98,12 +105,14 @@ class MarkdownControllerCache {
 
       try {
         final existing = _entries[task.key];
-        if (existing != null && existing.data == task.data) {
+        if (existing != null) {
+          if (existing.data != task.data) {
+            _updateEntryData(existing, task.data, streaming: false);
+          } else {
+            existing.controller.commitStream();
+          }
           _touch(task.key, existing);
         } else {
-          if (existing != null) {
-            _removeEntry(task.key, existing);
-          }
           _entries[task.key] = _MarkdownCacheEntry(
             data: task.data,
             controller: MarkdownController(data: task.data),
@@ -149,6 +158,23 @@ class MarkdownControllerCache {
     _entries.remove(key);
     entry.controller.dispose();
   }
+
+  void _updateEntryData(
+    _MarkdownCacheEntry entry,
+    String data, {
+    required bool streaming,
+  }) {
+    final previousData = entry.data;
+    entry.data = data;
+    if (streaming && data.startsWith(previousData)) {
+      entry.controller.appendChunk(data.substring(previousData.length));
+      return;
+    }
+    entry.controller.setData(data);
+    if (!streaming) {
+      entry.controller.commitStream();
+    }
+  }
 }
 
 class _MarkdownCacheEntry {
@@ -157,7 +183,7 @@ class _MarkdownCacheEntry {
     required this.controller,
   });
 
-  final String data;
+  String data;
   final MarkdownController controller;
   int retainCount = 0;
 }
@@ -168,11 +194,13 @@ class MarkdownColumn extends HookConsumerWidget {
     super.key,
     this.selectable = false,
     this.cacheKey,
+    this.streaming = false,
   });
 
   final String data;
   final bool selectable;
   final String? cacheKey;
+  final bool streaming;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -184,6 +212,7 @@ class MarkdownColumn extends HookConsumerWidget {
       child: _MarkdownView(
         data: data,
         cacheKey: cacheKey,
+        streaming: streaming,
         useColumn: true,
         selectable: selectable,
         contextMenuBuilder: (_, _, _, _) => const SizedBox.shrink(),
@@ -206,12 +235,14 @@ class Markdown extends HookConsumerWidget {
     this.padding = EdgeInsets.zero,
     this.physics,
     this.cacheKey,
+    this.streaming = false,
   });
 
   final String data;
   final EdgeInsetsGeometry? padding;
   final ScrollPhysics? physics;
   final String? cacheKey;
+  final bool streaming;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -222,6 +253,7 @@ class Markdown extends HookConsumerWidget {
     return _MarkdownView(
       data: data,
       cacheKey: cacheKey,
+      streaming: streaming,
       padding: padding,
       physics: physics,
       theme: _createMarkdownTheme(context, chatFontSizeDelta),
@@ -243,6 +275,7 @@ class _MarkdownView extends HookWidget {
     this.cacheKey,
     this.padding,
     this.physics,
+    this.streaming = false,
     this.useColumn = false,
     this.selectable = true,
     this.contextMenuBuilder,
@@ -250,6 +283,7 @@ class _MarkdownView extends HookWidget {
 
   final String data;
   final String? cacheKey;
+  final bool streaming;
   final MarkdownThemeData theme;
   final EdgeInsetsGeometry? padding;
   final ScrollPhysics? physics;
@@ -265,21 +299,28 @@ class _MarkdownView extends HookWidget {
       return _buildMarkdownWidget(data: data);
     }
 
-    final controller = useState<MarkdownController?>(null);
+    final controller =
+        useState<({String key, String data, MarkdownController controller})?>(
+          null,
+        );
 
     useEffect(() {
       var disposed = false;
       MarkdownController? retained;
 
-      void bindCachedController() {
-        final cached = markdownControllerCache.acquire(cacheKey!, data);
-        if (cached == null || disposed) return;
+      bool bindCachedController() {
+        final cached = markdownControllerCache.acquire(
+          cacheKey!,
+          data,
+          streaming: streaming,
+        );
+        if (cached == null || disposed) return false;
         retained = cached;
-        controller.value = cached;
+        controller.value = (key: cacheKey!, data: data, controller: cached);
+        return true;
       }
 
-      bindCachedController();
-      if (controller.value == null) {
+      if (!bindCachedController()) {
         unawaited(
           markdownControllerCache.warmup(cacheKey!, data).then((_) {
             if (disposed) return;
@@ -295,11 +336,13 @@ class _MarkdownView extends HookWidget {
           markdownControllerCache.release(cacheKey!, current);
         }
       };
-    }, [cacheKey, data]);
+    }, [cacheKey, data, streaming]);
 
     final cachedController = controller.value;
-    if (cachedController != null) {
-      return _buildMarkdownWidget(controller: cachedController);
+    if (cachedController != null &&
+        cachedController.key == cacheKey &&
+        cachedController.data == data) {
+      return _buildMarkdownWidget(controller: cachedController.controller);
     }
 
     return _MarkdownFallback(

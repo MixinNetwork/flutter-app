@@ -676,7 +676,6 @@ class _List extends HookConsumerWidget {
           key: buildMarkdownCacheKey(
             namespace: 'ai',
             id: aiMessage.id,
-            data: content,
           ),
           data: content,
         );
@@ -690,7 +689,6 @@ class _List extends HookConsumerWidget {
         key: buildMarkdownCacheKey(
           namespace: 'post',
           id: message.messageId,
-          data: content,
         ),
         data: content,
       );
