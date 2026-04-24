@@ -39,6 +39,31 @@ class AiChatController {
   static const _openAiStrategy = _OpenAiCompatibleStrategy();
   static const _anthropicStrategy = _AnthropicStrategy();
 
+  Future<String> assistText({
+    required String instruction,
+    String? input,
+    String? conversationId,
+    AiProviderConfig? provider,
+  }) async {
+    final config = provider ?? database.settingProperties.selectedAiProvider;
+    if (config == null) {
+      throw Exception('No AI provider configured');
+    }
+
+    final messages = await _buildAssistPromptMessages(
+      instruction: instruction,
+      input: input,
+      conversationId: conversationId,
+    );
+
+    return _streamRequest(
+      config,
+      messages,
+      cancelToken: CancelToken(),
+      onContent: (_) async {},
+    );
+  }
+
   Future<void> send({
     required String conversationId,
     required String input,
@@ -131,6 +156,7 @@ class AiChatController {
           assistantMessageId,
           _kAiStatusDone,
           updatedAt: DateTime.now(),
+          errorText: 'Stopped',
         );
         return;
       }
@@ -201,6 +227,55 @@ class AiChatController {
     }
 
     promptMessages.add(AiPromptMessage(role: _kAiRoleUser, content: input));
+    return promptMessages;
+  }
+
+  Future<List<AiPromptMessage>> _buildAssistPromptMessages({
+    required String instruction,
+    required String? input,
+    required String? conversationId,
+  }) async {
+    final promptMessages = <AiPromptMessage>[
+      AiPromptMessage(
+        role: 'system',
+        content:
+            'You are an invisible writing assistant inside a chat app. '
+            'Return only the requested text. Do not add explanations, labels, '
+            'markdown fences, or greetings unless explicitly requested.',
+      ),
+    ];
+
+    if (conversationId != null) {
+      final recentMessages = await database.messageDao
+          .messagesByConversationId(conversationId, _kAiContextMessageLimit)
+          .get();
+      if (recentMessages.isNotEmpty) {
+        final lines = recentMessages.reversed
+            .map((message) {
+              final sender = message.userFullName ?? message.userId;
+              final content = _messagePlainText(message);
+              return '[${message.createdAt.toIso8601String()}] $sender: $content';
+            })
+            .join('\n');
+        promptMessages.add(
+          AiPromptMessage(
+            role: 'system',
+            content: 'Current conversation recent messages:\n$lines',
+          ),
+        );
+      }
+    }
+
+    final inputText = input?.trim();
+    promptMessages.add(
+      AiPromptMessage(
+        role: _kAiRoleUser,
+        content: [
+          instruction.trim(),
+          if (inputText != null && inputText.isNotEmpty) '\nText:\n$inputText',
+        ].join('\n'),
+      ),
+    );
     return promptMessages;
   }
 
@@ -294,10 +369,7 @@ class _OpenAiCompatibleStrategy implements _AiProviderStrategy {
         'stream': true,
         'messages': messages
             .map(
-              (message) => {
-                'role': message.role,
-                'content': message.content,
-              },
+              (message) => {'role': message.role, 'content': message.content},
             )
             .toList(),
       },
@@ -378,10 +450,7 @@ class _AnthropicStrategy implements _AiProviderStrategy {
         'messages': messages
             .where((message) => message.role != 'system')
             .map(
-              (message) => {
-                'role': message.role,
-                'content': message.content,
-              },
+              (message) => {'role': message.role, 'content': message.content},
             )
             .toList(),
         'system': messages
@@ -443,10 +512,7 @@ class _AnthropicStrategy implements _AiProviderStrategy {
 }
 
 class _StreamingMessageUpdater {
-  _StreamingMessageUpdater({
-    required this.dao,
-    required this.messageId,
-  });
+  _StreamingMessageUpdater({required this.dao, required this.messageId});
 
   final AiChatMessageDao dao;
   final String messageId;
@@ -469,10 +535,7 @@ class _StreamingMessageUpdater {
     await flush();
   }
 
-  Future<void> flush({
-    String? contentOverride,
-    bool force = false,
-  }) async {
+  Future<void> flush({String? contentOverride, bool force = false}) async {
     final content = contentOverride ?? _buffer.toString();
     if (!force && content == _persistedContent) {
       return;

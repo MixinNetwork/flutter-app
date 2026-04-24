@@ -13,6 +13,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_animations/simple_animations.dart';
@@ -35,6 +36,7 @@ import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../../widgets/ai/ai_text_result_dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
@@ -241,12 +243,7 @@ class _InputContainer extends HookConsumerWidget {
               constraints: BoxConstraints(minHeight: aiModeEnabled ? 92 : 56),
               child: Container(
                 decoration: BoxDecoration(color: context.theme.primary),
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  aiModeEnabled ? 8 : 8,
-                  16,
-                  8,
-                ),
+                padding: EdgeInsets.fromLTRB(16, aiModeEnabled ? 8 : 8, 16, 8),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeOutCubic,
@@ -290,7 +287,14 @@ class _InputContainer extends HookConsumerWidget {
                               aiRequestInFlight: aiRequestInFlight,
                             ),
                           ),
-                          SizedBox(width: aiModeEnabled ? 10 : 16),
+                          if (!aiModeEnabled) ...[
+                            const SizedBox(width: 8),
+                            _AiDraftAssistButton(
+                              conversationId: conversationId,
+                              textEditingController: textEditingController,
+                            ),
+                          ],
+                          SizedBox(width: aiModeEnabled ? 10 : 8),
                           _AnimatedSendOrVoiceButton(
                             conversationId: conversationId,
                             textEditingController: textEditingController,
@@ -461,6 +465,160 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   }
 }
 
+enum _AiDraftAction { polish, shorten, polite, translate, replyWithContext }
+
+class _AiDraftAssistButton extends StatelessWidget {
+  const _AiDraftAssistButton({
+    required this.conversationId,
+    required this.textEditingController,
+  });
+
+  final String? conversationId;
+  final TextEditingController textEditingController;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled =
+        context.database.settingProperties.selectedAiProvider != null;
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 180),
+      opacity: enabled ? 1 : 0.45,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: CustomPopupMenuButton<_AiDraftAction>(
+          itemBuilder: (_) => [
+            CustomPopupMenuItem(
+              title: 'Polish',
+              value: _AiDraftAction.polish,
+              icon: Resources.assetsImagesBotSvg,
+            ),
+            CustomPopupMenuItem(
+              title: 'Make shorter',
+              value: _AiDraftAction.shorten,
+              icon: Resources.assetsImagesBotSvg,
+            ),
+            CustomPopupMenuItem(
+              title: 'Make polite',
+              value: _AiDraftAction.polite,
+              icon: Resources.assetsImagesBotSvg,
+            ),
+            CustomPopupMenuItem(
+              title: 'Translate draft',
+              value: _AiDraftAction.translate,
+              icon: Resources.assetsImagesBotSvg,
+            ),
+            CustomPopupMenuItem(
+              title: 'Reply with context',
+              value: _AiDraftAction.replyWithContext,
+              icon: Resources.assetsImagesBotSvg,
+            ),
+          ],
+          onSelected: (action) => unawaited(
+            _runAiDraftAction(
+              context,
+              action: action,
+              conversationId: conversationId,
+              textEditingController: textEditingController,
+            ),
+          ),
+          child: Icon(
+            Icons.auto_awesome_rounded,
+            size: 20,
+            color: context.theme.icon,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _runAiDraftAction(
+  BuildContext context, {
+  required _AiDraftAction action,
+  required String? conversationId,
+  required TextEditingController textEditingController,
+}) async {
+  final original = textEditingController.text.trim();
+  if (conversationId == null) return;
+  if (action != _AiDraftAction.replyWithContext && original.isEmpty) {
+    showToastFailed(ToastError('Please type a message first'));
+    return;
+  }
+
+  final language = _currentLanguageTag(context);
+  final instruction = switch (action) {
+    _AiDraftAction.polish =>
+      'Polish this draft for a chat message. Keep the original meaning, language, and approximate length.',
+    _AiDraftAction.shorten =>
+      'Rewrite this chat draft to be shorter and clearer. Keep the original language and intent.',
+    _AiDraftAction.polite =>
+      'Rewrite this chat draft to sound polite, natural, and still concise. Keep the original language.',
+    _AiDraftAction.translate =>
+      'Translate this chat draft into $language. Return only the translation.',
+    _AiDraftAction.replyWithContext =>
+      'Draft a concise, natural reply to the latest conversation message using the recent context. Return only the reply text.',
+  };
+  final title = switch (action) {
+    _AiDraftAction.polish => 'Polish',
+    _AiDraftAction.shorten => 'Make shorter',
+    _AiDraftAction.polite => 'Make polite',
+    _AiDraftAction.translate => 'Translate draft',
+    _AiDraftAction.replyWithContext => 'Reply with context',
+  };
+
+  showToastLoading(context: context);
+  try {
+    final result = await AiChatController(context.database).assistText(
+      instruction: instruction,
+      input: action == _AiDraftAction.replyWithContext ? null : original,
+      conversationId: conversationId,
+    );
+    Toast.dismiss();
+    if (!context.mounted) return;
+    final selectedAction = await showAiTextResultDialog(
+      context: context,
+      title: title,
+      original: original,
+      result: result,
+      allowReplace: original.isNotEmpty,
+    );
+    if (selectedAction == null) return;
+    switch (selectedAction) {
+      case AiTextResultAction.replace:
+        _replaceDraft(textEditingController, result);
+      case AiTextResultAction.insert:
+        _insertDraft(textEditingController, result);
+    }
+  } catch (error, stackTrace) {
+    e('AI draft assist failed: $error, $stackTrace');
+    showToastFailed(error, context: context);
+  }
+}
+
+String _currentLanguageTag(BuildContext context) {
+  final locale = Localizations.localeOf(context);
+  final countryCode = locale.countryCode;
+  if (countryCode == null || countryCode.isEmpty) return locale.languageCode;
+  return '${locale.languageCode}-$countryCode';
+}
+
+void _replaceDraft(TextEditingController controller, String text) {
+  controller.value = TextEditingValue(
+    text: text,
+    selection: TextSelection.collapsed(offset: text.length),
+  );
+}
+
+void _insertDraft(TextEditingController controller, String text) {
+  final current = controller.text;
+  final separator = current.trim().isEmpty ? '' : '\n';
+  final next = '$current$separator$text';
+  controller.value = TextEditingValue(
+    text: next,
+    selection: TextSelection.collapsed(offset: next.length),
+  );
+}
+
 void showMaxLengthReachedToast(BuildContext context) =>
     showToastFailed(ToastError(context.l10n.contentTooLong));
 
@@ -562,9 +720,7 @@ Future<void> _sendMessage(
       return;
     }
     try {
-      await AiChatController(
-        context.database,
-      ).send(
+      await AiChatController(context.database).send(
         conversationId: conversationId,
         input: text,
         provider: provider,
@@ -816,10 +972,7 @@ class _SendTextField extends HookConsumerWidget {
 }
 
 class _AiModeBar extends HookConsumerWidget {
-  const _AiModeBar({
-    required this.conversationId,
-    required this.provider,
-  });
+  const _AiModeBar({required this.conversationId, required this.provider});
 
   final String conversationId;
   final AiProviderConfig? provider;
@@ -929,13 +1082,7 @@ class _AiModeBadge extends StatelessWidget {
     height: 40,
     child: Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.auto_awesome_rounded,
-          size: 14,
-          color: color,
-        ),
-      ],
+      children: [Icon(Icons.auto_awesome_rounded, size: 14, color: color)],
     ),
   );
 }
@@ -1106,9 +1253,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                     .getSingleOrNull();
                 if (user == null) throw Exception('User not found');
 
-                final quoteMessage = ref.read(
-                  quoteMessageProvider.notifier,
-                );
+                final quoteMessage = ref.read(quoteMessageProvider.notifier);
 
                 await context.accountServer.sendContactMessage(
                   userId,
@@ -1152,9 +1297,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                   source: ImageSource.gallery,
                 );
                 if (image == null) return;
-                await showFilesPreviewDialog(context, [
-                  image.withMineType(),
-                ]);
+                await showFilesPreviewDialog(context, [image.withMineType()]);
               },
             ),
           if (!isDesktop)
@@ -1166,9 +1309,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                   source: ImageSource.gallery,
                 );
                 if (video == null) return;
-                await showFilesPreviewDialog(context, [
-                  video.withMineType(),
-                ]);
+                await showFilesPreviewDialog(context, [video.withMineType()]);
               },
             ),
         ],
@@ -1361,9 +1502,7 @@ class MentionTextMatcher extends TextMatcher implements EquatableMixin {
           return TextSpan(
             text: displayString,
             style: valid
-                ? (span.style ?? const TextStyle()).merge(
-                    highlightTextStyle,
-                  )
+                ? (span.style ?? const TextStyle()).merge(highlightTextStyle)
                 : span.style,
           );
         },

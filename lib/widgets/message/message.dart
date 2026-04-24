@@ -20,6 +20,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../account/account_server.dart';
+import '../../ai/ai_chat_controller.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../constants/icon_fonts.dart';
@@ -190,6 +191,124 @@ SelectedContent? _findSelectedContent(BuildContext context) {
   return null;
 }
 
+enum _MessageAiAction { translate, explain, suggestReplies }
+
+class _InlineMessageAiState with EquatableMixin {
+  const _InlineMessageAiState({this.entries = const {}});
+
+  final Map<_MessageAiAction, _InlineMessageAiEntry> entries;
+
+  _InlineMessageAiState put(
+    _MessageAiAction action,
+    _InlineMessageAiEntry entry,
+  ) => _InlineMessageAiState(
+    entries: Map<_MessageAiAction, _InlineMessageAiEntry>.from(entries)
+      ..[action] = entry,
+  );
+
+  _InlineMessageAiEntry? operator [](_MessageAiAction action) =>
+      entries[action];
+
+  bool get hasVisibleEntry =>
+      entries.values.any((entry) => entry.loading || entry.hasContent);
+
+  @override
+  List<Object?> get props => [entries];
+}
+
+class _InlineMessageAiEntry with EquatableMixin {
+  const _InlineMessageAiEntry({
+    this.loading = false,
+    this.result,
+    this.error,
+  });
+
+  final bool loading;
+  final String? result;
+  final String? error;
+
+  bool get hasContent =>
+      (result != null && result!.trim().isNotEmpty) ||
+      (error != null && error!.trim().isNotEmpty);
+
+  @override
+  List<Object?> get props => [loading, result, error];
+}
+
+String? _messageAiText(MessageItem message) {
+  final content = message.content?.trim();
+  if ((message.type.isText || message.type.isPost) &&
+      content != null &&
+      content.isNotEmpty) {
+    return content;
+  }
+
+  final caption = message.caption?.trim();
+  if (caption != null && caption.isNotEmpty) {
+    return caption;
+  }
+  return null;
+}
+
+Future<void> _runMessageAiAction(
+  BuildContext context, {
+  required MessageItem message,
+  required String input,
+  required _MessageAiAction action,
+  required void Function(_MessageAiAction, _InlineMessageAiEntry)
+  onStateChanged,
+}) async {
+  final language = _currentLanguageTag(context);
+  final instruction = switch (action) {
+    _MessageAiAction.translate =>
+      'Translate this chat message into $language. Return only the translation.',
+    _MessageAiAction.explain =>
+      'Explain this chat message clearly and concisely. Clarify slang, abbreviations, technical terms, and implied meaning when useful.',
+    _MessageAiAction.suggestReplies =>
+      'Suggest three concise, natural replies to this chat message using the recent conversation context. Return one reply per line, without numbering.',
+  };
+  final title = switch (action) {
+    _MessageAiAction.translate => 'Translate',
+    _MessageAiAction.explain => 'Explain',
+    _MessageAiAction.suggestReplies => 'Suggest replies',
+  };
+
+  onStateChanged(action, const _InlineMessageAiEntry(loading: true));
+  try {
+    final result = await AiChatController(context.database).assistText(
+      instruction: instruction,
+      input: input,
+      conversationId: message.conversationId,
+    );
+    if (!context.mounted) return;
+    onStateChanged(
+      action,
+      _InlineMessageAiEntry(result: result.trim()),
+    );
+  } catch (error, stackTrace) {
+    e('AI message assist failed: $error, $stackTrace');
+    if (!context.mounted) return;
+    onStateChanged(
+      action,
+      _InlineMessageAiEntry(error: '$title failed: $error'),
+    );
+  }
+}
+
+String _currentLanguageTag(BuildContext context) {
+  final locale = Localizations.localeOf(context);
+  final countryCode = locale.countryCode;
+  if (countryCode == null || countryCode.isEmpty) return locale.languageCode;
+  return '${locale.languageCode}-$countryCode';
+}
+
+List<String> _parseAiReplySuggestions(String result) => result
+    .split('\n')
+    .map((line) => line.trim().replaceFirst(RegExp(r'^[-*\d.)\s]+'), ''))
+    .where((line) => line.isNotEmpty)
+    .take(3)
+    .toList(growable: false);
+
 class MessageItemWidget extends HookConsumerWidget {
   const MessageItemWidget({
     required this.message,
@@ -277,6 +396,7 @@ class MessageItemWidget extends HookConsumerWidget {
           keys: [message.messageId],
         ).data ??
         Colors.transparent;
+    final inlineAiState = useState(const _InlineMessageAiState());
 
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
@@ -314,6 +434,9 @@ class MessageItemWidget extends HookConsumerWidget {
                   pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                   isBot: message.isBot,
                   isVerified: message.isVerified,
+                  aiSection: _InlineMessageAiSection(
+                    state: inlineAiState.value,
+                  ),
                   buildMenus: (request) {
                     request.onShowMenu.addListener(() {
                       showedMenuCubit.emit(true);
@@ -627,6 +750,67 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                     ];
 
+                    final aiText = _messageAiText(message);
+                    final aiActions = [
+                      if (aiText != null)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.translate),
+                          title: 'Translate',
+                          callback: () => unawaited(
+                            _runMessageAiAction(
+                              context,
+                              message: message,
+                              input: aiText,
+                              action: _MessageAiAction.translate,
+                              onStateChanged: (action, entry) {
+                                inlineAiState.value = inlineAiState.value.put(
+                                  action,
+                                  entry,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      if (aiText != null)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.psychology_alt),
+                          title: 'Explain',
+                          callback: () => unawaited(
+                            _runMessageAiAction(
+                              context,
+                              message: message,
+                              input: aiText,
+                              action: _MessageAiAction.explain,
+                              onStateChanged: (action, entry) {
+                                inlineAiState.value = inlineAiState.value.put(
+                                  action,
+                                  entry,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      if (aiText != null && !isTranscriptPage)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.auto_awesome),
+                          title: 'Suggest replies',
+                          callback: () => unawaited(
+                            _runMessageAiAction(
+                              context,
+                              message: message,
+                              input: aiText,
+                              action: _MessageAiAction.suggestReplies,
+                              onStateChanged: (action, entry) {
+                                inlineAiState.value = inlineAiState.value.put(
+                                  action,
+                                  entry,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                    ];
+
                     final devActions = [
                       if (!kReleaseMode)
                         MenuAction(
@@ -642,6 +826,7 @@ class MessageItemWidget extends HookConsumerWidget {
                       childrens: [
                         replayAction,
                         copyActions,
+                        aiActions,
                         messageActions,
                         saveActions,
                         addStickerMenuAction,
@@ -920,6 +1105,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
     required this.showAvatar,
     required this.isBot,
     required this.isVerified,
+    required this.aiSection,
   });
 
   final bool isCurrentUser;
@@ -932,6 +1118,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   final bool showAvatar;
   final bool isBot;
   final bool isVerified;
+  final Widget aiSection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -969,6 +1156,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
             child: Builder(builder: builder),
           ),
         ),
+        aiSection,
       ],
     );
 
@@ -1009,6 +1197,207 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       ],
     );
   }
+}
+
+class _InlineMessageAiSection extends StatelessWidget {
+  const _InlineMessageAiSection({required this.state});
+
+  final _InlineMessageAiState state;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!state.hasVisibleEntry) {
+      return const SizedBox.shrink();
+    }
+
+    final children = <Widget>[
+      for (final action in _MessageAiAction.values)
+        if (state[action]?.loading == true || state[action]?.hasContent == true)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: _InlineMessageAiCard(
+              action: action,
+              entry: state[action]!,
+            ),
+          ),
+    ];
+
+    if (children.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    );
+  }
+}
+
+class _InlineMessageAiCard extends StatelessWidget {
+  const _InlineMessageAiCard({
+    required this.action,
+    required this.entry,
+  });
+
+  final _MessageAiAction action;
+  final _InlineMessageAiEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = switch (action) {
+      _MessageAiAction.translate => 'Translation',
+      _MessageAiAction.explain => 'Explanation',
+      _MessageAiAction.suggestReplies => 'Suggested replies',
+    };
+    final loadingText = switch (action) {
+      _MessageAiAction.translate => 'Translating...',
+      _MessageAiAction.explain => 'Explaining...',
+      _MessageAiAction.suggestReplies => 'Generating replies...',
+    };
+
+    Widget content;
+    if (entry.loading) {
+      content = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.8,
+              color: context.theme.secondaryText,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            loadingText,
+            style: TextStyle(
+              color: context.theme.secondaryText,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+        ],
+      );
+    } else if (entry.error?.isNotEmpty == true) {
+      content = Text(
+        entry.error!,
+        style: TextStyle(
+          color: context.theme.red,
+          fontSize: 13,
+          height: 1.45,
+        ),
+      );
+    } else if (action == _MessageAiAction.suggestReplies) {
+      content = _InlineReplySuggestions(result: entry.result ?? '');
+    } else {
+      content = SelectableText(
+        entry.result ?? '',
+        style: TextStyle(
+          color: context.theme.text,
+          fontSize: 13,
+          height: 1.45,
+        ),
+      );
+    }
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 420),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: context.dynamicColor(
+          const Color.fromRGBO(245, 247, 250, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: context.theme.secondaryText,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 6),
+          content,
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineReplySuggestions extends StatelessWidget {
+  const _InlineReplySuggestions({required this.result});
+
+  final String result;
+
+  @override
+  Widget build(BuildContext context) {
+    final replies = _parseAiReplySuggestions(result);
+    if (replies.isEmpty) {
+      return SelectableText(
+        result,
+        style: TextStyle(
+          color: context.theme.text,
+          fontSize: 13,
+          height: 1.45,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < replies.length; i++)
+          Padding(
+            padding: EdgeInsets.only(bottom: i == replies.length - 1 ? 0 : 6),
+            child: _InlineReplyButton(reply: replies[i]),
+          ),
+      ],
+    );
+  }
+}
+
+class _InlineReplyButton extends StatelessWidget {
+  const _InlineReplyButton({required this.reply});
+
+  final String reply;
+
+  @override
+  Widget build(BuildContext context) => InteractiveDecoratedBox(
+    onTap: () => context.providerContainer
+        .read(recallMessageNotifierProvider)
+        .onReedit(reply),
+    decoration: BoxDecoration(
+      color: context.dynamicColor(
+        const Color.fromRGBO(255, 255, 255, 0.92),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.04),
+      ),
+      borderRadius: const BorderRadius.all(Radius.circular(6)),
+    ),
+    hoveringDecoration: BoxDecoration(
+      color: context.dynamicColor(
+        const Color.fromRGBO(0, 0, 0, 0.03),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+      ),
+      borderRadius: const BorderRadius.all(Radius.circular(6)),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: Text(
+        reply,
+        style: TextStyle(
+          color: context.theme.text,
+          fontSize: 13,
+          height: 1.35,
+        ),
+      ),
+    ),
+  );
 }
 
 class _UnreadMessageBar extends StatelessWidget {

@@ -133,12 +133,7 @@ class _AiMessageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == 'user';
-    final content = message.content.trim();
-    final text = content.isNotEmpty
-        ? content
-        : message.status == 'error'
-        ? (message.errorText ?? 'Request failed')
-        : 'Thinking...';
+    final text = _displayText(message);
     final statusColor = _statusColor(
       context,
       isUser: isUser,
@@ -597,11 +592,14 @@ Color _statusColor(
   return context.theme.ai.accent;
 }
 
-String _menuCopyText(AiChatMessage message) {
+String _menuCopyText(AiChatMessage message) => _displayText(message);
+
+String _displayText(AiChatMessage message) {
   final content = message.content.trim();
   if (content.isNotEmpty) return content;
   if (message.status == 'error') {
     return message.errorText ?? 'Request failed';
   }
-  return 'Thinking...';
+  if (message.status == 'pending') return 'Thinking...';
+  return message.errorText ?? 'No response';
 }
