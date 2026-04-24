@@ -325,6 +325,14 @@ class MessageItemWidget extends HookConsumerWidget {
                   isVerified: message.isVerified,
                   aiSection: MessageInlineAiSection(
                     state: inlineAiState.value,
+                    leadingPadding: !isCurrentUser
+                        ? kInlineMessageAiLeadingPadding
+                        : 0,
+                    onClose: (action) {
+                      final nextState = inlineAiState.value.remove(action);
+                      inlineAiState.value = nextState;
+                      writeInlineMessageAiState(message.messageId, nextState);
+                    },
                   ),
                   buildMenus: (request) {
                     request.onShowMenu.addListener(() {

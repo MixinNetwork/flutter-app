@@ -6,9 +6,12 @@ import '../../db/mixin_database.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
+import '../action_button.dart';
 import '../markdown.dart';
 
 enum MessageAiAction { translate, explain, suggestReplies }
+
+const kInlineMessageAiLeadingPadding = 9.0;
 
 final _inlineMessageAiStateCache = <String, InlineMessageAiState>{};
 
@@ -24,6 +27,13 @@ class InlineMessageAiState with EquatableMixin {
     entries: Map<MessageAiAction, InlineMessageAiEntry>.from(entries)
       ..[action] = entry,
   );
+
+  InlineMessageAiState remove(MessageAiAction action) {
+    if (!entries.containsKey(action)) return this;
+    final nextEntries = Map<MessageAiAction, InlineMessageAiEntry>.from(entries)
+      ..remove(action);
+    return InlineMessageAiState(entries: nextEntries);
+  }
 
   InlineMessageAiEntry? operator [](MessageAiAction action) => entries[action];
 
@@ -152,9 +162,16 @@ List<String> _parseAiReplySuggestions(String result) => result
     .toList(growable: false);
 
 class MessageInlineAiSection extends StatelessWidget {
-  const MessageInlineAiSection({required this.state, super.key});
+  const MessageInlineAiSection({
+    required this.state,
+    required this.onClose,
+    this.leadingPadding = 0,
+    super.key,
+  });
 
   final InlineMessageAiState state;
+  final void Function(MessageAiAction action) onClose;
+  final double leadingPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -170,6 +187,7 @@ class MessageInlineAiSection extends StatelessWidget {
             child: _InlineMessageAiCard(
               action: action,
               entry: state[action]!,
+              onClose: () => onClose(action),
             ),
           ),
     ];
@@ -178,9 +196,12 @@ class MessageInlineAiSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
+    return Padding(
+      padding: EdgeInsets.only(left: leadingPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
     );
   }
 }
@@ -189,10 +210,12 @@ class _InlineMessageAiCard extends StatelessWidget {
   const _InlineMessageAiCard({
     required this.action,
     required this.entry,
+    required this.onClose,
   });
 
   final MessageAiAction action;
   final InlineMessageAiEntry entry;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -298,6 +321,17 @@ class _InlineMessageAiCard extends StatelessWidget {
                     height: 1.2,
                   ),
                 ),
+              const SizedBox(width: 4),
+              ActionButton(
+                size: 14,
+                padding: const EdgeInsets.all(2),
+                onTap: onClose,
+                child: Icon(
+                  Icons.close,
+                  size: 14,
+                  color: context.theme.secondaryText,
+                ),
+              ),
             ],
           ),
           if (entry.model?.isNotEmpty == true) const SizedBox(height: 2),

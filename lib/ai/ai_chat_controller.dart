@@ -56,12 +56,23 @@ class AiChatController {
       conversationId: conversationId,
     );
 
-    return _streamRequest(
-      config,
-      messages,
-      cancelToken: CancelToken(),
-      onContent: (_) async {},
-    );
+    final cancelToken = CancelToken();
+    if (conversationId != null) {
+      _activeAiRequests[conversationId] = cancelToken;
+    }
+    try {
+      return await _streamRequest(
+        config,
+        messages,
+        cancelToken: cancelToken,
+        onContent: (_) async {},
+      );
+    } finally {
+      if (conversationId != null &&
+          _activeAiRequests[conversationId] == cancelToken) {
+        _activeAiRequests.remove(conversationId);
+      }
+    }
   }
 
   Future<void> send({

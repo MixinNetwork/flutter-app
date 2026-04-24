@@ -36,7 +36,6 @@ import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
-import '../../../widgets/ai/ai_text_result_dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
@@ -53,6 +52,7 @@ import '../../provider/mention_cache_provider.dart';
 import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
+import 'ai_draft_assist_panel.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
 import 'voice_recorder_bottom_bar.dart';
@@ -153,6 +153,59 @@ class _InputContainer extends HookConsumerWidget {
     );
 
     final mentionProviderInstance = mentionProvider(textEditingValueStream);
+    final aiDraftAssistState = useState(AiDraftAssistViewState.idle);
+    final aiDraftAssistRequestVersion = useState(0);
+
+    Future<String> handleAiDraftRequest(
+      AiDraftAction action,
+      String original,
+    ) async {
+      final currentConversationId = conversationId;
+      if (currentConversationId == null) {
+        throw ToastError('Conversation unavailable');
+      }
+
+      final requestId = aiDraftAssistRequestVersion.value + 1;
+      aiDraftAssistRequestVersion.value = requestId;
+      aiDraftAssistState.value = AiDraftAssistViewState(
+        phase: AiDraftAssistPhase.loading,
+        action: action,
+        original: original,
+      );
+
+      try {
+        final result = await _requestAiDraftAction(
+          context,
+          action: action,
+          conversationId: currentConversationId,
+          original: original,
+        );
+        if (aiDraftAssistRequestVersion.value == requestId) {
+          aiDraftAssistState.value = AiDraftAssistViewState(
+            phase: AiDraftAssistPhase.result,
+            action: action,
+            original: original,
+            result: result,
+          );
+        }
+        return result;
+      } catch (error) {
+        if (aiDraftAssistRequestVersion.value == requestId) {
+          aiDraftAssistState.value = AiDraftAssistViewState(
+            phase: AiDraftAssistPhase.error,
+            action: action,
+            original: original,
+            error: '$error',
+          );
+        }
+        rethrow;
+      }
+    }
+
+    void dismissAiDraftAssist() {
+      aiDraftAssistRequestVersion.value += 1;
+      aiDraftAssistState.value = AiDraftAssistViewState.idle;
+    }
 
     useEffect(() {
       if (conversationId == null) return null;
@@ -162,6 +215,11 @@ class _InputContainer extends HookConsumerWidget {
           conversationId: conversationId,
         ),
       );
+      return null;
+    }, [conversationId]);
+
+    useEffect(() {
+      dismissAiDraftAssist();
       return null;
     }, [conversationId]);
 
@@ -262,6 +320,39 @@ class _InputContainer extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                       ],
+                      if (!aiModeEnabled &&
+                          !aiDraftAssistState.value.isIdle) ...[
+                        AiDraftAssistInlineCandidate(
+                          viewState: aiDraftAssistState.value,
+                          onDismiss: dismissAiDraftAssist,
+                          onCopy: () {
+                            final result = aiDraftAssistState.value.result;
+                            if (result == null) return;
+                            Clipboard.setData(ClipboardData(text: result));
+                            showToastSuccessful(context: context);
+                          },
+                          onAppend: () {
+                            final result = aiDraftAssistState.value.result;
+                            if (result == null) return;
+                            applyAiDraftAssistResult(
+                              textEditingController,
+                              result,
+                              replace: false,
+                            );
+                            dismissAiDraftAssist();
+                          },
+                          onReplace: () {
+                            final result = aiDraftAssistState.value.result;
+                            if (result == null) return;
+                            applyAiDraftAssistResult(
+                              textEditingController,
+                              result,
+                              replace: true,
+                            );
+                            dismissAiDraftAssist();
+                          },
+                        ),
+                      ],
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -285,13 +376,35 @@ class _InputContainer extends HookConsumerWidget {
                               providerName: aiProvider?.name,
                               modelName: aiProvider?.model,
                               aiRequestInFlight: aiRequestInFlight,
+                              aiDraftAssistState: aiDraftAssistState.value,
                             ),
                           ),
                           if (!aiModeEnabled) ...[
                             const SizedBox(width: 8),
-                            _AiDraftAssistButton(
-                              conversationId: conversationId,
+                            AiDraftAssistButton(
+                              enabled:
+                                  context
+                                      .database
+                                      .settingProperties
+                                      .selectedAiProvider !=
+                                  null,
                               textEditingController: textEditingController,
+                              viewState: aiDraftAssistState.value,
+                              onSelected: (action) => unawaited(
+                                handleAiDraftRequest(
+                                  action,
+                                  textEditingController.text.trim(),
+                                ),
+                              ),
+                              onStop: () {
+                                final currentConversationId = conversationId;
+                                if (currentConversationId != null) {
+                                  AiChatController(
+                                    context.database,
+                                  ).stop(currentConversationId);
+                                }
+                                dismissAiDraftAssist();
+                              },
                             ),
                           ],
                           SizedBox(width: aiModeEnabled ? 10 : 8),
@@ -465,133 +578,47 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   }
 }
 
-enum _AiDraftAction { polish, shorten, polite, translate, replyWithContext }
-
-class _AiDraftAssistButton extends StatelessWidget {
-  const _AiDraftAssistButton({
-    required this.conversationId,
-    required this.textEditingController,
-  });
-
-  final String? conversationId;
-  final TextEditingController textEditingController;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled =
-        context.database.settingProperties.selectedAiProvider != null;
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
-      opacity: enabled ? 1 : 0.45,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: CustomPopupMenuButton<_AiDraftAction>(
-          itemBuilder: (_) => [
-            CustomPopupMenuItem(
-              title: 'Polish',
-              value: _AiDraftAction.polish,
-              icon: Resources.assetsImagesBotSvg,
-            ),
-            CustomPopupMenuItem(
-              title: 'Make shorter',
-              value: _AiDraftAction.shorten,
-              icon: Resources.assetsImagesBotSvg,
-            ),
-            CustomPopupMenuItem(
-              title: 'Make polite',
-              value: _AiDraftAction.polite,
-              icon: Resources.assetsImagesBotSvg,
-            ),
-            CustomPopupMenuItem(
-              title: 'Translate draft',
-              value: _AiDraftAction.translate,
-              icon: Resources.assetsImagesBotSvg,
-            ),
-            CustomPopupMenuItem(
-              title: 'Reply with context',
-              value: _AiDraftAction.replyWithContext,
-              icon: Resources.assetsImagesBotSvg,
-            ),
-          ],
-          onSelected: (action) => unawaited(
-            _runAiDraftAction(
-              context,
-              action: action,
-              conversationId: conversationId,
-              textEditingController: textEditingController,
-            ),
-          ),
-          child: Icon(
-            Icons.auto_awesome_rounded,
-            size: 20,
-            color: context.theme.icon,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Future<void> _runAiDraftAction(
+Future<String> _requestAiDraftAction(
   BuildContext context, {
-  required _AiDraftAction action,
-  required String? conversationId,
-  required TextEditingController textEditingController,
+  required AiDraftAction action,
+  required String conversationId,
+  required String original,
 }) async {
-  final original = textEditingController.text.trim();
-  if (conversationId == null) return;
-  if (action != _AiDraftAction.replyWithContext && original.isEmpty) {
-    showToastFailed(ToastError('Please type a message first'));
-    return;
+  if (action != AiDraftAction.replyWithContext && original.isEmpty) {
+    throw ToastError('Please type a message first');
   }
 
   final language = _currentLanguageTag(context);
   final instruction = switch (action) {
-    _AiDraftAction.polish =>
+    AiDraftAction.polish =>
       'Polish this draft for a chat message. Keep the original meaning, language, and approximate length.',
-    _AiDraftAction.shorten =>
+    AiDraftAction.shorten =>
       'Rewrite this chat draft to be shorter and clearer. Keep the original language and intent.',
-    _AiDraftAction.polite =>
+    AiDraftAction.polite =>
       'Rewrite this chat draft to sound polite, natural, and still concise. Keep the original language.',
-    _AiDraftAction.translate =>
+    AiDraftAction.translate =>
       'Translate this chat draft into $language. Return only the translation.',
-    _AiDraftAction.replyWithContext =>
+    AiDraftAction.replyWithContext =>
       'Draft a concise, natural reply to the latest conversation message using the recent context. Return only the reply text.',
   };
   final title = switch (action) {
-    _AiDraftAction.polish => 'Polish',
-    _AiDraftAction.shorten => 'Make shorter',
-    _AiDraftAction.polite => 'Make polite',
-    _AiDraftAction.translate => 'Translate draft',
-    _AiDraftAction.replyWithContext => 'Reply with context',
+    AiDraftAction.polish => 'Polish',
+    AiDraftAction.shorten => 'Make shorter',
+    AiDraftAction.polite => 'Make polite',
+    AiDraftAction.translate => 'Translate draft',
+    AiDraftAction.replyWithContext => 'Reply with context',
   };
 
-  showToastLoading(context: context);
   try {
     final result = await AiChatController(context.database).assistText(
       instruction: instruction,
-      input: action == _AiDraftAction.replyWithContext ? null : original,
+      input: action == AiDraftAction.replyWithContext ? null : original,
       conversationId: conversationId,
     );
-    Toast.dismiss();
-    if (!context.mounted) return;
-    final selectedAction = await showAiTextResultDialog(
-      context: context,
-      title: title,
-      original: original,
-      result: result,
-      allowReplace: original.isNotEmpty,
-    );
-    if (selectedAction == null) return;
-    switch (selectedAction) {
-      case AiTextResultAction.replace:
-        _replaceDraft(textEditingController, result);
-      case AiTextResultAction.insert:
-        _insertDraft(textEditingController, result);
-    }
+    return result.trim();
   } catch (error, stackTrace) {
-    e('AI draft assist failed: $error, $stackTrace');
-    showToastFailed(error, context: context);
+    e('AI draft assist failed: $title: $error, $stackTrace');
+    rethrow;
   }
 }
 
@@ -600,23 +627,6 @@ String _currentLanguageTag(BuildContext context) {
   final countryCode = locale.countryCode;
   if (countryCode == null || countryCode.isEmpty) return locale.languageCode;
   return '${locale.languageCode}-$countryCode';
-}
-
-void _replaceDraft(TextEditingController controller, String text) {
-  controller.value = TextEditingValue(
-    text: text,
-    selection: TextSelection.collapsed(offset: text.length),
-  );
-}
-
-void _insertDraft(TextEditingController controller, String text) {
-  final current = controller.text;
-  final separator = current.trim().isEmpty ? '' : '\n';
-  final next = '$current$separator$text';
-  controller.value = TextEditingValue(
-    text: next,
-    selection: TextSelection.collapsed(offset: next.length),
-  );
 }
 
 void showMaxLengthReachedToast(BuildContext context) =>
@@ -780,6 +790,7 @@ class _SendTextField extends HookConsumerWidget {
     required this.providerName,
     required this.modelName,
     required this.aiRequestInFlight,
+    required this.aiDraftAssistState,
   });
 
   final FocusNode focusNode;
@@ -790,6 +801,7 @@ class _SendTextField extends HookConsumerWidget {
   final String? providerName;
   final String? modelName;
   final bool aiRequestInFlight;
+  final AiDraftAssistViewState aiDraftAssistState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -863,17 +875,27 @@ class _SendTextField extends HookConsumerWidget {
         ? context.l10n.chatHintE2e
         : 'Type message or /ai';
     final canSubmit = sendable && (!aiModeEnabled || !aiRequestInFlight);
+    final aiDraftAssistActive = !aiDraftAssistState.isIdle;
+    final aiDraftAssistHasResult =
+        aiDraftAssistState.phase == AiDraftAssistPhase.result;
+    final fieldColor = context.dynamicColor(
+      const Color.fromRGBO(245, 247, 250, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+    );
+    final borderColor = aiDraftAssistActive
+        ? context.theme.accent.withValues(
+            alpha: aiDraftAssistHasResult ? 0.26 : 0.16,
+          )
+        : Colors.transparent;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-        color: context.dynamicColor(
-          const Color.fromRGBO(245, 247, 250, 1),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-        ),
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        color: fieldColor,
+        border: Border.all(color: borderColor),
       ),
       alignment: Alignment.center,
       child: FocusableActionDetector(
