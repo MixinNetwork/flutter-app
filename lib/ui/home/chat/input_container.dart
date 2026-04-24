@@ -379,7 +379,8 @@ class _InputContainer extends HookConsumerWidget {
                               aiDraftAssistState: aiDraftAssistState.value,
                             ),
                           ),
-                          if (!aiModeEnabled) ...[
+                          if (!aiModeEnabled &&
+                              enabledAiProviders.isNotEmpty) ...[
                             const SizedBox(width: 8),
                             AiDraftAssistButton(
                               enabled:

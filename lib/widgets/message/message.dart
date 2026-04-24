@@ -647,7 +647,14 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                     ];
 
-                    final aiText = messageAiText(message);
+                    final hasEnabledAiProvider = context
+                        .database
+                        .settingProperties
+                        .aiProviders
+                        .any((p) => p.enabled);
+                    final aiText = hasEnabledAiProvider
+                        ? messageAiText(message)
+                        : null;
                     void updateInlineAiState(
                       MessageAiAction action,
                       InlineMessageAiEntry entry,
