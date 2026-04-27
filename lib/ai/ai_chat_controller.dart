@@ -38,6 +38,7 @@ class AiChatController {
   final _uuid = const Uuid();
   static const _openAiStrategy = _OpenAiCompatibleStrategy();
   static const _anthropicStrategy = _AnthropicStrategy();
+  static const _geminiStrategy = _GeminiStrategy();
 
   Future<String> assistText({
     required String instruction,
@@ -328,6 +329,7 @@ class AiChatController {
   _AiProviderStrategy _strategyFor(AiProviderType type) => switch (type) {
     AiProviderType.openaiCompatible => _openAiStrategy,
     AiProviderType.anthropic => _anthropicStrategy,
+    AiProviderType.gemini => _geminiStrategy,
   };
 }
 
@@ -511,6 +513,128 @@ class _AnthropicStrategy implements _AiProviderStrategy {
       if (text is String && text.isNotEmpty) {
         buffer.write(text);
         await onContent(text);
+      }
+    }
+
+    final text = buffer.toString().trim();
+    if (text.isEmpty) {
+      throw Exception('Empty AI response');
+    }
+    return text;
+  }
+}
+
+class _GeminiStrategy implements _AiProviderStrategy {
+  const _GeminiStrategy();
+
+  @override
+  Map<String, dynamic> headers(AiProviderConfig config) => {
+    'x-goog-api-key': config.apiKey,
+    'content-type': 'application/json',
+  };
+
+  @override
+  Future<String> streamResponse({
+    required Dio dio,
+    required AiProviderConfig config,
+    required List<AiPromptMessage> messages,
+    required CancelToken cancelToken,
+    required Future<void> Function(String chunk) onContent,
+  }) async {
+    final systemInstruction = messages
+        .where((message) => message.role == 'system')
+        .map((message) => message.content.trim())
+        .where((content) => content.isNotEmpty)
+        .join('\n\n');
+
+    final contents = messages
+        .where((message) => message.role != 'system')
+        .map(
+          (message) => {
+            'role': message.role == _kAiRoleAssistant ? 'model' : 'user',
+            'parts': [
+              {'text': message.content},
+            ],
+          },
+        )
+        .toList();
+
+    final response = await dio.post<ResponseBody>(
+      '/models/${Uri.encodeComponent(config.model)}:streamGenerateContent',
+      queryParameters: const {'alt': 'sse'},
+      data: {
+        'contents': contents,
+        if (systemInstruction.isNotEmpty)
+          'system_instruction': {
+            'parts': [
+              {'text': systemInstruction},
+            ],
+          },
+        'generationConfig': {
+          'candidateCount': 1,
+        },
+      },
+      options: Options(responseType: ResponseType.stream),
+      cancelToken: cancelToken,
+    );
+
+    final body = response.data;
+    if (body == null) {
+      throw Exception('Empty AI response');
+    }
+
+    final buffer = StringBuffer();
+    await for (final data in _decodeSse(body.stream)) {
+      final json = jsonDecode(data);
+      if (json is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final promptFeedback = json['promptFeedback'];
+      if (promptFeedback is Map<String, dynamic>) {
+        final blockReason = promptFeedback['blockReason'];
+        if (blockReason is String && blockReason.isNotEmpty) {
+          throw Exception('Gemini request blocked: $blockReason');
+        }
+      }
+
+      final candidates = json['candidates'] as List<dynamic>?;
+      if (candidates == null || candidates.isEmpty) {
+        continue;
+      }
+
+      final first = candidates.first;
+      if (first is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final finishReason = first['finishReason'];
+      if (finishReason is String &&
+          finishReason.isNotEmpty &&
+          finishReason != 'STOP' &&
+          finishReason != 'FINISH_REASON_UNSPECIFIED') {
+        throw Exception('Gemini request finished with reason: $finishReason');
+      }
+
+      final content = first['content'];
+      if (content is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final parts = content['parts'] as List<dynamic>?;
+      if (parts == null || parts.isEmpty) {
+        continue;
+      }
+
+      for (final part in parts) {
+        if (part is! Map<String, dynamic>) {
+          continue;
+        }
+        final text = part['text'];
+        if (text is String && text.isNotEmpty) {
+          buffer.write(text);
+          await onContent(text);
+        }
       }
     }
 

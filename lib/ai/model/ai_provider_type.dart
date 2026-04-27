@@ -1,6 +1,7 @@
 enum AiProviderType {
   openaiCompatible('openai_compatible'),
-  anthropic('anthropic')
+  anthropic('anthropic'),
+  gemini('gemini')
   ;
 
   const AiProviderType(this.value);

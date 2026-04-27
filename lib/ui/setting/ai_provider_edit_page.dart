@@ -55,6 +55,15 @@ class AiProviderEditPage extends HookConsumerWidget {
     final obscureApiKey = useState(true);
 
     useEffect(() {
+      if (initial != null) return null;
+      final suggestion = _defaultBaseUrlFor(providerType.value);
+      if (baseUrlController.text.trim().isEmpty && suggestion.isNotEmpty) {
+        baseUrlController.text = suggestion;
+      }
+      return null;
+    }, [initial, providerType.value]);
+
+    useEffect(() {
       final resolved = _resolveDefaultModel(models.value, defaultModel.value);
       if (resolved != defaultModel.value) {
         defaultModel.value = resolved;
@@ -184,7 +193,8 @@ class AiProviderEditPage extends HookConsumerWidget {
                           decoration: InputDecoration(
                             isDense: true,
                             border: InputBorder.none,
-                            hintText: 'OpenAI / Anthropic / Self-hosted',
+                            hintText:
+                                'OpenAI / Anthropic / Gemini / Self-hosted',
                             hintStyle: TextStyle(color: theme.secondaryText),
                           ),
                         ),
@@ -205,16 +215,34 @@ class AiProviderEditPage extends HookConsumerWidget {
                             ),
                             iconEnabledColor: inputIconColor,
                             onChanged: (value) {
-                              if (value != null) providerType.value = value;
+                              if (value == null ||
+                                  value == providerType.value) {
+                                return;
+                              }
+                              final previousType = providerType.value;
+                              providerType.value = value;
+                              if (initial == null) {
+                                final suggestion = _defaultBaseUrlFor(value);
+                                final current = baseUrlController.text.trim();
+                                final replaceCurrent =
+                                    current.isEmpty ||
+                                    current == _defaultBaseUrlFor(previousType);
+                                if (replaceCurrent && suggestion.isNotEmpty) {
+                                  baseUrlController.text = suggestion;
+                                }
+                              }
                             },
                             items: AiProviderType.values
                                 .map(
                                   (type) => DropdownMenuItem<AiProviderType>(
                                     value: type,
                                     child: Text(
-                                      type == AiProviderType.anthropic
-                                          ? 'Anthropic'
-                                          : 'OpenAI Compatible',
+                                      switch (type) {
+                                        AiProviderType.anthropic => 'Anthropic',
+                                        AiProviderType.gemini => 'Gemini',
+                                        AiProviderType.openaiCompatible =>
+                                          'OpenAI Compatible',
+                                      },
                                     ),
                                   ),
                                 )
@@ -245,9 +273,19 @@ class AiProviderEditPage extends HookConsumerWidget {
                       decoration: InputDecoration(
                         isDense: true,
                         border: InputBorder.none,
-                        hintText: 'https://api.example.com/v1',
+                        hintText: _baseUrlHintFor(providerType.value),
                         hintStyle: TextStyle(color: theme.secondaryText),
                       ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
+                  child: Text(
+                    _baseUrlHelperTextFor(providerType.value),
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
                     ),
                   ),
                 ),
@@ -284,7 +322,7 @@ class AiProviderEditPage extends HookConsumerWidget {
                           decoration: InputDecoration(
                             isDense: true,
                             border: InputBorder.none,
-                            hintText: 'sk-...',
+                            hintText: _apiKeyHintFor(providerType.value),
                             hintStyle: TextStyle(color: theme.secondaryText),
                           ),
                         ),
@@ -387,6 +425,33 @@ class AiProviderEditPage extends HookConsumerWidget {
     }
     return models.first;
   }
+
+  static String _defaultBaseUrlFor(AiProviderType type) => switch (type) {
+    AiProviderType.openaiCompatible => '',
+    AiProviderType.anthropic => 'https://api.anthropic.com/v1',
+    AiProviderType.gemini => 'https://generativelanguage.googleapis.com/v1beta',
+  };
+
+  static String _baseUrlHintFor(AiProviderType type) => switch (type) {
+    AiProviderType.openaiCompatible => 'https://api.example.com/v1',
+    AiProviderType.anthropic => 'https://api.anthropic.com/v1',
+    AiProviderType.gemini => 'https://generativelanguage.googleapis.com/v1beta',
+  };
+
+  static String _baseUrlHelperTextFor(AiProviderType type) => switch (type) {
+    AiProviderType.openaiCompatible =>
+      'For OpenAI-compatible APIs, use the server root that exposes /chat/completions.',
+    AiProviderType.anthropic =>
+      'Anthropic uses the Messages API under /v1/messages.',
+    AiProviderType.gemini =>
+      'Gemini uses the Google Generative Language API and appends /models/{model}:streamGenerateContent automatically.',
+  };
+
+  static String _apiKeyHintFor(AiProviderType type) => switch (type) {
+    AiProviderType.openaiCompatible => 'sk-...',
+    AiProviderType.anthropic => 'sk-ant-...',
+    AiProviderType.gemini => 'AIza...',
+  };
 }
 
 class _SectionLabel extends StatelessWidget {
