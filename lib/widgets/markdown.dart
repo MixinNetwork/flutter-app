@@ -504,10 +504,15 @@ MarkdownThemeData _createMarkdownTheme(
   BuildContext context,
   double chatFontSizeDelta,
 ) {
-  final base = MarkdownThemeData.fallback(context);
+  final foreground = context.brightness == Brightness.dark
+      ? MarkdownThemeForeground.dark
+      : MarkdownThemeForeground.light;
+  final base = MarkdownThemeData.themed(
+    context,
+    foreground: foreground,
+  );
   final textColor = context.theme.text;
   final accentColor = context.theme.accent;
-  final codeBlockBackgroundColor = context.theme.chatBackground;
 
   TextStyle applyTextColor(TextStyle style) => style.copyWith(color: textColor);
   TextStyle applyFontSizeDelta(TextStyle style) {
@@ -523,7 +528,7 @@ MarkdownThemeData _createMarkdownTheme(
     bodyStyle: applyTextStyle(base.bodyStyle),
     quoteStyle: applyFontSizeDelta(
       base.quoteStyle.copyWith(
-        color: textColor.withValues(alpha: 0.82),
+        color: base.quoteStyle.color ?? textColor.withValues(alpha: 0.82),
       ),
     ),
     linkStyle: base.linkStyle.copyWith(
@@ -535,9 +540,6 @@ MarkdownThemeData _createMarkdownTheme(
     ),
     inlineCodeStyle: applyTextStyle(base.inlineCodeStyle),
     codeBlockStyle: applyTextStyle(base.codeBlockStyle),
-    codeBlockBackgroundColor: codeBlockBackgroundColor,
-    inlineCodeBackgroundColor: codeBlockBackgroundColor,
-    quoteBackgroundColor: codeBlockBackgroundColor,
     tableHeaderStyle: applyTextStyle(base.tableHeaderStyle),
     heading1Style: applyTextStyle(
       applyFontSizeDelta(

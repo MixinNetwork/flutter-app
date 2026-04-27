@@ -96,7 +96,8 @@ dependencies:
   local_auth: ^3.0.1
   lottie: ^3.3.3
   map: ^2.0.2
-  mixin_markdown_widget: ^0.1.0
+  mixin_markdown_widget:
+    path: ../flutter-plugins/packages/mixin_markdown_widget
   mime: ^2.0.0
   mixin_bot_sdk_dart: ^1.5.0
   mixin_logger: ^0.1.3

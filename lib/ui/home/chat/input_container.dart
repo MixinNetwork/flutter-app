@@ -852,29 +852,9 @@ class _SendTextField extends HookConsumerWidget {
         ).data ??
         false;
 
-    final placeholder = aiModeEnabled
-        ? aiRequestInFlight
-              ? [
-                  if (providerName?.trim().isNotEmpty == true)
-                    providerName!.trim()
-                  else
-                    'AI',
-                  if (modelName?.trim().isNotEmpty == true)
-                    '(${modelName!.trim()})',
-                  'is responding...',
-                ].join(' ')
-              : [
-                  'Ask',
-                  if (providerName?.trim().isNotEmpty == true)
-                    providerName!.trim()
-                  else
-                    'AI',
-                  if (modelName?.trim().isNotEmpty == true)
-                    '(${modelName!.trim()})',
-                ].join(' ')
-        : isEncryptConversation
+    final placeholder = isEncryptConversation
         ? context.l10n.chatHintE2e
-        : 'Type message or /ai';
+        : context.l10n.typeMessage;
     final canSubmit = sendable && (!aiModeEnabled || !aiRequestInFlight);
     final aiDraftAssistActive = !aiDraftAssistState.isIdle;
     final aiDraftAssistHasResult =
