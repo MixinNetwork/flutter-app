@@ -117,7 +117,9 @@ class AiProviderEditPage extends HookConsumerWidget {
           TextButton(
             onPressed: () {
               final name = nameController.text.trim();
-              final baseUrl = baseUrlController.text.trim();
+              final baseUrl = providerType.value == AiProviderType.gemini
+                  ? ''
+                  : baseUrlController.text.trim();
               final apiKey = apiKeyController.text.trim();
               final normalizedModels = _normalizeModels(models.value);
               final resolvedDefaultModel = _resolveDefaultModel(
@@ -125,7 +127,8 @@ class AiProviderEditPage extends HookConsumerWidget {
                 defaultModel.value,
               );
               if (name.isEmpty ||
-                  baseUrl.isEmpty ||
+                  (providerType.value != AiProviderType.gemini &&
+                      baseUrl.isEmpty) ||
                   apiKey.isEmpty ||
                   normalizedModels.isEmpty ||
                   resolvedDefaultModel.isEmpty) {
@@ -258,46 +261,48 @@ class AiProviderEditPage extends HookConsumerWidget {
                       ],
                     ),
                   ),
-                  const _SectionLabel(
-                    title: 'Endpoint',
-                  ),
-                  CellGroup(
-                    padding: const EdgeInsets.only(right: 10, left: 10),
-                    cellBackgroundColor: theme.settingCellBackgroundColor,
-                    child: _FormFieldCell(
-                      label: 'Base URL',
-                      backgroundColor: inputBackgroundColor,
-                      borderColor: inputBorderColor,
-                      child: TextField(
-                        controller: baseUrlController,
-                        keyboardType: TextInputType.url,
+                  if (providerType.value != AiProviderType.gemini) ...[
+                    const _SectionLabel(
+                      title: 'Endpoint',
+                    ),
+                    CellGroup(
+                      padding: const EdgeInsets.only(right: 10, left: 10),
+                      cellBackgroundColor: theme.settingCellBackgroundColor,
+                      child: _FormFieldCell(
+                        label: 'Base URL',
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: inputBorderColor,
+                        child: TextField(
+                          controller: baseUrlController,
+                          keyboardType: TextInputType.url,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: InputBorder.none,
+                            hintText: _baseUrlHintFor(providerType.value),
+                            hintStyle: TextStyle(color: theme.secondaryText),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        bottom: 14,
+                        top: 10,
+                      ),
+                      child: Text(
+                        _baseUrlHelperTextFor(providerType.value),
                         style: TextStyle(
-                          color: theme.text,
-                          fontSize: 16,
-                        ),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: _baseUrlHintFor(providerType.value),
-                          hintStyle: TextStyle(color: theme.secondaryText),
+                          color: context.theme.secondaryText,
+                          fontSize: 14,
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 20,
-                      bottom: 14,
-                      top: 10,
-                    ),
-                    child: Text(
-                      _baseUrlHelperTextFor(providerType.value),
-                      style: TextStyle(
-                        color: context.theme.secondaryText,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+                  ],
                   const _SectionLabel(
                     title: 'Authorization',
                   ),
@@ -440,7 +445,7 @@ class AiProviderEditPage extends HookConsumerWidget {
   static String _defaultBaseUrlFor(AiProviderType type) => switch (type) {
     AiProviderType.openaiCompatible => '',
     AiProviderType.anthropic => 'https://api.anthropic.com/v1',
-    AiProviderType.gemini => 'https://generativelanguage.googleapis.com/v1beta',
+    AiProviderType.gemini => '',
   };
 
   static String _baseUrlHintFor(AiProviderType type) => switch (type) {

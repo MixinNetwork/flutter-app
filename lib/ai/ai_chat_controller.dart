@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:genkit/genkit.dart' as genkit;
 import 'package:mixin_logger/mixin_logger.dart';
-import 'package:schemantic/schemantic.dart';
 import 'package:uuid/uuid.dart';
 
 import '../db/dao/ai_chat_message_dao.dart';
@@ -16,7 +13,6 @@ import 'ai_provider_requester.dart';
 import 'model/ai_chat_metadata.dart';
 import 'model/ai_prompt_message.dart';
 import 'model/ai_provider_config.dart';
-import 'model/ai_tool.dart';
 import 'tools/ai_conversation_tool_service.dart';
 
 const _kAiRoleUser = 'user';
@@ -27,7 +23,6 @@ const _kAiStatusError = 'error';
 const _kAiStreamFlushChars = 32;
 const _kAiStreamFlushInterval = Duration(milliseconds: 80);
 const _kAiLogPreviewLength = 240;
-const _kAiLogJsonPreviewLength = 480;
 final kAiRuntimeStartedAt = DateTime.now();
 final _activeAiRequests = <String, CancelToken>{};
 
@@ -252,103 +247,14 @@ class AiChatController {
     cancelToken: cancelToken,
     onContent: onContent,
     conversationId: conversationId,
-    tools: _toolsFor(
-      conversationId,
-      assistantMessageId: assistantMessageId,
-    ),
+    tools: conversationId == null
+        ? null
+        : _conversationTools.genkitTools(
+            conversationId: conversationId,
+            onEvent: (event) =>
+                _appendAssistantToolEvent(assistantMessageId, event),
+          ),
   );
-
-  List<genkit.Tool<Map<String, dynamic>, Map<String, dynamic>>>? _toolsFor(
-    String? conversationId, {
-    String? assistantMessageId,
-  }) {
-    if (conversationId == null) {
-      return null;
-    }
-    return AiConversationToolKit.definitions
-        .map(
-          (definition) =>
-              genkit.Tool<Map<String, dynamic>, Map<String, dynamic>>(
-                name: definition.name,
-                description: definition.description,
-                inputSchema: _schemaFor(definition),
-                fn: (input, context) async {
-                  final request = context.toolRequest?.toolRequest;
-                  return _executeConversationTool(
-                    conversationId: conversationId,
-                    assistantMessageId: assistantMessageId,
-                    id: request?.ref ?? '${definition.name}_${input.hashCode}',
-                    name: request?.name ?? definition.name,
-                    arguments: input,
-                  );
-                },
-              ),
-        )
-        .toList(growable: false);
-  }
-
-  SchemanticType<Map<String, dynamic>> _schemaFor(
-    AiToolDefinition definition,
-  ) => SchemanticType.from<Map<String, dynamic>>(
-    jsonSchema: definition.inputSchema.map(MapEntry.new),
-    parse: _jsonMap,
-  );
-
-  Future<Map<String, dynamic>> _executeConversationTool({
-    required String conversationId,
-    required String? assistantMessageId,
-    required String id,
-    required String name,
-    required Map<String, dynamic> arguments,
-  }) async {
-    final stopwatch = Stopwatch()..start();
-    d(
-      'AI tool execute start: conversationId=$conversationId '
-      'tool=$name id=$id '
-      'arguments=${_previewJson(arguments)}',
-    );
-    await _appendAssistantToolEvent(
-      assistantMessageId,
-      createAiToolCallEvent(id: id, name: name, arguments: arguments),
-    );
-    try {
-      final result = await _conversationTools.execute(
-        conversationId: conversationId,
-        name: name,
-        arguments: arguments,
-      );
-      d(
-        'AI tool execute done: conversationId=$conversationId '
-        'tool=$name id=$id '
-        'elapsedMs=${stopwatch.elapsedMilliseconds} '
-        'result=${_previewJson(result)}',
-      );
-      await _appendAssistantToolEvent(
-        assistantMessageId,
-        createAiToolResultEvent(
-          id: id,
-          name: name,
-          status: 'done',
-          elapsedMs: stopwatch.elapsedMilliseconds,
-          resultPreview: _previewJson(result),
-        ),
-      );
-      return result;
-    } catch (error, stacktrace) {
-      e('AI tool execution error: $error, $stacktrace');
-      await _appendAssistantToolEvent(
-        assistantMessageId,
-        createAiToolResultEvent(
-          id: id,
-          name: name,
-          status: 'error',
-          elapsedMs: stopwatch.elapsedMilliseconds,
-          errorText: error.toString(),
-        ),
-      );
-      return {'error': '$error'};
-    }
-  }
 
   Future<void> _appendAssistantToolEvent(
     String? assistantMessageId,
@@ -378,28 +284,6 @@ String _previewText(String? text, {int maxLength = _kAiLogPreviewLength}) {
     return compact;
   }
   return '${compact.substring(0, maxLength)}...(${compact.length} chars)';
-}
-
-String _previewJson(Object? value, {int maxLength = _kAiLogJsonPreviewLength}) {
-  try {
-    final encoded = jsonEncode(value);
-    if (encoded.length <= maxLength) {
-      return encoded;
-    }
-    return '${encoded.substring(0, maxLength)}...(${encoded.length} chars)';
-  } catch (_) {
-    return '$value';
-  }
-}
-
-Map<String, dynamic> _jsonMap(dynamic value) {
-  if (value is Map<String, dynamic>) {
-    return value;
-  }
-  if (value is Map) {
-    return value.map((key, value) => MapEntry('$key', value));
-  }
-  throw Exception('Invalid AI tool arguments');
 }
 
 class _StreamingMessageUpdater {

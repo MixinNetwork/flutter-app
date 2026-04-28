@@ -8,7 +8,6 @@ import 'model/ai_prompt_template.dart';
 class AiChatPromptBuilder {
   AiChatPromptBuilder(this.database);
 
-  static const _aiRoleUser = 'user';
   static const _aiStatusPending = 'pending';
   static const _aiContextMessageLimit = 30;
   static const _aiHistoryLimit = 12;
@@ -30,7 +29,7 @@ class AiChatPromptBuilder {
 
     final promptMessages = <AiPromptMessage>[
       ..._promptMessages(
-        role: 'system',
+        role: AiPromptRole.system,
         content: renderAiPromptTemplate(
           database.settingProperties.aiPromptTemplate(
             AiPromptTemplateKey.chatSystem,
@@ -65,13 +64,13 @@ class AiChatPromptBuilder {
         .takeLast(_aiHistoryLimit);
     for (final item in history) {
       promptMessages.add(
-        AiPromptMessage(role: item.role, content: item.content),
+        AiPromptMessage(role: AiPromptRole(item.role), content: item.content),
       );
     }
 
     promptMessages.addAll(
       _promptMessages(
-        role: _aiRoleUser,
+        role: AiPromptRole.user,
         content: renderAiPromptTemplate(
           chatUserMessagePromptTemplate,
           buildAiPromptTemplateVariables(
@@ -102,7 +101,7 @@ class AiChatPromptBuilder {
     final trimmedInstruction = instruction.trim();
     final promptMessages = <AiPromptMessage>[
       ..._promptMessages(
-        role: 'system',
+        role: AiPromptRole.system,
         content: renderAiPromptTemplate(
           database.settingProperties.aiPromptTemplate(
             AiPromptTemplateKey.assistSystem,
@@ -141,7 +140,7 @@ class AiChatPromptBuilder {
 
     promptMessages.addAll(
       _promptMessages(
-        role: _aiRoleUser,
+        role: AiPromptRole.user,
         content: renderAiPromptTemplate(
           assistUserMessagePromptTemplate,
           buildAiPromptTemplateVariables(
@@ -174,7 +173,7 @@ class AiChatPromptBuilder {
     }
     promptMessages.addAll(
       _promptMessages(
-        role: 'system',
+        role: AiPromptRole.system,
         content: renderAiPromptTemplate(
           conversationToolInstructionPromptTemplate,
           buildAiPromptTemplateVariables(
@@ -206,7 +205,7 @@ class AiChatPromptBuilder {
           .join('\n');
       promptMessages.addAll(
         _promptMessages(
-          role: 'system',
+          role: AiPromptRole.system,
           content: renderAiPromptTemplate(
             recentConversationContextPromptTemplate,
             buildAiPromptTemplateVariables(
@@ -248,7 +247,7 @@ class AiChatPromptBuilder {
   }
 
   List<AiPromptMessage> _promptMessages({
-    required String role,
+    required AiPromptRole role,
     required String content,
   }) {
     if (content.trim().isEmpty) {

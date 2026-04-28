@@ -1,14 +1,23 @@
+import 'dart:convert';
 import 'dart:math' as math;
+
+import 'package:genkit/genkit.dart' as genkit;
+import 'package:mixin_logger/mixin_logger.dart';
+import 'package:schemantic/schemantic.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/database.dart';
 import '../../db/mixin_database.dart';
-import '../model/ai_tool.dart';
+import '../model/ai_chat_metadata.dart';
 
 const _kDefaultConversationChunkSize = 100;
 const _kMaxConversationChunkSize = 200;
 const _kDefaultConversationSearchLimit = 8;
 const _kMaxConversationSearchLimit = 20;
+const _kAiToolLogPreviewLength = 480;
+
+typedef AiConversationToolEventSink =
+    Future<void> Function(Map<String, dynamic> event);
 
 class AiConversationToolMessage {
   const AiConversationToolMessage({
@@ -401,226 +410,420 @@ class AiConversationToolKit {
 
   final AiConversationToolService service;
 
-  static const definitions = <AiToolDefinition>[
-    AiToolDefinition(
+  List<genkit.Tool> genkitTools({
+    required String conversationId,
+    AiConversationToolEventSink? onEvent,
+  }) => [
+    genkit.Tool<GetConversationStatsInput, Map<String, dynamic>>(
       name: 'get_conversation_stats',
       description:
           'Get message counts and boundary timestamps for the current conversation or a specific time range.',
-      inputSchema: {
-        'type': 'object',
-        'properties': {
-          'start_time': {
-            'type': 'string',
-            'description': 'Optional inclusive ISO-8601 start time.',
-          },
-          'end_time': {
-            'type': 'string',
-            'description': 'Optional exclusive ISO-8601 end time.',
-          },
+      inputSchema: GetConversationStatsInput.schema,
+      fn: (input, context) => _executeTool(
+        conversationId: conversationId,
+        name: 'get_conversation_stats',
+        arguments: input.toArguments(),
+        context: context,
+        onEvent: onEvent,
+        fn: () async {
+          final stats = await service.getConversationStats(
+            conversationId: conversationId,
+            startInclusive: input.startInclusive,
+            endExclusive: input.endExclusive,
+          );
+          return stats.toJson();
         },
-        'additionalProperties': false,
-      },
+      ),
     ),
-    AiToolDefinition(
+    genkit.Tool<ListConversationChunksInput, Map<String, dynamic>>(
       name: 'list_conversation_chunks',
       description:
           'List chunk offsets that can be used to read the current conversation in fixed-size batches, optionally scoped to a time range.',
-      inputSchema: {
-        'type': 'object',
-        'properties': {
-          'chunk_size': {
-            'type': 'integer',
-            'description': 'Optional chunk size between 1 and 200.',
-          },
-          'start_time': {
-            'type': 'string',
-            'description': 'Optional inclusive ISO-8601 start time.',
-          },
-          'end_time': {
-            'type': 'string',
-            'description': 'Optional exclusive ISO-8601 end time.',
-          },
+      inputSchema: ListConversationChunksInput.schema,
+      fn: (input, context) => _executeTool(
+        conversationId: conversationId,
+        name: 'list_conversation_chunks',
+        arguments: input.toArguments(),
+        context: context,
+        onEvent: onEvent,
+        fn: () async {
+          final chunks = await service.listConversationChunks(
+            conversationId: conversationId,
+            chunkSize: input.chunkSize,
+            startInclusive: input.startInclusive,
+            endExclusive: input.endExclusive,
+          );
+          return chunks.toJson();
         },
-        'additionalProperties': false,
-      },
+      ),
     ),
-    AiToolDefinition(
+    genkit.Tool<ReadConversationChunkInput, Map<String, dynamic>>(
       name: 'read_conversation_chunk',
       description:
           'Read a batch of messages from the current conversation by offset and limit, optionally scoped to a time range.',
-      inputSchema: {
-        'type': 'object',
-        'properties': {
-          'offset': {
-            'type': 'integer',
-            'description': 'Zero-based offset into the matching message list.',
-          },
-          'limit': {
-            'type': 'integer',
-            'description': 'Number of messages to read, between 1 and 200.',
-          },
-          'start_time': {
-            'type': 'string',
-            'description': 'Optional inclusive ISO-8601 start time.',
-          },
-          'end_time': {
-            'type': 'string',
-            'description': 'Optional exclusive ISO-8601 end time.',
-          },
+      inputSchema: ReadConversationChunkInput.schema,
+      fn: (input, context) => _executeTool(
+        conversationId: conversationId,
+        name: 'read_conversation_chunk',
+        arguments: input.toArguments(),
+        context: context,
+        onEvent: onEvent,
+        fn: () async {
+          final page = await service.readConversationChunk(
+            conversationId: conversationId,
+            offset: input.offset,
+            limit: input.limit,
+            startInclusive: input.startInclusive,
+            endExclusive: input.endExclusive,
+          );
+          return page.toJson();
         },
-        'required': ['offset'],
-        'additionalProperties': false,
-      },
+      ),
     ),
-    AiToolDefinition(
+    genkit.Tool<SearchConversationMessagesInput, Map<String, dynamic>>(
       name: 'search_conversation_messages',
       description:
           'Search the current conversation for messages relevant to a query string.',
-      inputSchema: {
-        'type': 'object',
-        'properties': {
-          'query': {
-            'type': 'string',
-            'description': 'Search query text.',
-          },
-          'limit': {
-            'type': 'integer',
-            'description':
-                'Maximum number of matches to return, between 1 and 20.',
-          },
+      inputSchema: SearchConversationMessagesInput.schema,
+      fn: (input, context) => _executeTool(
+        conversationId: conversationId,
+        name: 'search_conversation_messages',
+        arguments: input.toArguments(),
+        context: context,
+        onEvent: onEvent,
+        fn: () async {
+          final result = await service.searchConversationMessages(
+            conversationId: conversationId,
+            query: input.query,
+            limit: input.limit,
+          );
+          return result.toJson();
         },
-        'required': ['query'],
-        'additionalProperties': false,
-      },
+      ),
     ),
   ];
 
-  Future<Map<String, dynamic>> execute({
+  Future<Map<String, dynamic>> _executeTool<Input>({
     required String conversationId,
     required String name,
     required Map<String, dynamic> arguments,
+    required genkit.ToolFnArgs<Input> context,
+    required Future<Map<String, dynamic>> Function() fn,
+    required AiConversationToolEventSink? onEvent,
   }) async {
-    switch (name) {
-      case 'get_conversation_stats':
-        final (startInclusive, endExclusive) = _parseRange(arguments);
-        final stats = await service.getConversationStats(
-          conversationId: conversationId,
-          startInclusive: startInclusive,
-          endExclusive: endExclusive,
-        );
-        return stats.toJson();
-      case 'list_conversation_chunks':
-        final (startInclusive, endExclusive) = _parseRange(arguments);
-        final chunkSize = _parseInt(
+    final request = context.toolRequest?.toolRequest;
+    final id = request?.ref ?? '${name}_${arguments.hashCode}';
+    final stopwatch = Stopwatch()..start();
+    d(
+      'AI tool execute start: conversationId=$conversationId '
+      'tool=$name id=$id arguments=${_previewJson(arguments)}',
+    );
+    await onEvent?.call(
+      createAiToolCallEvent(id: id, name: name, arguments: arguments),
+    );
+    try {
+      final result = await fn();
+      d(
+        'AI tool execute done: conversationId=$conversationId '
+        'tool=$name id=$id elapsedMs=${stopwatch.elapsedMilliseconds} '
+        'result=${_previewJson(result)}',
+      );
+      await onEvent?.call(
+        createAiToolResultEvent(
+          id: id,
+          name: name,
+          status: 'done',
+          elapsedMs: stopwatch.elapsedMilliseconds,
+          resultPreview: _previewJson(result),
+        ),
+      );
+      return result;
+    } catch (error, stacktrace) {
+      e('AI tool execution error: $error, $stacktrace');
+      await onEvent?.call(
+        createAiToolResultEvent(
+          id: id,
+          name: name,
+          status: 'error',
+          elapsedMs: stopwatch.elapsedMilliseconds,
+          errorText: error.toString(),
+        ),
+      );
+      return {'error': '$error'};
+    }
+  }
+}
+
+class GetConversationStatsInput {
+  const GetConversationStatsInput({
+    this.startInclusive,
+    this.endExclusive,
+  });
+
+  final DateTime? startInclusive;
+  final DateTime? endExclusive;
+
+  static final schema = SchemanticType.from<GetConversationStatsInput>(
+    jsonSchema: _rangeSchema(),
+    parse: (value) {
+      final arguments = _jsonMap(value);
+      final (startInclusive, endExclusive) = _parseRange(arguments);
+      return GetConversationStatsInput(
+        startInclusive: startInclusive,
+        endExclusive: endExclusive,
+      );
+    },
+  );
+
+  Map<String, dynamic> toArguments() => {
+    'start_time': startInclusive?.toIso8601String(),
+    'end_time': endExclusive?.toIso8601String(),
+  }..removeWhere((_, value) => value == null);
+}
+
+class ListConversationChunksInput {
+  const ListConversationChunksInput({
+    required this.chunkSize,
+    this.startInclusive,
+    this.endExclusive,
+  });
+
+  final int chunkSize;
+  final DateTime? startInclusive;
+  final DateTime? endExclusive;
+
+  static final schema = SchemanticType.from<ListConversationChunksInput>(
+    jsonSchema: _rangeSchema(
+      properties: {
+        'chunk_size': {
+          'type': 'integer',
+          'description': 'Optional chunk size between 1 and 200.',
+        },
+      },
+    ),
+    parse: (value) {
+      final arguments = _jsonMap(value);
+      final (startInclusive, endExclusive) = _parseRange(arguments);
+      return ListConversationChunksInput(
+        chunkSize: _parseInt(
           arguments,
           'chunk_size',
           defaultValue: _kDefaultConversationChunkSize,
           min: 1,
           max: _kMaxConversationChunkSize,
-        );
-        final chunks = await service.listConversationChunks(
-          conversationId: conversationId,
-          chunkSize: chunkSize,
-          startInclusive: startInclusive,
-          endExclusive: endExclusive,
-        );
-        return chunks.toJson();
-      case 'read_conversation_chunk':
-        final (startInclusive, endExclusive) = _parseRange(arguments);
-        final offset = _parseInt(
+        ),
+        startInclusive: startInclusive,
+        endExclusive: endExclusive,
+      );
+    },
+  );
+
+  Map<String, dynamic> toArguments() => {
+    'chunk_size': chunkSize,
+    'start_time': startInclusive?.toIso8601String(),
+    'end_time': endExclusive?.toIso8601String(),
+  }..removeWhere((_, value) => value == null);
+}
+
+class ReadConversationChunkInput {
+  const ReadConversationChunkInput({
+    required this.offset,
+    required this.limit,
+    this.startInclusive,
+    this.endExclusive,
+  });
+
+  final int offset;
+  final int limit;
+  final DateTime? startInclusive;
+  final DateTime? endExclusive;
+
+  static final schema = SchemanticType.from<ReadConversationChunkInput>(
+    jsonSchema: _rangeSchema(
+      properties: {
+        'offset': {
+          'type': 'integer',
+          'description': 'Zero-based offset into the matching message list.',
+        },
+        'limit': {
+          'type': 'integer',
+          'description': 'Number of messages to read, between 1 and 200.',
+        },
+      },
+      required: ['offset'],
+    ),
+    parse: (value) {
+      final arguments = _jsonMap(value);
+      final (startInclusive, endExclusive) = _parseRange(arguments);
+      return ReadConversationChunkInput(
+        offset: _parseInt(
           arguments,
           'offset',
           defaultValue: 0,
           min: 0,
           max: 1 << 20,
-        );
-        final limit = _parseInt(
+        ),
+        limit: _parseInt(
           arguments,
           'limit',
           defaultValue: _kDefaultConversationChunkSize,
           min: 1,
           max: _kMaxConversationChunkSize,
-        );
-        final page = await service.readConversationChunk(
-          conversationId: conversationId,
-          offset: offset,
-          limit: limit,
-          startInclusive: startInclusive,
-          endExclusive: endExclusive,
-        );
-        return page.toJson();
-      case 'search_conversation_messages':
-        final query = _parseRequiredString(arguments, 'query');
-        final limit = _parseInt(
+        ),
+        startInclusive: startInclusive,
+        endExclusive: endExclusive,
+      );
+    },
+  );
+
+  Map<String, dynamic> toArguments() => {
+    'offset': offset,
+    'limit': limit,
+    'start_time': startInclusive?.toIso8601String(),
+    'end_time': endExclusive?.toIso8601String(),
+  }..removeWhere((_, value) => value == null);
+}
+
+class SearchConversationMessagesInput {
+  const SearchConversationMessagesInput({
+    required this.query,
+    required this.limit,
+  });
+
+  final String query;
+  final int limit;
+
+  static final schema = SchemanticType.from<SearchConversationMessagesInput>(
+    jsonSchema: {
+      'type': 'object',
+      'properties': {
+        'query': {
+          'type': 'string',
+          'description': 'Search query text.',
+        },
+        'limit': {
+          'type': 'integer',
+          'description':
+              'Maximum number of matches to return, between 1 and 20.',
+        },
+      },
+      'required': ['query'],
+      'additionalProperties': false,
+    },
+    parse: (value) {
+      final arguments = _jsonMap(value);
+      return SearchConversationMessagesInput(
+        query: _parseRequiredString(arguments, 'query'),
+        limit: _parseInt(
           arguments,
           'limit',
           defaultValue: _kDefaultConversationSearchLimit,
           min: 1,
           max: _kMaxConversationSearchLimit,
-        );
-        final result = await service.searchConversationMessages(
-          conversationId: conversationId,
-          query: query,
-          limit: limit,
-        );
-        return result.toJson();
-      default:
-        throw UnsupportedError('Unknown conversation tool: $name');
-    }
-  }
+        ),
+      );
+    },
+  );
 
-  (DateTime?, DateTime?) _parseRange(Map<String, dynamic> arguments) {
-    final startInclusive = _parseDateTime(arguments, 'start_time');
-    final endExclusive = _parseDateTime(arguments, 'end_time');
-    if (startInclusive != null &&
-        endExclusive != null &&
-        !endExclusive.isAfter(startInclusive)) {
-      throw const FormatException('end_time must be later than start_time');
-    }
-    return (startInclusive, endExclusive);
-  }
+  Map<String, dynamic> toArguments() => {
+    'query': query,
+    'limit': limit,
+  };
+}
 
-  DateTime? _parseDateTime(Map<String, dynamic> arguments, String key) {
-    final raw = arguments[key];
-    if (raw == null) {
-      return null;
-    }
-    if (raw is! String || raw.trim().isEmpty) {
-      throw FormatException('$key must be an ISO-8601 string');
-    }
-    final value = DateTime.tryParse(raw.trim());
-    if (value == null) {
-      throw FormatException('$key must be a valid ISO-8601 string');
-    }
+Map<String, Object?> _rangeSchema({
+  Map<String, Object?> properties = const {},
+  List<String> required = const [],
+}) => {
+  'type': 'object',
+  'properties': {
+    'start_time': {
+      'type': 'string',
+      'description': 'Optional inclusive ISO-8601 start time.',
+    },
+    'end_time': {
+      'type': 'string',
+      'description': 'Optional exclusive ISO-8601 end time.',
+    },
+    ...properties,
+  },
+  if (required.isNotEmpty) 'required': required,
+  'additionalProperties': false,
+};
+
+(DateTime?, DateTime?) _parseRange(Map<String, dynamic> arguments) {
+  final startInclusive = _parseDateTime(arguments, 'start_time');
+  final endExclusive = _parseDateTime(arguments, 'end_time');
+  if (startInclusive != null &&
+      endExclusive != null &&
+      !endExclusive.isAfter(startInclusive)) {
+    throw const FormatException('end_time must be later than start_time');
+  }
+  return (startInclusive, endExclusive);
+}
+
+DateTime? _parseDateTime(Map<String, dynamic> arguments, String key) {
+  final raw = arguments[key];
+  if (raw == null) {
+    return null;
+  }
+  if (raw is! String || raw.trim().isEmpty) {
+    throw FormatException('$key must be an ISO-8601 string');
+  }
+  final value = DateTime.tryParse(raw.trim());
+  if (value == null) {
+    throw FormatException('$key must be a valid ISO-8601 string');
+  }
+  return value;
+}
+
+int _parseInt(
+  Map<String, dynamic> arguments,
+  String key, {
+  required int defaultValue,
+  required int min,
+  required int max,
+}) {
+  final raw = arguments[key];
+  if (raw == null) {
+    return defaultValue;
+  }
+  final value = switch (raw) {
+    final int value => value,
+    final String value =>
+      int.tryParse(value.trim()) ??
+          (throw FormatException('$key must be an integer')),
+    _ => throw FormatException('$key must be an integer'),
+  };
+  return value.clamp(min, max);
+}
+
+String _parseRequiredString(Map<String, dynamic> arguments, String key) {
+  final raw = arguments[key];
+  if (raw is! String || raw.trim().isEmpty) {
+    throw FormatException('$key must be a non-empty string');
+  }
+  return raw.trim();
+}
+
+Map<String, dynamic> _jsonMap(dynamic value) {
+  if (value is Map<String, dynamic>) {
     return value;
   }
-
-  int _parseInt(
-    Map<String, dynamic> arguments,
-    String key, {
-    required int defaultValue,
-    required int min,
-    required int max,
-  }) {
-    final raw = arguments[key];
-    if (raw == null) {
-      return defaultValue;
-    }
-    final value = switch (raw) {
-      final int value => value,
-      final String value =>
-        int.tryParse(value.trim()) ??
-            (throw FormatException('$key must be an integer')),
-      _ => throw FormatException('$key must be an integer'),
-    };
-    return value.clamp(min, max);
+  if (value is Map) {
+    return value.map((key, value) => MapEntry('$key', value));
   }
+  throw Exception('Invalid AI tool arguments');
+}
 
-  String _parseRequiredString(Map<String, dynamic> arguments, String key) {
-    final raw = arguments[key];
-    if (raw is! String || raw.trim().isEmpty) {
-      throw FormatException('$key must be a non-empty string');
+String _previewJson(Object? value) {
+  try {
+    final encoded = jsonEncode(value);
+    if (encoded.length <= _kAiToolLogPreviewLength) {
+      return encoded;
     }
-    return raw.trim();
+    return '${encoded.substring(0, _kAiToolLogPreviewLength)}...(${encoded.length} chars)';
+  } catch (_) {
+    return '$value';
   }
 }

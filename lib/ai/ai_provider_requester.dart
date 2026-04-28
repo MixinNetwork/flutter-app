@@ -63,7 +63,9 @@ class AiProviderRequester {
     try {
       final cancelFuture = cancelToken.whenCancel.then<void>((_) {});
       final stream = ai.generateStream<dynamic, String>(
-        messages: messages.map(_genkitMessage).toList(growable: false),
+        messages: messages
+            .map((message) => message.toGenkitMessage())
+            .toList(growable: false),
         model: _modelFor(config),
         tools: tools,
         toolChoice: tools == null ? null : 'auto',
@@ -167,18 +169,6 @@ class AiProviderRequester {
         AiProviderType.anthropic => anthropic.model(config.model),
         AiProviderType.gemini => googleAI.gemini(config.model),
       };
-
-  genkit.Message _genkitMessage(AiPromptMessage message) => genkit.Message(
-    role: _roleFor(message.role),
-    content: [genkit.TextPart(text: message.content)],
-  );
-
-  genkit.Role _roleFor(String role) => switch (role) {
-    'system' => genkit.Role.system,
-    'assistant' => genkit.Role.model,
-    'tool' => genkit.Role.tool,
-    _ => genkit.Role.user,
-  };
 
   String? _emptyToNull(String value) {
     final trimmed = value.trim();
