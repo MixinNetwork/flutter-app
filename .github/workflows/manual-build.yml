@@ -274,6 +274,8 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     if: contains(github.event.inputs.platforms, 'windows') || github.event.inputs.platforms == ''
     steps:
       - uses: actions/checkout@v4
