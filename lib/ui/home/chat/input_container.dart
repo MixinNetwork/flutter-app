@@ -332,7 +332,7 @@ class _InputContainer extends HookConsumerWidget {
                             Clipboard.setData(ClipboardData(text: result));
                             showToastSuccessful(context: context);
                           },
-                          onAppend: () {
+                          onInsert: () {
                             final result = aiDraftAssistState.value.result;
                             if (result == null) return;
                             applyAiDraftAssistResult(
@@ -341,6 +341,26 @@ class _InputContainer extends HookConsumerWidget {
                               replace: false,
                             );
                             dismissAiDraftAssist();
+                          },
+                          onUseAndSend: () {
+                            final result = aiDraftAssistState.value.result;
+                            if (result == null || conversationId == null) {
+                              return;
+                            }
+                            textEditingController.value = TextEditingValue(
+                              text: result,
+                              selection: TextSelection.collapsed(
+                                offset: result.length,
+                              ),
+                            );
+                            dismissAiDraftAssist();
+                            unawaited(
+                              _sendMessage(
+                                context,
+                                textEditingController,
+                                conversationId: conversationId,
+                              ),
+                            );
                           },
                           onReplace: () {
                             final result = aiDraftAssistState.value.result;

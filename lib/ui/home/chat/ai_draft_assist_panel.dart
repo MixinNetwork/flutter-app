@@ -291,16 +291,18 @@ class AiDraftAssistInlineCandidate extends StatelessWidget {
     required this.viewState,
     required this.onDismiss,
     required this.onCopy,
-    required this.onAppend,
+    required this.onInsert,
     required this.onReplace,
+    required this.onUseAndSend,
     super.key,
   });
 
   final AiDraftAssistViewState viewState;
   final VoidCallback onDismiss;
   final VoidCallback onCopy;
-  final VoidCallback onAppend;
+  final VoidCallback onInsert;
   final VoidCallback onReplace;
+  final VoidCallback onUseAndSend;
 
   @override
   Widget build(BuildContext context) {
@@ -337,8 +339,9 @@ class AiDraftAssistInlineCandidate extends StatelessWidget {
             result: viewState.result ?? '',
             onDismiss: onDismiss,
             onCopy: onCopy,
-            onAppend: onAppend,
+            onInsert: onInsert,
             onReplace: onReplace,
+            onUseAndSend: onUseAndSend,
           ),
           AiDraftAssistPhase.error => _AiDraftAssistInlineError(
             error: viewState.error ?? 'Unknown error',
@@ -358,16 +361,18 @@ class _AiDraftAssistInlineResult extends StatelessWidget {
     required this.result,
     required this.onDismiss,
     required this.onCopy,
-    required this.onAppend,
+    required this.onInsert,
     required this.onReplace,
+    required this.onUseAndSend,
   });
 
   final AiDraftAction? action;
   final String result;
   final VoidCallback onDismiss;
   final VoidCallback onCopy;
-  final VoidCallback onAppend;
+  final VoidCallback onInsert;
   final VoidCallback onReplace;
+  final VoidCallback onUseAndSend;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -385,6 +390,12 @@ class _AiDraftAssistInlineResult extends StatelessWidget {
               ),
             ),
           ),
+          _AiDraftInlineIconButton(
+            icon: Icons.copy_all_rounded,
+            color: context.theme.secondaryText,
+            onTap: onCopy,
+          ),
+          const SizedBox(width: 4),
           _AiDraftInlineIconButton(
             icon: Icons.close_rounded,
             color: context.theme.secondaryText,
@@ -415,18 +426,16 @@ class _AiDraftAssistInlineResult extends StatelessWidget {
         runSpacing: 8,
         children: [
           _AiDraftInlineTextButton(
-            title: 'Copy',
-            onTap: onCopy,
+            title: 'Insert',
+            onTap: onInsert,
             secondary: true,
           ),
-          _AiDraftInlineTextButton(
-            title: 'Append',
-            onTap: onAppend,
-            secondary: true,
-          ),
+          if (action == AiDraftAction.replyWithContext)
+            _AiDraftInlineTextButton(title: 'Use & Send', onTap: onUseAndSend),
           _AiDraftInlineTextButton(
             title: 'Replace Draft',
             onTap: onReplace,
+            secondary: action == AiDraftAction.replyWithContext,
           ),
         ],
       ),
