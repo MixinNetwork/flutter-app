@@ -3,12 +3,10 @@ import 'package:drift/native.dart';
 import 'package:flutter_app/ai/ai_chat_prompt_builder.dart';
 import 'package:flutter_app/ai/model/ai_prompt_message.dart';
 import 'package:flutter_app/db/ai_database.dart';
-import 'package:flutter_app/db/dao/ai_chat_message_dao.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 void main() {
   group('AI chat threads', () {
