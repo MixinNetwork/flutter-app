@@ -709,18 +709,25 @@ class _List extends HookConsumerWidget {
 
     Widget buildTimelineChild(ChatTimelineItem item, int index) {
       warmupMarkdownAround(index);
+      final prevDateTime = index > 0 ? timeline[index - 1].createdAt : null;
       if (item.isAiMessage) {
-        return AiMessageCard(
-          key: ValueKey('ai-${item.id}'),
-          message: item.aiMessage!,
-          prev: prevAiOf(item, timeline),
-          next: nextAiOf(item, timeline),
+        return MessageDayTimeItem(
+          key: ValueKey('ai-daytime-${item.id}'),
+          dateTime: item.createdAt,
+          prevDateTime: prevDateTime,
+          child: AiMessageCard(
+            key: ValueKey('ai-${item.id}'),
+            message: item.aiMessage!,
+            prev: prevAiOf(item, timeline),
+            next: nextAiOf(item, timeline),
+          ),
         );
       }
       final message = item.message!;
       return MessageItemWidget(
         key: keyRef.value[message.messageId],
         prev: prevMessageOf(item, timeline),
+        prevDateTime: prevDateTime,
         message: message,
         next: nextMessageOf(item, timeline),
         lastReadMessageId: state.lastReadMessageId,

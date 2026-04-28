@@ -196,6 +196,7 @@ class MessageItemWidget extends HookConsumerWidget {
     required this.message,
     super.key,
     this.prev,
+    this.prevDateTime,
     this.next,
     this.lastReadMessageId,
     this.isTranscriptPage = false,
@@ -205,6 +206,7 @@ class MessageItemWidget extends HookConsumerWidget {
 
   final MessageItem message;
   final MessageItem? prev;
+  final DateTime? prevDateTime;
   final MessageItem? next;
   final String? lastReadMessageId;
   final bool isTranscriptPage;
@@ -242,7 +244,10 @@ class MessageItemWidget extends HookConsumerWidget {
 
     final showNip =
         !(sameUserNext && sameDayNext) && (!showAvatar || isCurrentUser);
-    final datetime = sameDayPrev ? null : message.createdAt;
+    final datetime =
+        isSameDay(prevDateTime ?? prev?.createdAt, message.createdAt)
+            ? null
+            : message.createdAt;
     String? userName;
     String? userId;
     String? userAvatarUrl;
