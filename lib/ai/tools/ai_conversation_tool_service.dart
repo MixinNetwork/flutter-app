@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:genkit/genkit.dart' as genkit;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:schemantic/schemantic.dart';
+import 'package:toon_format/toon_format.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/database.dart';
@@ -414,7 +415,7 @@ class AiConversationToolKit {
     required String conversationId,
     AiConversationToolEventSink? onEvent,
   }) => [
-    genkit.Tool<GetConversationStatsInput, Map<String, dynamic>>(
+    genkit.Tool<GetConversationStatsInput, String>(
       name: 'get_conversation_stats',
       description:
           'Get message counts and boundary timestamps for the current conversation or a specific time range.',
@@ -435,7 +436,7 @@ class AiConversationToolKit {
         },
       ),
     ),
-    genkit.Tool<ListConversationChunksInput, Map<String, dynamic>>(
+    genkit.Tool<ListConversationChunksInput, String>(
       name: 'list_conversation_chunks',
       description:
           'List chunk offsets that can be used to read the current conversation in fixed-size batches, optionally scoped to a time range.',
@@ -457,7 +458,7 @@ class AiConversationToolKit {
         },
       ),
     ),
-    genkit.Tool<ReadConversationChunkInput, Map<String, dynamic>>(
+    genkit.Tool<ReadConversationChunkInput, String>(
       name: 'read_conversation_chunk',
       description:
           'Read a batch of messages from the current conversation by offset and limit, optionally scoped to a time range.',
@@ -480,7 +481,7 @@ class AiConversationToolKit {
         },
       ),
     ),
-    genkit.Tool<SearchConversationMessagesInput, Map<String, dynamic>>(
+    genkit.Tool<SearchConversationMessagesInput, String>(
       name: 'search_conversation_messages',
       description:
           'Search the current conversation for messages relevant to a query string.',
@@ -503,7 +504,7 @@ class AiConversationToolKit {
     ),
   ];
 
-  Future<Map<String, dynamic>> _executeTool<Input>({
+  Future<String> _executeTool<Input>({
     required String conversationId,
     required String name,
     required Map<String, dynamic> arguments,
@@ -523,10 +524,11 @@ class AiConversationToolKit {
     );
     try {
       final result = await fn();
+      final encodedResult = _encodeToolResult(result);
       d(
         'AI tool execute done: conversationId=$conversationId '
         'tool=$name id=$id elapsedMs=${stopwatch.elapsedMilliseconds} '
-        'result=${_previewJson(result)}',
+        'result=${_previewText(encodedResult)}',
       );
       await onEvent?.call(
         createAiToolResultEvent(
@@ -534,10 +536,10 @@ class AiConversationToolKit {
           name: name,
           status: 'done',
           elapsedMs: stopwatch.elapsedMilliseconds,
-          resultPreview: _previewJson(result),
+          resultPreview: _previewText(encodedResult),
         ),
       );
-      return result;
+      return encodedResult;
     } catch (error, stacktrace) {
       e('AI tool execution error: $error, $stacktrace');
       await onEvent?.call(
@@ -549,7 +551,7 @@ class AiConversationToolKit {
           errorText: error.toString(),
         ),
       );
-      return {'error': '$error'};
+      return _encodeToolResult({'error': '$error'});
     }
   }
 }
@@ -826,4 +828,28 @@ String _previewJson(Object? value) {
   } catch (_) {
     return '$value';
   }
+}
+
+String _encodeToolResult(Map<String, dynamic> result) =>
+    encode(_stripNullValues(result));
+
+Object? _stripNullValues(Object? value) {
+  if (value is Map) {
+    return {
+      for (final entry in value.entries)
+        if (entry.value != null) entry.key: _stripNullValues(entry.value),
+    };
+  }
+  if (value is List) {
+    return value.map(_stripNullValues).toList(growable: false);
+  }
+  return value;
+}
+
+String _previewText(String value) {
+  final compact = value.replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (compact.length <= _kAiToolLogPreviewLength) {
+    return compact;
+  }
+  return '${compact.substring(0, _kAiToolLogPreviewLength)}...(${compact.length} chars)';
 }

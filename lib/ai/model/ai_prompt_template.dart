@@ -282,10 +282,12 @@ const conversationToolInstructionPromptTemplate =
     'Read-only conversation tools are available for the current '
     'conversation. Use them when you need exhaustive coverage, '
     'date-scoped summaries, statistics, older messages, or more '
-    'context than the provided messages. When answering the user, '
-    'default to {{language}} unless the user explicitly requires '
-    'another language or preserving the source language. Do not call '
-    'tools when the provided context is already sufficient.';
+    'context than the provided messages. Tool results are returned in '
+    'TOON format, a compact tabular notation for structured data. '
+    'When answering the user, default to {{language}} unless the user '
+    'explicitly requires another language or preserving the source '
+    'language. Do not call tools when the provided context is already '
+    'sufficient.';
 
 const recentConversationContextPromptTemplate =
     'Current conversation recent messages:\n{{messages}}';

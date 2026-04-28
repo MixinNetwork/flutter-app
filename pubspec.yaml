@@ -174,6 +174,10 @@ dependencies:
   genkit_anthropic: ^0.2.4
   genkit_google_genai: ^0.2.4
   schemantic: ^0.1.1
+  toon_format:
+    git:
+      url: https://github.com/toon-format/toon-dart.git
+      ref: 51fa0e9311837b84c24e30827b53891041378448
 
 dev_dependencies:
   build_runner: ^2.13.1
