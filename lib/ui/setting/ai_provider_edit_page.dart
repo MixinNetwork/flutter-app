@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../ai/ai_provider_requester.dart';
+import '../../ai/model/ai_prompt_message.dart';
 import '../../ai/model/ai_provider_config.dart';
 import '../../ai/model/ai_provider_type.dart';
 import '../../utils/extension/extension.dart';
@@ -53,6 +56,7 @@ class AiProviderEditPage extends HookConsumerWidget {
       ),
     );
     final obscureApiKey = useState(true);
+    final testingModel = useState<String?>(null);
 
     useEffect(() {
       if (initial != null) return null;
@@ -107,6 +111,64 @@ class AiProviderEditPage extends HookConsumerWidget {
         nextModels,
         removed == defaultModel.value ? null : defaultModel.value,
       );
+    }
+
+    Future<void> testModel(String model) async {
+      final name = nameController.text.trim().isEmpty
+          ? 'Test Provider'
+          : nameController.text.trim();
+      final baseUrl = providerType.value == AiProviderType.gemini
+          ? ''
+          : baseUrlController.text.trim();
+      final apiKey = apiKeyController.text.trim();
+      if ((providerType.value != AiProviderType.gemini && baseUrl.isEmpty) ||
+          apiKey.isEmpty ||
+          model.trim().isEmpty) {
+        showToastFailed(ToastError('Please complete provider settings first'));
+        return;
+      }
+
+      testingModel.value = model;
+      showToastLoading(context: context);
+      final stopwatch = Stopwatch()..start();
+      try {
+        await const AiProviderRequester().requestText(
+          AiProviderConfig(
+            id: initial?.id ?? const Uuid().v4(),
+            name: name,
+            type: providerType.value,
+            baseUrl: baseUrl,
+            apiKey: apiKey,
+            model: model,
+            models: [model],
+            defaultModel: model,
+          ),
+          [
+            AiPromptMessage(
+              role: AiPromptRole.user,
+              content: 'Reply with exactly: OK',
+            ),
+          ],
+          proxy: database.settingProperties.activatedProxy,
+          cancelToken: CancelToken(),
+          onContent: (_) async {},
+          conversationId: null,
+        );
+        stopwatch.stop();
+        if (!context.mounted) return;
+        showToast(
+          'Model works · ${stopwatch.elapsedMilliseconds} ms',
+          context: context,
+        );
+      } catch (error) {
+        stopwatch.stop();
+        if (!context.mounted) return;
+        showToastFailed(error, context: context);
+      } finally {
+        if (context.mounted && testingModel.value == model) {
+          testingModel.value = null;
+        }
+      }
     }
 
     return Scaffold(
@@ -404,7 +466,9 @@ class AiProviderEditPage extends HookConsumerWidget {
                             _ModelItem(
                               model: models.value[i],
                               selected: models.value[i] == defaultModel.value,
+                              testing: testingModel.value == models.value[i],
                               onTap: () => defaultModel.value = models.value[i],
+                              onTest: () => testModel(models.value[i]),
                               onEdit: () => showModelDialog(
                                 initialValue: models.value[i],
                                 index: i,
@@ -567,14 +631,18 @@ class _ModelItem extends StatelessWidget {
   const _ModelItem({
     required this.model,
     required this.selected,
+    required this.testing,
     required this.onTap,
+    required this.onTest,
     required this.onEdit,
     required this.onDelete,
   });
 
   final String model;
   final bool selected;
+  final bool testing;
   final VoidCallback onTap;
+  final VoidCallback onTest;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -618,6 +686,21 @@ class _ModelItem extends StatelessWidget {
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        IconButton(
+          tooltip: 'Test model',
+          onPressed: testing ? null : onTest,
+          icon: testing
+              ? SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      context.theme.accent,
+                    ),
+                  ),
+                )
+              : Icon(Icons.speed_rounded, color: context.theme.icon),
+        ),
         IconButton(
           onPressed: onEdit,
           icon: Icon(Icons.edit_outlined, color: context.theme.icon),
