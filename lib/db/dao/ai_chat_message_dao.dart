@@ -26,6 +26,22 @@ class AiChatMessageDao extends DatabaseAccessor<MixinDatabase>
             ]))
           .watch();
 
+  Stream<List<AiChatMessage>> watchLatestConversationMessages(
+    String conversationId,
+    int limit,
+  ) =>
+      (select(
+              db.aiChatMessages,
+            )
+            ..where((tbl) => tbl.conversationId.equals(conversationId))
+            ..orderBy([
+              (tbl) => OrderingTerm.desc(tbl.createdAt),
+              (tbl) => OrderingTerm.desc(tbl.id),
+            ])
+            ..limit(limit))
+          .watch()
+          .map((items) => items.reversed.toList(growable: false));
+
   Future<List<AiChatMessage>> conversationMessages(String conversationId) =>
       (select(
               db.aiChatMessages,
@@ -36,6 +52,32 @@ class AiChatMessageDao extends DatabaseAccessor<MixinDatabase>
               (tbl) => OrderingTerm.asc(tbl.id),
             ]))
           .get();
+
+  Future<List<AiChatMessage>> beforeConversationMessages({
+    required String conversationId,
+    required AiChatMessage before,
+    required int limit,
+  }) async {
+    final beforeCreatedAt = before.createdAt.millisecondsSinceEpoch;
+    final list =
+        await (select(
+                db.aiChatMessages,
+              )
+              ..where(
+                (tbl) =>
+                    tbl.conversationId.equals(conversationId) &
+                    (tbl.createdAt.isSmallerThanValue(beforeCreatedAt) |
+                        (tbl.createdAt.equals(beforeCreatedAt) &
+                            tbl.id.isSmallerThanValue(before.id))),
+              )
+              ..orderBy([
+                (tbl) => OrderingTerm.desc(tbl.createdAt),
+                (tbl) => OrderingTerm.desc(tbl.id),
+              ])
+              ..limit(limit))
+            .get();
+    return list.reversed.toList(growable: false);
+  }
 
   Future<void> insertMessage(AiChatMessagesCompanion row) =>
       into(db.aiChatMessages).insertOnConflictUpdate(row);

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart'
     hide SelectableRegion, SelectableRegionState;
 import 'package:flutter/rendering.dart' show SelectedContent, SelectionStatus;
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
-import '../../constants/resources.dart';
 import '../../db/mixin_database.dart' hide Offset;
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
@@ -20,7 +18,6 @@ import '../message/message_layout.dart';
 import '../message/message_style.dart';
 import '../qr_code.dart';
 
-const _aiAssistantTitle = 'AI Assistant';
 const _copyAiMessageTitle = 'Copy AI Message';
 
 class AiMessageCard extends StatelessWidget {
@@ -44,10 +41,12 @@ class AiMessageCard extends StatelessWidget {
     final sameRoleNext = next?.role == message.role;
     final mergedWithPrev = sameDayPrev && sameRolePrev;
     final mergedWithNext = sameDayNext && sameRoleNext;
-    final body = ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 420),
-      child: _AiMessageBody(message: message),
-    );
+    final body = isUser
+        ? ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: _AiMessageBody(message: message),
+          )
+        : _AiMessageBody(message: message);
 
     if (isUser) {
       return Padding(
@@ -78,48 +77,12 @@ class AiMessageCard extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 8,
-        right: 44,
         top: mergedWithPrev ? 6 : 18,
         bottom: 6,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 32,
-            child: !mergedWithPrev
-                ? _AiAvatar(thinking: message.status == 'pending')
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 1),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!mergedWithPrev)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Text(
-                        _aiAssistantTitle,
-                        style: TextStyle(
-                          color: context.theme.secondaryText,
-                          fontSize: context.messageStyle.statusFontSize,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  _AiMessageMenu(
-                    message: message,
-                    child: body,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      child: _AiMessageMenu(
+        message: message,
+        child: body,
       ),
     );
   }
@@ -134,11 +97,6 @@ class _AiMessageBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.role == 'user';
     final text = _displayText(message);
-    final statusColor = _statusColor(
-      context,
-      isUser: isUser,
-      status: message.status,
-    );
 
     Widget body;
     final textStyle = TextStyle(
@@ -173,8 +131,6 @@ class _AiMessageBody extends StatelessWidget {
       dateAndStatus: _AiFooter(
         isUser: isUser,
         model: message.model,
-        status: message.status,
-        color: statusColor,
         dateTime: message.createdAt,
       ),
     );
@@ -247,70 +203,6 @@ class _AiBubble extends StatelessWidget {
         child: MessageBubbleNipPadding(
           currentUser: isCurrentUser,
           child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _AiAvatar extends HookWidget {
-  const _AiAvatar({required this.thinking});
-
-  final bool thinking;
-
-  @override
-  Widget build(BuildContext context) {
-    final aiColors = context.theme.ai;
-    final background = aiColors.avatarBackground;
-    final foreground = aiColors.accent;
-    final disableAnimations =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final controller = useAnimationController(
-      duration: const Duration(milliseconds: 1800),
-    );
-    useEffect(() {
-      if (!thinking || disableAnimations) {
-        controller
-          ..stop()
-          ..value = 0;
-        return null;
-      }
-      controller.repeat();
-      return null;
-    }, [thinking, disableAnimations, controller]);
-
-    final progress = useAnimation(
-      CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-    );
-    final scale = !thinking || disableAnimations
-        ? 1.0
-        : 1 + (0.03 * (0.5 - (progress - 0.5).abs()) * 2);
-    final glowAlpha = !thinking || disableAnimations ? 0.0 : 0.16 * progress;
-
-    return Transform.scale(
-      scale: scale,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: background,
-          shape: BoxShape.circle,
-          boxShadow: glowAlpha == 0
-              ? null
-              : [
-                  BoxShadow(
-                    color: foreground.withValues(alpha: glowAlpha),
-                    blurRadius: 10,
-                    spreadRadius: 0.5,
-                  ),
-                ],
-        ),
-        alignment: Alignment.center,
-        child: SvgPicture.asset(
-          Resources.assetsImagesBotFillSvg,
-          width: 18,
-          height: 18,
-          colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
         ),
       ),
     );
@@ -410,156 +302,49 @@ SelectedContent? _findSelectedContent(BuildContext context) {
   return null;
 }
 
-class _AiStatusBadge extends HookWidget {
-  const _AiStatusBadge({
-    required this.isUser,
-    required this.model,
-    required this.status,
-    required this.color,
-  });
-
-  final bool isUser;
-  final String? model;
-  final String status;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final trimmedModel = isUser ? null : model?.trim();
-    final icon = status == 'pending'
-        ? _AiThinkingIndicator(color: color)
-        : Icon(
-            _statusIcon(messageRoleIsUser: isUser, status: status),
-            size: 12,
-            color: color,
-          );
-
-    if (trimmedModel == null || trimmedModel.isEmpty) {
-      return icon;
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        icon,
-        const SizedBox(width: 4),
-        Text(
-          trimmedModel,
-          style: TextStyle(
-            fontSize: context.messageStyle.statusFontSize,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _AiFooter extends StatelessWidget {
   const _AiFooter({
     required this.isUser,
     required this.model,
-    required this.status,
-    required this.color,
     required this.dateTime,
   });
 
   final bool isUser;
   final String? model;
-  final String status;
-  final Color color;
   final DateTime dateTime;
 
   @override
-  Widget build(BuildContext context) => MessageMetaRow(
-    dateTime: dateTime,
-    trailingSpacing: 4,
-    trailing: _AiStatusBadge(
-      isUser: isUser,
-      model: model,
-      status: status,
-      color: color,
-    ),
-  );
-}
-
-class _AiThinkingIndicator extends HookWidget {
-  const _AiThinkingIndicator({required this.color});
-
-  final Color color;
-
-  @override
   Widget build(BuildContext context) {
-    final disableAnimations =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-
-    if (disableAnimations) {
-      return Icon(Icons.more_horiz_rounded, size: 12, color: color);
+    if (isUser) {
+      return MessageMetaRow(dateTime: dateTime);
     }
 
-    final controller = useAnimationController(
-      duration: const Duration(milliseconds: 1200),
+    final metaColor = context.dynamicColor(
+      const Color.fromRGBO(131, 145, 158, 1),
+      darkColor: const Color.fromRGBO(128, 131, 134, 1),
     );
-    useEffect(() {
-      controller.repeat();
-      return null;
-    }, [controller]);
+    final textStyle = TextStyle(
+      fontSize: context.messageStyle.statusFontSize,
+      color: metaColor,
+    );
+    final dateTimeText = DateFormat.Hm().format(dateTime.toLocal());
+    final trimmedModel = isUser ? null : model?.trim();
 
-    return RotationTransition(
-      turns: controller,
-      child: CustomPaint(
-        size: const Size.square(12),
-        painter: _AiThinkingIndicatorPainter(color: color),
+    return SelectionContainer.disabled(
+      child: SizedBox(
+        width: double.infinity,
+        child: Row(
+          children: [
+            Text(dateTimeText, style: textStyle),
+            if (trimmedModel != null && trimmedModel.isNotEmpty) ...[
+              const Spacer(),
+              Text(trimmedModel, style: textStyle),
+            ],
+          ],
+        ),
       ),
     );
   }
-}
-
-class _AiThinkingIndicatorPainter extends CustomPainter {
-  const _AiThinkingIndicatorPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final radius = (size.width / 2) - 1;
-
-    final track = Paint()
-      ..color = color.withValues(alpha: 0.22)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.round;
-
-    final arc = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..strokeCap = StrokeCap.round;
-
-    canvas
-      ..drawCircle(center, radius, track)
-      ..drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        -1.2,
-        1.95,
-        false,
-        arc,
-      );
-  }
-
-  @override
-  bool shouldRepaint(covariant _AiThinkingIndicatorPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-IconData _statusIcon({
-  required bool messageRoleIsUser,
-  required String status,
-}) {
-  if (status == 'error') return Icons.error_outline_rounded;
-  if (messageRoleIsUser) return Icons.auto_awesome_rounded;
-  return Icons.smart_toy_rounded;
 }
 
 Color _bubbleColor(
@@ -576,22 +361,6 @@ Color _bubbleColor(
   }
 
   return context.theme.ai.assistantBubble;
-}
-
-Color _statusColor(
-  BuildContext context, {
-  required bool isUser,
-  required String status,
-}) {
-  if (status == 'error') {
-    return context.theme.ai.error;
-  }
-
-  if (isUser) {
-    return context.theme.green;
-  }
-
-  return context.theme.ai.accent;
 }
 
 String _menuCopyText(AiChatMessage message) => _displayText(message);
