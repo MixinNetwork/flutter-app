@@ -1,0 +1,30 @@
+import '../converter/millis_date_converter.dart';
+
+CREATE TABLE ai_chat_messages (
+    id TEXT NOT NULL,
+    thread_id TEXT NOT NULL DEFAULT '',
+    conversation_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    status TEXT NOT NULL,
+    model TEXT,
+    error_text TEXT,
+    metadata TEXT,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE ai_chat_threads (
+    id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    title TEXT,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(id)
+);
+
+CREATE INDEX IF NOT EXISTS index_ai_chat_messages_conversation_id_created_at ON ai_chat_messages(conversation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_ai_chat_messages_thread_id_created_at ON ai_chat_messages(thread_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_updated_at ON ai_chat_threads(conversation_id, updated_at DESC);

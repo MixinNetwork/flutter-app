@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../../db/mixin_database.dart';
+import '../../../../db/ai_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/ai/ai_message_card.dart';
 import '../../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
@@ -15,11 +15,13 @@ import 'constants.dart';
 class AiAssistantMessageList extends HookWidget {
   const AiAssistantMessageList({
     required this.conversationId,
+    required this.threadId,
     required this.latestMessages,
     super.key,
   });
 
   final String conversationId;
+  final String? threadId;
   final List<AiChatMessage> latestMessages;
 
   @override
@@ -32,8 +34,8 @@ class AiAssistantMessageList extends HookWidget {
       [olderMessages.value, latestMessages],
     );
     final centerKey = useMemoized(
-      () => ValueKey('ai-list-center-$conversationId'),
-      [conversationId],
+      () => ValueKey('ai-list-center-$conversationId-$threadId'),
+      [conversationId, threadId],
     );
     final topKey = useMemoized(
       () => GlobalKey(debugLabel: 'ai list top'),
@@ -71,14 +73,16 @@ class AiAssistantMessageList extends HookWidget {
       if (isLoadingOlder.value || isOldest.value || messages.isEmpty) {
         return;
       }
+      final currentThreadId = threadId;
+      if (currentThreadId == null) return;
 
       final before = messages.first;
       isLoadingOlder.value = true;
 
       try {
         final list = await context.database.aiChatMessageDao
-            .beforeConversationMessages(
-              conversationId: conversationId,
+            .beforeThreadMessages(
+              threadId: currentThreadId,
               before: before,
               limit: aiAssistantMessagePageLimit,
             );
@@ -103,7 +107,7 @@ class AiAssistantMessageList extends HookWidget {
       lastUserMessageIdRef.value = null;
       previousLatestMessagesRef.value = const <AiChatMessage>[];
       return null;
-    }, [conversationId]);
+    }, [conversationId, threadId]);
 
     useEffect(() {
       final previousLatestMessages = previousLatestMessagesRef.value;
@@ -197,7 +201,7 @@ class AiAssistantMessageList extends HookWidget {
         return false;
       },
       child: MessageDayTimeViewportWidget.chatPage(
-        key: ValueKey(conversationId),
+        key: ValueKey('$conversationId-$threadId'),
         bottomKey: bottomKey,
         center: null,
         topKey: topKey,

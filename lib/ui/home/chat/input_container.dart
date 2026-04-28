@@ -25,6 +25,7 @@ import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
+import '../../../db/ai_database.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
@@ -120,14 +121,22 @@ class _InputContainer extends HookConsumerWidget {
       selectedModel: aiModeState.model,
     );
     final aiModeEnabled = aiModeState.enabled;
+    final activeAiThread = useMemoizedStream(
+      () => conversationId == null
+          ? Stream.value(null)
+          : context.database.aiChatMessageDao.watchLatestThread(
+              conversationId,
+            ),
+      keys: [conversationId],
+    ).data;
     final aiMessages =
         useMemoizedStream(
-          () => conversationId == null
+          () => activeAiThread == null
               ? Stream.value(const <AiChatMessage>[])
-              : context.database.aiChatMessageDao.watchConversationMessages(
-                  conversationId,
+              : context.database.aiChatMessageDao.watchThreadMessages(
+                  activeAiThread.id,
                 ),
-          keys: [conversationId],
+          keys: [activeAiThread?.id],
           initialData: const <AiChatMessage>[],
         ).data ??
         const <AiChatMessage>[];
@@ -436,6 +445,7 @@ class _InputContainer extends HookConsumerWidget {
                             textEditingValueStream: textEditingValueStream,
                             aiModeEnabled: aiModeEnabled,
                             aiRequestInFlight: aiRequestInFlight,
+                            aiThreadId: activeAiThread?.id,
                           ),
                         ],
                       ),
@@ -454,6 +464,7 @@ class _InputContainer extends HookConsumerWidget {
 class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   const _AnimatedSendOrVoiceButton({
     required this.conversationId,
+    required this.aiThreadId,
     required this.textEditingValueStream,
     required this.textEditingController,
     required this.aiModeEnabled,
@@ -461,6 +472,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   });
 
   final String? conversationId;
+  final String? aiThreadId;
   final Stream<TextEditingValue> textEditingValueStream;
   final TextEditingController textEditingController;
   final bool aiModeEnabled;
@@ -485,7 +497,9 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         onTap: () {
           final currentConversationId = conversationId;
           if (currentConversationId == null) return;
-          AiChatController(context.database).stop(currentConversationId);
+          AiChatController(
+            context.database,
+          ).stop(currentConversationId, threadId: aiThreadId);
         },
       );
     }
@@ -506,6 +520,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
                 context,
                 textEditingController,
                 conversationId: conversationId,
+                aiThreadId: aiThreadId,
               ),
             ),
           ),
@@ -688,6 +703,7 @@ Future<void> _sendMessage(
   BuildContext context,
   TextEditingController textEditingController, {
   required String? conversationId,
+  String? aiThreadId,
   bool silent = false,
 }) async {
   final text = textEditingController.value.text.trim();
@@ -729,6 +745,7 @@ Future<void> _sendMessage(
     try {
       await AiChatController(context.database).send(
         conversationId: conversationId,
+        threadId: aiThreadId,
         input: inlineAiInput,
         language: _currentLanguageTag(context),
         provider: provider,

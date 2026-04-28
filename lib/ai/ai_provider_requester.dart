@@ -28,6 +28,7 @@ class AiProviderRequester {
     required Future<void> Function(String chunk) onContent,
     required String? conversationId,
     List<genkit.Tool>? tools,
+    void Function(Map<String, dynamic> metadata)? onResponseMetadata,
   }) async {
     d(
       'AI request start: provider=${config.type.name} model=${config.model} '
@@ -46,6 +47,7 @@ class AiProviderRequester {
         cancelToken: cancelToken,
         onContent: onContent,
         conversationId: conversationId,
+        onResponseMetadata: onResponseMetadata,
         tools: tools,
       ),
     );
@@ -57,9 +59,11 @@ class AiProviderRequester {
     required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
     required String? conversationId,
+    required void Function(Map<String, dynamic> metadata)? onResponseMetadata,
     required List<genkit.Tool>? tools,
   }) async {
     final ai = _createGenkit(config);
+    final stopwatch = Stopwatch()..start();
     try {
       final cancelFuture = cancelToken.whenCancel.then<void>((_) {});
       final stream = ai.generateStream<dynamic, String>(
@@ -115,6 +119,13 @@ class AiProviderRequester {
       if (text.isEmpty) {
         throw Exception('Empty AI response');
       }
+      stopwatch.stop();
+      onResponseMetadata?.call(
+        _genkitResponseMetadata(
+          response,
+          elapsedMs: stopwatch.elapsedMilliseconds,
+        ),
+      );
       d(
         'AI request done: provider=${config.type.name} model=${config.model} '
         'conversationId=$conversationId text=${_previewText(text)}',
@@ -175,6 +186,17 @@ class AiProviderRequester {
     return trimmed.isEmpty ? null : trimmed;
   }
 }
+
+Map<String, dynamic> _genkitResponseMetadata(
+  genkit.GenerateResponseHelper<String> response, {
+  required int elapsedMs,
+}) => <String, dynamic>{
+  'elapsedMs': elapsedMs,
+  'latencyMs': response.latencyMs,
+  'finishReason': response.finishReason?.value,
+  'finishMessage': response.finishMessage,
+  'usage': response.usage?.toJson(),
+}..removeWhere((_, value) => value == null);
 
 String _previewText(
   String? text, {

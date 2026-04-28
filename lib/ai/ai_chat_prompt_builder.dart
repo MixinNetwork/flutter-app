@@ -16,16 +16,16 @@ class AiChatPromptBuilder {
 
   Future<List<AiPromptMessage>> buildPromptMessages(
     String conversationId,
+    String threadId,
     String input,
-    String language,
-  ) async {
+    String language, {
+    String? currentMessageId,
+  }) async {
     final now = DateTime.now();
     final recentMessages = await database.messageDao
         .messagesByConversationId(conversationId, _aiContextMessageLimit)
         .get();
-    final aiMessages = await database.aiChatMessageDao.conversationMessages(
-      conversationId,
-    );
+    final aiMessages = await database.aiChatMessageDao.threadMessages(threadId);
 
     final promptMessages = <AiPromptMessage>[
       ..._promptMessages(
@@ -60,7 +60,11 @@ class AiChatPromptBuilder {
     );
 
     final history = aiMessages
-        .where((element) => element.status != _aiStatusPending)
+        .where(
+          (element) =>
+              element.status != _aiStatusPending &&
+              element.id != currentMessageId,
+        )
         .takeLast(_aiHistoryLimit);
     for (final item in history) {
       promptMessages.add(
@@ -84,6 +88,7 @@ class AiChatPromptBuilder {
     );
     d(
       'AI prompt built: conversationId=$conversationId '
+      'threadId=$threadId '
       'recent=${recentMessages.length} '
       'history=${history.length} promptMessages=${promptMessages.length}',
     );

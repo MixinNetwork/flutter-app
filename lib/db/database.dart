@@ -4,6 +4,7 @@ import '../ui/provider/slide_category_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
 import '../utils/property/setting_property.dart';
+import 'ai_database.dart';
 import 'dao/ai_chat_message_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
@@ -38,7 +39,7 @@ import 'fts_database.dart';
 import 'mixin_database.dart';
 
 class Database {
-  Database(this.mixinDatabase, this.ftsDatabase) {
+  Database(this.mixinDatabase, this.ftsDatabase, this.aiDatabase) {
     settingProperties = SettingPropertyStorage(mixinDatabase.propertyDao);
   }
 
@@ -46,9 +47,11 @@ class Database {
 
   final FtsDatabase ftsDatabase;
 
+  final AiDatabase aiDatabase;
+
   AppDao get appDao => mixinDatabase.appDao;
 
-  AiChatMessageDao get aiChatMessageDao => mixinDatabase.aiChatMessageDao;
+  AiChatMessageDao get aiChatMessageDao => aiDatabase.aiChatMessageDao;
 
   AssetDao get assetDao => mixinDatabase.assetDao;
 
@@ -117,6 +120,7 @@ class Database {
   Future<void> dispose() async {
     await mixinDatabase.close();
     await ftsDatabase.close();
+    await aiDatabase.close();
     // dispose stream, https://github.com/simolus3/moor/issues/290
   }
 

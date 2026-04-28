@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../ai/ai_chat_controller.dart';
 import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
-import '../../../db/mixin_database.dart';
+import '../../../db/ai_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
@@ -41,14 +41,21 @@ class AiAssistantPage extends HookConsumerWidget {
       providerId: aiModeState.providerId,
       selectedModel: aiModeState.model,
     );
+    final activeThread = useMemoizedStream(
+      () => context.database.aiChatMessageDao.watchLatestThread(
+        conversationId,
+      ),
+      keys: [conversationId],
+    ).data;
     final latestMessages =
         useMemoizedStream(
-          () =>
-              context.database.aiChatMessageDao.watchLatestConversationMessages(
-                conversationId,
-                aiAssistantMessagePageLimit,
-              ),
-          keys: [conversationId],
+          () => activeThread == null
+              ? Stream.value(const <AiChatMessage>[])
+              : context.database.aiChatMessageDao.watchLatestThreadMessages(
+                  activeThread.id,
+                  aiAssistantMessagePageLimit,
+                ),
+          keys: [activeThread?.id],
           initialData: const <AiChatMessage>[],
         ).data ??
         const <AiChatMessage>[];
@@ -83,6 +90,7 @@ class AiAssistantPage extends HookConsumerWidget {
       try {
         await AiChatController(context.database).send(
           conversationId: conversationId,
+          threadId: activeThread?.id,
           input: text,
           language: currentLanguageTag(context),
           provider: aiProvider,
@@ -101,6 +109,7 @@ class AiAssistantPage extends HookConsumerWidget {
           Expanded(
             child: AiAssistantMessageList(
               conversationId: conversationId,
+              threadId: activeThread?.id,
               latestMessages: latestMessages,
             ),
           ),
@@ -112,8 +121,9 @@ class AiAssistantPage extends HookConsumerWidget {
             enabledAiProviders: enabledAiProviders,
             requestInFlight: requestInFlight,
             onSend: send,
-            onStop: () =>
-                AiChatController(context.database).stop(conversationId),
+            onStop: () => AiChatController(
+              context.database,
+            ).stop(conversationId, threadId: activeThread?.id),
             onProviderSelected: (value) => aiModeNotifier.updateProvider(
               providerId: value.id,
               model: value.model,

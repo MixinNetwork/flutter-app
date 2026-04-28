@@ -73,23 +73,6 @@ CREATE TABLE chains (chain_id TEXT NOT NULL, name TEXT NOT NULL, symbol TEXT NOT
 
 CREATE TABLE properties ("key" TEXT NOT NULL, "group" TEXT NOT NULL MAPPED BY `const PropertyGroupConverter()`, "value" TEXT NOT NULL, PRIMARY KEY("key", "group"));
 
-CREATE TABLE ai_chat_messages (
-    id TEXT NOT NULL,
-    conversation_id TEXT NOT NULL,
-    role TEXT NOT NULL,
-    provider_id TEXT NOT NULL,
-    anchor_message_id TEXT,
-    anchor_created_at INTEGER MAPPED BY `const MillisDateConverter()`,
-    content TEXT NOT NULL,
-    status TEXT NOT NULL,
-    model TEXT,
-    error_text TEXT,
-    metadata TEXT,
-    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
-    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
-    PRIMARY KEY(id)
-);
-
 CREATE TABLE safe_snapshots (
     snapshot_id TEXT NOT NULL,
     type TEXT NOT NULL,
@@ -170,4 +153,3 @@ CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messa
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages(conversation_id, quote_message_id);
 CREATE INDEX IF NOT EXISTS index_tokens_kernel_asset_id ON tokens(kernel_asset_id);
 CREATE INDEX IF NOT EXISTS index_tokens_collection_hash ON tokens(collection_hash);
-CREATE INDEX IF NOT EXISTS index_ai_chat_messages_conversation_id_created_at ON ai_chat_messages(conversation_id, created_at DESC);

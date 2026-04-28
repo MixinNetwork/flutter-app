@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../ai/model/ai_chat_metadata.dart';
-import '../../db/mixin_database.dart' hide Offset;
+import '../../db/ai_database.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/platform.dart';
@@ -123,6 +123,7 @@ class _AiResponseMessageCard extends StatelessWidget {
           const SizedBox(height: 4),
           _AiResponseFooter(
             model: message.model,
+            metadata: message.metadata,
             dateTime: message.createdAt,
           ),
         ],
@@ -398,10 +399,12 @@ SelectedContent? _findSelectedContent(BuildContext context) {
 class _AiResponseFooter extends StatelessWidget {
   const _AiResponseFooter({
     required this.model,
+    required this.metadata,
     required this.dateTime,
   });
 
   final String? model;
+  final String? metadata;
   final DateTime dateTime;
 
   @override
@@ -416,24 +419,58 @@ class _AiResponseFooter extends StatelessWidget {
     );
     final dateTimeText = DateFormat.Hm().format(dateTime.toLocal());
     final trimmedModel = model?.trim();
+    final responseMeta = aiMetadataResponse(metadata);
+    final elapsedMs = (responseMeta['elapsedMs'] as num?)?.round();
+    final totalTokens = _totalTokens(responseMeta);
 
     return SelectionContainer.disabled(
       child: SizedBox(
         width: double.infinity,
-        child: Row(
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 2,
           children: [
             const SizedBox(width: 4),
             Text(dateTimeText, style: textStyle),
-            if (trimmedModel != null && trimmedModel.isNotEmpty) ...[
-              const SizedBox(width: 12),
+            if (trimmedModel != null && trimmedModel.isNotEmpty)
               Text(trimmedModel, style: textStyle),
-            ],
+            if (elapsedMs != null && elapsedMs > 0)
+              Text(_formatElapsed(elapsedMs), style: textStyle),
+            if (totalTokens != null && totalTokens > 0)
+              Text(_formatTokens(totalTokens), style: textStyle),
           ],
         ),
       ),
     );
   }
 }
+
+num? _totalTokens(Map<String, dynamic> responseMeta) =>
+    _usageValue(responseMeta, 'totalTokens') ??
+    ((_usageValue(responseMeta, 'inputTokens') ?? 0) +
+        (_usageValue(responseMeta, 'outputTokens') ?? 0));
+
+num? _usageValue(Map<String, dynamic> responseMeta, String key) {
+  final usage = responseMeta['usage'];
+  if (usage is Map<String, dynamic>) {
+    return usage[key] as num?;
+  }
+  if (usage is Map) {
+    return usage[key] as num?;
+  }
+  return null;
+}
+
+String _formatElapsed(int elapsedMs) {
+  if (elapsedMs < 1000) {
+    return '${elapsedMs}ms';
+  }
+  final seconds = elapsedMs / Duration.millisecondsPerSecond;
+  return '${seconds.toStringAsFixed(seconds >= 10 ? 0 : 1)}s';
+}
+
+String _formatTokens(num tokens) =>
+    '${NumberFormat.decimalPattern().format(tokens.round())} tokens';
 
 String _displayText(AiChatMessage message) {
   final content = message.content.trim();

@@ -5,9 +5,9 @@ import 'package:drift/drift.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:uuid/uuid.dart';
 
+import '../db/ai_database.dart';
 import '../db/dao/ai_chat_message_dao.dart';
 import '../db/database.dart';
-import '../db/mixin_database.dart';
 import 'ai_chat_prompt_builder.dart';
 import 'ai_provider_requester.dart';
 import 'model/ai_chat_metadata.dart';
@@ -98,16 +98,22 @@ class AiChatController {
     required String conversationId,
     required String input,
     required String language,
+    String? threadId,
     AiProviderConfig? provider,
     void Function()? onInputAccepted,
   }) async {
+    final thread = await database.aiChatMessageDao.ensureThread(
+      conversationId: conversationId,
+      threadId: threadId,
+    );
     await database.aiChatMessageDao.resolveStalePendingAssistantMessages(
       updatedBefore: kAiRuntimeStartedAt,
       conversationId: conversationId,
+      threadId: thread.id,
     );
     final hasPendingAssistant = await database.aiChatMessageDao
         .hasPendingAssistantMessage(
-          conversationId,
+          thread.id,
           updatedAfter: kAiRuntimeStartedAt,
         );
     if (hasPendingAssistant) {
@@ -121,6 +127,7 @@ class AiChatController {
 
     d(
       'AI send start: conversationId=$conversationId '
+      'threadId=${thread.id} '
       'provider=${config.type.name} model=${config.model} '
       'input=${_previewText(input)}',
     );
@@ -130,18 +137,13 @@ class AiChatController {
     final userMessageId = _uuid.v4();
     final assistantMessageId = _uuid.v4();
     final cancelToken = CancelToken();
-    final anchorMessage = await database.messageDao
-        .messagesByConversationId(conversationId, 1)
-        .getSingleOrNull();
-
     await database.aiChatMessageDao.insertMessage(
       AiChatMessagesCompanion.insert(
         id: userMessageId,
+        threadId: Value(thread.id),
         conversationId: conversationId,
         role: _kAiRoleUser,
         providerId: config.id,
-        anchorMessageId: Value(anchorMessage?.messageId),
-        anchorCreatedAt: Value(anchorMessage?.createdAt),
         content: input,
         status: _kAiStatusDone,
         model: Value(config.model),
@@ -153,11 +155,10 @@ class AiChatController {
     await database.aiChatMessageDao.insertMessage(
       AiChatMessagesCompanion.insert(
         id: assistantMessageId,
+        threadId: Value(thread.id),
         conversationId: conversationId,
         role: _kAiRoleAssistant,
         providerId: config.id,
-        anchorMessageId: Value(anchorMessage?.messageId),
-        anchorCreatedAt: Value(anchorMessage?.createdAt),
         content: '',
         status: _kAiStatusPending,
         model: Value(config.model),
@@ -173,13 +174,21 @@ class AiChatController {
       dao: database.aiChatMessageDao,
       messageId: assistantMessageId,
     );
+    final requestKeys = {
+      conversationId,
+      thread.id,
+    };
     _activeAiRequests[conversationId] = cancelToken;
+    _activeAiRequests[thread.id] = cancelToken;
     try {
       final messages = await _promptBuilder.buildPromptMessages(
         conversationId,
+        thread.id,
         input,
         language,
+        currentMessageId: userMessageId,
       );
+      Map<String, dynamic>? responseMetadata;
       final result = await _requestText(
         config,
         messages,
@@ -187,8 +196,34 @@ class AiChatController {
         onContent: updater.append,
         conversationId: conversationId,
         assistantMessageId: assistantMessageId,
+        onResponseMetadata: (metadata) {
+          responseMetadata = createAiResponseMetadata(
+            elapsedMs: (metadata['elapsedMs'] as num?)?.round() ?? 0,
+            promptMessageCount:
+                (metadata['promptMessageCount'] as num?)?.round() ??
+                messages.length,
+            toolCount: (metadata['toolCount'] as num?)?.round() ?? 0,
+            outputCharacters: 0,
+            response: metadata,
+          );
+        },
       );
       await updater.flush(contentOverride: result, force: true);
+      final completedResponseMetadata =
+          responseMetadata ??
+          createAiResponseMetadata(
+            elapsedMs: 0,
+            promptMessageCount: messages.length,
+            toolCount: 0,
+            outputCharacters: result.length,
+            response: const <String, dynamic>{},
+          );
+      completedResponseMetadata['outputCharacters'] = result.length;
+      await database.aiChatMessageDao.setMessageMetadataResponse(
+        assistantMessageId,
+        completedResponseMetadata,
+        updatedAt: DateTime.now(),
+      );
       await database.aiChatMessageDao.updateMessageStatus(
         assistantMessageId,
         _kAiStatusDone,
@@ -196,12 +231,14 @@ class AiChatController {
       );
       d(
         'AI send done: conversationId=$conversationId '
+        'threadId=${thread.id} '
         'assistantMessageId=$assistantMessageId output=${_previewText(result)}',
       );
     } catch (error, stacktrace) {
       if (cancelToken.isCancelled) {
         d(
           'AI send cancelled: conversationId=$conversationId '
+          'threadId=${thread.id} '
           'assistantMessageId=$assistantMessageId',
         );
         await updater.flush(force: true);
@@ -222,15 +259,22 @@ class AiChatController {
       );
       rethrow;
     } finally {
-      if (_activeAiRequests[conversationId] == cancelToken) {
-        _activeAiRequests.remove(conversationId);
+      for (final requestKey in requestKeys) {
+        if (_activeAiRequests[requestKey] == cancelToken) {
+          _activeAiRequests.remove(requestKey);
+        }
       }
     }
   }
 
-  void stop(String conversationId) {
-    d('AI stop requested: conversationId=$conversationId');
-    _activeAiRequests[conversationId]?.cancel('AI generation stopped');
+  void stop(String conversationId, {String? threadId}) {
+    d('AI stop requested: conversationId=$conversationId threadId=$threadId');
+    final cancelToken = threadId == null
+        ? _activeAiRequests[conversationId]
+        : null;
+    (cancelToken ?? _activeAiRequests[threadId])?.cancel(
+      'AI generation stopped',
+    );
   }
 
   Future<String> _requestText(
@@ -240,21 +284,32 @@ class AiChatController {
     required Future<void> Function(String chunk) onContent,
     String? conversationId,
     String? assistantMessageId,
-  }) => _providerRequester.requestText(
-    config,
-    messages,
-    proxy: database.settingProperties.activatedProxy,
-    cancelToken: cancelToken,
-    onContent: onContent,
-    conversationId: conversationId,
-    tools: conversationId == null
+    void Function(Map<String, dynamic> metadata)? onResponseMetadata,
+  }) {
+    final tools = conversationId == null
         ? null
         : _conversationTools.genkitTools(
             conversationId: conversationId,
             onEvent: (event) =>
                 _appendAssistantToolEvent(assistantMessageId, event),
-          ),
-  );
+          );
+    return _providerRequester.requestText(
+      config,
+      messages,
+      proxy: database.settingProperties.activatedProxy,
+      cancelToken: cancelToken,
+      onContent: onContent,
+      conversationId: conversationId,
+      onResponseMetadata: onResponseMetadata == null
+          ? null
+          : (metadata) => onResponseMetadata({
+              ...metadata,
+              'promptMessageCount': messages.length,
+              'toolCount': tools?.length ?? 0,
+            }),
+      tools: tools,
+    );
+  }
 
   Future<void> _appendAssistantToolEvent(
     String? assistantMessageId,
