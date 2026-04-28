@@ -1,31 +1,24 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:genkit/genkit.dart' as genkit;
+import 'package:genkit/plugin.dart' as genkit_plugin;
+import 'package:genkit_anthropic/genkit_anthropic.dart';
+import 'package:genkit_google_genai/genkit_google_genai.dart';
+import 'package:genkit_openai/genkit_openai.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
 import '../utils/proxy.dart';
 import 'model/ai_prompt_message.dart';
 import 'model/ai_provider_config.dart';
 import 'model/ai_provider_type.dart';
-import 'model/ai_tool.dart';
-import 'provider/ai_provider_strategy.dart';
-import 'provider/anthropic_strategy.dart';
-import 'provider/gemini_strategy.dart';
-import 'provider/openai_compatible_strategy.dart';
-import 'tools/ai_conversation_tool_service.dart';
 
 class AiProviderRequester {
   const AiProviderRequester();
 
   static const _aiToolMaxRounds = 8;
-  static const _aiStreamFlushChars = 32;
   static const _aiLogPreviewLength = 240;
-  static const _aiLogJsonPreviewLength = 480;
-
-  static const _openAiStrategy = OpenAiCompatibleStrategy();
-  static const _anthropicStrategy = AnthropicStrategy();
-  static const _geminiStrategy = GeminiStrategy();
 
   Future<String> requestText(
     AiProviderConfig config,
@@ -34,189 +27,163 @@ class AiProviderRequester {
     required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
     required String? conversationId,
-    Future<AiToolExecutionResult> Function(AiToolCall toolCall)? onToolCall,
+    List<genkit.Tool>? tools,
   }) async {
     d(
       'AI request start: provider=${config.type.name} model=${config.model} '
       'conversationId=$conversationId messages=${messages.length} '
-      'tools=${conversationId != null && onToolCall != null}',
+      'tools=${tools?.length ?? 0}',
     );
-    final dio =
-        Dio(
-            BaseOptions(
-              baseUrl: config.baseUrl,
-              connectTimeout: const Duration(seconds: 20),
-              receiveTimeout: const Duration(minutes: 5),
-              sendTimeout: const Duration(seconds: 20),
-              headers: _strategyFor(config.type).headers(config),
-            ),
-          )
-          ..interceptors.add(
-            InterceptorsWrapper(
-              onRequest: (options, handler) {
-                options.extra['ai_request_started_at'] = DateTime.now();
-                d(
-                  'AI HTTP request: ${options.method} ${options.uri} '
-                  'provider=${config.type.name} model=${config.model}',
-                );
-                handler.next(options);
-              },
-              onResponse: (response, handler) {
-                final startedAt =
-                    response.requestOptions.extra['ai_request_started_at']
-                        as DateTime?;
-                d(
-                  'AI HTTP response: ${response.requestOptions.method} '
-                  '${response.requestOptions.uri} '
-                  'status=${response.statusCode} '
-                  'elapsedMs=${startedAt == null ? -1 : DateTime.now().difference(startedAt).inMilliseconds}',
-                );
-                handler.next(response);
-              },
-              onError: (error, handler) {
-                final startedAt =
-                    error.requestOptions.extra['ai_request_started_at']
-                        as DateTime?;
-                e(
-                  'AI HTTP error: ${error.requestOptions.method} '
-                  '${error.requestOptions.uri} '
-                  'elapsedMs=${startedAt == null ? -1 : DateTime.now().difference(startedAt).inMilliseconds} '
-                  'error=${error.message}',
-                  error,
-                  error.stackTrace,
-                );
-                handler.next(error);
-              },
-            ),
-          )
-          ..applyProxy(proxy);
+    if (cancelToken.isCancelled) {
+      throw Exception('AI generation stopped');
+    }
 
-    if (conversationId == null || onToolCall == null) {
-      return _strategyFor(config.type).streamResponse(
-        dio: dio,
-        config: config,
-        messages: messages,
+    return _runWithProxy(
+      proxy,
+      () => _requestTextWithGenkit(
+        config,
+        messages,
         cancelToken: cancelToken,
         onContent: onContent,
-      );
-    }
-
-    return _requestWithTools(
-      dio,
-      config,
-      [...messages],
-      conversationId: conversationId,
-      cancelToken: cancelToken,
-      onContent: onContent,
-      onToolCall: onToolCall,
+        conversationId: conversationId,
+        tools: tools,
+      ),
     );
   }
 
-  Future<String> _requestWithTools(
-    Dio dio,
+  Future<String> _requestTextWithGenkit(
     AiProviderConfig config,
     List<AiPromptMessage> messages, {
-    required String conversationId,
     required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
-    required Future<AiToolExecutionResult> Function(AiToolCall toolCall)
-    onToolCall,
+    required String? conversationId,
+    required List<genkit.Tool>? tools,
   }) async {
-    for (var round = 0; round < _aiToolMaxRounds; round++) {
-      d(
-        'AI tool round start: conversationId=$conversationId '
-        'round=${round + 1}/$_aiToolMaxRounds messages=${messages.length}',
-      );
-      final strategy = _strategyFor(config.type);
-      final response = strategy is OpenAiCompatibleStrategy
-          ? await strategy.streamCompleteResponse(
-              dio: dio,
-              config: config,
-              messages: messages,
-              tools: AiConversationToolKit.definitions,
-              cancelToken: cancelToken,
-              onContent: onContent,
-            )
-          : await strategy.completeResponse(
-              dio: dio,
-              config: config,
-              messages: messages,
-              tools: AiConversationToolKit.definitions,
-              cancelToken: cancelToken,
-            );
-      d(
-        'AI tool round response: conversationId=$conversationId '
-        'round=${round + 1} text=${_previewText(response.text)} '
-        'toolCalls=${_previewToolCalls(response.toolCalls)}',
+    final ai = _createGenkit(config);
+    try {
+      final cancelFuture = cancelToken.whenCancel.then<void>((_) {});
+      final stream = ai.generateStream<dynamic, String>(
+        messages: messages.map(_genkitMessage).toList(growable: false),
+        model: _modelFor(config),
+        tools: tools,
+        toolChoice: tools == null ? null : 'auto',
+        maxTurns: _aiToolMaxRounds,
       );
 
-      if (!response.hasToolCalls) {
-        final text = response.text.trim();
-        if (text.isEmpty) {
-          throw Exception('Empty AI response');
-        }
-        if (!response.contentEmitted) {
-          await _emitBufferedText(text, onContent);
-        }
-        d(
-          'AI tool request done: '
-          'conversationId=$conversationId '
-          'round=${round + 1} text=${_previewText(text)}',
-        );
-        return text;
-      }
-
-      messages.add(
-        AiPromptMessage(
-          role: 'assistant',
-          content: response.text,
-          toolCalls: response.toolCalls,
-        ),
+      final subscriptionCompleter = Completer<void>();
+      late final StreamSubscription<genkit.GenerateResponseChunk<String>>
+      subscription;
+      subscription = stream.listen(
+        (chunk) {
+          final text = chunk.text;
+          if (text.isEmpty) {
+            return;
+          }
+          subscription.pause();
+          unawaited(
+            Future<void>.sync(() => onContent(text))
+                .catchError((Object error, StackTrace stackTrace) {
+                  if (!subscriptionCompleter.isCompleted) {
+                    subscriptionCompleter.completeError(error, stackTrace);
+                  }
+                })
+                .whenComplete(subscription.resume),
+          );
+        },
+        onError: subscriptionCompleter.completeError,
+        onDone: subscriptionCompleter.complete,
+        cancelOnError: true,
       );
-      for (final toolCall in response.toolCalls) {
-        final result = await onToolCall(toolCall);
-        messages.add(
-          AiPromptMessage(
-            role: 'tool',
-            content: result.content,
-            toolCallId: result.toolCallId,
-            toolName: result.toolName,
-            toolPayload: result.payload,
-          ),
-        );
+
+      await Future.any([
+        subscriptionCompleter.future,
+        cancelFuture.then((_) async {
+          await subscription.cancel();
+          throw Exception('AI generation stopped');
+        }),
+      ]);
+
+      final response = await Future.any([
+        stream.onResult,
+        cancelFuture.then<genkit.GenerateResponseHelper<String>>((_) {
+          throw Exception('AI generation stopped');
+        }),
+      ]);
+      final text = response.text.trim();
+      if (text.isEmpty) {
+        throw Exception('Empty AI response');
       }
+      d(
+        'AI request done: provider=${config.type.name} model=${config.model} '
+        'conversationId=$conversationId text=${_previewText(text)}',
+      );
+      return text;
+    } finally {
+      await ai.shutdown();
     }
+  }
 
-    e(
-      'AI exceeded tool call limit: conversationId=$conversationId '
-      'maxRounds=$_aiToolMaxRounds',
+  Future<String> _runWithProxy(
+    ProxyConfig? proxy,
+    Future<String> Function() fn,
+  ) {
+    if (proxy == null) {
+      return fn();
+    }
+    if (proxy.type == ProxyType.socks5) {
+      d('AI Genkit request does not support SOCKS5 proxy: ${proxy.toUri()}');
+      return fn();
+    }
+    return HttpOverrides.runZoned(
+      fn,
+      createHttpClient: (context) =>
+          HttpClient(context: context)..setProxy(proxy),
     );
-    throw Exception('AI exceeded tool call limit');
   }
 
-  Future<void> _emitBufferedText(
-    String text,
-    Future<void> Function(String chunk) onContent,
-  ) async {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) {
-      return;
-    }
-    if (trimmed.length <= _aiStreamFlushChars) {
-      await onContent(trimmed);
-      return;
-    }
-    for (var start = 0; start < trimmed.length; start += _aiStreamFlushChars) {
-      final end = (start + _aiStreamFlushChars).clamp(0, trimmed.length);
-      await onContent(trimmed.substring(start, end));
-    }
-  }
+  genkit.Genkit _createGenkit(AiProviderConfig config) => genkit.Genkit(
+    plugins: [_pluginFor(config)],
+    model: _modelFor(config),
+    isDevEnv: false,
+  );
 
-  AiProviderStrategy _strategyFor(AiProviderType type) => switch (type) {
-    AiProviderType.openaiCompatible => _openAiStrategy,
-    AiProviderType.anthropic => _anthropicStrategy,
-    AiProviderType.gemini => _geminiStrategy,
+  genkit_plugin.GenkitPlugin _pluginFor(AiProviderConfig config) =>
+      switch (config.type) {
+        AiProviderType.openaiCompatible => openAI(
+          apiKey: config.apiKey,
+          baseUrl: _emptyToNull(config.baseUrl),
+          models: [CustomModelDefinition(name: config.model)],
+        ),
+        AiProviderType.anthropic => anthropic(
+          apiKey: config.apiKey,
+          baseUrl: _emptyToNull(config.baseUrl),
+        ),
+        AiProviderType.gemini => googleAI(apiKey: config.apiKey),
+      };
+
+  genkit.ModelRef<dynamic> _modelFor(AiProviderConfig config) =>
+      switch (config.type) {
+        AiProviderType.openaiCompatible => openAI.model(config.model),
+        AiProviderType.anthropic => anthropic.model(config.model),
+        AiProviderType.gemini => googleAI.gemini(config.model),
+      };
+
+  genkit.Message _genkitMessage(AiPromptMessage message) => genkit.Message(
+    role: _roleFor(message.role),
+    content: [genkit.TextPart(text: message.content)],
+  );
+
+  genkit.Role _roleFor(String role) => switch (role) {
+    'system' => genkit.Role.system,
+    'assistant' => genkit.Role.model,
+    'tool' => genkit.Role.tool,
+    _ => genkit.Role.user,
   };
+
+  String? _emptyToNull(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
 }
 
 String _previewText(
@@ -231,32 +198,4 @@ String _previewText(
     return compact;
   }
   return '${compact.substring(0, maxLength)}...(${compact.length} chars)';
-}
-
-String _previewJson(
-  Object? value, {
-  int maxLength = AiProviderRequester._aiLogJsonPreviewLength,
-}) {
-  try {
-    final encoded = jsonEncode(value);
-    if (encoded.length <= maxLength) {
-      return encoded;
-    }
-    return '${encoded.substring(0, maxLength)}...(${encoded.length} chars)';
-  } catch (_) {
-    return '$value';
-  }
-}
-
-String _previewToolCalls(List<AiToolCall> toolCalls) {
-  if (toolCalls.isEmpty) {
-    return '[]';
-  }
-  return toolCalls
-      .map(
-        (toolCall) =>
-            '${toolCall.name}#${toolCall.id}('
-            '${_previewJson(toolCall.arguments, maxLength: 120)})',
-      )
-      .join(', ');
 }

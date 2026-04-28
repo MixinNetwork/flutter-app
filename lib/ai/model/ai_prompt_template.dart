@@ -290,10 +290,6 @@ const conversationToolInstructionPromptTemplate =
 const recentConversationContextPromptTemplate =
     'Current conversation recent messages:\n{{messages}}';
 
-const retrievedConversationContextPromptTemplate =
-    'Relevant older conversation messages matched by search '
-    '(use only if they help answer the current request):\n{{messages}}';
-
 Map<String, String?> buildAiPromptTemplateVariables({
   String? conversationId,
   String? input,

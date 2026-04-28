@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  anthropic_sdk_dart:
+    dependency: transitive
+    description:
+      name: anthropic_sdk_dart
+      sha256: b0e91039942930341b24e3871d5b9481b6d31528b711eb752f413f4d1f5980eb
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   archive:
     dependency: "direct main"
     description:
@@ -442,10 +450,10 @@ packages:
     dependency: transitive
     description:
       name: dlibphonenumber
-      sha256: "95d8e08c6f750e81c5303efd16085db4e7c696b4c306c99617548f81b1854f0c"
+      sha256: df96f4bdb14b0a47664de8ec7cd1de92e4e9b9bc4e34330d2da9088b0ba71e59
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.47"
+    version: "1.1.62"
   drift:
     dependency: "direct main"
     description:
@@ -486,6 +494,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  email_validator:
+    dependency: transitive
+    description:
+      name: email_validator
+      sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   emojis:
     dependency: "direct main"
     description:
@@ -803,6 +819,38 @@ packages:
       url: "https://github.com/boyan01/gal.git"
     source: git
     version: "2.1.3"
+  genkit:
+    dependency: "direct main"
+    description:
+      name: genkit
+      sha256: ccc84935593e6f12447c8d4b27034fceb4573cbc3d51b76d32aa9bbbf8d3badd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.1"
+  genkit_anthropic:
+    dependency: "direct main"
+    description:
+      name: genkit_anthropic
+      sha256: "3a902993fdd4cefca4d10ee76df3cf064622247d74c5d0f2b619e5c2b6022727"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
+  genkit_google_genai:
+    dependency: "direct main"
+    description:
+      name: genkit_google_genai
+      sha256: "95f798f10776e9078251f7e6ae91e4e5c9cb0b960fc22d50a6baf59fdbcecfbc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
+  genkit_openai:
+    dependency: "direct main"
+    description:
+      name: genkit_openai
+      sha256: "398b3d7a5bc08fb6764ea0a5244151cca31263e67ba9598981e81238109874d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
   get_it:
     dependency: transitive
     description:
@@ -1091,6 +1139,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.11.0"
+  json_schema_builder:
+    dependency: transitive
+    description:
+      name: json_schema_builder
+      sha256: "65035d48d028401ad0ffc8c2f173209c7b1441e465a942a0f909070fae33170c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   json_serializable:
     dependency: "direct dev"
     description:
@@ -1134,10 +1190,11 @@ packages:
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
-      name: libsignal_protocol_dart
-      sha256: "2b18de43016474ab85d21553a88f59d6f4fea8c2eddf35be7e24ab5f8969a81d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "9f7dcbd61850eb5a056d28de3d5758bc08153a0d"
+      resolved-ref: "9f7dcbd61850eb5a056d28de3d5758bc08153a0d"
+      url: "https://github.com/MixinNetwork/libsignal_protocol_dart.git"
+    source: git
     version: "0.7.4"
   lints:
     dependency: transitive
@@ -1412,6 +1469,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.3"
+  openai_dart:
+    dependency: transitive
+    description:
+      name: openai_dart
+      sha256: "13763068d8bf87f7e0ebdb8bf365bada7a7538696380e68ec5d37644d97ff519"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  opentelemetry:
+    dependency: transitive
+    description:
+      name: opentelemetry
+      sha256: "92d63a2e0731d34a7548add82420b8f3819ccda569f9bdfdcc4b25e00fe88da4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.11"
   optional:
     dependency: transitive
     description:
@@ -1608,10 +1681,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "579fe5557eae58e3adca2e999e38f02441d8aa908703854a9e0a0f47fa857731"
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "6.0.0"
   protocol_handler:
     dependency: "direct main"
     description:
@@ -1692,6 +1765,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.2"
   rational:
     dependency: transitive
     description:
@@ -1740,6 +1821,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  schemantic:
+    dependency: "direct main"
+    description:
+      name: schemantic
+      sha256: "8c143bf964c18a0f2c0c6053d71599ab4985567d86a289d373c171c9190ccb9d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   screen_retriever:
     dependency: transitive
     description:

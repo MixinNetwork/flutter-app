@@ -495,12 +495,12 @@ class AiConversationToolKit {
     ),
   ];
 
-  Future<AiToolExecutionResult> execute({
+  Future<Map<String, dynamic>> execute({
     required String conversationId,
-    required AiToolCall call,
+    required String name,
+    required Map<String, dynamic> arguments,
   }) async {
-    final arguments = call.arguments;
-    switch (call.name) {
+    switch (name) {
       case 'get_conversation_stats':
         final (startInclusive, endExclusive) = _parseRange(arguments);
         final stats = await service.getConversationStats(
@@ -508,11 +508,7 @@ class AiConversationToolKit {
           startInclusive: startInclusive,
           endExclusive: endExclusive,
         );
-        return AiToolExecutionResult(
-          toolCallId: call.id,
-          toolName: call.name,
-          payload: stats.toJson(),
-        );
+        return stats.toJson();
       case 'list_conversation_chunks':
         final (startInclusive, endExclusive) = _parseRange(arguments);
         final chunkSize = _parseInt(
@@ -528,11 +524,7 @@ class AiConversationToolKit {
           startInclusive: startInclusive,
           endExclusive: endExclusive,
         );
-        return AiToolExecutionResult(
-          toolCallId: call.id,
-          toolName: call.name,
-          payload: chunks.toJson(),
-        );
+        return chunks.toJson();
       case 'read_conversation_chunk':
         final (startInclusive, endExclusive) = _parseRange(arguments);
         final offset = _parseInt(
@@ -556,11 +548,7 @@ class AiConversationToolKit {
           startInclusive: startInclusive,
           endExclusive: endExclusive,
         );
-        return AiToolExecutionResult(
-          toolCallId: call.id,
-          toolName: call.name,
-          payload: page.toJson(),
-        );
+        return page.toJson();
       case 'search_conversation_messages':
         final query = _parseRequiredString(arguments, 'query');
         final limit = _parseInt(
@@ -575,13 +563,9 @@ class AiConversationToolKit {
           query: query,
           limit: limit,
         );
-        return AiToolExecutionResult(
-          toolCallId: call.id,
-          toolName: call.name,
-          payload: result.toJson(),
-        );
+        return result.toJson();
       default:
-        throw UnsupportedError('Unknown conversation tool: ${call.name}');
+        throw UnsupportedError('Unknown conversation tool: $name');
     }
   }
 

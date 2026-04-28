@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
+import 'package:genkit/genkit.dart' as genkit;
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:schemantic/schemantic.dart';
 import 'package:uuid/uuid.dart';
 
 import '../db/dao/ai_chat_message_dao.dart';
@@ -250,59 +252,85 @@ class AiChatController {
     cancelToken: cancelToken,
     onContent: onContent,
     conversationId: conversationId,
-    onToolCall: _toolExecutorFor(
+    tools: _toolsFor(
       conversationId,
       assistantMessageId: assistantMessageId,
     ),
   );
 
-  Future<AiToolExecutionResult> Function(AiToolCall toolCall)? _toolExecutorFor(
+  List<genkit.Tool<Map<String, dynamic>, Map<String, dynamic>>>? _toolsFor(
     String? conversationId, {
     String? assistantMessageId,
   }) {
     if (conversationId == null) {
       return null;
     }
-    return (toolCall) => _executeConversationTool(
-      conversationId: conversationId,
-      assistantMessageId: assistantMessageId,
-      toolCall: toolCall,
-    );
+    return AiConversationToolKit.definitions
+        .map(
+          (definition) =>
+              genkit.Tool<Map<String, dynamic>, Map<String, dynamic>>(
+                name: definition.name,
+                description: definition.description,
+                inputSchema: _schemaFor(definition),
+                fn: (input, context) async {
+                  final request = context.toolRequest?.toolRequest;
+                  return _executeConversationTool(
+                    conversationId: conversationId,
+                    assistantMessageId: assistantMessageId,
+                    id: request?.ref ?? '${definition.name}_${input.hashCode}',
+                    name: request?.name ?? definition.name,
+                    arguments: input,
+                  );
+                },
+              ),
+        )
+        .toList(growable: false);
   }
 
-  Future<AiToolExecutionResult> _executeConversationTool({
+  SchemanticType<Map<String, dynamic>> _schemaFor(
+    AiToolDefinition definition,
+  ) => SchemanticType.from<Map<String, dynamic>>(
+    jsonSchema: definition.inputSchema.map(MapEntry.new),
+    parse: _jsonMap,
+  );
+
+  Future<Map<String, dynamic>> _executeConversationTool({
     required String conversationId,
     required String? assistantMessageId,
-    required AiToolCall toolCall,
+    required String id,
+    required String name,
+    required Map<String, dynamic> arguments,
   }) async {
     final stopwatch = Stopwatch()..start();
     d(
       'AI tool execute start: conversationId=$conversationId '
-      'tool=${toolCall.name} id=${toolCall.id} '
-      'arguments=${_previewJson(toolCall.arguments)}',
+      'tool=$name id=$id '
+      'arguments=${_previewJson(arguments)}',
     );
     await _appendAssistantToolEvent(
       assistantMessageId,
-      createAiToolCallEvent(toolCall),
+      createAiToolCallEvent(id: id, name: name, arguments: arguments),
     );
     try {
       final result = await _conversationTools.execute(
         conversationId: conversationId,
-        call: toolCall,
+        name: name,
+        arguments: arguments,
       );
       d(
         'AI tool execute done: conversationId=$conversationId '
-        'tool=${toolCall.name} id=${toolCall.id} '
+        'tool=$name id=$id '
         'elapsedMs=${stopwatch.elapsedMilliseconds} '
-        'result=${_previewJson(result.payload)}',
+        'result=${_previewJson(result)}',
       );
       await _appendAssistantToolEvent(
         assistantMessageId,
         createAiToolResultEvent(
-          toolCall: toolCall,
+          id: id,
+          name: name,
           status: 'done',
           elapsedMs: stopwatch.elapsedMilliseconds,
-          resultPreview: _previewJson(result.payload),
+          resultPreview: _previewJson(result),
         ),
       );
       return result;
@@ -311,17 +339,14 @@ class AiChatController {
       await _appendAssistantToolEvent(
         assistantMessageId,
         createAiToolResultEvent(
-          toolCall: toolCall,
+          id: id,
+          name: name,
           status: 'error',
           elapsedMs: stopwatch.elapsedMilliseconds,
           errorText: error.toString(),
         ),
       );
-      return AiToolExecutionResult(
-        toolCallId: toolCall.id,
-        toolName: toolCall.name,
-        payload: {'error': '$error'},
-      );
+      return {'error': '$error'};
     }
   }
 
@@ -365,6 +390,16 @@ String _previewJson(Object? value, {int maxLength = _kAiLogJsonPreviewLength}) {
   } catch (_) {
     return '$value';
   }
+}
+
+Map<String, dynamic> _jsonMap(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+  if (value is Map) {
+    return value.map((key, value) => MapEntry('$key', value));
+  }
+  throw Exception('Invalid AI tool arguments');
 }
 
 class _StreamingMessageUpdater {

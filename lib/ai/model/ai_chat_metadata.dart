@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'ai_provider_config.dart';
-import 'ai_tool.dart';
 
 const aiMetadataToolEventsKey = 'toolEvents';
 const aiToolEventTypeCall = 'tool_call';
@@ -47,24 +46,29 @@ String appendAiToolEventToMetadata(
   return jsonEncode(root);
 }
 
-Map<String, dynamic> createAiToolCallEvent(AiToolCall toolCall) => {
+Map<String, dynamic> createAiToolCallEvent({
+  required String id,
+  required String name,
+  required Map<String, dynamic> arguments,
+}) => {
   'type': aiToolEventTypeCall,
-  'id': toolCall.id,
-  'name': toolCall.name,
-  'arguments': toolCall.arguments,
+  'id': id,
+  'name': name,
+  'arguments': arguments,
   'createdAt': DateTime.now().toUtc().toIso8601String(),
 };
 
 Map<String, dynamic> createAiToolResultEvent({
-  required AiToolCall toolCall,
+  required String id,
+  required String name,
   required String status,
   required int elapsedMs,
   String? resultPreview,
   String? errorText,
 }) => <String, dynamic>{
   'type': aiToolEventTypeResult,
-  'id': toolCall.id,
-  'name': toolCall.name,
+  'id': id,
+  'name': name,
   'status': status,
   'elapsedMs': elapsedMs,
   'resultPreview': resultPreview,
