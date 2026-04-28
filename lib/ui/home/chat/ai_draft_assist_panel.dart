@@ -8,7 +8,13 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 
-enum AiDraftAction { polish, shorten, polite, translate, replyWithContext }
+enum AiDraftAction {
+  polish,
+  shorten,
+  polite,
+  translate,
+  replyWithContext,
+}
 
 enum AiDraftAssistPhase { idle, loading, result, error }
 

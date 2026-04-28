@@ -684,6 +684,59 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .map((row) => row.read(countExp)!);
   }
 
+  Selectable<MessageItem> messagesByConversationIdAndCreatedAtRange(
+    String conversationId, {
+    required int limit,
+    int offset = 0,
+    DateTime? startInclusive,
+    DateTime? endExclusive,
+    bool ascending = true,
+  }) {
+    final startMillis = startInclusive?.millisecondsSinceEpoch;
+    final endMillis = endExclusive?.millisecondsSinceEpoch;
+    return _baseMessageItems(
+      (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+          message.conversationId.equals(conversationId) &
+          (startMillis == null
+              ? const Constant(true)
+              : message.createdAt.isBiggerOrEqualValue(startMillis)) &
+          (endMillis == null
+              ? const Constant(true)
+              : message.createdAt.isSmallerThanValue(endMillis)),
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+      order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+        if (ascending) OrderingTerm.asc(message.createdAt),
+        if (ascending) OrderingTerm.asc(message.rowId),
+        if (!ascending) OrderingTerm.desc(message.createdAt),
+        if (!ascending) OrderingTerm.desc(message.rowId),
+      ]),
+    );
+  }
+
+  Selectable<int> messageCountByConversationIdAndCreatedAtRange(
+    String conversationId, {
+    DateTime? startInclusive,
+    DateTime? endExclusive,
+  }) {
+    final startMillis = startInclusive?.millisecondsSinceEpoch;
+    final endMillis = endExclusive?.millisecondsSinceEpoch;
+    final countExp = countAll();
+    return (db.selectOnly(db.messages)
+          ..addColumns([countExp])
+          ..where(
+            db.messages.conversationId.equals(conversationId) &
+                (startMillis == null
+                    ? const Constant(true)
+                    : db.messages.createdAt.isBiggerOrEqualValue(
+                        startMillis,
+                      )) &
+                (endMillis == null
+                    ? const Constant(true)
+                    : db.messages.createdAt.isSmallerThanValue(endMillis)),
+          ))
+        .map((row) => row.read(countExp)!);
+  }
+
   Future<List<String>> getUnreadMessageIds(
     String conversationId,
     String userId,

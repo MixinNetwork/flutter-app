@@ -611,7 +611,8 @@ Future<String> _requestAiDraftAction(
   };
 
   try {
-    final result = await AiChatController(context.database).assistText(
+    final controller = AiChatController(context.database);
+    final result = await controller.assistText(
       instruction: instruction,
       input: action == AiDraftAction.replyWithContext ? null : original,
       conversationId: conversationId,
