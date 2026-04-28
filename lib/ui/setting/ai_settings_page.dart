@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../ai/model/ai_prompt_template.dart';
 import '../../ai/model/ai_provider_config.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../provider/database_provider.dart';
+import 'ai_prompt_settings_page.dart';
 import 'ai_provider_edit_page.dart';
 
 class AiSettingsPage extends HookConsumerWidget {
@@ -21,6 +23,14 @@ class AiSettingsPage extends HookConsumerWidget {
     final providers = database.settingProperties.aiProviders;
     final selectedId = database.settingProperties.selectedAiProviderId;
     final selectedProvider = database.settingProperties.selectedAiProvider;
+    final customizedPromptCount = aiPromptTemplateDefinitions
+        .where(
+          (definition) =>
+              database.settingProperties.hasAiPromptTemplateOverride(
+                definition.key,
+              ),
+        )
+        .length;
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -33,6 +43,40 @@ class AiSettingsPage extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                CellGroup(
+                  padding: const EdgeInsets.only(right: 10, left: 10),
+                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
+                  child: CellItem(
+                    title: const Text('Prompt Templates'),
+                    leading: Icon(
+                      Icons.tune_rounded,
+                      color: context.theme.icon,
+                    ),
+                    description: Text(
+                      customizedPromptCount == 0
+                          ? 'Default'
+                          : '$customizedPromptCount custom',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: null,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AiPromptSettingsPage(),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
+                  child: Text(
+                    'Customize chat prompts, assist prompts, and built-in variables like {{conversationId}}, {{currentIsoDateTime}}, and {{language}}.',
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
                 CellGroup(
                   padding: const EdgeInsets.only(right: 10, left: 10),
                   cellBackgroundColor: context.theme.settingCellBackgroundColor,

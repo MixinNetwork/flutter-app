@@ -20,6 +20,7 @@ import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../ai/ai_chat_controller.dart';
+import '../../../ai/model/ai_prompt_template.dart';
 import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
@@ -590,18 +591,21 @@ Future<String> _requestAiDraftAction(
   }
 
   final language = _currentLanguageTag(context);
-  final instruction = switch (action) {
-    AiDraftAction.polish =>
-      'Polish this draft for a chat message. Keep the original meaning, language, and approximate length.',
-    AiDraftAction.shorten =>
-      'Rewrite this chat draft to be shorter and clearer. Keep the original language and intent.',
-    AiDraftAction.polite =>
-      'Rewrite this chat draft to sound polite, natural, and still concise. Keep the original language.',
-    AiDraftAction.translate =>
-      'Translate this chat draft into $language. Return only the translation.',
-    AiDraftAction.replyWithContext =>
-      'Draft a concise, natural reply to the latest conversation message using the recent context. Return only the reply text.',
+  final templateKey = switch (action) {
+    AiDraftAction.polish => AiPromptTemplateKey.draftPolish,
+    AiDraftAction.shorten => AiPromptTemplateKey.draftShorten,
+    AiDraftAction.polite => AiPromptTemplateKey.draftPolite,
+    AiDraftAction.translate => AiPromptTemplateKey.draftTranslate,
+    AiDraftAction.replyWithContext => AiPromptTemplateKey.draftReplyWithContext,
   };
+  final instruction = renderAiPromptTemplate(
+    context.database.settingProperties.aiPromptTemplate(templateKey),
+    buildAiPromptTemplateVariables(
+      conversationId: conversationId,
+      input: original,
+      language: language,
+    ),
+  );
   final title = switch (action) {
     AiDraftAction.polish => 'Polish',
     AiDraftAction.shorten => 'Make shorter',
@@ -614,6 +618,7 @@ Future<String> _requestAiDraftAction(
     final controller = AiChatController(context.database);
     final result = await controller.assistText(
       instruction: instruction,
+      language: language,
       input: action == AiDraftAction.replyWithContext ? null : original,
       conversationId: conversationId,
     );
@@ -682,6 +687,7 @@ Future<void> _sendMessage(
   final aiModeState = context.providerContainer.read(
     aiInputModeProvider(conversationId),
   );
+  final language = _currentLanguageTag(context);
 
   if (text == '/ai') {
     final provider = context.database.settingProperties.selectedAiProvider;
@@ -708,6 +714,7 @@ Future<void> _sendMessage(
       await AiChatController(context.database).send(
         conversationId: conversationId,
         input: inlineAiInput,
+        language: language,
         provider: provider,
         onInputAccepted: () => textEditingController.text = '',
       );
@@ -735,6 +742,7 @@ Future<void> _sendMessage(
       await AiChatController(context.database).send(
         conversationId: conversationId,
         input: text,
+        language: language,
         provider: provider,
         onInputAccepted: () => textEditingController.text = '',
       );

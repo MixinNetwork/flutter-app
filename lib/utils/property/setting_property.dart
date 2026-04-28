@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mixin_logger/mixin_logger.dart';
 
+import '../../ai/model/ai_prompt_template.dart';
 import '../../ai/model/ai_provider_config.dart';
 import '../../db/dao/property_dao.dart';
 import '../../db/util/property_storage.dart';
@@ -14,6 +15,7 @@ const _kSelectedProxyKey = 'selected_proxy';
 const _kProxyListKey = 'proxy_list';
 const _kAiProviderListKey = 'ai_provider_list';
 const _kSelectedAiProviderKey = 'selected_ai_provider';
+const _kAiPromptTemplateOverridesKey = 'ai_prompt_template_overrides';
 
 class SettingPropertyStorage extends PropertyStorage {
   SettingPropertyStorage(PropertyDao dao) : super(PropertyGroup.setting, dao);
@@ -126,5 +128,43 @@ class SettingPropertyStorage extends PropertyStorage {
     if (selectedAiProviderId == id) {
       selectedAiProviderId = providers.firstOrNull?.id;
     }
+  }
+
+  Map<String, String> get _aiPromptTemplateOverrides {
+    final json = get<String>(_kAiPromptTemplateOverridesKey);
+    if (json == null || json.isEmpty) {
+      return {};
+    }
+    try {
+      final map = jsonDecode(json) as Map;
+      return map.map(
+        (key, value) => MapEntry(key.toString(), value?.toString() ?? ''),
+      );
+    } catch (error, stacktrace) {
+      e('load aiPromptTemplateOverrides error: $error, $stacktrace');
+      return {};
+    }
+  }
+
+  String aiPromptTemplate(AiPromptTemplateKey key) {
+    final overrides = _aiPromptTemplateOverrides;
+    if (overrides.containsKey(key.storageKey)) {
+      return overrides[key.storageKey] ?? '';
+    }
+    return key.definition.defaultValue;
+  }
+
+  bool hasAiPromptTemplateOverride(AiPromptTemplateKey key) =>
+      _aiPromptTemplateOverrides.containsKey(key.storageKey);
+
+  void saveAiPromptTemplate(AiPromptTemplateKey key, String value) {
+    final overrides = _aiPromptTemplateOverrides;
+    overrides[key.storageKey] = value;
+    set(_kAiPromptTemplateOverridesKey, jsonEncode(overrides));
+  }
+
+  void resetAiPromptTemplate(AiPromptTemplateKey key) {
+    final overrides = _aiPromptTemplateOverrides..remove(key.storageKey);
+    set(_kAiPromptTemplateOverridesKey, jsonEncode(overrides));
   }
 }

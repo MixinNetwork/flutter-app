@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 import '../../ai/ai_chat_controller.dart';
+import '../../ai/model/ai_prompt_template.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../utils/extension/extension.dart';
@@ -104,17 +105,19 @@ Future<void> runMessageAiAction(
   final language = _currentLanguageTag(context);
   final provider = context.database.settingProperties.selectedAiProvider;
   final model = provider?.model;
-  final instruction = switch (action) {
-    MessageAiAction.translate =>
-      'Translate this chat message into $language. Return only the translation.',
-    MessageAiAction.explain =>
-      'Explain this chat message clearly and concisely in $language. '
-          'Clarify slang, abbreviations, technical terms, and implied meaning when useful. '
-          'Return only the explanation.',
-    MessageAiAction.suggestReplies =>
-      'Suggest three concise, natural replies in $language to this chat message '
-          'using the recent conversation context. Return one reply per line, without numbering.',
+  final templateKey = switch (action) {
+    MessageAiAction.translate => AiPromptTemplateKey.messageTranslate,
+    MessageAiAction.explain => AiPromptTemplateKey.messageExplain,
+    MessageAiAction.suggestReplies => AiPromptTemplateKey.messageSuggestReplies,
   };
+  final instruction = renderAiPromptTemplate(
+    context.database.settingProperties.aiPromptTemplate(templateKey),
+    buildAiPromptTemplateVariables(
+      conversationId: message.conversationId,
+      input: input,
+      language: language,
+    ),
+  );
   final title = switch (action) {
     MessageAiAction.translate => 'Translate',
     MessageAiAction.explain => 'Explain',
@@ -128,6 +131,7 @@ Future<void> runMessageAiAction(
   try {
     final result = await AiChatController(context.database).assistText(
       instruction: instruction,
+      language: language,
       input: input,
       conversationId: message.conversationId,
       provider: provider,

@@ -48,6 +48,7 @@ class AiChatController {
 
   Future<String> assistText({
     required String instruction,
+    required String language,
     String? input,
     String? conversationId,
     AiProviderConfig? provider,
@@ -65,6 +66,7 @@ class AiChatController {
 
     final messages = await _promptBuilder.buildAssistPromptMessages(
       instruction: instruction,
+      language: language,
       input: input,
       conversationId: conversationId,
     );
@@ -98,6 +100,7 @@ class AiChatController {
   Future<void> send({
     required String conversationId,
     required String input,
+    required String language,
     AiProviderConfig? provider,
     void Function()? onInputAccepted,
   }) async {
@@ -176,6 +179,7 @@ class AiChatController {
       final messages = await _promptBuilder.buildPromptMessages(
         conversationId,
         input,
+        language,
       );
       final result = await _requestText(
         config,
@@ -228,70 +232,6 @@ class AiChatController {
   void stop(String conversationId) {
     d('AI stop requested: conversationId=$conversationId');
     _activeAiRequests[conversationId]?.cancel('AI generation stopped');
-  }
-
-  Future<String> summarizeConversationRange({
-    required String conversationId,
-    required DateTime startInclusive,
-    required DateTime endExclusive,
-    String? languageTag,
-    AiProviderConfig? provider,
-  }) async {
-    final config = provider ?? database.settingProperties.selectedAiProvider;
-    if (config == null) {
-      throw Exception('No AI provider configured');
-    }
-
-    final stats = await _conversationToolService.getConversationStats(
-      conversationId: conversationId,
-      startInclusive: startInclusive,
-      endExclusive: endExclusive,
-    );
-    if (stats.messageCount <= 0) {
-      return 'No messages found in the selected time range.';
-    }
-
-    final messages = _promptBuilder.buildConversationSummaryPromptMessages(
-      stats: stats,
-      languageTag: languageTag,
-    );
-    final cancelToken = CancelToken();
-    _activeAiRequests[conversationId] = cancelToken;
-    try {
-      return await _requestText(
-        config,
-        messages,
-        cancelToken: cancelToken,
-        onContent: (_) async {},
-        conversationId: conversationId,
-        streamFinalResponse: false,
-      );
-    } finally {
-      if (_activeAiRequests[conversationId] == cancelToken) {
-        _activeAiRequests.remove(conversationId);
-      }
-    }
-  }
-
-  Future<String> summarizeConversationToday({
-    required String conversationId,
-    String? languageTag,
-    AiProviderConfig? provider,
-    DateTime? now,
-  }) {
-    final localNow = now ?? DateTime.now();
-    final startInclusive = DateTime(
-      localNow.year,
-      localNow.month,
-      localNow.day,
-    );
-    return summarizeConversationRange(
-      conversationId: conversationId,
-      startInclusive: startInclusive,
-      endExclusive: startInclusive.add(const Duration(days: 1)),
-      languageTag: languageTag,
-      provider: provider,
-    );
   }
 
   Future<String> _requestText(

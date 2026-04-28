@@ -6,7 +6,7 @@ import '../db/dao/message_dao.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart';
 import 'model/ai_prompt_message.dart';
-import 'tools/ai_conversation_tool_service.dart';
+import 'model/ai_prompt_template.dart';
 
 class AiChatPromptBuilder {
   AiChatPromptBuilder(this.database);
@@ -24,7 +24,9 @@ class AiChatPromptBuilder {
   Future<List<AiPromptMessage>> buildPromptMessages(
     String conversationId,
     String input,
+    String language,
   ) async {
+    final now = DateTime.now();
     final recentMessages = await database.messageDao
         .messagesByConversationId(conversationId, _aiContextMessageLimit)
         .get();
@@ -38,21 +40,36 @@ class AiChatPromptBuilder {
     );
 
     final promptMessages = <AiPromptMessage>[
-      AiPromptMessage(
+      ..._promptMessages(
         role: 'system',
-        content:
-            'You are a local AI assistant inside a chat application. '
-            'Only use the provided current conversation context. '
-            'Help summarize, answer questions about the conversation, '
-            'and draft replies. Be concise and practical.',
+        content: renderAiPromptTemplate(
+          database.settingProperties.aiPromptTemplate(
+            AiPromptTemplateKey.chatSystem,
+          ),
+          buildAiPromptTemplateVariables(
+            conversationId: conversationId,
+            input: input,
+            language: language,
+            now: now,
+          ),
+        ),
       ),
     ];
 
-    _appendConversationToolInstruction(promptMessages, enabled: true);
+    _appendConversationToolInstruction(
+      promptMessages,
+      enabled: true,
+      conversationId: conversationId,
+      language: language,
+      now: now,
+    );
     _appendConversationContext(
       promptMessages,
+      conversationId: conversationId,
       recentMessages: recentMessages,
       retrievedMessages: retrievedMessages,
+      language: language,
+      now: now,
     );
 
     final history = aiMessages
@@ -64,7 +81,20 @@ class AiChatPromptBuilder {
       );
     }
 
-    promptMessages.add(AiPromptMessage(role: _aiRoleUser, content: input));
+    promptMessages.addAll(
+      _promptMessages(
+        role: _aiRoleUser,
+        content: renderAiPromptTemplate(
+          chatUserMessagePromptTemplate,
+          buildAiPromptTemplateVariables(
+            conversationId: conversationId,
+            input: input,
+            language: language,
+            now: now,
+          ),
+        ),
+      ),
+    );
     d(
       'AI prompt built: conversationId=$conversationId '
       'recent=${recentMessages.length} retrieved=${retrievedMessages.length} '
@@ -77,20 +107,38 @@ class AiChatPromptBuilder {
     required String instruction,
     required String? input,
     required String? conversationId,
+    required String language,
   }) async {
+    final now = DateTime.now();
+    final inputText = input?.trim();
+    final trimmedInstruction = instruction.trim();
     final promptMessages = <AiPromptMessage>[
-      AiPromptMessage(
+      ..._promptMessages(
         role: 'system',
-        content:
-            'You are an invisible writing assistant inside a chat app. '
-            'Return only the requested text. Do not add explanations, '
-            'labels, markdown fences, or greetings unless explicitly '
-            'requested.',
+        content: renderAiPromptTemplate(
+          database.settingProperties.aiPromptTemplate(
+            AiPromptTemplateKey.assistSystem,
+          ),
+          buildAiPromptTemplateVariables(
+            conversationId: conversationId,
+            input: inputText,
+            instruction: trimmedInstruction,
+            inputSection: buildAiPromptInputSection(inputText),
+            language: language,
+            now: now,
+          ),
+        ),
       ),
     ];
 
     if (conversationId != null) {
-      _appendConversationToolInstruction(promptMessages, enabled: true);
+      _appendConversationToolInstruction(
+        promptMessages,
+        enabled: true,
+        conversationId: conversationId,
+        language: language,
+        now: now,
+      );
       final recentMessages = await database.messageDao
           .messagesByConversationId(conversationId, _aiContextMessageLimit)
           .get();
@@ -101,19 +149,28 @@ class AiChatPromptBuilder {
       );
       _appendConversationContext(
         promptMessages,
+        conversationId: conversationId,
         recentMessages: recentMessages,
         retrievedMessages: retrievedMessages,
+        language: language,
+        now: now,
       );
     }
 
-    final inputText = input?.trim();
-    promptMessages.add(
-      AiPromptMessage(
+    promptMessages.addAll(
+      _promptMessages(
         role: _aiRoleUser,
-        content: [
-          instruction.trim(),
-          if (inputText != null && inputText.isNotEmpty) '\nText:\n$inputText',
-        ].join('\n'),
+        content: renderAiPromptTemplate(
+          assistUserMessagePromptTemplate,
+          buildAiPromptTemplateVariables(
+            conversationId: conversationId,
+            input: inputText,
+            instruction: trimmedInstruction,
+            inputSection: buildAiPromptInputSection(inputText),
+            language: language,
+            now: now,
+          ),
+        ),
       ),
     );
     d(
@@ -123,77 +180,38 @@ class AiChatPromptBuilder {
     return promptMessages;
   }
 
-  List<AiPromptMessage> buildConversationSummaryPromptMessages({
-    required AiConversationToolStats stats,
-    required String? languageTag,
-  }) {
-    final outputLanguage = languageTag?.trim();
-    return [
-      AiPromptMessage(
-        role: 'system',
-        content:
-            'You are a conversation summarizer inside a chat application. '
-            'For this task, you must use the available read-only '
-            'conversation tools to inspect the requested time range '
-            'before writing the final answer. Start by calling '
-            'list_conversation_chunks for the exact range, then '
-            'read_conversation_chunk until you have covered the full '
-            'range. Do not rely only on recent context or search for '
-            'this task.',
-      ),
-      AiPromptMessage(
-        role: 'system',
-        content:
-            'Summaries must cover the requested range completely and '
-            'should include main topics, key decisions, action items, '
-            'unresolved questions, and notable follow-ups. Keep the '
-            'final answer concise but comprehensive.',
-      ),
-      AiPromptMessage(
-        role: 'user',
-        content: [
-          'Summarize the conversation messages in this time range.',
-          'Conversation ID: ${stats.conversationId}',
-          'Start time: ${stats.startInclusive?.toIso8601String() ?? 'unspecified'}',
-          'End time: ${stats.endExclusive?.toIso8601String() ?? 'unspecified'}',
-          'Messages in range: ${stats.messageCount}',
-          if (stats.firstMessageAt != null)
-            'First message at: ${stats.firstMessageAt!.toIso8601String()}',
-          if (stats.lastMessageAt != null)
-            'Last message at: ${stats.lastMessageAt!.toIso8601String()}',
-          if (outputLanguage != null && outputLanguage.isNotEmpty)
-            'Write the final summary in $outputLanguage.',
-          'Before finalizing, make sure you have covered every chunk in the range.',
-          'Return only the summary text.',
-        ].join('\n'),
-      ),
-    ];
-  }
-
   void _appendConversationToolInstruction(
     List<AiPromptMessage> promptMessages, {
     required bool enabled,
+    required String? conversationId,
+    required String language,
+    required DateTime now,
   }) {
     if (!enabled) {
       return;
     }
-    promptMessages.add(
-      AiPromptMessage(
+    promptMessages.addAll(
+      _promptMessages(
         role: 'system',
-        content:
-            'Read-only conversation tools are available for the current '
-            'conversation. Use them when you need exhaustive coverage, '
-            'date-scoped summaries, statistics, older messages, or more '
-            'context than the provided messages. Do not call tools when '
-            'the provided context is already sufficient.',
+        content: renderAiPromptTemplate(
+          conversationToolInstructionPromptTemplate,
+          buildAiPromptTemplateVariables(
+            conversationId: conversationId,
+            language: language,
+            now: now,
+          ),
+        ),
       ),
     );
   }
 
   void _appendConversationContext(
     List<AiPromptMessage> promptMessages, {
+    required String conversationId,
     required List<MessageItem> recentMessages,
     required List<SearchMessageDetailItem> retrievedMessages,
+    required String language,
+    required DateTime now,
   }) {
     if (recentMessages.isNotEmpty) {
       final lines = recentMessages.reversed
@@ -205,10 +223,18 @@ class AiChatPromptBuilder {
             ),
           )
           .join('\n');
-      promptMessages.add(
-        AiPromptMessage(
+      promptMessages.addAll(
+        _promptMessages(
           role: 'system',
-          content: 'Current conversation recent messages:\n$lines',
+          content: renderAiPromptTemplate(
+            recentConversationContextPromptTemplate,
+            buildAiPromptTemplateVariables(
+              conversationId: conversationId,
+              messages: lines,
+              language: language,
+              now: now,
+            ),
+          ),
         ),
       );
     }
@@ -226,12 +252,18 @@ class AiChatPromptBuilder {
           ),
         )
         .join('\n');
-    promptMessages.add(
-      AiPromptMessage(
+    promptMessages.addAll(
+      _promptMessages(
         role: 'system',
-        content:
-            'Relevant older conversation messages matched by search '
-            '(use only if they help answer the current request):\n$lines',
+        content: renderAiPromptTemplate(
+          retrievedConversationContextPromptTemplate,
+          buildAiPromptTemplateVariables(
+            conversationId: conversationId,
+            messages: lines,
+            language: language,
+            now: now,
+          ),
+        ),
       ),
     );
   }
@@ -341,6 +373,16 @@ class AiChatPromptBuilder {
       return '[$type] $mediaName';
     }
     return '[$type]';
+  }
+
+  List<AiPromptMessage> _promptMessages({
+    required String role,
+    required String content,
+  }) {
+    if (content.trim().isEmpty) {
+      return const [];
+    }
+    return [AiPromptMessage(role: role, content: content)];
   }
 }
 

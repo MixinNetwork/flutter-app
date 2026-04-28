@@ -2,9 +2,11 @@
 library;
 
 import 'package:drift/native.dart';
+import 'package:flutter_app/ai/model/ai_prompt_template.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/util/property_storage.dart';
 import 'package:flutter_app/enum/property_group.dart';
+import 'package:flutter_app/utils/property/setting_property.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -54,5 +56,26 @@ void main() {
     storage.set('test_list_string', ['1', '2', '3']);
     expect(storage.getList<String>('test_list_string'), ['1', '2', '3']);
     expect(storage.getList('test_list_string'), ['1', '2', '3']);
+  });
+
+  test('AI prompt template settings support override and reset', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    final storage = SettingPropertyStorage(database.propertyDao);
+    const key = AiPromptTemplateKey.chatSystem;
+
+    expect(storage.aiPromptTemplate(key), key.definition.defaultValue);
+    expect(storage.hasAiPromptTemplateOverride(key), isFalse);
+
+    storage.saveAiPromptTemplate(key, 'Custom prompt {{conversationId}}');
+    expect(storage.aiPromptTemplate(key), 'Custom prompt {{conversationId}}');
+    expect(storage.hasAiPromptTemplateOverride(key), isTrue);
+
+    storage.saveAiPromptTemplate(key, '');
+    expect(storage.aiPromptTemplate(key), isEmpty);
+    expect(storage.hasAiPromptTemplateOverride(key), isTrue);
+
+    storage.resetAiPromptTemplate(key);
+    expect(storage.aiPromptTemplate(key), key.definition.defaultValue);
+    expect(storage.hasAiPromptTemplateOverride(key), isFalse);
   });
 }
