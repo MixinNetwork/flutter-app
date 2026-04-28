@@ -16,6 +16,8 @@ const _kMaxConversationChunkSize = 200;
 const _kDefaultConversationSearchLimit = 8;
 const _kMaxConversationSearchLimit = 20;
 const _kAiToolLogPreviewLength = 480;
+const _kMaxConversationMessageTextLength = 1000;
+const _kSearchMessageSnippetRadius = 240;
 
 typedef AiConversationToolEventSink =
     Future<void> Function(Map<String, dynamic> event);
@@ -24,7 +26,6 @@ class AiConversationToolMessage {
   const AiConversationToolMessage({
     required this.messageId,
     required this.createdAt,
-    required this.senderId,
     required this.senderName,
     required this.type,
     required this.text,
@@ -32,15 +33,13 @@ class AiConversationToolMessage {
 
   final String messageId;
   final DateTime createdAt;
-  final String senderId;
   final String senderName;
   final String type;
   final String text;
 
   Map<String, dynamic> toJson() => {
     'message_id': messageId,
-    'created_at': createdAt.toIso8601String(),
-    'sender_id': senderId,
+    'created_at': _formatToolDateTime(createdAt),
     'sender_name': senderName,
     'type': type,
     'text': text,
@@ -49,28 +48,23 @@ class AiConversationToolMessage {
 
 class AiConversationToolStats {
   const AiConversationToolStats({
-    required this.conversationId,
     required this.messageCount,
-    required this.startInclusive,
-    required this.endExclusive,
     this.firstMessageAt,
     this.lastMessageAt,
   });
 
-  final String conversationId;
   final int messageCount;
-  final DateTime? startInclusive;
-  final DateTime? endExclusive;
   final DateTime? firstMessageAt;
   final DateTime? lastMessageAt;
 
   Map<String, dynamic> toJson() => {
-    'conversation_id': conversationId,
     'message_count': messageCount,
-    'start_time': startInclusive?.toIso8601String(),
-    'end_time': endExclusive?.toIso8601String(),
-    'first_message_at': firstMessageAt?.toIso8601String(),
-    'last_message_at': lastMessageAt?.toIso8601String(),
+    'first_message_at': firstMessageAt == null
+        ? null
+        : _formatToolDateTime(firstMessageAt!),
+    'last_message_at': lastMessageAt == null
+        ? null
+        : _formatToolDateTime(lastMessageAt!),
   };
 }
 
@@ -94,62 +88,38 @@ class AiConversationToolChunk {
 
 class AiConversationToolChunkList {
   const AiConversationToolChunkList({
-    required this.conversationId,
-    required this.chunkSize,
     required this.totalMessages,
-    required this.startInclusive,
-    required this.endExclusive,
     required this.chunks,
   });
 
-  final String conversationId;
-  final int chunkSize;
   final int totalMessages;
-  final DateTime? startInclusive;
-  final DateTime? endExclusive;
   final List<AiConversationToolChunk> chunks;
 
   Map<String, dynamic> toJson() => {
-    'conversation_id': conversationId,
-    'chunk_size': chunkSize,
     'total_messages': totalMessages,
     'total_chunks': chunks.length,
-    'start_time': startInclusive?.toIso8601String(),
-    'end_time': endExclusive?.toIso8601String(),
     'chunks': chunks.map((chunk) => chunk.toJson()).toList(growable: false),
   };
 }
 
 class AiConversationToolChunkPage {
   const AiConversationToolChunkPage({
-    required this.conversationId,
     required this.offset,
-    required this.limit,
     required this.totalMessages,
-    required this.startInclusive,
-    required this.endExclusive,
     required this.messages,
     required this.nextOffset,
   });
 
-  final String conversationId;
   final int offset;
-  final int limit;
   final int totalMessages;
-  final DateTime? startInclusive;
-  final DateTime? endExclusive;
   final List<AiConversationToolMessage> messages;
   final int? nextOffset;
 
   Map<String, dynamic> toJson() => {
-    'conversation_id': conversationId,
     'offset': offset,
-    'limit': limit,
     'total_messages': totalMessages,
     'returned_count': messages.length,
     'next_offset': nextOffset,
-    'start_time': startInclusive?.toIso8601String(),
-    'end_time': endExclusive?.toIso8601String(),
     'messages': messages
         .map((message) => message.toJson())
         .toList(growable: false),
@@ -158,22 +128,16 @@ class AiConversationToolChunkPage {
 
 class AiConversationToolSearchResult {
   const AiConversationToolSearchResult({
-    required this.conversationId,
-    required this.query,
-    required this.limit,
     required this.messages,
+    required this.nextAnchorId,
   });
 
-  final String conversationId;
-  final String query;
-  final int limit;
   final List<AiConversationToolMessage> messages;
+  final String? nextAnchorId;
 
   Map<String, dynamic> toJson() => {
-    'conversation_id': conversationId,
-    'query': query,
-    'limit': limit,
     'returned_count': messages.length,
+    'next_anchor_id': nextAnchorId,
     'messages': messages
         .map((message) => message.toJson())
         .toList(growable: false),
@@ -206,6 +170,7 @@ abstract interface class AiConversationToolService {
     required String conversationId,
     required String query,
     required int limit,
+    String? anchorMessageId,
   });
 }
 
@@ -253,10 +218,7 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
     }
 
     return AiConversationToolStats(
-      conversationId: conversationId,
       messageCount: messageCount,
-      startInclusive: startInclusive,
-      endExclusive: endExclusive,
       firstMessageAt: firstMessageAt,
       lastMessageAt: lastMessageAt,
     );
@@ -289,11 +251,7 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
       );
     }
     return AiConversationToolChunkList(
-      conversationId: conversationId,
-      chunkSize: chunkSize,
       totalMessages: totalMessages,
-      startInclusive: startInclusive,
-      endExclusive: endExclusive,
       chunks: chunks,
     );
   }
@@ -330,12 +288,8 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
         : null;
 
     return AiConversationToolChunkPage(
-      conversationId: conversationId,
       offset: safeOffset,
-      limit: limit,
       totalMessages: totalMessages,
-      startInclusive: startInclusive,
-      endExclusive: endExclusive,
       messages: messages.map(_messageItemToToolMessage).toList(growable: false),
       nextOffset: nextOffset,
     );
@@ -346,19 +300,19 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
     required String conversationId,
     required String query,
     required int limit,
+    String? anchorMessageId,
   }) async {
     final messages = await database.fuzzySearchMessage(
       query: query,
       limit: limit,
       conversationIds: [conversationId],
+      anchorMessageId: anchorMessageId,
     );
     return AiConversationToolSearchResult(
-      conversationId: conversationId,
-      query: query,
-      limit: limit,
       messages: messages
-          .map(_searchMessageToToolMessage)
+          .map((message) => _searchMessageToToolMessage(message, query: query))
           .toList(growable: false),
+      nextAnchorId: messages.length < limit ? null : messages.last.messageId,
     );
   }
 
@@ -366,28 +320,30 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
       AiConversationToolMessage(
         messageId: message.messageId,
         createdAt: message.createdAt,
-        senderId: message.userId,
         senderName: message.userFullName ?? message.userId,
         type: message.type,
         text: _messageText(
           content: message.content,
           mediaName: message.mediaName,
           type: message.type,
+          maxLength: _kMaxConversationMessageTextLength,
         ),
       );
 
   AiConversationToolMessage _searchMessageToToolMessage(
-    SearchMessageDetailItem message,
-  ) => AiConversationToolMessage(
+    SearchMessageDetailItem message, {
+    required String query,
+  }) => AiConversationToolMessage(
     messageId: message.messageId,
     createdAt: message.createdAt,
-    senderId: message.senderId,
     senderName: message.senderFullName ?? message.senderId,
     type: message.type,
     text: _messageText(
       content: message.content,
       mediaName: message.mediaName,
       type: message.type,
+      query: query,
+      maxLength: _kSearchMessageSnippetRadius * 2,
     ),
   );
 
@@ -395,9 +351,13 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
     required String? content,
     required String? mediaName,
     required String type,
+    String? query,
+    int? maxLength,
   }) {
     if (content?.trim().isNotEmpty == true) {
-      return content!.trim();
+      final text = content!.trim();
+      final snippet = query == null ? text : _searchSnippet(text, query);
+      return _truncateText(snippet, maxLength);
     }
     if (mediaName?.isNotEmpty == true) {
       return '[$type] $mediaName';
@@ -418,7 +378,7 @@ class AiConversationToolKit {
     genkit.Tool<GetConversationStatsInput, String>(
       name: 'get_conversation_stats',
       description:
-          'Get message counts and boundary timestamps for the current conversation or a specific time range.',
+          'Get message count and first/last timestamps for the conversation.',
       inputSchema: GetConversationStatsInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -438,8 +398,7 @@ class AiConversationToolKit {
     ),
     genkit.Tool<ListConversationChunksInput, String>(
       name: 'list_conversation_chunks',
-      description:
-          'List chunk offsets that can be used to read the current conversation in fixed-size batches, optionally scoped to a time range.',
+      description: 'List offsets for reading conversation messages in batches.',
       inputSchema: ListConversationChunksInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -460,8 +419,7 @@ class AiConversationToolKit {
     ),
     genkit.Tool<ReadConversationChunkInput, String>(
       name: 'read_conversation_chunk',
-      description:
-          'Read a batch of messages from the current conversation by offset and limit, optionally scoped to a time range.',
+      description: 'Read conversation messages by offset and limit.',
       inputSchema: ReadConversationChunkInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -483,8 +441,7 @@ class AiConversationToolKit {
     ),
     genkit.Tool<SearchConversationMessagesInput, String>(
       name: 'search_conversation_messages',
-      description:
-          'Search the current conversation for messages relevant to a query string.',
+      description: 'Search messages in the current conversation.',
       inputSchema: SearchConversationMessagesInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -497,6 +454,7 @@ class AiConversationToolKit {
             conversationId: conversationId,
             query: input.query,
             limit: input.limit,
+            anchorMessageId: input.anchorMessageId,
           );
           return result.toJson();
         },
@@ -578,8 +536,8 @@ class GetConversationStatsInput {
   );
 
   Map<String, dynamic> toArguments() => {
-    'start_time': startInclusive?.toIso8601String(),
-    'end_time': endExclusive?.toIso8601String(),
+    'start': startInclusive?.toIso8601String(),
+    'end': endExclusive?.toIso8601String(),
   }..removeWhere((_, value) => value == null);
 }
 
@@ -597,9 +555,9 @@ class ListConversationChunksInput {
   static final schema = SchemanticType.from<ListConversationChunksInput>(
     jsonSchema: _rangeSchema(
       properties: {
-        'chunk_size': {
+        'size': {
           'type': 'integer',
-          'description': 'Optional chunk size between 1 and 200.',
+          'description': 'Batch size, 1-200.',
         },
       },
     ),
@@ -609,7 +567,7 @@ class ListConversationChunksInput {
       return ListConversationChunksInput(
         chunkSize: _parseInt(
           arguments,
-          'chunk_size',
+          'size',
           defaultValue: _kDefaultConversationChunkSize,
           min: 1,
           max: _kMaxConversationChunkSize,
@@ -621,9 +579,9 @@ class ListConversationChunksInput {
   );
 
   Map<String, dynamic> toArguments() => {
-    'chunk_size': chunkSize,
-    'start_time': startInclusive?.toIso8601String(),
-    'end_time': endExclusive?.toIso8601String(),
+    'size': chunkSize,
+    'start': startInclusive?.toIso8601String(),
+    'end': endExclusive?.toIso8601String(),
   }..removeWhere((_, value) => value == null);
 }
 
@@ -645,11 +603,11 @@ class ReadConversationChunkInput {
       properties: {
         'offset': {
           'type': 'integer',
-          'description': 'Zero-based offset into the matching message list.',
+          'description': 'Zero-based message offset.',
         },
         'limit': {
           'type': 'integer',
-          'description': 'Number of messages to read, between 1 and 200.',
+          'description': 'Message count, 1-200.',
         },
       },
       required: ['offset'],
@@ -681,8 +639,8 @@ class ReadConversationChunkInput {
   Map<String, dynamic> toArguments() => {
     'offset': offset,
     'limit': limit,
-    'start_time': startInclusive?.toIso8601String(),
-    'end_time': endExclusive?.toIso8601String(),
+    'start': startInclusive?.toIso8601String(),
+    'end': endExclusive?.toIso8601String(),
   }..removeWhere((_, value) => value == null);
 }
 
@@ -690,10 +648,12 @@ class SearchConversationMessagesInput {
   const SearchConversationMessagesInput({
     required this.query,
     required this.limit,
+    this.anchorMessageId,
   });
 
   final String query;
   final int limit;
+  final String? anchorMessageId;
 
   static final schema = SchemanticType.from<SearchConversationMessagesInput>(
     jsonSchema: {
@@ -701,12 +661,15 @@ class SearchConversationMessagesInput {
       'properties': {
         'query': {
           'type': 'string',
-          'description': 'Search query text.',
+          'description': 'Search text.',
         },
         'limit': {
           'type': 'integer',
-          'description':
-              'Maximum number of matches to return, between 1 and 20.',
+          'description': 'Max matches, 1-20.',
+        },
+        'anchor_id': {
+          'type': 'string',
+          'description': 'Use next_anchor_id from the previous page.',
         },
       },
       'required': ['query'],
@@ -723,6 +686,7 @@ class SearchConversationMessagesInput {
           min: 1,
           max: _kMaxConversationSearchLimit,
         ),
+        anchorMessageId: _parseOptionalString(arguments, 'anchor_id'),
       );
     },
   );
@@ -730,7 +694,8 @@ class SearchConversationMessagesInput {
   Map<String, dynamic> toArguments() => {
     'query': query,
     'limit': limit,
-  };
+    'anchor_id': anchorMessageId,
+  }..removeWhere((_, value) => value == null);
 }
 
 Map<String, Object?> _rangeSchema({
@@ -739,13 +704,13 @@ Map<String, Object?> _rangeSchema({
 }) => {
   'type': 'object',
   'properties': {
-    'start_time': {
+    'start': {
       'type': 'string',
-      'description': 'Optional inclusive ISO-8601 start time.',
+      'description': 'Inclusive ISO-8601 start.',
     },
-    'end_time': {
+    'end': {
       'type': 'string',
-      'description': 'Optional exclusive ISO-8601 end time.',
+      'description': 'Exclusive ISO-8601 end.',
     },
     ...properties,
   },
@@ -754,12 +719,12 @@ Map<String, Object?> _rangeSchema({
 };
 
 (DateTime?, DateTime?) _parseRange(Map<String, dynamic> arguments) {
-  final startInclusive = _parseDateTime(arguments, 'start_time');
-  final endExclusive = _parseDateTime(arguments, 'end_time');
+  final startInclusive = _parseDateTime(arguments, 'start');
+  final endExclusive = _parseDateTime(arguments, 'end');
   if (startInclusive != null &&
       endExclusive != null &&
       !endExclusive.isAfter(startInclusive)) {
-    throw const FormatException('end_time must be later than start_time');
+    throw const FormatException('end must be later than start');
   }
   return (startInclusive, endExclusive);
 }
@@ -808,6 +773,18 @@ String _parseRequiredString(Map<String, dynamic> arguments, String key) {
   return raw.trim();
 }
 
+String? _parseOptionalString(Map<String, dynamic> arguments, String key) {
+  final raw = arguments[key];
+  if (raw == null) {
+    return null;
+  }
+  if (raw is! String) {
+    throw FormatException('$key must be a string');
+  }
+  final value = raw.trim();
+  return value.isEmpty ? null : value;
+}
+
 Map<String, dynamic> _jsonMap(dynamic value) {
   if (value is Map<String, dynamic>) {
     return value;
@@ -828,6 +805,46 @@ String _previewJson(Object? value) {
   } catch (_) {
     return '$value';
   }
+}
+
+String _formatToolDateTime(DateTime value) =>
+    '${value.year.toString().padLeft(4, '0')}-'
+    '${value.month.toString().padLeft(2, '0')}-'
+    '${value.day.toString().padLeft(2, '0')}T'
+    '${value.hour.toString().padLeft(2, '0')}:'
+    '${value.minute.toString().padLeft(2, '0')}'
+    '${value.isUtc ? 'Z' : ''}';
+
+String _searchSnippet(String text, String query) {
+  final trimmedQuery = query.trim();
+  if (trimmedQuery.isEmpty || text.length <= _kSearchMessageSnippetRadius * 2) {
+    return text;
+  }
+
+  final lowerText = text.toLowerCase();
+  final lowerQuery = trimmedQuery.toLowerCase();
+  final index = lowerText.indexOf(lowerQuery);
+  if (index < 0) {
+    return _truncateText(text, _kSearchMessageSnippetRadius * 2);
+  }
+
+  final start = math.max(0, index - _kSearchMessageSnippetRadius);
+  final end = math.min(
+    text.length,
+    index + trimmedQuery.length + _kSearchMessageSnippetRadius,
+  );
+  final prefix = start == 0 ? '' : '...';
+  final suffix = end == text.length ? '' : '...';
+  return '$prefix${text.substring(start, end)}$suffix';
+}
+
+String _truncateText(String text, int? maxLength) {
+  if (maxLength == null || text.length <= maxLength) {
+    return text;
+  }
+  const suffix = '... [truncated]';
+  final end = math.max(0, maxLength - suffix.length);
+  return '${text.substring(0, end)}$suffix';
 }
 
 String _encodeToolResult(Map<String, dynamic> result) =>
