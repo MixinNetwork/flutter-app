@@ -490,7 +490,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
         ).data ??
         false;
 
-    if (aiRequestInFlight) {
+    if (aiModeEnabled && aiRequestInFlight) {
       return ActionButton(
         name: Resources.assetsImagesRecordStopSvg,
         color: context.theme.accent,

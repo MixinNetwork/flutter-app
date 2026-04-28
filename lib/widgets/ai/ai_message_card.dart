@@ -10,6 +10,7 @@ import '../../db/ai_database.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/platform.dart';
+import '../dialog.dart';
 import '../markdown.dart';
 import '../menu.dart';
 import '../message/item/text/selectable.dart';
@@ -20,6 +21,7 @@ import '../message/message_style.dart';
 import '../qr_code.dart';
 
 const _copyAiMessageTitle = 'Copy AI Message';
+const _showAiResponseDetailsTitle = 'AI Response Details';
 
 class AiMessageCard extends StatelessWidget {
   const AiMessageCard({
@@ -99,7 +101,7 @@ class _AiUserMessageCard extends StatelessWidget {
   );
 }
 
-class _AiResponseMessageCard extends StatelessWidget {
+class _AiResponseMessageCard extends StatefulWidget {
   const _AiResponseMessageCard({
     required this.message,
     required this.mergedWithPrev,
@@ -109,24 +111,39 @@ class _AiResponseMessageCard extends StatelessWidget {
   final bool mergedWithPrev;
 
   @override
+  State<_AiResponseMessageCard> createState() => _AiResponseMessageCardState();
+}
+
+class _AiResponseMessageCardState extends State<_AiResponseMessageCard> {
+  bool _hovering = false;
+
+  @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.only(
-      top: mergedWithPrev ? 6 : 18,
+      top: widget.mergedWithPrev ? 6 : 18,
       bottom: 6,
     ),
-    child: _AiMessageMenu(
-      message: message,
-      child: Column(
-        spacing: 6,
-        children: [
-          _AiResponseMessageBody(message: message),
-          const SizedBox(height: 4),
-          _AiResponseFooter(
-            model: message.model,
-            metadata: message.metadata,
-            dateTime: message.createdAt,
-          ),
-        ],
+    child: MouseRegion(
+      onEnter: (_) {
+        if (!_hovering) setState(() => _hovering = true);
+      },
+      onExit: (_) {
+        if (_hovering) setState(() => _hovering = false);
+      },
+      child: _AiMessageMenu(
+        message: widget.message,
+        child: Column(
+          spacing: 6,
+          children: [
+            _AiResponseMessageBody(message: widget.message),
+            const SizedBox(height: 4),
+            _AiResponseFooter(
+              model: widget.message.model,
+              dateTime: widget.message.createdAt,
+              showModel: _hovering,
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -350,6 +367,12 @@ class _AiMessageMenu extends StatelessWidget {
                   ),
               ],
               [
+                if (message.role != 'user')
+                  MenuAction(
+                    image: MenuImage.icon(Icons.info_outline),
+                    title: _showAiResponseDetailsTitle,
+                    callback: () => _showAiResponseDetails(context, message),
+                  ),
                 MenuAction(
                   image: MenuImage.icon(Icons.data_object),
                   title: _copyAiMessageTitle,
@@ -396,16 +419,130 @@ SelectedContent? _findSelectedContent(BuildContext context) {
   return null;
 }
 
+void _showAiResponseDetails(BuildContext context, AiChatMessage message) {
+  final rootMeta = decodeAiMessageMetadata(message.metadata);
+  final providerMeta = rootMeta['provider'];
+  final responseMeta = aiMetadataResponse(message.metadata);
+  final usage = responseMeta['usage'];
+  final elapsedMs = (responseMeta['elapsedMs'] as num?)?.round();
+  final totalTokens = _totalTokens(responseMeta);
+  final inputTokens = _usageValue(responseMeta, 'inputTokens');
+  final outputTokens = _usageValue(responseMeta, 'outputTokens');
+  final promptMessageCount = responseMeta['promptMessageCount'] as num?;
+  final toolCount = responseMeta['toolCount'] as num?;
+  final outputCharacters = responseMeta['outputCharacters'] as num?;
+  final providerType = providerMeta is Map ? providerMeta['type'] : null;
+  final providerModel = providerMeta is Map ? providerMeta['model'] : null;
+  final model = (message.model?.trim().isNotEmpty ?? false)
+      ? message.model!.trim()
+      : providerModel is String
+      ? providerModel
+      : null;
+  final completedAt = _formatIsoDateTime(responseMeta['completedAt']);
+  final createdAt = DateFormat(
+    'yyyy-MM-dd HH:mm:ss',
+  ).format(message.createdAt.toLocal());
+  final details = <MapEntry<String, String>>[
+    MapEntry('Created', createdAt),
+    if (completedAt != null) MapEntry('Completed', completedAt),
+    MapEntry('Status', message.status),
+    if (model != null && model.isNotEmpty) MapEntry('Model', model),
+    if (providerType is String && providerType.isNotEmpty)
+      MapEntry('Provider', providerType),
+    if (elapsedMs != null && elapsedMs > 0)
+      MapEntry('Elapsed', _formatElapsed(elapsedMs)),
+    if (totalTokens != null && totalTokens > 0)
+      MapEntry('Total tokens', _formatFullTokens(totalTokens)),
+    if (inputTokens != null && inputTokens > 0)
+      MapEntry('Input tokens', _formatFullTokens(inputTokens)),
+    if (outputTokens != null && outputTokens > 0)
+      MapEntry('Output tokens', _formatFullTokens(outputTokens)),
+    if (promptMessageCount != null && promptMessageCount > 0)
+      MapEntry('Prompt messages', '${promptMessageCount.round()}'),
+    if (toolCount != null && toolCount > 0)
+      MapEntry('Tools', '${toolCount.round()}'),
+    if (outputCharacters != null && outputCharacters > 0)
+      MapEntry('Output chars', '${outputCharacters.round()}'),
+    if (usage is Map && usage.isEmpty) const MapEntry('Usage', 'Empty'),
+  ];
+  final detailsText = details
+      .map((entry) => '${entry.key}: ${entry.value}')
+      .join('\n');
+
+  showMixinDialog<void>(
+    context: context,
+    constraints: const BoxConstraints(maxWidth: 420),
+    child: Builder(
+      builder: (context) => AlertDialogLayout(
+        minWidth: 360,
+        minHeight: 0,
+        titleMarginBottom: 20,
+        title: const Text(_showAiResponseDetailsTitle),
+        content: DefaultTextStyle.merge(
+          style: TextStyle(
+            color: context.theme.text,
+            fontSize: 13,
+            fontWeight: FontWeight.normal,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: details
+                .map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 112,
+                          child: Text(
+                            entry.key,
+                            style: TextStyle(
+                              color: context.theme.secondaryText,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: SelectableText(
+                            entry.value,
+                            style: TextStyle(color: context.theme.text),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+        ),
+        actions: [
+          MixinButton(
+            backgroundTransparent: true,
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: detailsText));
+            },
+            child: Text(context.l10n.copy),
+          ),
+          MixinButton(
+            onTap: () => Navigator.pop(context),
+            child: Text(context.l10n.close),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _AiResponseFooter extends StatelessWidget {
   const _AiResponseFooter({
     required this.model,
-    required this.metadata,
     required this.dateTime,
+    required this.showModel,
   });
 
   final String? model;
-  final String? metadata;
   final DateTime dateTime;
+  final bool showModel;
 
   @override
   Widget build(BuildContext context) {
@@ -419,26 +556,23 @@ class _AiResponseFooter extends StatelessWidget {
     );
     final dateTimeText = DateFormat.Hm().format(dateTime.toLocal());
     final trimmedModel = model?.trim();
-    final responseMeta = aiMetadataResponse(metadata);
-    final elapsedMs = (responseMeta['elapsedMs'] as num?)?.round();
-    final totalTokens = _totalTokens(responseMeta);
+    final text = [
+      dateTimeText,
+      if (showModel && trimmedModel != null && trimmedModel.isNotEmpty)
+        trimmedModel,
+    ].join(' · ');
 
     return SelectionContainer.disabled(
-      child: SizedBox(
-        width: double.infinity,
-        child: Wrap(
-          spacing: 12,
-          runSpacing: 2,
-          children: [
-            const SizedBox(width: 4),
-            Text(dateTimeText, style: textStyle),
-            if (trimmedModel != null && trimmedModel.isNotEmpty)
-              Text(trimmedModel, style: textStyle),
-            if (elapsedMs != null && elapsedMs > 0)
-              Text(_formatElapsed(elapsedMs), style: textStyle),
-            if (totalTokens != null && totalTokens > 0)
-              Text(_formatTokens(totalTokens), style: textStyle),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: SizedBox(
+          width: double.infinity,
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: textStyle,
+          ),
         ),
       ),
     );
@@ -469,8 +603,15 @@ String _formatElapsed(int elapsedMs) {
   return '${seconds.toStringAsFixed(seconds >= 10 ? 0 : 1)}s';
 }
 
-String _formatTokens(num tokens) =>
-    '${NumberFormat.decimalPattern().format(tokens.round())} tokens';
+String _formatFullTokens(num tokens) =>
+    NumberFormat.decimalPattern().format(tokens.round());
+
+String? _formatIsoDateTime(Object? value) {
+  if (value is! String || value.isEmpty) return null;
+  final dateTime = DateTime.tryParse(value);
+  if (dateTime == null) return null;
+  return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime.toLocal());
+}
 
 String _displayText(AiChatMessage message) {
   final content = message.content.trim();

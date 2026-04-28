@@ -140,19 +140,19 @@ class AiAssistantPage extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        leadingWidth: 104,
-        leading: _AiAssistantLeadingActions(
-          addEnabled: !isNewThreadPage,
-          onOpenThreads: () => context.read<ChatSideCubit>().pushPage(
-            ChatSideCubit.aiAssistantThreadsPage,
-          ),
-          onNewThread: openNewThreadPage,
-        ),
         title: Text(_threadTitle(currentThread, threads)),
         actions: [
-          MixinCloseButton(
-            onTap: () => context.read<ChatSideCubit>().onPopPage(),
+          _AiAssistantActions(
+            addEnabled: !isNewThreadPage,
+            onOpenThreads: () => context.read<ChatSideCubit>().pushPage(
+              ChatSideCubit.aiAssistantThreadsPage,
+            ),
+            onNewThread: openNewThreadPage,
           ),
+          if (!Navigator.of(context).canPop())
+            MixinCloseButton(
+              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+            ),
         ],
       ),
       body: Column(
@@ -215,9 +215,10 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
       appBar: MixinAppBar(
         title: const Text(aiAssistantThreads),
         actions: [
-          MixinCloseButton(
-            onTap: () => context.read<ChatSideCubit>().onPopPage(),
-          ),
+          if (!Navigator.of(context).canPop())
+            MixinCloseButton(
+              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+            ),
         ],
       ),
       body: threads.isEmpty
@@ -261,8 +262,8 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
   }
 }
 
-class _AiAssistantLeadingActions extends StatelessWidget {
-  const _AiAssistantLeadingActions({
+class _AiAssistantActions extends StatelessWidget {
+  const _AiAssistantActions({
     required this.addEnabled,
     required this.onOpenThreads,
     required this.onNewThread,
