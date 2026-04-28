@@ -42,103 +42,140 @@ class AiMessageCard extends StatelessWidget {
     final sameRoleNext = next?.role == message.role;
     final mergedWithPrev = sameDayPrev && sameRolePrev;
     final mergedWithNext = sameDayNext && sameRoleNext;
-    final body = isUser
-        ? ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: _AiMessageBody(message: message),
-          )
-        : _AiMessageBody(message: message);
 
     if (isUser) {
-      return Padding(
-        padding: EdgeInsets.only(
-          left: 72,
-          right: 8,
-          top: mergedWithPrev ? 4 : 14,
-          bottom: 4,
-        ),
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: _AiMessageMenu(
-            message: message,
-            child: _AiBubble(
-              isCurrentUser: true,
-              showNip: !mergedWithNext,
-              color: _bubbleColor(
-                context,
-                isUser: true,
-                status: message.status,
-              ),
-              child: body,
-            ),
-          ),
-        ),
+      return _AiUserMessageCard(
+        message: message,
+        mergedWithPrev: mergedWithPrev,
+        mergedWithNext: mergedWithNext,
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.only(
-        top: mergedWithPrev ? 6 : 18,
-        bottom: 6,
-      ),
-      child: _AiMessageMenu(
-        message: message,
-        child: body,
-      ),
+    return _AiResponseMessageCard(
+      message: message,
+      mergedWithPrev: mergedWithPrev,
     );
   }
 }
 
-class _AiMessageBody extends StatelessWidget {
-  const _AiMessageBody({required this.message});
+class _AiUserMessageCard extends StatelessWidget {
+  const _AiUserMessageCard({
+    required this.message,
+    required this.mergedWithPrev,
+    required this.mergedWithNext,
+  });
+
+  final AiChatMessage message;
+  final bool mergedWithPrev;
+  final bool mergedWithNext;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.only(
+      left: 36,
+      right: 8,
+      top: mergedWithPrev ? 4 : 14,
+      bottom: 4,
+    ),
+    child: Align(
+      alignment: Alignment.centerRight,
+      child: _AiMessageMenu(
+        message: message,
+        child: _AiBubble(
+          isCurrentUser: true,
+          showNip: !mergedWithNext,
+          color: context.theme.ai.userBubble,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: MessageLayout(
+              spacing: 6,
+              content: _AiUserMessageBody(message: message),
+              dateAndStatus: MessageMetaRow(dateTime: message.createdAt),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _AiResponseMessageCard extends StatelessWidget {
+  const _AiResponseMessageCard({
+    required this.message,
+    required this.mergedWithPrev,
+  });
+
+  final AiChatMessage message;
+  final bool mergedWithPrev;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.only(
+      top: mergedWithPrev ? 6 : 18,
+      bottom: 6,
+    ),
+    child: _AiMessageMenu(
+      message: message,
+      child: Column(
+        spacing: 6,
+        children: [
+          _AiResponseMessageBody(message: message),
+          const SizedBox(height: 4),
+          _AiResponseFooter(
+            model: message.model,
+            dateTime: message.createdAt,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _AiUserMessageBody extends StatelessWidget {
+  const _AiUserMessageBody({required this.message});
+
+  final AiChatMessage message;
+
+  @override
+  Widget build(BuildContext context) => _AiSelectableText(
+    text: _displayText(message),
+    style: _aiMessageTextStyle(context, message),
+  );
+}
+
+class _AiResponseMessageBody extends StatelessWidget {
+  const _AiResponseMessageBody({required this.message});
 
   final AiChatMessage message;
 
   @override
   Widget build(BuildContext context) {
-    final isUser = message.role == 'user';
-    final text = _displayText(message);
     final isPendingAssistant =
-        !isUser &&
-        message.status == 'pending' &&
-        message.content.trim().isEmpty;
-
-    Widget body;
-    final textStyle = TextStyle(
-      color: message.status == 'error'
-          ? context.theme.ai.error
-          : context.theme.text,
-      fontSize: context.messageStyle.primaryFontSize,
-      height: 1.45,
-    );
+        message.status == 'pending' && message.content.trim().isEmpty;
+    final textStyle = _aiMessageTextStyle(context, message);
 
     if (isPendingAssistant) {
-      body = _AiPendingAssistantActivity(message: message, style: textStyle);
-    } else if (isUser || message.status == 'error') {
-      body = _AiSelectableText(text: text, style: textStyle);
-    } else {
-      final cacheKey = buildMarkdownCacheKey(
-        namespace: 'ai',
-        id: message.id,
-      );
-      body = DefaultTextStyle.merge(
+      return _AiPendingAssistantActivity(message: message, style: textStyle);
+    }
+
+    if (message.status == 'error') {
+      return _AiSelectableText(
+        text: _displayText(message),
         style: textStyle,
-        child: MarkdownColumn(
-          data: text,
-          selectable: true,
-          cacheKey: cacheKey,
-          streaming: message.status == 'pending',
-        ),
       );
     }
 
-    return MessageLayout(
-      spacing: 6,
-      content: body,
-      dateAndStatus: _AiFooter(
-        isUser: isUser,
-        model: message.model,
-        dateTime: message.createdAt,
+    final cacheKey = buildMarkdownCacheKey(
+      namespace: 'ai',
+      id: message.id,
+    );
+    return DefaultTextStyle.merge(
+      style: textStyle,
+      child: MarkdownColumn(
+        data: _displayText(message),
+        selectable: true,
+        cacheKey: cacheKey,
+        streaming: message.status == 'pending',
       ),
     );
   }
@@ -224,6 +261,14 @@ class _AiSelectableTextState extends State<_AiSelectableText> {
   }
 }
 
+TextStyle _aiMessageTextStyle(BuildContext context, AiChatMessage message) =>
+    TextStyle(
+      color: message.status == 'error'
+          ? context.theme.ai.error
+          : context.theme.text,
+      fontSize: context.messageStyle.primaryFontSize,
+    );
+
 class _AiBubble extends StatelessWidget {
   const _AiBubble({
     required this.child,
@@ -268,7 +313,7 @@ class _AiMessageMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = _menuCopyText(message);
+    final content = _displayText(message);
 
     return Builder(
       builder: (childContext) => CustomContextMenuWidget(
@@ -350,23 +395,17 @@ SelectedContent? _findSelectedContent(BuildContext context) {
   return null;
 }
 
-class _AiFooter extends StatelessWidget {
-  const _AiFooter({
-    required this.isUser,
+class _AiResponseFooter extends StatelessWidget {
+  const _AiResponseFooter({
     required this.model,
     required this.dateTime,
   });
 
-  final bool isUser;
   final String? model;
   final DateTime dateTime;
 
   @override
   Widget build(BuildContext context) {
-    if (isUser) {
-      return MessageMetaRow(dateTime: dateTime);
-    }
-
     final metaColor = context.dynamicColor(
       const Color.fromRGBO(131, 145, 158, 1),
       darkColor: const Color.fromRGBO(128, 131, 134, 1),
@@ -376,16 +415,17 @@ class _AiFooter extends StatelessWidget {
       color: metaColor,
     );
     final dateTimeText = DateFormat.Hm().format(dateTime.toLocal());
-    final trimmedModel = isUser ? null : model?.trim();
+    final trimmedModel = model?.trim();
 
     return SelectionContainer.disabled(
       child: SizedBox(
         width: double.infinity,
         child: Row(
           children: [
+            const SizedBox(width: 4),
             Text(dateTimeText, style: textStyle),
             if (trimmedModel != null && trimmedModel.isNotEmpty) ...[
-              const Spacer(),
+              const SizedBox(width: 12),
               Text(trimmedModel, style: textStyle),
             ],
           ],
@@ -394,24 +434,6 @@ class _AiFooter extends StatelessWidget {
     );
   }
 }
-
-Color _bubbleColor(
-  BuildContext context, {
-  required bool isUser,
-  required String status,
-}) {
-  if (status == 'error') {
-    return context.theme.ai.errorBubble;
-  }
-
-  if (isUser) {
-    return context.theme.ai.userBubble;
-  }
-
-  return context.theme.ai.assistantBubble;
-}
-
-String _menuCopyText(AiChatMessage message) => _displayText(message);
 
 String _displayText(AiChatMessage message) {
   final content = message.content.trim();
