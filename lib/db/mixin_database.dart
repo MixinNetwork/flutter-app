@@ -101,7 +101,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase(super.e);
 
   @override
-  int get schemaVersion => 30;
+  int get schemaVersion => 31;
 
   final eventBus = DataBaseEventBus.instance;
 
@@ -295,6 +295,9 @@ class MixinDatabase extends _$MixinDatabase {
           aiChatMessages,
           aiChatMessages.anchorCreatedAt,
         );
+      }
+      if (from <= 30) {
+        await _addColumnIfNotExists(m, aiChatMessages, aiChatMessages.metadata);
       }
     },
     beforeOpen: (details) async {

@@ -37,85 +37,37 @@ class AiSettingsPage extends HookConsumerWidget {
       appBar: const MixinAppBar(title: Text('AI Settings')),
       body: Align(
         alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: CellItem(
-                    title: const Text('Prompt Templates'),
-                    leading: Icon(
-                      Icons.tune_rounded,
-                      color: context.theme.icon,
-                    ),
-                    description: Text(
-                      customizedPromptCount == 0
-                          ? 'Default'
-                          : '$customizedPromptCount custom',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: null,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const AiPromptSettingsPage(),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                  child: Text(
-                    'Customize chat prompts, assist prompts, and built-in variables like {{conversationId}}, {{currentIsoDateTime}}, and {{language}}.',
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: CellItem(
-                    title: const Text('Add Provider'),
-                    leading: Icon(Icons.add, color: context.theme.icon),
-                    trailing: null,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const AiProviderEditPage(),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                  child: Text(
-                    providers.isEmpty
-                        ? 'Add an AI provider to enable AI mode in chat.'
-                        : 'The selected provider is used by default in AI mode.',
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                if (providers.isNotEmpty) ...[
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   CellGroup(
                     padding: const EdgeInsets.only(right: 10, left: 10),
                     cellBackgroundColor:
                         context.theme.settingCellBackgroundColor,
                     child: CellItem(
-                      title: const Text('Default Provider'),
+                      title: const Text('Prompt Templates'),
+                      leading: Icon(
+                        Icons.tune_rounded,
+                        color: context.theme.icon,
+                      ),
                       description: Text(
-                        _providerSummary(selectedProvider),
+                        customizedPromptCount == 0
+                            ? 'Default'
+                            : '$customizedPromptCount custom',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: null,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AiPromptSettingsPage(),
+                        ),
+                      ),
                     ),
                   ),
                   Padding(
@@ -125,7 +77,7 @@ class AiSettingsPage extends HookConsumerWidget {
                       top: 10,
                     ),
                     child: Text(
-                      'Each API endpoint can contain multiple models. One default model is used for new AI requests.',
+                      'Customize chat prompts, assist prompts, and built-in variables like {{conversationId}}, {{currentIsoDateTime}}, and {{language}}.',
                       style: TextStyle(
                         color: context.theme.secondaryText,
                         fontSize: 14,
@@ -136,26 +88,87 @@ class AiSettingsPage extends HookConsumerWidget {
                     padding: const EdgeInsets.only(right: 10, left: 10),
                     cellBackgroundColor:
                         context.theme.settingCellBackgroundColor,
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < providers.length; i++) ...[
-                          _ProviderCell(
-                            provider: providers[i],
-                            selected: selectedId == providers[i].id,
-                          ),
-                          if (i != providers.length - 1)
-                            Divider(
-                              height: 0.5,
-                              indent: 16,
-                              endIndent: 16,
-                              color: context.theme.divider,
-                            ),
-                        ],
-                      ],
+                    child: CellItem(
+                      title: const Text('Add Provider'),
+                      leading: Icon(Icons.add, color: context.theme.icon),
+                      trailing: null,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AiProviderEditPage(),
+                        ),
+                      ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      bottom: 14,
+                      top: 10,
+                    ),
+                    child: Text(
+                      providers.isEmpty
+                          ? 'Add an AI provider to enable AI mode in chat.'
+                          : 'The selected provider is used by default in AI mode.',
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  if (providers.isNotEmpty) ...[
+                    CellGroup(
+                      padding: const EdgeInsets.only(right: 10, left: 10),
+                      cellBackgroundColor:
+                          context.theme.settingCellBackgroundColor,
+                      child: CellItem(
+                        title: const Text('Default Provider'),
+                        description: Text(
+                          _providerSummary(selectedProvider),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: null,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        bottom: 14,
+                        top: 10,
+                      ),
+                      child: Text(
+                        'Each API endpoint can contain multiple models. One default model is used for new AI requests.',
+                        style: TextStyle(
+                          color: context.theme.secondaryText,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    CellGroup(
+                      padding: const EdgeInsets.only(right: 10, left: 10),
+                      cellBackgroundColor:
+                          context.theme.settingCellBackgroundColor,
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < providers.length; i++) ...[
+                            _ProviderCell(
+                              provider: providers[i],
+                              selected: selectedId == providers[i].id,
+                            ),
+                            if (i != providers.length - 1)
+                              Divider(
+                                height: 0.5,
+                                indent: 16,
+                                endIndent: 16,
+                                color: context.theme.divider,
+                              ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

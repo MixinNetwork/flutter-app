@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../ai/model/ai_chat_metadata.dart';
 import '../mixin_database.dart';
 
 part 'ai_chat_message_dao.g.dart';
@@ -105,6 +106,30 @@ class AiChatMessageDao extends DatabaseAccessor<MixinDatabase>
       updatedAt: Value(updatedAt),
     ),
   );
+
+  Future<void> appendMessageMetadataToolEvent(
+    String id,
+    Map<String, dynamic> event, {
+    required DateTime updatedAt,
+  }) async {
+    await transaction(() async {
+      final message = await (select(
+        db.aiChatMessages,
+      )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+      if (message == null) {
+        return;
+      }
+      final metadata = appendAiToolEventToMetadata(message.metadata, event);
+      await (update(
+        db.aiChatMessages,
+      )..where((tbl) => tbl.id.equals(id))).write(
+        AiChatMessagesCompanion(
+          metadata: Value(metadata),
+          updatedAt: Value(updatedAt),
+        ),
+      );
+    });
+  }
 
   Future<void> deleteConversationMessages(String conversationId) => (delete(
     db.aiChatMessages,

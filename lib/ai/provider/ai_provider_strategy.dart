@@ -33,10 +33,12 @@ class AiCompletionResponse {
   const AiCompletionResponse({
     this.text = '',
     this.toolCalls = const [],
+    this.contentEmitted = false,
   });
 
   final String text;
   final List<AiToolCall> toolCalls;
+  final bool contentEmitted;
 
   bool get hasToolCalls => toolCalls.isNotEmpty;
 }

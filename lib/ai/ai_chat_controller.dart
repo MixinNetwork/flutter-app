@@ -11,6 +11,7 @@ import '../db/database.dart';
 import '../db/mixin_database.dart';
 import 'ai_chat_prompt_builder.dart';
 import 'ai_provider_requester.dart';
+import 'model/ai_chat_metadata.dart';
 import 'model/ai_prompt_message.dart';
 import 'model/ai_provider_config.dart';
 import 'model/ai_tool.dart';
@@ -82,7 +83,6 @@ class AiChatController {
         cancelToken: cancelToken,
         onContent: (_) async {},
         conversationId: conversationId,
-        streamFinalResponse: false,
       );
       d(
         'AI assist done: provider=${config.type.name} model=${config.model} '
@@ -129,6 +129,7 @@ class AiChatController {
     );
 
     final now = DateTime.now();
+    final assistantCreatedAt = now.add(const Duration(milliseconds: 1));
     final userMessageId = _uuid.v4();
     final assistantMessageId = _uuid.v4();
     final cancelToken = CancelToken();
@@ -163,8 +164,9 @@ class AiChatController {
         content: '',
         status: _kAiStatusPending,
         model: Value(config.model),
-        createdAt: now,
-        updatedAt: now,
+        metadata: Value(createAiMessageMetadata(config)),
+        createdAt: assistantCreatedAt,
+        updatedAt: assistantCreatedAt,
       ),
     );
 
@@ -187,7 +189,7 @@ class AiChatController {
         cancelToken: cancelToken,
         onContent: updater.append,
         conversationId: conversationId,
-        streamFinalResponse: true,
+        assistantMessageId: assistantMessageId,
       );
       await updater.flush(contentOverride: result, force: true);
       await database.aiChatMessageDao.updateMessageStatus(
@@ -239,33 +241,38 @@ class AiChatController {
     List<AiPromptMessage> messages, {
     required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
-    required bool streamFinalResponse,
     String? conversationId,
+    String? assistantMessageId,
   }) => _providerRequester.requestText(
     config,
     messages,
     proxy: database.settingProperties.activatedProxy,
     cancelToken: cancelToken,
     onContent: onContent,
-    streamFinalResponse: streamFinalResponse,
     conversationId: conversationId,
-    onToolCall: _toolExecutorFor(conversationId),
+    onToolCall: _toolExecutorFor(
+      conversationId,
+      assistantMessageId: assistantMessageId,
+    ),
   );
 
   Future<AiToolExecutionResult> Function(AiToolCall toolCall)? _toolExecutorFor(
-    String? conversationId,
-  ) {
+    String? conversationId, {
+    String? assistantMessageId,
+  }) {
     if (conversationId == null) {
       return null;
     }
     return (toolCall) => _executeConversationTool(
       conversationId: conversationId,
+      assistantMessageId: assistantMessageId,
       toolCall: toolCall,
     );
   }
 
   Future<AiToolExecutionResult> _executeConversationTool({
     required String conversationId,
+    required String? assistantMessageId,
     required AiToolCall toolCall,
   }) async {
     final stopwatch = Stopwatch()..start();
@@ -273,6 +280,10 @@ class AiChatController {
       'AI tool execute start: conversationId=$conversationId '
       'tool=${toolCall.name} id=${toolCall.id} '
       'arguments=${_previewJson(toolCall.arguments)}',
+    );
+    await _appendAssistantToolEvent(
+      assistantMessageId,
+      createAiToolCallEvent(toolCall),
     );
     try {
       final result = await _conversationTools.execute(
@@ -285,14 +296,50 @@ class AiChatController {
         'elapsedMs=${stopwatch.elapsedMilliseconds} '
         'result=${_previewJson(result.payload)}',
       );
+      await _appendAssistantToolEvent(
+        assistantMessageId,
+        createAiToolResultEvent(
+          toolCall: toolCall,
+          status: 'done',
+          elapsedMs: stopwatch.elapsedMilliseconds,
+          resultPreview: _previewJson(result.payload),
+        ),
+      );
       return result;
     } catch (error, stacktrace) {
       e('AI tool execution error: $error, $stacktrace');
+      await _appendAssistantToolEvent(
+        assistantMessageId,
+        createAiToolResultEvent(
+          toolCall: toolCall,
+          status: 'error',
+          elapsedMs: stopwatch.elapsedMilliseconds,
+          errorText: error.toString(),
+        ),
+      );
       return AiToolExecutionResult(
         toolCallId: toolCall.id,
         toolName: toolCall.name,
         payload: {'error': '$error'},
       );
+    }
+  }
+
+  Future<void> _appendAssistantToolEvent(
+    String? assistantMessageId,
+    Map<String, dynamic> event,
+  ) async {
+    if (assistantMessageId == null) {
+      return;
+    }
+    try {
+      await database.aiChatMessageDao.appendMessageMetadataToolEvent(
+        assistantMessageId,
+        event,
+        updatedAt: DateTime.now(),
+      );
+    } catch (error, stacktrace) {
+      e('AI tool metadata update error: $error, $stacktrace');
     }
   }
 }

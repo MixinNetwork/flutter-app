@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../ai/model/ai_chat_metadata.dart';
 import '../../db/mixin_database.dart' hide Offset;
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
@@ -97,6 +98,10 @@ class _AiMessageBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = message.role == 'user';
     final text = _displayText(message);
+    final isPendingAssistant =
+        !isUser &&
+        message.status == 'pending' &&
+        message.content.trim().isEmpty;
 
     Widget body;
     final textStyle = TextStyle(
@@ -107,7 +112,9 @@ class _AiMessageBody extends StatelessWidget {
       height: 1.45,
     );
 
-    if (isUser || message.status == 'error') {
+    if (isPendingAssistant) {
+      body = _AiPendingAssistantActivity(message: message, style: textStyle);
+    } else if (isUser || message.status == 'error') {
       body = _AiSelectableText(text: text, style: textStyle);
     } else {
       final cacheKey = buildMarkdownCacheKey(
@@ -132,6 +139,47 @@ class _AiMessageBody extends StatelessWidget {
         isUser: isUser,
         model: message.model,
         dateTime: message.createdAt,
+      ),
+    );
+  }
+}
+
+class _AiPendingAssistantActivity extends StatelessWidget {
+  const _AiPendingAssistantActivity({
+    required this.message,
+    required this.style,
+  });
+
+  final AiChatMessage message;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = _pendingAssistantText(message);
+    final color = context.dynamicColor(
+      const Color.fromRGBO(131, 145, 158, 1),
+      darkColor: const Color.fromRGBO(128, 131, 134, 1),
+    );
+
+    return SelectionContainer.disabled(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox.square(
+            dimension: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              text,
+              style: style.copyWith(color: color),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -371,6 +419,50 @@ String _displayText(AiChatMessage message) {
   if (message.status == 'error') {
     return message.errorText ?? 'Request failed';
   }
-  if (message.status == 'pending') return 'Thinking...';
+  if (message.status == 'pending') return _pendingAssistantText(message);
   return message.errorText ?? 'No response';
 }
+
+String _pendingAssistantText(AiChatMessage message) {
+  final activeToolName = _activeToolName(message.metadata);
+  if (activeToolName != null) {
+    return _toolActivityText(activeToolName);
+  }
+  return 'Thinking...';
+}
+
+String? _activeToolName(String? metadata) {
+  final events = aiMetadataToolEvents(metadata);
+  if (events.isEmpty) {
+    return null;
+  }
+
+  final finishedToolCallIds = events
+      .where((event) => event['type'] == aiToolEventTypeResult)
+      .map((event) => event['id'])
+      .whereType<String>()
+      .toSet();
+
+  for (final event in events.reversed) {
+    if (event['type'] != aiToolEventTypeCall) {
+      continue;
+    }
+    final id = event['id'];
+    if (id is String && finishedToolCallIds.contains(id)) {
+      continue;
+    }
+    final name = event['name'];
+    if (name is String && name.isNotEmpty) {
+      return name;
+    }
+  }
+  return null;
+}
+
+String _toolActivityText(String toolName) => switch (toolName) {
+  'get_conversation_stats' => 'Reading conversation stats...',
+  'list_conversation_chunks' => 'Planning conversation read...',
+  'read_conversation_chunk' => 'Reading conversation...',
+  'search_conversation_messages' => 'Searching conversation...',
+  _ => 'Using tool...',
+};

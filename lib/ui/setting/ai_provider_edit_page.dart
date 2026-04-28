@@ -166,242 +166,253 @@ class AiProviderEditPage extends HookConsumerWidget {
       ),
       body: Align(
         alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _SectionLabel(
-                  title: 'Provider',
-                ),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: Column(
-                    children: [
-                      _FormFieldCell(
-                        label: 'Display Name',
-                        backgroundColor: inputBackgroundColor,
-                        borderColor: inputBorderColor,
-                        child: TextField(
-                          controller: nameController,
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            hintText:
-                                'OpenAI / Anthropic / Gemini / Self-hosted',
-                            hintStyle: TextStyle(color: theme.secondaryText),
-                          ),
-                        ),
-                      ),
-                      _CellDivider(color: theme.divider),
-                      _FormFieldCell(
-                        label: 'Provider Type',
-                        backgroundColor: inputBackgroundColor,
-                        borderColor: inputBorderColor,
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<AiProviderType>(
-                            value: providerType.value,
-                            isExpanded: true,
-                            dropdownColor: theme.popUp,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _SectionLabel(
+                    title: 'Provider',
+                  ),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor:
+                        context.theme.settingCellBackgroundColor,
+                    child: Column(
+                      children: [
+                        _FormFieldCell(
+                          label: 'Display Name',
+                          backgroundColor: inputBackgroundColor,
+                          borderColor: inputBorderColor,
+                          child: TextField(
+                            controller: nameController,
                             style: TextStyle(
                               color: theme.text,
                               fontSize: 16,
                             ),
-                            iconEnabledColor: inputIconColor,
-                            onChanged: (value) {
-                              if (value == null ||
-                                  value == providerType.value) {
-                                return;
-                              }
-                              final previousType = providerType.value;
-                              providerType.value = value;
-                              if (initial == null) {
-                                final suggestion = _defaultBaseUrlFor(value);
-                                final current = baseUrlController.text.trim();
-                                final replaceCurrent =
-                                    current.isEmpty ||
-                                    current == _defaultBaseUrlFor(previousType);
-                                if (replaceCurrent && suggestion.isNotEmpty) {
-                                  baseUrlController.text = suggestion;
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: InputBorder.none,
+                              hintText:
+                                  'OpenAI / Anthropic / Gemini / Self-hosted',
+                              hintStyle: TextStyle(color: theme.secondaryText),
+                            ),
+                          ),
+                        ),
+                        _CellDivider(color: theme.divider),
+                        _FormFieldCell(
+                          label: 'Provider Type',
+                          backgroundColor: inputBackgroundColor,
+                          borderColor: inputBorderColor,
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<AiProviderType>(
+                              value: providerType.value,
+                              isExpanded: true,
+                              dropdownColor: theme.popUp,
+                              style: TextStyle(
+                                color: theme.text,
+                                fontSize: 16,
+                              ),
+                              iconEnabledColor: inputIconColor,
+                              onChanged: (value) {
+                                if (value == null ||
+                                    value == providerType.value) {
+                                  return;
                                 }
-                              }
-                            },
-                            items: AiProviderType.values
-                                .map(
-                                  (type) => DropdownMenuItem<AiProviderType>(
-                                    value: type,
-                                    child: Text(
-                                      switch (type) {
-                                        AiProviderType.anthropic => 'Anthropic',
-                                        AiProviderType.gemini => 'Gemini',
-                                        AiProviderType.openaiCompatible =>
-                                          'OpenAI Compatible',
-                                      },
+                                final previousType = providerType.value;
+                                providerType.value = value;
+                                if (initial == null) {
+                                  final suggestion = _defaultBaseUrlFor(value);
+                                  final current = baseUrlController.text.trim();
+                                  final replaceCurrent =
+                                      current.isEmpty ||
+                                      current ==
+                                          _defaultBaseUrlFor(previousType);
+                                  if (replaceCurrent && suggestion.isNotEmpty) {
+                                    baseUrlController.text = suggestion;
+                                  }
+                                }
+                              },
+                              items: AiProviderType.values
+                                  .map(
+                                    (type) => DropdownMenuItem<AiProviderType>(
+                                      value: type,
+                                      child: Text(
+                                        switch (type) {
+                                          AiProviderType.anthropic =>
+                                            'Anthropic',
+                                          AiProviderType.gemini => 'Gemini',
+                                          AiProviderType.openaiCompatible =>
+                                            'OpenAI Compatible',
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const _SectionLabel(
+                    title: 'Endpoint',
+                  ),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor: theme.settingCellBackgroundColor,
+                    child: _FormFieldCell(
+                      label: 'Base URL',
+                      backgroundColor: inputBackgroundColor,
+                      borderColor: inputBorderColor,
+                      child: TextField(
+                        controller: baseUrlController,
+                        keyboardType: TextInputType.url,
+                        style: TextStyle(
+                          color: theme.text,
+                          fontSize: 16,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          hintText: _baseUrlHintFor(providerType.value),
+                          hintStyle: TextStyle(color: theme.secondaryText),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      bottom: 14,
+                      top: 10,
+                    ),
+                    child: Text(
+                      _baseUrlHelperTextFor(providerType.value),
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const _SectionLabel(
+                    title: 'Authorization',
+                  ),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor:
+                        context.theme.settingCellBackgroundColor,
+                    child: Column(
+                      children: [
+                        _FormFieldCell(
+                          label: 'API Key',
+                          backgroundColor: inputBackgroundColor,
+                          borderColor: inputBorderColor,
+                          trailing: IconButton(
+                            onPressed: () =>
+                                obscureApiKey.value = !obscureApiKey.value,
+                            icon: Icon(
+                              obscureApiKey.value
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              size: 20,
+                              color: inputIconColor,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: apiKeyController,
+                            obscureText: obscureApiKey.value,
+                            style: TextStyle(
+                              color: theme.text,
+                              fontSize: 16,
+                            ),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              border: InputBorder.none,
+                              hintText: _apiKeyHintFor(providerType.value),
+                              hintStyle: TextStyle(color: theme.secondaryText),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const _SectionLabel(
+                    title: 'Models',
+                  ),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor: theme.settingCellBackgroundColor,
+                    child: Column(
+                      children: [
+                        CellItem(
+                          title: const Text('Default Model'),
+                          description: Text(
+                            defaultModel.value.isEmpty
+                                ? 'No default model yet'
+                                : defaultModel.value,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: null,
+                        ),
+                        _CellDivider(color: context.theme.divider),
+                        CellItem(
+                          title: const Text('Add Model'),
+                          leading: Icon(Icons.add, color: context.theme.icon),
+                          trailing: null,
+                          onTap: showModelDialog,
+                        ),
+                        if (models.value.isEmpty) ...[
+                          _CellDivider(color: context.theme.divider),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 20,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.view_list_outlined,
+                                  size: 18,
+                                  color: theme.secondaryText,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'No models yet. Add at least one model before saving.',
+                                    style: TextStyle(
+                                      color: theme.secondaryText,
+                                      fontSize: 14,
                                     ),
                                   ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const _SectionLabel(
-                  title: 'Endpoint',
-                ),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: theme.settingCellBackgroundColor,
-                  child: _FormFieldCell(
-                    label: 'Base URL',
-                    backgroundColor: inputBackgroundColor,
-                    borderColor: inputBorderColor,
-                    child: TextField(
-                      controller: baseUrlController,
-                      keyboardType: TextInputType.url,
-                      style: TextStyle(
-                        color: theme.text,
-                        fontSize: 16,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: InputBorder.none,
-                        hintText: _baseUrlHintFor(providerType.value),
-                        hintStyle: TextStyle(color: theme.secondaryText),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                  child: Text(
-                    _baseUrlHelperTextFor(providerType.value),
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const _SectionLabel(
-                  title: 'Authorization',
-                ),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: Column(
-                    children: [
-                      _FormFieldCell(
-                        label: 'API Key',
-                        backgroundColor: inputBackgroundColor,
-                        borderColor: inputBorderColor,
-                        trailing: IconButton(
-                          onPressed: () =>
-                              obscureApiKey.value = !obscureApiKey.value,
-                          icon: Icon(
-                            obscureApiKey.value
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            size: 20,
-                            color: inputIconColor,
-                          ),
-                        ),
-                        child: TextField(
-                          controller: apiKeyController,
-                          obscureText: obscureApiKey.value,
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            hintText: _apiKeyHintFor(providerType.value),
-                            hintStyle: TextStyle(color: theme.secondaryText),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const _SectionLabel(
-                  title: 'Models',
-                ),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: theme.settingCellBackgroundColor,
-                  child: Column(
-                    children: [
-                      CellItem(
-                        title: const Text('Default Model'),
-                        description: Text(
-                          defaultModel.value.isEmpty
-                              ? 'No default model yet'
-                              : defaultModel.value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: null,
-                      ),
-                      _CellDivider(color: context.theme.divider),
-                      CellItem(
-                        title: const Text('Add Model'),
-                        leading: Icon(Icons.add, color: context.theme.icon),
-                        trailing: null,
-                        onTap: showModelDialog,
-                      ),
-                      if (models.value.isEmpty) ...[
-                        _CellDivider(color: context.theme.divider),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 20,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.view_list_outlined,
-                                size: 18,
-                                color: theme.secondaryText,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'No models yet. Add at least one model before saving.',
-                                  style: TextStyle(
-                                    color: theme.secondaryText,
-                                    fontSize: 14,
-                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ] else ...[
-                        for (var i = 0; i < models.value.length; i++) ...[
-                          _CellDivider(color: context.theme.divider),
-                          _ModelItem(
-                            model: models.value[i],
-                            selected: models.value[i] == defaultModel.value,
-                            onTap: () => defaultModel.value = models.value[i],
-                            onEdit: () => showModelDialog(
-                              initialValue: models.value[i],
-                              index: i,
+                              ],
                             ),
-                            onDelete: () => removeModelAt(i),
                           ),
+                        ] else ...[
+                          for (var i = 0; i < models.value.length; i++) ...[
+                            _CellDivider(color: context.theme.divider),
+                            _ModelItem(
+                              model: models.value[i],
+                              selected: models.value[i] == defaultModel.value,
+                              onTap: () => defaultModel.value = models.value[i],
+                              onEdit: () => showModelDialog(
+                                initialValue: models.value[i],
+                                index: i,
+                              ),
+                              onDelete: () => removeModelAt(i),
+                            ),
+                          ],
                         ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

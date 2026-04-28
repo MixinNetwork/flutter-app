@@ -128,6 +128,105 @@ class OpenAiCompatibleStrategy implements AiProviderStrategy {
     return text;
   }
 
+  Future<AiCompletionResponse> streamCompleteResponse({
+    required Dio dio,
+    required AiProviderConfig config,
+    required List<AiPromptMessage> messages,
+    required List<AiToolDefinition> tools,
+    required CancelToken cancelToken,
+    required Future<void> Function(String chunk) onContent,
+  }) async {
+    final response = await dio.post<ResponseBody>(
+      '/chat/completions',
+      data: {
+        'model': config.model,
+        'stream': true,
+        'messages': messages.map(_openAiMessagePayload).toList(growable: false),
+        if (tools.isNotEmpty)
+          'tools': tools
+              .map(
+                (tool) => {
+                  'type': 'function',
+                  'function': {
+                    'name': tool.name,
+                    'description': tool.description,
+                    'parameters': tool.inputSchema,
+                  },
+                },
+              )
+              .toList(growable: false),
+        if (tools.isNotEmpty) 'tool_choice': 'auto',
+      },
+      options: Options(responseType: ResponseType.stream),
+      cancelToken: cancelToken,
+    );
+
+    final body = response.data;
+    if (body == null) {
+      throw Exception('Empty AI response');
+    }
+
+    final textBuffer = StringBuffer();
+    var contentEmitted = false;
+    final toolCallBuilders = <int, _OpenAiToolCallBuilder>{};
+    await for (final data in AiProviderStrategySupport.decodeSse(body.stream)) {
+      if (data == '[DONE]') {
+        continue;
+      }
+
+      final json = jsonDecode(data);
+      if (json is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final choices = json['choices'] as List<dynamic>?;
+      if (choices == null || choices.isEmpty) {
+        continue;
+      }
+
+      final first = choices.first;
+      if (first is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final delta = first['delta'];
+      if (delta is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final toolCalls = delta['tool_calls'];
+      if (toolCalls is List) {
+        for (final item in toolCalls) {
+          if (item is Map<String, dynamic>) {
+            _appendOpenAiToolCallDelta(toolCallBuilders, item);
+          }
+        }
+      }
+
+      final content = delta['content'];
+      if (content is String && content.isNotEmpty) {
+        textBuffer.write(content);
+        if (toolCallBuilders.isEmpty) {
+          contentEmitted = true;
+          await onContent(content);
+        }
+      }
+    }
+
+    final text = textBuffer.toString();
+    final toolCalls = toolCallBuilders.values
+        .map((builder) => builder.build())
+        .toList(growable: false);
+    if (text.trim().isEmpty && toolCalls.isEmpty) {
+      throw Exception('Empty AI response');
+    }
+    return AiCompletionResponse(
+      text: text,
+      toolCalls: toolCalls,
+      contentEmitted: contentEmitted,
+    );
+  }
+
   Map<String, dynamic> _openAiMessagePayload(AiPromptMessage message) => {
     'role': message.role,
     'content': message.content,
@@ -157,6 +256,53 @@ class OpenAiCompatibleStrategy implements AiProviderStrategy {
       id: value['id'] as String? ?? '${name}_${value.hashCode}',
       name: name,
       arguments: AiProviderStrategySupport.toolArguments(function['arguments']),
+    );
+  }
+
+  void _appendOpenAiToolCallDelta(
+    Map<int, _OpenAiToolCallBuilder> builders,
+    Map<String, dynamic> value,
+  ) {
+    final index = value['index'];
+    final toolCallIndex = index is int ? index : builders.length;
+    final builder = builders.putIfAbsent(
+      toolCallIndex,
+      _OpenAiToolCallBuilder.new,
+    );
+
+    final id = value['id'];
+    if (id is String && id.isNotEmpty) {
+      builder.id = id;
+    }
+
+    final function = value['function'];
+    if (function is Map<String, dynamic>) {
+      final name = function['name'];
+      if (name is String && name.isNotEmpty) {
+        builder.name = name;
+      }
+      final arguments = function['arguments'];
+      if (arguments is String && arguments.isNotEmpty) {
+        builder.arguments.write(arguments);
+      }
+    }
+  }
+}
+
+final class _OpenAiToolCallBuilder {
+  String? id;
+  String? name;
+  final StringBuffer arguments = StringBuffer();
+
+  AiToolCall build() {
+    final toolName = name;
+    if (toolName == null || toolName.isEmpty) {
+      throw Exception('Invalid AI tool call name');
+    }
+    return AiToolCall(
+      id: id ?? '${toolName}_$hashCode',
+      name: toolName,
+      arguments: AiProviderStrategySupport.toolArguments(arguments.toString()),
     );
   }
 }

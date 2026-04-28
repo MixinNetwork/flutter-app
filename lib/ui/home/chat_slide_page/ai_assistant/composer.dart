@@ -1,10 +1,15 @@
+import 'dart:ui' as ui show BoxHeightStyle;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../ai/model/ai_provider_config.dart';
 import '../../../../constants/constants.dart';
+import '../../../../constants/resources.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/action_button.dart';
+import '../../../../widgets/actions/actions.dart';
+import '../../../../widgets/high_light_text.dart';
 import '../../../../widgets/menu.dart';
 import 'constants.dart';
 
@@ -36,94 +41,172 @@ class AiAssistantComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttonColor = !enabled
-        ? context.theme.secondaryText
-        : requestInFlight
-        ? context.theme.red
-        : context.theme.accent;
+    final fieldColor = context.dynamicColor(
+      const Color.fromRGBO(245, 247, 250, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+    );
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: BoxDecoration(
-        color: context.theme.primary,
-        border: Border(top: BorderSide(color: context.theme.divider)),
-      ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(14)),
-          color: context.dynamicColor(
-            const Color.fromRGBO(245, 247, 250, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      color: context.theme.primary,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (provider != null) ...[
+            _AiAssistantModeBar(
+              provider: provider!,
+              enabledAiProviders: enabledAiProviders,
+              onProviderSelected: onProviderSelected,
+              onModelSelected: onModelSelected,
+            ),
+            const SizedBox(height: 8),
+          ],
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (provider != null) ...[
-                _AiAssistantModeBar(
-                  provider: provider!,
-                  enabledAiProviders: enabledAiProviders,
-                  onProviderSelected: onProviderSelected,
-                  onModelSelected: onModelSelected,
-                ),
-                const SizedBox(height: 2),
-              ],
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      focusNode: focusNode,
-                      controller: textEditingController,
-                      enabled: enabled,
-                      minLines: 1,
-                      maxLines: 6,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(kMaxTextLength),
-                      ],
-                      style: TextStyle(
-                        color: context.theme.text,
-                        fontSize: 14,
-                        height: 1.4,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: InputBorder.none,
-                        hintText: enabled
-                            ? aiAssistantInputHint
-                            : aiAssistantUnavailable,
-                        hintStyle: TextStyle(
-                          color: context.theme.secondaryText,
-                          fontSize: 14,
+              Expanded(
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 40),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    color: fieldColor,
+                  ),
+                  alignment: Alignment.center,
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: textEditingController,
+                    builder: (context, value, child) {
+                      final hasInputText = value.text.trim().isNotEmpty;
+                      final canSend =
+                          enabled &&
+                          !requestInFlight &&
+                          hasInputText &&
+                          value.composing.composed;
+
+                      return FocusableActionDetector(
+                        autofocus: true,
+                        shortcuts: {
+                          if (canSend)
+                            const SingleActivator(LogicalKeyboardKey.enter):
+                                const _SendMessageIntent(),
+                          const SingleActivator(LogicalKeyboardKey.escape):
+                              const EscapeIntent(),
+                        },
+                        actions: {
+                          _SendMessageIntent: CallbackAction<Intent>(
+                            onInvoke: (_) {
+                              onSend();
+                              return null;
+                            },
+                          ),
+                          EscapeIntent: CallbackAction<EscapeIntent>(
+                            onInvoke: (_) {
+                              focusNode.unfocus();
+                              return null;
+                            },
+                          ),
+                        },
+                        child: Stack(
+                          children: [
+                            TextField(
+                              focusNode: focusNode,
+                              controller: textEditingController,
+                              enabled: enabled,
+                              minLines: 1,
+                              maxLines: 7,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(
+                                  kMaxTextLength,
+                                ),
+                              ],
+                              textAlignVertical: TextAlignVertical.center,
+                              style: TextStyle(
+                                color: context.theme.text,
+                                fontSize: 14,
+                              ),
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: EdgeInsets.only(
+                                  left: 10,
+                                  right: 10,
+                                  top: 8,
+                                  bottom: 8,
+                                ),
+                              ),
+                              selectionHeightStyle:
+                                  ui.BoxHeightStyle.includeLineSpacingMiddle,
+                              contextMenuBuilder: (context, state) =>
+                                  MixinAdaptiveSelectionToolbar(
+                                    editableTextState: state,
+                                  ),
+                            ),
+                            if (!hasInputText)
+                              Positioned.fill(
+                                left: 8,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IgnorePointer(
+                                    child: Text(
+                                      enabled
+                                          ? aiAssistantInputHint
+                                          : aiAssistantUnavailable,
+                                      style: TextStyle(
+                                        color: context.theme.secondaryText,
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                  const SizedBox(width: 8),
-                  ActionButton(
-                    padding: const EdgeInsets.all(6),
-                    size: 20,
-                    interactive: enabled,
-                    onTap: requestInFlight ? onStop : onSend,
-                    child: Icon(
-                      requestInFlight
-                          ? Icons.stop_rounded
-                          : Icons.arrow_upward_rounded,
-                      size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: textEditingController,
+                builder: (context, value, child) {
+                  final hasInputText = value.text.trim().isNotEmpty;
+                  final interactive =
+                      enabled && (requestInFlight || hasInputText);
+                  final buttonColor =
+                      !enabled || (!requestInFlight && !hasInputText)
+                      ? context.theme.secondaryText
+                      : requestInFlight
+                      ? context.theme.red
+                      : context.theme.accent;
+
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    opacity: interactive ? 1 : 0.45,
+                    child: ActionButton(
+                      name: requestInFlight
+                          ? Resources.assetsImagesRecordStopSvg
+                          : Resources.assetsImagesIcSendSvg,
                       color: buttonColor,
+                      interactive: interactive,
+                      onTap: requestInFlight ? onStop : onSend,
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+class _SendMessageIntent extends Intent {
+  const _SendMessageIntent();
 }
 
 class _AiAssistantModeBar extends StatelessWidget {
@@ -159,45 +242,60 @@ class _AiAssistantModeBar extends StatelessWidget {
         )
         .toList(growable: false);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: context.dynamicColor(
-              const Color.fromRGBO(0, 0, 0, 0.05),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-            ),
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Row(
-          children: [
-            Flexible(
-              child: _AiModeChip<AiProviderConfig>(
-                icon: Icons.hub_rounded,
-                label: provider.name,
-                items: providerOptions,
-                enabled: providerOptions.length > 1,
-                onSelected: onProviderSelected,
+    return SizedBox(
+      width: double.infinity,
+      height: 30,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const spacing = 10.0;
+          const dividerSpace = 21.0;
+          final availableWidth = constraints.maxWidth - spacing - dividerSpace;
+
+          return Row(
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: availableWidth > 0 ? availableWidth / 2 : 0,
+                ),
+                child: _AiModeChip<AiProviderConfig>(
+                  icon: Icons.hub_rounded,
+                  label: provider.name,
+                  items: providerOptions,
+                  enabled: providerOptions.length > 1,
+                  onSelected: onProviderSelected,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: _AiModeChip<String>(
-                icon: Icons.tune_rounded,
-                label: provider.model,
-                items: modelOptions,
-                enabled: modelOptions.length > 1,
-                onSelected: onModelSelected,
+              const SizedBox(width: 10),
+              _AiModeDivider(),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _AiModeChip<String>(
+                  icon: Icons.tune_rounded,
+                  label: provider.model,
+                  items: modelOptions,
+                  enabled: modelOptions.length > 1,
+                  fill: true,
+                  onSelected: onModelSelected,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
+}
+
+class _AiModeDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 1,
+    height: 14,
+    color: context.dynamicColor(
+      const Color.fromRGBO(0, 0, 0, 0.08),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.1),
+    ),
+  );
 }
 
 class _AiModeChip<T> extends StatelessWidget {
@@ -207,6 +305,7 @@ class _AiModeChip<T> extends StatelessWidget {
     required this.items,
     required this.onSelected,
     required this.enabled,
+    this.fill = false,
   });
 
   final IconData icon;
@@ -214,14 +313,16 @@ class _AiModeChip<T> extends StatelessWidget {
   final List<CustomPopupMenuItem<T>> items;
   final ValueChanged<T> onSelected;
   final bool enabled;
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
     final child = Row(
+      mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
       children: [
         Icon(icon, size: 13, color: context.theme.secondaryText),
         const SizedBox(width: 6),
-        Expanded(
+        Flexible(
           child: Text(
             label,
             maxLines: 1,

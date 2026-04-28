@@ -138,7 +138,7 @@ class SettingPage extends HookConsumerWidget {
                                 ResponsiveNavigatorStateNotifier.appearancePage,
                             title: context.l10n.appearance,
                           ),
-                          _Item(
+                          const _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcAppearanceSvg,
                             pageName:

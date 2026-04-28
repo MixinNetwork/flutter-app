@@ -33,14 +33,12 @@ class AiProviderRequester {
     required ProxyConfig? proxy,
     required CancelToken cancelToken,
     required Future<void> Function(String chunk) onContent,
-    required bool streamFinalResponse,
     required String? conversationId,
     Future<AiToolExecutionResult> Function(AiToolCall toolCall)? onToolCall,
   }) async {
     d(
       'AI request start: provider=${config.type.name} model=${config.model} '
-      'conversationId=$conversationId streamFinal=$streamFinalResponse '
-      'messages=${messages.length} '
+      'conversationId=$conversationId messages=${messages.length} '
       'tools=${conversationId != null && onToolCall != null}',
     );
     final dio =
@@ -111,7 +109,6 @@ class AiProviderRequester {
       cancelToken: cancelToken,
       onContent: onContent,
       onToolCall: onToolCall,
-      streamFinalResponse: streamFinalResponse,
     );
   }
 
@@ -124,20 +121,29 @@ class AiProviderRequester {
     required Future<void> Function(String chunk) onContent,
     required Future<AiToolExecutionResult> Function(AiToolCall toolCall)
     onToolCall,
-    required bool streamFinalResponse,
   }) async {
     for (var round = 0; round < _aiToolMaxRounds; round++) {
       d(
         'AI tool round start: conversationId=$conversationId '
         'round=${round + 1}/$_aiToolMaxRounds messages=${messages.length}',
       );
-      final response = await _strategyFor(config.type).completeResponse(
-        dio: dio,
-        config: config,
-        messages: messages,
-        tools: AiConversationToolKit.definitions,
-        cancelToken: cancelToken,
-      );
+      final strategy = _strategyFor(config.type);
+      final response = strategy is OpenAiCompatibleStrategy
+          ? await strategy.streamCompleteResponse(
+              dio: dio,
+              config: config,
+              messages: messages,
+              tools: AiConversationToolKit.definitions,
+              cancelToken: cancelToken,
+              onContent: onContent,
+            )
+          : await strategy.completeResponse(
+              dio: dio,
+              config: config,
+              messages: messages,
+              tools: AiConversationToolKit.definitions,
+              cancelToken: cancelToken,
+            );
       d(
         'AI tool round response: conversationId=$conversationId '
         'round=${round + 1} text=${_previewText(response.text)} '
@@ -149,32 +155,11 @@ class AiProviderRequester {
         if (text.isEmpty) {
           throw Exception('Empty AI response');
         }
-        if (streamFinalResponse) {
-          try {
-            d(
-              'AI final stream start: conversationId=$conversationId '
-              'round=${round + 1}',
-            );
-            return await _strategyFor(config.type).streamResponse(
-              dio: dio,
-              config: config,
-              messages: messages,
-              cancelToken: cancelToken,
-              onContent: onContent,
-            );
-          } catch (error, stacktrace) {
-            e('AI final streaming fallback: $error, $stacktrace');
-            await _emitBufferedText(text, onContent);
-            d(
-              'AI final stream fallback: conversationId=$conversationId '
-              'round=${round + 1} text=${_previewText(text)}',
-            );
-            return text;
-          }
+        if (!response.contentEmitted) {
+          await _emitBufferedText(text, onContent);
         }
-        await onContent(text);
         d(
-          'AI tool request done without stream: '
+          'AI tool request done: '
           'conversationId=$conversationId '
           'round=${round + 1} text=${_previewText(text)}',
         );

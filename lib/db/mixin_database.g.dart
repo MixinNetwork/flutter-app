@@ -17771,6 +17771,17 @@ class AiChatMessages extends Table
     requiredDuringInsert: false,
     $customConstraints: '',
   );
+  static const VerificationMeta _metadataMeta = const VerificationMeta(
+    'metadata',
+  );
+  late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
+    'metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -17801,6 +17812,7 @@ class AiChatMessages extends Table
     status,
     model,
     errorText,
+    metadata,
     createdAt,
     updatedAt,
   ];
@@ -17885,6 +17897,12 @@ class AiChatMessages extends Table
         errorText.isAcceptableOrUnknown(data['error_text']!, _errorTextMeta),
       );
     }
+    if (data.containsKey('metadata')) {
+      context.handle(
+        _metadataMeta,
+        metadata.isAcceptableOrUnknown(data['metadata']!, _metadataMeta),
+      );
+    }
     return context;
   }
 
@@ -17936,6 +17954,10 @@ class AiChatMessages extends Table
         DriftSqlType.string,
         data['${effectivePrefix}error_text'],
       ),
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      ),
       createdAt: AiChatMessages.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -17981,6 +18003,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
   final String status;
   final String? model;
   final String? errorText;
+  final String? metadata;
   final DateTime createdAt;
   final DateTime updatedAt;
   const AiChatMessage({
@@ -17994,6 +18017,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
     required this.status,
     this.model,
     this.errorText,
+    this.metadata,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -18019,6 +18043,9 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
     }
     if (!nullToAbsent || errorText != null) {
       map['error_text'] = Variable<String>(errorText);
+    }
+    if (!nullToAbsent || metadata != null) {
+      map['metadata'] = Variable<String>(metadata);
     }
     {
       map['created_at'] = Variable<int>(
@@ -18053,6 +18080,9 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
       errorText: errorText == null && nullToAbsent
           ? const Value.absent()
           : Value(errorText),
+      metadata: metadata == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metadata),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -18076,6 +18106,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
       status: serializer.fromJson<String>(json['status']),
       model: serializer.fromJson<String?>(json['model']),
       errorText: serializer.fromJson<String?>(json['error_text']),
+      metadata: serializer.fromJson<String?>(json['metadata']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
     );
@@ -18094,6 +18125,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
       'status': serializer.toJson<String>(status),
       'model': serializer.toJson<String?>(model),
       'error_text': serializer.toJson<String?>(errorText),
+      'metadata': serializer.toJson<String?>(metadata),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'updated_at': serializer.toJson<DateTime>(updatedAt),
     };
@@ -18110,6 +18142,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
     String? status,
     Value<String?> model = const Value.absent(),
     Value<String?> errorText = const Value.absent(),
+    Value<String?> metadata = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => AiChatMessage(
@@ -18127,6 +18160,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
     status: status ?? this.status,
     model: model.present ? model.value : this.model,
     errorText: errorText.present ? errorText.value : this.errorText,
+    metadata: metadata.present ? metadata.value : this.metadata,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -18150,6 +18184,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
       status: data.status.present ? data.status.value : this.status,
       model: data.model.present ? data.model.value : this.model,
       errorText: data.errorText.present ? data.errorText.value : this.errorText,
+      metadata: data.metadata.present ? data.metadata.value : this.metadata,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -18168,6 +18203,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
           ..write('status: $status, ')
           ..write('model: $model, ')
           ..write('errorText: $errorText, ')
+          ..write('metadata: $metadata, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -18186,6 +18222,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
     status,
     model,
     errorText,
+    metadata,
     createdAt,
     updatedAt,
   );
@@ -18203,6 +18240,7 @@ class AiChatMessage extends DataClass implements Insertable<AiChatMessage> {
           other.status == this.status &&
           other.model == this.model &&
           other.errorText == this.errorText &&
+          other.metadata == this.metadata &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -18218,6 +18256,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
   final Value<String> status;
   final Value<String?> model;
   final Value<String?> errorText;
+  final Value<String?> metadata;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -18232,6 +18271,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
     this.status = const Value.absent(),
     this.model = const Value.absent(),
     this.errorText = const Value.absent(),
+    this.metadata = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -18247,6 +18287,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
     required String status,
     this.model = const Value.absent(),
     this.errorText = const Value.absent(),
+    this.metadata = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -18269,6 +18310,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
     Expression<String>? status,
     Expression<String>? model,
     Expression<String>? errorText,
+    Expression<String>? metadata,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowid,
@@ -18284,6 +18326,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
       if (status != null) 'status': status,
       if (model != null) 'model': model,
       if (errorText != null) 'error_text': errorText,
+      if (metadata != null) 'metadata': metadata,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -18301,6 +18344,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
     Value<String>? status,
     Value<String?>? model,
     Value<String?>? errorText,
+    Value<String?>? metadata,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -18316,6 +18360,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
       status: status ?? this.status,
       model: model ?? this.model,
       errorText: errorText ?? this.errorText,
+      metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -18357,6 +18402,9 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
     if (errorText.present) {
       map['error_text'] = Variable<String>(errorText.value);
     }
+    if (metadata.present) {
+      map['metadata'] = Variable<String>(metadata.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(
         AiChatMessages.$convertercreatedAt.toSql(createdAt.value),
@@ -18386,6 +18434,7 @@ class AiChatMessagesCompanion extends UpdateCompanion<AiChatMessage> {
           ..write('status: $status, ')
           ..write('model: $model, ')
           ..write('errorText: $errorText, ')
+          ..write('metadata: $metadata, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -28764,6 +28813,7 @@ typedef $AiChatMessagesCreateCompanionBuilder =
       required String status,
       Value<String?> model,
       Value<String?> errorText,
+      Value<String?> metadata,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> rowid,
@@ -28780,6 +28830,7 @@ typedef $AiChatMessagesUpdateCompanionBuilder =
       Value<String> status,
       Value<String?> model,
       Value<String?> errorText,
+      Value<String?> metadata,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -28842,6 +28893,11 @@ class $AiChatMessagesFilterComposer
 
   ColumnFilters<String> get errorText => $composableBuilder(
     column: $table.errorText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metadata => $composableBuilder(
+    column: $table.metadata,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -28917,6 +28973,11 @@ class $AiChatMessagesOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get metadata => $composableBuilder(
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -28976,6 +29037,9 @@ class $AiChatMessagesAnnotationComposer
   GeneratedColumn<String> get errorText =>
       $composableBuilder(column: $table.errorText, builder: (column) => column);
 
+  GeneratedColumn<String> get metadata =>
+      $composableBuilder(column: $table.metadata, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<DateTime, int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -29024,6 +29088,7 @@ class $AiChatMessagesTableManager
                 Value<String> status = const Value.absent(),
                 Value<String?> model = const Value.absent(),
                 Value<String?> errorText = const Value.absent(),
+                Value<String?> metadata = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -29038,6 +29103,7 @@ class $AiChatMessagesTableManager
                 status: status,
                 model: model,
                 errorText: errorText,
+                metadata: metadata,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -29054,6 +29120,7 @@ class $AiChatMessagesTableManager
                 required String status,
                 Value<String?> model = const Value.absent(),
                 Value<String?> errorText = const Value.absent(),
+                Value<String?> metadata = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -29068,6 +29135,7 @@ class $AiChatMessagesTableManager
                 status: status,
                 model: model,
                 errorText: errorText,
+                metadata: metadata,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

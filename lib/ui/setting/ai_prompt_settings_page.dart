@@ -30,90 +30,94 @@ class AiPromptSettingsPage extends HookConsumerWidget {
       appBar: const MixinAppBar(title: Text('AI Prompt Templates')),
       body: Align(
         alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: context.theme.settingCellBackgroundColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          customizedCount == 0
-                              ? 'All prompts are using built-in defaults.'
-                              : '$customizedCount prompt templates currently use custom overrides.',
-                          style: TextStyle(
-                            color: context.theme.text,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Templates support placeholders like {{conversationId}}, {{currentIsoDateTime}}, {{language}}, and {{input}}. Each editor shows the variables available for that prompt.',
-                          style: TextStyle(
-                            color: context.theme.secondaryText,
-                            fontSize: 14,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Leave a template empty to disable that prompt block. Saving the exact default text removes the custom override.',
-                          style: TextStyle(
-                            color: context.theme.secondaryText,
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                for (final group in AiPromptTemplateGroup.values) ...[
-                  _SectionLabel(title: group.title),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   CellGroup(
                     padding: const EdgeInsets.only(right: 10, left: 10),
                     cellBackgroundColor:
                         context.theme.settingCellBackgroundColor,
-                    child: Column(
-                      children: [
-                        for (
-                          var i = 0;
-                          i <
-                              aiPromptTemplateDefinitions
-                                  .where((item) => item.group == group)
-                                  .length;
-                          i++
-                        ) ...[
-                          _PromptTemplateCell(
-                            definition: aiPromptTemplateDefinitions
-                                .where((item) => item.group == group)
-                                .elementAt(i),
-                          ),
-                          if (i !=
-                              aiPromptTemplateDefinitions
-                                      .where((item) => item.group == group)
-                                      .length -
-                                  1)
-                            Divider(
-                              height: 0.5,
-                              indent: 16,
-                              endIndent: 16,
-                              color: context.theme.divider,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            customizedCount == 0
+                                ? 'All prompts are using built-in defaults.'
+                                : '$customizedCount prompt templates currently use custom overrides.',
+                            style: TextStyle(
+                              color: context.theme.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                             ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Templates support placeholders like {{conversationId}}, {{currentIsoDateTime}}, {{language}}, and {{input}}. Each editor shows the variables available for that prompt.',
+                            style: TextStyle(
+                              color: context.theme.secondaryText,
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Leave a template empty to disable that prompt block. Saving the exact default text removes the custom override.',
+                            style: TextStyle(
+                              color: context.theme.secondaryText,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
                         ],
-                      ],
+                      ),
                     ),
                   ),
+                  for (final group in AiPromptTemplateGroup.values) ...[
+                    _SectionLabel(title: group.title),
+                    CellGroup(
+                      padding: const EdgeInsets.only(right: 10, left: 10),
+                      cellBackgroundColor:
+                          context.theme.settingCellBackgroundColor,
+                      child: Column(
+                        children: [
+                          for (
+                            var i = 0;
+                            i <
+                                aiPromptTemplateDefinitions
+                                    .where((item) => item.group == group)
+                                    .length;
+                            i++
+                          ) ...[
+                            _PromptTemplateCell(
+                              definition: aiPromptTemplateDefinitions
+                                  .where((item) => item.group == group)
+                                  .elementAt(i),
+                            ),
+                            if (i !=
+                                aiPromptTemplateDefinitions
+                                        .where((item) => item.group == group)
+                                        .length -
+                                    1)
+                              Divider(
+                                height: 0.5,
+                                indent: 16,
+                                endIndent: 16,
+                                color: context.theme.divider,
+                              ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -237,97 +241,108 @@ class _AiPromptTemplateEditPage extends HookConsumerWidget {
       ),
       body: Align(
         alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _SectionLabel(title: 'Description'),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: theme.settingCellBackgroundColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      definition.description,
-                      style: TextStyle(
-                        color: theme.text,
-                        fontSize: 14,
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
-                ),
-                const _SectionLabel(title: 'Variables'),
-                CellGroup(
-                  padding: const EdgeInsets.only(right: 10, left: 10),
-                  cellBackgroundColor: theme.settingCellBackgroundColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: _PromptVariableChipWrap(
-                      variables: definition.variables,
-                      onTap: (variable) =>
-                          _insertToken(controller, variable.token),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                  child: Text(
-                    'Hover to preview the description. Click a chip to insert it at the current cursor position.',
-                    style: TextStyle(
-                      color: theme.secondaryText,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const _SectionLabel(title: 'Template'),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: inputBackgroundColor,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: inputBorderColor),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      child: TextField(
-                        controller: controller,
-                        minLines: 10,
-                        maxLines: null,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _SectionLabel(title: 'Description'),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor: theme.settingCellBackgroundColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        definition.description,
                         style: TextStyle(
                           color: theme.text,
-                          fontSize: 15,
+                          fontSize: 14,
                           height: 1.45,
-                        ),
-                        decoration: InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          hintText: definition.defaultValue,
-                          hintStyle: TextStyle(color: theme.secondaryText),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 12),
-                  child: Text(
-                    'Empty text disables this prompt block. Saving the exact default text removes the override and falls back to the built-in template.',
-                    style: TextStyle(
-                      color: theme.secondaryText,
-                      fontSize: 13,
-                      height: 1.4,
+                  const _SectionLabel(title: 'Variables'),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor: theme.settingCellBackgroundColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _PromptVariableChipWrap(
+                        variables: definition.variables,
+                        onTap: (variable) =>
+                            _insertToken(controller, variable.token),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      bottom: 14,
+                      top: 10,
+                    ),
+                    child: Text(
+                      'Hover to preview the description. Click a chip to insert it at the current cursor position.',
+                      style: TextStyle(
+                        color: theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const _SectionLabel(title: 'Template'),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: inputBackgroundColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: inputBorderColor),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        child: TextField(
+                          controller: controller,
+                          minLines: 10,
+                          maxLines: null,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 15,
+                            height: 1.45,
+                          ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: InputBorder.none,
+                            hintText: definition.defaultValue,
+                            hintStyle: TextStyle(color: theme.secondaryText),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 12,
+                    ),
+                    child: Text(
+                      'Empty text disables this prompt block. Saving the exact default text removes the override and falls back to the built-in template.',
+                      style: TextStyle(
+                        color: theme.secondaryText,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
