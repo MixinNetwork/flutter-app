@@ -3,10 +3,12 @@ import 'package:drift/native.dart';
 import 'package:flutter_app/ai/ai_chat_prompt_builder.dart';
 import 'package:flutter_app/ai/model/ai_prompt_message.dart';
 import 'package:flutter_app/db/ai_database.dart';
+import 'package:flutter_app/db/dao/ai_chat_message_dao.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 void main() {
   group('AI chat threads', () {
@@ -14,15 +16,21 @@ void main() {
     late FtsDatabase ftsDatabase;
     late AiDatabase aiDatabase;
     late Database database;
+    late bool disposeDatabase;
 
     setUp(() {
       mixinDatabase = MixinDatabase(NativeDatabase.memory());
       ftsDatabase = FtsDatabase(NativeDatabase.memory());
       aiDatabase = AiDatabase(NativeDatabase.memory());
       database = Database(mixinDatabase, ftsDatabase, aiDatabase);
+      disposeDatabase = true;
     });
 
-    tearDown(() => database.dispose());
+    tearDown(() async {
+      if (disposeDatabase) {
+        await database.dispose();
+      }
+    });
 
     test('scopes messages and pending state by thread', () async {
       const conversationId = 'conversation-id';
@@ -81,6 +89,57 @@ void main() {
           secondThread.id,
         ),
         isFalse,
+      );
+    });
+
+    test('maintains thread list metadata from messages', () async {
+      const conversationId = 'conversation-id';
+      final thread = await database.aiChatMessageDao.createThread(
+        conversationId,
+      );
+      final now = DateTime.now();
+
+      await database.aiChatMessageDao.insertMessage(
+        AiChatMessagesCompanion.insert(
+          id: 'user-message',
+          threadId: Value(thread.id),
+          conversationId: conversationId,
+          role: 'user',
+          providerId: 'provider-id',
+          content: 'hello',
+          status: 'done',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      await database.aiChatMessageDao.insertMessage(
+        AiChatMessagesCompanion.insert(
+          id: 'assistant-message',
+          threadId: Value(thread.id),
+          conversationId: conversationId,
+          role: 'assistant',
+          providerId: 'provider-id',
+          content: '',
+          status: 'pending',
+          createdAt: now.add(const Duration(milliseconds: 1)),
+          updatedAt: now.add(const Duration(milliseconds: 1)),
+        ),
+      );
+      await database.aiChatMessageDao.updateMessageContent(
+        'assistant-message',
+        'assistant answer',
+        updatedAt: now.add(const Duration(milliseconds: 2)),
+      );
+
+      final updatedThread = await database.aiChatMessageDao.threadById(
+        thread.id,
+      );
+
+      expect(updatedThread?.messageCount, 2);
+      expect(updatedThread?.lastMessagePreview, 'assistant answer');
+      expect(
+        updatedThread?.lastMessageAt?.millisecondsSinceEpoch,
+        now.add(const Duration(milliseconds: 1)).millisecondsSinceEpoch,
       );
     });
 

@@ -94,7 +94,7 @@ class AiChatController {
     }
   }
 
-  Future<void> send({
+  Future<String> send({
     required String conversationId,
     required String input,
     required String language,
@@ -234,6 +234,7 @@ class AiChatController {
         'threadId=${thread.id} '
         'assistantMessageId=$assistantMessageId output=${_previewText(result)}',
       );
+      return thread.id;
     } catch (error, stacktrace) {
       if (cancelToken.isCancelled) {
         d(
@@ -248,7 +249,7 @@ class AiChatController {
           updatedAt: DateTime.now(),
           errorText: 'Stopped',
         );
-        return;
+        return thread.id;
       }
       e('AI chat error: $error, $stacktrace');
       await database.aiChatMessageDao.updateMessageStatus(

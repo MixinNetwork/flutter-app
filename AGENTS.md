@@ -141,6 +141,10 @@ SENTRY_DSN=...
 - Keep generated, third-party, and platform registrant files untouched unless the task explicitly requires them.
 - Keep changes scoped to the requested behavior; do not refactor unrelated areas.
 - Reuse existing UI components from `lib/widgets` and patterns from nearby screens.
+- For context menus on list items, messages, and other right-click surfaces, use
+  the native `super_context_menu` flow (`CustomContextMenuWidget`,
+  `MenuAction`, `MenusWithSeparator`) used elsewhere in the app instead of
+  custom popup/menu widgets.
 - Reuse existing DB access through DAOs and providers instead of bypassing with ad hoc SQL unless Drift APIs cannot express the query.
 - For user-facing text, use `Localization` and ARB files rather than hard-coded strings.
 - For async work, preserve current error propagation style and do not swallow exceptions without a concrete recovery path.

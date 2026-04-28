@@ -73,6 +73,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const groupsInCommon = 'groupsInCommon';
   static const disappearMessages = 'disappearMessages';
   static const aiAssistantPage = 'aiAssistantPage';
+  static const aiAssistantThreadsPage = 'aiAssistantThreadsPage';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -136,6 +137,12 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           key: ValueKey(aiAssistantPage),
           name: aiAssistantPage,
           child: _ChatSidePageBuilder(AiAssistantPage.new),
+        );
+      case aiAssistantThreadsPage:
+        return const MaterialPage(
+          key: ValueKey(aiAssistantThreadsPage),
+          name: aiAssistantThreadsPage,
+          child: _ChatSidePageBuilder(AiAssistantThreadsPage.new),
         );
       default:
         throw ArgumentError('Invalid route');

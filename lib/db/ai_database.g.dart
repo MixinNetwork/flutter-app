@@ -748,6 +748,88 @@ class AiChatThreads extends Table with TableInfo<AiChatThreads, AiChatThread> {
     requiredDuringInsert: false,
     $customConstraints: '',
   );
+  static const VerificationMeta _summaryMeta = const VerificationMeta(
+    'summary',
+  );
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+    'summary',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  static const VerificationMeta _lastMessagePreviewMeta =
+      const VerificationMeta('lastMessagePreview');
+  late final GeneratedColumn<String> lastMessagePreview =
+      GeneratedColumn<String>(
+        'last_message_preview',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  static const VerificationMeta _messageCountMeta = const VerificationMeta(
+    'messageCount',
+  );
+  late final GeneratedColumn<int> messageCount = GeneratedColumn<int>(
+    'message_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const CustomExpression('0'),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT \'active\'',
+    defaultValue: const CustomExpression('\'active\''),
+  );
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> pinnedAt =
+      GeneratedColumn<int>(
+        'pinned_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<DateTime?>(AiChatThreads.$converterpinnedAtn);
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> archivedAt =
+      GeneratedColumn<int>(
+        'archived_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<DateTime?>(AiChatThreads.$converterarchivedAtn);
+  late final GeneratedColumnWithTypeConverter<DateTime?, int> lastMessageAt =
+      GeneratedColumn<int>(
+        'last_message_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<DateTime?>(AiChatThreads.$converterlastMessageAtn);
+  static const VerificationMeta _metadataMeta = const VerificationMeta(
+    'metadata',
+  );
+  late final GeneratedColumn<String> metadata = GeneratedColumn<String>(
+    'metadata',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
       GeneratedColumn<int>(
         'created_at',
@@ -771,6 +853,14 @@ class AiChatThreads extends Table with TableInfo<AiChatThreads, AiChatThread> {
     id,
     conversationId,
     title,
+    summary,
+    lastMessagePreview,
+    messageCount,
+    status,
+    pinnedAt,
+    archivedAt,
+    lastMessageAt,
+    metadata,
     createdAt,
     updatedAt,
   ];
@@ -808,6 +898,42 @@ class AiChatThreads extends Table with TableInfo<AiChatThreads, AiChatThread> {
         title.isAcceptableOrUnknown(data['title']!, _titleMeta),
       );
     }
+    if (data.containsKey('summary')) {
+      context.handle(
+        _summaryMeta,
+        summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta),
+      );
+    }
+    if (data.containsKey('last_message_preview')) {
+      context.handle(
+        _lastMessagePreviewMeta,
+        lastMessagePreview.isAcceptableOrUnknown(
+          data['last_message_preview']!,
+          _lastMessagePreviewMeta,
+        ),
+      );
+    }
+    if (data.containsKey('message_count')) {
+      context.handle(
+        _messageCountMeta,
+        messageCount.isAcceptableOrUnknown(
+          data['message_count']!,
+          _messageCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('metadata')) {
+      context.handle(
+        _metadataMeta,
+        metadata.isAcceptableOrUnknown(data['metadata']!, _metadataMeta),
+      );
+    }
     return context;
   }
 
@@ -829,6 +955,44 @@ class AiChatThreads extends Table with TableInfo<AiChatThreads, AiChatThread> {
         DriftSqlType.string,
         data['${effectivePrefix}title'],
       ),
+      summary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary'],
+      ),
+      lastMessagePreview: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_message_preview'],
+      ),
+      messageCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}message_count'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      pinnedAt: AiChatThreads.$converterpinnedAtn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}pinned_at'],
+        ),
+      ),
+      archivedAt: AiChatThreads.$converterarchivedAtn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}archived_at'],
+        ),
+      ),
+      lastMessageAt: AiChatThreads.$converterlastMessageAtn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}last_message_at'],
+        ),
+      ),
+      metadata: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata'],
+      ),
       createdAt: AiChatThreads.$convertercreatedAt.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -849,6 +1013,18 @@ class AiChatThreads extends Table with TableInfo<AiChatThreads, AiChatThread> {
     return AiChatThreads(attachedDatabase, alias);
   }
 
+  static TypeConverter<DateTime, int> $converterpinnedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterpinnedAtn =
+      NullAwareTypeConverter.wrap($converterpinnedAt);
+  static TypeConverter<DateTime, int> $converterarchivedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterarchivedAtn =
+      NullAwareTypeConverter.wrap($converterarchivedAt);
+  static TypeConverter<DateTime, int> $converterlastMessageAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime?, int?> $converterlastMessageAtn =
+      NullAwareTypeConverter.wrap($converterlastMessageAt);
   static TypeConverter<DateTime, int> $convertercreatedAt =
       const MillisDateConverter();
   static TypeConverter<DateTime, int> $converterupdatedAt =
@@ -863,12 +1039,28 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
   final String id;
   final String conversationId;
   final String? title;
+  final String? summary;
+  final String? lastMessagePreview;
+  final int messageCount;
+  final String status;
+  final DateTime? pinnedAt;
+  final DateTime? archivedAt;
+  final DateTime? lastMessageAt;
+  final String? metadata;
   final DateTime createdAt;
   final DateTime updatedAt;
   const AiChatThread({
     required this.id,
     required this.conversationId,
     this.title,
+    this.summary,
+    this.lastMessagePreview,
+    required this.messageCount,
+    required this.status,
+    this.pinnedAt,
+    this.archivedAt,
+    this.lastMessageAt,
+    this.metadata,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -879,6 +1071,32 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
     map['conversation_id'] = Variable<String>(conversationId);
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
+    }
+    if (!nullToAbsent || summary != null) {
+      map['summary'] = Variable<String>(summary);
+    }
+    if (!nullToAbsent || lastMessagePreview != null) {
+      map['last_message_preview'] = Variable<String>(lastMessagePreview);
+    }
+    map['message_count'] = Variable<int>(messageCount);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || pinnedAt != null) {
+      map['pinned_at'] = Variable<int>(
+        AiChatThreads.$converterpinnedAtn.toSql(pinnedAt),
+      );
+    }
+    if (!nullToAbsent || archivedAt != null) {
+      map['archived_at'] = Variable<int>(
+        AiChatThreads.$converterarchivedAtn.toSql(archivedAt),
+      );
+    }
+    if (!nullToAbsent || lastMessageAt != null) {
+      map['last_message_at'] = Variable<int>(
+        AiChatThreads.$converterlastMessageAtn.toSql(lastMessageAt),
+      );
+    }
+    if (!nullToAbsent || metadata != null) {
+      map['metadata'] = Variable<String>(metadata);
     }
     {
       map['created_at'] = Variable<int>(
@@ -900,6 +1118,26 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
       title: title == null && nullToAbsent
           ? const Value.absent()
           : Value(title),
+      summary: summary == null && nullToAbsent
+          ? const Value.absent()
+          : Value(summary),
+      lastMessagePreview: lastMessagePreview == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMessagePreview),
+      messageCount: Value(messageCount),
+      status: Value(status),
+      pinnedAt: pinnedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pinnedAt),
+      archivedAt: archivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAt),
+      lastMessageAt: lastMessageAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMessageAt),
+      metadata: metadata == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metadata),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -914,6 +1152,16 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
       id: serializer.fromJson<String>(json['id']),
       conversationId: serializer.fromJson<String>(json['conversation_id']),
       title: serializer.fromJson<String?>(json['title']),
+      summary: serializer.fromJson<String?>(json['summary']),
+      lastMessagePreview: serializer.fromJson<String?>(
+        json['last_message_preview'],
+      ),
+      messageCount: serializer.fromJson<int>(json['message_count']),
+      status: serializer.fromJson<String>(json['status']),
+      pinnedAt: serializer.fromJson<DateTime?>(json['pinned_at']),
+      archivedAt: serializer.fromJson<DateTime?>(json['archived_at']),
+      lastMessageAt: serializer.fromJson<DateTime?>(json['last_message_at']),
+      metadata: serializer.fromJson<String?>(json['metadata']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
     );
@@ -925,6 +1173,14 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
       'id': serializer.toJson<String>(id),
       'conversation_id': serializer.toJson<String>(conversationId),
       'title': serializer.toJson<String?>(title),
+      'summary': serializer.toJson<String?>(summary),
+      'last_message_preview': serializer.toJson<String?>(lastMessagePreview),
+      'message_count': serializer.toJson<int>(messageCount),
+      'status': serializer.toJson<String>(status),
+      'pinned_at': serializer.toJson<DateTime?>(pinnedAt),
+      'archived_at': serializer.toJson<DateTime?>(archivedAt),
+      'last_message_at': serializer.toJson<DateTime?>(lastMessageAt),
+      'metadata': serializer.toJson<String?>(metadata),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'updated_at': serializer.toJson<DateTime>(updatedAt),
     };
@@ -934,12 +1190,32 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
     String? id,
     String? conversationId,
     Value<String?> title = const Value.absent(),
+    Value<String?> summary = const Value.absent(),
+    Value<String?> lastMessagePreview = const Value.absent(),
+    int? messageCount,
+    String? status,
+    Value<DateTime?> pinnedAt = const Value.absent(),
+    Value<DateTime?> archivedAt = const Value.absent(),
+    Value<DateTime?> lastMessageAt = const Value.absent(),
+    Value<String?> metadata = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => AiChatThread(
     id: id ?? this.id,
     conversationId: conversationId ?? this.conversationId,
     title: title.present ? title.value : this.title,
+    summary: summary.present ? summary.value : this.summary,
+    lastMessagePreview: lastMessagePreview.present
+        ? lastMessagePreview.value
+        : this.lastMessagePreview,
+    messageCount: messageCount ?? this.messageCount,
+    status: status ?? this.status,
+    pinnedAt: pinnedAt.present ? pinnedAt.value : this.pinnedAt,
+    archivedAt: archivedAt.present ? archivedAt.value : this.archivedAt,
+    lastMessageAt: lastMessageAt.present
+        ? lastMessageAt.value
+        : this.lastMessageAt,
+    metadata: metadata.present ? metadata.value : this.metadata,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -950,6 +1226,22 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
           ? data.conversationId.value
           : this.conversationId,
       title: data.title.present ? data.title.value : this.title,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      lastMessagePreview: data.lastMessagePreview.present
+          ? data.lastMessagePreview.value
+          : this.lastMessagePreview,
+      messageCount: data.messageCount.present
+          ? data.messageCount.value
+          : this.messageCount,
+      status: data.status.present ? data.status.value : this.status,
+      pinnedAt: data.pinnedAt.present ? data.pinnedAt.value : this.pinnedAt,
+      archivedAt: data.archivedAt.present
+          ? data.archivedAt.value
+          : this.archivedAt,
+      lastMessageAt: data.lastMessageAt.present
+          ? data.lastMessageAt.value
+          : this.lastMessageAt,
+      metadata: data.metadata.present ? data.metadata.value : this.metadata,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -961,6 +1253,14 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
           ..write('id: $id, ')
           ..write('conversationId: $conversationId, ')
           ..write('title: $title, ')
+          ..write('summary: $summary, ')
+          ..write('lastMessagePreview: $lastMessagePreview, ')
+          ..write('messageCount: $messageCount, ')
+          ..write('status: $status, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('lastMessageAt: $lastMessageAt, ')
+          ..write('metadata: $metadata, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -968,8 +1268,21 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, conversationId, title, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    conversationId,
+    title,
+    summary,
+    lastMessagePreview,
+    messageCount,
+    status,
+    pinnedAt,
+    archivedAt,
+    lastMessageAt,
+    metadata,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -977,6 +1290,14 @@ class AiChatThread extends DataClass implements Insertable<AiChatThread> {
           other.id == this.id &&
           other.conversationId == this.conversationId &&
           other.title == this.title &&
+          other.summary == this.summary &&
+          other.lastMessagePreview == this.lastMessagePreview &&
+          other.messageCount == this.messageCount &&
+          other.status == this.status &&
+          other.pinnedAt == this.pinnedAt &&
+          other.archivedAt == this.archivedAt &&
+          other.lastMessageAt == this.lastMessageAt &&
+          other.metadata == this.metadata &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -985,6 +1306,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
   final Value<String> id;
   final Value<String> conversationId;
   final Value<String?> title;
+  final Value<String?> summary;
+  final Value<String?> lastMessagePreview;
+  final Value<int> messageCount;
+  final Value<String> status;
+  final Value<DateTime?> pinnedAt;
+  final Value<DateTime?> archivedAt;
+  final Value<DateTime?> lastMessageAt;
+  final Value<String?> metadata;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -992,6 +1321,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
     this.id = const Value.absent(),
     this.conversationId = const Value.absent(),
     this.title = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.lastMessagePreview = const Value.absent(),
+    this.messageCount = const Value.absent(),
+    this.status = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.lastMessageAt = const Value.absent(),
+    this.metadata = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1000,6 +1337,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
     required String id,
     required String conversationId,
     this.title = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.lastMessagePreview = const Value.absent(),
+    this.messageCount = const Value.absent(),
+    this.status = const Value.absent(),
+    this.pinnedAt = const Value.absent(),
+    this.archivedAt = const Value.absent(),
+    this.lastMessageAt = const Value.absent(),
+    this.metadata = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -1011,6 +1356,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
     Expression<String>? id,
     Expression<String>? conversationId,
     Expression<String>? title,
+    Expression<String>? summary,
+    Expression<String>? lastMessagePreview,
+    Expression<int>? messageCount,
+    Expression<String>? status,
+    Expression<int>? pinnedAt,
+    Expression<int>? archivedAt,
+    Expression<int>? lastMessageAt,
+    Expression<String>? metadata,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
     Expression<int>? rowid,
@@ -1019,6 +1372,15 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
       if (id != null) 'id': id,
       if (conversationId != null) 'conversation_id': conversationId,
       if (title != null) 'title': title,
+      if (summary != null) 'summary': summary,
+      if (lastMessagePreview != null)
+        'last_message_preview': lastMessagePreview,
+      if (messageCount != null) 'message_count': messageCount,
+      if (status != null) 'status': status,
+      if (pinnedAt != null) 'pinned_at': pinnedAt,
+      if (archivedAt != null) 'archived_at': archivedAt,
+      if (lastMessageAt != null) 'last_message_at': lastMessageAt,
+      if (metadata != null) 'metadata': metadata,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -1029,6 +1391,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
     Value<String>? id,
     Value<String>? conversationId,
     Value<String?>? title,
+    Value<String?>? summary,
+    Value<String?>? lastMessagePreview,
+    Value<int>? messageCount,
+    Value<String>? status,
+    Value<DateTime?>? pinnedAt,
+    Value<DateTime?>? archivedAt,
+    Value<DateTime?>? lastMessageAt,
+    Value<String?>? metadata,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -1037,6 +1407,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
       id: id ?? this.id,
       conversationId: conversationId ?? this.conversationId,
       title: title ?? this.title,
+      summary: summary ?? this.summary,
+      lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
+      messageCount: messageCount ?? this.messageCount,
+      status: status ?? this.status,
+      pinnedAt: pinnedAt ?? this.pinnedAt,
+      archivedAt: archivedAt ?? this.archivedAt,
+      lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+      metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -1054,6 +1432,36 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (lastMessagePreview.present) {
+      map['last_message_preview'] = Variable<String>(lastMessagePreview.value);
+    }
+    if (messageCount.present) {
+      map['message_count'] = Variable<int>(messageCount.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (pinnedAt.present) {
+      map['pinned_at'] = Variable<int>(
+        AiChatThreads.$converterpinnedAtn.toSql(pinnedAt.value),
+      );
+    }
+    if (archivedAt.present) {
+      map['archived_at'] = Variable<int>(
+        AiChatThreads.$converterarchivedAtn.toSql(archivedAt.value),
+      );
+    }
+    if (lastMessageAt.present) {
+      map['last_message_at'] = Variable<int>(
+        AiChatThreads.$converterlastMessageAtn.toSql(lastMessageAt.value),
+      );
+    }
+    if (metadata.present) {
+      map['metadata'] = Variable<String>(metadata.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(
@@ -1077,6 +1485,14 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
           ..write('id: $id, ')
           ..write('conversationId: $conversationId, ')
           ..write('title: $title, ')
+          ..write('summary: $summary, ')
+          ..write('lastMessagePreview: $lastMessagePreview, ')
+          ..write('messageCount: $messageCount, ')
+          ..write('status: $status, ')
+          ..write('pinnedAt: $pinnedAt, ')
+          ..write('archivedAt: $archivedAt, ')
+          ..write('lastMessageAt: $lastMessageAt, ')
+          ..write('metadata: $metadata, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -1100,7 +1516,11 @@ abstract class _$AiDatabase extends GeneratedDatabase {
   );
   late final Index indexAiChatThreadsConversationIdUpdatedAt = Index(
     'index_ai_chat_threads_conversation_id_updated_at',
-    'CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_updated_at ON ai_chat_threads (conversation_id, updated_at DESC)',
+    'CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_updated_at ON ai_chat_threads (conversation_id, status, updated_at DESC)',
+  );
+  late final Index indexAiChatThreadsConversationIdLastMessageAt = Index(
+    'index_ai_chat_threads_conversation_id_last_message_at',
+    'CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_last_message_at ON ai_chat_threads (conversation_id, status, last_message_at DESC)',
   );
   late final AiChatMessageDao aiChatMessageDao = AiChatMessageDao(
     this as AiDatabase,
@@ -1115,6 +1535,7 @@ abstract class _$AiDatabase extends GeneratedDatabase {
     indexAiChatMessagesConversationIdCreatedAt,
     indexAiChatMessagesThreadIdCreatedAt,
     indexAiChatThreadsConversationIdUpdatedAt,
+    indexAiChatThreadsConversationIdLastMessageAt,
   ];
 }
 
@@ -1462,6 +1883,14 @@ typedef $AiChatThreadsCreateCompanionBuilder =
       required String id,
       required String conversationId,
       Value<String?> title,
+      Value<String?> summary,
+      Value<String?> lastMessagePreview,
+      Value<int> messageCount,
+      Value<String> status,
+      Value<DateTime?> pinnedAt,
+      Value<DateTime?> archivedAt,
+      Value<DateTime?> lastMessageAt,
+      Value<String?> metadata,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> rowid,
@@ -1471,6 +1900,14 @@ typedef $AiChatThreadsUpdateCompanionBuilder =
       Value<String> id,
       Value<String> conversationId,
       Value<String?> title,
+      Value<String?> summary,
+      Value<String?> lastMessagePreview,
+      Value<int> messageCount,
+      Value<String> status,
+      Value<DateTime?> pinnedAt,
+      Value<DateTime?> archivedAt,
+      Value<DateTime?> lastMessageAt,
+      Value<String?> metadata,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -1497,6 +1934,49 @@ class $AiChatThreadsFilterComposer
 
   ColumnFilters<String> get title => $composableBuilder(
     column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastMessagePreview => $composableBuilder(
+    column: $table.lastMessagePreview,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get messageCount => $composableBuilder(
+    column: $table.messageCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get pinnedAt =>
+      $composableBuilder(
+        column: $table.pinnedAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get archivedAt =>
+      $composableBuilder(
+        column: $table.archivedAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, int> get lastMessageAt =>
+      $composableBuilder(
+        column: $table.lastMessageAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get metadata => $composableBuilder(
+    column: $table.metadata,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1537,6 +2017,46 @@ class $AiChatThreadsOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastMessagePreview => $composableBuilder(
+    column: $table.lastMessagePreview,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get messageCount => $composableBuilder(
+    column: $table.messageCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pinnedAt => $composableBuilder(
+    column: $table.pinnedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get archivedAt => $composableBuilder(
+    column: $table.archivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastMessageAt => $composableBuilder(
+    column: $table.lastMessageAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metadata => $composableBuilder(
+    column: $table.metadata,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1567,6 +2087,40 @@ class $AiChatThreadsAnnotationComposer
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<String> get lastMessagePreview => $composableBuilder(
+    column: $table.lastMessagePreview,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get messageCount => $composableBuilder(
+    column: $table.messageCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, int> get pinnedAt =>
+      $composableBuilder(column: $table.pinnedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, int> get archivedAt =>
+      $composableBuilder(
+        column: $table.archivedAt,
+        builder: (column) => column,
+      );
+
+  GeneratedColumnWithTypeConverter<DateTime?, int> get lastMessageAt =>
+      $composableBuilder(
+        column: $table.lastMessageAt,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get metadata =>
+      $composableBuilder(column: $table.metadata, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<DateTime, int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1609,6 +2163,14 @@ class $AiChatThreadsTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> conversationId = const Value.absent(),
                 Value<String?> title = const Value.absent(),
+                Value<String?> summary = const Value.absent(),
+                Value<String?> lastMessagePreview = const Value.absent(),
+                Value<int> messageCount = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> pinnedAt = const Value.absent(),
+                Value<DateTime?> archivedAt = const Value.absent(),
+                Value<DateTime?> lastMessageAt = const Value.absent(),
+                Value<String?> metadata = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1616,6 +2178,14 @@ class $AiChatThreadsTableManager
                 id: id,
                 conversationId: conversationId,
                 title: title,
+                summary: summary,
+                lastMessagePreview: lastMessagePreview,
+                messageCount: messageCount,
+                status: status,
+                pinnedAt: pinnedAt,
+                archivedAt: archivedAt,
+                lastMessageAt: lastMessageAt,
+                metadata: metadata,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -1625,6 +2195,14 @@ class $AiChatThreadsTableManager
                 required String id,
                 required String conversationId,
                 Value<String?> title = const Value.absent(),
+                Value<String?> summary = const Value.absent(),
+                Value<String?> lastMessagePreview = const Value.absent(),
+                Value<int> messageCount = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> pinnedAt = const Value.absent(),
+                Value<DateTime?> archivedAt = const Value.absent(),
+                Value<DateTime?> lastMessageAt = const Value.absent(),
+                Value<String?> metadata = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -1632,6 +2210,14 @@ class $AiChatThreadsTableManager
                 id: id,
                 conversationId: conversationId,
                 title: title,
+                summary: summary,
+                lastMessagePreview: lastMessagePreview,
+                messageCount: messageCount,
+                status: status,
+                pinnedAt: pinnedAt,
+                archivedAt: archivedAt,
+                lastMessageAt: lastMessageAt,
+                metadata: metadata,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

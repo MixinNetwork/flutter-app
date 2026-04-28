@@ -14,12 +14,35 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
   static const assistantRole = 'assistant';
   static const pendingStatus = 'pending';
   static const errorStatus = 'error';
+  static const activeThreadStatus = 'active';
   static const _uuid = Uuid();
+
+  Stream<List<AiChatThread>> watchThreads(String conversationId) =>
+      (select(db.aiChatThreads)
+            ..where(
+              (tbl) =>
+                  tbl.conversationId.equals(conversationId) &
+                  tbl.status.equals(activeThreadStatus),
+            )
+            ..orderBy([
+              (tbl) => OrderingTerm.desc(tbl.pinnedAt),
+              (tbl) => OrderingTerm.desc(tbl.lastMessageAt),
+              (tbl) => OrderingTerm.desc(tbl.updatedAt),
+              (tbl) => OrderingTerm.desc(tbl.createdAt),
+              (tbl) => OrderingTerm.desc(tbl.id),
+            ]))
+          .watch();
 
   Stream<AiChatThread?> watchLatestThread(String conversationId) =>
       (select(db.aiChatThreads)
-            ..where((tbl) => tbl.conversationId.equals(conversationId))
+            ..where(
+              (tbl) =>
+                  tbl.conversationId.equals(conversationId) &
+                  tbl.status.equals(activeThreadStatus),
+            )
             ..orderBy([
+              (tbl) => OrderingTerm.desc(tbl.pinnedAt),
+              (tbl) => OrderingTerm.desc(tbl.lastMessageAt),
               (tbl) => OrderingTerm.desc(tbl.updatedAt),
               (tbl) => OrderingTerm.desc(tbl.createdAt),
               (tbl) => OrderingTerm.desc(tbl.id),
@@ -29,8 +52,14 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
 
   Future<AiChatThread?> latestThread(String conversationId) =>
       (select(db.aiChatThreads)
-            ..where((tbl) => tbl.conversationId.equals(conversationId))
+            ..where(
+              (tbl) =>
+                  tbl.conversationId.equals(conversationId) &
+                  tbl.status.equals(activeThreadStatus),
+            )
             ..orderBy([
+              (tbl) => OrderingTerm.desc(tbl.pinnedAt),
+              (tbl) => OrderingTerm.desc(tbl.lastMessageAt),
               (tbl) => OrderingTerm.desc(tbl.updatedAt),
               (tbl) => OrderingTerm.desc(tbl.createdAt),
               (tbl) => OrderingTerm.desc(tbl.id),
@@ -47,11 +76,34 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
     final thread = AiChatThread(
       id: _uuid.v4(),
       conversationId: conversationId,
+      messageCount: 0,
+      status: activeThreadStatus,
       createdAt: now,
       updatedAt: now,
     );
     await into(db.aiChatThreads).insert(thread);
     return thread;
+  }
+
+  Future<void> updateThreadTitle(String threadId, String? title) =>
+      (update(
+        db.aiChatThreads,
+      )..where((tbl) => tbl.id.equals(threadId))).write(
+        AiChatThreadsCompanion(
+          title: Value(title?.trim().isEmpty ?? true ? null : title!.trim()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+  Future<void> deleteThread(String threadId) async {
+    await transaction(() async {
+      await (delete(
+        db.aiChatMessages,
+      )..where((tbl) => tbl.threadId.equals(threadId))).go();
+      await (delete(
+        db.aiChatThreads,
+      )..where((tbl) => tbl.id.equals(threadId))).go();
+    });
   }
 
   Future<AiChatThread> ensureThread({
@@ -60,7 +112,9 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
   }) async {
     if (threadId != null) {
       final thread = await threadById(threadId);
-      if (thread == null || thread.conversationId != conversationId) {
+      if (thread == null ||
+          thread.conversationId != conversationId ||
+          thread.status != activeThreadStatus) {
         throw StateError('AI thread not found');
       }
       return thread;
@@ -137,32 +191,44 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
 
   Future<void> insertMessage(AiChatMessagesCompanion row) async {
     await into(db.aiChatMessages).insertOnConflictUpdate(row);
-    await _touchThread(row.threadId.value);
+    await refreshThreadStats(row.threadId.value);
   }
 
   Future<void> updateMessageContent(
     String id,
     String content, {
     required DateTime updatedAt,
-  }) => (update(db.aiChatMessages)..where((tbl) => tbl.id.equals(id))).write(
-    AiChatMessagesCompanion(
-      content: Value(content),
-      updatedAt: Value(updatedAt),
-    ),
-  );
+  }) async {
+    final threadId = await _messageThreadId(id);
+    await (update(db.aiChatMessages)..where((tbl) => tbl.id.equals(id))).write(
+      AiChatMessagesCompanion(
+        content: Value(content),
+        updatedAt: Value(updatedAt),
+      ),
+    );
+    if (threadId != null) {
+      await refreshThreadStats(threadId);
+    }
+  }
 
   Future<void> updateMessageStatus(
     String id,
     String status, {
     required DateTime updatedAt,
     String? errorText,
-  }) => (update(db.aiChatMessages)..where((tbl) => tbl.id.equals(id))).write(
-    AiChatMessagesCompanion(
-      status: Value(status),
-      errorText: Value(errorText),
-      updatedAt: Value(updatedAt),
-    ),
-  );
+  }) async {
+    final threadId = await _messageThreadId(id);
+    await (update(db.aiChatMessages)..where((tbl) => tbl.id.equals(id))).write(
+      AiChatMessagesCompanion(
+        status: Value(status),
+        errorText: Value(errorText),
+        updatedAt: Value(updatedAt),
+      ),
+    );
+    if (threadId != null) {
+      await refreshThreadStats(threadId);
+    }
+  }
 
   Future<void> appendMessageMetadataToolEvent(
     String id,
@@ -215,9 +281,16 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
     });
   }
 
-  Future<void> deleteConversationMessages(String conversationId) => (delete(
-    db.aiChatMessages,
-  )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+  Future<void> deleteConversationMessages(String conversationId) async {
+    await transaction(() async {
+      await (delete(
+        db.aiChatMessages,
+      )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+      await (delete(
+        db.aiChatThreads,
+      )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+    });
+  }
 
   Future<bool> hasPendingAssistantMessage(
     String threadId, {
@@ -270,10 +343,52 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
     );
   }
 
-  Future<void> _touchThread(String threadId) =>
-      (update(
-        db.aiChatThreads,
-      )..where((tbl) => tbl.id.equals(threadId))).write(
-        AiChatThreadsCompanion(updatedAt: Value(DateTime.now())),
-      );
+  Future<void> refreshThreadStats(String threadId) async {
+    final countExpression = db.aiChatMessages.id.count();
+    final countQuery = selectOnly(db.aiChatMessages)
+      ..addColumns([countExpression])
+      ..where(db.aiChatMessages.threadId.equals(threadId));
+    final countRow = await countQuery.getSingleOrNull();
+    final messageCount = countRow?.read(countExpression) ?? 0;
+    final latestMessage =
+        await (select(db.aiChatMessages)
+              ..where((tbl) => tbl.threadId.equals(threadId))
+              ..orderBy([
+                (tbl) => OrderingTerm.desc(tbl.createdAt),
+                (tbl) => OrderingTerm.desc(tbl.id),
+              ])
+              ..limit(1))
+            .getSingleOrNull();
+
+    await (update(
+      db.aiChatThreads,
+    )..where((tbl) => tbl.id.equals(threadId))).write(
+      AiChatThreadsCompanion(
+        lastMessagePreview: Value(_previewMessageContent(latestMessage)),
+        messageCount: Value(messageCount),
+        lastMessageAt: Value(latestMessage?.createdAt),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<String?> _messageThreadId(String messageId) async {
+    final row =
+        await (select(db.aiChatMessages)
+              ..where((tbl) => tbl.id.equals(messageId))
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.threadId;
+  }
+
+  String? _previewMessageContent(AiChatMessage? message) {
+    final content = message?.content.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (content == null || content.isEmpty) {
+      return null;
+    }
+    if (content.length <= 160) {
+      return content;
+    }
+    return content.substring(0, 160);
+  }
 }
