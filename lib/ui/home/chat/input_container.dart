@@ -701,21 +701,15 @@ Future<void> _sendMessage(
     return;
   }
 
-  final aiModeController = context.providerContainer.read(
-    aiInputModeProvider(conversationId).notifier,
-  );
-  final aiModeState = context.providerContainer.read(
-    aiInputModeProvider(conversationId),
-  );
-  final language = _currentLanguageTag(context);
-
   if (text == '/ai') {
     final provider = context.database.settingProperties.selectedAiProvider;
-    if (provider == null) {
+    if (provider == null || provider.model.trim().isEmpty) {
       showToastFailed(ToastError('Please add an AI provider first'));
       return;
     }
-    aiModeController.enter(providerId: provider.id, model: provider.model);
+    unawaited(
+      context.read<ChatSideCubit>().replace(ChatSideCubit.aiAssistantPage),
+    );
     textEditingController.text = '';
     return;
   }
@@ -725,44 +719,18 @@ Future<void> _sendMessage(
       : null;
   if (inlineAiInput != null && inlineAiInput.isNotEmpty) {
     final provider = context.database.settingProperties.selectedAiProvider;
-    if (provider == null) {
+    if (provider == null || provider.model.trim().isEmpty) {
       showToastFailed(ToastError('Please add an AI provider first'));
       return;
     }
-    aiModeController.enter(providerId: provider.id, model: provider.model);
+    unawaited(
+      context.read<ChatSideCubit>().replace(ChatSideCubit.aiAssistantPage),
+    );
     try {
       await AiChatController(context.database).send(
         conversationId: conversationId,
         input: inlineAiInput,
-        language: language,
-        provider: provider,
-        onInputAccepted: () => textEditingController.text = '',
-      );
-    } catch (error, _) {
-      showToastFailed(error);
-    }
-    return;
-  }
-
-  if (aiModeState.enabled) {
-    final provider = _resolveAiModeProvider(
-      selectedAiProvider: context.database.settingProperties.selectedAiProvider,
-      enabledAiProviders: context.database.settingProperties.aiProviders
-          .whereType<AiProviderConfig>()
-          .where((element) => element.enabled)
-          .toList(),
-      providerId: aiModeState.providerId,
-      selectedModel: aiModeState.model,
-    );
-    if (provider == null) {
-      showToastFailed(ToastError('Please add an AI provider first'));
-      return;
-    }
-    try {
-      await AiChatController(context.database).send(
-        conversationId: conversationId,
-        input: text,
-        language: language,
+        language: _currentLanguageTag(context),
         provider: provider,
         onInputAccepted: () => textEditingController.text = '',
       );

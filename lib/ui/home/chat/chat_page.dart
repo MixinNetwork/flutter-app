@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +21,6 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
-import '../../../widgets/ai/ai_message_card.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/conversation/mute_dialog.dart';
@@ -30,7 +28,6 @@ import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
-import '../../../widgets/markdown.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
@@ -45,6 +42,7 @@ import '../../provider/message_selection_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../chat_slide_page/ai_assistant_page.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
 import '../chat_slide_page/disappear_message_page.dart';
@@ -74,6 +72,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const sharedApps = 'sharedApps';
   static const groupsInCommon = 'groupsInCommon';
   static const disappearMessages = 'disappearMessages';
+  static const aiAssistantPage = 'aiAssistantPage';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -131,6 +130,12 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           key: ValueKey(disappearMessages),
           name: disappearMessages,
           child: _ChatSidePageBuilder(DisappearMessagePage.new),
+        );
+      case aiAssistantPage:
+        return const MaterialPage(
+          key: ValueKey(aiAssistantPage),
+          name: aiAssistantPage,
+          child: _ChatSidePageBuilder(AiAssistantPage.new),
         );
       default:
         throw ArgumentError('Invalid route');
@@ -573,24 +578,11 @@ class _List extends HookConsumerWidget {
     final state = useBlocState<MessageBloc, MessageState>(
       when: (state) => state.conversationId != null,
     );
-    final key = ValueKey((state.conversationId, state.refreshKey));
-    final center = state.center;
-    final timeline = state.timeline;
 
-    final centerTimelineIndex = center == null
-        ? null
-        : timeline.indexWhere(
-            (item) => item.message?.messageId == center.messageId,
-          );
-    final topTimeline = centerTimelineIndex == null
-        ? timeline
-        : timeline.take(centerTimelineIndex).toList();
-    final centerTimeline = centerTimelineIndex == null
-        ? null
-        : timeline[centerTimelineIndex];
-    final bottomTimeline = centerTimelineIndex == null
-        ? const <ChatTimelineItem>[]
-        : timeline.skip(centerTimelineIndex + 1).toList();
+    final key = ValueKey((state.conversationId, state.refreshKey));
+    final top = state.top;
+    final center = state.center;
+    final bottom = state.bottom;
 
     final keyRef = useRef<Map<String, Key>>({});
 
@@ -611,128 +603,6 @@ class _List extends HookConsumerWidget {
     final scrollController = BlocProvider.of<MessageBloc>(
       context,
     ).scrollController;
-
-    MessageItem? prevMessageOf(
-      ChatTimelineItem item,
-      List<ChatTimelineItem> items,
-    ) {
-      final index = items.indexOf(item);
-      if (index <= 0) return null;
-      for (var i = index - 1; i >= 0; i--) {
-        final message = items[i].message;
-        if (message != null) return message;
-      }
-      return null;
-    }
-
-    MessageItem? nextMessageOf(
-      ChatTimelineItem item,
-      List<ChatTimelineItem> items,
-    ) {
-      final index = items.indexOf(item);
-      if (index == -1 || index >= items.length - 1) return null;
-      for (var i = index + 1; i < items.length; i++) {
-        final message = items[i].message;
-        if (message != null) return message;
-      }
-      return null;
-    }
-
-    AiChatMessage? prevAiOf(
-      ChatTimelineItem item,
-      List<ChatTimelineItem> items,
-    ) {
-      final index = items.indexOf(item);
-      if (index <= 0) return null;
-      for (var i = index - 1; i >= 0; i--) {
-        final aiMessage = items[i].aiMessage;
-        if (aiMessage != null) return aiMessage;
-      }
-      return null;
-    }
-
-    AiChatMessage? nextAiOf(
-      ChatTimelineItem item,
-      List<ChatTimelineItem> items,
-    ) {
-      final index = items.indexOf(item);
-      if (index == -1 || index >= items.length - 1) return null;
-      for (var i = index + 1; i < items.length; i++) {
-        final aiMessage = items[i].aiMessage;
-        if (aiMessage != null) return aiMessage;
-      }
-      return null;
-    }
-
-    ({String key, String data})? markdownWarmupEntryOf(ChatTimelineItem item) {
-      final aiMessage = item.aiMessage;
-      if (aiMessage != null) {
-        if (aiMessage.role == 'user' || aiMessage.status == 'error') {
-          return null;
-        }
-        final content = aiMessage.content.trim();
-        if (content.isEmpty) return null;
-        return (
-          key: buildMarkdownCacheKey(
-            namespace: 'ai',
-            id: aiMessage.id,
-          ),
-          data: content,
-        );
-      }
-
-      final message = item.message;
-      if (message == null || !message.type.isPost) return null;
-      final content = (message.content ?? '').postOptimize();
-      if (content.isEmpty) return null;
-      return (
-        key: buildMarkdownCacheKey(
-          namespace: 'post',
-          id: message.messageId,
-        ),
-        data: content,
-      );
-    }
-
-    void warmupMarkdownAround(int index) {
-      final start = math.max(0, index - 6);
-      final end = math.min(timeline.length, index + 7);
-      final entries = <({String key, String data})>[];
-      for (var i = start; i < end; i++) {
-        final entry = markdownWarmupEntryOf(timeline[i]);
-        if (entry != null) {
-          entries.add(entry);
-        }
-      }
-      markdownControllerCache.warmupAll(entries);
-    }
-
-    Widget buildTimelineChild(ChatTimelineItem item, int index) {
-      warmupMarkdownAround(index);
-      final prevDateTime = index > 0 ? timeline[index - 1].createdAt : null;
-      if (item.isAiMessage) {
-        return MessageDayTimeItem(
-          key: ValueKey('ai-daytime-${item.id}'),
-          dateTime: item.createdAt,
-          prevDateTime: prevDateTime,
-          child: AiMessageCard(
-            key: ValueKey('ai-${item.id}'),
-            message: item.aiMessage!,
-            prev: prevAiOf(item, timeline),
-            next: nextAiOf(item, timeline),
-          ),
-        );
-      }
-      final message = item.message!;
-      return MessageItemWidget(
-        key: keyRef.value[message.messageId],
-        prev: prevMessageOf(item, timeline),
-        prevDateTime: prevDateTime,
-        message: message,
-        next: nextMessageOf(item, timeline),
-        lastReadMessageId: state.lastReadMessageId,
-      );
-    }
 
     return MessageDayTimeViewportWidget.chatPage(
       key: key,
@@ -756,31 +626,50 @@ class _List extends HookConsumerWidget {
               context,
               index,
             ) {
-              final actualIndex = topTimeline.length - index - 1;
-              return buildTimelineChild(topTimeline[actualIndex], actualIndex);
-            }, childCount: topTimeline.length),
+              final actualIndex = top.length - index - 1;
+              final messageItem = top[actualIndex];
+              return MessageItemWidget(
+                key: keyRef.value[messageItem.messageId],
+                prev: top.getOrNull(actualIndex - 1),
+                message: messageItem,
+                next:
+                    top.getOrNull(actualIndex + 1) ??
+                    center ??
+                    bottom.lastOrNull,
+                lastReadMessageId: state.lastReadMessageId,
+              );
+            }, childCount: top.length),
           ),
           SliverToBoxAdapter(
             key: key,
             child: Builder(
               builder: (context) {
-                if (centerTimeline == null) return const SizedBox();
-                return buildTimelineChild(centerTimeline, centerTimelineIndex!);
+                if (center == null) return const SizedBox();
+                return MessageItemWidget(
+                  key: keyRef.value[center.messageId],
+                  prev: top.lastOrNull,
+                  message: center,
+                  next: bottom.firstOrNull,
+                  lastReadMessageId: state.lastReadMessageId,
+                );
               },
             ),
           ),
           SliverList(
             key: bottomKey,
-            delegate: SliverChildBuilderDelegate(
-              (
-                context,
-                index,
-              ) => buildTimelineChild(
-                bottomTimeline[index],
-                (centerTimelineIndex ?? -1) + index + 1,
-              ),
-              childCount: bottomTimeline.length,
-            ),
+            delegate: SliverChildBuilderDelegate((
+              context,
+              index,
+            ) {
+              final messageItem = bottom[index];
+              return MessageItemWidget(
+                key: keyRef.value[messageItem.messageId],
+                prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+                message: messageItem,
+                next: bottom.getOrNull(index + 1),
+                lastReadMessageId: state.lastReadMessageId,
+              );
+            }, childCount: bottom.length),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
         ],

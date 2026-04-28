@@ -20,6 +20,9 @@ import '../message/message_layout.dart';
 import '../message/message_style.dart';
 import '../qr_code.dart';
 
+const _aiAssistantTitle = 'AI Assistant';
+const _copyAiMessageTitle = 'Copy AI Message';
+
 class AiMessageCard extends StatelessWidget {
   const AiMessageCard({
     required this.message,
@@ -41,84 +44,81 @@ class AiMessageCard extends StatelessWidget {
     final sameRoleNext = next?.role == message.role;
     final mergedWithPrev = sameDayPrev && sameRolePrev;
     final mergedWithNext = sameDayNext && sameRoleNext;
-    final showAssistantMeta = !isUser && !mergedWithPrev;
-    final bubbleColor = _bubbleColor(
-      context,
-      isUser: isUser,
-      status: message.status,
-    );
-    final body = _AiBubble(
-      isCurrentUser: isUser,
-      showNip: !mergedWithNext && !showAssistantMeta,
-      color: bubbleColor,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: _AiMessageBody(message: message),
-      ),
-    );
-    final content = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: isUser
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        if (showAssistantMeta)
-          Padding(
-            padding: const EdgeInsets.only(left: 10, bottom: 2),
-            child: Text(
-              'AI Assistant',
-              style: TextStyle(
-                color: context.theme.secondaryText,
-                fontSize: context.messageStyle.statusFontSize,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        body,
-      ],
+    final body = ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 420),
+      child: _AiMessageBody(message: message),
     );
 
     if (isUser) {
       return Padding(
         padding: EdgeInsets.only(
-          left: 65,
-          right: 16,
-          top: mergedWithPrev ? 0 : 8,
-          bottom: 2,
+          left: 72,
+          right: 8,
+          top: mergedWithPrev ? 4 : 14,
+          bottom: 4,
         ),
         child: Align(
           alignment: Alignment.centerRight,
           child: _AiMessageMenu(
             message: message,
-            child: content,
+            child: _AiBubble(
+              isCurrentUser: true,
+              showNip: !mergedWithNext,
+              color: _bubbleColor(
+                context,
+                isUser: true,
+                status: message.status,
+              ),
+              child: body,
+            ),
           ),
         ),
       );
     }
 
     return Padding(
-      padding: EdgeInsets.only(top: mergedWithPrev ? 0 : 8, bottom: 2),
+      padding: EdgeInsets.only(
+        left: 8,
+        right: 44,
+        top: mergedWithPrev ? 6 : 18,
+        bottom: 6,
+      ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 8),
           SizedBox(
             width: 32,
-            child: showAssistantMeta
+            child: !mergedWithPrev
                 ? _AiAvatar(thinking: message.status == 'pending')
                 : null,
           ),
-          Flexible(
+          const SizedBox(width: 12),
+          Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: _AiMessageMenu(
-                message: message,
-                child: content,
+              padding: const EdgeInsets.only(top: 1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!mergedWithPrev)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        _aiAssistantTitle,
+                        style: TextStyle(
+                          color: context.theme.secondaryText,
+                          fontSize: context.messageStyle.statusFontSize,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  _AiMessageMenu(
+                    message: message,
+                    child: body,
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 65),
         ],
       ),
     );
@@ -142,7 +142,9 @@ class _AiMessageBody extends StatelessWidget {
 
     Widget body;
     final textStyle = TextStyle(
-      color: context.theme.text,
+      color: message.status == 'error'
+          ? context.theme.ai.error
+          : context.theme.text,
       fontSize: context.messageStyle.primaryFontSize,
       height: 1.45,
     );
@@ -364,7 +366,7 @@ class _AiMessageMenu extends StatelessWidget {
               [
                 MenuAction(
                   image: MenuImage.icon(Icons.data_object),
-                  title: 'Copy AI message',
+                  title: _copyAiMessageTitle,
                   callback: () {
                     Clipboard.setData(ClipboardData(text: message.toString()));
                   },
