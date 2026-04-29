@@ -31,6 +31,7 @@ import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/chat/chat_side_route_names.dart';
 import '../../ui/home/chat_slide_page/ai_assistant/constants.dart';
+import '../../ui/home/chat_slide_page/ai_assistant/unread_summary.dart';
 import '../../ui/home/route/responsive_navigator.dart';
 import '../../ui/provider/ai_context_attachment_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
@@ -850,7 +851,10 @@ class MessageItemWidget extends HookConsumerWidget {
           ),
         ),
         if (message.messageId == lastReadMessageId && next != null)
-          const _UnreadMessageBar(),
+          _UnreadMessageBar(
+            conversationId: message.conversationId,
+            lastReadMessageId: lastReadMessageId,
+          ),
       ],
     );
 
@@ -1132,23 +1136,69 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   }
 }
 
-class _UnreadMessageBar extends StatelessWidget {
-  const _UnreadMessageBar();
+class _UnreadMessageBar extends HookConsumerWidget {
+  const _UnreadMessageBar({
+    required this.conversationId,
+    required this.lastReadMessageId,
+  });
+
+  final String conversationId;
+  final String? lastReadMessageId;
 
   @override
-  Widget build(BuildContext context) => Container(
-    color: context.theme.background,
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    margin: const EdgeInsets.symmetric(vertical: 6),
-    alignment: Alignment.center,
-    child: Text(
-      context.l10n.unreadMessages,
-      style: TextStyle(
-        color: context.theme.secondaryText,
-        fontSize: context.messageStyle.secondaryFontSize,
+  Widget build(BuildContext context, WidgetRef ref) {
+    useListenable(context.database.settingProperties);
+
+    final hasAiModel = hasAvailableAiModel(context);
+    return Container(
+      color: context.theme.background,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          const SizedBox(width: 44),
+          Expanded(
+            child: Text(
+              context.l10n.unreadMessages,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: context.messageStyle.secondaryFontSize,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 44,
+            child: hasAiModel
+                ? Align(
+                    child: Tooltip(
+                      message: 'Summarize unread messages',
+                      child: InteractiveDecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        onTap: () => summarizeUnreadMessagesWithAi(
+                          context: context,
+                          conversationId: conversationId,
+                          lastReadMessageId: lastReadMessageId,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 16,
+                            color: context.theme.accent,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _MessageSelectionWrapper extends HookConsumerWidget {

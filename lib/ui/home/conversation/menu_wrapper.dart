@@ -13,6 +13,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/slide_category_provider.dart';
+import '../chat_slide_page/ai_assistant/unread_summary.dart';
 
 class ConversationMenuWrapper extends HookConsumerWidget {
   const ConversationMenuWrapper({
@@ -40,6 +41,8 @@ class ConversationMenuWrapper extends HookConsumerWidget {
     final isGroupConversation =
         conversation?.isGroupConversation ??
         searchConversation!.isGroupConversation;
+    final lastReadMessageId = conversation?.lastReadMessageId;
+    final hasUnreadMessages = (conversation?.unseenMessageCount ?? 0) > 0;
 
     return CustomContextMenuWidget(
       desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
@@ -58,6 +61,18 @@ class ConversationMenuWrapper extends HookConsumerWidget {
         return MenusWithSeparator(
           childrens: [
             [
+              if (hasUnreadMessages && hasAvailableAiModel(context))
+                MenuAction(
+                  image: MenuImage.icon(Icons.auto_awesome_rounded),
+                  title: 'Summarize unread messages',
+                  callback: () => summarizeUnreadMessagesWithAi(
+                    context: context,
+                    conversationId: conversationId,
+                    lastReadMessageId: lastReadMessageId,
+                    conversation: conversation,
+                    selectConversation: true,
+                  ),
+                ),
               if (pinTime != null)
                 MenuAction(
                   image: MenuImage.icon(IconFonts.unPin),

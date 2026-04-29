@@ -43,6 +43,16 @@ enum AiPromptVariable {
     'messages',
     'Messages',
     'Conversation message lines assembled by the app.',
+  ),
+  unreadStartAt(
+    'unreadStartAt',
+    'Unread Start At',
+    'ISO 8601 timestamp of the first unread message.',
+  ),
+  firstUnreadMessageId(
+    'firstUnreadMessageId',
+    'First Unread Message ID',
+    'Message ID of the first unread message.',
   )
   ;
 
@@ -57,6 +67,7 @@ enum AiPromptVariable {
 
 enum AiPromptTemplateKey {
   chatSystem,
+  summarizeUnreadMessages,
   assistSystem,
   messageTranslate,
   messageExplain,
@@ -105,6 +116,29 @@ const aiPromptTemplateDefinitions = <AiPromptTemplateDefinition>[
       AiPromptVariable.currentIsoDateTime,
       AiPromptVariable.input,
       AiPromptVariable.language,
+    ],
+  ),
+  AiPromptTemplateDefinition(
+    key: AiPromptTemplateKey.summarizeUnreadMessages,
+    group: AiPromptTemplateGroup.conversation,
+    title: 'Summarize Unread Messages Prompt',
+    description: 'User prompt for summarizing new unread messages.',
+    defaultValue:
+        'Summarize the new information in this conversation since the unread '
+        'section started.\n\n'
+        'Unread section start:\n'
+        '- start_at: {{unreadStartAt}}\n'
+        '- first_unread_message_id: {{firstUnreadMessageId}}\n\n'
+        'Use the conversation tools to inspect messages created at or after '
+        'start_at. Focus only on new information, decisions, questions, '
+        'requests, mentions of the user, links, files, media references, and '
+        'action items.',
+    variables: [
+      AiPromptVariable.conversationId,
+      AiPromptVariable.currentIsoDateTime,
+      AiPromptVariable.language,
+      AiPromptVariable.unreadStartAt,
+      AiPromptVariable.firstUnreadMessageId,
     ],
   ),
   AiPromptTemplateDefinition(

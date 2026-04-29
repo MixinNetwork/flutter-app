@@ -192,10 +192,7 @@ class _ChatSidePageBuilder extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conversationId = useMemoized(
-      () => ref.read(lastConversationIdProvider),
-      [],
-    );
+    final conversationId = ref.watch(lastConversationIdProvider);
 
     final filter = useCallback<bool Function(ConversationState?)>(
       (state) => state?.conversationId == conversationId,
