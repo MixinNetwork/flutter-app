@@ -43,6 +43,8 @@ const kResponsiveNavigationMinWidth = 320.0;
 const kConversationListWidth = 300.0;
 // chat side page fixed width, chat info page etc.
 const kChatSidePageWidth = 300.0;
+// AI assistant needs more room for the prompt composer and model controls.
+const kAiAssistantChatSidePageWidth = 380.0;
 
 final _conversationPageKey = GlobalKey();
 

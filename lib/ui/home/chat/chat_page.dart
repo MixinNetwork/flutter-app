@@ -238,6 +238,7 @@ class ChatPage extends HookConsumerWidget {
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
           bloc: chatSideCubit,
         );
+    final chatSidePageWidth = _chatSidePageWidth(navigatorState.pages);
 
     ref.listen(hasSelectedMessageProvider, (previous, hasSelectedMessage) {
       if (!hasSelectedMessage) return;
@@ -288,7 +289,7 @@ class ChatPage extends HookConsumerWidget {
           builder: (context, boxConstraints) {
             final routeMode =
                 boxConstraints.maxWidth <
-                (kResponsiveNavigationMinWidth + kChatSidePageWidth);
+                (kResponsiveNavigationMinWidth + chatSidePageWidth);
             chatSideCubit.updateRouteMode(routeMode);
 
             return _ChatMenuHandler(
@@ -327,6 +328,17 @@ class ChatPage extends HookConsumerWidget {
       ),
     );
   }
+}
+
+double _chatSidePageWidth(List<Page<dynamic>> pages) {
+  final hasAiAssistantPage = pages.any(
+    (page) =>
+        page.name == ChatSideCubit.aiAssistantPage ||
+        page.name == ChatSideCubit.aiAssistantThreadsPage,
+  );
+  return hasAiAssistantPage
+      ? kAiAssistantChatSidePageWidth
+      : kChatSidePageWidth;
 }
 
 class _SideRouter extends StatelessWidget {
@@ -393,11 +405,12 @@ class _AnimatedChatSlide extends HookConsumerWidget {
       }
     }, [pages, controller]);
 
+    final chatSidePageWidth = _chatSidePageWidth(_pages.value);
+
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) => SizedBox(
-        width:
-            kChatSidePageWidth * Curves.easeInOut.transform(controller.value),
+        width: chatSidePageWidth * Curves.easeInOut.transform(controller.value),
         height: constraints.maxHeight,
         child: controller.value != 0 ? child : null,
       ),
@@ -406,8 +419,8 @@ class _AnimatedChatSlide extends HookConsumerWidget {
           alignment: AlignmentDirectional.centerStart,
           maxHeight: constraints.maxHeight,
           minHeight: constraints.maxHeight,
-          maxWidth: kChatSidePageWidth,
-          minWidth: kChatSidePageWidth,
+          maxWidth: chatSidePageWidth,
+          minWidth: chatSidePageWidth,
           child: Navigator(
             pages: _pages.value,
             onDidRemovePage: onDidRemovePage,
