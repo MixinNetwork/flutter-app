@@ -29,6 +29,10 @@ import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/chat/chat_side_route_names.dart';
+import '../../ui/home/chat_slide_page/ai_assistant/constants.dart';
+import '../../ui/home/route/responsive_navigator.dart';
+import '../../ui/provider/ai_context_attachment_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
@@ -160,6 +164,23 @@ void _quickReply(BuildContext context) {
   });
 }
 
+void _attachMessagesToAi(
+  BuildContext context,
+  WidgetRef ref,
+  List<MessageItem> messages,
+) {
+  if (messages.isEmpty) return;
+  final conversationId = messages.first.conversationId;
+  ref
+      .read(aiContextAttachmentProvider(conversationId).notifier)
+      .attachMessages(messages);
+  unawaited(
+    context.read<AbstractResponsiveNavigatorCubit>().replace(
+      chatSideAiAssistantPage,
+    ),
+  );
+}
+
 SelectedContent? _findSelectedContent(BuildContext context) {
   SelectableRegionState? findSelectableRegionState(BuildContext context) {
     if (context is! Element) {
@@ -246,8 +267,8 @@ class MessageItemWidget extends HookConsumerWidget {
         !(sameUserNext && sameDayNext) && (!showAvatar || isCurrentUser);
     final datetime =
         isSameDay(prevDateTime ?? prev?.createdAt, message.createdAt)
-            ? null
-            : message.createdAt;
+        ? null
+        : message.createdAt;
     String? userName;
     String? userId;
     String? userAvatarUrl;
@@ -670,6 +691,15 @@ class MessageItemWidget extends HookConsumerWidget {
                     }
 
                     final aiActions = [
+                      if (hasEnabledAiProvider &&
+                          !isTranscriptPage &&
+                          !isPinnedPage)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.auto_awesome_rounded),
+                          title: aiAssistantAttachToAi,
+                          callback: () =>
+                              _attachMessagesToAi(context, ref, [message]),
+                        ),
                       if (aiText != null)
                         MenuAction(
                           image: MenuImage.icon(Icons.translate),

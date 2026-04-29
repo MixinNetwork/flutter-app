@@ -9,6 +9,7 @@ import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
 import '../../../db/ai_database.dart';
+import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -18,8 +19,11 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/empty.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/ai_input_mode_provider.dart';
 import '../../provider/conversation_provider.dart';
+import '../bloc/blink_cubit.dart';
+import '../bloc/message_bloc.dart';
 import '../chat/chat_page.dart';
 import 'ai_assistant/composer.dart';
 import 'ai_assistant/constants.dart';
@@ -41,6 +45,12 @@ class AiAssistantPage extends HookConsumerWidget {
     useListenable(context.database.settingProperties);
 
     final conversationId = conversationState.conversationId;
+    final attachedMessages = ref.watch(
+      aiContextAttachmentProvider(conversationId),
+    );
+    final attachedMessagesNotifier = ref.read(
+      aiContextAttachmentProvider(conversationId).notifier,
+    );
     final aiModeState = ref.watch(aiInputModeProvider(conversationId));
     final aiModeNotifier = ref.read(
       aiInputModeProvider(conversationId).notifier,
@@ -124,7 +134,11 @@ class AiAssistantPage extends HookConsumerWidget {
           input: text,
           language: currentLanguageTag(context),
           provider: aiProvider,
-          onInputAccepted: textEditingController.clear,
+          attachedMessages: attachedMessages,
+          onInputAccepted: () {
+            textEditingController.clear();
+            attachedMessagesNotifier.clear();
+          },
         );
         activeThreadNotifier.state = threadId;
       } catch (error, _) {
@@ -169,12 +183,16 @@ class AiAssistantPage extends HookConsumerWidget {
             textEditingController: textEditingController,
             enabled: aiProvider != null,
             provider: aiProvider,
+            attachedMessages: attachedMessages,
             enabledAiProviders: enabledAiProviders,
             requestInFlight: requestInFlight,
             onSend: send,
             onStop: () => AiChatController(
               context.database,
             ).stop(conversationId, threadId: currentThread?.id),
+            onTapAttachment: (message) =>
+                _jumpToAttachedMessage(context, message),
+            onRemoveAttachment: attachedMessagesNotifier.remove,
             onProviderSelected: (value) => aiModeNotifier.updateProvider(
               providerId: value.id,
               model: value.model,
@@ -184,6 +202,16 @@ class AiAssistantPage extends HookConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+void _jumpToAttachedMessage(BuildContext context, MessageItem message) {
+  context.read<MessageBloc>().scrollTo(message.messageId);
+  context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+
+  final chatSideCubit = context.read<ChatSideCubit>();
+  if (chatSideCubit.state.routeMode) {
+    chatSideCubit.pop();
   }
 }
 

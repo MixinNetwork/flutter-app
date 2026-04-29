@@ -58,5 +58,25 @@ void main() {
         containsPair('totalTokens', 124),
       );
     });
+
+    test('stores user message attachments', () {
+      final metadata = createAiUserMessageMetadata([
+        const {
+          'messageId': 'message-id',
+          'senderName': 'Alice',
+          'preview': 'Please review this',
+        },
+      ]);
+
+      expect(metadata, isNotNull);
+      expect(
+        aiMetadataAttachments(metadata),
+        [
+          containsPair('messageId', 'message-id'),
+        ],
+      );
+      expect(aiMetadataToolEvents(metadata), isEmpty);
+      expect(aiMetadataResponse(metadata), isEmpty);
+    });
   });
 }

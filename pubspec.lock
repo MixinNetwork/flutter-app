@@ -1328,10 +1328,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_markdown_widget
-      sha256: ea1fd34d1eeb837e6be54641458800739080e4ee5a9ecc100536c82f0b69242f
+      sha256: "58b366d61d55fe852a91a7b3fb102481a76a7a8f208e0bd948ef823501ba29d9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.1"
   msix:
     dependency: "direct dev"
     description:

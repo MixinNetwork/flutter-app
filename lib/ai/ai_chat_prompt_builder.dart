@@ -2,6 +2,7 @@ import 'package:mixin_logger/mixin_logger.dart';
 
 import '../db/database.dart';
 import '../db/mixin_database.dart';
+import 'ai_message_context.dart';
 import 'model/ai_prompt_message.dart';
 import 'model/ai_prompt_template.dart';
 
@@ -20,6 +21,7 @@ class AiChatPromptBuilder {
     String input,
     String language, {
     String? currentMessageId,
+    List<MessageItem> attachedMessages = const [],
   }) async {
     final now = DateTime.now();
     final recentMessages = await database.messageDao
@@ -58,6 +60,12 @@ class AiChatPromptBuilder {
       language: language,
       now: now,
     );
+    _appendAttachedMessages(
+      promptMessages,
+      attachedMessages: attachedMessages,
+      language: language,
+      now: now,
+    );
 
     final history = aiMessages
         .where(
@@ -90,6 +98,7 @@ class AiChatPromptBuilder {
       'AI prompt built: conversationId=$conversationId '
       'threadId=$threadId '
       'recent=${recentMessages.length} '
+      'attached=${attachedMessages.length} '
       'history=${history.length} promptMessages=${promptMessages.length}',
     );
     return promptMessages;
@@ -223,6 +232,31 @@ class AiChatPromptBuilder {
         ),
       );
     }
+  }
+
+  void _appendAttachedMessages(
+    List<AiPromptMessage> promptMessages, {
+    required List<MessageItem> attachedMessages,
+    required String language,
+    required DateTime now,
+  }) {
+    if (attachedMessages.isEmpty) {
+      return;
+    }
+
+    final lines = attachedMessages.map(aiMessageContextLine).join('\n');
+    promptMessages.addAll(
+      _promptMessages(
+        role: AiPromptRole.system,
+        content:
+            'User-attached messages for the next request. Treat these as '
+            'the primary quoted context, especially when the user says '
+            '"this message", "these messages", or asks for a specific '
+            'message to be handled. Answer in $language unless the user '
+            'explicitly asks for another language. Current time: '
+            '${now.toIso8601String()}.\n$lines',
+      ),
+    );
   }
 
   String _conversationContextLine({

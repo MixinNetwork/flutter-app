@@ -8,5 +8,6 @@ const aiAssistantUntitledThread = 'New chat';
 const aiAssistantDeleteThread = 'Delete Chat';
 const aiAssistantDeleteThreadDescription =
     'This removes the AI messages in this chat.';
+const aiAssistantAttachToAi = 'Attach to AI';
 const aiAssistantStickToBottomDistance = 96.0;
 const aiAssistantMessagePageLimit = 80;

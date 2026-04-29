@@ -38,6 +38,7 @@ import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../../widgets/ai/ai_context_attachment_bar.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
@@ -48,12 +49,15 @@ import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/ai_input_mode_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
+import '../bloc/blink_cubit.dart';
+import '../bloc/message_bloc.dart';
 import 'ai_draft_assist_panel.dart';
 import 'chat_page.dart';
 import 'files_preview.dart';
@@ -121,6 +125,12 @@ class _InputContainer extends HookConsumerWidget {
       selectedModel: aiModeState.model,
     );
     final aiModeEnabled = aiModeState.enabled;
+    final attachedMessages = conversationId == null
+        ? const <MessageItem>[]
+        : ref.watch(aiContextAttachmentProvider(conversationId));
+    final attachedMessagesNotifier = conversationId == null
+        ? null
+        : ref.read(aiContextAttachmentProvider(conversationId).notifier);
     final activeAiThread = useMemoizedStream(
       () => conversationId == null
           ? Stream.value(null)
@@ -329,6 +339,15 @@ class _InputContainer extends HookConsumerWidget {
                           provider: aiProvider,
                         ),
                         const SizedBox(height: 8),
+                        AiContextAttachmentBar(
+                          messages: attachedMessages,
+                          onTap: (message) =>
+                              _jumpToAttachedMessage(context, message),
+                          onRemove: (messageId) =>
+                              attachedMessagesNotifier?.remove(messageId),
+                        ),
+                        if (attachedMessages.isNotEmpty)
+                          const SizedBox(height: 8),
                       ],
                       if (!aiModeEnabled &&
                           !aiDraftAssistState.value.isIdle) ...[
@@ -405,6 +424,7 @@ class _InputContainer extends HookConsumerWidget {
                               aiModeEnabled: aiModeEnabled,
                               providerName: aiProvider?.name,
                               modelName: aiProvider?.model,
+                              aiThreadId: activeAiThread?.id,
                               aiRequestInFlight: aiRequestInFlight,
                               aiDraftAssistState: aiDraftAssistState.value,
                             ),
@@ -671,6 +691,11 @@ String _currentLanguageTag(BuildContext context) {
   return '${locale.languageCode}-$countryCode';
 }
 
+void _jumpToAttachedMessage(BuildContext context, MessageItem message) {
+  context.read<MessageBloc>().scrollTo(message.messageId);
+  context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+}
+
 void showMaxLengthReachedToast(BuildContext context) =>
     showToastFailed(ToastError(context.l10n.contentTooLong));
 
@@ -733,6 +758,49 @@ Future<void> _sendMessage(
   final inlineAiInput = text.startsWith('/ai ')
       ? text.substring(4).trim()
       : null;
+  final attachedMessages = context.providerContainer.read(
+    aiContextAttachmentProvider(conversationId),
+  );
+  final attachedMessagesNotifier = context.providerContainer.read(
+    aiContextAttachmentProvider(conversationId).notifier,
+  );
+
+  final aiModeState = context.providerContainer.read(
+    aiInputModeProvider(conversationId),
+  );
+  if (aiModeState.enabled) {
+    final provider = _resolveAiModeProvider(
+      selectedAiProvider: context.database.settingProperties.selectedAiProvider,
+      enabledAiProviders: context.database.settingProperties.aiProviders
+          .whereType<AiProviderConfig>()
+          .where((element) => element.enabled)
+          .toList(),
+      providerId: aiModeState.providerId,
+      selectedModel: aiModeState.model,
+    );
+    if (provider == null || provider.model.trim().isEmpty) {
+      showToastFailed(ToastError('Please add an AI provider first'));
+      return;
+    }
+    try {
+      await AiChatController(context.database).send(
+        conversationId: conversationId,
+        threadId: aiThreadId,
+        input: text,
+        language: _currentLanguageTag(context),
+        provider: provider,
+        attachedMessages: attachedMessages,
+        onInputAccepted: () {
+          textEditingController.text = '';
+          attachedMessagesNotifier.clear();
+        },
+      );
+    } catch (error, _) {
+      showToastFailed(error);
+    }
+    return;
+  }
+
   if (inlineAiInput != null && inlineAiInput.isNotEmpty) {
     final provider = context.database.settingProperties.selectedAiProvider;
     if (provider == null || provider.model.trim().isEmpty) {
@@ -749,7 +817,11 @@ Future<void> _sendMessage(
         input: inlineAiInput,
         language: _currentLanguageTag(context),
         provider: provider,
-        onInputAccepted: () => textEditingController.text = '',
+        attachedMessages: attachedMessages,
+        onInputAccepted: () {
+          textEditingController.text = '';
+          attachedMessagesNotifier.clear();
+        },
       );
     } catch (error, _) {
       showToastFailed(error);
@@ -804,6 +876,7 @@ class _SendTextField extends HookConsumerWidget {
     required this.aiModeEnabled,
     required this.providerName,
     required this.modelName,
+    required this.aiThreadId,
     required this.aiRequestInFlight,
     required this.aiDraftAssistState,
   });
@@ -815,6 +888,7 @@ class _SendTextField extends HookConsumerWidget {
   final bool aiModeEnabled;
   final String? providerName;
   final String? modelName;
+  final String? aiThreadId;
   final bool aiRequestInFlight;
   final AiDraftAssistViewState aiDraftAssistState;
 
@@ -915,6 +989,7 @@ class _SendTextField extends HookConsumerWidget {
                 context,
                 textEditingController,
                 conversationId: ref.read(currentConversationIdProvider),
+                aiThreadId: aiThreadId,
               ),
             ),
           ),

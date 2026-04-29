@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import '../../../../ai/model/ai_provider_config.dart';
 import '../../../../constants/constants.dart';
 import '../../../../constants/resources.dart';
+import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/action_button.dart';
 import '../../../../widgets/actions/actions.dart';
+import '../../../../widgets/ai/ai_context_attachment_bar.dart';
 import '../../../../widgets/high_light_text.dart';
 import '../../../../widgets/menu.dart';
 import 'constants.dart';
@@ -18,10 +20,13 @@ class AiAssistantComposer extends StatelessWidget {
     required this.focusNode,
     required this.textEditingController,
     required this.enabled,
+    required this.attachedMessages,
     required this.enabledAiProviders,
     required this.requestInFlight,
     required this.onSend,
     required this.onStop,
+    required this.onTapAttachment,
+    required this.onRemoveAttachment,
     required this.onProviderSelected,
     required this.onModelSelected,
     this.provider,
@@ -32,10 +37,13 @@ class AiAssistantComposer extends StatelessWidget {
   final TextEditingController textEditingController;
   final bool enabled;
   final AiProviderConfig? provider;
+  final List<MessageItem> attachedMessages;
   final List<AiProviderConfig> enabledAiProviders;
   final bool requestInFlight;
   final VoidCallback onSend;
   final VoidCallback onStop;
+  final ValueChanged<MessageItem> onTapAttachment;
+  final ValueChanged<String> onRemoveAttachment;
   final ValueChanged<AiProviderConfig> onProviderSelected;
   final ValueChanged<String?> onModelSelected;
 
@@ -53,6 +61,12 @@ class AiAssistantComposer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (provider != null) ...[
+            AiContextAttachmentBar(
+              messages: attachedMessages,
+              onTap: onTapAttachment,
+              onRemove: onRemoveAttachment,
+            ),
+            if (attachedMessages.isNotEmpty) const SizedBox(height: 8),
             _AiAssistantModeBar(
               provider: provider!,
               enabledAiProviders: enabledAiProviders,

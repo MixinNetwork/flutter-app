@@ -11,6 +11,7 @@ import 'package:mixin_markdown_widget/mixin_markdown_widget.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/uri_utils.dart';
+import 'message/message_style.dart';
 import 'mixin_image.dart';
 
 const _kMarkdownControllerCacheLimit = 120;
@@ -513,20 +514,26 @@ MarkdownThemeData _createMarkdownTheme(
   );
   final textColor = context.theme.text;
   final accentColor = context.theme.accent;
+  final chatBodyFontSize =
+      MessageStyle.defaultStyle.primaryFontSize + chatFontSizeDelta;
+  final baseBodyFontSize = base.bodyStyle.fontSize ?? chatBodyFontSize;
+  final fontSizeScale = baseBodyFontSize == 0
+      ? 1.0
+      : chatBodyFontSize / baseBodyFontSize;
 
   TextStyle applyTextColor(TextStyle style) => style.copyWith(color: textColor);
-  TextStyle applyFontSizeDelta(TextStyle style) {
+  TextStyle scaleFontSize(TextStyle style) {
     final fontSize = style.fontSize;
     if (fontSize == null) return style;
-    return style.copyWith(fontSize: fontSize + chatFontSizeDelta);
+    return style.copyWith(fontSize: fontSize * fontSizeScale);
   }
 
   TextStyle applyTextStyle(TextStyle style) =>
-      applyTextColor(applyFontSizeDelta(style));
+      applyTextColor(scaleFontSize(style));
 
   return base.copyWith(
     bodyStyle: applyTextStyle(base.bodyStyle),
-    quoteStyle: applyFontSizeDelta(
+    quoteStyle: scaleFontSize(
       base.quoteStyle.copyWith(
         color: base.quoteStyle.color ?? textColor.withValues(alpha: 0.82),
       ),
@@ -535,16 +542,18 @@ MarkdownThemeData _createMarkdownTheme(
       color: accentColor,
       decorationColor: accentColor,
       fontSize:
-          (base.linkStyle.fontSize ?? base.bodyStyle.fontSize ?? 16) +
-          chatFontSizeDelta,
+          (base.linkStyle.fontSize ??
+              base.bodyStyle.fontSize ??
+              chatBodyFontSize) *
+          fontSizeScale,
+      decoration: .none,
     ),
     inlineCodeStyle: applyTextStyle(base.inlineCodeStyle),
     codeBlockStyle: applyTextStyle(base.codeBlockStyle),
     tableHeaderStyle: applyTextStyle(base.tableHeaderStyle),
     heading1Style: applyTextStyle(
-      applyFontSizeDelta(
+      scaleFontSize(
         base.heading1Style.copyWith(
-          fontSize: 32,
           height: 40 / 32,
           fontWeight: FontWeight.bold,
         ),
@@ -558,5 +567,6 @@ MarkdownThemeData _createMarkdownTheme(
     quoteBorderColor: accentColor.withValues(alpha: 0.4),
     selectionColor: accentColor.withValues(alpha: 0.24),
     showHeading1Divider: false,
+    quoteBackgroundColor: Colors.transparent,
   );
 }

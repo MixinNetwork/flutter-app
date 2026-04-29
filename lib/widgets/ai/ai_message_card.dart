@@ -155,10 +155,95 @@ class _AiUserMessageBody extends StatelessWidget {
   final AiChatMessage message;
 
   @override
-  Widget build(BuildContext context) => _AiSelectableText(
-    text: _displayText(message),
-    style: _aiMessageTextStyle(context, message),
-  );
+  Widget build(BuildContext context) {
+    final attachments = aiMetadataAttachments(message.metadata);
+    final body = _AiSelectableText(
+      text: _displayText(message),
+      style: _aiMessageTextStyle(context, message),
+    );
+    if (attachments.isEmpty) {
+      return body;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _AiAttachedContextSummary(attachments: attachments),
+        const SizedBox(height: 6),
+        body,
+      ],
+    );
+  }
+}
+
+class _AiAttachedContextSummary extends StatelessWidget {
+  const _AiAttachedContextSummary({required this.attachments});
+
+  final List<Map<String, dynamic>> attachments;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.dynamicColor(
+      const Color.fromRGBO(0, 0, 0, 0.08),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.1),
+    );
+
+    return SelectionContainer.disabled(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 13,
+                    color: context.theme.secondaryText,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      'AI context · ${attachments.length}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              for (final attachment in attachments.take(3))
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    _attachmentSummaryText(attachment),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _AiResponseMessageBody extends StatelessWidget {
@@ -621,6 +706,18 @@ String _displayText(AiChatMessage message) {
   }
   if (message.status == 'pending') return _pendingAssistantText(message);
   return message.errorText ?? 'No response';
+}
+
+String _attachmentSummaryText(Map<String, dynamic> attachment) {
+  final sender = attachment['senderName'] as String?;
+  final preview = attachment['preview'] as String?;
+  if (sender == null || sender.isEmpty) {
+    return preview ?? '';
+  }
+  if (preview == null || preview.isEmpty) {
+    return sender;
+  }
+  return '$sender: $preview';
 }
 
 String _pendingAssistantText(AiChatMessage message) {

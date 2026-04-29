@@ -4,6 +4,7 @@ import 'ai_provider_config.dart';
 
 const aiMetadataToolEventsKey = 'toolEvents';
 const aiMetadataResponseKey = 'response';
+const aiMetadataAttachmentsKey = 'attachments';
 const aiToolEventTypeCall = 'tool_call';
 const aiToolEventTypeResult = 'tool_result';
 
@@ -15,6 +16,17 @@ String createAiMessageMetadata(AiProviderConfig provider) => jsonEncode({
   },
   aiMetadataToolEventsKey: const <Map<String, dynamic>>[],
 });
+
+String? createAiUserMessageMetadata(
+  List<Map<String, dynamic>> attachments,
+) {
+  if (attachments.isEmpty) {
+    return null;
+  }
+  return jsonEncode({
+    aiMetadataAttachmentsKey: attachments,
+  });
+}
 
 Map<String, dynamic> decodeAiMessageMetadata(String? metadata) {
   if (metadata == null || metadata.trim().isEmpty) {
@@ -32,6 +44,21 @@ Map<String, dynamic> decodeAiMessageMetadata(String? metadata) {
     return <String, dynamic>{};
   }
   return <String, dynamic>{};
+}
+
+List<Map<String, dynamic>> aiMetadataAttachments(String? metadata) {
+  final attachments = decodeAiMessageMetadata(
+    metadata,
+  )[aiMetadataAttachmentsKey];
+  if (attachments is! List) {
+    return const <Map<String, dynamic>>[];
+  }
+  return attachments
+      .whereType<Map>()
+      .map(
+        (attachment) => attachment.map((key, value) => MapEntry('$key', value)),
+      )
+      .toList(growable: false);
 }
 
 String appendAiToolEventToMetadata(

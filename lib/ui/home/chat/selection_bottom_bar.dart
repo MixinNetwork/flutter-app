@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
@@ -12,8 +15,12 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
+import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/message_selection_provider.dart';
+import '../chat_slide_page/ai_assistant/constants.dart';
+import '../route/responsive_navigator.dart';
+import 'chat_side_route_names.dart';
 
 class SelectionBottomBar extends HookConsumerWidget {
   const SelectionBottomBar({super.key});
@@ -27,6 +34,9 @@ class SelectionBottomBar extends HookConsumerWidget {
     final canCombineForward = ref.watch(
       messageSelectionProvider.select((value) => value.canCombineForward),
     );
+    final canAttachToAi = context.database.settingProperties.aiProviders
+        .whereType<AiProviderConfig>()
+        .any((item) => item.enabled && item.model.trim().isNotEmpty);
 
     return SizedBox(
       height: 80,
@@ -128,6 +138,31 @@ class SelectionBottomBar extends HookConsumerWidget {
             ),
           ),
           _Button(
+            label: aiAssistantAttachToAi,
+            icon: Icons.auto_awesome_rounded,
+            enable: canAttachToAi,
+            onTap: () async {
+              final conversationId = ref.read(currentConversationIdProvider);
+              if (conversationId == null) return;
+              final selection = ref.read(messageSelectionProvider);
+              final messages = await context.database.messageDao
+                  .messageItemByMessageIds(
+                    selection.selectedMessageIds.toList(),
+                  )
+                  .get();
+              if (messages.isEmpty) return;
+              ref
+                  .read(aiContextAttachmentProvider(conversationId).notifier)
+                  .attachMessages(messages);
+              selection.clearSelection();
+              unawaited(
+                context.read<AbstractResponsiveNavigatorCubit>().replace(
+                  chatSideAiAssistantPage,
+                ),
+              );
+            },
+          ),
+          _Button(
             label: context.l10n.delete,
             iconAssetName: Resources.assetsImagesContextMenuDeleteSvg,
             onTap: () async {
@@ -174,13 +209,15 @@ class SelectionBottomBar extends HookConsumerWidget {
 class _Button extends StatelessWidget {
   const _Button({
     required this.label,
-    required this.iconAssetName,
     required this.onTap,
+    this.iconAssetName,
+    this.icon,
     this.enable = true,
-  });
+  }) : assert(iconAssetName != null || icon != null);
 
   final String label;
-  final String iconAssetName;
+  final String? iconAssetName;
+  final IconData? icon;
   final VoidCallback onTap;
   final bool enable;
 
@@ -192,15 +229,18 @@ class _Button extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              iconAssetName,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                context.theme.icon,
-                BlendMode.srcIn,
-              ),
-            ),
+            if (iconAssetName != null)
+              SvgPicture.asset(
+                iconAssetName!,
+                width: 24,
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  context.theme.icon,
+                  BlendMode.srcIn,
+                ),
+              )
+            else
+              Icon(icon, size: 24, color: context.theme.icon),
             const SizedBox(height: 8),
             Text(
               label,

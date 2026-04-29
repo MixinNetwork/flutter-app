@@ -56,6 +56,7 @@ import '../home.dart';
 import '../hook/pin_message.dart';
 import '../route/responsive_navigator.dart';
 import 'chat_bar.dart';
+import 'chat_side_route_names.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
 import 'selection_bottom_bar.dart';
@@ -72,7 +73,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const sharedApps = 'sharedApps';
   static const groupsInCommon = 'groupsInCommon';
   static const disappearMessages = 'disappearMessages';
-  static const aiAssistantPage = 'aiAssistantPage';
+  static const aiAssistantPage = chatSideAiAssistantPage;
   static const aiAssistantThreadsPage = 'aiAssistantThreadsPage';
 
   @override
@@ -267,6 +268,9 @@ class ChatPage extends HookConsumerWidget {
       providers: [
         BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: chatSideCubit),
+        BlocProvider<AbstractResponsiveNavigatorCubit>.value(
+          value: chatSideCubit,
+        ),
         BlocProvider.value(value: searchConversationKeywordCubit),
         BlocProvider(
           create: (context) => MessageBloc(

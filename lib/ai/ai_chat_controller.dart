@@ -8,7 +8,9 @@ import 'package:uuid/uuid.dart';
 import '../db/ai_database.dart';
 import '../db/dao/ai_chat_message_dao.dart';
 import '../db/database.dart';
+import '../db/mixin_database.dart';
 import 'ai_chat_prompt_builder.dart';
+import 'ai_message_context.dart';
 import 'ai_provider_requester.dart';
 import 'model/ai_chat_metadata.dart';
 import 'model/ai_prompt_message.dart';
@@ -100,6 +102,7 @@ class AiChatController {
     required String language,
     String? threadId,
     AiProviderConfig? provider,
+    List<MessageItem> attachedMessages = const [],
     void Function()? onInputAccepted,
   }) async {
     final thread = await database.aiChatMessageDao.ensureThread(
@@ -147,6 +150,11 @@ class AiChatController {
         content: input,
         status: _kAiStatusDone,
         model: Value(config.model),
+        metadata: Value(
+          createAiUserMessageMetadata(
+            attachedMessages.map(aiMessageContextMetadata).toList(),
+          ),
+        ),
         createdAt: now,
         updatedAt: now,
       ),
@@ -187,6 +195,7 @@ class AiChatController {
         input,
         language,
         currentMessageId: userMessageId,
+        attachedMessages: attachedMessages,
       );
       Map<String, dynamic>? responseMetadata;
       final result = await _requestText(
