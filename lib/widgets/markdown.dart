@@ -1,9 +1,6 @@
-import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_markdown_widget/mixin_markdown_widget.dart';
@@ -15,7 +12,6 @@ import 'message/message_style.dart';
 import 'mixin_image.dart';
 
 const _kMarkdownControllerCacheLimit = 120;
-const _kMarkdownWarmupPerFrame = 2;
 
 String buildMarkdownCacheKey({
   required String namespace,
@@ -26,19 +22,20 @@ final markdownControllerCache = MarkdownControllerCache();
 
 class MarkdownControllerCache {
   final _entries = <String, _MarkdownCacheEntry>{};
-  final _pending = <String, Completer<void>>{};
-  final _queuedKeys = <String>{};
-  final _warmupQueue = ListQueue<({String key, String data})>();
 
-  bool _warmupScheduled = false;
-
-  MarkdownController? acquire(
+  MarkdownController acquire(
     String key,
     String data, {
     bool streaming = false,
   }) {
-    final entry = _entries[key];
-    if (entry == null) return null;
+    var entry = _entries[key];
+    if (entry == null) {
+      entry = _MarkdownCacheEntry(
+        data: data,
+        controller: MarkdownController(data: data),
+      );
+      _entries[key] = entry;
+    }
     if (entry.data != data) {
       _updateEntryData(entry, data, streaming: streaming);
     } else if (!streaming) {
@@ -46,6 +43,7 @@ class MarkdownControllerCache {
     }
     _touch(key, entry);
     entry.retainCount += 1;
+    _evictIfNeeded();
     return entry.controller;
   }
 
@@ -54,81 +52,6 @@ class MarkdownControllerCache {
     if (entry == null || !identical(entry.controller, controller)) return;
     if (entry.retainCount > 0) {
       entry.retainCount -= 1;
-    }
-  }
-
-  Future<void> warmup(String key, String data) {
-    final entry = _entries[key];
-    if (entry != null) {
-      if (entry.data == data) {
-        _touch(key, entry);
-        entry.controller.commitStream();
-        return Future.value();
-      }
-      _updateEntryData(entry, data, streaming: false);
-      _touch(key, entry);
-      return Future.value();
-    }
-
-    final pending = _pending[key];
-    if (pending != null) return pending.future;
-
-    final completer = Completer<void>();
-    _pending[key] = completer;
-    if (_queuedKeys.add(key)) {
-      _warmupQueue.add((key: key, data: data));
-      _scheduleWarmup();
-    }
-    return completer.future;
-  }
-
-  void warmupAll(Iterable<({String key, String data})> entries) {
-    for (final entry in entries) {
-      unawaited(warmup(entry.key, entry.data));
-    }
-  }
-
-  void _scheduleWarmup() {
-    if (_warmupScheduled) return;
-    _warmupScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _warmupScheduled = false;
-      _drainWarmupQueue();
-    });
-  }
-
-  void _drainWarmupQueue() {
-    var count = 0;
-    while (_warmupQueue.isNotEmpty && count < _kMarkdownWarmupPerFrame) {
-      final task = _warmupQueue.removeFirst();
-      _queuedKeys.remove(task.key);
-      final completer = _pending.remove(task.key);
-
-      try {
-        final existing = _entries[task.key];
-        if (existing != null) {
-          if (existing.data != task.data) {
-            _updateEntryData(existing, task.data, streaming: false);
-          } else {
-            existing.controller.commitStream();
-          }
-          _touch(task.key, existing);
-        } else {
-          _entries[task.key] = _MarkdownCacheEntry(
-            data: task.data,
-            controller: MarkdownController(data: task.data),
-          );
-          _evictIfNeeded();
-        }
-        completer?.complete();
-      } catch (error, stackTrace) {
-        completer?.completeError(error, stackTrace);
-      }
-      count += 1;
-    }
-
-    if (_warmupQueue.isNotEmpty) {
-      _scheduleWarmup();
     }
   }
 
@@ -300,57 +223,24 @@ class _MarkdownView extends HookWidget {
       return _buildMarkdownWidget(data: data);
     }
 
-    final controller =
-        useState<({String key, String data, MarkdownController controller})?>(
-          null,
-        );
-
-    useEffect(() {
-      var disposed = false;
-      MarkdownController? retained;
-
-      bool bindCachedController() {
-        final cached = markdownControllerCache.acquire(
-          cacheKey!,
-          data,
-          streaming: streaming,
-        );
-        if (cached == null || disposed) return false;
-        retained = cached;
-        controller.value = (key: cacheKey!, data: data, controller: cached);
-        return true;
-      }
-
-      if (!bindCachedController()) {
-        unawaited(
-          markdownControllerCache.warmup(cacheKey!, data).then((_) {
-            if (disposed) return;
-            bindCachedController();
-          }),
-        );
-      }
-
-      return () {
-        disposed = true;
-        final current = retained;
-        if (current != null) {
-          markdownControllerCache.release(cacheKey!, current);
-        }
-      };
-    }, [cacheKey, data, streaming]);
-
-    final cachedController = controller.value;
-    if (cachedController != null &&
-        cachedController.key == cacheKey &&
-        cachedController.data == data) {
-      return _buildMarkdownWidget(controller: cachedController.controller);
-    }
-
-    return _MarkdownFallback(
-      data: data,
-      theme: theme,
-      padding: padding,
+    final key = cacheKey!;
+    final controller = useMemoized(
+      () => markdownControllerCache.acquire(
+        key,
+        data,
+        streaming: streaming,
+      ),
+      [key, data, streaming],
     );
+
+    useEffect(
+      () => () {
+        markdownControllerCache.release(key, controller);
+      },
+      [key, controller],
+    );
+
+    return _buildMarkdownWidget(controller: controller);
   }
 
   Widget _buildMarkdownWidget({
@@ -368,30 +258,6 @@ class _MarkdownView extends HookWidget {
     imageBuilder: imageBuilder,
     onTapLink: onTapLink,
   );
-}
-
-class _MarkdownFallback extends StatelessWidget {
-  const _MarkdownFallback({
-    required this.data,
-    required this.theme,
-    this.padding,
-  });
-
-  final String data;
-  final MarkdownThemeData theme;
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    final effectivePadding = padding ?? EdgeInsets.zero;
-    return Padding(
-      padding: effectivePadding,
-      child: Text(
-        data,
-        style: theme.bodyStyle,
-      ),
-    );
-  }
 }
 
 Widget _buildMarkdownImage(
