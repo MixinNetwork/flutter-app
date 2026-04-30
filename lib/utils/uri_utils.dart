@@ -296,13 +296,42 @@ Future<bool> _selectConversation(
     }
   }
 
+  final initIndexMessageId = await _validatedMessageIdOfConversation(
+    context,
+    conversationId,
+    uri.messageIdOfConversation,
+  );
+  if (uri.messageIdOfConversation != null && initIndexMessageId == null) {
+    showToastFailed(null);
+    return false;
+  }
+
   await ConversationStateNotifier.selectConversation(
     context,
     conversationId,
+    initIndexMessageId: initIndexMessageId,
     sync: true,
     checkCurrentUserExist: true,
   );
   return true;
+}
+
+Future<String?> _validatedMessageIdOfConversation(
+  BuildContext context,
+  String conversationId,
+  String? messageId,
+) async {
+  final trimmedMessageId = messageId?.trim();
+  if (trimmedMessageId == null || trimmedMessageId.isEmpty) {
+    return null;
+  }
+
+  final messageConversationId = await context.database.messageDao
+      .findConversationIdByMessageId(trimmedMessageId);
+  if (messageConversationId != conversationId) {
+    return null;
+  }
+  return trimmedMessageId;
 }
 
 extension MixinUriExt on Uri {
@@ -376,6 +405,11 @@ extension _MixinUriExtension on Uri {
   String? get startTextOfConversation {
     if (!isMixin) return null;
     return queryParameters['start'];
+  }
+
+  String? get messageIdOfConversation {
+    if (!isMixin) return null;
+    return queryParameters['message_id'];
   }
 
   String? get userOfSend {
