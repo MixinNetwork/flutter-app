@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter_app/ai/ai_chat_prompt_builder.dart';
 import 'package:flutter_app/ai/ai_message_context.dart';
 import 'package:flutter_app/ai/tools/ai_conversation_tool_service.dart';
 import 'package:flutter_app/db/ai_database.dart';
@@ -156,6 +157,73 @@ void main() {
         containsPair('message_id', 'target'),
       );
     });
+
+    test(
+      'attached transcript prompt includes focused transcript items',
+      () async {
+        final createdAt = DateTime(2026, 4, 30, 11);
+        await _insertMessage(
+          database,
+          id: 'before-transcript',
+          userId: 'alice',
+          content: 'noise before transcript',
+          createdAt: createdAt,
+        );
+        await _insertMessage(
+          database,
+          id: 'transcript',
+          userId: 'bob',
+          content: '[Transcript]',
+          createdAt: createdAt.add(const Duration(minutes: 1)),
+          category: MessageCategory.plainTranscript,
+        );
+        await _insertMessage(
+          database,
+          id: 'after-transcript',
+          userId: 'alice',
+          content: 'noise after transcript',
+          createdAt: createdAt.add(const Duration(minutes: 2)),
+        );
+        await database.mixinDatabase
+            .into(database.mixinDatabase.transcriptMessages)
+            .insert(
+              TranscriptMessagesCompanion.insert(
+                transcriptId: 'transcript',
+                messageId: 'transcript-item-1',
+                category: MessageCategory.plainText,
+                createdAt: createdAt.add(const Duration(minutes: 3)),
+                content: const Value('real transcript detail'),
+                userId: const Value('alice'),
+                userFullName: const Value('Alice'),
+              ),
+            );
+
+        final attached = await database.messageDao
+            .messageItemByMessageId('transcript')
+            .getSingle();
+        final promptMessages = await AiChatPromptBuilder(database)
+            .buildPromptMessages(
+              'conversation',
+              'thread',
+              'what is inside this transcript?',
+              'English',
+              attachedMessages: [attached],
+            );
+        final prompt = promptMessages
+            .map((message) => message.content)
+            .join('\n');
+
+        expect(prompt, contains('Primary attached message:'));
+        expect(prompt, contains('relation=attached_primary'));
+        expect(prompt, contains('Attached transcript messages:'));
+        expect(prompt, contains('real transcript detail'));
+        expect(
+          prompt,
+          contains('Nearby context messages, for disambiguation only'),
+        );
+        expect(prompt, contains('noise before transcript'));
+      },
+    );
   });
 }
 
@@ -176,6 +244,7 @@ Future<void> _insertMessage(
   required String userId,
   required String content,
   required DateTime createdAt,
+  String category = MessageCategory.plainText,
   String? quoteMessageId,
   String? quoteContent,
 }) async {
@@ -186,7 +255,7 @@ Future<void> _insertMessage(
           messageId: id,
           conversationId: 'conversation',
           userId: userId,
-          category: MessageCategory.plainText,
+          category: category,
           content: Value(content),
           status: MessageStatus.read,
           createdAt: createdAt,
@@ -205,7 +274,7 @@ Future<void> _insertMessage(
           docId: rowId,
           messageId: id,
           conversationId: 'conversation',
-          category: MessageCategory.plainText,
+          category: category,
           userId: userId,
           createdAt: createdAt,
         ),

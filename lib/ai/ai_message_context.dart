@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../blaze/vo/transcript_minimal.dart';
 import '../db/dao/message_dao.dart';
 import '../db/extension/message.dart';
 import '../db/extension/message_category.dart';
@@ -12,6 +13,10 @@ String aiMessageContextText(MessageItem message) {
       content != null &&
       content.isNotEmpty) {
     return content;
+  }
+
+  if (message.type.isTranscript) {
+    return _transcriptContextText(content) ?? '[transcript]';
   }
 
   final caption = message.caption?.trim();
@@ -30,6 +35,36 @@ String aiMessageContextText(MessageItem message) {
         message.content,
       ) ??
       '[${message.type}]';
+}
+
+String? _transcriptContextText(String? content) {
+  if (content == null || content.isEmpty) {
+    return null;
+  }
+  try {
+    final decoded = jsonDecode(content);
+    if (decoded is! List) {
+      return content;
+    }
+    final lines = decoded
+        .map((json) {
+          final item = TranscriptMinimal.fromJson(
+            Map<String, dynamic>.from(json as Map),
+          );
+          final text =
+              messagePreviewOptimize(null, item.category, item.content) ??
+              item.content ??
+              '[${item.category}]';
+          return '${item.name}: $text';
+        })
+        .join('\n');
+    if (lines.isEmpty) {
+      return null;
+    }
+    return lines;
+  } catch (_) {
+    return content;
+  }
 }
 
 String aiMessageContextLine(

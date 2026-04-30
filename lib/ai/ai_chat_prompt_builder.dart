@@ -1,6 +1,8 @@
 import 'package:mixin_logger/mixin_logger.dart';
 
+import '../db/dao/transcript_message_dao.dart';
 import '../db/database.dart';
+import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import 'ai_message_context.dart';
 import 'model/ai_prompt_message.dart';
@@ -16,6 +18,8 @@ class AiChatPromptBuilder {
   static const _attachedContextAfterLimit = 2;
   static const _attachedQuotedByLimit = 3;
   static const _attachedContextMaxTextLength = 1000;
+  static const _attachedTranscriptLimit = 80;
+  static const _attachedTranscriptMaxTextLength = 800;
 
   final Database database;
 
@@ -274,19 +278,44 @@ class AiChatPromptBuilder {
     );
     final lines = <String>[
       'Attached context block for message_id=${message.messageId}:',
-      for (final contextMessage in contextMessages)
-        aiMessageContextLine(
-          contextMessage,
-          relation: contextMessage.messageId == message.messageId
-              ? 'attached'
-              : 'nearby',
-          maxTextLength: _attachedContextMaxTextLength,
-        ),
+      'Primary attached message:',
+      aiMessageContextLine(
+        message,
+        relation: 'attached_primary',
+        maxTextLength: _attachedContextMaxTextLength,
+      ),
     ];
 
     final missingQuoteLine = await _missingQuoteContextLine(message);
     if (missingQuoteLine != null) {
       lines.add('  $missingQuoteLine');
+    }
+
+    if (message.type.isTranscript) {
+      final transcriptLines = await _attachedTranscriptContextLines(message);
+      if (transcriptLines.isNotEmpty) {
+        lines
+          ..add('Attached transcript messages:')
+          ..addAll(transcriptLines);
+      }
+    }
+
+    final nearbyMessages = contextMessages
+        .where(
+          (contextMessage) => contextMessage.messageId != message.messageId,
+        )
+        .toList(growable: false);
+    if (nearbyMessages.isNotEmpty) {
+      lines.add('Nearby context messages, for disambiguation only:');
+      for (final contextMessage in nearbyMessages) {
+        lines.add(
+          aiMessageContextLine(
+            contextMessage,
+            relation: 'nearby',
+            maxTextLength: _attachedContextMaxTextLength,
+          ),
+        );
+      }
     }
 
     final quotedByMessages = await database.messageDao
@@ -310,6 +339,28 @@ class AiChatPromptBuilder {
     }
 
     return lines.join('\n');
+  }
+
+  Future<List<String>> _attachedTranscriptContextLines(
+    MessageItem message,
+  ) async {
+    final transcriptMessages = await database.transcriptMessageDao
+        .transactionMessageItem(message.messageId)
+        .get();
+    if (transcriptMessages.isEmpty) {
+      return const [];
+    }
+
+    return transcriptMessages
+        .take(_attachedTranscriptLimit)
+        .map(
+          (item) => aiMessageContextLine(
+            item.messageItem,
+            relation: 'attached_transcript_item',
+            maxTextLength: _attachedTranscriptMaxTextLength,
+          ),
+        )
+        .toList(growable: false);
   }
 
   Future<List<MessageItem>> _messageContextWindow(
