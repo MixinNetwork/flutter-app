@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import '../db/dao/message_dao.dart';
+import '../db/extension/message.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import '../utils/message_optimize.dart';
@@ -28,10 +32,88 @@ String aiMessageContextText(MessageItem message) {
       '[${message.type}]';
 }
 
-String aiMessageContextLine(MessageItem message) =>
-    '[${message.createdAt.toIso8601String()}] '
-    '${message.userFullName ?? message.userId} '
-    '(message_id=${message.messageId}): ${aiMessageContextText(message)}';
+String aiMessageContextLine(
+  MessageItem message, {
+  String? relation,
+  int? maxTextLength,
+}) {
+  final relationText = relation == null ? '' : ', relation=$relation';
+  final text = _truncateAiContextText(
+    aiMessageContextText(message),
+    maxTextLength,
+  );
+  final line =
+      '[${message.createdAt.toIso8601String()}] '
+      '${message.userFullName ?? message.userId} '
+      '(message_id=${message.messageId}$relationText): $text';
+  final quote = aiMessageQuotedItem(message);
+  if (quote == null) {
+    return line;
+  }
+  return '$line\n  ${aiQuoteMessageContextLine(quote)}';
+}
+
+QuoteMessageItem? aiMessageQuotedItem(MessageItem message) {
+  final raw = message.quoteContent?.trim();
+  if (raw == null || raw.isEmpty) {
+    return null;
+  }
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is Map<String, dynamic>) {
+      return mapToQuoteMessage(decoded);
+    }
+    if (decoded is Map) {
+      return mapToQuoteMessage(Map<String, dynamic>.from(decoded));
+    }
+  } catch (_) {
+    return null;
+  }
+  return null;
+}
+
+String aiQuoteMessageContextLine(
+  QuoteMessageItem message, {
+  String prefix = 'quoted_message',
+  int? maxTextLength = 1000,
+}) {
+  final text = _truncateAiContextText(
+    aiQuoteMessageContextText(message),
+    maxTextLength,
+  );
+  return '$prefix: [${message.createdAt.toIso8601String()}] '
+      '${message.userFullName ?? message.userId} '
+      '(message_id=${message.messageId}): $text';
+}
+
+String aiQuoteMessageContextText(QuoteMessageItem message) {
+  final content = message.content?.trim();
+  if ((message.type.isText || message.type.isPost) &&
+      content != null &&
+      content.isNotEmpty) {
+    return content;
+  }
+  if (content != null && content.isNotEmpty) {
+    return content;
+  }
+
+  final mediaName = message.mediaName?.trim();
+  if (mediaName != null && mediaName.isNotEmpty) {
+    return '[${message.type}] $mediaName';
+  }
+
+  final assetName = message.assetName?.trim();
+  if (assetName != null && assetName.isNotEmpty) {
+    return '[${message.type}] $assetName';
+  }
+
+  return messagePreviewOptimize(
+        message.status,
+        message.type,
+        message.content,
+      ) ??
+      '[${message.type}]';
+}
 
 String aiMessageContextPreview(MessageItem message, {int maxLength = 96}) {
   final text = aiMessageContextText(message).replaceAll(RegExp(r'\s+'), ' ');
@@ -50,3 +132,13 @@ Map<String, dynamic> aiMessageContextMetadata(MessageItem message) => {
   'createdAt': message.createdAt.toUtc().toIso8601String(),
   'preview': aiMessageContextPreview(message, maxLength: 180),
 };
+
+String _truncateAiContextText(String text, int? maxLength) {
+  if (maxLength == null || text.length <= maxLength) {
+    return text;
+  }
+  if (maxLength <= 3) {
+    return text.substring(0, maxLength);
+  }
+  return '${text.substring(0, maxLength - 3)}...';
+}

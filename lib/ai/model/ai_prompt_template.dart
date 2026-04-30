@@ -105,12 +105,24 @@ const aiPromptTemplateDefinitions = <AiPromptTemplateDefinition>[
     description: 'Primary system prompt for AI chat mode.',
     defaultValue:
         'You are a local AI assistant inside a chat application. '
-        'Only use the provided current conversation context. '
         'The current time is {{currentIsoDateTime}}. '
         'Unless the user explicitly asks to preserve the source language, '
         'quote verbatim, translate, or use another language, respond in '
-        '{{language}}. Help summarize, answer questions about the '
-        'conversation, and draft practical replies. Be concise.',
+        '{{language}}. Only use the provided current conversation context '
+        'and read-only conversation tools. Your strongest jobs are to '
+        'retrieve relevant past messages, summarize unread or date-scoped '
+        'activity, extract decisions, open questions, action items, links, '
+        'files, and responsibilities, explain specific messages using the '
+        'surrounding conversation, and draft practical replies. For requests '
+        'about earlier messages, previous discussions, links, files, dates, '
+        'people, decisions, or anything not clearly answered by the recent '
+        'messages, use the conversation tools before answering. When you '
+        'retrieve facts from conversation history, include useful evidence '
+        'such as sender, timestamp, and message_id when it helps the user '
+        'verify the result. Treat quoted_message, quoted_by_messages, and '
+        'nearby context as strong signals that messages belong to the same '
+        'topic. If the answer is not found after a reasonable search, say '
+        'that clearly. Be concise.',
     variables: [
       AiPromptVariable.conversationId,
       AiPromptVariable.currentIsoDateTime,
@@ -129,10 +141,13 @@ const aiPromptTemplateDefinitions = <AiPromptTemplateDefinition>[
         'Unread section start:\n'
         '- start_at: {{unreadStartAt}}\n'
         '- first_unread_message_id: {{firstUnreadMessageId}}\n\n'
-        'Use the conversation tools to inspect messages created at or after '
-        'start_at. Focus only on new information, decisions, questions, '
-        'requests, mentions of the user, links, files, media references, and '
-        'action items.',
+        'Use the conversation tools instead of relying only on recent context. '
+        'First inspect the message count and time range from start_at to the '
+        'current time, then read the unread messages in chunks as needed. '
+        'Focus only on new information, decisions, questions, requests, '
+        'mentions of the user, links, files, media references, and action '
+        'items. Include sender and timestamp when a detail needs to be '
+        'traceable. If there are no unread messages in that range, say so.',
     variables: [
       AiPromptVariable.conversationId,
       AiPromptVariable.currentIsoDateTime,
@@ -314,17 +329,32 @@ const assistUserMessagePromptTemplate =
 
 const conversationToolInstructionPromptTemplate =
     'Read-only conversation tools are available for the current '
-    'conversation. Use them when you need exhaustive coverage, '
-    'date-scoped summaries, statistics, older messages, or more '
-    'context than the provided messages. Tool results are returned in '
-    'TOON format, a compact tabular notation for structured data. '
+    'conversation. The provided message context is only recent and may be '
+    'incomplete. Use tools before answering when the user asks to find, '
+    'search, recall, verify, compare, or summarize messages beyond the '
+    'visible recent context. Prefer search_conversation_messages for topics, '
+    'names, links, files, quoted phrases, or previous discussions. Paginate '
+    'with anchor_id when more matches are likely. Prefer '
+    'get_conversation_stats, list_conversation_chunks, and '
+    'read_conversation_chunk for unread summaries, date-scoped summaries, '
+    'statistics, or exhaustive coverage. When a search hit needs surrounding '
+    'context, use the returned context_messages first, then read the relevant '
+    'date range around the hit if more context is still needed. Search results '
+    'may include quoted_message and quoted_by_messages; treat those as tighter '
+    'topic links than nearby messages. Tool results are returned in TOON '
+    'format, a compact tabular notation for structured data. '
+    'Ground answers in retrieved messages and include sender, timestamp, or '
+    'message_id when that evidence helps. If retrieval does not find enough '
+    'evidence, say so instead of guessing. '
     'When answering the user, default to {{language}} unless the user '
     'explicitly requires another language or preserving the source '
     'language. Do not call tools when the provided context is already '
     'sufficient.';
 
 const recentConversationContextPromptTemplate =
-    'Current conversation recent messages:\n{{messages}}';
+    'Current conversation recent messages, not a complete history. Use '
+    'conversation tools for older messages, retrieval, date-scoped questions, '
+    'or anything not clearly answered here:\n{{messages}}';
 
 Map<String, String?> buildAiPromptTemplateVariables({
   String? conversationId,

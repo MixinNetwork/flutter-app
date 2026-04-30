@@ -15,6 +15,8 @@ const _kSelectedProxyKey = 'selected_proxy';
 const _kProxyListKey = 'proxy_list';
 const _kAiProviderListKey = 'ai_provider_list';
 const _kSelectedAiProviderKey = 'selected_ai_provider';
+const _kSelectedAiTranslatorProviderKey = 'selected_ai_translator_provider';
+const _kSelectedAiTranslatorModelKey = 'selected_ai_translator_model';
 const _kAiPromptTemplateOverridesKey = 'ai_prompt_template_overrides';
 
 class SettingPropertyStorage extends PropertyStorage {
@@ -91,17 +93,41 @@ class SettingPropertyStorage extends PropertyStorage {
   set selectedAiProviderId(String? value) =>
       set(_kSelectedAiProviderKey, value);
 
-  AiProviderConfig? get selectedAiProvider {
+  String? get selectedAiTranslatorProviderId =>
+      get(_kSelectedAiTranslatorProviderKey);
+
+  set selectedAiTranslatorProviderId(String? value) =>
+      set(_kSelectedAiTranslatorProviderKey, value);
+
+  String? get selectedAiTranslatorModel => get(_kSelectedAiTranslatorModelKey);
+
+  set selectedAiTranslatorModel(String? value) =>
+      set(_kSelectedAiTranslatorModelKey, value);
+
+  AiProviderConfig? get selectedAiProvider =>
+      _resolveAiProvider(selectedAiProviderId, null);
+
+  AiProviderConfig? get selectedAiTranslatorProvider =>
+      _resolveAiProvider(
+        selectedAiTranslatorProviderId,
+        selectedAiTranslatorModel,
+      ) ??
+      selectedAiProvider;
+
+  AiProviderConfig? _resolveAiProvider(String? selectedId, String? model) {
     final providers = aiProviders.where((element) => element.enabled).toList();
     if (providers.isEmpty) {
       return null;
     }
-    final selectedId = selectedAiProviderId;
-    if (selectedId == null) {
-      return providers.first;
-    }
-    return providers.firstWhereOrNull((element) => element.id == selectedId) ??
-        providers.first;
+    final provider = selectedId == null
+        ? providers.first
+        : providers.firstWhereOrNull((element) => element.id == selectedId) ??
+              providers.first;
+    final selectedModel = model?.trim();
+    if (selectedModel == null || selectedModel.isEmpty) return provider;
+    if (!provider.models.contains(selectedModel)) return provider;
+    if (provider.model == selectedModel) return provider;
+    return provider.copyWith(model: selectedModel, defaultModel: selectedModel);
   }
 
   void saveAiProvider(AiProviderConfig config) {
@@ -127,6 +153,10 @@ class SettingPropertyStorage extends PropertyStorage {
     );
     if (selectedAiProviderId == id) {
       selectedAiProviderId = providers.firstOrNull?.id;
+    }
+    if (selectedAiTranslatorProviderId == id) {
+      selectedAiTranslatorProviderId = null;
+      selectedAiTranslatorModel = null;
     }
   }
 

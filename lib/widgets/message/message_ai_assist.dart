@@ -103,7 +103,12 @@ Future<void> runMessageAiAction(
   required void Function(MessageAiAction, InlineMessageAiEntry) onStateChanged,
 }) async {
   final language = _currentLanguageTag(context);
-  final provider = context.database.settingProperties.selectedAiProvider;
+  final provider = switch (action) {
+    MessageAiAction.translate =>
+      context.database.settingProperties.selectedAiTranslatorProvider,
+    MessageAiAction.explain || MessageAiAction.suggestReplies =>
+      context.database.settingProperties.selectedAiProvider,
+  };
   final model = provider?.model;
   final templateKey = switch (action) {
     MessageAiAction.translate => AiPromptTemplateKey.messageTranslate,

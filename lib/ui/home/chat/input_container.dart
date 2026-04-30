@@ -695,11 +695,15 @@ Future<String> _requestAiDraftAction(
 
   try {
     final controller = AiChatController(context.database);
+    final provider = action == AiDraftAction.translate
+        ? context.database.settingProperties.selectedAiTranslatorProvider
+        : context.database.settingProperties.selectedAiProvider;
     final result = await controller.assistText(
       instruction: instruction,
       language: language,
       input: action == AiDraftAction.replyWithContext ? null : original,
       conversationId: conversationId,
+      provider: provider,
     );
     return result.trim();
   } catch (error, stackTrace) {

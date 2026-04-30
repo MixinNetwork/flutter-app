@@ -8,6 +8,7 @@ import '../../ai/model/ai_provider_config.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/database_provider.dart';
 import 'ai_prompt_settings_page.dart';
@@ -23,6 +24,12 @@ class AiSettingsPage extends HookConsumerWidget {
     final providers = database.settingProperties.aiProviders;
     final selectedId = database.settingProperties.selectedAiProviderId;
     final selectedProvider = database.settingProperties.selectedAiProvider;
+    final selectedTranslatorProvider =
+        database.settingProperties.selectedAiTranslatorProvider;
+    final selectedTranslatorProviderId =
+        database.settingProperties.selectedAiTranslatorProviderId;
+    final selectedTranslatorModel =
+        database.settingProperties.selectedAiTranslatorModel;
     final customizedPromptCount = aiPromptTemplateDefinitions
         .where(
           (definition) =>
@@ -130,6 +137,33 @@ class AiSettingsPage extends HookConsumerWidget {
                         trailing: null,
                       ),
                     ),
+                    CellGroup(
+                      padding: const EdgeInsets.only(right: 10, left: 10),
+                      cellBackgroundColor:
+                          context.theme.settingCellBackgroundColor,
+                      child: CellItem(
+                        title: const Text('Translator Provider'),
+                        leading: Icon(
+                          Icons.translate_rounded,
+                          color: context.theme.icon,
+                        ),
+                        description: Text(
+                          selectedTranslatorProviderId == null
+                              ? 'Default · ${_providerModelSummary(selectedTranslatorProvider)}'
+                              : _providerModelSummary(
+                                  selectedTranslatorProvider,
+                                ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => _showTranslatorProviderDialog(
+                          context,
+                          providers: providers,
+                          selectedProviderId: selectedTranslatorProviderId,
+                          selectedModel: selectedTranslatorModel,
+                        ),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(
                         left: 20,
@@ -184,6 +218,180 @@ class AiSettingsPage extends HookConsumerWidget {
     }
     return '${provider.model} · $modelCount models';
   }
+
+  static String _providerModelSummary(AiProviderConfig? provider) {
+    if (provider == null) return 'No enabled provider';
+    return '${provider.name} · ${provider.model}';
+  }
+
+  static Future<void> _showTranslatorProviderDialog(
+    BuildContext context, {
+    required List<AiProviderConfig> providers,
+    required String? selectedProviderId,
+    required String? selectedModel,
+  }) async {
+    await showMixinDialog<void>(
+      context: context,
+      child: _TranslatorProviderDialog(
+        providers: providers
+            .where((provider) => provider.enabled)
+            .where((provider) => provider.model.trim().isNotEmpty)
+            .toList(growable: false),
+        selectedProviderId: selectedProviderId,
+        selectedModel: selectedModel,
+      ),
+    );
+  }
+}
+
+class _TranslatorProviderDialog extends HookConsumerWidget {
+  const _TranslatorProviderDialog({
+    required this.providers,
+    required this.selectedProviderId,
+    required this.selectedModel,
+  });
+
+  final List<AiProviderConfig> providers;
+  final String? selectedProviderId;
+  final String? selectedModel;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final database = ref.watch(databaseProvider).requireValue;
+    final selection = useState(
+      _AiProviderModelSelection(
+        providerId: selectedProviderId,
+        model: selectedModel,
+      ),
+    );
+
+    return AlertDialogLayout(
+      title: const Text('Translator Provider'),
+      titleMarginBottom: 20,
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 360),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ProviderModelOption(
+                title: 'Use Default Provider',
+                subtitle: _providerSummary(
+                  database.settingProperties.selectedAiProvider,
+                ),
+                selected: selection.value.providerId == null,
+                onTap: () =>
+                    selection.value = const _AiProviderModelSelection(),
+              ),
+              for (final provider in providers)
+                for (final model in provider.models)
+                  _ProviderModelOption(
+                    title: provider.name,
+                    subtitle: model,
+                    selected:
+                        selection.value.providerId == provider.id &&
+                        selection.value.model == model,
+                    onTap: () => selection.value = _AiProviderModelSelection(
+                      providerId: provider.id,
+                      model: model,
+                    ),
+                  ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        MixinButton(
+          backgroundTransparent: true,
+          onTap: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        MixinButton(
+          onTap: () {
+            database.settingProperties.selectedAiTranslatorProviderId =
+                selection.value.providerId;
+            database.settingProperties.selectedAiTranslatorModel =
+                selection.value.model;
+            Navigator.of(context).pop();
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+
+  static String _providerSummary(AiProviderConfig? provider) {
+    if (provider == null) return 'No enabled provider';
+    return '${provider.name} · ${provider.model}';
+  }
+}
+
+class _AiProviderModelSelection {
+  const _AiProviderModelSelection({this.providerId, this.model});
+
+  final String? providerId;
+  final String? model;
+}
+
+class _ProviderModelOption extends StatelessWidget {
+  const _ProviderModelOption({
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Icon(
+            selected
+                ? Icons.radio_button_checked_rounded
+                : Icons.radio_button_unchecked_rounded,
+            color: selected
+                ? context.theme.accent
+                : context.theme.secondaryText,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: context.theme.text, fontSize: 15),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _ProviderCell extends HookConsumerWidget {

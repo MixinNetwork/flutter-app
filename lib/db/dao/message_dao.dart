@@ -788,6 +788,21 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ).getSingleOrNull();
   }
 
+  Selectable<MessageItem> messagesByQuoteId(
+    String conversationId,
+    String quoteMessageId,
+    int limit,
+  ) => _baseMessageItems(
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+        message.conversationId.equals(conversationId) &
+        message.quoteMessageId.equals(quoteMessageId),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+      OrderingTerm.asc(message.createdAt),
+      OrderingTerm.asc(message.rowId),
+    ]),
+  );
+
   Future<int> updateMessageQuoteContent(
     String messageId,
     String? quoteContent,

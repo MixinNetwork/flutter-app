@@ -12,6 +12,10 @@ class AiChatPromptBuilder {
   static const _aiStatusPending = 'pending';
   static const _aiContextMessageLimit = 30;
   static const _aiHistoryLimit = 12;
+  static const _attachedContextBeforeLimit = 2;
+  static const _attachedContextAfterLimit = 2;
+  static const _attachedQuotedByLimit = 3;
+  static const _attachedContextMaxTextLength = 1000;
 
   final Database database;
 
@@ -60,7 +64,7 @@ class AiChatPromptBuilder {
       language: language,
       now: now,
     );
-    _appendAttachedMessages(
+    await _appendAttachedMessages(
       promptMessages,
       attachedMessages: attachedMessages,
       language: language,
@@ -210,10 +214,10 @@ class AiChatPromptBuilder {
     if (recentMessages.isNotEmpty) {
       final lines = recentMessages.reversed
           .map(
-            (message) => _conversationContextLine(
-              createdAt: message.createdAt,
-              sender: message.userFullName ?? message.userId,
-              content: _messagePlainText(message),
+            (message) => aiMessageContextLine(
+              message,
+              relation: 'recent',
+              maxTextLength: _attachedContextMaxTextLength,
             ),
           )
           .join('\n');
@@ -234,17 +238,20 @@ class AiChatPromptBuilder {
     }
   }
 
-  void _appendAttachedMessages(
+  Future<void> _appendAttachedMessages(
     List<AiPromptMessage> promptMessages, {
     required List<MessageItem> attachedMessages,
     required String language,
     required DateTime now,
-  }) {
+  }) async {
     if (attachedMessages.isEmpty) {
       return;
     }
 
-    final lines = attachedMessages.map(aiMessageContextLine).join('\n');
+    final blocks = <String>[];
+    for (final message in attachedMessages) {
+      blocks.add(await _attachedMessageContextBlock(message));
+    }
     promptMessages.addAll(
       _promptMessages(
         role: AiPromptRole.system,
@@ -254,35 +261,114 @@ class AiChatPromptBuilder {
             '"this message", "these messages", or asks for a specific '
             'message to be handled. Answer in $language unless the user '
             'explicitly asks for another language. Current time: '
-            '${now.toIso8601String()}.\n$lines',
+            '${now.toIso8601String()}.\n\n${blocks.join('\n\n')}',
       ),
     );
   }
 
-  String _conversationContextLine({
-    required DateTime createdAt,
-    required String sender,
-    required String content,
-  }) => '[${createdAt.toIso8601String()}] $sender: $content';
+  Future<String> _attachedMessageContextBlock(MessageItem message) async {
+    final contextMessages = await _messageContextWindow(
+      message,
+      beforeLimit: _attachedContextBeforeLimit,
+      afterLimit: _attachedContextAfterLimit,
+    );
+    final lines = <String>[
+      'Attached context block for message_id=${message.messageId}:',
+      for (final contextMessage in contextMessages)
+        aiMessageContextLine(
+          contextMessage,
+          relation: contextMessage.messageId == message.messageId
+              ? 'attached'
+              : 'nearby',
+          maxTextLength: _attachedContextMaxTextLength,
+        ),
+    ];
 
-  String _messagePlainText(MessageItem message) => _messagePlainTextFromFields(
-    content: message.content,
-    mediaName: message.mediaName,
-    type: message.type,
-  );
+    final missingQuoteLine = await _missingQuoteContextLine(message);
+    if (missingQuoteLine != null) {
+      lines.add('  $missingQuoteLine');
+    }
 
-  String _messagePlainTextFromFields({
-    required String? content,
-    required String? mediaName,
-    required String type,
-  }) {
-    if (content?.trim().isNotEmpty == true) {
-      return content!.trim();
+    final quotedByMessages = await database.messageDao
+        .messagesByQuoteId(
+          message.conversationId,
+          message.messageId,
+          _attachedQuotedByLimit,
+        )
+        .get();
+    if (quotedByMessages.isNotEmpty) {
+      lines.add('Messages quoting attached message:');
+      for (final quotedByMessage in quotedByMessages) {
+        lines.add(
+          aiMessageContextLine(
+            quotedByMessage,
+            relation: 'quotes_attached',
+            maxTextLength: _attachedContextMaxTextLength,
+          ),
+        );
+      }
     }
-    if (mediaName?.isNotEmpty == true) {
-      return '[$type] $mediaName';
+
+    return lines.join('\n');
+  }
+
+  Future<List<MessageItem>> _messageContextWindow(
+    MessageItem message, {
+    required int beforeLimit,
+    required int afterLimit,
+  }) async {
+    final orderInfo = await database.messageDao.messageOrderInfo(
+      message.messageId,
+    );
+    if (orderInfo == null) {
+      return [message];
     }
-    return '[$type]';
+
+    final beforeMessages = beforeLimit <= 0
+        ? const <MessageItem>[]
+        : await database.messageDao
+              .beforeMessagesByConversationId(
+                orderInfo,
+                message.conversationId,
+                beforeLimit,
+              )
+              .get();
+    final afterMessages = afterLimit <= 0
+        ? const <MessageItem>[]
+        : await database.messageDao
+              .afterMessagesByConversationId(
+                orderInfo,
+                message.conversationId,
+                afterLimit,
+              )
+              .get();
+    final byMessageId = <String, MessageItem>{};
+    for (final item in [
+      ...beforeMessages.reversed,
+      message,
+      ...afterMessages,
+    ]) {
+      byMessageId[item.messageId] = item;
+    }
+    return byMessageId.values.toList(growable: false);
+  }
+
+  Future<String?> _missingQuoteContextLine(MessageItem message) async {
+    if (aiMessageQuotedItem(message) != null) {
+      return null;
+    }
+    final quoteId = message.quoteId?.trim();
+    if (quoteId == null || quoteId.isEmpty) {
+      return null;
+    }
+    final quote = await database.messageDao.findMessageItemById(
+      message.conversationId,
+      quoteId,
+    );
+    if (quote == null) {
+      return 'quoted_message: message_id=$quoteId (not available)';
+    }
+    return aiQuoteMessageContextLine(quote);
   }
 
   List<AiPromptMessage> _promptMessages({

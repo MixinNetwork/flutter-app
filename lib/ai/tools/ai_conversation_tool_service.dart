@@ -9,12 +9,16 @@ import 'package:toon_format/toon_format.dart';
 import '../../db/dao/message_dao.dart';
 import '../../db/database.dart';
 import '../../db/mixin_database.dart';
+import '../ai_message_context.dart';
 import '../model/ai_chat_metadata.dart';
 
 const _kDefaultConversationChunkSize = 100;
 const _kMaxConversationChunkSize = 200;
 const _kDefaultConversationSearchLimit = 8;
 const _kMaxConversationSearchLimit = 20;
+const _kSearchContextBeforeLimit = 2;
+const _kSearchContextAfterLimit = 2;
+const _kSearchQuotedByLimit = 3;
 const _kAiToolLogPreviewLength = 480;
 const _kMaxConversationMessageTextLength = 1000;
 const _kSearchMessageSnippetRadius = 240;
@@ -29,6 +33,9 @@ class AiConversationToolMessage {
     required this.senderName,
     required this.type,
     required this.text,
+    this.quotedMessage,
+    this.contextMessages = const [],
+    this.quotedByMessages = const [],
   });
 
   final String messageId;
@@ -36,6 +43,9 @@ class AiConversationToolMessage {
   final String senderName;
   final String type;
   final String text;
+  final Map<String, dynamic>? quotedMessage;
+  final List<Map<String, dynamic>> contextMessages;
+  final List<Map<String, dynamic>> quotedByMessages;
 
   Map<String, dynamic> toJson() => {
     'message_id': messageId,
@@ -43,6 +53,9 @@ class AiConversationToolMessage {
     'sender_name': senderName,
     'type': type,
     'text': text,
+    if (quotedMessage != null) 'quoted_message': quotedMessage,
+    if (contextMessages.isNotEmpty) 'context_messages': contextMessages,
+    if (quotedByMessages.isNotEmpty) 'quoted_by_messages': quotedByMessages,
   };
 }
 
@@ -287,10 +300,15 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
         ? safeOffset + messages.length
         : null;
 
+    final toolMessages = <AiConversationToolMessage>[];
+    for (final message in messages) {
+      toolMessages.add(await _messageItemToToolMessage(message));
+    }
+
     return AiConversationToolChunkPage(
       offset: safeOffset,
       totalMessages: totalMessages,
-      messages: messages.map(_messageItemToToolMessage).toList(growable: false),
+      messages: toolMessages,
       nextOffset: nextOffset,
     );
   }
@@ -308,27 +326,75 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
       conversationIds: [conversationId],
       anchorMessageId: anchorMessageId,
     );
+    if (messages.isEmpty) {
+      return const AiConversationToolSearchResult(
+        messages: [],
+        nextAnchorId: null,
+      );
+    }
+    final fullMessages = await database.messageDao
+        .messageItemByMessageIds(
+          messages.map((message) => message.messageId).toList(),
+        )
+        .get();
+    final fullMessageById = {
+      for (final message in fullMessages) message.messageId: message,
+    };
+    final toolMessages = <AiConversationToolMessage>[];
+    for (final message in messages) {
+      final fullMessage = fullMessageById[message.messageId];
+      toolMessages.add(
+        fullMessage == null
+            ? _searchMessageToToolMessage(message, query: query)
+            : await _messageItemToToolMessage(
+                fullMessage,
+                query: query,
+                maxLength: _kSearchMessageSnippetRadius * 2,
+                includeContext: true,
+                resolveMissingQuote: true,
+              ),
+      );
+    }
+
     return AiConversationToolSearchResult(
-      messages: messages
-          .map((message) => _searchMessageToToolMessage(message, query: query))
-          .toList(growable: false),
+      messages: toolMessages,
       nextAnchorId: messages.length < limit ? null : messages.last.messageId,
     );
   }
 
-  AiConversationToolMessage _messageItemToToolMessage(MessageItem message) =>
-      AiConversationToolMessage(
-        messageId: message.messageId,
-        createdAt: message.createdAt,
-        senderName: message.userFullName ?? message.userId,
+  Future<AiConversationToolMessage> _messageItemToToolMessage(
+    MessageItem message, {
+    String? query,
+    int? maxLength,
+    bool includeContext = false,
+    bool resolveMissingQuote = false,
+  }) async {
+    final contextMessages = includeContext
+        ? await _contextMessageMapsAround(message)
+        : const <Map<String, dynamic>>[];
+    final quotedByMessages = includeContext
+        ? await _quotedByMessageMaps(message)
+        : const <Map<String, dynamic>>[];
+    return AiConversationToolMessage(
+      messageId: message.messageId,
+      createdAt: message.createdAt,
+      senderName: message.userFullName ?? message.userId,
+      type: message.type,
+      text: _messageText(
+        content: message.content,
+        mediaName: message.mediaName,
         type: message.type,
-        text: _messageText(
-          content: message.content,
-          mediaName: message.mediaName,
-          type: message.type,
-          maxLength: _kMaxConversationMessageTextLength,
-        ),
-      );
+        query: query,
+        maxLength: maxLength ?? _kMaxConversationMessageTextLength,
+      ),
+      quotedMessage: await _quotedMessageMap(
+        message,
+        resolveMissing: resolveMissingQuote,
+      ),
+      contextMessages: contextMessages,
+      quotedByMessages: quotedByMessages,
+    );
+  }
 
   AiConversationToolMessage _searchMessageToToolMessage(
     SearchMessageDetailItem message, {
@@ -346,6 +412,101 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
       maxLength: _kSearchMessageSnippetRadius * 2,
     ),
   );
+
+  Future<List<Map<String, dynamic>>> _contextMessageMapsAround(
+    MessageItem message,
+  ) async {
+    final orderInfo = await database.messageDao.messageOrderInfo(
+      message.messageId,
+    );
+    if (orderInfo == null) {
+      return const [];
+    }
+
+    final beforeMessages = await database.messageDao
+        .beforeMessagesByConversationId(
+          orderInfo,
+          message.conversationId,
+          _kSearchContextBeforeLimit,
+        )
+        .get();
+    final afterMessages = await database.messageDao
+        .afterMessagesByConversationId(
+          orderInfo,
+          message.conversationId,
+          _kSearchContextAfterLimit,
+        )
+        .get();
+    return [
+      for (final item in beforeMessages.reversed) _messageItemToToolMap(item),
+      for (final item in afterMessages) _messageItemToToolMap(item),
+    ];
+  }
+
+  Future<List<Map<String, dynamic>>> _quotedByMessageMaps(
+    MessageItem message,
+  ) async {
+    final messages = await database.messageDao
+        .messagesByQuoteId(
+          message.conversationId,
+          message.messageId,
+          _kSearchQuotedByLimit,
+        )
+        .get();
+    return messages.map(_messageItemToToolMap).toList(growable: false);
+  }
+
+  Future<Map<String, dynamic>?> _quotedMessageMap(
+    MessageItem message, {
+    required bool resolveMissing,
+  }) async {
+    final quote = aiMessageQuotedItem(message);
+    if (quote != null) {
+      return _quoteMessageItemToToolMap(quote);
+    }
+    if (!resolveMissing) {
+      return null;
+    }
+    final quoteId = message.quoteId?.trim();
+    if (quoteId == null || quoteId.isEmpty) {
+      return null;
+    }
+    final resolved = await database.messageDao.findMessageItemById(
+      message.conversationId,
+      quoteId,
+    );
+    if (resolved == null) {
+      return {
+        'message_id': quoteId,
+        'unavailable': true,
+      };
+    }
+    return _quoteMessageItemToToolMap(resolved);
+  }
+
+  Map<String, dynamic> _messageItemToToolMap(MessageItem message) => {
+    'message_id': message.messageId,
+    'created_at': _formatToolDateTime(message.createdAt),
+    'sender_name': message.userFullName ?? message.userId,
+    'type': message.type,
+    'text': _messageText(
+      content: message.content,
+      mediaName: message.mediaName,
+      type: message.type,
+      maxLength: _kMaxConversationMessageTextLength,
+    ),
+  };
+
+  Map<String, dynamic> _quoteMessageItemToToolMap(QuoteMessageItem message) => {
+    'message_id': message.messageId,
+    'created_at': _formatToolDateTime(message.createdAt),
+    'sender_name': message.userFullName ?? message.userId,
+    'type': message.type,
+    'text': _truncateText(
+      aiQuoteMessageContextText(message),
+      _kMaxConversationMessageTextLength,
+    ),
+  };
 
   String _messageText({
     required String? content,
@@ -378,7 +539,9 @@ class AiConversationToolKit {
     genkit.Tool<GetConversationStatsInput, String>(
       name: 'get_conversation_stats',
       description:
-          'Get message count and first/last timestamps for the conversation.',
+          'Get message count and first/last timestamps for the conversation, '
+          'optionally limited to a date range. Use this before date-scoped or '
+          'unread summaries to understand coverage.',
       inputSchema: GetConversationStatsInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -398,7 +561,10 @@ class AiConversationToolKit {
     ),
     genkit.Tool<ListConversationChunksInput, String>(
       name: 'list_conversation_chunks',
-      description: 'List offsets for reading conversation messages in batches.',
+      description:
+          'List offsets for reading conversation messages in batches, '
+          'optionally limited to a date range. Use this to plan exhaustive '
+          'summaries or wide history review.',
       inputSchema: ListConversationChunksInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -419,7 +585,11 @@ class AiConversationToolKit {
     ),
     genkit.Tool<ReadConversationChunkInput, String>(
       name: 'read_conversation_chunk',
-      description: 'Read conversation messages by offset and limit.',
+      description:
+          'Read conversation messages by offset and limit, optionally limited '
+          'to a date range. Use this for unread summaries, date-scoped '
+          'summaries, or surrounding context after a search hit. Messages may '
+          'include quoted_message when they directly quote another message.',
       inputSchema: ReadConversationChunkInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
@@ -441,7 +611,11 @@ class AiConversationToolKit {
     ),
     genkit.Tool<SearchConversationMessagesInput, String>(
       name: 'search_conversation_messages',
-      description: 'Search messages in the current conversation.',
+      description:
+          'Search messages in the current conversation by keyword, phrase, '
+          'person, topic, link, or file name. Use anchor_id to page through '
+          'more matches when needed. Results include nearby context messages '
+          'and quote relationships when available.',
       inputSchema: SearchConversationMessagesInput.schema,
       fn: (input, context) => _executeTool(
         conversationId: conversationId,
