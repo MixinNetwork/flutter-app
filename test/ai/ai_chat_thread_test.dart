@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_app/ai/ai_chat_prompt_builder.dart';
+import 'package:flutter_app/ai/ai_thread_target.dart';
 import 'package:flutter_app/ai/model/ai_prompt_message.dart';
 import 'package:flutter_app/db/ai_database.dart';
 import 'package:flutter_app/db/database.dart';
@@ -138,6 +139,34 @@ void main() {
       expect(
         updatedThread?.lastMessageAt?.millisecondsSinceEpoch,
         now.add(const Duration(milliseconds: 1)).millisecondsSinceEpoch,
+      );
+    });
+
+    test('resolves explicit thread targets without latest fallback', () async {
+      const conversationId = 'conversation-id';
+      final latestThread = await database.aiChatMessageDao.createThread(
+        conversationId,
+      );
+
+      final existingThread = await database.aiChatMessageDao
+          .resolveThreadTarget(
+            conversationId: conversationId,
+            target: AiThreadTarget.existing(latestThread.id),
+          );
+      final newThread = await database.aiChatMessageDao.resolveThreadTarget(
+        conversationId: conversationId,
+        target: const AiThreadTarget.createNew(),
+      );
+
+      expect(existingThread.id, latestThread.id);
+      expect(newThread.id, isNot(latestThread.id));
+      expect(newThread.conversationId, conversationId);
+      expect(
+        () => database.aiChatMessageDao.resolveThreadTarget(
+          conversationId: 'other-conversation-id',
+          target: AiThreadTarget.existing(latestThread.id),
+        ),
+        throwsStateError,
       );
     });
 

@@ -1,15 +1,16 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../ai/ai_chat_controller.dart';
+import '../../../../ai/ai_thread_target.dart';
 import '../../../../ai/model/ai_prompt_template.dart';
 import '../../../../db/dao/conversation_dao.dart';
 import '../../../../db/database.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/toast.dart';
+import '../../../provider/ai_assistant_thread_provider.dart';
 import '../../../provider/conversation_provider.dart';
 import '../../chat/chat_page.dart';
-import '../ai_assistant_page.dart';
 import 'helpers.dart';
 
 bool hasAvailableAiModel(BuildContext context) =>
@@ -60,13 +61,14 @@ Future<void> summarizeUnreadMessagesWithAi({
       conversationId,
     );
     providerContainer
-            .read(aiAssistantThreadIdProvider(conversationId).notifier)
-            .state =
-        thread.id;
+        .read(aiAssistantThreadSelectionProvider(conversationId).notifier)
+        .state = AiAssistantThreadSelection.existing(
+      thread.id,
+    );
 
     await AiChatController(database).send(
       conversationId: conversationId,
-      threadId: thread.id,
+      target: AiThreadTarget.existing(thread.id),
       input: _unreadSummaryPrompt(
         database: database,
         conversationId: conversationId,

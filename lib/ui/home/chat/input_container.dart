@@ -20,6 +20,7 @@ import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../ai/ai_chat_controller.dart';
+import '../../../ai/ai_thread_target.dart';
 import '../../../ai/model/ai_prompt_template.dart';
 import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
@@ -49,6 +50,7 @@ import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/abstract_responsive_navigator.dart';
+import '../../provider/ai_assistant_thread_provider.dart';
 import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/ai_input_mode_provider.dart';
 import '../../provider/conversation_provider.dart';
@@ -131,22 +133,38 @@ class _InputContainer extends HookConsumerWidget {
     final attachedMessagesNotifier = conversationId == null
         ? null
         : ref.read(aiContextAttachmentProvider(conversationId).notifier);
-    final activeAiThread = useMemoizedStream(
-      () => conversationId == null
-          ? Stream.value(null)
-          : context.database.aiChatMessageDao.watchLatestThread(
-              conversationId,
-            ),
-      keys: [conversationId],
-    ).data;
+    final aiThreadSelection = conversationId == null
+        ? const AiAssistantThreadSelection.latest()
+        : ref.watch(aiAssistantThreadSelectionProvider(conversationId));
+    final aiThreads =
+        useMemoizedStream(
+          () => conversationId == null
+              ? Stream.value(const <AiChatThread>[])
+              : context.database.aiChatMessageDao.watchThreads(
+                  conversationId,
+                ),
+          keys: [conversationId],
+          initialData: const <AiChatThread>[],
+        ).data ??
+        const <AiChatThread>[];
+    final createNewAiThread =
+        aiThreadSelection.isNewThread || aiThreads.isEmpty;
+    final selectedAiThread = createNewAiThread
+        ? null
+        : aiThreadSelection.isLatest
+        ? aiThreads.firstOrNull
+        : aiThreads.firstWhereOrNull(
+            (item) => item.id == aiThreadSelection.threadId,
+          );
+    final currentAiThread = createNewAiThread ? null : selectedAiThread;
     final aiMessages =
         useMemoizedStream(
-          () => activeAiThread == null
+          () => currentAiThread == null
               ? Stream.value(const <AiChatMessage>[])
               : context.database.aiChatMessageDao.watchThreadMessages(
-                  activeAiThread.id,
+                  currentAiThread.id,
                 ),
-          keys: [activeAiThread?.id],
+          keys: [currentAiThread?.id],
           initialData: const <AiChatMessage>[],
         ).data ??
         const <AiChatMessage>[];
@@ -387,6 +405,7 @@ class _InputContainer extends HookConsumerWidget {
                                 context,
                                 textEditingController,
                                 conversationId: conversationId,
+                                createNewAiThread: createNewAiThread,
                               ),
                             );
                           },
@@ -424,7 +443,8 @@ class _InputContainer extends HookConsumerWidget {
                               aiModeEnabled: aiModeEnabled,
                               providerName: aiProvider?.name,
                               modelName: aiProvider?.model,
-                              aiThreadId: activeAiThread?.id,
+                              aiThreadId: currentAiThread?.id,
+                              createNewAiThread: createNewAiThread,
                               aiRequestInFlight: aiRequestInFlight,
                               aiDraftAssistState: aiDraftAssistState.value,
                             ),
@@ -465,7 +485,8 @@ class _InputContainer extends HookConsumerWidget {
                             textEditingValueStream: textEditingValueStream,
                             aiModeEnabled: aiModeEnabled,
                             aiRequestInFlight: aiRequestInFlight,
-                            aiThreadId: activeAiThread?.id,
+                            aiThreadId: currentAiThread?.id,
+                            createNewAiThread: createNewAiThread,
                           ),
                         ],
                       ),
@@ -485,6 +506,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
   const _AnimatedSendOrVoiceButton({
     required this.conversationId,
     required this.aiThreadId,
+    required this.createNewAiThread,
     required this.textEditingValueStream,
     required this.textEditingController,
     required this.aiModeEnabled,
@@ -493,6 +515,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
 
   final String? conversationId;
   final String? aiThreadId;
+  final bool createNewAiThread;
   final Stream<TextEditingValue> textEditingValueStream;
   final TextEditingController textEditingController;
   final bool aiModeEnabled;
@@ -541,6 +564,7 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
                 textEditingController,
                 conversationId: conversationId,
                 aiThreadId: aiThreadId,
+                createNewAiThread: createNewAiThread,
               ),
             ),
           ),
@@ -729,6 +753,7 @@ Future<void> _sendMessage(
   TextEditingController textEditingController, {
   required String? conversationId,
   String? aiThreadId,
+  bool createNewAiThread = false,
   bool silent = false,
 }) async {
   final text = textEditingController.value.text.trim();
@@ -782,14 +807,33 @@ Future<void> _sendMessage(
       showToastFailed(ToastError('Please add an AI provider first'));
       return;
     }
+    final target = _aiThreadTarget(
+      aiThreadId: aiThreadId,
+      createNewAiThread: createNewAiThread,
+    );
+    if (target == null) {
+      showToastFailed(ToastError('AI thread unavailable'));
+      return;
+    }
     try {
       await AiChatController(context.database).send(
         conversationId: conversationId,
-        threadId: aiThreadId,
+        target: target,
         input: text,
         language: _currentLanguageTag(context),
         provider: provider,
         attachedMessages: attachedMessages,
+        onThreadReady: (threadId) {
+          context.providerContainer
+              .read(
+                aiAssistantThreadSelectionProvider(
+                  conversationId,
+                ).notifier,
+              )
+              .state = AiAssistantThreadSelection.existing(
+            threadId,
+          );
+        },
         onInputAccepted: () {
           textEditingController.text = '';
           attachedMessagesNotifier.clear();
@@ -810,14 +854,33 @@ Future<void> _sendMessage(
     unawaited(
       context.read<ChatSideCubit>().replace(ChatSideCubit.aiAssistantPage),
     );
+    final target = _aiThreadTarget(
+      aiThreadId: aiThreadId,
+      createNewAiThread: createNewAiThread,
+    );
+    if (target == null) {
+      showToastFailed(ToastError('AI thread unavailable'));
+      return;
+    }
     try {
       await AiChatController(context.database).send(
         conversationId: conversationId,
-        threadId: aiThreadId,
+        target: target,
         input: inlineAiInput,
         language: _currentLanguageTag(context),
         provider: provider,
         attachedMessages: attachedMessages,
+        onThreadReady: (threadId) {
+          context.providerContainer
+              .read(
+                aiAssistantThreadSelectionProvider(
+                  conversationId,
+                ).notifier,
+              )
+              .state = AiAssistantThreadSelection.existing(
+            threadId,
+          );
+        },
         onInputAccepted: () {
           textEditingController.text = '';
           attachedMessagesNotifier.clear();
@@ -840,6 +903,19 @@ Future<void> _sendMessage(
 
   textEditingController.text = '';
   context.providerContainer.read(quoteMessageProvider.notifier).state = null;
+}
+
+AiThreadTarget? _aiThreadTarget({
+  required String? aiThreadId,
+  required bool createNewAiThread,
+}) {
+  if (createNewAiThread) {
+    return const AiThreadTarget.createNew();
+  }
+  if (aiThreadId == null) {
+    return null;
+  }
+  return AiThreadTarget.existing(aiThreadId);
 }
 
 AiProviderConfig? _resolveAiModeProvider({
@@ -877,6 +953,7 @@ class _SendTextField extends HookConsumerWidget {
     required this.providerName,
     required this.modelName,
     required this.aiThreadId,
+    required this.createNewAiThread,
     required this.aiRequestInFlight,
     required this.aiDraftAssistState,
   });
@@ -889,6 +966,7 @@ class _SendTextField extends HookConsumerWidget {
   final String? providerName;
   final String? modelName;
   final String? aiThreadId;
+  final bool createNewAiThread;
   final bool aiRequestInFlight;
   final AiDraftAssistViewState aiDraftAssistState;
 
@@ -990,6 +1068,7 @@ class _SendTextField extends HookConsumerWidget {
                 textEditingController,
                 conversationId: ref.read(currentConversationIdProvider),
                 aiThreadId: aiThreadId,
+                createNewAiThread: createNewAiThread,
               ),
             ),
           ),

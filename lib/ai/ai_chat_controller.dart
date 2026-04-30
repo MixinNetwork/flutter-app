@@ -12,6 +12,7 @@ import '../db/mixin_database.dart';
 import 'ai_chat_prompt_builder.dart';
 import 'ai_message_context.dart';
 import 'ai_provider_requester.dart';
+import 'ai_thread_target.dart';
 import 'model/ai_chat_metadata.dart';
 import 'model/ai_prompt_message.dart';
 import 'model/ai_provider_config.dart';
@@ -100,14 +101,15 @@ class AiChatController {
     required String conversationId,
     required String input,
     required String language,
-    String? threadId,
+    required AiThreadTarget target,
     AiProviderConfig? provider,
     List<MessageItem> attachedMessages = const [],
+    void Function(String threadId)? onThreadReady,
     void Function()? onInputAccepted,
   }) async {
-    final thread = await database.aiChatMessageDao.ensureThread(
+    final thread = await database.aiChatMessageDao.resolveThreadTarget(
       conversationId: conversationId,
-      threadId: threadId,
+      target: target,
     );
     await database.aiChatMessageDao.resolveStalePendingAssistantMessages(
       updatedBefore: kAiRuntimeStartedAt,
@@ -177,17 +179,18 @@ class AiChatController {
     );
 
     onInputAccepted?.call();
+    onThreadReady?.call(thread.id);
 
     final updater = _StreamingMessageUpdater(
       dao: database.aiChatMessageDao,
       messageId: assistantMessageId,
     );
     final requestKeys = {
-      conversationId,
       thread.id,
+      assistantMessageId,
     };
-    _activeAiRequests[conversationId] = cancelToken;
     _activeAiRequests[thread.id] = cancelToken;
+    _activeAiRequests[assistantMessageId] = cancelToken;
     try {
       final messages = await _promptBuilder.buildPromptMessages(
         conversationId,

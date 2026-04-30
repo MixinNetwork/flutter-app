@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../ai/ai_chat_controller.dart';
+import '../../../ai/ai_thread_target.dart';
 import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
@@ -19,6 +20,7 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/empty.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+import '../../provider/ai_assistant_thread_provider.dart';
 import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/ai_input_mode_provider.dart';
 import '../../provider/conversation_provider.dart';
@@ -29,11 +31,6 @@ import 'ai_assistant/composer.dart';
 import 'ai_assistant/constants.dart';
 import 'ai_assistant/helpers.dart';
 import 'ai_assistant/message_list.dart';
-
-const _newAiAssistantThreadId = '';
-
-final aiAssistantThreadIdProvider = StateProvider.autoDispose
-    .family<String?, String>((ref, conversationId) => null);
 
 class AiAssistantPage extends HookConsumerWidget {
   const AiAssistantPage(this.conversationState, {super.key});
@@ -72,18 +69,20 @@ class AiAssistantPage extends HookConsumerWidget {
           initialData: const <AiChatThread>[],
         ).data ??
         const <AiChatThread>[];
-    final activeThreadId = ref.watch(
-      aiAssistantThreadIdProvider(conversationId),
+    final threadSelection = ref.watch(
+      aiAssistantThreadSelectionProvider(conversationId),
     );
-    final activeThreadNotifier = ref.read(
-      aiAssistantThreadIdProvider(conversationId).notifier,
+    final threadSelectionNotifier = ref.read(
+      aiAssistantThreadSelectionProvider(conversationId).notifier,
     );
-    final isNewThreadPage =
-        activeThreadId == _newAiAssistantThreadId || threads.isEmpty;
-    final activeThread = threads.firstWhereOrNull(
-      (item) => item.id == activeThreadId,
-    );
-    final fallbackThread = threads.firstOrNull;
+    final isNewThreadPage = threadSelection.isNewThread || threads.isEmpty;
+    final selectedThreadId = threadSelection.threadId;
+    final activeThread = selectedThreadId == null
+        ? null
+        : threads.firstWhereOrNull((item) => item.id == selectedThreadId);
+    final fallbackThread = threadSelection.isLatest
+        ? threads.firstOrNull
+        : null;
     final currentThread = isNewThreadPage
         ? null
         : activeThread ?? fallbackThread;
@@ -126,21 +125,34 @@ class AiAssistantPage extends HookConsumerWidget {
         showToastFailed(ToastError(aiAssistantUnavailable));
         return;
       }
+      final target = isNewThreadPage
+          ? const AiThreadTarget.createNew()
+          : currentThread == null
+          ? null
+          : AiThreadTarget.existing(currentThread.id);
+      if (target == null) {
+        showToastFailed(ToastError('AI thread unavailable'));
+        return;
+      }
 
       try {
-        final threadId = await AiChatController(context.database).send(
+        await AiChatController(context.database).send(
           conversationId: conversationId,
-          threadId: currentThread?.id,
+          target: target,
           input: text,
           language: currentLanguageTag(context),
           provider: aiProvider,
           attachedMessages: attachedMessages,
+          onThreadReady: (threadId) {
+            threadSelectionNotifier.state = AiAssistantThreadSelection.existing(
+              threadId,
+            );
+          },
           onInputAccepted: () {
             textEditingController.clear();
             attachedMessagesNotifier.clear();
           },
         );
-        activeThreadNotifier.state = threadId;
       } catch (error, _) {
         showToastFailed(error);
       }
@@ -148,7 +160,8 @@ class AiAssistantPage extends HookConsumerWidget {
 
     void openNewThreadPage() {
       if (isNewThreadPage) return;
-      activeThreadNotifier.state = _newAiAssistantThreadId;
+      threadSelectionNotifier.state =
+          const AiAssistantThreadSelection.newThread();
     }
 
     return Scaffold(
@@ -230,13 +243,16 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
           initialData: const <AiChatThread>[],
         ).data ??
         const <AiChatThread>[];
-    final activeThreadId = ref.watch(
-      aiAssistantThreadIdProvider(conversationId),
+    final threadSelection = ref.watch(
+      aiAssistantThreadSelectionProvider(conversationId),
     );
-    final activeThreadNotifier = ref.read(
-      aiAssistantThreadIdProvider(conversationId).notifier,
+    final threadSelectionNotifier = ref.read(
+      aiAssistantThreadSelectionProvider(conversationId).notifier,
     );
-    final hasSelectedThread = threads.any((item) => item.id == activeThreadId);
+    final activeThreadId = threadSelection.threadId;
+    final hasSelectedThread =
+        activeThreadId != null &&
+        threads.any((item) => item.id == activeThreadId);
 
     return Scaffold(
       backgroundColor: context.theme.primary,
@@ -257,7 +273,8 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
                 final thread = threads[index];
                 final selected =
                     activeThreadId == thread.id ||
-                    ((activeThreadId == null || !hasSelectedThread) &&
+                    (activeThreadId == null &&
+                        !hasSelectedThread &&
                         index == 0);
                 return _AiAssistantThreadTile(
                   thread: thread,
@@ -274,11 +291,13 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
                       thread.id,
                     );
                     if (activeThreadId == thread.id) {
-                      activeThreadNotifier.state = null;
+                      threadSelectionNotifier.state =
+                          const AiAssistantThreadSelection.latest();
                     }
                   },
                   onTap: () {
-                    activeThreadNotifier.state = thread.id;
+                    threadSelectionNotifier.state =
+                        AiAssistantThreadSelection.existing(thread.id);
                     context.read<ChatSideCubit>().pop();
                   },
                 );

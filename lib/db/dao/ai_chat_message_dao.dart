@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../ai/ai_thread_target.dart';
 import '../../ai/model/ai_chat_metadata.dart';
 import '../ai_database.dart';
 
@@ -106,23 +107,22 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
     });
   }
 
-  Future<AiChatThread> ensureThread({
+  Future<AiChatThread> resolveThreadTarget({
     required String conversationId,
-    String? threadId,
+    required AiThreadTarget target,
   }) async {
-    if (threadId != null) {
-      final thread = await threadById(threadId);
-      if (thread == null ||
-          thread.conversationId != conversationId ||
-          thread.status != activeThreadStatus) {
-        throw StateError('AI thread not found');
-      }
-      return thread;
+    switch (target) {
+      case ExistingAiThreadTarget(:final threadId):
+        final thread = await threadById(threadId);
+        if (thread == null ||
+            thread.conversationId != conversationId ||
+            thread.status != activeThreadStatus) {
+          throw StateError('AI thread not found');
+        }
+        return thread;
+      case NewAiThreadTarget():
+        return createThread(conversationId);
     }
-
-    final existing = await latestThread(conversationId);
-    if (existing != null) return existing;
-    return createThread(conversationId);
   }
 
   Stream<List<AiChatMessage>> watchThreadMessages(String threadId) =>
