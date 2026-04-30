@@ -24,6 +24,10 @@ String aiMessageContextText(MessageItem message) {
     return caption;
   }
 
+  if (message.type.isImage) {
+    return '[image]';
+  }
+
   final mediaName = message.mediaName?.trim();
   if (mediaName != null && mediaName.isNotEmpty) {
     return '[${message.type}] $mediaName';

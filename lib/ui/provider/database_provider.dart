@@ -54,6 +54,7 @@ class DatabaseOpener extends DistinctStateNotifier<AsyncValue<Database>> {
         mixinDatabase,
         await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
         await AiDatabase.connect(identityNumber, fromMainIsolate: true),
+        identityNumber: identityNumber,
       );
       // Do a database query, to ensure database has properly initialized.
       await mixinDatabase.doInitVerify();

@@ -6,6 +6,7 @@ import '../utils/logger.dart';
 import '../utils/property/setting_property.dart';
 import 'ai_database.dart';
 import 'dao/ai_chat_message_dao.dart';
+import 'dao/ai_image_ocr_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
 import 'dao/chain_dao.dart';
@@ -39,7 +40,12 @@ import 'fts_database.dart';
 import 'mixin_database.dart';
 
 class Database {
-  Database(this.mixinDatabase, this.ftsDatabase, this.aiDatabase) {
+  Database(
+    this.mixinDatabase,
+    this.ftsDatabase,
+    this.aiDatabase, {
+    this.identityNumber,
+  }) {
     settingProperties = SettingPropertyStorage(mixinDatabase.propertyDao);
   }
 
@@ -49,9 +55,13 @@ class Database {
 
   final AiDatabase aiDatabase;
 
+  final String? identityNumber;
+
   AppDao get appDao => mixinDatabase.appDao;
 
   AiChatMessageDao get aiChatMessageDao => aiDatabase.aiChatMessageDao;
+
+  AiImageOcrDao get aiImageOcrDao => aiDatabase.aiImageOcrDao;
 
   AssetDao get assetDao => mixinDatabase.assetDao;
 

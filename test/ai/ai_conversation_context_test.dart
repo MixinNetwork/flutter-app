@@ -224,6 +224,38 @@ void main() {
         expect(prompt, contains('noise before transcript'));
       },
     );
+
+    test('attached image prompt includes OCR context status', () async {
+      final createdAt = DateTime(2026, 4, 30, 12);
+      await _insertMessage(
+        database,
+        id: 'image',
+        userId: 'alice',
+        content: '',
+        createdAt: createdAt,
+        category: MessageCategory.plainImage,
+        mediaUrl: 'missing-image.png',
+      );
+
+      final attached = await database.messageDao
+          .messageItemByMessageId('image')
+          .getSingle();
+      final promptMessages = await AiChatPromptBuilder(database)
+          .buildPromptMessages(
+            'conversation',
+            'thread',
+            'what text is in this image?',
+            'English',
+            attachedMessages: [attached],
+          );
+      final prompt = promptMessages
+          .map((message) => message.content)
+          .join('\n');
+
+      expect(prompt, contains('OCR text from primary attached image:'));
+      expect(prompt, contains('status=error'));
+      expect(prompt, contains('local image file is not available'));
+    });
   });
 }
 
@@ -245,6 +277,7 @@ Future<void> _insertMessage(
   required String content,
   required DateTime createdAt,
   String category = MessageCategory.plainText,
+  String? mediaUrl,
   String? quoteMessageId,
   String? quoteContent,
 }) async {
@@ -257,6 +290,7 @@ Future<void> _insertMessage(
           userId: userId,
           category: category,
           content: Value(content),
+          mediaUrl: Value(mediaUrl),
           status: MessageStatus.read,
           createdAt: createdAt,
           quoteMessageId: Value(quoteMessageId),

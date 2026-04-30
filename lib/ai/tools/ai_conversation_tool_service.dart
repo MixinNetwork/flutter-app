@@ -8,9 +8,11 @@ import 'package:toon_format/toon_format.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/database.dart';
+import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart';
 import '../ai_message_context.dart';
 import '../model/ai_chat_metadata.dart';
+import 'ai_image_ocr_service.dart';
 
 const _kDefaultConversationChunkSize = 100;
 const _kMaxConversationChunkSize = 200;
@@ -185,12 +187,18 @@ abstract interface class AiConversationToolService {
     required int limit,
     String? anchorMessageId,
   });
+
+  Future<AiImageOcrTextResult> readImageText({
+    required String conversationId,
+    required String messageId,
+  });
 }
 
 class DatabaseAiConversationToolService implements AiConversationToolService {
   DatabaseAiConversationToolService(this.database);
 
   final Database database;
+  late final AiImageOcrService _imageOcrService = AiImageOcrService(database);
 
   @override
   Future<AiConversationToolStats> getConversationStats({
@@ -362,6 +370,15 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
     );
   }
 
+  @override
+  Future<AiImageOcrTextResult> readImageText({
+    required String conversationId,
+    required String messageId,
+  }) => _imageOcrService.recognizeMessageImageText(
+    conversationId: conversationId,
+    messageId: messageId,
+  );
+
   Future<AiConversationToolMessage> _messageItemToToolMessage(
     MessageItem message, {
     String? query,
@@ -523,6 +540,10 @@ class DatabaseAiConversationToolService implements AiConversationToolService {
     if (mediaName?.isNotEmpty == true) {
       return '[$type] $mediaName';
     }
+    if (type.isImage) {
+      return '[$type image; use read_image_text with message_id when the user '
+          'asks about text in this image]';
+    }
     return '[$type]';
   }
 }
@@ -629,6 +650,30 @@ class AiConversationToolKit {
             query: input.query,
             limit: input.limit,
             anchorMessageId: input.anchorMessageId,
+          );
+          return result.toJson();
+        },
+      ),
+    ),
+    genkit.Tool<ReadImageTextInput, String>(
+      name: 'read_image_text',
+      description:
+          'Run local OCR for an image message in the current conversation. '
+          'Use this when the user asks what text appears in an image, '
+          'screenshot, photo, receipt, document, or error capture. OCR only '
+          'recognizes visible text and may be incomplete; do not treat it as '
+          'full visual understanding.',
+      inputSchema: ReadImageTextInput.schema,
+      fn: (input, context) => _executeTool(
+        conversationId: conversationId,
+        name: 'read_image_text',
+        arguments: input.toArguments(),
+        context: context,
+        onEvent: onEvent,
+        fn: () async {
+          final result = await service.readImageText(
+            conversationId: conversationId,
+            messageId: input.messageId,
           );
           return result.toJson();
         },
@@ -870,6 +915,34 @@ class SearchConversationMessagesInput {
     'limit': limit,
     'anchor_id': anchorMessageId,
   }..removeWhere((_, value) => value == null);
+}
+
+class ReadImageTextInput {
+  const ReadImageTextInput({required this.messageId});
+
+  final String messageId;
+
+  static final schema = SchemanticType.from<ReadImageTextInput>(
+    jsonSchema: {
+      'type': 'object',
+      'properties': {
+        'message_id': {
+          'type': 'string',
+          'description': 'Image message id in the current conversation.',
+        },
+      },
+      'required': ['message_id'],
+      'additionalProperties': false,
+    },
+    parse: (value) {
+      final arguments = _jsonMap(value);
+      return ReadImageTextInput(
+        messageId: _parseRequiredString(arguments, 'message_id'),
+      );
+    },
+  );
+
+  Map<String, dynamic> toArguments() => {'message_id': messageId};
 }
 
 Map<String, Object?> _rangeSchema({

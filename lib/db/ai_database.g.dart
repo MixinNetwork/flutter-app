@@ -1501,11 +1501,641 @@ class AiChatThreadsCompanion extends UpdateCompanion<AiChatThread> {
   }
 }
 
+class ImageOcrResults extends Table
+    with TableInfo<ImageOcrResults, ImageOcrResult> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ImageOcrResults(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _messageIdMeta = const VerificationMeta(
+    'messageId',
+  );
+  late final GeneratedColumn<String> messageId = GeneratedColumn<String>(
+    'message_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _conversationIdMeta = const VerificationMeta(
+    'conversationId',
+  );
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+    'conversation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _mediaFingerprintMeta = const VerificationMeta(
+    'mediaFingerprint',
+  );
+  late final GeneratedColumn<String> mediaFingerprint = GeneratedColumn<String>(
+    'media_fingerprint',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _engineMeta = const VerificationMeta('engine');
+  late final GeneratedColumn<String> engine = GeneratedColumn<String>(
+    'engine',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _recognizedTextMeta = const VerificationMeta(
+    'recognizedText',
+  );
+  late final GeneratedColumn<String> recognizedText = GeneratedColumn<String>(
+    'recognized_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT \'\'',
+    defaultValue: const CustomExpression('\'\''),
+  );
+  static const VerificationMeta _linesJsonMeta = const VerificationMeta(
+    'linesJson',
+  );
+  late final GeneratedColumn<String> linesJson = GeneratedColumn<String>(
+    'lines_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  static const VerificationMeta _errorTextMeta = const VerificationMeta(
+    'errorText',
+  );
+  late final GeneratedColumn<String> errorText = GeneratedColumn<String>(
+    'error_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>(
+        'created_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<DateTime>(ImageOcrResults.$convertercreatedAt);
+  late final GeneratedColumnWithTypeConverter<DateTime, int> updatedAt =
+      GeneratedColumn<int>(
+        'updated_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<DateTime>(ImageOcrResults.$converterupdatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [
+    messageId,
+    conversationId,
+    mediaFingerprint,
+    engine,
+    status,
+    recognizedText,
+    linesJson,
+    errorText,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'image_ocr_results';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImageOcrResult> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(
+        _messageIdMeta,
+        messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+        _conversationIdMeta,
+        conversationId.isAcceptableOrUnknown(
+          data['conversation_id']!,
+          _conversationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('media_fingerprint')) {
+      context.handle(
+        _mediaFingerprintMeta,
+        mediaFingerprint.isAcceptableOrUnknown(
+          data['media_fingerprint']!,
+          _mediaFingerprintMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_mediaFingerprintMeta);
+    }
+    if (data.containsKey('engine')) {
+      context.handle(
+        _engineMeta,
+        engine.isAcceptableOrUnknown(data['engine']!, _engineMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_engineMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('recognized_text')) {
+      context.handle(
+        _recognizedTextMeta,
+        recognizedText.isAcceptableOrUnknown(
+          data['recognized_text']!,
+          _recognizedTextMeta,
+        ),
+      );
+    }
+    if (data.containsKey('lines_json')) {
+      context.handle(
+        _linesJsonMeta,
+        linesJson.isAcceptableOrUnknown(data['lines_json']!, _linesJsonMeta),
+      );
+    }
+    if (data.containsKey('error_text')) {
+      context.handle(
+        _errorTextMeta,
+        errorText.isAcceptableOrUnknown(data['error_text']!, _errorTextMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  ImageOcrResult map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImageOcrResult(
+      messageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_id'],
+      )!,
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      mediaFingerprint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_fingerprint'],
+      )!,
+      engine: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}engine'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      recognizedText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recognized_text'],
+      )!,
+      linesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lines_json'],
+      ),
+      errorText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_text'],
+      ),
+      createdAt: ImageOcrResults.$convertercreatedAt.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}created_at'],
+        )!,
+      ),
+      updatedAt: ImageOcrResults.$converterupdatedAt.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}updated_at'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  ImageOcrResults createAlias(String alias) {
+    return ImageOcrResults(attachedDatabase, alias);
+  }
+
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converterupdatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ImageOcrResult extends DataClass implements Insertable<ImageOcrResult> {
+  final String messageId;
+  final String conversationId;
+  final String mediaFingerprint;
+  final String engine;
+  final String status;
+  final String recognizedText;
+  final String? linesJson;
+  final String? errorText;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ImageOcrResult({
+    required this.messageId,
+    required this.conversationId,
+    required this.mediaFingerprint,
+    required this.engine,
+    required this.status,
+    required this.recognizedText,
+    this.linesJson,
+    this.errorText,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['media_fingerprint'] = Variable<String>(mediaFingerprint);
+    map['engine'] = Variable<String>(engine);
+    map['status'] = Variable<String>(status);
+    map['recognized_text'] = Variable<String>(recognizedText);
+    if (!nullToAbsent || linesJson != null) {
+      map['lines_json'] = Variable<String>(linesJson);
+    }
+    if (!nullToAbsent || errorText != null) {
+      map['error_text'] = Variable<String>(errorText);
+    }
+    {
+      map['created_at'] = Variable<int>(
+        ImageOcrResults.$convertercreatedAt.toSql(createdAt),
+      );
+    }
+    {
+      map['updated_at'] = Variable<int>(
+        ImageOcrResults.$converterupdatedAt.toSql(updatedAt),
+      );
+    }
+    return map;
+  }
+
+  ImageOcrResultsCompanion toCompanion(bool nullToAbsent) {
+    return ImageOcrResultsCompanion(
+      messageId: Value(messageId),
+      conversationId: Value(conversationId),
+      mediaFingerprint: Value(mediaFingerprint),
+      engine: Value(engine),
+      status: Value(status),
+      recognizedText: Value(recognizedText),
+      linesJson: linesJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linesJson),
+      errorText: errorText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorText),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ImageOcrResult.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImageOcrResult(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      mediaFingerprint: serializer.fromJson<String>(json['media_fingerprint']),
+      engine: serializer.fromJson<String>(json['engine']),
+      status: serializer.fromJson<String>(json['status']),
+      recognizedText: serializer.fromJson<String>(json['recognized_text']),
+      linesJson: serializer.fromJson<String?>(json['lines_json']),
+      errorText: serializer.fromJson<String?>(json['error_text']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'media_fingerprint': serializer.toJson<String>(mediaFingerprint),
+      'engine': serializer.toJson<String>(engine),
+      'status': serializer.toJson<String>(status),
+      'recognized_text': serializer.toJson<String>(recognizedText),
+      'lines_json': serializer.toJson<String?>(linesJson),
+      'error_text': serializer.toJson<String?>(errorText),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'updated_at': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ImageOcrResult copyWith({
+    String? messageId,
+    String? conversationId,
+    String? mediaFingerprint,
+    String? engine,
+    String? status,
+    String? recognizedText,
+    Value<String?> linesJson = const Value.absent(),
+    Value<String?> errorText = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => ImageOcrResult(
+    messageId: messageId ?? this.messageId,
+    conversationId: conversationId ?? this.conversationId,
+    mediaFingerprint: mediaFingerprint ?? this.mediaFingerprint,
+    engine: engine ?? this.engine,
+    status: status ?? this.status,
+    recognizedText: recognizedText ?? this.recognizedText,
+    linesJson: linesJson.present ? linesJson.value : this.linesJson,
+    errorText: errorText.present ? errorText.value : this.errorText,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ImageOcrResult copyWithCompanion(ImageOcrResultsCompanion data) {
+    return ImageOcrResult(
+      messageId: data.messageId.present ? data.messageId.value : this.messageId,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      mediaFingerprint: data.mediaFingerprint.present
+          ? data.mediaFingerprint.value
+          : this.mediaFingerprint,
+      engine: data.engine.present ? data.engine.value : this.engine,
+      status: data.status.present ? data.status.value : this.status,
+      recognizedText: data.recognizedText.present
+          ? data.recognizedText.value
+          : this.recognizedText,
+      linesJson: data.linesJson.present ? data.linesJson.value : this.linesJson,
+      errorText: data.errorText.present ? data.errorText.value : this.errorText,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImageOcrResult(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('mediaFingerprint: $mediaFingerprint, ')
+          ..write('engine: $engine, ')
+          ..write('status: $status, ')
+          ..write('recognizedText: $recognizedText, ')
+          ..write('linesJson: $linesJson, ')
+          ..write('errorText: $errorText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    messageId,
+    conversationId,
+    mediaFingerprint,
+    engine,
+    status,
+    recognizedText,
+    linesJson,
+    errorText,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImageOcrResult &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.mediaFingerprint == this.mediaFingerprint &&
+          other.engine == this.engine &&
+          other.status == this.status &&
+          other.recognizedText == this.recognizedText &&
+          other.linesJson == this.linesJson &&
+          other.errorText == this.errorText &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ImageOcrResultsCompanion extends UpdateCompanion<ImageOcrResult> {
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<String> mediaFingerprint;
+  final Value<String> engine;
+  final Value<String> status;
+  final Value<String> recognizedText;
+  final Value<String?> linesJson;
+  final Value<String?> errorText;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ImageOcrResultsCompanion({
+    this.messageId = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.mediaFingerprint = const Value.absent(),
+    this.engine = const Value.absent(),
+    this.status = const Value.absent(),
+    this.recognizedText = const Value.absent(),
+    this.linesJson = const Value.absent(),
+    this.errorText = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImageOcrResultsCompanion.insert({
+    required String messageId,
+    required String conversationId,
+    required String mediaFingerprint,
+    required String engine,
+    required String status,
+    this.recognizedText = const Value.absent(),
+    this.linesJson = const Value.absent(),
+    this.errorText = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : messageId = Value(messageId),
+       conversationId = Value(conversationId),
+       mediaFingerprint = Value(mediaFingerprint),
+       engine = Value(engine),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ImageOcrResult> custom({
+    Expression<String>? messageId,
+    Expression<String>? conversationId,
+    Expression<String>? mediaFingerprint,
+    Expression<String>? engine,
+    Expression<String>? status,
+    Expression<String>? recognizedText,
+    Expression<String>? linesJson,
+    Expression<String>? errorText,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (mediaFingerprint != null) 'media_fingerprint': mediaFingerprint,
+      if (engine != null) 'engine': engine,
+      if (status != null) 'status': status,
+      if (recognizedText != null) 'recognized_text': recognizedText,
+      if (linesJson != null) 'lines_json': linesJson,
+      if (errorText != null) 'error_text': errorText,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImageOcrResultsCompanion copyWith({
+    Value<String>? messageId,
+    Value<String>? conversationId,
+    Value<String>? mediaFingerprint,
+    Value<String>? engine,
+    Value<String>? status,
+    Value<String>? recognizedText,
+    Value<String?>? linesJson,
+    Value<String?>? errorText,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ImageOcrResultsCompanion(
+      messageId: messageId ?? this.messageId,
+      conversationId: conversationId ?? this.conversationId,
+      mediaFingerprint: mediaFingerprint ?? this.mediaFingerprint,
+      engine: engine ?? this.engine,
+      status: status ?? this.status,
+      recognizedText: recognizedText ?? this.recognizedText,
+      linesJson: linesJson ?? this.linesJson,
+      errorText: errorText ?? this.errorText,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (mediaFingerprint.present) {
+      map['media_fingerprint'] = Variable<String>(mediaFingerprint.value);
+    }
+    if (engine.present) {
+      map['engine'] = Variable<String>(engine.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (recognizedText.present) {
+      map['recognized_text'] = Variable<String>(recognizedText.value);
+    }
+    if (linesJson.present) {
+      map['lines_json'] = Variable<String>(linesJson.value);
+    }
+    if (errorText.present) {
+      map['error_text'] = Variable<String>(errorText.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(
+        ImageOcrResults.$convertercreatedAt.toSql(createdAt.value),
+      );
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(
+        ImageOcrResults.$converterupdatedAt.toSql(updatedAt.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImageOcrResultsCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('mediaFingerprint: $mediaFingerprint, ')
+          ..write('engine: $engine, ')
+          ..write('status: $status, ')
+          ..write('recognizedText: $recognizedText, ')
+          ..write('linesJson: $linesJson, ')
+          ..write('errorText: $errorText, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AiDatabase extends GeneratedDatabase {
   _$AiDatabase(QueryExecutor e) : super(e);
   $AiDatabaseManager get managers => $AiDatabaseManager(this);
   late final AiChatMessages aiChatMessages = AiChatMessages(this);
   late final AiChatThreads aiChatThreads = AiChatThreads(this);
+  late final ImageOcrResults imageOcrResults = ImageOcrResults(this);
   late final Index indexAiChatMessagesConversationIdCreatedAt = Index(
     'index_ai_chat_messages_conversation_id_created_at',
     'CREATE INDEX IF NOT EXISTS index_ai_chat_messages_conversation_id_created_at ON ai_chat_messages (conversation_id, created_at DESC)',
@@ -1522,9 +2152,14 @@ abstract class _$AiDatabase extends GeneratedDatabase {
     'index_ai_chat_threads_conversation_id_last_message_at',
     'CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_last_message_at ON ai_chat_threads (conversation_id, status, last_message_at DESC)',
   );
+  late final Index indexImageOcrResultsConversationIdUpdatedAt = Index(
+    'index_image_ocr_results_conversation_id_updated_at',
+    'CREATE INDEX IF NOT EXISTS index_image_ocr_results_conversation_id_updated_at ON image_ocr_results (conversation_id, updated_at DESC)',
+  );
   late final AiChatMessageDao aiChatMessageDao = AiChatMessageDao(
     this as AiDatabase,
   );
+  late final AiImageOcrDao aiImageOcrDao = AiImageOcrDao(this as AiDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1532,10 +2167,12 @@ abstract class _$AiDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     aiChatMessages,
     aiChatThreads,
+    imageOcrResults,
     indexAiChatMessagesConversationIdCreatedAt,
     indexAiChatMessagesThreadIdCreatedAt,
     indexAiChatThreadsConversationIdUpdatedAt,
     indexAiChatThreadsConversationIdLastMessageAt,
+    indexImageOcrResultsConversationIdUpdatedAt,
   ];
 }
 
@@ -2244,6 +2881,309 @@ typedef $AiChatThreadsProcessedTableManager =
       AiChatThread,
       PrefetchHooks Function()
     >;
+typedef $ImageOcrResultsCreateCompanionBuilder =
+    ImageOcrResultsCompanion Function({
+      required String messageId,
+      required String conversationId,
+      required String mediaFingerprint,
+      required String engine,
+      required String status,
+      Value<String> recognizedText,
+      Value<String?> linesJson,
+      Value<String?> errorText,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $ImageOcrResultsUpdateCompanionBuilder =
+    ImageOcrResultsCompanion Function({
+      Value<String> messageId,
+      Value<String> conversationId,
+      Value<String> mediaFingerprint,
+      Value<String> engine,
+      Value<String> status,
+      Value<String> recognizedText,
+      Value<String?> linesJson,
+      Value<String?> errorText,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $ImageOcrResultsFilterComposer
+    extends Composer<_$AiDatabase, ImageOcrResults> {
+  $ImageOcrResultsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get messageId => $composableBuilder(
+    column: $table.messageId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaFingerprint => $composableBuilder(
+    column: $table.mediaFingerprint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get engine => $composableBuilder(
+    column: $table.engine,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recognizedText => $composableBuilder(
+    column: $table.recognizedText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linesJson => $composableBuilder(
+    column: $table.linesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorText => $composableBuilder(
+    column: $table.errorText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $composableBuilder(
+        column: $table.createdAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get updatedAt =>
+      $composableBuilder(
+        column: $table.updatedAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $ImageOcrResultsOrderingComposer
+    extends Composer<_$AiDatabase, ImageOcrResults> {
+  $ImageOcrResultsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get messageId => $composableBuilder(
+    column: $table.messageId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaFingerprint => $composableBuilder(
+    column: $table.mediaFingerprint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get engine => $composableBuilder(
+    column: $table.engine,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recognizedText => $composableBuilder(
+    column: $table.recognizedText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linesJson => $composableBuilder(
+    column: $table.linesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorText => $composableBuilder(
+    column: $table.errorText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $ImageOcrResultsAnnotationComposer
+    extends Composer<_$AiDatabase, ImageOcrResults> {
+  $ImageOcrResultsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get messageId =>
+      $composableBuilder(column: $table.messageId, builder: (column) => column);
+
+  GeneratedColumn<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get mediaFingerprint => $composableBuilder(
+    column: $table.mediaFingerprint,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get engine =>
+      $composableBuilder(column: $table.engine, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get recognizedText => $composableBuilder(
+    column: $table.recognizedText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linesJson =>
+      $composableBuilder(column: $table.linesJson, builder: (column) => column);
+
+  GeneratedColumn<String> get errorText =>
+      $composableBuilder(column: $table.errorText, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $ImageOcrResultsTableManager
+    extends
+        RootTableManager<
+          _$AiDatabase,
+          ImageOcrResults,
+          ImageOcrResult,
+          $ImageOcrResultsFilterComposer,
+          $ImageOcrResultsOrderingComposer,
+          $ImageOcrResultsAnnotationComposer,
+          $ImageOcrResultsCreateCompanionBuilder,
+          $ImageOcrResultsUpdateCompanionBuilder,
+          (
+            ImageOcrResult,
+            BaseReferences<_$AiDatabase, ImageOcrResults, ImageOcrResult>,
+          ),
+          ImageOcrResult,
+          PrefetchHooks Function()
+        > {
+  $ImageOcrResultsTableManager(_$AiDatabase db, ImageOcrResults table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $ImageOcrResultsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ImageOcrResultsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ImageOcrResultsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> messageId = const Value.absent(),
+                Value<String> conversationId = const Value.absent(),
+                Value<String> mediaFingerprint = const Value.absent(),
+                Value<String> engine = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> recognizedText = const Value.absent(),
+                Value<String?> linesJson = const Value.absent(),
+                Value<String?> errorText = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ImageOcrResultsCompanion(
+                messageId: messageId,
+                conversationId: conversationId,
+                mediaFingerprint: mediaFingerprint,
+                engine: engine,
+                status: status,
+                recognizedText: recognizedText,
+                linesJson: linesJson,
+                errorText: errorText,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String messageId,
+                required String conversationId,
+                required String mediaFingerprint,
+                required String engine,
+                required String status,
+                Value<String> recognizedText = const Value.absent(),
+                Value<String?> linesJson = const Value.absent(),
+                Value<String?> errorText = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ImageOcrResultsCompanion.insert(
+                messageId: messageId,
+                conversationId: conversationId,
+                mediaFingerprint: mediaFingerprint,
+                engine: engine,
+                status: status,
+                recognizedText: recognizedText,
+                linesJson: linesJson,
+                errorText: errorText,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $ImageOcrResultsProcessedTableManager =
+    ProcessedTableManager<
+      _$AiDatabase,
+      ImageOcrResults,
+      ImageOcrResult,
+      $ImageOcrResultsFilterComposer,
+      $ImageOcrResultsOrderingComposer,
+      $ImageOcrResultsAnnotationComposer,
+      $ImageOcrResultsCreateCompanionBuilder,
+      $ImageOcrResultsUpdateCompanionBuilder,
+      (
+        ImageOcrResult,
+        BaseReferences<_$AiDatabase, ImageOcrResults, ImageOcrResult>,
+      ),
+      ImageOcrResult,
+      PrefetchHooks Function()
+    >;
 
 class $AiDatabaseManager {
   final _$AiDatabase _db;
@@ -2252,4 +3192,6 @@ class $AiDatabaseManager {
       $AiChatMessagesTableManager(_db, _db.aiChatMessages);
   $AiChatThreadsTableManager get aiChatThreads =>
       $AiChatThreadsTableManager(_db, _db.aiChatThreads);
+  $ImageOcrResultsTableManager get imageOcrResults =>
+      $ImageOcrResultsTableManager(_db, _db.imageOcrResults);
 }

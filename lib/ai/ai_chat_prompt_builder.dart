@@ -7,6 +7,7 @@ import '../db/mixin_database.dart';
 import 'ai_message_context.dart';
 import 'model/ai_prompt_message.dart';
 import 'model/ai_prompt_template.dart';
+import 'tools/ai_image_ocr_service.dart';
 
 class AiChatPromptBuilder {
   AiChatPromptBuilder(this.database);
@@ -22,6 +23,7 @@ class AiChatPromptBuilder {
   static const _attachedTranscriptMaxTextLength = 800;
 
   final Database database;
+  late final AiImageOcrService _imageOcrService = AiImageOcrService(database);
 
   Future<List<AiPromptMessage>> buildPromptMessages(
     String conversationId,
@@ -298,6 +300,17 @@ class AiChatPromptBuilder {
           ..add('Attached transcript messages:')
           ..addAll(transcriptLines);
       }
+    }
+    if (message.type.isImage) {
+      final ocrResult = await _imageOcrService.recognizeMessageImageText(
+        conversationId: message.conversationId,
+        messageId: message.messageId,
+      );
+      lines.addAll(
+        ocrResult.toPromptLines(
+          'OCR text from primary attached image:',
+        ),
+      );
     }
 
     final nearbyMessages = contextMessages
