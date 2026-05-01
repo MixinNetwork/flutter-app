@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
@@ -11,6 +13,8 @@ import '../../utils/audio_message_player/audio_message_service.dart';
 import '../../utils/device_transfer/device_transfer_widget.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/mcp/mixin_mcp_bridge.dart';
+import '../../utils/mcp/mixin_mcp_server.dart';
 import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../utils/system/text_input.dart';
@@ -53,12 +57,36 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final database = context.database;
+    final accountServer = context.accountServer;
+    useListenable(database.settingProperties);
+    final enableMcpServer = database.settingProperties.enableMcpServer;
+
+    useEffect(() {
+      MixinMcpBridge.instance.rootContext = context;
+      if (enableMcpServer) {
+        unawaited(
+          MixinMcpServer.instance.start(
+            database: database,
+            userId: accountServer.userId,
+            currentConversationId: () =>
+                ref.read(currentConversationIdProvider),
+          ),
+        );
+      } else {
+        unawaited(MixinMcpServer.instance.stop());
+      }
+      return () {
+        unawaited(MixinMcpServer.instance.stop());
+      };
+    }, [database, accountServer.userId, enableMcpServer]);
+
     final localTimeError =
         useMemoizedStream(
-          () => context.accountServer.connectedStateStream
+          () => accountServer.connectedStateStream
               .map((event) => event == ConnectedState.hasLocalTimeError)
               .distinct(),
-          keys: [context.accountServer],
+          keys: [accountServer],
         ).data ??
         false;
 
@@ -68,8 +96,8 @@ class HomePage extends HookConsumerWidget {
 
     final updateRequired =
         useMemoizedStream(
-          () => context.accountServer.isUpdateRequired,
-          keys: [context.accountServer],
+          () => accountServer.isUpdateRequired,
+          keys: [accountServer],
         ).data ??
         false;
 

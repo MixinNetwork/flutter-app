@@ -72,6 +72,10 @@ class AiChatMessageDao extends DatabaseAccessor<AiDatabase>
     db.aiChatThreads,
   )..where((tbl) => tbl.id.equals(threadId))).getSingleOrNull();
 
+  Future<AiChatMessage?> messageById(String messageId) => (select(
+    db.aiChatMessages,
+  )..where((tbl) => tbl.id.equals(messageId))).getSingleOrNull();
+
   Future<AiChatThread> createThread(String conversationId) async {
     final now = DateTime.now();
     final thread = AiChatThread(

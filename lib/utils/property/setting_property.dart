@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:mixin_logger/mixin_logger.dart';
 
@@ -18,13 +19,37 @@ const _kSelectedAiProviderKey = 'selected_ai_provider';
 const _kSelectedAiTranslatorProviderKey = 'selected_ai_translator_provider';
 const _kSelectedAiTranslatorModelKey = 'selected_ai_translator_model';
 const _kAiPromptTemplateOverridesKey = 'ai_prompt_template_overrides';
+const _kEnableMcpServerKey = 'enable_mcp_server';
+const _kMcpServerTokenKey = 'mcp_server_token';
 
 class SettingPropertyStorage extends PropertyStorage {
   SettingPropertyStorage(PropertyDao dao) : super(PropertyGroup.setting, dao);
 
+  static final Random _secureRandom = Random.secure();
+
   bool get enableProxy => get(_kEnableProxyKey) ?? false;
 
   set enableProxy(bool value) => set(_kEnableProxyKey, value);
+
+  bool get enableMcpServer => get(_kEnableMcpServerKey) ?? false;
+
+  set enableMcpServer(bool value) {
+    if (value && mcpServerToken == null) {
+      regenerateMcpServerToken();
+    }
+    set(_kEnableMcpServerKey, value);
+  }
+
+  String? get mcpServerToken => get(_kMcpServerTokenKey);
+
+  String regenerateMcpServerToken() {
+    final token = List.generate(
+      32,
+      (_) => _secureRandom.nextInt(256).toRadixString(16).padLeft(2, '0'),
+    ).join();
+    set(_kMcpServerTokenKey, token);
+    return token;
+  }
 
   String? get selectedProxyId => get(_kSelectedProxyKey);
 

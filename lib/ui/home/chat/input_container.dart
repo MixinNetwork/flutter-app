@@ -34,6 +34,7 @@ import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/mcp/mixin_mcp_bridge.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
@@ -185,6 +186,19 @@ class _InputContainer extends HookConsumerWidget {
           TextPosition(offset: draft?.length ?? 0),
         );
     }, [conversationId]);
+
+    useEffect(() {
+      final currentConversationId = conversationId;
+      if (currentConversationId == null) return null;
+      MixinMcpBridge.instance.bindInputController(
+        currentConversationId,
+        textEditingController,
+      );
+      return () => MixinMcpBridge.instance.unbindInputController(
+        currentConversationId,
+        textEditingController,
+      );
+    }, [conversationId, textEditingController]);
 
     final textEditingValueStream = useValueNotifierConvertSteam(
       textEditingController,

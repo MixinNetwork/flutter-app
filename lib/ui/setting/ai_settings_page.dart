@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../ai/model/ai_prompt_template.dart';
 import '../../ai/model/ai_provider_config.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/mcp/mixin_mcp_server.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
@@ -38,6 +40,10 @@ class AiSettingsPage extends HookConsumerWidget {
               ),
         )
         .length;
+    final mcpServer = useListenable(MixinMcpServer.instance);
+    final enableMcpServer = database.settingProperties.enableMcpServer;
+    final mcpEndpoint = mcpServer.endpoint;
+    final mcpToken = database.settingProperties.mcpServerToken;
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -85,6 +91,132 @@ class AiSettingsPage extends HookConsumerWidget {
                     ),
                     child: Text(
                       'Customize chat prompts, assist prompts, and built-in variables like {{conversationId}}, {{currentIsoDateTime}}, and {{language}}.',
+                      style: TextStyle(
+                        color: context.theme.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  CellGroup(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    cellBackgroundColor:
+                        context.theme.settingCellBackgroundColor,
+                    child: Column(
+                      children: [
+                        CellItem(
+                          title: const Text('Local MCP Server'),
+                          leading: Icon(
+                            Icons.hub_outlined,
+                            color: context.theme.icon,
+                          ),
+                          description: Text(
+                            mcpServer.isRunning ? 'Running' : 'Off',
+                          ),
+                          trailing: Transform.scale(
+                            scale: 0.7,
+                            child: CupertinoSwitch(
+                              activeTrackColor: context.theme.accent,
+                              value: enableMcpServer,
+                              onChanged: (value) {
+                                database.settingProperties.enableMcpServer =
+                                    value;
+                              },
+                            ),
+                          ),
+                        ),
+                        if (enableMcpServer) ...[
+                          Divider(
+                            height: 0.5,
+                            indent: 16,
+                            endIndent: 16,
+                            color: context.theme.divider,
+                          ),
+                          CellItem(
+                            title: const Text('Endpoint'),
+                            description: Expanded(
+                              child: Text(
+                                mcpEndpoint?.toString() ?? 'Starting...',
+                                textAlign: TextAlign.end,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            trailing: IconButton(
+                              onPressed: mcpEndpoint == null
+                                  ? null
+                                  : () {
+                                      Clipboard.setData(
+                                        ClipboardData(
+                                          text: mcpEndpoint.toString(),
+                                        ),
+                                      );
+                                      showToastSuccessful();
+                                    },
+                              icon: Icon(
+                                Icons.copy_rounded,
+                                color: context.theme.icon,
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            height: 0.5,
+                            indent: 16,
+                            endIndent: 16,
+                            color: context.theme.divider,
+                          ),
+                          CellItem(
+                            title: const Text('Access Token'),
+                            description: Expanded(
+                              child: Text(
+                                mcpToken ?? 'Unavailable',
+                                textAlign: TextAlign.end,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: mcpToken == null
+                                      ? null
+                                      : () {
+                                          Clipboard.setData(
+                                            ClipboardData(text: mcpToken),
+                                          );
+                                          showToastSuccessful();
+                                        },
+                                  icon: Icon(
+                                    Icons.copy_rounded,
+                                    color: context.theme.icon,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    database.settingProperties
+                                        .regenerateMcpServerToken();
+                                    showToastSuccessful();
+                                  },
+                                  icon: Icon(
+                                    Icons.refresh_rounded,
+                                    color: context.theme.icon,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      bottom: 14,
+                      top: 10,
+                    ),
+                    child: Text(
+                      'Exposes read-only conversation tools, UI navigation, draft editing, and AI thread inspection on localhost only. It never sends messages.',
                       style: TextStyle(
                         color: context.theme.secondaryText,
                         fontSize: 14,
