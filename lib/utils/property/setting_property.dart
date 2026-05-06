@@ -21,6 +21,8 @@ const _kSelectedAiTranslatorModelKey = 'selected_ai_translator_model';
 const _kAiPromptTemplateOverridesKey = 'ai_prompt_template_overrides';
 const _kEnableMcpServerKey = 'enable_mcp_server';
 const _kMcpServerTokenKey = 'mcp_server_token';
+const _kEnableMcpDraftToolsKey = 'enable_mcp_draft_tools';
+const _kEnableMcpCircleManagementKey = 'enable_mcp_circle_management';
 
 class SettingPropertyStorage extends PropertyStorage {
   SettingPropertyStorage(PropertyDao dao) : super(PropertyGroup.setting, dao);
@@ -41,6 +43,16 @@ class SettingPropertyStorage extends PropertyStorage {
   }
 
   String? get mcpServerToken => get(_kMcpServerTokenKey);
+
+  bool get enableMcpDraftTools => get(_kEnableMcpDraftToolsKey) ?? false;
+
+  set enableMcpDraftTools(bool value) => set(_kEnableMcpDraftToolsKey, value);
+
+  bool get enableMcpCircleManagement =>
+      get(_kEnableMcpCircleManagementKey) ?? false;
+
+  set enableMcpCircleManagement(bool value) =>
+      set(_kEnableMcpCircleManagementKey, value);
 
   String regenerateMcpServerToken() {
     final token = List.generate(

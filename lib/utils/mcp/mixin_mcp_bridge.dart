@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
+    show CircleConversationRequest;
 
 import '../../db/database.dart';
 import '../../db/mixin_database.dart';
@@ -126,6 +128,48 @@ class MixinMcpBridge {
     context.providerContainer
         .read(aiContextAttachmentProvider(conversationId).notifier)
         .attachMessages([message]);
+  }
+
+  Future<void> createCircle({
+    required String name,
+    required List<CircleConversationRequest> conversations,
+  }) async {
+    final context = _requireContext();
+    await context.accountServer.createCircle(name, conversations);
+  }
+
+  Future<void> renameCircle({
+    required String circleId,
+    required String name,
+  }) async {
+    final context = _requireContext();
+    await context.accountServer.updateCircle(circleId, name);
+  }
+
+  Future<void> deleteCircle(String circleId) async {
+    final context = _requireContext();
+    await context.accountServer.deleteCircle(circleId);
+  }
+
+  Future<void> addConversationsToCircle({
+    required String circleId,
+    required List<CircleConversationRequest> conversations,
+  }) async {
+    final context = _requireContext();
+    await context.accountServer.editCircleConversation(circleId, conversations);
+  }
+
+  Future<void> removeConversationsFromCircle({
+    required String circleId,
+    required List<String> conversationIds,
+  }) async {
+    final context = _requireContext();
+    for (final conversationId in conversationIds) {
+      await context.accountServer.circleRemoveConversation(
+        circleId,
+        conversationId,
+      );
+    }
   }
 
   TextEditingController? _controllerFor(String conversationId) {

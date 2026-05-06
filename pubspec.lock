@@ -243,7 +243,7 @@ packages:
     source: hosted
     version: "1.1.2"
   code_assets:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: code_assets
       sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
@@ -343,8 +343,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/data_detector"
-      ref: "08c1ce40eb6abfad6049fb6aad8bd30312ec5319"
-      resolved-ref: "08c1ce40eb6abfad6049fb6aad8bd30312ec5319"
+      ref: "821be771429135163704ede47acf95be5ba82095"
+      resolved-ref: "821be771429135163704ede47acf95be5ba82095"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
@@ -916,7 +916,7 @@ packages:
     source: hosted
     version: "1.1.0"
   hooks:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: hooks
       sha256: "7a08a0d684cb3b8fb604b78455d5d352f502b68079f7b80b831c62220ab0a4f6"
@@ -1292,6 +1292,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  mcp_server:
+    dependency: "direct main"
+    description:
+      name: mcp_server
+      sha256: d5b2603a51b524c60753ea9031c52759f80b53dd6606f38ae70305b5eaa28d4d
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   meta:
     dependency: transitive
     description:
@@ -1327,10 +1335,9 @@ packages:
   mixin_markdown_widget:
     dependency: "direct main"
     description:
-      name: mixin_markdown_widget
-      sha256: "58b366d61d55fe852a91a7b3fb102481a76a7a8f208e0bd948ef823501ba29d9"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../flutter-plugins/packages/mixin_markdown_widget"
+      relative: true
+    source: path
     version: "0.2.1"
   msix:
     dependency: "direct dev"
@@ -1385,10 +1392,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "77c341fce45bb3865a7bc3ddee4201605799e3de2f7af200e8dae26369d210ea"
+      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "9.3.0"
   octo_image:
     dependency: "direct main"
     description:
@@ -1629,6 +1636,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
+  platform_ocr:
+    dependency: "direct main"
+    description:
+      name: platform_ocr
+      sha256: a50c7ac0d8667b3d2a1a3900f1b221b966d9602539ddc2351565d3de43e881e3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   plugin_platform_interface:
     dependency: transitive
     description:

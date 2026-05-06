@@ -74,6 +74,17 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
         (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => maxLimit,
       );
 
+  Future<List<PinMessage>> pinMessagesByConversationId({
+    required String conversationId,
+    required int limit,
+    required int offset,
+  }) =>
+      (select(db.pinMessages)
+            ..where((tbl) => tbl.conversationId.equals(conversationId))
+            ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
+            ..limit(limit, offset: offset))
+          .get();
+
   Future<List<PinMessage>> getPinMessages({
     required int limit,
     required int offset,

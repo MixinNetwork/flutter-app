@@ -42,8 +42,13 @@ class AiSettingsPage extends HookConsumerWidget {
         .length;
     final mcpServer = useListenable(MixinMcpServer.instance);
     final enableMcpServer = database.settingProperties.enableMcpServer;
+    final enableMcpDraftTools = database.settingProperties.enableMcpDraftTools;
+    final enableMcpCircleManagement =
+        database.settingProperties.enableMcpCircleManagement;
     final mcpEndpoint = mcpServer.endpoint;
     final mcpToken = database.settingProperties.mcpServerToken;
+    const mcpPort = MixinMcpServer.defaultPort;
+    final mcpError = mcpServer.lastStartError;
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -135,7 +140,8 @@ class AiSettingsPage extends HookConsumerWidget {
                             title: const Text('Endpoint'),
                             description: Expanded(
                               child: Text(
-                                mcpEndpoint?.toString() ?? 'Starting...',
+                                mcpEndpoint?.toString() ??
+                                    'http://127.0.0.1:$mcpPort/mcp',
                                 textAlign: TextAlign.end,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -158,6 +164,29 @@ class AiSettingsPage extends HookConsumerWidget {
                               ),
                             ),
                           ),
+                          if (mcpError != null) ...[
+                            Divider(
+                              height: 0.5,
+                              indent: 16,
+                              endIndent: 16,
+                              color: context.theme.divider,
+                            ),
+                            CellItem(
+                              title: const Text('Status'),
+                              description: Expanded(
+                                child: Text(
+                                  'Failed to bind port $mcpPort',
+                                  textAlign: TextAlign.end,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: context.theme.red,
+                                  ),
+                                ),
+                              ),
+                              trailing: null,
+                            ),
+                          ],
                           Divider(
                             height: 0.5,
                             indent: 16,
@@ -205,6 +234,52 @@ class AiSettingsPage extends HookConsumerWidget {
                               ],
                             ),
                           ),
+                          Divider(
+                            height: 0.5,
+                            indent: 16,
+                            endIndent: 16,
+                            color: context.theme.divider,
+                          ),
+                          CellItem(
+                            title: const Text('Draft Editing'),
+                            description: const Text('Draft write tools'),
+                            trailing: Transform.scale(
+                              scale: 0.7,
+                              child: CupertinoSwitch(
+                                activeTrackColor: context.theme.accent,
+                                value: enableMcpDraftTools,
+                                onChanged: (value) {
+                                  database
+                                          .settingProperties
+                                          .enableMcpDraftTools =
+                                      value;
+                                },
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            height: 0.5,
+                            indent: 16,
+                            endIndent: 16,
+                            color: context.theme.divider,
+                          ),
+                          CellItem(
+                            title: const Text('Circle Management'),
+                            description: const Text('Create and edit circles'),
+                            trailing: Transform.scale(
+                              scale: 0.7,
+                              child: CupertinoSwitch(
+                                activeTrackColor: context.theme.accent,
+                                value: enableMcpCircleManagement,
+                                onChanged: (value) {
+                                  database
+                                          .settingProperties
+                                          .enableMcpCircleManagement =
+                                      value;
+                                },
+                              ),
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -216,7 +291,10 @@ class AiSettingsPage extends HookConsumerWidget {
                       top: 10,
                     ),
                     child: Text(
-                      'Exposes read-only conversation tools, UI navigation, draft editing, and AI thread inspection on localhost only. It never sends messages.',
+                      'Exposes read-only conversation tools, UI navigation, '
+                      'and AI thread inspection on localhost only at port '
+                      '$mcpPort. Draft and circle write tools require their '
+                      'own switches. It never sends messages.',
                       style: TextStyle(
                         color: context.theme.secondaryText,
                         fontSize: 14,

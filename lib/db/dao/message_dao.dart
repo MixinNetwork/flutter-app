@@ -23,6 +23,21 @@ class MessageOrderInfo {
   final int createdAt;
 }
 
+const _attachmentMessageCategories = [
+  MessageCategory.signalImage,
+  MessageCategory.signalVideo,
+  MessageCategory.signalData,
+  MessageCategory.signalAudio,
+  MessageCategory.plainImage,
+  MessageCategory.plainVideo,
+  MessageCategory.plainData,
+  MessageCategory.plainAudio,
+  MessageCategory.encryptedImage,
+  MessageCategory.encryptedVideo,
+  MessageCategory.encryptedData,
+  MessageCategory.encryptedAudio,
+];
+
 @DriftAccessor(include: {'../moor/dao/message.drift'})
 class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
@@ -690,13 +705,25 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
     DateTime? startInclusive,
     DateTime? endExclusive,
+    String? senderId,
+    String? senderIdentityNumber,
+    List<String> categories = const [],
     bool ascending = true,
   }) {
     final startMillis = startInclusive?.millisecondsSinceEpoch;
     final endMillis = endExclusive?.millisecondsSinceEpoch;
     return _baseMessageItems(
-      (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+      (message, sender, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
           message.conversationId.equals(conversationId) &
+          (senderId == null
+              ? const Constant(true)
+              : message.userId.equals(senderId)) &
+          (senderIdentityNumber == null
+              ? const Constant(true)
+              : sender.identityNumber.equals(senderIdentityNumber)) &
+          (categories.isEmpty
+              ? const Constant(true)
+              : message.category.isIn(categories)) &
           (startMillis == null
               ? const Constant(true)
               : message.createdAt.isBiggerOrEqualValue(startMillis)) &
@@ -712,6 +739,54 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       ]),
     );
   }
+
+  Selectable<MessageItem> mentionMessagesByConversationId(
+    String conversationId, {
+    required int limit,
+    int offset = 0,
+    bool unreadOnly = false,
+  }) => _baseMessageItems(
+    (message, _, _, _, _, _, _, _, _, _, _, _, messageMention, _, em) =>
+        message.conversationId.equals(conversationId) &
+        messageMention.messageId.isNotNull() &
+        (unreadOnly
+            ? messageMention.hasRead.equals(false)
+            : const Constant(true)),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+  );
+
+  Selectable<MessageItem> attachmentMessagesByConversationId(
+    String conversationId, {
+    required int limit,
+    int offset = 0,
+    DateTime? startInclusive,
+    DateTime? endExclusive,
+    String? senderId,
+    String? senderIdentityNumber,
+    List<String> categories = const [],
+  }) => messagesByConversationIdAndCreatedAtRange(
+    conversationId,
+    limit: limit,
+    offset: offset,
+    startInclusive: startInclusive,
+    endExclusive: endExclusive,
+    senderId: senderId,
+    senderIdentityNumber: senderIdentityNumber,
+    categories: categories.isEmpty ? _attachmentMessageCategories : categories,
+  );
+
+  Selectable<MessageItem> linkMessagesByConversationId(
+    String conversationId, {
+    required int limit,
+    int offset = 0,
+  }) => _baseMessageItems(
+    (message, _, _, _, _, _, _, _, _, hyperlink, _, _, _, _, em) =>
+        message.conversationId.equals(conversationId) &
+        message.hyperlink.isNotNull() &
+        message.hyperlink.equals('').not() &
+        hyperlink.hyperlink.isNotNull(),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+  );
 
   Selectable<int> messageCountByConversationIdAndCreatedAtRange(
     String conversationId, {
