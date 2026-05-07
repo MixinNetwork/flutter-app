@@ -65,6 +65,7 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
     this.icon,
     this.color,
     this.alignment,
+    this.useActionButton = true,
   });
 
   final CustomPopupMenuItemBuilder<T> itemBuilder;
@@ -73,43 +74,59 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
   final Widget? child;
   final Color? color;
   final Alignment? alignment;
+  final bool useActionButton;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
-    interactive: false,
-    buildMenus: () => itemBuilder(context)
-        .map(
-          (e) => ContextMenu(
-            title: e.title,
-            onTap: () => onSelected?.call(e.value),
-            isDestructiveAction: e.isDestructiveAction,
-            icon: e.icon,
-          ),
-        )
-        .toList(),
-    child: Builder(
-      builder: (context) => ActionButton(
-        name: icon,
-        color: color ?? context.theme.icon,
-        onTapUp: (details) {
-          d('onTapUp: $alignment');
-          if (alignment == null) {
-            context.sendMenuPosition(details.globalPosition);
-            return;
+  Widget build(BuildContext context, WidgetRef ref) {
+    void showMenu(TapUpDetails details, BuildContext buildContext) {
+      d('onTapUp: $alignment');
+      final targetAlignment = alignment;
+      if (targetAlignment == null) {
+        buildContext.sendMenuPosition(details.globalPosition);
+        return;
+      }
+      final renderBox = buildContext.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        var position = targetAlignment.withinRect(renderBox.paintBounds);
+        position = renderBox.localToGlobal(position);
+        buildContext.sendMenuPosition(position);
+      } else {
+        buildContext.sendMenuPosition(details.globalPosition);
+      }
+    }
+
+    return ContextMenuPortalEntry(
+      interactive: false,
+      buildMenus: () => itemBuilder(context)
+          .map(
+            (e) => ContextMenu(
+              title: e.title,
+              onTap: () => onSelected?.call(e.value),
+              isDestructiveAction: e.isDestructiveAction,
+              icon: e.icon,
+            ),
+          )
+          .toList(),
+      child: Builder(
+        builder: (context) {
+          final triggerChild = child;
+          if (!useActionButton && triggerChild != null) {
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: (details) => showMenu(details, context),
+              child: triggerChild,
+            );
           }
-          final renderBox = context.findRenderObject() as RenderBox?;
-          if (renderBox != null) {
-            var position = alignment!.withinRect(renderBox.paintBounds);
-            position = renderBox.localToGlobal(position);
-            context.sendMenuPosition(position);
-          } else {
-            context.sendMenuPosition(details.globalPosition);
-          }
+          return ActionButton(
+            name: icon,
+            color: color ?? context.theme.icon,
+            onTapUp: (details) => showMenu(details, context),
+            child: child,
+          );
         },
-        child: child,
       ),
-    ),
-  );
+    );
+  }
 }
 
 class CustomPopupMenuItem<T> {

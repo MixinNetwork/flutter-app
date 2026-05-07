@@ -42,6 +42,7 @@ import '../../provider/message_selection_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../chat_slide_page/ai_assistant_page.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
 import '../chat_slide_page/disappear_message_page.dart';
@@ -55,6 +56,7 @@ import '../home.dart';
 import '../hook/pin_message.dart';
 import '../route/responsive_navigator.dart';
 import 'chat_bar.dart';
+import 'chat_side_route_names.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
 import 'selection_bottom_bar.dart';
@@ -71,6 +73,8 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const sharedApps = 'sharedApps';
   static const groupsInCommon = 'groupsInCommon';
   static const disappearMessages = 'disappearMessages';
+  static const aiAssistantPage = chatSideAiAssistantPage;
+  static const aiAssistantThreadsPage = 'aiAssistantThreadsPage';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -129,6 +133,18 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           name: disappearMessages,
           child: _ChatSidePageBuilder(DisappearMessagePage.new),
         );
+      case aiAssistantPage:
+        return const MaterialPage(
+          key: ValueKey(aiAssistantPage),
+          name: aiAssistantPage,
+          child: _ChatSidePageBuilder(AiAssistantPage.new),
+        );
+      case aiAssistantThreadsPage:
+        return const MaterialPage(
+          key: ValueKey(aiAssistantThreadsPage),
+          name: aiAssistantThreadsPage,
+          child: _ChatSidePageBuilder(AiAssistantThreadsPage.new),
+        );
       default:
         throw ArgumentError('Invalid route');
     }
@@ -176,10 +192,7 @@ class _ChatSidePageBuilder extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final conversationId = useMemoized(
-      () => ref.read(lastConversationIdProvider),
-      [],
-    );
+    final conversationId = ref.watch(lastConversationIdProvider);
 
     final filter = useCallback<bool Function(ConversationState?)>(
       (state) => state?.conversationId == conversationId,
@@ -225,6 +238,7 @@ class ChatPage extends HookConsumerWidget {
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
           bloc: chatSideCubit,
         );
+    final chatSidePageWidth = _chatSidePageWidth(navigatorState.pages);
 
     ref.listen(hasSelectedMessageProvider, (previous, hasSelectedMessage) {
       if (!hasSelectedMessage) return;
@@ -252,6 +266,9 @@ class ChatPage extends HookConsumerWidget {
       providers: [
         BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: chatSideCubit),
+        BlocProvider<AbstractResponsiveNavigatorCubit>.value(
+          value: chatSideCubit,
+        ),
         BlocProvider.value(value: searchConversationKeywordCubit),
         BlocProvider(
           create: (context) => MessageBloc(
@@ -272,7 +289,7 @@ class ChatPage extends HookConsumerWidget {
           builder: (context, boxConstraints) {
             final routeMode =
                 boxConstraints.maxWidth <
-                (kResponsiveNavigationMinWidth + kChatSidePageWidth);
+                (kResponsiveNavigationMinWidth + chatSidePageWidth);
             chatSideCubit.updateRouteMode(routeMode);
 
             return _ChatMenuHandler(
@@ -311,6 +328,17 @@ class ChatPage extends HookConsumerWidget {
       ),
     );
   }
+}
+
+double _chatSidePageWidth(List<Page<dynamic>> pages) {
+  final hasAiAssistantPage = pages.any(
+    (page) =>
+        page.name == ChatSideCubit.aiAssistantPage ||
+        page.name == ChatSideCubit.aiAssistantThreadsPage,
+  );
+  return hasAiAssistantPage
+      ? kAiAssistantChatSidePageWidth
+      : kChatSidePageWidth;
 }
 
 class _SideRouter extends StatelessWidget {
@@ -377,11 +405,12 @@ class _AnimatedChatSlide extends HookConsumerWidget {
       }
     }, [pages, controller]);
 
+    final chatSidePageWidth = _chatSidePageWidth(_pages.value);
+
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) => SizedBox(
-        width:
-            kChatSidePageWidth * Curves.easeInOut.transform(controller.value),
+        width: chatSidePageWidth * Curves.easeInOut.transform(controller.value),
         height: constraints.maxHeight,
         child: controller.value != 0 ? child : null,
       ),
@@ -390,8 +419,8 @@ class _AnimatedChatSlide extends HookConsumerWidget {
           alignment: AlignmentDirectional.centerStart,
           maxHeight: constraints.maxHeight,
           minHeight: constraints.maxHeight,
-          maxWidth: kChatSidePageWidth,
-          minWidth: kChatSidePageWidth,
+          maxWidth: chatSidePageWidth,
+          minWidth: chatSidePageWidth,
           child: Navigator(
             pages: _pages.value,
             onDidRemovePage: onDidRemovePage,
@@ -576,14 +605,14 @@ class _List extends HookConsumerWidget {
     final center = state.center;
     final bottom = state.bottom;
 
-    final ref = useRef<Map<String, Key>>({});
+    final keyRef = useRef<Map<String, Key>>({});
 
     final ids = state.list.map((e) => e.messageId);
 
     useMemoized(() {
-      ref.value.removeWhere((key, value) => !ids.contains(key));
+      keyRef.value.removeWhere((key, value) => !ids.contains(key));
       ids.forEach((id) {
-        ref.value[id] = ref.value[id] ?? GlobalKey(debugLabel: id);
+        keyRef.value[id] = keyRef.value[id] ?? GlobalKey(debugLabel: id);
       });
     }, [ids]);
 
@@ -604,7 +633,7 @@ class _List extends HookConsumerWidget {
       scrollController: scrollController,
       centerKey: center == null
           ? null
-          : ref.value[center.messageId] as GlobalKey?,
+          : keyRef.value[center.messageId] as GlobalKey?,
       child: ClampingCustomScrollView(
         key: key,
         center: key,
@@ -621,7 +650,7 @@ class _List extends HookConsumerWidget {
               final actualIndex = top.length - index - 1;
               final messageItem = top[actualIndex];
               return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
+                key: keyRef.value[messageItem.messageId],
                 prev: top.getOrNull(actualIndex - 1),
                 message: messageItem,
                 next:
@@ -638,7 +667,7 @@ class _List extends HookConsumerWidget {
               builder: (context) {
                 if (center == null) return const SizedBox();
                 return MessageItemWidget(
-                  key: ref.value[center.messageId],
+                  key: keyRef.value[center.messageId],
                   prev: top.lastOrNull,
                   message: center,
                   next: bottom.firstOrNull,
@@ -655,7 +684,7 @@ class _List extends HookConsumerWidget {
             ) {
               final messageItem = bottom[index];
               return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
+                key: keyRef.value[messageItem.messageId],
                 prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
                 message: messageItem,
                 next: bottom.getOrNull(index + 1),

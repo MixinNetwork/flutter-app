@@ -29,6 +29,11 @@ import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/chat/chat_side_route_names.dart';
+import '../../ui/home/chat_slide_page/ai_assistant/constants.dart';
+import '../../ui/home/chat_slide_page/ai_assistant/unread_summary.dart';
+import '../../ui/home/route/responsive_navigator.dart';
+import '../../ui/provider/ai_context_attachment_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
@@ -75,6 +80,7 @@ import 'item/transfer/transfer_message.dart';
 import 'item/unknown_message.dart';
 import 'item/video/video_message.dart';
 import 'item/waiting_message.dart';
+import 'message_ai_assist.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
 import 'message_style.dart';
@@ -159,6 +165,23 @@ void _quickReply(BuildContext context) {
   });
 }
 
+void _attachMessagesToAi(
+  BuildContext context,
+  WidgetRef ref,
+  List<MessageItem> messages,
+) {
+  if (messages.isEmpty) return;
+  final conversationId = messages.first.conversationId;
+  ref
+      .read(aiContextAttachmentProvider(conversationId).notifier)
+      .attachMessages(messages);
+  unawaited(
+    context.read<AbstractResponsiveNavigatorCubit>().replace(
+      chatSideAiAssistantPage,
+    ),
+  );
+}
+
 SelectedContent? _findSelectedContent(BuildContext context) {
   SelectableRegionState? findSelectableRegionState(BuildContext context) {
     if (context is! Element) {
@@ -195,6 +218,7 @@ class MessageItemWidget extends HookConsumerWidget {
     required this.message,
     super.key,
     this.prev,
+    this.prevDateTime,
     this.next,
     this.lastReadMessageId,
     this.isTranscriptPage = false,
@@ -204,6 +228,7 @@ class MessageItemWidget extends HookConsumerWidget {
 
   final MessageItem message;
   final MessageItem? prev;
+  final DateTime? prevDateTime;
   final MessageItem? next;
   final String? lastReadMessageId;
   final bool isTranscriptPage;
@@ -241,7 +266,10 @@ class MessageItemWidget extends HookConsumerWidget {
 
     final showNip =
         !(sameUserNext && sameDayNext) && (!showAvatar || isCurrentUser);
-    final datetime = sameDayPrev ? null : message.createdAt;
+    final datetime =
+        isSameDay(prevDateTime ?? prev?.createdAt, message.createdAt)
+        ? null
+        : message.createdAt;
     String? userName;
     String? userId;
     String? userAvatarUrl;
@@ -277,6 +305,14 @@ class MessageItemWidget extends HookConsumerWidget {
           keys: [message.messageId],
         ).data ??
         Colors.transparent;
+    final inlineAiState = useState(
+      readInlineMessageAiState(message.messageId),
+    );
+
+    useEffect(() {
+      inlineAiState.value = readInlineMessageAiState(message.messageId);
+      return null;
+    }, [message.messageId]);
 
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
@@ -314,6 +350,17 @@ class MessageItemWidget extends HookConsumerWidget {
                   pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                   isBot: message.isBot,
                   isVerified: message.isVerified,
+                  aiSection: MessageInlineAiSection(
+                    state: inlineAiState.value,
+                    leadingPadding: !isCurrentUser
+                        ? kInlineMessageAiLeadingPadding
+                        : 0,
+                    onClose: (action) {
+                      final nextState = inlineAiState.value.remove(action);
+                      inlineAiState.value = nextState;
+                      writeInlineMessageAiState(message.messageId, nextState);
+                    },
+                  ),
                   buildMenus: (request) {
                     request.onShowMenu.addListener(() {
                       showedMenuCubit.emit(true);
@@ -627,6 +674,77 @@ class MessageItemWidget extends HookConsumerWidget {
                         ),
                     ];
 
+                    final hasEnabledAiProvider = context
+                        .database
+                        .settingProperties
+                        .aiProviders
+                        .any((p) => p.enabled);
+                    final aiText = hasEnabledAiProvider
+                        ? messageAiText(message)
+                        : null;
+                    void updateInlineAiState(
+                      MessageAiAction action,
+                      InlineMessageAiEntry entry,
+                    ) {
+                      final nextState = inlineAiState.value.put(action, entry);
+                      inlineAiState.value = nextState;
+                      writeInlineMessageAiState(message.messageId, nextState);
+                    }
+
+                    final aiActions = [
+                      if (hasEnabledAiProvider &&
+                          !isTranscriptPage &&
+                          !isPinnedPage)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.auto_awesome_rounded),
+                          title: aiAssistantAttachToAi,
+                          callback: () =>
+                              _attachMessagesToAi(context, ref, [message]),
+                        ),
+                      if (aiText != null)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.translate),
+                          title: 'Translate',
+                          callback: () => unawaited(
+                            runMessageAiAction(
+                              context,
+                              message: message,
+                              input: aiText,
+                              action: MessageAiAction.translate,
+                              onStateChanged: updateInlineAiState,
+                            ),
+                          ),
+                        ),
+                      if (aiText != null)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.psychology_alt),
+                          title: 'Explain',
+                          callback: () => unawaited(
+                            runMessageAiAction(
+                              context,
+                              message: message,
+                              input: aiText,
+                              action: MessageAiAction.explain,
+                              onStateChanged: updateInlineAiState,
+                            ),
+                          ),
+                        ),
+                      if (aiText != null && !isTranscriptPage)
+                        MenuAction(
+                          image: MenuImage.icon(Icons.auto_awesome),
+                          title: 'Suggest replies',
+                          callback: () => unawaited(
+                            runMessageAiAction(
+                              context,
+                              message: message,
+                              input: aiText,
+                              action: MessageAiAction.suggestReplies,
+                              onStateChanged: updateInlineAiState,
+                            ),
+                          ),
+                        ),
+                    ];
+
                     final devActions = [
                       if (!kReleaseMode)
                         MenuAction(
@@ -642,6 +760,7 @@ class MessageItemWidget extends HookConsumerWidget {
                       childrens: [
                         replayAction,
                         copyActions,
+                        aiActions,
                         messageActions,
                         saveActions,
                         addStickerMenuAction,
@@ -732,7 +851,10 @@ class MessageItemWidget extends HookConsumerWidget {
           ),
         ),
         if (message.messageId == lastReadMessageId && next != null)
-          const _UnreadMessageBar(),
+          _UnreadMessageBar(
+            conversationId: message.conversationId,
+            lastReadMessageId: lastReadMessageId,
+          ),
       ],
     );
 
@@ -920,6 +1042,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
     required this.showAvatar,
     required this.isBot,
     required this.isVerified,
+    required this.aiSection,
   });
 
   final bool isCurrentUser;
@@ -932,6 +1055,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   final bool showAvatar;
   final bool isBot;
   final bool isVerified;
+  final Widget aiSection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -969,6 +1093,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
             child: Builder(builder: builder),
           ),
         ),
+        aiSection,
       ],
     );
 
@@ -1011,23 +1136,69 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   }
 }
 
-class _UnreadMessageBar extends StatelessWidget {
-  const _UnreadMessageBar();
+class _UnreadMessageBar extends HookConsumerWidget {
+  const _UnreadMessageBar({
+    required this.conversationId,
+    required this.lastReadMessageId,
+  });
+
+  final String conversationId;
+  final String? lastReadMessageId;
 
   @override
-  Widget build(BuildContext context) => Container(
-    color: context.theme.background,
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    margin: const EdgeInsets.symmetric(vertical: 6),
-    alignment: Alignment.center,
-    child: Text(
-      context.l10n.unreadMessages,
-      style: TextStyle(
-        color: context.theme.secondaryText,
-        fontSize: context.messageStyle.secondaryFontSize,
+  Widget build(BuildContext context, WidgetRef ref) {
+    useListenable(context.database.settingProperties);
+
+    final hasAiModel = hasAvailableAiModel(context);
+    return Container(
+      color: context.theme.background,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          const SizedBox(width: 44),
+          Expanded(
+            child: Text(
+              context.l10n.unreadMessages,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: context.messageStyle.secondaryFontSize,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 44,
+            child: hasAiModel
+                ? Align(
+                    child: Tooltip(
+                      message: 'Summarize unread messages',
+                      child: InteractiveDecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        onTap: () => summarizeUnreadMessagesWithAi(
+                          context: context,
+                          conversationId: conversationId,
+                          lastReadMessageId: lastReadMessageId,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 16,
+                            color: context.theme.accent,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _MessageSelectionWrapper extends HookConsumerWidget {

@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  anthropic_sdk_dart:
+    dependency: transitive
+    description:
+      name: anthropic_sdk_dart
+      sha256: b0e91039942930341b24e3871d5b9481b6d31528b711eb752f413f4d1f5980eb
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   archive:
     dependency: "direct main"
     description:
@@ -235,7 +243,7 @@ packages:
     source: hosted
     version: "1.1.2"
   code_assets:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: code_assets
       sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
@@ -335,8 +343,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/data_detector"
-      ref: "08c1ce40eb6abfad6049fb6aad8bd30312ec5319"
-      resolved-ref: "08c1ce40eb6abfad6049fb6aad8bd30312ec5319"
+      ref: "821be771429135163704ede47acf95be5ba82095"
+      resolved-ref: "821be771429135163704ede47acf95be5ba82095"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
@@ -442,10 +450,10 @@ packages:
     dependency: transitive
     description:
       name: dlibphonenumber
-      sha256: "95d8e08c6f750e81c5303efd16085db4e7c696b4c306c99617548f81b1854f0c"
+      sha256: df96f4bdb14b0a47664de8ec7cd1de92e4e9b9bc4e34330d2da9088b0ba71e59
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.47"
+    version: "1.1.62"
   drift:
     dependency: "direct main"
     description:
@@ -486,6 +494,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  email_validator:
+    dependency: transitive
+    description:
+      name: email_validator
+      sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   emojis:
     dependency: "direct main"
     description:
@@ -667,14 +683,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.1.1"
-  flutter_highlight:
-    dependency: transitive
-    description:
-      name: flutter_highlight
-      sha256: "7b96333867aa07e122e245c033b8ad622e4e3a42a1a2372cbb098a2541d8782c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.0"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -728,6 +736,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_math_fork:
+    dependency: transitive
+    description:
+      name: flutter_math_fork
+      sha256: "6d5f2f1aa57ae539ffb0a04bb39d2da67af74601d685a161aff7ce5bda5fa407"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.4"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -803,6 +819,38 @@ packages:
       url: "https://github.com/boyan01/gal.git"
     source: git
     version: "2.1.3"
+  genkit:
+    dependency: "direct main"
+    description:
+      name: genkit
+      sha256: ccc84935593e6f12447c8d4b27034fceb4573cbc3d51b76d32aa9bbbf8d3badd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.1"
+  genkit_anthropic:
+    dependency: "direct main"
+    description:
+      name: genkit_anthropic
+      sha256: "3a902993fdd4cefca4d10ee76df3cf064622247d74c5d0f2b619e5c2b6022727"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
+  genkit_google_genai:
+    dependency: "direct main"
+    description:
+      name: genkit_google_genai
+      sha256: "95f798f10776e9078251f7e6ae91e4e5c9cb0b960fc22d50a6baf59fdbcecfbc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
+  genkit_openai:
+    dependency: "direct main"
+    description:
+      name: genkit_openai
+      sha256: "398b3d7a5bc08fb6764ea0a5244151cca31263e67ba9598981e81238109874d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
   get_it:
     dependency: transitive
     description:
@@ -843,14 +891,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
-  highlight:
-    dependency: transitive
-    description:
-      name: highlight
-      sha256: "5353a83ffe3e3eca7df0abfb72dcf3fa66cc56b953728e7113ad4ad88497cf21"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.0"
   hive:
     dependency: "direct main"
     description:
@@ -876,7 +916,7 @@ packages:
     source: hosted
     version: "1.1.0"
   hooks:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: hooks
       sha256: "7a08a0d684cb3b8fb604b78455d5d352f502b68079f7b80b831c62220ab0a4f6"
@@ -1099,6 +1139,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.11.0"
+  json_schema_builder:
+    dependency: transitive
+    description:
+      name: json_schema_builder
+      sha256: "65035d48d028401ad0ffc8c2f173209c7b1441e465a942a0f909070fae33170c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   json_serializable:
     dependency: "direct dev"
     description:
@@ -1142,10 +1190,11 @@ packages:
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
-      name: libsignal_protocol_dart
-      sha256: "2b18de43016474ab85d21553a88f59d6f4fea8c2eddf35be7e24ab5f8969a81d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "9f7dcbd61850eb5a056d28de3d5758bc08153a0d"
+      resolved-ref: "9f7dcbd61850eb5a056d28de3d5758bc08153a0d"
+      url: "https://github.com/MixinNetwork/libsignal_protocol_dart.git"
+    source: git
     version: "0.7.4"
   lints:
     dependency: transitive
@@ -1227,14 +1276,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.3.0"
-  markdown_widget:
-    dependency: "direct main"
-    description:
-      name: markdown_widget
-      sha256: b52c13d3ee4d0e60c812e15b0593f142a3b8a2003cde1babb271d001a1dbdc1c
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.2+8"
   matcher:
     dependency: transitive
     description:
@@ -1251,6 +1292,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  mcp_server:
+    dependency: "direct main"
+    description:
+      name: mcp_server
+      sha256: d5b2603a51b524c60753ea9031c52759f80b53dd6606f38ae70305b5eaa28d4d
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   meta:
     dependency: transitive
     description:
@@ -1283,6 +1332,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.3"
+  mixin_markdown_widget:
+    dependency: "direct main"
+    description:
+      name: mixin_markdown_widget
+      sha256: "4b4f6430c3be9be5766ae06b0d6c78ab6bd3059c1f2df076ef325028b6f030d5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   msix:
     dependency: "direct dev"
     description:
@@ -1336,10 +1393,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "77c341fce45bb3865a7bc3ddee4201605799e3de2f7af200e8dae26369d210ea"
+      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "9.3.0"
   octo_image:
     dependency: "direct main"
     description:
@@ -1352,10 +1409,10 @@ packages:
     dependency: "direct main"
     description:
       name: ogg_opus_player
-      sha256: cc839bf53bae215e3b4f8a796040038042173337d13d11604eae720b54f41e9d
+      sha256: d9bba5c2e276ff13ceae1c216a2650560c805d6b06de4bf4eb608bc38f1b75f4
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.0"
+    version: "0.8.0"
   open_file:
     dependency: "direct main"
     description:
@@ -1420,6 +1477,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.3"
+  openai_dart:
+    dependency: transitive
+    description:
+      name: openai_dart
+      sha256: "13763068d8bf87f7e0ebdb8bf365bada7a7538696380e68ec5d37644d97ff519"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  opentelemetry:
+    dependency: transitive
+    description:
+      name: opentelemetry
+      sha256: "92d63a2e0731d34a7548add82420b8f3819ccda569f9bdfdcc4b25e00fe88da4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.11"
   optional:
     dependency: transitive
     description:
@@ -1564,6 +1637,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
+  platform_ocr:
+    dependency: "direct main"
+    description:
+      name: platform_ocr
+      sha256: a50c7ac0d8667b3d2a1a3900f1b221b966d9602539ddc2351565d3de43e881e3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -1596,6 +1677,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
+  pretext:
+    dependency: transitive
+    description:
+      name: pretext
+      sha256: "414ef08acce07d877ec62348a56c998d8d45eab4cc6bfab35a7287520c6e4c7c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   pretty_qr_code:
     dependency: "direct main"
     description:
@@ -1608,10 +1697,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "579fe5557eae58e3adca2e999e38f02441d8aa908703854a9e0a0f47fa857731"
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "6.0.0"
   protocol_handler:
     dependency: "direct main"
     description:
@@ -1692,6 +1781,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.2"
   rational:
     dependency: transitive
     description:
@@ -1700,6 +1797,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.3"
+  re_highlight:
+    dependency: transitive
+    description:
+      name: re_highlight
+      sha256: "6c4ac3f76f939fb7ca9df013df98526634e17d8f7460e028bd23a035870024f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   recase:
     dependency: "direct main"
     description:
@@ -1732,6 +1837,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  schemantic:
+    dependency: "direct main"
+    description:
+      name: schemantic
+      sha256: "8c143bf964c18a0f2c0c6053d71599ab4985567d86a289d373c171c9190ccb9d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   screen_retriever:
     dependency: transitive
     description:
@@ -1772,14 +1885,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
-  scroll_to_index:
-    dependency: transitive
-    description:
-      name: scroll_to_index
-      sha256: b707546e7500d9f070d63e5acf74fd437ec7eeeb68d3412ef7b0afada0b4f176
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   scrollable_positioned_list:
     dependency: "direct main"
     description:
@@ -2009,6 +2114,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.0"
+  toon_format:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "51fa0e9311837b84c24e30827b53891041378448"
+      resolved-ref: "51fa0e9311837b84c24e30827b53891041378448"
+      url: "https://github.com/toon-format/toon-dart.git"
+    source: git
+    version: "0.1.0"
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -2358,4 +2480,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.11.0 <4.0.0"
-  flutter: ">=3.38.1"
+  flutter: ">=3.38.1 <4.0.0"

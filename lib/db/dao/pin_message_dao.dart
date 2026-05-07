@@ -74,6 +74,81 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
         (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => maxLimit,
       );
 
+  Future<List<PinMessage>> pinMessagesByConversationId({
+    required String conversationId,
+    required int limit,
+    String? beforeMessageId,
+    String? afterMessageId,
+    bool ascending = false,
+  }) async {
+    final before = beforeMessageId == null
+        ? null
+        : await pinMessageByMessageId(
+            conversationId: conversationId,
+            messageId: beforeMessageId,
+          );
+    if (beforeMessageId != null && before == null) {
+      throw StateError('Pinned cursor message not found');
+    }
+    final after = afterMessageId == null
+        ? null
+        : await pinMessageByMessageId(
+            conversationId: conversationId,
+            messageId: afterMessageId,
+          );
+    if (afterMessageId != null && after == null) {
+      throw StateError('Pinned cursor message not found');
+    }
+    return (select(db.pinMessages)
+          ..where(
+            (tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                (before == null
+                    ? const Constant(true)
+                    : tbl.createdAt.isSmallerThanValue(
+                            before.createdAt.millisecondsSinceEpoch,
+                          ) |
+                          (tbl.createdAt.equals(
+                                before.createdAt.millisecondsSinceEpoch,
+                              ) &
+                              tbl.messageId.isSmallerThanValue(
+                                before.messageId,
+                              ))) &
+                (after == null
+                    ? const Constant(true)
+                    : tbl.createdAt.isBiggerThanValue(
+                            after.createdAt.millisecondsSinceEpoch,
+                          ) |
+                          (tbl.createdAt.equals(
+                                after.createdAt.millisecondsSinceEpoch,
+                              ) &
+                              tbl.messageId.isBiggerThanValue(
+                                after.messageId,
+                              ))),
+          )
+          ..orderBy([
+            (tbl) => ascending
+                ? OrderingTerm.asc(tbl.createdAt)
+                : OrderingTerm.desc(tbl.createdAt),
+            (tbl) => ascending
+                ? OrderingTerm.asc(tbl.messageId)
+                : OrderingTerm.desc(tbl.messageId),
+          ])
+          ..limit(limit))
+        .get();
+  }
+
+  Future<PinMessage?> pinMessageByMessageId({
+    required String conversationId,
+    required String messageId,
+  }) =>
+      (select(db.pinMessages)..where(
+            (tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.messageId.equals(messageId),
+          ))
+          .getSingleOrNull();
+
   Future<List<PinMessage>> getPinMessages({
     required int limit,
     required int offset,

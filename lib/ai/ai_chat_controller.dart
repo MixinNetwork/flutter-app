@@ -1,0 +1,395 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:drift/drift.dart';
+import 'package:mixin_logger/mixin_logger.dart';
+import 'package:uuid/uuid.dart';
+
+import '../db/ai_database.dart';
+import '../db/dao/ai_chat_message_dao.dart';
+import '../db/database.dart';
+import '../db/mixin_database.dart';
+import 'ai_chat_prompt_builder.dart';
+import 'ai_message_context.dart';
+import 'ai_provider_requester.dart';
+import 'ai_thread_target.dart';
+import 'model/ai_chat_metadata.dart';
+import 'model/ai_prompt_message.dart';
+import 'model/ai_provider_config.dart';
+import 'tools/ai_conversation_tool_service.dart';
+
+const _kAiRoleUser = 'user';
+const _kAiRoleAssistant = 'assistant';
+const _kAiStatusPending = 'pending';
+const _kAiStatusDone = 'done';
+const _kAiStatusError = 'error';
+const _kAiStreamFlushChars = 32;
+const _kAiStreamFlushInterval = Duration(milliseconds: 80);
+const _kAiLogPreviewLength = 240;
+final kAiRuntimeStartedAt = DateTime.now();
+final _activeAiRequests = <String, CancelToken>{};
+
+bool isActivePendingAiMessage(AiChatMessage message) =>
+    message.role == _kAiRoleAssistant &&
+    message.status == _kAiStatusPending &&
+    !message.updatedAt.isBefore(kAiRuntimeStartedAt);
+
+class AiChatController {
+  AiChatController(this.database);
+
+  final Database database;
+  final _uuid = const Uuid();
+  static const _providerRequester = AiProviderRequester();
+  late final DatabaseAiConversationToolService _conversationToolService =
+      DatabaseAiConversationToolService(database);
+  late final AiConversationToolKit _conversationTools = AiConversationToolKit(
+    _conversationToolService,
+  );
+  late final AiChatPromptBuilder _promptBuilder = AiChatPromptBuilder(database);
+
+  Future<String> assistText({
+    required String instruction,
+    required String language,
+    String? input,
+    String? conversationId,
+    AiProviderConfig? provider,
+  }) async {
+    final config = provider ?? database.settingProperties.selectedAiProvider;
+    if (config == null) {
+      throw Exception('No AI provider configured');
+    }
+
+    d(
+      'AI assist start: provider=${config.type.name} model=${config.model} '
+      'conversationId=$conversationId instruction=${_previewText(instruction)} '
+      'input=${_previewText(input)}',
+    );
+
+    final messages = await _promptBuilder.buildAssistPromptMessages(
+      instruction: instruction,
+      language: language,
+      input: input,
+      conversationId: conversationId,
+    );
+
+    final cancelToken = CancelToken();
+    if (conversationId != null) {
+      _activeAiRequests[conversationId] = cancelToken;
+    }
+    try {
+      final result = await _requestText(
+        config,
+        messages,
+        cancelToken: cancelToken,
+        onContent: (_) async {},
+        conversationId: conversationId,
+      );
+      d(
+        'AI assist done: provider=${config.type.name} model=${config.model} '
+        'conversationId=$conversationId output=${_previewText(result)}',
+      );
+      return result;
+    } finally {
+      if (conversationId != null &&
+          _activeAiRequests[conversationId] == cancelToken) {
+        _activeAiRequests.remove(conversationId);
+      }
+    }
+  }
+
+  Future<String> send({
+    required String conversationId,
+    required String input,
+    required String language,
+    required AiThreadTarget target,
+    AiProviderConfig? provider,
+    List<MessageItem> attachedMessages = const [],
+    void Function(String threadId)? onThreadReady,
+    void Function()? onInputAccepted,
+  }) async {
+    final thread = await database.aiChatMessageDao.resolveThreadTarget(
+      conversationId: conversationId,
+      target: target,
+    );
+    await database.aiChatMessageDao.resolveStalePendingAssistantMessages(
+      updatedBefore: kAiRuntimeStartedAt,
+      conversationId: conversationId,
+      threadId: thread.id,
+    );
+    final hasPendingAssistant = await database.aiChatMessageDao
+        .hasPendingAssistantMessage(
+          thread.id,
+          updatedAfter: kAiRuntimeStartedAt,
+        );
+    if (hasPendingAssistant) {
+      throw Exception('AI is still responding');
+    }
+
+    final config = provider ?? database.settingProperties.selectedAiProvider;
+    if (config == null) {
+      throw Exception('No AI provider configured');
+    }
+
+    d(
+      'AI send start: conversationId=$conversationId '
+      'threadId=${thread.id} '
+      'provider=${config.type.name} model=${config.model} '
+      'input=${_previewText(input)}',
+    );
+
+    final now = DateTime.now();
+    final assistantCreatedAt = now.add(const Duration(milliseconds: 1));
+    final userMessageId = _uuid.v4();
+    final assistantMessageId = _uuid.v4();
+    final cancelToken = CancelToken();
+    await database.aiChatMessageDao.insertMessage(
+      AiChatMessagesCompanion.insert(
+        id: userMessageId,
+        threadId: Value(thread.id),
+        conversationId: conversationId,
+        role: _kAiRoleUser,
+        providerId: config.id,
+        content: input,
+        status: _kAiStatusDone,
+        model: Value(config.model),
+        metadata: Value(
+          createAiUserMessageMetadata(
+            attachedMessages.map(aiMessageContextMetadata).toList(),
+          ),
+        ),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+
+    await database.aiChatMessageDao.insertMessage(
+      AiChatMessagesCompanion.insert(
+        id: assistantMessageId,
+        threadId: Value(thread.id),
+        conversationId: conversationId,
+        role: _kAiRoleAssistant,
+        providerId: config.id,
+        content: '',
+        status: _kAiStatusPending,
+        model: Value(config.model),
+        metadata: Value(createAiMessageMetadata(config)),
+        createdAt: assistantCreatedAt,
+        updatedAt: assistantCreatedAt,
+      ),
+    );
+
+    onInputAccepted?.call();
+    onThreadReady?.call(thread.id);
+
+    final updater = _StreamingMessageUpdater(
+      dao: database.aiChatMessageDao,
+      messageId: assistantMessageId,
+    );
+    final requestKeys = {
+      thread.id,
+      assistantMessageId,
+    };
+    _activeAiRequests[thread.id] = cancelToken;
+    _activeAiRequests[assistantMessageId] = cancelToken;
+    try {
+      final messages = await _promptBuilder.buildPromptMessages(
+        conversationId,
+        thread.id,
+        input,
+        language,
+        currentMessageId: userMessageId,
+        attachedMessages: attachedMessages,
+      );
+      Map<String, dynamic>? responseMetadata;
+      final result = await _requestText(
+        config,
+        messages,
+        cancelToken: cancelToken,
+        onContent: updater.append,
+        conversationId: conversationId,
+        assistantMessageId: assistantMessageId,
+        onResponseMetadata: (metadata) {
+          responseMetadata = createAiResponseMetadata(
+            elapsedMs: (metadata['elapsedMs'] as num?)?.round() ?? 0,
+            promptMessageCount:
+                (metadata['promptMessageCount'] as num?)?.round() ??
+                messages.length,
+            toolCount: (metadata['toolCount'] as num?)?.round() ?? 0,
+            outputCharacters: 0,
+            response: metadata,
+          );
+        },
+      );
+      await updater.flush(contentOverride: result, force: true);
+      final completedResponseMetadata =
+          responseMetadata ??
+          createAiResponseMetadata(
+            elapsedMs: 0,
+            promptMessageCount: messages.length,
+            toolCount: 0,
+            outputCharacters: result.length,
+            response: const <String, dynamic>{},
+          );
+      completedResponseMetadata['outputCharacters'] = result.length;
+      await database.aiChatMessageDao.setMessageMetadataResponse(
+        assistantMessageId,
+        completedResponseMetadata,
+        updatedAt: DateTime.now(),
+      );
+      await database.aiChatMessageDao.updateMessageStatus(
+        assistantMessageId,
+        _kAiStatusDone,
+        updatedAt: DateTime.now(),
+      );
+      d(
+        'AI send done: conversationId=$conversationId '
+        'threadId=${thread.id} '
+        'assistantMessageId=$assistantMessageId output=${_previewText(result)}',
+      );
+      return thread.id;
+    } catch (error, stacktrace) {
+      if (cancelToken.isCancelled) {
+        d(
+          'AI send cancelled: conversationId=$conversationId '
+          'threadId=${thread.id} '
+          'assistantMessageId=$assistantMessageId',
+        );
+        await updater.flush(force: true);
+        await database.aiChatMessageDao.updateMessageStatus(
+          assistantMessageId,
+          _kAiStatusDone,
+          updatedAt: DateTime.now(),
+          errorText: 'Stopped',
+        );
+        return thread.id;
+      }
+      e('AI chat error: $error, $stacktrace');
+      await database.aiChatMessageDao.updateMessageStatus(
+        assistantMessageId,
+        _kAiStatusError,
+        updatedAt: DateTime.now(),
+        errorText: error.toString(),
+      );
+      rethrow;
+    } finally {
+      for (final requestKey in requestKeys) {
+        if (_activeAiRequests[requestKey] == cancelToken) {
+          _activeAiRequests.remove(requestKey);
+        }
+      }
+    }
+  }
+
+  void stop(String conversationId, {String? threadId}) {
+    d('AI stop requested: conversationId=$conversationId threadId=$threadId');
+    final cancelToken = threadId == null
+        ? _activeAiRequests[conversationId]
+        : null;
+    (cancelToken ?? _activeAiRequests[threadId])?.cancel(
+      'AI generation stopped',
+    );
+  }
+
+  Future<String> _requestText(
+    AiProviderConfig config,
+    List<AiPromptMessage> messages, {
+    required CancelToken cancelToken,
+    required Future<void> Function(String chunk) onContent,
+    String? conversationId,
+    String? assistantMessageId,
+    void Function(Map<String, dynamic> metadata)? onResponseMetadata,
+  }) {
+    final tools = conversationId == null
+        ? null
+        : _conversationTools.genkitTools(
+            conversationId: conversationId,
+            onEvent: (event) =>
+                _appendAssistantToolEvent(assistantMessageId, event),
+          );
+    return _providerRequester.requestText(
+      config,
+      messages,
+      proxy: database.settingProperties.activatedProxy,
+      cancelToken: cancelToken,
+      onContent: onContent,
+      conversationId: conversationId,
+      onResponseMetadata: onResponseMetadata == null
+          ? null
+          : (metadata) => onResponseMetadata({
+              ...metadata,
+              'promptMessageCount': messages.length,
+              'toolCount': tools?.length ?? 0,
+            }),
+      tools: tools,
+    );
+  }
+
+  Future<void> _appendAssistantToolEvent(
+    String? assistantMessageId,
+    Map<String, dynamic> event,
+  ) async {
+    if (assistantMessageId == null) {
+      return;
+    }
+    try {
+      await database.aiChatMessageDao.appendMessageMetadataToolEvent(
+        assistantMessageId,
+        event,
+        updatedAt: DateTime.now(),
+      );
+    } catch (error, stacktrace) {
+      e('AI tool metadata update error: $error, $stacktrace');
+    }
+  }
+}
+
+String _previewText(String? text, {int maxLength = _kAiLogPreviewLength}) {
+  final compact = text?.replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
+  if (compact.isEmpty) {
+    return '""';
+  }
+  if (compact.length <= maxLength) {
+    return compact;
+  }
+  return '${compact.substring(0, maxLength)}...(${compact.length} chars)';
+}
+
+class _StreamingMessageUpdater {
+  _StreamingMessageUpdater({required this.dao, required this.messageId});
+
+  final AiChatMessageDao dao;
+  final String messageId;
+  final _buffer = StringBuffer();
+
+  String _persistedContent = '';
+  DateTime _lastFlushedAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  Future<void> append(String chunk) async {
+    if (chunk.isEmpty) return;
+
+    _buffer.write(chunk);
+    final now = DateTime.now();
+    final pendingChars = _buffer.length - _persistedContent.length;
+    if (pendingChars < _kAiStreamFlushChars &&
+        now.difference(_lastFlushedAt) < _kAiStreamFlushInterval) {
+      return;
+    }
+
+    await flush();
+  }
+
+  Future<void> flush({String? contentOverride, bool force = false}) async {
+    final content = contentOverride ?? _buffer.toString();
+    if (!force && content == _persistedContent) {
+      return;
+    }
+
+    _persistedContent = content;
+    _lastFlushedAt = DateTime.now();
+    await dao.updateMessageContent(
+      messageId,
+      content,
+      updatedAt: _lastFlushedAt,
+    );
+  }
+}

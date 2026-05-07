@@ -5,6 +5,7 @@ import '../home/chat/chat_page.dart';
 import '../setting/about_page.dart';
 import '../setting/account_delete_page.dart';
 import '../setting/account_page.dart';
+import '../setting/ai_settings_page.dart';
 import '../setting/appearance_page.dart';
 import '../setting/backup_page.dart';
 import '../setting/edit_profile_page.dart';
@@ -31,6 +32,7 @@ class ResponsiveNavigatorStateNotifier
   static const chatBackupPage = 'chatBackupPage';
   static const dataAndStorageUsagePage = 'dataAndStorageUsagePage';
   static const appearancePage = 'appearancePage';
+  static const aiSettingsPage = 'aiSettingsPage';
   static const aboutPage = 'aboutPage';
   static const storageUsage = 'storageUsage';
   static const storageUsageDetail = 'storageUsageDetail';
@@ -43,6 +45,7 @@ class ResponsiveNavigatorStateNotifier
     chatBackupPage,
     dataAndStorageUsagePage,
     appearancePage,
+    aiSettingsPage,
     aboutPage,
     storageUsage,
     storageUsageDetail,
@@ -116,6 +119,12 @@ class ResponsiveNavigatorStateNotifier
           key: ValueKey(appearancePage),
           name: appearancePage,
           child: AppearancePage(key: ValueKey(appearancePage)),
+        );
+      case aiSettingsPage:
+        return const MaterialPage(
+          key: ValueKey(aiSettingsPage),
+          name: aiSettingsPage,
+          child: AiSettingsPage(key: ValueKey(aiSettingsPage)),
         );
       case accountPage:
         return const MaterialPage(

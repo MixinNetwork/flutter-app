@@ -33,6 +33,31 @@ class MessageDayTime extends HookConsumerWidget {
   }
 }
 
+class MessageDayTimeItem extends StatelessWidget {
+  const MessageDayTimeItem({
+    required this.dateTime,
+    required this.child,
+    super.key,
+    this.prevDateTime,
+  });
+
+  final DateTime dateTime;
+  final DateTime? prevDateTime;
+  final Widget child;
+
+  bool get showDayTime => !isSameDay(prevDateTime, dateTime);
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (showDayTime) MessageDayTime(dateTime: dateTime),
+      child,
+    ],
+  );
+}
+
 class _MessageDayTimeWidget extends HookConsumerWidget {
   const _MessageDayTimeWidget({required this.dateTime});
 
@@ -75,28 +100,44 @@ class HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
 class _CurrentShowingMessages {
   _CurrentShowingMessages();
 
-  final List<db.MessageItem> items = [];
+  final List<DateTime> items = [];
   final List<Element> elements = [];
   final List<Element?> dayTimeElements = [];
 
   void dumpKeyedSubtree(Element element, {bool reverse = false}) {
-    final item = element.descendantFirstOf(
-      (e) => e.widget is MessageItemWidget,
-    );
-    final widget = item.widget as MessageItemWidget;
+    final item = element.descendantFirstWhere((e) {
+      final widget = e.widget;
+      return widget is MessageItemWidget || widget is MessageDayTimeItem;
+    });
+    if (item == null) {
+      return;
+    }
+    final widget = item.widget;
 
-    final dayTimeElement =
-        !isSameDay(widget.message.createdAt, widget.prev?.createdAt)
-        ? element.descendantFirstOf(
+    late final DateTime createdAt;
+    DateTime? prevCreatedAt;
+
+    if (widget is MessageDayTimeItem) {
+      createdAt = widget.dateTime;
+      prevCreatedAt = widget.prevDateTime;
+    } else if (widget is MessageItemWidget) {
+      createdAt = widget.message.createdAt;
+      prevCreatedAt = widget.prev?.createdAt;
+    } else {
+      return;
+    }
+
+    final dayTimeElement = !isSameDay(createdAt, prevCreatedAt)
+        ? element.descendantFirstWhere(
             (e) => e.widget is _MessageDayTimeWidget,
           )
         : null;
     if (!reverse) {
-      items.add(widget.message);
+      items.add(createdAt);
       elements.add(item);
       dayTimeElements.add(dayTimeElement);
     } else {
-      items.insert(0, widget.message);
+      items.insert(0, createdAt);
       elements.insert(0, item);
       dayTimeElements.insert(0, dayTimeElement);
     }
@@ -153,11 +194,11 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   }) => MessageDayTimeViewportWidget._create(
     () {
       final result = _CurrentShowingMessages();
-      (listKey.currentContext! as Element)
-          .descendantFirstOf((e) => e.widget is SliverList)
-          .visitChildElements((e) {
-            result.dumpKeyedSubtree(e, reverse: reverse);
-          });
+      final listElement = (listKey.currentContext! as Element)
+          .descendantFirstWhere((e) => e.widget is SliverList);
+      listElement?.visitChildElements((e) {
+        result.dumpKeyedSubtree(e, reverse: reverse);
+      });
       return result;
     },
     key: key,
@@ -262,7 +303,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
         if (offset.dy < render.size.height / 2) {
           // up
           firstInScreenIndex = closestToTopDayTimeIndex;
-          bloc.update(items[closestToTopDayTimeIndex].createdAt);
+          bloc.update(items[closestToTopDayTimeIndex]);
           dateTimeTopOffset.value = 0;
         } else {
           // down
@@ -272,8 +313,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
                 e('firstInScreenIndex > closestToTopDayTimeIndex');
               }
               if (isSameDay(
-                items[firstInScreenIndex].createdAt,
-                items[closestToTopDayTimeIndex].createdAt,
+                items[firstInScreenIndex],
+                items[closestToTopDayTimeIndex],
               )) {
                 e(
                   'there is a day time item but is the same day.'
@@ -295,7 +336,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
         dateTimeTopOffset.value = 0;
       }
 
-      dateTime.value = items.getOrNull(firstInScreenIndex)?.createdAt;
+      dateTime.value = items.getOrNull(firstInScreenIndex);
     }
 
     useEffect(() {
@@ -350,7 +391,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
 }
 
 extension _ElementExt on Element {
-  Element descendantFirstOf(bool Function(Element e) predicate) {
+  Element? descendantFirstWhere(bool Function(Element e) predicate) {
     Element? dump(Element element) {
       if (predicate(element)) {
         return element;
@@ -365,6 +406,6 @@ extension _ElementExt on Element {
       return child;
     }
 
-    return dump(this)!;
+    return dump(this);
   }
 }
