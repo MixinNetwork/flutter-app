@@ -538,7 +538,7 @@ class MixinMcpServer extends ChangeNotifier {
           e('MCP tool error ${tool.name}: $error', stacktrace);
         }
         return mcp.CallToolResult(
-          content: [mcp.TextContent(text: const JsonEncoder().convert(data))],
+          content: [mcp.TextContent(text: encodeAiToolResult(data))],
           structuredContent: data,
         );
       },

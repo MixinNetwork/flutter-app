@@ -11,9 +11,20 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:toon_format/toon_format.dart';
 
 void main() {
+  test('tool result encoder uses TOON text and strips null values', () {
+    final encoded = encodeAiToolResult({
+      'messages': [
+        {'message_id': '1', 'content': 'hello', 'unused': null},
+      ],
+    });
+
+    expect(encoded, contains('messages'));
+    expect(encoded, isNot(contains('"messages"')));
+    expect(encoded, isNot(contains('unused')));
+  });
+
   group('AI conversation context', () {
     late MixinDatabase mixinDatabase;
     late FtsDatabase ftsDatabase;
@@ -124,7 +135,7 @@ void main() {
         limit: 1,
       );
       final targetJson = targetResult.toJson();
-      expect(encode(targetJson), contains('context_messages'));
+      expect(encodeAiToolResult(targetJson), contains('context_messages'));
       final targetMessage =
           (targetJson['messages'] as List).single as Map<String, dynamic>;
 

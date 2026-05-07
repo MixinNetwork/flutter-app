@@ -701,7 +701,7 @@ class AiConversationToolKit {
     );
     try {
       final result = await fn();
-      final encodedResult = _encodeToolResult(result);
+      final encodedResult = encodeAiToolResult(result);
       d(
         'AI tool execute done: conversationId=$conversationId '
         'tool=$name id=$id elapsedMs=${stopwatch.elapsedMilliseconds} '
@@ -728,7 +728,7 @@ class AiConversationToolKit {
           errorText: error.toString(),
         ),
       );
-      return _encodeToolResult({'error': '$error'});
+      return encodeAiToolResult({'error': '$error'});
     }
   }
 }
@@ -1094,7 +1094,7 @@ String _truncateText(String text, int? maxLength) {
   return '${text.substring(0, end)}$suffix';
 }
 
-String _encodeToolResult(Map<String, dynamic> result) =>
+String encodeAiToolResult(Map<String, dynamic> result) =>
     encode(_stripNullValues(result));
 
 Object? _stripNullValues(Object? value) {
