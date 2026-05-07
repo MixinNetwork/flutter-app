@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -13,6 +12,7 @@ import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../provider/database_provider.dart';
+import 'ai_mcp_settings_page.dart';
 import 'ai_prompt_settings_page.dart';
 import 'ai_provider_edit_page.dart';
 
@@ -41,14 +41,13 @@ class AiSettingsPage extends HookConsumerWidget {
         )
         .length;
     final mcpServer = useListenable(MixinMcpServer.instance);
-    final enableMcpServer = database.settingProperties.enableMcpServer;
-    final enableMcpDraftTools = database.settingProperties.enableMcpDraftTools;
-    final enableMcpCircleManagement =
-        database.settingProperties.enableMcpCircleManagement;
-    final mcpEndpoint = mcpServer.endpoint;
-    final mcpToken = database.settingProperties.mcpServerToken;
-    const mcpPort = MixinMcpServer.defaultPort;
-    final mcpError = mcpServer.lastStartError;
+    final mcpTools = MixinMcpServer.toolInfos(database);
+    final enabledMcpToolCount = mcpTools.where((tool) => tool.enabled).length;
+    final mcpStatus = mcpServer.isRunning
+        ? 'Running'
+        : database.settingProperties.enableMcpServer
+        ? 'On'
+        : 'Off';
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -106,182 +105,20 @@ class AiSettingsPage extends HookConsumerWidget {
                     padding: const EdgeInsets.only(right: 10, left: 10),
                     cellBackgroundColor:
                         context.theme.settingCellBackgroundColor,
-                    child: Column(
-                      children: [
-                        CellItem(
-                          title: const Text('Local MCP Server'),
-                          leading: Icon(
-                            Icons.hub_outlined,
-                            color: context.theme.icon,
-                          ),
-                          description: Text(
-                            mcpServer.isRunning ? 'Running' : 'Off',
-                          ),
-                          trailing: Transform.scale(
-                            scale: 0.7,
-                            child: CupertinoSwitch(
-                              activeTrackColor: context.theme.accent,
-                              value: enableMcpServer,
-                              onChanged: (value) {
-                                database.settingProperties.enableMcpServer =
-                                    value;
-                              },
-                            ),
-                          ),
+                    child: CellItem(
+                      title: const Text('Local MCP Server'),
+                      leading: Icon(
+                        Icons.hub_outlined,
+                        color: context.theme.icon,
+                      ),
+                      description: Text(
+                        '$mcpStatus · $enabledMcpToolCount/${mcpTools.length} tools',
+                      ),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const AiMcpSettingsPage(),
                         ),
-                        if (enableMcpServer) ...[
-                          Divider(
-                            height: 0.5,
-                            indent: 16,
-                            endIndent: 16,
-                            color: context.theme.divider,
-                          ),
-                          CellItem(
-                            title: const Text('Endpoint'),
-                            description: Expanded(
-                              child: Text(
-                                mcpEndpoint?.toString() ??
-                                    'http://127.0.0.1:$mcpPort/mcp',
-                                textAlign: TextAlign.end,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            trailing: IconButton(
-                              onPressed: mcpEndpoint == null
-                                  ? null
-                                  : () {
-                                      Clipboard.setData(
-                                        ClipboardData(
-                                          text: mcpEndpoint.toString(),
-                                        ),
-                                      );
-                                      showToastSuccessful();
-                                    },
-                              icon: Icon(
-                                Icons.copy_rounded,
-                                color: context.theme.icon,
-                              ),
-                            ),
-                          ),
-                          if (mcpError != null) ...[
-                            Divider(
-                              height: 0.5,
-                              indent: 16,
-                              endIndent: 16,
-                              color: context.theme.divider,
-                            ),
-                            CellItem(
-                              title: const Text('Status'),
-                              description: Expanded(
-                                child: Text(
-                                  'Failed to bind port $mcpPort',
-                                  textAlign: TextAlign.end,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: context.theme.red,
-                                  ),
-                                ),
-                              ),
-                              trailing: null,
-                            ),
-                          ],
-                          Divider(
-                            height: 0.5,
-                            indent: 16,
-                            endIndent: 16,
-                            color: context.theme.divider,
-                          ),
-                          CellItem(
-                            title: const Text('Access Token'),
-                            description: Expanded(
-                              child: Text(
-                                mcpToken ?? 'Unavailable',
-                                textAlign: TextAlign.end,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: mcpToken == null
-                                      ? null
-                                      : () {
-                                          Clipboard.setData(
-                                            ClipboardData(text: mcpToken),
-                                          );
-                                          showToastSuccessful();
-                                        },
-                                  icon: Icon(
-                                    Icons.copy_rounded,
-                                    color: context.theme.icon,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    database.settingProperties
-                                        .regenerateMcpServerToken();
-                                    showToastSuccessful();
-                                  },
-                                  icon: Icon(
-                                    Icons.refresh_rounded,
-                                    color: context.theme.icon,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Divider(
-                            height: 0.5,
-                            indent: 16,
-                            endIndent: 16,
-                            color: context.theme.divider,
-                          ),
-                          CellItem(
-                            title: const Text('Draft Editing'),
-                            description: const Text('Draft write tools'),
-                            trailing: Transform.scale(
-                              scale: 0.7,
-                              child: CupertinoSwitch(
-                                activeTrackColor: context.theme.accent,
-                                value: enableMcpDraftTools,
-                                onChanged: (value) {
-                                  database
-                                          .settingProperties
-                                          .enableMcpDraftTools =
-                                      value;
-                                },
-                              ),
-                            ),
-                          ),
-                          Divider(
-                            height: 0.5,
-                            indent: 16,
-                            endIndent: 16,
-                            color: context.theme.divider,
-                          ),
-                          CellItem(
-                            title: const Text('Circle Management'),
-                            description: const Text('Create and edit circles'),
-                            trailing: Transform.scale(
-                              scale: 0.7,
-                              child: CupertinoSwitch(
-                                activeTrackColor: context.theme.accent,
-                                value: enableMcpCircleManagement,
-                                onChanged: (value) {
-                                  database
-                                          .settingProperties
-                                          .enableMcpCircleManagement =
-                                      value;
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                      ),
                     ),
                   ),
                   Padding(
@@ -291,10 +128,8 @@ class AiSettingsPage extends HookConsumerWidget {
                       top: 10,
                     ),
                     child: Text(
-                      'Exposes read-only conversation tools, UI navigation, '
-                      'and AI thread inspection on localhost only at port '
-                      '$mcpPort. Draft and circle write tools require their '
-                      'own switches. It never sends messages.',
+                      'Manage the localhost MCP endpoint, access token, write '
+                      'permissions, and supported tool list.',
                       style: TextStyle(
                         color: context.theme.secondaryText,
                         fontSize: 14,

@@ -25,6 +25,24 @@ import 'mixin_mcp_bridge.dart';
 
 typedef CurrentConversationIdResolver = String? Function();
 
+class MixinMcpToolInfo {
+  const MixinMcpToolInfo({
+    required this.name,
+    required this.description,
+    required this.scopeKey,
+    required this.scopeTitle,
+    required this.enabled,
+    required this.requiredArguments,
+  });
+
+  final String name;
+  final String description;
+  final String scopeKey;
+  final String scopeTitle;
+  final bool enabled;
+  final List<String> requiredArguments;
+}
+
 enum _McpPermissionScope {
   read,
   appControl,
@@ -38,6 +56,13 @@ extension on _McpPermissionScope {
     _McpPermissionScope.appControl => 'app_control',
     _McpPermissionScope.draftWrite => 'draft_write',
     _McpPermissionScope.circleManagement => 'circle_management',
+  };
+
+  String get title => switch (this) {
+    _McpPermissionScope.read => 'Read',
+    _McpPermissionScope.appControl => 'App Control',
+    _McpPermissionScope.draftWrite => 'Draft Editing',
+    _McpPermissionScope.circleManagement => 'Circle Management',
   };
 }
 
@@ -70,6 +95,19 @@ class MixinMcpServer extends ChangeNotifier {
   bool get isRunning => _server != null && _transport != null;
 
   Object? get lastStartError => _lastStartError;
+
+  static List<MixinMcpToolInfo> toolInfos(Database database) => _toolSpecs
+      .map(
+        (spec) => MixinMcpToolInfo(
+          name: spec.name,
+          description: spec.description,
+          scopeKey: spec.scope.key,
+          scopeTitle: spec.scope.title,
+          enabled: _toolEnabled(database, spec),
+          requiredArguments: spec.required,
+        ),
+      )
+      .toList(growable: false);
 
   Future<void> start({
     required Database database,
