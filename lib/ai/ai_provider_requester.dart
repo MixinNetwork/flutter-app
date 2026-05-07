@@ -169,7 +169,7 @@ class AiProviderRequester {
         ),
         AiProviderType.anthropic => anthropic(
           apiKey: config.apiKey,
-          baseUrl: _emptyToNull(config.baseUrl),
+          baseUrl: normalizeAiProviderBaseUrl(config.type, config.baseUrl),
         ),
         AiProviderType.gemini => googleAI(apiKey: config.apiKey),
       };
@@ -185,6 +185,13 @@ class AiProviderRequester {
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
   }
+}
+
+String? normalizeAiProviderBaseUrl(AiProviderType type, String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return null;
+  if (type != AiProviderType.anthropic) return trimmed;
+  return trimmed.replaceFirst(RegExp(r'/v1/?$'), '');
 }
 
 Map<String, dynamic> _genkitResponseMetadata(

@@ -66,5 +66,29 @@ void main() {
         ),
       );
     });
+
+    test('normalizes Anthropic base URL to the API host root', () {
+      expect(
+        normalizeAiProviderBaseUrl(
+          AiProviderType.anthropic,
+          'https://api.anthropic.com/v1',
+        ),
+        'https://api.anthropic.com',
+      );
+      expect(
+        normalizeAiProviderBaseUrl(
+          AiProviderType.anthropic,
+          'https://api.anthropic.com/v1/',
+        ),
+        'https://api.anthropic.com',
+      );
+      expect(
+        normalizeAiProviderBaseUrl(
+          AiProviderType.openaiCompatible,
+          'https://api.example.com/v1',
+        ),
+        'https://api.example.com/v1',
+      );
+    });
   });
 }

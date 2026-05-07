@@ -508,13 +508,13 @@ class AiProviderEditPage extends HookConsumerWidget {
 
   static String _defaultBaseUrlFor(AiProviderType type) => switch (type) {
     AiProviderType.openaiCompatible => '',
-    AiProviderType.anthropic => 'https://api.anthropic.com/v1',
+    AiProviderType.anthropic => 'https://api.anthropic.com',
     AiProviderType.gemini => '',
   };
 
   static String _baseUrlHintFor(AiProviderType type) => switch (type) {
     AiProviderType.openaiCompatible => 'https://api.example.com/v1',
-    AiProviderType.anthropic => 'https://api.anthropic.com/v1',
+    AiProviderType.anthropic => 'https://api.anthropic.com',
     AiProviderType.gemini => 'https://generativelanguage.googleapis.com/v1beta',
   };
 
@@ -522,7 +522,7 @@ class AiProviderEditPage extends HookConsumerWidget {
     AiProviderType.openaiCompatible =>
       'For OpenAI-compatible APIs, use the server root that exposes /chat/completions.',
     AiProviderType.anthropic =>
-      'Anthropic uses the Messages API under /v1/messages.',
+      'Use the API host root. The app appends /v1/messages automatically.',
     AiProviderType.gemini =>
       'Gemini uses the Google Generative Language API and appends /models/{model}:streamGenerateContent automatically.',
   };
