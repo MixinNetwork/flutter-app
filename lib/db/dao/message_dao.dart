@@ -705,6 +705,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
     DateTime? startInclusive,
     DateTime? endExclusive,
+    MessageOrderInfo? before,
+    MessageOrderInfo? after,
     String? senderId,
     String? senderIdentityNumber,
     List<String> categories = const [],
@@ -729,7 +731,17 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               : message.createdAt.isBiggerOrEqualValue(startMillis)) &
           (endMillis == null
               ? const Constant(true)
-              : message.createdAt.isSmallerThanValue(endMillis)),
+              : message.createdAt.isSmallerThanValue(endMillis)) &
+          (before == null
+              ? const Constant(true)
+              : message.createdAt.isSmallerThanValue(before.createdAt) |
+                    (message.createdAt.equals(before.createdAt) &
+                        message.rowId.isSmallerThanValue(before.rowId))) &
+          (after == null
+              ? const Constant(true)
+              : message.createdAt.isBiggerThanValue(after.createdAt) |
+                    (message.createdAt.equals(after.createdAt) &
+                        message.rowId.isBiggerThanValue(after.rowId))),
       (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
       order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
         if (ascending) OrderingTerm.asc(message.createdAt),
@@ -745,14 +757,33 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required int limit,
     int offset = 0,
     bool unreadOnly = false,
+    MessageOrderInfo? before,
+    MessageOrderInfo? after,
+    bool ascending = true,
   }) => _baseMessageItems(
     (message, _, _, _, _, _, _, _, _, _, _, _, messageMention, _, em) =>
         message.conversationId.equals(conversationId) &
         messageMention.messageId.isNotNull() &
         (unreadOnly
             ? messageMention.hasRead.equals(false)
-            : const Constant(true)),
+            : const Constant(true)) &
+        (before == null
+            ? const Constant(true)
+            : message.createdAt.isSmallerThanValue(before.createdAt) |
+                  (message.createdAt.equals(before.createdAt) &
+                      message.rowId.isSmallerThanValue(before.rowId))) &
+        (after == null
+            ? const Constant(true)
+            : message.createdAt.isBiggerThanValue(after.createdAt) |
+                  (message.createdAt.equals(after.createdAt) &
+                      message.rowId.isBiggerThanValue(after.rowId))),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+      if (ascending) OrderingTerm.asc(message.createdAt),
+      if (ascending) OrderingTerm.asc(message.rowId),
+      if (!ascending) OrderingTerm.desc(message.createdAt),
+      if (!ascending) OrderingTerm.desc(message.rowId),
+    ]),
   );
 
   Selectable<MessageItem> attachmentMessagesByConversationId(
@@ -761,31 +792,56 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
     DateTime? startInclusive,
     DateTime? endExclusive,
+    MessageOrderInfo? before,
+    MessageOrderInfo? after,
     String? senderId,
     String? senderIdentityNumber,
     List<String> categories = const [],
+    bool ascending = true,
   }) => messagesByConversationIdAndCreatedAtRange(
     conversationId,
     limit: limit,
     offset: offset,
     startInclusive: startInclusive,
     endExclusive: endExclusive,
+    before: before,
+    after: after,
     senderId: senderId,
     senderIdentityNumber: senderIdentityNumber,
     categories: categories.isEmpty ? _attachmentMessageCategories : categories,
+    ascending: ascending,
   );
 
   Selectable<MessageItem> linkMessagesByConversationId(
     String conversationId, {
     required int limit,
     int offset = 0,
+    MessageOrderInfo? before,
+    MessageOrderInfo? after,
+    bool ascending = true,
   }) => _baseMessageItems(
     (message, _, _, _, _, _, _, _, _, hyperlink, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.hyperlink.isNotNull() &
         message.hyperlink.equals('').not() &
-        hyperlink.hyperlink.isNotNull(),
+        hyperlink.hyperlink.isNotNull() &
+        (before == null
+            ? const Constant(true)
+            : message.createdAt.isSmallerThanValue(before.createdAt) |
+                  (message.createdAt.equals(before.createdAt) &
+                      message.rowId.isSmallerThanValue(before.rowId))) &
+        (after == null
+            ? const Constant(true)
+            : message.createdAt.isBiggerThanValue(after.createdAt) |
+                  (message.createdAt.equals(after.createdAt) &
+                      message.rowId.isBiggerThanValue(after.rowId))),
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+      if (ascending) OrderingTerm.asc(message.createdAt),
+      if (ascending) OrderingTerm.asc(message.rowId),
+      if (!ascending) OrderingTerm.desc(message.createdAt),
+      if (!ascending) OrderingTerm.desc(message.rowId),
+    ]),
   );
 
   Selectable<int> messageCountByConversationIdAndCreatedAtRange(

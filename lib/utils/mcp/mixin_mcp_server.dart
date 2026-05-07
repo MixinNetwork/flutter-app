@@ -18,6 +18,7 @@ import '../../db/dao/message_dao.dart';
 import '../../db/dao/participant_dao.dart';
 import '../../db/database.dart';
 import '../../db/mixin_database.dart';
+import '../../enum/message_category.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
 import '../system/package_info.dart';
@@ -219,30 +220,15 @@ class MixinMcpServer extends ChangeNotifier {
               .toList(growable: false),
         };
       case 'mixin_list_conversations':
-        final query = _optionalString(arguments, 'query');
         final circleId = _optionalString(arguments, 'circle_id');
-        final limit = _int(
-          arguments,
-          'limit',
-          defaultValue: 30,
-          min: 1,
-          max: 100,
-        );
-        final offset = _int(arguments, 'offset', defaultValue: 0);
-        final conversations = circleId != null
-            ? await database.conversationDao
-                  .conversationsByCircleId(circleId, limit, offset)
-                  .get()
-            : query == null || query.trim().isEmpty
-            ? await database.conversationDao.conversationItems().get()
-            : await _searchConversations(database, query, offset + limit);
+        final page = await _readConversationPage(database, arguments);
         return {
-          'conversations': conversations
-              .skip(circleId == null ? offset : 0)
-              .take(limit)
+          'circle_id': circleId,
+          'conversations': page.conversations
               .map(_conversationToJson)
               .toList(growable: false),
-        };
+          'pagination': page.toJson(),
+        }..removeWhere((_, value) => value == null);
       case 'mixin_get_conversation':
         final conversation = await _conversationById(
           database,
@@ -262,56 +248,8 @@ class MixinMcpServer extends ChangeNotifier {
           endExclusive: _date(arguments, 'end'),
         );
         return stats.toJson();
-      case 'mixin_read_messages':
-        final messages = await database.messageDao
-            .messagesByConversationIdAndCreatedAtRange(
-              _requiredString(arguments, 'conversation_id'),
-              offset: _int(arguments, 'offset', defaultValue: 0),
-              limit: _int(
-                arguments,
-                'limit',
-                defaultValue: 50,
-                min: 1,
-                max: 200,
-              ),
-              startInclusive: _date(arguments, 'start'),
-              endExclusive: _date(arguments, 'end'),
-              senderId: _optionalString(arguments, 'sender_id'),
-              senderIdentityNumber: _optionalString(
-                arguments,
-                'sender_identity_number',
-              ),
-              categories: _optionalStringList(arguments, 'message_types'),
-            )
-            .get();
-        return {
-          'messages': _messagesToJson(
-            messages,
-            includePinState: _bool(arguments, 'include_pin_state'),
-          ),
-        };
-      case 'mixin_search_messages':
-        final conversationId = _optionalString(arguments, 'conversation_id');
-        final circleId = _optionalString(arguments, 'circle_id');
-        final conversationIds = conversationId == null
-            ? circleId == null
-                  ? const <String>[]
-                  : await database.conversationDao.conversationIdsByCircleId(
-                      circleId,
-                    )
-            : [conversationId];
-        if (circleId != null && conversationIds.isEmpty) {
-          return {'messages': const <Map<String, dynamic>>[]};
-        }
-        final messages = await database.fuzzySearchMessage(
-          query: _requiredString(arguments, 'query'),
-          limit: _int(arguments, 'limit', defaultValue: 20, min: 1, max: 50),
-          conversationIds: conversationIds,
-          userId: _optionalString(arguments, 'sender_id'),
-          categories: _optionalStringList(arguments, 'message_types'),
-          anchorMessageId: _optionalString(arguments, 'anchor_id'),
-        );
-        return {'messages': _searchMessagesToJson(messages)};
+      case 'mixin_list_messages':
+        return _listMessages(database, arguments);
       case 'mixin_get_message':
         final message = await _messageById(
           database,
@@ -345,70 +283,14 @@ class MixinMcpServer extends ChangeNotifier {
           'message': _messageToJson(message, includePinState: true),
           'after': _messagesToJson(after, includePinState: true),
         };
-      case 'mixin_read_image_text':
+      case 'mixin_read_image_message_text':
         final result = await _conversationTools.readImageText(
           conversationId: _requiredString(arguments, 'conversation_id'),
           messageId: _requiredString(arguments, 'message_id'),
         );
         return result.toJson();
-      case 'mixin_list_attachments':
-        final messages = await database.messageDao
-            .attachmentMessagesByConversationId(
-              _requiredString(arguments, 'conversation_id'),
-              offset: _int(arguments, 'offset', defaultValue: 0),
-              limit: _int(
-                arguments,
-                'limit',
-                defaultValue: 50,
-                min: 1,
-                max: 200,
-              ),
-              startInclusive: _date(arguments, 'start'),
-              endExclusive: _date(arguments, 'end'),
-              senderId: _optionalString(arguments, 'sender_id'),
-              senderIdentityNumber: _optionalString(
-                arguments,
-                'sender_identity_number',
-              ),
-              categories: _optionalStringList(arguments, 'message_types'),
-            )
-            .get();
-        return {
-          'attachments': messages
-              .where(_hasAttachment)
-              .map(_attachmentToJson)
-              .toList(growable: false),
-        };
-      case 'mixin_list_pinned_messages':
-        final conversationId = _requiredString(arguments, 'conversation_id');
-        final pins = await database.pinMessageDao.pinMessagesByConversationId(
-          conversationId: conversationId,
-          limit: _int(arguments, 'limit', defaultValue: 50, min: 1, max: 200),
-          offset: _int(arguments, 'offset', defaultValue: 0),
-        );
-        final messageIds = pins.map((pin) => pin.messageId).toList();
-        final messages = await database.messageDao
-            .messageItemByMessageIds(messageIds)
-            .get();
-        final messagesById = {
-          for (final message in messages) message.messageId: message,
-        };
-        return {
-          'messages': pins
-              .map((pin) {
-                final message = messagesById[pin.messageId];
-                if (message == null) return null;
-                return {
-                  ..._messageToJson(message, includePinState: true),
-                  'pinned_at': _dateTime(pin.createdAt),
-                };
-              })
-              .nonNulls
-              .toList(growable: false),
-        };
-      case 'mixin_list_participants':
+      case 'mixin_list_conversation_participants':
         final query = _optionalString(arguments, 'query');
-        final offset = _int(arguments, 'offset', defaultValue: 0);
         final limit = _int(
           arguments,
           'limit',
@@ -428,14 +310,18 @@ class MixinMcpServer extends ChangeNotifier {
                     (participant) => _participantMatches(participant, query),
                   )
                   .toList(growable: false);
+        final page = _participantPageFromRows(
+          filtered,
+          limit: limit,
+          cursorUserId: _optionalString(arguments, 'cursor_user_id'),
+        );
         return {
-          'participants': filtered
-              .skip(offset)
-              .take(limit)
+          'participants': page.participants
               .map(_participantToJson)
               .toList(growable: false),
+          'pagination': page.toJson(),
         };
-      case 'mixin_resolve_user_in_conversation':
+      case 'mixin_resolve_conversation_participant':
         final query = _requiredString(arguments, 'query');
         final participants = await database.participantDao
             .groupParticipantsByConversationId(
@@ -453,60 +339,6 @@ class MixinMcpServer extends ChangeNotifier {
         final circles = await database.circleDao.allCircles().get();
         return {
           'circles': circles.map(_circleToJson).toList(growable: false),
-        };
-      case 'mixin_list_circle_conversations':
-        final circleId = _requiredString(arguments, 'circle_id');
-        final limit = _int(
-          arguments,
-          'limit',
-          defaultValue: 50,
-          min: 1,
-          max: 200,
-        );
-        final offset = _int(arguments, 'offset', defaultValue: 0);
-        final conversations = await database.conversationDao
-            .conversationsByCircleId(circleId, limit, offset)
-            .get();
-        return {
-          'circle_id': circleId,
-          'conversations': conversations
-              .map(_conversationToJson)
-              .toList(growable: false),
-        };
-      case 'mixin_read_mentions':
-        final messages = await database.messageDao
-            .mentionMessagesByConversationId(
-              _requiredString(arguments, 'conversation_id'),
-              limit: _int(
-                arguments,
-                'limit',
-                defaultValue: 50,
-                min: 1,
-                max: 200,
-              ),
-              offset: _int(arguments, 'offset', defaultValue: 0),
-              unreadOnly: _bool(arguments, 'unread_only'),
-            )
-            .get();
-        return {
-          'messages': _messagesToJson(messages, includePinState: true),
-        };
-      case 'mixin_list_links':
-        final messages = await database.messageDao
-            .linkMessagesByConversationId(
-              _requiredString(arguments, 'conversation_id'),
-              limit: _int(
-                arguments,
-                'limit',
-                defaultValue: 50,
-                min: 1,
-                max: 200,
-              ),
-              offset: _int(arguments, 'offset', defaultValue: 0),
-            )
-            .get();
-        return {
-          'links': messages.map(_linkToJson).toList(growable: false),
         };
       case 'mixin_open_conversation':
         final conversationId = _requiredString(arguments, 'conversation_id');
@@ -526,7 +358,7 @@ class MixinMcpServer extends ChangeNotifier {
           'conversation_id': message.conversationId,
           'message_id': message.messageId,
         };
-      case 'mixin_get_draft':
+      case 'mixin_get_conversation_draft':
         final conversationId = _requiredString(arguments, 'conversation_id');
         return {
           'conversation_id': conversationId,
@@ -535,7 +367,7 @@ class MixinMcpServer extends ChangeNotifier {
             conversationId,
           ),
         };
-      case 'mixin_set_draft':
+      case 'mixin_set_conversation_draft':
         final conversationId = _requiredString(arguments, 'conversation_id');
         await MixinMcpBridge.instance.setDraft(
           database,
@@ -543,7 +375,7 @@ class MixinMcpServer extends ChangeNotifier {
           _requiredString(arguments, 'text'),
         );
         return {'updated': true, 'conversation_id': conversationId};
-      case 'mixin_insert_text':
+      case 'mixin_insert_conversation_text':
         final conversationId = _requiredString(arguments, 'conversation_id');
         await MixinMcpBridge.instance.insertText(
           database,
@@ -551,7 +383,7 @@ class MixinMcpServer extends ChangeNotifier {
           _requiredString(arguments, 'text'),
         );
         return {'updated': true, 'conversation_id': conversationId};
-      case 'mixin_clear_draft':
+      case 'mixin_clear_conversation_draft':
         final conversationId = _requiredString(arguments, 'conversation_id');
         await MixinMcpBridge.instance.setDraft(database, conversationId, '');
         return {'updated': true, 'conversation_id': conversationId};
@@ -620,7 +452,7 @@ class MixinMcpServer extends ChangeNotifier {
           'circle_id': circleId,
           'conversation_ids': conversationIds,
         };
-      case 'mixin_attach_message_to_ai':
+      case 'mixin_attach_message_to_ai_context':
         final message = await _messageById(
           database,
           _requiredString(arguments, 'message_id'),
@@ -634,7 +466,7 @@ class MixinMcpServer extends ChangeNotifier {
           'conversation_id': message.conversationId,
           'message_id': message.messageId,
         };
-      case 'mixin_list_ai_threads':
+      case 'mixin_list_conversation_ai_threads':
         final threads = await database.aiChatMessageDao
             .watchThreads(_requiredString(arguments, 'conversation_id'))
             .first;
@@ -652,7 +484,7 @@ class MixinMcpServer extends ChangeNotifier {
           'thread': _aiThreadToJson(thread),
           'messages': messages.map(_aiMessageToJson).toList(growable: false),
         };
-      case 'mixin_get_ai_tool_events':
+      case 'mixin_get_ai_message_tool_events':
         final messageId = _requiredString(arguments, 'message_id');
         final message = await database.aiChatMessageDao.messageById(messageId);
         if (message == null) throw StateError('AI message not found');
@@ -803,6 +635,690 @@ Object? _redactForAudit(Object? value, [String? key]) {
     return '<${value.length} chars>';
   }
   return value;
+}
+
+const _messagePageLatest = 'latest';
+const _messagePageBefore = 'before';
+const _messagePageAfter = 'after';
+const _messageKindAll = 'all';
+const _messageKindAttachments = 'attachments';
+const _messageKindPinned = 'pinned';
+const _messageKindMentions = 'mentions';
+const _messageKindLinks = 'links';
+const _conversationScanLimit = 5000;
+const _attachmentMessageCategories = [
+  MessageCategory.signalImage,
+  MessageCategory.signalVideo,
+  MessageCategory.signalData,
+  MessageCategory.signalAudio,
+  MessageCategory.plainImage,
+  MessageCategory.plainVideo,
+  MessageCategory.plainData,
+  MessageCategory.plainAudio,
+  MessageCategory.encryptedImage,
+  MessageCategory.encryptedVideo,
+  MessageCategory.encryptedData,
+  MessageCategory.encryptedAudio,
+];
+
+class _ConversationPage {
+  const _ConversationPage({
+    required this.conversations,
+    required this.limit,
+    required this.hasMore,
+    required this.order,
+    this.cursorConversationId,
+  });
+
+  final List<ConversationItem> conversations;
+  final int limit;
+  final bool hasMore;
+  final String order;
+  final String? cursorConversationId;
+
+  Map<String, dynamic> toJson() => {
+    'order': order,
+    'limit': limit,
+    'cursor_conversation_id': cursorConversationId,
+    'next_cursor_conversation_id': hasMore
+        ? conversations.lastOrNull?.conversationId
+        : null,
+    'has_more': hasMore,
+  }..removeWhere((_, value) => value == null);
+}
+
+class _ParticipantPage {
+  const _ParticipantPage({
+    required this.participants,
+    required this.limit,
+    required this.hasMore,
+    this.cursorUserId,
+  });
+
+  final List<ParticipantUser> participants;
+  final int limit;
+  final bool hasMore;
+  final String? cursorUserId;
+
+  Map<String, dynamic> toJson() => {
+    'order': 'full_name_identity_number_user_id',
+    'limit': limit,
+    'cursor_user_id': cursorUserId,
+    'next_cursor_user_id': hasMore ? participants.lastOrNull?.userId : null,
+    'has_more': hasMore,
+  }..removeWhere((_, value) => value == null);
+}
+
+class _MessagePage {
+  const _MessagePage({
+    required this.messages,
+    required this.page,
+    required this.limit,
+    required this.hasMore,
+    this.cursorMessageId,
+  });
+
+  final List<MessageItem> messages;
+  final String page;
+  final int limit;
+  final bool hasMore;
+  final String? cursorMessageId;
+
+  Map<String, dynamic> toJson() => _cursorPaginationToJson(
+    page: page,
+    limit: limit,
+    hasMore: hasMore,
+    cursorMessageId: cursorMessageId,
+    oldestMessageId: messages.firstOrNull?.messageId,
+    newestMessageId: messages.lastOrNull?.messageId,
+  );
+}
+
+class _PinnedMessagePage {
+  const _PinnedMessagePage({
+    required this.pins,
+    required this.page,
+    required this.limit,
+    required this.hasMore,
+    this.cursorMessageId,
+  });
+
+  final List<PinMessage> pins;
+  final String page;
+  final int limit;
+  final bool hasMore;
+  final String? cursorMessageId;
+
+  Map<String, dynamic> toJson() => {
+    ..._cursorPaginationToJson(
+      page: page,
+      limit: limit,
+      hasMore: hasMore,
+      cursorMessageId: cursorMessageId,
+      oldestMessageId: pins.firstOrNull?.messageId,
+      newestMessageId: pins.lastOrNull?.messageId,
+    ),
+    'order': 'oldest_to_newest_by_pinned_at',
+  };
+}
+
+Future<Map<String, dynamic>> _listMessages(
+  Database database,
+  Map<String, dynamic> arguments,
+) async {
+  final query = _optionalString(arguments, 'query');
+  return query == null
+      ? _listConversationMessages(database, arguments)
+      : _searchMessages(database, arguments, query);
+}
+
+Future<Map<String, dynamic>> _listConversationMessages(
+  Database database,
+  Map<String, dynamic> arguments,
+) async {
+  final conversationId = _requiredString(arguments, 'conversation_id');
+  final kind = _messageKind(arguments);
+  if (_optionalString(arguments, 'circle_id') != null) {
+    throw ArgumentError('circle_id only applies when query is set');
+  }
+  return switch (kind) {
+    _messageKindAll => () async {
+      final page = await _readMessagePage(database, arguments);
+      return {
+        'messages': _messagesToJson(
+          page.messages,
+          includePinState: _bool(arguments, 'include_pin_state'),
+        ),
+        'pagination': page.toJson(),
+      };
+    }(),
+    _messageKindAttachments => () async {
+      final page = await _readMessagePage(
+        database,
+        arguments,
+        attachmentMessagesOnly: true,
+      );
+      return {
+        'messages': _messagesToJson(page.messages, includePinState: true),
+        'pagination': page.toJson(),
+      };
+    }(),
+    _messageKindPinned => () async {
+      final page = await _readPinnedMessagePage(
+        database,
+        conversationId: conversationId,
+        arguments: arguments,
+      );
+      return {
+        'messages': await _pinnedMessagesToJson(database, page.pins),
+        'pagination': page.toJson(),
+      };
+    }(),
+    _messageKindMentions => () async {
+      final page = await _readMentionMessagePage(database, arguments);
+      return {
+        'messages': _messagesToJson(page.messages, includePinState: true),
+        'pagination': page.toJson(),
+      };
+    }(),
+    _messageKindLinks => () async {
+      final page = await _readLinkMessagePage(database, arguments);
+      return {
+        'messages': _messagesToJson(page.messages, includePinState: true),
+        'pagination': page.toJson(),
+      };
+    }(),
+    _ => throw ArgumentError('Unsupported message kind: $kind'),
+  };
+}
+
+Future<Map<String, dynamic>> _searchMessages(
+  Database database,
+  Map<String, dynamic> arguments,
+  String query,
+) async {
+  final kind = _messageKind(arguments);
+  if (kind != _messageKindAll && kind != _messageKindAttachments) {
+    throw ArgumentError(
+      'kind is only supported as all or attachments when query is set',
+    );
+  }
+  final conversationId = _optionalString(arguments, 'conversation_id');
+  final circleId = _optionalString(arguments, 'circle_id');
+  final conversationIds = conversationId == null
+      ? circleId == null
+            ? const <String>[]
+            : await database.conversationDao.conversationIdsByCircleId(circleId)
+      : [conversationId];
+  if (circleId != null && conversationIds.isEmpty) {
+    return {
+      'messages': const <Map<String, dynamic>>[],
+      'pagination': {
+        'limit': _searchMessageLimit(arguments),
+        'has_more': false,
+      },
+    };
+  }
+  final limit = _searchMessageLimit(arguments);
+  final messages = await database.fuzzySearchMessage(
+    query: query,
+    limit: limit + 1,
+    conversationIds: conversationIds,
+    userId: _optionalString(arguments, 'sender_id'),
+    categories: _searchMessageCategories(arguments, kind),
+    anchorMessageId: _optionalString(arguments, 'cursor_message_id'),
+  );
+  final hasMore = messages.length > limit;
+  final selected = messages.take(limit).toList(growable: false);
+  return {
+    'messages': _searchMessagesToJson(selected),
+    'pagination': {
+      'limit': limit,
+      'cursor_message_id': _optionalString(arguments, 'cursor_message_id'),
+      'next_cursor_message_id': hasMore ? selected.lastOrNull?.messageId : null,
+      'has_more': hasMore,
+    }..removeWhere((_, value) => value == null),
+  };
+}
+
+Future<List<Map<String, dynamic>>> _pinnedMessagesToJson(
+  Database database,
+  List<PinMessage> pins,
+) async {
+  final messageIds = pins.map((pin) => pin.messageId).toList();
+  final messages = await database.messageDao
+      .messageItemByMessageIds(messageIds)
+      .get();
+  final messagesById = {
+    for (final message in messages) message.messageId: message,
+  };
+  return pins
+      .map((pin) {
+        final message = messagesById[pin.messageId];
+        if (message == null) return null;
+        return {
+          ..._messageToJson(message, includePinState: true),
+          'pinned_at': _dateTime(pin.createdAt),
+        };
+      })
+      .nonNulls
+      .toList(growable: false);
+}
+
+int _searchMessageLimit(Map<String, dynamic> arguments) =>
+    _int(arguments, 'limit', defaultValue: 100, min: 1, max: 200);
+
+List<String> _searchMessageCategories(
+  Map<String, dynamic> arguments,
+  String kind,
+) {
+  final explicit = _optionalStringList(arguments, 'message_types');
+  if (explicit.isNotEmpty) return explicit;
+  return kind == _messageKindAttachments
+      ? _attachmentMessageCategories
+      : const [];
+}
+
+String _messageKind(Map<String, dynamic> arguments) {
+  final kind = _optionalString(arguments, 'kind') ?? _messageKindAll;
+  return switch (kind) {
+    _messageKindAll ||
+    _messageKindAttachments ||
+    _messageKindPinned ||
+    _messageKindMentions ||
+    _messageKindLinks => kind,
+    _ => throw ArgumentError(
+      'kind must be one of all, attachments, pinned, mentions, or links',
+    ),
+  };
+}
+
+Future<_MessagePage> _readMessagePage(
+  Database database,
+  Map<String, dynamic> arguments, {
+  bool attachmentMessagesOnly = false,
+}) async {
+  final conversationId = _requiredString(arguments, 'conversation_id');
+  final limit = _int(arguments, 'limit', defaultValue: 100, min: 1, max: 200);
+  final page = _messagePage(arguments);
+  final cursorMessageId = _cursorMessageId(arguments, page);
+  final before = page == _messagePageBefore
+      ? await _messageOrderInfoForCursor(
+          database,
+          conversationId,
+          cursorMessageId,
+        )
+      : null;
+  final after = page == _messagePageAfter
+      ? await _messageOrderInfoForCursor(
+          database,
+          conversationId,
+          cursorMessageId,
+        )
+      : null;
+  final ascending = page == _messagePageAfter;
+  final rows = attachmentMessagesOnly
+      ? await database.messageDao
+            .attachmentMessagesByConversationId(
+              conversationId,
+              limit: limit + 1,
+              startInclusive: _date(arguments, 'start'),
+              endExclusive: _date(arguments, 'end'),
+              before: before,
+              after: after,
+              senderId: _optionalString(arguments, 'sender_id'),
+              senderIdentityNumber: _optionalString(
+                arguments,
+                'sender_identity_number',
+              ),
+              categories: _optionalStringList(arguments, 'message_types'),
+              ascending: ascending,
+            )
+            .get()
+      : await database.messageDao
+            .messagesByConversationIdAndCreatedAtRange(
+              conversationId,
+              limit: limit + 1,
+              startInclusive: _date(arguments, 'start'),
+              endExclusive: _date(arguments, 'end'),
+              before: before,
+              after: after,
+              senderId: _optionalString(arguments, 'sender_id'),
+              senderIdentityNumber: _optionalString(
+                arguments,
+                'sender_identity_number',
+              ),
+              categories: _optionalStringList(arguments, 'message_types'),
+              ascending: ascending,
+            )
+            .get();
+  return _messagePageFromRows(
+    rows,
+    page: page,
+    limit: limit,
+    cursorMessageId: cursorMessageId,
+    ascending: ascending,
+  );
+}
+
+Future<_MessagePage> _readMentionMessagePage(
+  Database database,
+  Map<String, dynamic> arguments,
+) async {
+  final conversationId = _requiredString(arguments, 'conversation_id');
+  final limit = _int(arguments, 'limit', defaultValue: 100, min: 1, max: 200);
+  final page = _messagePage(arguments);
+  final cursorMessageId = _cursorMessageId(arguments, page);
+  final before = page == _messagePageBefore
+      ? await _messageOrderInfoForCursor(
+          database,
+          conversationId,
+          cursorMessageId,
+        )
+      : null;
+  final after = page == _messagePageAfter
+      ? await _messageOrderInfoForCursor(
+          database,
+          conversationId,
+          cursorMessageId,
+        )
+      : null;
+  final ascending = page == _messagePageAfter;
+  final rows = await database.messageDao
+      .mentionMessagesByConversationId(
+        conversationId,
+        limit: limit + 1,
+        unreadOnly: _bool(arguments, 'unread_only'),
+        before: before,
+        after: after,
+        ascending: ascending,
+      )
+      .get();
+  return _messagePageFromRows(
+    rows,
+    page: page,
+    limit: limit,
+    cursorMessageId: cursorMessageId,
+    ascending: ascending,
+  );
+}
+
+Future<_MessagePage> _readLinkMessagePage(
+  Database database,
+  Map<String, dynamic> arguments,
+) async {
+  final conversationId = _requiredString(arguments, 'conversation_id');
+  final limit = _int(arguments, 'limit', defaultValue: 100, min: 1, max: 200);
+  final page = _messagePage(arguments);
+  final cursorMessageId = _cursorMessageId(arguments, page);
+  final before = page == _messagePageBefore
+      ? await _messageOrderInfoForCursor(
+          database,
+          conversationId,
+          cursorMessageId,
+        )
+      : null;
+  final after = page == _messagePageAfter
+      ? await _messageOrderInfoForCursor(
+          database,
+          conversationId,
+          cursorMessageId,
+        )
+      : null;
+  final ascending = page == _messagePageAfter;
+  final rows = await database.messageDao
+      .linkMessagesByConversationId(
+        conversationId,
+        limit: limit + 1,
+        before: before,
+        after: after,
+        ascending: ascending,
+      )
+      .get();
+  return _messagePageFromRows(
+    rows,
+    page: page,
+    limit: limit,
+    cursorMessageId: cursorMessageId,
+    ascending: ascending,
+  );
+}
+
+Future<_PinnedMessagePage> _readPinnedMessagePage(
+  Database database, {
+  required String conversationId,
+  required Map<String, dynamic> arguments,
+}) async {
+  final limit = _int(arguments, 'limit', defaultValue: 100, min: 1, max: 200);
+  final page = _messagePage(arguments);
+  final cursorMessageId = _cursorMessageId(arguments, page);
+  final pins = await database.pinMessageDao.pinMessagesByConversationId(
+    conversationId: conversationId,
+    limit: limit + 1,
+    beforeMessageId: page == _messagePageBefore ? cursorMessageId : null,
+    afterMessageId: page == _messagePageAfter ? cursorMessageId : null,
+    ascending: page == _messagePageAfter,
+  );
+  final hasMore = pins.length > limit;
+  final selected = pins.take(limit).toList(growable: false);
+  return _PinnedMessagePage(
+    pins: page == _messagePageAfter
+        ? selected
+        : selected.reversed.toList(growable: false),
+    page: page,
+    limit: limit,
+    hasMore: hasMore,
+    cursorMessageId: cursorMessageId,
+  );
+}
+
+_MessagePage _messagePageFromRows(
+  List<MessageItem> rows, {
+  required String page,
+  required int limit,
+  required String? cursorMessageId,
+  required bool ascending,
+}) {
+  final hasMore = rows.length > limit;
+  final selected = rows.take(limit).toList(growable: false);
+  return _MessagePage(
+    messages: ascending ? selected : selected.reversed.toList(growable: false),
+    page: page,
+    limit: limit,
+    hasMore: hasMore,
+    cursorMessageId: cursorMessageId,
+  );
+}
+
+Map<String, dynamic> _cursorPaginationToJson({
+  required String page,
+  required int limit,
+  required bool hasMore,
+  required String? cursorMessageId,
+  required String? oldestMessageId,
+  required String? newestMessageId,
+}) => {
+  'order': 'oldest_to_newest',
+  'page': page,
+  'limit': limit,
+  'cursor_message_id': cursorMessageId,
+  'has_more': hasMore,
+  'has_more_direction': page == _messagePageAfter ? 'newer' : 'older',
+  'oldest_message_id': oldestMessageId,
+  'newest_message_id': newestMessageId,
+  'older_page': oldestMessageId == null
+      ? null
+      : {
+          'page': _messagePageBefore,
+          'cursor_message_id': oldestMessageId,
+        },
+  'newer_page': newestMessageId == null
+      ? null
+      : {
+          'page': _messagePageAfter,
+          'cursor_message_id': newestMessageId,
+        },
+}..removeWhere((_, value) => value == null);
+
+String _messagePage(Map<String, dynamic> arguments) {
+  final page = _optionalString(arguments, 'page') ?? _messagePageLatest;
+  return switch (page) {
+    _messagePageLatest || _messagePageBefore || _messagePageAfter => page,
+    _ => throw ArgumentError(
+      'page must be one of latest, before, or after',
+    ),
+  };
+}
+
+String? _cursorMessageId(Map<String, dynamic> arguments, String page) {
+  final cursorMessageId = _optionalString(arguments, 'cursor_message_id');
+  if (page == _messagePageLatest) {
+    if (cursorMessageId != null) {
+      throw ArgumentError(
+        'cursor_message_id is only valid when page is before or after',
+      );
+    }
+    return null;
+  }
+  if (cursorMessageId == null) {
+    throw ArgumentError('cursor_message_id is required when page is $page');
+  }
+  return cursorMessageId;
+}
+
+Future<_ConversationPage> _readConversationPage(
+  Database database,
+  Map<String, dynamic> arguments,
+) async {
+  final limit = _int(arguments, 'limit', defaultValue: 30, min: 1, max: 100);
+  final query = _optionalString(arguments, 'query');
+  final circleId = _optionalString(arguments, 'circle_id');
+  final rows = query == null
+      ? circleId == null
+            ? await database.conversationDao.conversationItems().get()
+            : await database.conversationDao
+                  .conversationsByCircleId(circleId, _conversationScanLimit, 0)
+                  .get()
+      : await _searchConversations(database, query, _conversationScanLimit);
+  final scopedRows = query == null || circleId == null
+      ? rows
+      : await _filterConversationsByCircle(database, rows, circleId);
+  return _conversationPageFromRows(
+    scopedRows,
+    limit: limit,
+    cursorConversationId: _optionalString(
+      arguments,
+      'cursor_conversation_id',
+    ),
+    order: query == null ? 'app_chat_list' : 'search_relevance',
+  );
+}
+
+_ConversationPage _conversationPageFromRows(
+  List<ConversationItem> rows, {
+  required int limit,
+  required String? cursorConversationId,
+  required String order,
+}) {
+  final start = _cursorStartIndex(
+    rows,
+    cursorConversationId,
+    (conversation) => conversation.conversationId,
+    'cursor_conversation_id',
+  );
+  final selected = rows.skip(start).take(limit + 1).toList(growable: false);
+  final hasMore = selected.length > limit;
+  return _ConversationPage(
+    conversations: selected.take(limit).toList(growable: false),
+    limit: limit,
+    hasMore: hasMore,
+    order: order,
+    cursorConversationId: cursorConversationId,
+  );
+}
+
+Future<List<ConversationItem>> _filterConversationsByCircle(
+  Database database,
+  List<ConversationItem> rows,
+  String circleId,
+) async {
+  final conversationIds = await database.conversationDao
+      .conversationIdsByCircleId(circleId, limit: _conversationScanLimit);
+  final conversationIdSet = conversationIds.toSet();
+  return rows
+      .where(
+        (conversation) =>
+            conversationIdSet.contains(conversation.conversationId),
+      )
+      .toList(growable: false);
+}
+
+_ParticipantPage _participantPageFromRows(
+  List<ParticipantUser> rows, {
+  required int limit,
+  required String? cursorUserId,
+}) {
+  final sorted = [...rows]
+    ..sort((a, b) {
+      final name = _compareNullableText(a.fullName, b.fullName);
+      if (name != 0) return name;
+      final identityNumber = a.identityNumber.compareTo(b.identityNumber);
+      if (identityNumber != 0) return identityNumber;
+      return a.userId.compareTo(b.userId);
+    });
+  final start = _cursorStartIndex(
+    sorted,
+    cursorUserId,
+    (participant) => participant.userId,
+    'cursor_user_id',
+  );
+  final selected = sorted.skip(start).take(limit + 1).toList(growable: false);
+  final hasMore = selected.length > limit;
+  return _ParticipantPage(
+    participants: selected.take(limit).toList(growable: false),
+    limit: limit,
+    hasMore: hasMore,
+    cursorUserId: cursorUserId,
+  );
+}
+
+int _cursorStartIndex<T>(
+  List<T> rows,
+  String? cursor,
+  String Function(T row) idOf,
+  String cursorName,
+) {
+  if (cursor == null) return 0;
+  final index = rows.indexWhere((row) => idOf(row) == cursor);
+  if (index < 0) throw ArgumentError('$cursorName not found');
+  return index + 1;
+}
+
+int _compareNullableText(String? a, String? b) {
+  final left = a?.trim().toLowerCase();
+  final right = b?.trim().toLowerCase();
+  if (left == null || left.isEmpty) {
+    return right == null || right.isEmpty ? 0 : 1;
+  }
+  if (right == null || right.isEmpty) return -1;
+  return left.compareTo(right);
+}
+
+Future<MessageOrderInfo> _messageOrderInfoForCursor(
+  Database database,
+  String conversationId,
+  String? cursorMessageId,
+) async {
+  if (cursorMessageId == null) {
+    throw ArgumentError('cursor_message_id is required');
+  }
+  final message = await _messageById(database, cursorMessageId);
+  if (message.conversationId != conversationId) {
+    throw ArgumentError('cursor_message_id is not in conversation_id');
+  }
+  final info = await database.messageDao.messageOrderInfo(cursorMessageId);
+  if (info == null) throw StateError('Message order info not found');
+  return info;
 }
 
 Future<ConversationItem> _conversationById(
@@ -991,11 +1507,6 @@ Map<String, dynamic>? _linkPreviewToJson(MessageItem message) {
   return link.isEmpty ? null : link;
 }
 
-Map<String, dynamic> _linkToJson(MessageItem message) => {
-  ..._messageToJson(message, includePinState: true),
-  'link': _linkPreviewToJson(message),
-}..removeWhere((_, value) => value == null);
-
 Map<String, dynamic> _participantToJson(ParticipantUser participant) => {
   'conversation_id': participant.conversationId,
   'user_id': participant.userId,
@@ -1145,19 +1656,104 @@ const _stringArraySchema = {
   'items': {'type': 'string'},
 };
 
+const _conversationIdProperty = {
+  'type': 'string',
+  'description':
+      'Mixin conversation_id. Use mixin_resolve_conversation first when only a name or mixin:// URL is known.',
+};
+
+const _messageIdProperty = {
+  'type': 'string',
+  'description': 'Mixin message_id.',
+};
+
+const _limit100Property = {
+  'type': 'integer',
+  'description': 'Maximum number of items to return.',
+  'default': 100,
+  'minimum': 1,
+  'maximum': 200,
+};
+
+const _limit50Property = {
+  'type': 'integer',
+  'description': 'Maximum number of items to return.',
+  'default': 50,
+  'minimum': 1,
+  'maximum': 200,
+};
+
+const _limit30Property = {
+  'type': 'integer',
+  'description': 'Maximum number of items to return.',
+  'default': 30,
+  'minimum': 1,
+  'maximum': 100,
+};
+
+const _conversationCursorProperty = {
+  'type': 'string',
+  'description':
+      'Optional cursor for the next page. Use pagination.next_cursor_conversation_id from the previous result.',
+};
+
+const _participantCursorProperty = {
+  'type': 'string',
+  'description':
+      'Optional cursor for the next page. Use pagination.next_cursor_user_id from the previous result.',
+};
+
+const _messageCursorProperties = {
+  'page': {
+    'type': 'string',
+    'enum': [_messagePageLatest, _messagePageBefore, _messagePageAfter],
+    'default': _messagePageLatest,
+    'description':
+        'latest returns the latest matching messages. before returns messages older than cursor_message_id. after returns messages newer than cursor_message_id. Results are always oldest_to_newest.',
+  },
+  'cursor_message_id': {
+    'type': 'string',
+    'description':
+        'Required when page is before or after. Use pagination.older_page.cursor_message_id or pagination.newer_page.cursor_message_id from the previous result.',
+  },
+  'limit': _limit100Property,
+};
+
+const _conversationRangeProperties = {
+  'conversation_id': _conversationIdProperty,
+  'start': {
+    'type': 'string',
+    'format': 'date-time',
+    'description': 'Inclusive ISO-8601 lower bound for message created_at.',
+  },
+  'end': {
+    'type': 'string',
+    'format': 'date-time',
+    'description': 'Exclusive ISO-8601 upper bound for message created_at.',
+  },
+};
+
 const _toolSpecs = [
   _Tool(
     'mixin_get_app_status',
-    'Get login, active conversation, app version, and MCP capability status.',
+    'Get login state, app version, active conversation ids, permission scopes, and enabled MCP tools.',
   ),
   _Tool(
     'mixin_list_conversations',
-    'List recent conversations, search conversations, or list a circle.',
+    'List conversations. Without query, returns app chat-list order. With query, searches conversations. With circle_id, restricts results to that circle. Use cursor_conversation_id to continue.',
     properties: {
-      'query': {'type': 'string'},
-      'circle_id': {'type': 'string'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
+      'query': {
+        'type': 'string',
+        'description':
+            'Optional fuzzy conversation name search. Omit to list conversations.',
+      },
+      'circle_id': {
+        'type': 'string',
+        'description':
+            'Optional circle id from mixin_list_circles. When set, only conversations in that circle are returned.',
+      },
+      'limit': _limit30Property,
+      'cursor_conversation_id': _conversationCursorProperty,
     },
   ),
   _Tool(
@@ -1165,50 +1761,96 @@ const _toolSpecs = [
     'Get one conversation by conversation_id.',
     required: ['conversation_id'],
     properties: {
-      'conversation_id': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
     },
   ),
   _Tool(
     'mixin_resolve_conversation',
-    'Resolve a conversation from conversation_id, mixin URI, or query.',
+    'Resolve exactly one conversation from conversation_id, mixin://conversations/<id>, or a fuzzy query. Provide one of conversation_id, uri, or query.',
     properties: {
-      'conversation_id': {'type': 'string'},
-      'uri': {'type': 'string'},
-      'query': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
+      'uri': {
+        'type': 'string',
+        'description':
+            'Mixin URI such as mixin://conversations/<conversation_id>.',
+      },
+      'query': {
+        'type': 'string',
+        'description':
+            'Fuzzy conversation name search. Returns the best match.',
+      },
+    },
+    schema: {
+      'oneOf': [
+        {
+          'required': ['conversation_id'],
+        },
+        {
+          'required': ['uri'],
+        },
+        {
+          'required': ['query'],
+        },
+      ],
     },
   ),
   _Tool(
     'mixin_get_conversation_stats',
-    'Get message count and first/last timestamps for a conversation.',
+    'Get message_count, first_message_at, and last_message_at for a conversation and optional time range.',
     required: ['conversation_id'],
     properties: _conversationRangeProperties,
   ),
   _Tool(
-    'mixin_read_messages',
-    'Read conversation messages by range, sender, type, offset, and limit.',
-    required: ['conversation_id'],
+    'mixin_list_messages',
+    'List or search messages. With query, searches globally or inside conversation_id/circle_id. Without query, conversation_id is required and messages are listed by cursor. Use kind to list all messages, attachments, pinned messages, mentions, or links.',
     properties: {
       ..._conversationRangeProperties,
-      'sender_id': {'type': 'string'},
-      'sender_identity_number': {'type': 'string'},
-      'message_types': _stringArraySchema,
-      'include_pin_state': {'type': 'boolean'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
-    },
-  ),
-  _Tool(
-    'mixin_search_messages',
-    'Search messages globally, inside a conversation, or inside a circle.',
-    required: ['query'],
-    properties: {
-      'query': {'type': 'string'},
-      'conversation_id': {'type': 'string'},
-      'circle_id': {'type': 'string'},
-      'sender_id': {'type': 'string'},
-      'message_types': _stringArraySchema,
-      'limit': {'type': 'integer'},
-      'anchor_id': {'type': 'string'},
+      ..._messageCursorProperties,
+      'query': {
+        'type': 'string',
+        'description':
+            'Optional search text. When omitted, conversation_id is required and the tool lists messages from that conversation.',
+      },
+      'circle_id': {
+        'type': 'string',
+        'description': 'Optional search scope. Only applies when query is set.',
+      },
+      'kind': {
+        'type': 'string',
+        'enum': [
+          _messageKindAll,
+          _messageKindAttachments,
+          _messageKindPinned,
+          _messageKindMentions,
+          _messageKindLinks,
+        ],
+        'default': _messageKindAll,
+        'description':
+            'Message filter. For search, only all and attachments are supported. For conversation listing, all values are supported.',
+      },
+      'sender_id': {
+        'type': 'string',
+        'description': 'Optional sender user_id filter.',
+      },
+      'sender_identity_number': {
+        'type': 'string',
+        'description':
+            'Optional sender identity number filter. Only applies when query is omitted.',
+      },
+      'message_types': {
+        ..._stringArraySchema,
+        'description': 'Optional Mixin message category filters.',
+      },
+      'include_pin_state': {
+        'type': 'boolean',
+        'default': false,
+        'description': 'Whether every returned message includes is_pinned.',
+      },
+      'unread_only': {
+        'type': 'boolean',
+        'default': false,
+        'description': 'Only applies when kind is mentions.',
+      },
     },
   ),
   _Tool(
@@ -1216,69 +1858,65 @@ const _toolSpecs = [
     'Get a message by message_id.',
     required: ['message_id'],
     properties: {
-      'message_id': {'type': 'string'},
+      'message_id': _messageIdProperty,
     },
   ),
   _Tool(
     'mixin_get_message_context',
-    'Read messages around a message_id.',
+    'Read messages immediately before and after one message_id.',
     required: ['message_id'],
     properties: {
-      'message_id': {'type': 'string'},
-      'limit': {'type': 'integer'},
+      'message_id': _messageIdProperty,
+      'limit': {
+        'type': 'integer',
+        'description':
+            'Number of messages to read before and after the target.',
+        'default': 10,
+        'minimum': 1,
+        'maximum': 50,
+      },
     },
   ),
   _Tool(
-    'mixin_read_image_text',
-    'Run local OCR for an image message.',
+    'mixin_read_image_message_text',
+    'Run local OCR for one image message.',
     required: ['conversation_id', 'message_id'],
     properties: {
-      'conversation_id': {'type': 'string'},
-      'message_id': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
+      'message_id': _messageIdProperty,
     },
   ),
   _Tool(
-    'mixin_list_attachments',
-    'List attachment metadata for a conversation.',
+    'mixin_list_conversation_participants',
+    'List or search participants in a conversation. Results are ordered by full_name, identity_number, then user_id.',
     required: ['conversation_id'],
     properties: {
-      ..._conversationRangeProperties,
-      'sender_id': {'type': 'string'},
-      'sender_identity_number': {'type': 'string'},
-      'message_types': _stringArraySchema,
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
+      'conversation_id': _conversationIdProperty,
+      'query': {
+        'type': 'string',
+        'description': 'Optional user_id, identity number, or name search.',
+      },
+      'limit': _limit50Property,
+      'cursor_user_id': _participantCursorProperty,
     },
   ),
   _Tool(
-    'mixin_list_pinned_messages',
-    'List pinned messages for a conversation.',
-    required: ['conversation_id'],
-    properties: {
-      'conversation_id': {'type': 'string'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
-    },
-  ),
-  _Tool(
-    'mixin_list_participants',
-    'List or search participants in a conversation.',
-    required: ['conversation_id'],
-    properties: {
-      'conversation_id': {'type': 'string'},
-      'query': {'type': 'string'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
-    },
-  ),
-  _Tool(
-    'mixin_resolve_user_in_conversation',
-    'Resolve participants by user_id, identity number, or name.',
+    'mixin_resolve_conversation_participant',
+    'Resolve participants in one conversation by user_id, identity number, or name.',
     required: ['conversation_id', 'query'],
     properties: {
-      'conversation_id': {'type': 'string'},
-      'query': {'type': 'string'},
-      'limit': {'type': 'integer'},
+      'conversation_id': _conversationIdProperty,
+      'query': {
+        'type': 'string',
+        'description': 'User id, identity number, or name.',
+      },
+      'limit': {
+        'type': 'integer',
+        'description': 'Maximum number of matching participants to return.',
+        'default': 5,
+        'minimum': 1,
+        'maximum': 20,
+      },
     },
   ),
   _Tool(
@@ -1286,43 +1924,12 @@ const _toolSpecs = [
     'List local circles and their conversation counts.',
   ),
   _Tool(
-    'mixin_list_circle_conversations',
-    'List conversations in a circle.',
-    required: ['circle_id'],
-    properties: {
-      'circle_id': {'type': 'string'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
-    },
-  ),
-  _Tool(
-    'mixin_read_mentions',
-    'Read mention messages in a conversation without marking them read.',
-    required: ['conversation_id'],
-    properties: {
-      'conversation_id': {'type': 'string'},
-      'unread_only': {'type': 'boolean'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
-    },
-  ),
-  _Tool(
-    'mixin_list_links',
-    'List messages with link previews in a conversation.',
-    required: ['conversation_id'],
-    properties: {
-      'conversation_id': {'type': 'string'},
-      'offset': {'type': 'integer'},
-      'limit': {'type': 'integer'},
-    },
-  ),
-  _Tool(
     'mixin_open_conversation',
     'Open a conversation in the Mixin UI.',
     scope: _McpPermissionScope.appControl,
     required: ['conversation_id'],
     properties: {
-      'conversation_id': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
     },
   ),
   _Tool(
@@ -1331,45 +1938,51 @@ const _toolSpecs = [
     scope: _McpPermissionScope.appControl,
     required: ['message_id'],
     properties: {
-      'message_id': {'type': 'string'},
+      'message_id': _messageIdProperty,
     },
   ),
   _Tool(
-    'mixin_get_draft',
+    'mixin_get_conversation_draft',
     'Get the current draft text for a conversation.',
     scope: _McpPermissionScope.draftWrite,
     required: ['conversation_id'],
     properties: {
-      'conversation_id': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
     },
   ),
   _Tool(
-    'mixin_set_draft',
+    'mixin_set_conversation_draft',
     'Replace the draft text for a conversation. Does not send.',
     scope: _McpPermissionScope.draftWrite,
     required: ['conversation_id', 'text'],
     properties: {
-      'conversation_id': {'type': 'string'},
-      'text': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
+      'text': {
+        'type': 'string',
+        'description': 'Draft text. This never sends a message.',
+      },
     },
   ),
   _Tool(
-    'mixin_insert_text',
+    'mixin_insert_conversation_text',
     'Insert text into the active input, or append to stored draft.',
     scope: _McpPermissionScope.draftWrite,
     required: ['conversation_id', 'text'],
     properties: {
-      'conversation_id': {'type': 'string'},
-      'text': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
+      'text': {
+        'type': 'string',
+        'description': 'Text to insert. This never sends a message.',
+      },
     },
   ),
   _Tool(
-    'mixin_clear_draft',
+    'mixin_clear_conversation_draft',
     'Clear the draft text for a conversation. Does not send.',
     scope: _McpPermissionScope.draftWrite,
     required: ['conversation_id'],
     properties: {
-      'conversation_id': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
     },
   ),
   _Tool(
@@ -1378,8 +1991,14 @@ const _toolSpecs = [
     scope: _McpPermissionScope.circleManagement,
     required: ['name'],
     properties: {
-      'name': {'type': 'string'},
-      'conversation_ids': _stringArraySchema,
+      'name': {
+        'type': 'string',
+        'description': 'Circle name.',
+      },
+      'conversation_ids': {
+        ..._stringArraySchema,
+        'description': 'Optional initial conversation_ids.',
+      },
     },
   ),
   _Tool(
@@ -1408,7 +2027,10 @@ const _toolSpecs = [
     required: ['circle_id', 'conversation_ids'],
     properties: {
       'circle_id': {'type': 'string'},
-      'conversation_ids': _stringArraySchema,
+      'conversation_ids': {
+        ..._stringArraySchema,
+        'description': 'Conversation ids to add.',
+      },
     },
   ),
   _Tool(
@@ -1418,24 +2040,27 @@ const _toolSpecs = [
     required: ['circle_id', 'conversation_ids'],
     properties: {
       'circle_id': {'type': 'string'},
-      'conversation_ids': _stringArraySchema,
+      'conversation_ids': {
+        ..._stringArraySchema,
+        'description': 'Conversation ids to remove.',
+      },
     },
   ),
   _Tool(
-    'mixin_attach_message_to_ai',
+    'mixin_attach_message_to_ai_context',
     'Attach a message to the app AI context chip for its conversation.',
     scope: _McpPermissionScope.appControl,
     required: ['message_id'],
     properties: {
-      'message_id': {'type': 'string'},
+      'message_id': _messageIdProperty,
     },
   ),
   _Tool(
-    'mixin_list_ai_threads',
+    'mixin_list_conversation_ai_threads',
     'List AI threads for a conversation.',
     required: ['conversation_id'],
     properties: {
-      'conversation_id': {'type': 'string'},
+      'conversation_id': _conversationIdProperty,
     },
   ),
   _Tool(
@@ -1447,20 +2072,14 @@ const _toolSpecs = [
     },
   ),
   _Tool(
-    'mixin_get_ai_tool_events',
+    'mixin_get_ai_message_tool_events',
     'Read stored AI tool call/result events for an AI message.',
     required: ['message_id'],
     properties: {
-      'message_id': {'type': 'string'},
+      'message_id': _messageIdProperty,
     },
   ),
 ];
-
-const _conversationRangeProperties = {
-  'conversation_id': {'type': 'string'},
-  'start': {'type': 'string', 'description': 'Inclusive ISO-8601 timestamp.'},
-  'end': {'type': 'string', 'description': 'Exclusive ISO-8601 timestamp.'},
-};
 
 class _Tool {
   const _Tool(
@@ -1469,6 +2088,7 @@ class _Tool {
     this.scope = _McpPermissionScope.read,
     this.required = const [],
     this.properties = const <String, Object>{},
+    this.schema = const <String, Object>{},
   });
 
   final String name;
@@ -1476,10 +2096,12 @@ class _Tool {
   final _McpPermissionScope scope;
   final List<String> required;
   final Map<String, Object> properties;
+  final Map<String, Object> schema;
 
   Map<String, Object?> get inputSchema => {
     ..._emptyObjectSchema,
     'properties': properties,
     'required': required,
+    ...schema,
   };
 }
