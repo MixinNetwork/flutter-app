@@ -1335,10 +1335,11 @@ packages:
   mixin_markdown_widget:
     dependency: "direct main"
     description:
-      path: "../flutter-plugins/packages/mixin_markdown_widget"
-      relative: true
-    source: path
-    version: "0.2.1"
+      name: mixin_markdown_widget
+      sha256: "4b4f6430c3be9be5766ae06b0d6c78ab6bd3059c1f2df076ef325028b6f030d5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   msix:
     dependency: "direct dev"
     description:
@@ -1408,10 +1409,10 @@ packages:
     dependency: "direct main"
     description:
       name: ogg_opus_player
-      sha256: cc839bf53bae215e3b4f8a796040038042173337d13d11604eae720b54f41e9d
+      sha256: d9bba5c2e276ff13ceae1c216a2650560c805d6b06de4bf4eb608bc38f1b75f4
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.0"
+    version: "0.8.0"
   open_file:
     dependency: "direct main"
     description:
