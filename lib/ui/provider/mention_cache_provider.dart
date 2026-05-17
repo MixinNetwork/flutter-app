@@ -101,7 +101,7 @@ class MentionCache {
   }
 
   String? replaceMention(String? s, Map<String, MentionUser> _mentionMap) {
-    if (s == null || s.isEmpty) return null;
+    if (s == null || s.isEmpty) return s;
 
     final mentionMap = _mentionMap.map(
       (key, value) => MapEntry(key.toLowerCase(), value),
