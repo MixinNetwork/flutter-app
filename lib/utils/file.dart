@@ -116,8 +116,7 @@ enum TempFileType {
   voiceRecord('voice_record', '.ogg'),
   logZip('log', '.zip'),
   // video thumbnail
-  thumbnail('thumbnail', '.png')
-  ;
+  thumbnail('thumbnail', '.png');
 
   const TempFileType(this.prefix, this.suffix);
 

@@ -17,8 +17,7 @@ enum PlaybackState {
   idle,
   playing,
   paused,
-  completed
-  ;
+  completed;
 
   bool get isPlaying => this == PlaybackState.playing;
 

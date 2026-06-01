@@ -29,8 +29,7 @@ enum _DeviceTransferPageType {
   restore,
   backup,
   restoreWaitingConnect,
-  backupWaitingConnect
-  ;
+  backupWaitingConnect;
 
   Widget build() {
     switch (this) {
