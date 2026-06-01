@@ -20,7 +20,7 @@ class ClampingViewport extends Viewport {
     super.crossAxisDirection,
     double anchor = 0.0,
     super.center,
-    super.cacheExtent,
+    super.scrollCacheExtent,
     super.slivers,
   }) : _anchor = anchor;
 
@@ -40,7 +40,7 @@ class ClampingViewport extends Viewport {
             Viewport.getDefaultCrossAxisDirection(context, axisDirection),
         anchor: anchor,
         offset: offset,
-        cacheExtent: cacheExtent,
+        scrollCacheExtent: scrollCacheExtent,
       );
 }
 
@@ -61,7 +61,7 @@ class ClampingRenderViewport extends RenderViewport {
     double anchor = 0.0,
     super.children,
     super.center,
-    super.cacheExtent,
+    super.scrollCacheExtent,
   }) : _anchor = anchor;
 
   static const int _maxLayoutCycles = 10;
@@ -277,11 +277,11 @@ class ClampingRenderViewport extends RenderViewport {
     final forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset)
         .clamp(0.0, mainAxisExtent);
 
-    switch (cacheExtentStyle) {
+    switch (scrollCacheExtent.style) {
       case CacheExtentStyle.pixel:
-        _calculatedCacheExtent = cacheExtent;
+        _calculatedCacheExtent = scrollCacheExtent.value;
       case CacheExtentStyle.viewport:
-        _calculatedCacheExtent = mainAxisExtent * cacheExtent!;
+        _calculatedCacheExtent = mainAxisExtent * scrollCacheExtent.value;
     }
 
     final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
