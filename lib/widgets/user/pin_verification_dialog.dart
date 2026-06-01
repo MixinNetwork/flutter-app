@@ -306,4 +306,7 @@ class _PinInputLayoutState extends State<PinInputLayout>
   void insertContent(KeyboardInsertedContent content) {
     // TODO: implement insertContent
   }
+
+  @override
+  bool onFocusReceived() => false;
 }
