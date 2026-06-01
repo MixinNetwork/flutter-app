@@ -442,10 +442,10 @@ packages:
     dependency: transitive
     description:
       name: dlibphonenumber
-      sha256: "95d8e08c6f750e81c5303efd16085db4e7c696b4c306c99617548f81b1854f0c"
+      sha256: "009f91d3409445e09e5b1ff32247ede6dc5f3a3d2ee703e82fd5ab12d8c8064e"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.47"
+    version: "1.1.64"
   drift:
     dependency: "direct main"
     description:
@@ -1143,10 +1143,10 @@ packages:
     dependency: "direct main"
     description:
       name: libsignal_protocol_dart
-      sha256: "2b18de43016474ab85d21553a88f59d6f4fea8c2eddf35be7e24ab5f8969a81d"
+      sha256: "7c974718418a6f164b8e7e7fc5043e6c3b642a38a4dd597458f4c8309c585afa"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.4"
+    version: "0.8.0"
   lints:
     dependency: transitive
     description:
@@ -1608,10 +1608,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: "579fe5557eae58e3adca2e999e38f02441d8aa908703854a9e0a0f47fa857731"
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "6.0.0"
   protocol_handler:
     dependency: "direct main"
     description:
@@ -2358,4 +2358,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.11.0 <4.0.0"
-  flutter: ">=3.38.1 <4.0.0"
+  flutter: ">=3.38.1"
