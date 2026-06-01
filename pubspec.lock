@@ -815,10 +815,10 @@ packages:
     dependency: "direct main"
     description:
       name: github
-      sha256: c88cd9f11e131a05b1910e1c742c80e6dc7708701884d1fcf28147fc95933aa8
+      sha256: "44c30b8c4041c2b67b4a49490eb19f967c9449b49c40543370a2ccac99264731"
       url: "https://pub.dev"
     source: hosted
-    version: "9.25.0"
+    version: "9.25.1"
   glob:
     dependency: transitive
     description:
