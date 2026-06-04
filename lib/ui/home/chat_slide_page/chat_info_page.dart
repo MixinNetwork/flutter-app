@@ -106,9 +106,9 @@ class ChatInfoPage extends HookConsumerWidget {
           children: [
             const SizedBox(height: 8),
             GestureDetector(
-              onLongPress: () {
-                final copy = HardwareKeyboard.instance.logicalKeysPressed
-                    .contains(LogicalKeyboardKey.altLeft);
+              onTap: () {
+                final copy =
+                    HardwareKeyboard.instance.logicalKeysPressed.hasAltKey;
                 if (copy) {
                   Clipboard.setData(
                     ClipboardData(
