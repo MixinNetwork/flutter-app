@@ -298,7 +298,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
-          flutter-version: ${{ env.FLUTTER_VERSION || '3.41.9' }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - uses: actions-rs/toolchain@v1
         with:
