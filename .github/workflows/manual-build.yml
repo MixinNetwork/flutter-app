@@ -296,15 +296,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
-        if: env.FLUTTER_VERSION == ''
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
-
-      - uses: subosito/flutter-action@v2
-        if: env.FLUTTER_VERSION != ''
-        with:
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ env.FLUTTER_VERSION || '3.41.9' }}
 
       - uses: actions-rs/toolchain@v1
         with:
