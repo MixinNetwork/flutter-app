@@ -8,7 +8,7 @@ import '../logger.dart';
 // auto added by .github/workflows/manual-build.yml
 const _kAppVersion = String.fromEnvironment(
   'APP_VERSION',
-  defaultValue: '1.15.0',
+  defaultValue: '4.3.0',
 );
 const _kAppBuildNumber = String.fromEnvironment(
   'APP_BUILD_NUMBER',
