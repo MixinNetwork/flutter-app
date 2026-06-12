@@ -290,7 +290,7 @@ jobs:
           overwrite: true
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     if: contains(github.event.inputs.platforms, 'windows') || github.event.inputs.platforms == ''
     steps:
       - uses: actions/checkout@v4
