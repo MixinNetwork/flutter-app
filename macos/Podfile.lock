@@ -22,8 +22,6 @@ PODS:
     - FlutterMacOS
   - rhttp (0.0.1):
     - FlutterMacOS
-  - screen_retriever_macos (0.0.1):
-    - FlutterMacOS
   - super_native_extensions (0.0.1):
     - FlutterMacOS
   - video_compress (0.3.0):
@@ -44,7 +42,6 @@ DEPENDENCIES:
   - PLCrashReporter
   - protocol_handler_macos (from `Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos`)
   - rhttp (from `Flutter/ephemeral/.symlinks/plugins/rhttp/macos`)
-  - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
   - video_compress (from `Flutter/ephemeral/.symlinks/plugins/video_compress/macos`)
   - window_size (from `Flutter/ephemeral/.symlinks/plugins/window_size/macos`)
@@ -76,8 +73,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos
   rhttp:
     :path: Flutter/ephemeral/.symlinks/plugins/rhttp/macos
-  screen_retriever_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
   super_native_extensions:
     :path: Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos
   video_compress:
@@ -98,7 +93,6 @@ SPEC CHECKSUMS:
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
   protocol_handler_macos: f9cd7b13bcaf6b0425f7410cbe52376cb843a936
   rhttp: 08d791d6373089de796318f4cfb172cbcf34e78b
-  screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
   super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
   video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534
   window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9

@@ -19,7 +19,6 @@ import 'package:window_size/window_size.dart';
 
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
-import 'constants/env.dart';
 import 'ui/home/home.dart';
 import 'ui/setting/log_page.dart';
 import 'utils/app_lifecycle.dart';
@@ -86,12 +85,6 @@ Future<void> _runApp(List<String> args) async {
     e('unhandled error: $error $stack');
     return true;
   };
-
-  if (Env.sentryDsn.isNotEmpty) {
-    i('app running with sentry');
-  } else {
-    e('app running without sentry');
-  }
 
   Hive.init(mixinDocumentsDirectory.path);
 
