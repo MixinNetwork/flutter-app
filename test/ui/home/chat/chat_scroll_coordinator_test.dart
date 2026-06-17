@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -151,6 +152,36 @@ void main() {
       expect(loadAfterCount, 1);
     },
   );
+
+  testWidgets('viewport date only inspects rendered message keys', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(1000, testMessage);
+    final keysByMessageId = CountingKeyMap({
+      for (final message in messages)
+        message.messageId: MessageGlobalKey(message.messageId),
+    });
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+      cacheExtent: 0,
+    );
+
+    coordinator.scrollController.jumpTo(80.0 * 500);
+    await tester.pump();
+
+    keysByMessageId.lookupCount = 0;
+    coordinator.updateMessages(messages, keysByMessageId);
+    await tester.pump();
+
+    expect(coordinator.visibleDateTime.value, testMessage(500).createdAt);
+    expect(keysByMessageId.lookupCount, lessThan(50));
+  });
 
   testWidgets('scheduleRestore does not jump while user is scrolling', (
     tester,
@@ -809,6 +840,33 @@ class TrackingScrollController extends ScrollController {
   }
 }
 
+class CountingKeyMap extends MapBase<String, GlobalKey> {
+  CountingKeyMap(this._delegate);
+
+  final Map<String, GlobalKey> _delegate;
+  int lookupCount = 0;
+
+  @override
+  GlobalKey? operator [](Object? key) {
+    lookupCount++;
+    return _delegate[key];
+  }
+
+  @override
+  void operator []=(String key, GlobalKey value) {
+    _delegate[key] = value;
+  }
+
+  @override
+  void clear() => _delegate.clear();
+
+  @override
+  Iterable<String> get keys => _delegate.keys;
+
+  @override
+  GlobalKey? remove(Object? key) => _delegate.remove(key);
+}
+
 Future<void> pumpScrollableMessages(
   WidgetTester tester,
   ChatScrollCoordinator coordinator,
@@ -832,6 +890,7 @@ Future<void> pumpScrollableMessages(
               : ScrollCacheExtent.pixels(cacheExtent),
           slivers: [
             SliverList.builder(
+              key: coordinator.topSliverKey,
               itemCount: messages.length,
               itemBuilder: (context, index) => SizedBox(
                 key: keysByMessageId[messages[index].messageId],

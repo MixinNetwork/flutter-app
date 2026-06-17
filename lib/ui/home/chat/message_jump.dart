@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
@@ -64,6 +66,11 @@ extension ChatMessageJump on BuildContext {
       direction: ChatScrollRestoreDirection.towardNewer,
     );
     read<MessageBloc>().jumpToLatestWindow();
+  }
+
+  void popChatSideRouteIfNeeded() {
+    if (ModalRoute.of(this)?.canPop != true) return;
+    unawaited(Navigator.maybePop(this));
   }
 
   String? _currentWindowSourceMessageId(MessageState state) {

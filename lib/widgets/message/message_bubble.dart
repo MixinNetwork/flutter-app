@@ -140,10 +140,7 @@ class MessageBubble extends HookConsumerWidget {
         onTap: () {
           final message = context.message;
           unawaited(context.jumpToMessageInChat(message.messageId));
-          // pop to chat page if current pin page is modal.
-          if (ModalRoute.of(context)?.canPop == true) {
-            Navigator.maybePop(context);
-          }
+          context.popChatSideRouteIfNeeded();
         },
       );
 

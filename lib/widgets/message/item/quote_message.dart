@@ -501,6 +501,7 @@ class _QuoteMessageBase extends HookConsumerWidget {
                   sourceMessageId: messageId,
                 ),
               );
+              context.popChatSideRouteIfNeeded();
               return;
             }
           } catch (_) {}

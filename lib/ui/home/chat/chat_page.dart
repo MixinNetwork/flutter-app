@@ -539,7 +539,7 @@ void syncMessageGlobalKeys(
   for (final messageId in messageIds) {
     keysByMessageId.putIfAbsent(
       messageId,
-      () => GlobalKey(debugLabel: messageId),
+      () => MessageGlobalKey(messageId),
     );
   }
 }
@@ -650,6 +650,7 @@ class _List extends HookConsumerWidget {
               ),
               slivers: [
                 SliverList(
+                  key: scrollCoordinator.topSliverKey,
                   delegate: SliverChildBuilderDelegate((
                     context,
                     index,
@@ -684,6 +685,7 @@ class _List extends HookConsumerWidget {
                   ),
                 ),
                 SliverList(
+                  key: scrollCoordinator.bottomSliverKey,
                   delegate: SliverChildBuilderDelegate((
                     context,
                     index,

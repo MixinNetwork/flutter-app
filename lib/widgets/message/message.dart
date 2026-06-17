@@ -400,6 +400,7 @@ class MessageItemWidget extends HookConsumerWidget {
                             unawaited(
                               context.jumpToMessageInChat(message.messageId),
                             );
+                            context.popChatSideRouteIfNeeded();
                           },
                         ),
                       if (enableForward)
