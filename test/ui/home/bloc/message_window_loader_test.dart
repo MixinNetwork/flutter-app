@@ -8,27 +8,27 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 void main() {
   test(
-    'centered loads start before, after, and center queries together',
+    'centered load hydrates around id window in one item query',
     () async {
       final calls = <String>[];
-      final beforeCompleter = Completer<List<MessageItem>>();
-      final afterCompleter = Completer<List<MessageItem>>();
-      final centerCompleter = Completer<MessageItem?>();
+      final beforeIdsCompleter = Completer<List<String>>();
+      final afterIdsCompleter = Completer<List<String>>();
+      final hydrateCompleter = Completer<List<MessageItem>>();
 
       final loader = MessageWindowLoader(
         recentMessages: (_, _) => throw StateError('unexpected recent query'),
         messageOrderInfo: (_) async => MessageOrderInfo(rowId: 2, createdAt: 2),
-        beforeMessages: (_, _, _) {
-          calls.add('before');
-          return beforeCompleter.future;
+        beforeMessageIds: (_, _, _) {
+          calls.add('beforeIds');
+          return beforeIdsCompleter.future;
         },
-        afterMessages: (_, _, _) {
-          calls.add('after');
-          return afterCompleter.future;
+        afterMessageIds: (_, _, _) {
+          calls.add('afterIds');
+          return afterIdsCompleter.future;
         },
-        messageById: (_) {
-          calls.add('center');
-          return centerCompleter.future;
+        messagesByIds: (ids) {
+          calls.add('hydrate:${ids.join(',')}');
+          return hydrateCompleter.future;
         },
       );
 
@@ -39,23 +39,31 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
 
-      expect(calls, unorderedEquals(['before', 'after', 'center']));
+      expect(calls, unorderedEquals(['beforeIds', 'afterIds']));
 
-      centerCompleter.complete(testMessage(2));
-      beforeCompleter.complete([testMessage(1)]);
-      afterCompleter.complete([testMessage(3)]);
+      beforeIdsCompleter.complete(['1']);
+      afterIdsCompleter.complete(['3']);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls, contains('hydrate:1,center,3'));
+
+      hydrateCompleter.complete([
+        testMessage(3),
+        testMessage(1),
+        testMessage(2, messageId: 'center'),
+      ]);
 
       final state = await future;
 
       expect(state.top.map((e) => e.messageId), ['1']);
-      expect(state.center?.messageId, '2');
+      expect(state.center?.messageId, 'center');
       expect(state.bottom.map((e) => e.messageId), ['3']);
     },
   );
 }
 
-MessageItem testMessage(int index) => MessageItem(
-  messageId: '$index',
+MessageItem testMessage(int index, {String? messageId}) => MessageItem(
+  messageId: messageId ?? '$index',
   conversationId: 'conversation',
   type: 'PLAIN_TEXT',
   createdAt: DateTime(2026, 1, 1, 12, index),

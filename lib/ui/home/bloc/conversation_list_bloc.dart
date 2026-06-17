@@ -105,7 +105,6 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               dao.conversationItemsByCategory(state.type, limit, offset).get(),
           updateEvent,
           mentionCache,
-          () => dao.conversationHasDataByCategory(state.type),
         );
       case SlideCategoryType.circle:
         _map[state] ??= _ConversationListBloc(
@@ -118,8 +117,6 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .get(),
           circleUpdateEvent,
           mentionCache,
-          () =>
-              database.conversationDao.conversationHasDataByCircleId(state.id!),
         );
       case SlideCategoryType.setting:
         return;
@@ -178,10 +175,8 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
     Stream<void> updateEvent,
     this.mentionCache,
-    Future<bool> Function() queryHasData,
   ) : _queryCount = queryCount,
       _queryRange = queryRange,
-      _queryHasData = queryHasData,
       _updateEvent = updateEvent,
       super(
         initState: const PagingState<ConversationItem>(),
@@ -193,7 +188,6 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   final Future<int> Function() _queryCount;
   final Future<List<ConversationItem>> Function(int limit, int offset)
   _queryRange;
-  final Future<bool> Function() _queryHasData;
   final Stream<void> _updateEvent;
 
   StreamSubscription<void>? _updateSubscription;
@@ -230,9 +224,6 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
 
     return list;
   }
-
-  @override
-  Future<bool> queryHasData() => _queryHasData();
 
   Future<void> _warmMentionCache(List<ConversationItem> list) async {
     try {

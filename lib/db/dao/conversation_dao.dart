@@ -108,9 +108,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     return predicate;
   }
 
-  Future<bool> conversationHasDataByCategory(SlideCategoryType category) =>
-      _conversationHasData(_conversationPredicateByCategory(category));
-
   Future<int> conversationCountByCategory(SlideCategoryType category) =>
       _baseConversationItemCount(
         (conversation, owner, circle) =>
@@ -252,15 +249,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     ) => maxLimit,
   );
 
-  Future<bool> _conversationHasData(Expression<bool> predicate) =>
-      db.hasData(db.conversations, [
-        innerJoin(
-          db.users,
-          db.conversations.ownerId.equalsExp(db.users.userId),
-          useColumns: false,
-        ),
-      ], predicate);
-
   Selectable<BaseUnseenConversationCountResult>
   unseenConversationCountByCategory(SlideCategoryType category) =>
       _baseUnseenConversationCount(
@@ -348,17 +336,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         _baseConversationItemOrder(conversation),
     (_, _, _, _, _, _, _, em) => Limit(limit, offset),
   );
-
-  Future<bool> conversationHasDataByCircleId(String circleId) =>
-      db.hasData(db.circleConversations, [
-        innerJoin(
-          db.conversations,
-          db.circleConversations.conversationId.equalsExp(
-            db.conversations.conversationId,
-          ),
-          useColumns: false,
-        ),
-      ], db.circleConversations.circleId.equals(circleId));
 
   Selectable<ConversationItem> unseenConversationsByCircleId(String circleId) =>
       _baseConversationItemsByCircleId(

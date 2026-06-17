@@ -1127,6 +1127,26 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
   );
 
+  Selectable<String> beforeMessageIdsByConversationId(
+    MessageOrderInfo anchor,
+    String conversationId,
+    int limit,
+  ) =>
+      (selectOnly(db.messages)
+            ..addColumns([db.messages.messageId])
+            ..where(
+              db.messages.conversationId.equals(conversationId) &
+                  (db.messages.createdAt.isSmallerThanValue(anchor.createdAt) |
+                      (db.messages.createdAt.equals(anchor.createdAt) &
+                          db.messages.rowId.isSmallerThanValue(anchor.rowId))),
+            )
+            ..orderBy([
+              OrderingTerm.desc(db.messages.createdAt),
+              OrderingTerm.desc(db.messages.rowId),
+            ])
+            ..limit(limit))
+          .map((row) => row.read(db.messages.messageId)!);
+
   Selectable<MessageItem> afterMessagesByConversationId(
     MessageOrderInfo anchor,
     String conversationId,
@@ -1143,6 +1163,26 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       OrderingTerm.asc(message.rowId),
     ]),
   );
+
+  Selectable<String> afterMessageIdsByConversationId(
+    MessageOrderInfo anchor,
+    String conversationId,
+    int limit,
+  ) =>
+      (selectOnly(db.messages)
+            ..addColumns([db.messages.messageId])
+            ..where(
+              db.messages.conversationId.equals(conversationId) &
+                  (db.messages.createdAt.isBiggerThanValue(anchor.createdAt) |
+                      (db.messages.createdAt.equals(anchor.createdAt) &
+                          db.messages.rowId.isBiggerThanValue(anchor.rowId))),
+            )
+            ..orderBy([
+              OrderingTerm.asc(db.messages.createdAt),
+              OrderingTerm.asc(db.messages.rowId),
+            ])
+            ..limit(limit))
+          .map((row) => row.read(db.messages.messageId)!);
 
   Selectable<MessageItem> messageItemByMessageId(String messageId) =>
       _baseMessageItems(
