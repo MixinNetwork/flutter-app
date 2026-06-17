@@ -20,6 +20,8 @@ import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../chat/chat_jump_trace.dart';
 
+part 'message_window_loader.dart';
+
 abstract class _MessageEvent extends Equatable {
   @override
   List<Object?> get props => [];
@@ -280,6 +282,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final MentionCache mentionCache;
   final AccountServer accountServer;
   int limit;
+  late final MessageWindowLoader _messageWindowLoader =
+      MessageWindowLoader.fromDao(messageDao);
 
   MessageDao get messageDao => database.messageDao;
 
@@ -290,6 +294,14 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         ...set.map((e) => e?.content),
         ...set.map((e) => e?.quoteContent),
       }.nonNulls.toSet(),
+    );
+  }
+
+  void _warmMentionCache(MessageState state) {
+    unawaited(
+      _preCacheMention(state).catchError((Object error, StackTrace stackTrace) {
+        e('preCacheMention failed: $error');
+      }),
     );
   }
 
@@ -317,36 +329,40 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         centerMessageId: event.centerMessageId,
         forceLatest: event.forceLatest,
       );
-      await _preCacheMention(messageState);
-      emit(
-        _pretreatment(
-          messageState.copyWith(
-            refreshKey: Object(),
-            lastReadMessageId: event.lastReadMessageId,
-          ),
+      final nextState = _pretreatment(
+        messageState.copyWith(
+          refreshKey: Object(),
+          lastReadMessageId: event.lastReadMessageId,
         ),
       );
+      emit(nextState);
+      _warmMentionCache(nextState);
     } else if (event is _MessageDeleteEvent) {
       final messageState = state.removeMessage(event.messageId);
-      emit(_pretreatment(messageState));
+      final nextState = _pretreatment(messageState);
+      emit(nextState);
+      _warmMentionCache(nextState);
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
           if (state.isLatest) return;
           final messageState = await _after(conversationId);
-          await _preCacheMention(messageState);
-          emit(_pretreatment(messageState));
+          final nextState = _pretreatment(messageState);
+          emit(nextState);
+          _warmMentionCache(nextState);
         } else if (event is _MessageLoadBeforeEvent) {
           if (state.isOldest) return;
           final messageState = await _before(conversationId);
-          await _preCacheMention(messageState);
-          emit(_pretreatment(messageState));
+          final nextState = _pretreatment(messageState);
+          emit(nextState);
+          _warmMentionCache(nextState);
         }
       } else if (event is _MessageInsertOrReplaceEvent) {
         final result = _insertOrReplace(conversationId, event.data);
         if (result != null) {
-          await _preCacheMention(result);
-          emit(_pretreatment(result));
+          final nextState = _pretreatment(result);
+          emit(nextState);
+          _warmMentionCache(nextState);
         }
       } else if (event is _MessageScrollEvent) {
         traceChatJump(
@@ -436,66 +452,12 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     String conversationId,
     int limit, {
     String? centerMessageId,
-  }) async {
-    Future<MessageState> recentMessages() async {
-      final list = await messageDao
-          .messagesByConversationId(conversationId, limit)
-          .get();
-
-      traceChatJump('query recent count=${list.length} limit=$limit');
-      return MessageState(
-        top: list.reversed.toList(),
-        isLatest: true,
-        isOldest: list.length < limit,
-      );
-    }
-
-    if (centerMessageId == null) return recentMessages();
-
-    final info = await messageDao.messageOrderInfo(centerMessageId);
-    if (info == null) {
-      traceChatJump(
-        'query center missing-order target=${shortMessageId(centerMessageId)}',
-      );
-      return recentMessages();
-    }
-
-    final _limit = limit ~/ 2;
-    final bottomList = await messageDao
-        .afterMessagesByConversationId(info, conversationId, _limit)
-        .get();
-    var topList =
-        (await messageDao
-                .beforeMessagesByConversationId(info, conversationId, _limit)
-                .get())
-            .reversed
-            .toList();
-
-    final isLatest = bottomList.length < _limit;
-    final isOldest = topList.length < _limit;
-
-    var center = await messageDao
-        .messageItemByMessageId(centerMessageId)
-        .getSingleOrNull();
-
-    if (bottomList.isEmpty && center != null) {
-      topList = [...topList, center];
-      center = null;
-    }
-
-    traceChatJump(
-      'query centered target=${shortMessageId(centerMessageId)} '
-      'top=${topList.length} center=${center != null} '
-      'bottom=${bottomList.length} isLatest=$isLatest isOldest=$isOldest',
-    );
-    return MessageState(
-      top: topList,
-      center: center,
-      bottom: bottomList,
-      isLatest: isLatest,
-      isOldest: isOldest,
-    );
-  }
+  }) => _messageWindowLoader.load(
+    conversationId,
+    limit,
+    centerMessageId: centerMessageId,
+    trace: traceChatJump,
+  );
 
   MessageState? _insertOrReplace(
     String conversationId,

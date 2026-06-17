@@ -183,6 +183,51 @@ void main() {
     expect(keysByMessageId.lookupCount, lessThan(50));
   });
 
+  testWidgets('scroll updates do not resolve visible date geometry', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(1000, testMessage);
+    final keysByMessageId = CountingKeyMap({
+      for (final message in messages)
+        message.messageId: MessageGlobalKey(message.messageId),
+    });
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+      cacheExtent: 0,
+    );
+    coordinator.scrollController.jumpTo(80.0 * 500);
+    await tester.pump();
+
+    keysByMessageId.lookupCount = 0;
+    coordinator.handleScrollNotification(
+      ScrollUpdateNotification(
+        metrics: FixedScrollMetrics(
+          minScrollExtent: 0,
+          maxScrollExtent: 80000,
+          pixels: 80.0 * 500,
+          viewportDimension: 240,
+          axisDirection: AxisDirection.down,
+          devicePixelRatio: 1,
+        ),
+        context: tester.element(find.byType(CustomScrollView)),
+        scrollDelta: 10,
+      ),
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      loadBefore: () {},
+      loadAfter: () {},
+    );
+    await tester.pump();
+
+    expect(keysByMessageId.lookupCount, 0);
+  });
+
   testWidgets('scheduleRestore does not jump while user is scrolling', (
     tester,
   ) async {

@@ -187,8 +187,6 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
       emit(state.copyWith(map: map, initialized: true));
     } else if (event is PagingInitEvent) {
-      emit(state.copyWith(hasData: await queryHasData()));
-
       final offset = event.offset;
 
       final count = await queryCount();
@@ -197,6 +195,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
         state.copyWith(
           map: await queryMap(limit, offset),
           count: count,
+          hasData: count != 0,
           initialized: true,
           index: event.index,
           alignment: event.alignment,

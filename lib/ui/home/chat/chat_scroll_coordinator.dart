@@ -16,7 +16,7 @@ class MessageGlobalKey extends GlobalObjectKey<State<StatefulWidget>> {
 
 class ChatScrollCoordinator {
   ChatScrollCoordinator() {
-    scrollController.addListener(_scheduleViewportStateUpdate);
+    scrollController.addListener(_scheduleScrollPositionUpdate);
   }
 
   static const _jumpLatestThreshold = 40.0;
@@ -46,6 +46,7 @@ class ChatScrollCoordinator {
   ChatScrollRestoreDirection? _animatedRestoreDirection;
   bool _restoreScheduled = false;
   bool _viewportStateUpdateScheduled = false;
+  bool _viewportStateUpdateIncludesVisibleDate = false;
   bool _disposed = false;
   int _programmaticScrollDepth = 0;
 
@@ -135,7 +136,10 @@ class ChatScrollCoordinator {
     required VoidCallback loadBefore,
     required VoidCallback loadAfter,
   }) {
-    updateMessages(messages, keysByMessageId);
+    _setMessages(messages, keysByMessageId);
+    _scheduleViewportStateUpdate(
+      updateVisibleDate: notification is ScrollEndNotification,
+    );
     if (notification is! ScrollUpdateNotification) return false;
     if (_programmaticScrollDepth > 0) {
       traceChatJump(
@@ -212,7 +216,7 @@ class ChatScrollCoordinator {
   void dispose() {
     _disposed = true;
     scrollController
-      ..removeListener(_scheduleViewportStateUpdate)
+      ..removeListener(_scheduleScrollPositionUpdate)
       ..dispose();
     visibleDateTime.dispose();
     showJumpToLatest.dispose();
@@ -421,6 +425,7 @@ class ChatScrollCoordinator {
       );
     }
     scrollController.jumpTo(target);
+    _scheduleViewportStateUpdate();
     return Future<void>.value();
   }
 
@@ -435,6 +440,7 @@ class ChatScrollCoordinator {
           'jump done ${formatScrollMetrics(scrollController.position)}',
         );
       }
+      _scheduleViewportStateUpdate();
     }
   }
 
@@ -511,23 +517,33 @@ class ChatScrollCoordinator {
     return firstVisibleMessageId;
   }
 
-  void _scheduleViewportStateUpdate() {
-    if (_viewportStateUpdateScheduled || _disposed) return;
+  void _scheduleScrollPositionUpdate() {
+    _scheduleViewportStateUpdate(updateVisibleDate: false);
+  }
+
+  void _scheduleViewportStateUpdate({bool updateVisibleDate = true}) {
+    if (_disposed) return;
+    _viewportStateUpdateIncludesVisibleDate =
+        _viewportStateUpdateIncludesVisibleDate || updateVisibleDate;
+    if (_viewportStateUpdateScheduled) return;
     _viewportStateUpdateScheduled = true;
     scheduleMicrotask(() {
+      final updateVisibleDate = _viewportStateUpdateIncludesVisibleDate;
       _viewportStateUpdateScheduled = false;
+      _viewportStateUpdateIncludesVisibleDate = false;
       if (_disposed) return;
-      _updateViewportState();
+      _updateViewportState(updateVisibleDate: updateVisibleDate);
     });
   }
 
-  void _updateViewportState() {
+  void _updateViewportState({bool updateVisibleDate = true}) {
     if (!scrollController.hasClients) return;
     final nextShowJumpToLatest = !_isPinnedToBottom();
     if (showJumpToLatest.value != nextShowJumpToLatest) {
       showJumpToLatest.value = nextShowJumpToLatest;
     }
 
+    if (!updateVisibleDate) return;
     final firstVisibleMessageId = _firstVisibleMessageId();
     final nextDateTime = firstVisibleMessageId == null
         ? null

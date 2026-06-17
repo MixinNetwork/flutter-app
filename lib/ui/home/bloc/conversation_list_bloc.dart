@@ -204,7 +204,9 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     _updateSubscription ??= _updateEvent.listen(
       (_) => add(PagingUpdateEvent()),
     );
-    add(PagingUpdateEvent());
+    if (state.initialized) {
+      add(PagingUpdateEvent());
+    }
   }
 
   void deactivate() {
@@ -224,11 +226,19 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   @override
   Future<List<ConversationItem>> queryRange(int limit, int offset) async {
     final list = await _queryRange(limit, offset);
-    await mentionCache.checkMentionCache(list.map((e) => e.content).toSet());
+    unawaited(_warmMentionCache(list));
 
     return list;
   }
 
   @override
   Future<bool> queryHasData() => _queryHasData();
+
+  Future<void> _warmMentionCache(List<ConversationItem> list) async {
+    try {
+      await mentionCache.checkMentionCache(list.map((e) => e.content).toSet());
+    } catch (error) {
+      e('conversation mention cache failed: $error');
+    }
+  }
 }
