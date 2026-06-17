@@ -279,7 +279,7 @@ void main() {
     expect(coordinator.trackingScrollController.jumpCount, 0);
   });
 
-  testWidgets('scheduleRestore stages distant explicit message jumps', (
+  testWidgets('scheduleRestore does not stage explicit message jumps', (
     tester,
   ) async {
     final coordinator = TrackingChatScrollCoordinator();
@@ -312,8 +312,54 @@ void main() {
     await tester.pump();
 
     expect(coordinator.trackingScrollController.animateCount, 1);
-    expect(coordinator.trackingScrollController.jumpCount, 1);
+    expect(coordinator.trackingScrollController.jumpCount, 0);
   });
+
+  testWidgets(
+    'scheduleRestore starts older explicit jumps after the target',
+    (tester) async {
+      final coordinator = TrackingChatScrollCoordinator();
+      final messages = List.generate(30, testMessage);
+      final keysByMessageId = {
+        for (final message in messages) message.messageId: GlobalKey(),
+      };
+      final targetMessageId = messages[18].messageId;
+
+      addTearDown(coordinator.dispose);
+      await pumpFullyBuiltScrollableMessages(
+        tester,
+        coordinator,
+        messages,
+        keysByMessageId,
+      );
+      coordinator.trackingScrollController
+        ..animateCount = 0
+        ..jumpCount = 0
+        ..jumpOffsets.clear()
+        ..animateOffsets.clear();
+
+      coordinator
+        ..animateNextMessageRestore(
+          targetMessageId,
+          direction: ChatScrollRestoreDirection.towardOlder,
+        )
+        ..scheduleRestore(
+          messages: messages,
+          keysByMessageId: keysByMessageId,
+          reset: true,
+          isLatest: false,
+          centerMessageId: targetMessageId,
+        );
+      await tester.pump();
+
+      expect(coordinator.trackingScrollController.animateCount, 1);
+      expect(coordinator.trackingScrollController.jumpCount, 1);
+      expect(
+        coordinator.trackingScrollController.jumpOffsets.single,
+        greaterThan(coordinator.trackingScrollController.animateOffsets.single),
+      );
+    },
+  );
 
   testWidgets('scrollToBottom stages distant animated jumps', (
     tester,
@@ -691,6 +737,8 @@ class TrackingScrollController extends ScrollController {
   int animateCount = 0;
   double? lastOffset;
   Duration? lastDuration;
+  final jumpOffsets = <double>[];
+  final animateOffsets = <double>[];
   Completer<void>? animationCompleter;
 
   @override
@@ -702,6 +750,7 @@ class TrackingScrollController extends ScrollController {
     animateCount++;
     lastOffset = offset;
     lastDuration = duration;
+    animateOffsets.add(offset);
     return animationCompleter?.future ?? Future<void>.value();
   }
 
@@ -709,6 +758,7 @@ class TrackingScrollController extends ScrollController {
   void jumpTo(double value) {
     jumpCount++;
     lastOffset = value;
+    jumpOffsets.add(value);
     super.jumpTo(value);
   }
 }

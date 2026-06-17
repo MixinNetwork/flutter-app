@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import 'chat_jump_trace.dart';
 
+enum ChatScrollRestoreDirection { towardOlder, towardNewer }
+
 class ChatScrollCoordinator {
   ChatScrollCoordinator() {
     scrollController.addListener(_scheduleViewportStateUpdate);
@@ -31,6 +33,7 @@ class ChatScrollCoordinator {
   Map<String, GlobalKey> _keysByMessageId = const {};
   bool _pinnedToBottom = true;
   bool _animateNextRestore = false;
+  ChatScrollRestoreDirection? _animatedRestoreDirection;
   bool _restoreScheduled = false;
   bool _viewportStateUpdateScheduled = false;
   bool _disposed = false;
@@ -56,7 +59,15 @@ class ChatScrollCoordinator {
   }
 
   set nextAnimatedRestoreMessageId(String messageId) {
+    animateNextMessageRestore(messageId);
+  }
+
+  void animateNextMessageRestore(
+    String messageId, {
+    ChatScrollRestoreDirection? direction,
+  }) {
     _animatedRestoreMessageId = messageId;
+    _animatedRestoreDirection = direction;
   }
 
   void animateNextRestore() {
@@ -71,10 +82,12 @@ class ChatScrollCoordinator {
     String? centerMessageId,
   }) {
     final animatedMessageId = reset ? _animatedRestoreMessageId : null;
+    final animatedRestoreDirection = reset ? _animatedRestoreDirection : null;
     final animated =
         reset && (animatedMessageId != null || _animateNextRestore);
     if (reset) {
       _animatedRestoreMessageId = null;
+      _animatedRestoreDirection = null;
       _animateNextRestore = false;
     }
     _messages = messages;
@@ -86,6 +99,7 @@ class ChatScrollCoordinator {
       isLatest: isLatest,
       centerMessageId: centerMessageId,
       animatedMessageId: animatedMessageId,
+      animatedRestoreDirection: animatedRestoreDirection,
       animated: animated,
     );
     if (_restoreScheduled) return;
@@ -206,6 +220,7 @@ class ChatScrollCoordinator {
             request.centerMessageId!,
             request.keysByMessageId,
             animated: request.animatedMessageId == request.centerMessageId,
+            animatedDirection: request.animatedRestoreDirection,
           )) {
         return;
       }
@@ -226,6 +241,7 @@ class ChatScrollCoordinator {
     String messageId,
     Map<String, GlobalKey> keysByMessageId, {
     bool animated = false,
+    ChatScrollRestoreDirection? animatedDirection,
   }) {
     final geometry = _messageTargetGeometry(messageId, keysByMessageId);
     if (geometry == null) {
@@ -244,7 +260,12 @@ class ChatScrollCoordinator {
       '${formatScrollMetrics(scrollController.position)}',
     );
     unawaited(
-      _jumpToClamped(target, animated: animated).whenComplete(
+      _jumpToClamped(
+        target,
+        animated: animated,
+        stageDistant: false,
+        animationDirection: animated ? animatedDirection : null,
+      ).whenComplete(
         () => _traceTargetAfterLayout(
           'restore-after',
           messageId,
@@ -305,6 +326,7 @@ class ChatScrollCoordinator {
     double value, {
     bool animated = false,
     bool stageDistant = true,
+    ChatScrollRestoreDirection? animationDirection,
   }) {
     if (!scrollController.hasClients) return Future<void>.value();
     final position = scrollController.position;
@@ -315,6 +337,7 @@ class ChatScrollCoordinator {
     if (!target.isFinite) return Future<void>.value();
     traceChatJump(
       'jump start animated=$animated stage=$stageDistant '
+      'direction=$animationDirection '
       'target=${formatDouble(target)} '
       'distance=${formatDouble(target - position.pixels)} '
       '${formatScrollMetrics(position)}',
@@ -340,6 +363,18 @@ class ChatScrollCoordinator {
             return Future<void>.value();
           }
           final distance = target - position.pixels;
+          if (animationDirection != null) {
+            _jumpToDirectionalAnimationStart(
+              target,
+              animationDirection,
+              position,
+            );
+            return scrollController.animateTo(
+              target,
+              duration: _jumpAnimationDuration,
+              curve: _jumpAnimationCurve,
+            );
+          }
           if (stageDistant && distance.abs() > maxAnimatedDistance) {
             final stagedTarget = target - maxAnimatedDistance * distance.sign;
             traceChatJump(
@@ -387,6 +422,47 @@ class ChatScrollCoordinator {
       viewportDimension * _maxAnimatedJumpViewportCount,
       _maxAnimatedJumpDistance,
     );
+  }
+
+  void _jumpToDirectionalAnimationStart(
+    double target,
+    ChatScrollRestoreDirection direction,
+    ScrollPosition position,
+  ) {
+    final startDistance = _restoreAnimationStartDistance(position);
+    if (startDistance <= 0) return;
+
+    final currentDistance = position.pixels - target;
+    final hasCorrectSide = switch (direction) {
+      ChatScrollRestoreDirection.towardOlder =>
+        currentDistance > _jumpToTolerance,
+      ChatScrollRestoreDirection.towardNewer =>
+        currentDistance < -_jumpToTolerance,
+    };
+    final shouldReposition =
+        !hasCorrectSide || currentDistance.abs() > startDistance;
+    if (!shouldReposition) return;
+
+    final start = switch (direction) {
+      ChatScrollRestoreDirection.towardOlder => target + startDistance,
+      ChatScrollRestoreDirection.towardNewer => target - startDistance,
+    }.clamp(position.minScrollExtent, position.maxScrollExtent);
+    if ((start - target).abs() <= _jumpToTolerance) return;
+
+    traceChatJump(
+      'jump directional-start direction=$direction '
+      'start=${formatDouble(start)} final=${formatDouble(target)} '
+      'distance=${formatDouble(start - target)}',
+    );
+    scrollController.jumpTo(start);
+  }
+
+  double _restoreAnimationStartDistance(ScrollPosition position) {
+    final viewportDimension = position.viewportDimension;
+    if (!viewportDimension.isFinite || viewportDimension <= 0) return 0;
+    final maxAnimatedDistance = _maxAnimatedDistance(position);
+    if (maxAnimatedDistance <= 0) return 0;
+    return math.min(viewportDimension * 0.75, maxAnimatedDistance);
   }
 
   bool _isPinnedToBottom() {
@@ -527,6 +603,7 @@ class _ChatRestoreRequest {
     required this.animated,
     this.centerMessageId,
     this.animatedMessageId,
+    this.animatedRestoreDirection,
   });
 
   final List<MessageItem> messages;
@@ -536,4 +613,5 @@ class _ChatRestoreRequest {
   final bool animated;
   final String? centerMessageId;
   final String? animatedMessageId;
+  final ChatScrollRestoreDirection? animatedRestoreDirection;
 }

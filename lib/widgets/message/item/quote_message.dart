@@ -513,7 +513,12 @@ class _QuoteMessageBase extends HookConsumerWidget {
             'quote tap source=${shortMessageId(messageId)} '
             'target=${shortMessageId(quoteMessageId)}',
           );
-          unawaited(context.jumpToMessageInChat(quoteMessageId));
+          unawaited(
+            context.jumpToMessageInChat(
+              quoteMessageId,
+              sourceMessageId: messageId,
+            ),
+          );
         },
         behavior: HitTestBehavior.opaque,
         child: Container(
