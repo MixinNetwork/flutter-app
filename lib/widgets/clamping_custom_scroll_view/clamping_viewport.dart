@@ -132,6 +132,8 @@ class ClampingRenderViewport extends RenderViewport {
   double _correctedOffset = 0;
   bool _lastPositionIsBottom = false;
   num? _lastMaxScrollOffset;
+  RenderSliver? _lastCenter;
+  bool _suppressBottomTracking = false;
 
   @override
   void performLayout() {
@@ -144,6 +146,13 @@ class ClampingRenderViewport extends RenderViewport {
       return;
     }
     assert(center!.parent == this);
+    if (!identical(_lastCenter, center)) {
+      _lastCenter = center;
+      _correctedOffset = 0;
+      _lastPositionIsBottom = false;
+      _lastMaxScrollOffset = null;
+      _suppressBottomTracking = true;
+    }
 
     late double mainAxisExtent;
     late double crossAxisExtent;
@@ -204,15 +213,17 @@ class ClampingRenderViewport extends RenderViewport {
             _lastMaxScrollOffset != maxScrollOffset;
         final positionIsBottom = offset.pixels == maxScrollOffset;
         final correction = maxScrollOffset - offset.pixels;
+        final suppressBottomTracking = _suppressBottomTracking;
         try {
-          if (maxScrollOffsetChanged &&
+          if (!suppressBottomTracking &&
+              maxScrollOffsetChanged &&
               _lastPositionIsBottom &&
               correction > 0) {
             offset.correctBy(correction);
             continue;
           }
         } finally {
-          _lastPositionIsBottom = positionIsBottom;
+          _lastPositionIsBottom = !suppressBottomTracking && positionIsBottom;
           _lastMaxScrollOffset = maxScrollOffset;
         }
 
@@ -220,6 +231,7 @@ class ClampingRenderViewport extends RenderViewport {
           minScrollOffset.toDouble(),
           maxScrollOffset.toDouble(),
         )) {
+          _suppressBottomTracking = false;
           break;
         }
         // *** End of difference from [RenderViewport].

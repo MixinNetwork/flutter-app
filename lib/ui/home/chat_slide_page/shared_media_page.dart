@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -7,9 +9,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/menu.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/blink_cubit.dart';
-
-import '../bloc/message_bloc.dart';
+import '../chat/message_jump.dart';
 import 'share_media/file_page.dart';
 import 'share_media/media_page.dart';
 import 'share_media/post_page.dart';
@@ -102,8 +102,7 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
           image: MenuImage.icon(IconFonts.positionToChat),
           title: context.l10n.locateToChat,
           callback: () {
-            context.read<BlinkCubit>().blinkByMessageId(messageId);
-            context.read<MessageBloc>().scrollTo(messageId);
+            unawaited(context.jumpToMessageInChat(messageId));
           },
         ),
       ],

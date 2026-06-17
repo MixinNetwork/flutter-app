@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -55,8 +57,10 @@ import '../home.dart';
 import '../hook/pin_message.dart';
 import '../route/responsive_navigator.dart';
 import 'chat_bar.dart';
+import 'chat_scroll_coordinator.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
+import 'message_jump.dart';
 import 'selection_bottom_bar.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
@@ -263,6 +267,10 @@ class ChatPage extends HookConsumerWidget {
             ),
             limit: windowHeight ~/ 20,
           ),
+        ),
+        Provider(
+          create: (_) => ChatScrollCoordinator(),
+          dispose: (_, coordinator) => coordinator.dispose(),
         ),
         Provider.value(value: pinMessageState),
       ],
@@ -474,11 +482,7 @@ class ChatContainer extends HookConsumerWidget {
                                 ),
                                 child: const Stack(
                                   children: [
-                                    RepaintBoundary(
-                                      child: _NotificationListener(
-                                        child: _List(),
-                                      ),
-                                    ),
+                                    RepaintBoundary(child: _List()),
                                     Positioned(
                                       left: 6,
                                       right: 6,
@@ -524,42 +528,20 @@ class ChatContainer extends HookConsumerWidget {
   }
 }
 
-class _NotificationListener extends StatelessWidget {
-  const _NotificationListener({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) =>
-      NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          final dimension = notification.metrics.viewportDimension / 2;
-
-          if (notification is ScrollUpdateNotification) {
-            if (notification.scrollDelta == null) return false;
-
-            if (notification.scrollDelta! > 0) {
-              // down
-              if (notification.metrics.maxScrollExtent -
-                      notification.metrics.pixels <
-                  dimension) {
-                BlocProvider.of<MessageBloc>(context).after();
-              }
-            } else if (notification.scrollDelta! < 0) {
-              // up
-              if ((notification.metrics.minScrollExtent -
-                          notification.metrics.pixels)
-                      .abs() <
-                  dimension) {
-                BlocProvider.of<MessageBloc>(context).before();
-              }
-            }
-          }
-
-          return false;
-        },
-        child: child,
-      );
+@visibleForTesting
+void syncMessageGlobalKeys(
+  Map<String, GlobalKey> keysByMessageId,
+  Set<String> messageIds,
+) {
+  keysByMessageId.removeWhere(
+    (messageId, _) => !messageIds.contains(messageId),
+  );
+  for (final messageId in messageIds) {
+    keysByMessageId.putIfAbsent(
+      messageId,
+      () => MessageGlobalKey(messageId),
+    );
+  }
 }
 
 class _List extends HookConsumerWidget {
@@ -567,6 +549,9 @@ class _List extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final messageBloc = context.read<MessageBloc>();
+    final scrollCoordinator = context.read<ChatScrollCoordinator>();
+    final hiddenMessageDayTimeBloc = useBloc(HiddenMessageDayTimeBloc.new);
     final state = useBlocState<MessageBloc, MessageState>(
       when: (state) => state.conversationId != null,
     );
@@ -575,99 +560,178 @@ class _List extends HookConsumerWidget {
     final top = state.top;
     final center = state.center;
     final bottom = state.bottom;
+    final messages = state.list;
 
-    final ref = useRef<Map<String, Key>>({});
+    final messageKeysRef = useRef<Map<String, GlobalKey>>({});
+    final previousConversationIdRef = useRef<String?>(null);
+    final previousRefreshKeyRef = useRef<Object?>(null);
 
-    final ids = state.list.map((e) => e.messageId);
+    final messageIds = messages.map((e) => e.messageId).toSet();
+    final messageIdsKey = messages.map((e) => e.messageId).join('|');
+    final resetScrollWindow =
+        previousConversationIdRef.value != state.conversationId ||
+        previousRefreshKeyRef.value != state.refreshKey;
+
+    if (!resetScrollWindow) {
+      scrollCoordinator.captureViewportState(messages, messageKeysRef.value);
+    }
+
+    ref.listen(pendingJumpLatestProvider, (previous, next) {
+      if (next == null) return;
+      scheduleMicrotask(() async {
+        if (!context.mounted) return;
+        await context.jumpToLatestInChat();
+        if (!context.mounted) return;
+        ref.read(pendingJumpLatestProvider.notifier).state = null;
+      });
+    });
 
     useMemoized(() {
-      ref.value.removeWhere((key, value) => !ids.contains(key));
-      ids.forEach((id) {
-        ref.value[id] = ref.value[id] ?? GlobalKey(debugLabel: id);
-      });
-    }, [ids]);
+      syncMessageGlobalKeys(messageKeysRef.value, messageIds);
+    }, [messageIdsKey]);
 
-    final topKey = useMemoized(() => GlobalKey(debugLabel: 'chat list top'));
-    final bottomKey = useMemoized(
-      () => GlobalKey(debugLabel: 'chat list bottom'),
+    useEffect(() {
+      void syncHiddenDateTime() {
+        hiddenMessageDayTimeBloc.update(
+          scrollCoordinator.visibleDateTime.value,
+        );
+      }
+
+      scrollCoordinator.visibleDateTime.addListener(syncHiddenDateTime);
+      syncHiddenDateTime();
+      return () {
+        scrollCoordinator.visibleDateTime.removeListener(syncHiddenDateTime);
+      };
+    }, [hiddenMessageDayTimeBloc, scrollCoordinator]);
+
+    useEffect(
+      () {
+        scrollCoordinator.scheduleRestore(
+          messages: messages,
+          keysByMessageId: messageKeysRef.value,
+          reset: resetScrollWindow,
+          isLatest: state.isLatest,
+          centerMessageId: center?.messageId,
+        );
+        previousConversationIdRef.value = state.conversationId;
+        previousRefreshKeyRef.value = state.refreshKey;
+        return null;
+      },
+      [
+        state.conversationId,
+        state.refreshKey,
+        messageIdsKey,
+        state.isLatest,
+      ],
     );
 
-    final scrollController = BlocProvider.of<MessageBloc>(
-      context,
-    ).scrollController;
-
-    return MessageDayTimeViewportWidget.chatPage(
-      key: key,
-      bottomKey: bottomKey,
-      center: center,
-      topKey: topKey,
-      scrollController: scrollController,
-      centerKey: center == null
-          ? null
-          : ref.value[center.messageId] as GlobalKey?,
-      child: ClampingCustomScrollView(
-        key: key,
-        center: key,
-        controller: scrollController,
-        anchor: 0.3,
-        physics: const ClampingScrollPhysics(),
-        slivers: [
-          SliverList(
-            key: topKey,
-            delegate: SliverChildBuilderDelegate((
-              context,
-              index,
-            ) {
-              final actualIndex = top.length - index - 1;
-              final messageItem = top[actualIndex];
-              return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
-                prev: top.getOrNull(actualIndex - 1),
-                message: messageItem,
-                next:
-                    top.getOrNull(actualIndex + 1) ??
-                    center ??
-                    bottom.lastOrNull,
-                lastReadMessageId: state.lastReadMessageId,
-              );
-            }, childCount: top.length),
-          ),
-          SliverToBoxAdapter(
-            key: key,
-            child: Builder(
-              builder: (context) {
-                if (center == null) return const SizedBox();
-                return MessageItemWidget(
-                  key: ref.value[center.messageId],
-                  prev: top.lastOrNull,
-                  message: center,
-                  next: bottom.firstOrNull,
-                  lastReadMessageId: state.lastReadMessageId,
-                );
-              },
+    return BlocProvider.value(
+      value: hiddenMessageDayTimeBloc,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          NotificationListener<ScrollNotification>(
+            onNotification: (notification) =>
+                scrollCoordinator.handleScrollNotification(
+                  notification,
+                  messages: messages,
+                  keysByMessageId: messageKeysRef.value,
+                  loadBefore: messageBloc.before,
+                  loadAfter: messageBloc.after,
+                ),
+            child: ClampingCustomScrollView(
+              key: scrollCoordinator.viewportKey,
+              center: key,
+              controller: scrollCoordinator.scrollController,
+              anchor: 0.3,
+              physics: const ClampingScrollPhysics(),
+              scrollCacheExtent: const ScrollCacheExtent.viewport(
+                ChatScrollCoordinator.loadedJumpViewportCount,
+              ),
+              slivers: [
+                SliverList(
+                  key: scrollCoordinator.topSliverKey,
+                  delegate: SliverChildBuilderDelegate((
+                    context,
+                    index,
+                  ) {
+                    final actualIndex = top.length - index - 1;
+                    final messageItem = top[actualIndex];
+                    return MessageItemWidget(
+                      key: messageKeysRef.value[messageItem.messageId],
+                      prev: top.getOrNull(actualIndex - 1),
+                      message: messageItem,
+                      next:
+                          top.getOrNull(actualIndex + 1) ??
+                          center ??
+                          bottom.lastOrNull,
+                      lastReadMessageId: state.lastReadMessageId,
+                    );
+                  }, childCount: top.length),
+                ),
+                SliverToBoxAdapter(
+                  key: key,
+                  child: Builder(
+                    builder: (context) {
+                      if (center == null) return const SizedBox();
+                      return MessageItemWidget(
+                        key: messageKeysRef.value[center.messageId],
+                        prev: top.lastOrNull,
+                        message: center,
+                        next: bottom.firstOrNull,
+                        lastReadMessageId: state.lastReadMessageId,
+                      );
+                    },
+                  ),
+                ),
+                SliverList(
+                  key: scrollCoordinator.bottomSliverKey,
+                  delegate: SliverChildBuilderDelegate((
+                    context,
+                    index,
+                  ) {
+                    final messageItem = bottom[index];
+                    return MessageItemWidget(
+                      key: messageKeysRef.value[messageItem.messageId],
+                      prev:
+                          bottom.getOrNull(index - 1) ??
+                          center ??
+                          top.lastOrNull,
+                      message: messageItem,
+                      next: bottom.getOrNull(index + 1),
+                      lastReadMessageId: state.lastReadMessageId,
+                    );
+                  }, childCount: bottom.length),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 10)),
+              ],
             ),
           ),
-          SliverList(
-            key: bottomKey,
-            delegate: SliverChildBuilderDelegate((
-              context,
-              index,
-            ) {
-              final messageItem = bottom[index];
-              return MessageItemWidget(
-                key: ref.value[messageItem.messageId],
-                prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-                message: messageItem,
-                next: bottom.getOrNull(index + 1),
-                lastReadMessageId: state.lastReadMessageId,
-              );
-            }, childCount: bottom.length),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 10)),
+          _ChatDateOverlay(scrollCoordinator: scrollCoordinator),
         ],
       ),
     );
   }
+}
+
+class _ChatDateOverlay extends StatelessWidget {
+  const _ChatDateOverlay({required this.scrollCoordinator});
+
+  final ChatScrollCoordinator scrollCoordinator;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<DateTime?>(
+    valueListenable: scrollCoordinator.visibleDateTime,
+    builder: (context, dateTime, child) {
+      if (dateTime == null) return const SizedBox();
+      return IgnorePointer(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: MessageDayTimeChip(dateTime: dateTime),
+        ),
+      );
+    },
+  );
 }
 
 class _JumpCurrentButton extends HookConsumerWidget {
@@ -675,31 +739,14 @@ class _JumpCurrentButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messageBloc = context.read<MessageBloc>();
-    final conversationId = ref.watch(currentConversationIdProvider);
+    final scrollCoordinator = context.read<ChatScrollCoordinator>();
 
     final state = useBlocState<MessageBloc, MessageState>();
-    final scrollController = useListenable(messageBloc.scrollController);
+    final showJumpToLatest = useValueListenable(
+      scrollCoordinator.showJumpToLatest,
+    );
 
-    final listPositionIsLatest = useState(false);
-
-    double? pixels;
-    try {
-      pixels = scrollController.position.pixels;
-    } catch (_) {}
-
-    useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (timeStamp) => listPositionIsLatest.value =
-            scrollController.hasClients &&
-            (scrollController.position.maxScrollExtent -
-                    scrollController.position.pixels) >
-                40,
-      );
-    }, [scrollController.hasClients, pixels, conversationId, state.refreshKey]);
-
-    final enable =
-        (!state.isEmpty && !state.isLatest) || listPositionIsLatest.value;
+    final enable = (!state.isEmpty && !state.isLatest) || showJumpToLatest;
 
     final pendingJumpMessageController = ref.read(
       pendingJumpMessageProvider.notifier,
@@ -713,15 +760,14 @@ class _JumpCurrentButton extends HookConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: InteractiveDecoratedBox(
-        onTap: () {
+        onTap: () async {
           final messageId = pendingJumpMessageController.state;
           if (messageId != null) {
-            messageBloc.scrollTo(messageId);
-            context.read<BlinkCubit>().blinkByMessageId(messageId);
+            await context.jumpToMessageInChat(messageId);
             pendingJumpMessageController.state = null;
             return;
           }
-          messageBloc.jumpToCurrent();
+          await context.jumpToLatestInChat();
         },
         child: Container(
           height: 40,
@@ -867,10 +913,18 @@ class _PinMessagesBanner extends HookConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Expanded(
-                        child: CustomText(
-                          (lastMessage ?? '').overflow,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        child: InteractiveDecoratedBox(
+                          cursor: SystemMouseCursors.click,
+                          onTap: () {
+                            final messageId = currentPinMessageIds.firstOrNull;
+                            if (messageId == null) return;
+                            unawaited(context.jumpToMessageInChat(messageId));
+                          },
+                          child: CustomText(
+                            (lastMessage ?? '').overflow,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ],
@@ -968,12 +1022,12 @@ class _JumpMentionButton extends HookConsumerWidget {
         ],
       ),
       child: InteractiveDecoratedBox(
-        onTap: () {
+        onTap: () async {
           if (messageMentions.isEmpty) return;
 
           final mention = messageMentions.first;
-          context.read<MessageBloc>().scrollTo(mention.messageId);
-          context.accountServer.markMentionRead(
+          await context.jumpToMessageInChat(mention.messageId);
+          await context.accountServer.markMentionRead(
             mention.messageId,
             mention.conversationId,
           );

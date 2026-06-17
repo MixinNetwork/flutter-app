@@ -22,10 +22,10 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
 import '../chat/chat_page.dart';
+import '../chat/message_jump.dart';
 import '../conversation/search_list.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
@@ -306,13 +306,8 @@ class _SearchMessageList extends HookConsumerWidget {
           message: message,
           keyword: keyword,
           showSender: true,
-          onTap: () {
-            ConversationStateNotifier.selectConversation(
-              context,
-              message.conversationId,
-              initIndexMessageId: message.messageId,
-            );
-            context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+          onTap: () async {
+            await context.jumpToMessageInChat(message.messageId);
             final chatSideCubit = context.read<ChatSideCubit>();
             if (chatSideCubit.state.routeMode) {
               chatSideCubit.clear();
