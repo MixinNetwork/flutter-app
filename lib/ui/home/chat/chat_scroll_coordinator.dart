@@ -70,8 +70,9 @@ class ChatScrollCoordinator {
     _animatedRestoreDirection = direction;
   }
 
-  void animateNextRestore() {
+  void animateNextRestore({ChatScrollRestoreDirection? direction}) {
     _animateNextRestore = true;
+    _animatedRestoreDirection = direction;
   }
 
   void scheduleRestore({
@@ -225,7 +226,12 @@ class ChatScrollCoordinator {
         return;
       }
       if (request.isLatest) {
-        unawaited(_jumpToBottom(animated: request.animated));
+        unawaited(
+          _jumpToBottom(
+            animated: request.animated,
+            animationDirection: request.animatedRestoreDirection,
+          ),
+        );
       }
       return;
     }
@@ -317,9 +323,13 @@ class ChatScrollCoordinator {
     return viewportDimension * loadedJumpViewportCount;
   }
 
-  Future<void> _jumpToBottom({bool animated = false}) => _jumpToClamped(
+  Future<void> _jumpToBottom({
+    bool animated = false,
+    ChatScrollRestoreDirection? animationDirection,
+  }) => _jumpToClamped(
     scrollController.position.maxScrollExtent,
     animated: animated,
+    animationDirection: animated ? animationDirection : null,
   );
 
   Future<void> _jumpToClamped(
@@ -342,7 +352,8 @@ class ChatScrollCoordinator {
       'distance=${formatDouble(target - position.pixels)} '
       '${formatScrollMetrics(position)}',
     );
-    if ((target - position.pixels).abs() <= _jumpToTolerance) {
+    if (animationDirection == null &&
+        (target - position.pixels).abs() <= _jumpToTolerance) {
       if (animated) {
         return _runProgrammaticScroll(
           () => scrollController.animateTo(

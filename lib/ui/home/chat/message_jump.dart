@@ -18,6 +18,7 @@ extension ChatMessageJump on BuildContext {
     read<BlinkCubit>().blinkByMessageId(messageId);
 
     final scrollCoordinator = read<ChatScrollCoordinator>();
+    final messageBloc = read<MessageBloc>();
     final handled = await scrollCoordinator.scrollToMessageIfInLoadedWindow(
       messageId,
       animated: true,
@@ -31,19 +32,43 @@ extension ChatMessageJump on BuildContext {
     }
 
     traceChatJump('reload-window target=${shortMessageId(messageId)}');
+    final directionSourceMessageId =
+        sourceMessageId ?? _currentWindowSourceMessageId(messageBloc.state);
     final direction = await _restoreDirectionFromSource(
-      sourceMessageId: sourceMessageId,
+      sourceMessageId: directionSourceMessageId,
       targetMessageId: messageId,
     );
     traceChatJump(
-      'restore direction source=${shortMessageId(sourceMessageId)} '
+      'restore direction source=${shortMessageId(directionSourceMessageId)} '
       'target=${shortMessageId(messageId)} direction=$direction',
     );
     scrollCoordinator.animateNextMessageRestore(
       messageId,
       direction: direction,
     );
-    read<MessageBloc>().scrollTo(messageId);
+    messageBloc.scrollTo(messageId);
+  }
+
+  Future<void> jumpToLatestInChat() async {
+    traceChatJump('request latest');
+    final scrollCoordinator = read<ChatScrollCoordinator>();
+    if (await scrollCoordinator.scrollToBottomIfInLoadedWindow(
+      animated: true,
+    )) {
+      traceChatJump('loaded-window latest handled=true');
+      return;
+    }
+
+    traceChatJump('reload-window latest');
+    scrollCoordinator.animateNextRestore(
+      direction: ChatScrollRestoreDirection.towardNewer,
+    );
+    read<MessageBloc>().jumpToLatestWindow();
+  }
+
+  String? _currentWindowSourceMessageId(MessageState state) {
+    if (state.center != null) return state.center!.messageId;
+    return state.bottomMessage?.messageId ?? state.topMessage?.messageId;
   }
 
   Future<ChatScrollRestoreDirection?> _restoreDirectionFromSource({

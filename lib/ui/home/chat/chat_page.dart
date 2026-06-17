@@ -727,7 +727,6 @@ class _JumpCurrentButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messageBloc = context.read<MessageBloc>();
     final scrollCoordinator = context.read<ChatScrollCoordinator>();
 
     final state = useBlocState<MessageBloc, MessageState>();
@@ -756,15 +755,7 @@ class _JumpCurrentButton extends HookConsumerWidget {
             pendingJumpMessageController.state = null;
             return;
           }
-          if (state.isLatest &&
-              await scrollCoordinator.scrollToBottomIfInLoadedWindow(
-                animated: true,
-              )) {
-            return;
-          }
-
-          scrollCoordinator.animateNextRestore();
-          messageBloc.jumpToLatestWindow();
+          await context.jumpToLatestInChat();
         },
         child: Container(
           height: 40,

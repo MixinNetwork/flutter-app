@@ -718,6 +718,52 @@ void main() {
 
     expect(coordinator.trackingScrollController.animateCount, 1);
   });
+
+  testWidgets(
+    'scheduleRestore starts newer latest restores before the bottom target',
+    (tester) async {
+      final coordinator = TrackingChatScrollCoordinator();
+      final messages = List.generate(30, testMessage);
+      final keysByMessageId = {
+        for (final message in messages) message.messageId: GlobalKey(),
+      };
+
+      addTearDown(coordinator.dispose);
+      await pumpFullyBuiltScrollableMessages(
+        tester,
+        coordinator,
+        messages,
+        keysByMessageId,
+      );
+      coordinator.scrollController.jumpTo(
+        coordinator.scrollController.position.maxScrollExtent,
+      );
+      coordinator.trackingScrollController
+        ..animateCount = 0
+        ..jumpCount = 0
+        ..jumpOffsets.clear()
+        ..animateOffsets.clear();
+
+      coordinator
+        ..animateNextRestore(
+          direction: ChatScrollRestoreDirection.towardNewer,
+        )
+        ..scheduleRestore(
+          messages: messages,
+          keysByMessageId: keysByMessageId,
+          reset: true,
+          isLatest: true,
+        );
+      await tester.pump();
+
+      expect(coordinator.trackingScrollController.animateCount, 1);
+      expect(coordinator.trackingScrollController.jumpCount, 1);
+      expect(
+        coordinator.trackingScrollController.jumpOffsets.single,
+        lessThan(coordinator.trackingScrollController.animateOffsets.single),
+      );
+    },
+  );
 }
 
 class TrackingChatScrollCoordinator extends ChatScrollCoordinator {
