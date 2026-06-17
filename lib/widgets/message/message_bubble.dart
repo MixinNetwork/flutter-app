@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../constants/resources.dart';
-import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/provider/conversation_provider.dart';
+import '../../ui/home/chat/message_jump.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
 import '../toast.dart';
@@ -138,12 +139,7 @@ class MessageBubble extends HookConsumerWidget {
         name: Resources.assetsImagesPinArrowSvg,
         onTap: () {
           final message = context.message;
-          context.read<BlinkCubit>().blinkByMessageId(message.messageId);
-          ConversationStateNotifier.selectConversation(
-            context,
-            message.conversationId,
-            initIndexMessageId: message.messageId,
-          );
+          unawaited(context.jumpToMessageInChat(message.messageId));
           // pop to chat page if current pin page is modal.
           if (ModalRoute.of(context)?.canPop == true) {
             Navigator.maybePop(context);

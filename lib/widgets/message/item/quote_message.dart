@@ -14,7 +14,6 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../ui/home/chat/chat_jump_trace.dart';
 import '../../../ui/home/chat/message_jump.dart';
-import '../../../ui/provider/conversation_provider.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
 import '../../../ui/provider/pending_jump_message_provider.dart';
 import '../../../ui/provider/user_cache_provider.dart';
@@ -496,10 +495,11 @@ class _QuoteMessageBase extends HookConsumerWidget {
           }
           try {
             if (context.isPinnedPage) {
-              ConversationStateNotifier.selectConversation(
-                context,
-                context.message.conversationId,
-                initIndexMessageId: quoteMessageId,
+              unawaited(
+                context.jumpToMessageInChat(
+                  quoteMessageId,
+                  sourceMessageId: messageId,
+                ),
               );
               return;
             }

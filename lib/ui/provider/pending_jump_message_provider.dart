@@ -12,3 +12,14 @@ final pendingJumpMessageProvider = StateProvider.autoDispose<String?>((ref) {
 
   return null;
 });
+
+final pendingJumpLatestProvider = StateProvider.autoDispose<Object?>((ref) {
+  final keepAlive = ref.keepAlive();
+
+  ref.listen(currentConversationIdProvider, (previous, next) {
+    keepAlive.close();
+    ref.invalidateSelf();
+  });
+
+  return null;
+});

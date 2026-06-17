@@ -576,6 +576,16 @@ class _List extends HookConsumerWidget {
       scrollCoordinator.captureViewportState(messages, messageKeysRef.value);
     }
 
+    ref.listen(pendingJumpLatestProvider, (previous, next) {
+      if (next == null) return;
+      scheduleMicrotask(() async {
+        if (!context.mounted) return;
+        await context.jumpToLatestInChat();
+        if (!context.mounted) return;
+        ref.read(pendingJumpLatestProvider.notifier).state = null;
+      });
+    });
+
     useMemoized(() {
       syncMessageGlobalKeys(messageKeysRef.value, messageIds);
     }, [messageIdsKey]);

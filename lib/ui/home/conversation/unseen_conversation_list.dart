@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../provider/conversation_provider.dart';
+import '../../provider/pending_jump_message_provider.dart';
 import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/unseen_conversations_provider.dart';
 import 'conversation_list.dart';
@@ -29,19 +30,25 @@ class UnseenConversationList extends HookConsumerWidget {
     return ScrollablePositionedList.builder(
       itemBuilder: (context, index) {
         final conversation = unseenConversations[index];
+        final selected =
+            conversation.conversationId == currentConversationId && !routeMode;
         return ConversationMenuWrapper(
           conversation: conversation,
           removeChatFromCircle: true,
           child: ConversationItemWidget(
             conversation: conversation,
-            selected:
-                conversation.conversationId == currentConversationId &&
-                !routeMode,
-            onTap: () => ConversationStateNotifier.selectConversation(
-              context,
-              conversation.conversationId,
-              conversation: conversation,
-            ),
+            selected: selected,
+            onTap: () {
+              if (selected) {
+                ref.read(pendingJumpLatestProvider.notifier).state = Object();
+                return;
+              }
+              ConversationStateNotifier.selectConversation(
+                context,
+                conversation.conversationId,
+                conversation: conversation,
+              );
+            },
           ),
         );
       },

@@ -24,6 +24,7 @@ import '../../../widgets/unread_text.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
+import '../../provider/pending_jump_message_provider.dart';
 import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../bloc/conversation_list_bloc.dart';
@@ -88,6 +89,11 @@ class ConversationList extends HookConsumerWidget {
                   selected: selected,
                   conversation: conversation,
                   onTap: () {
+                    if (selected) {
+                      ref.read(pendingJumpLatestProvider.notifier).state =
+                          Object();
+                      return;
+                    }
                     ConversationStateNotifier.selectConversation(
                       context,
                       conversation.conversationId,
