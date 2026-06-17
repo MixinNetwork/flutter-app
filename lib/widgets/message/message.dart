@@ -29,6 +29,7 @@ import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/chat/message_jump.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
@@ -391,6 +392,16 @@ class MessageItemWidget extends HookConsumerWidget {
                     ];
 
                     final messageActions = [
+                      if (isPinnedPage)
+                        MenuAction(
+                          image: MenuImage.icon(IconFonts.positionToChat),
+                          title: context.l10n.locateToChat,
+                          callback: () {
+                            unawaited(
+                              context.jumpToMessageInChat(message.messageId),
+                            );
+                          },
+                        ),
                       if (enableForward)
                         MenuAction(
                           image: MenuImage.icon(IconFonts.forward),

@@ -16,6 +16,7 @@ import '../../../../utils/hook.dart';
 import '../../../../widgets/message/item/image/image_message.dart';
 import '../../../../widgets/message/item/video/video_message.dart';
 import '../../../../widgets/message/message.dart';
+import '../../../../widgets/near_edge_scroll_listener.dart';
 import '../../chat/chat_page.dart';
 import '../shared_media_page.dart';
 
@@ -116,21 +117,8 @@ class MediaPage extends HookConsumerWidget {
       );
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is! ScrollUpdateNotification) return false;
-        if (notification.scrollDelta == null) return false;
-        if (notification.scrollDelta! < 0) return false;
-
-        final dimension = notification.metrics.viewportDimension / 2;
-
-        if (notification.metrics.maxScrollExtent - notification.metrics.pixels <
-            dimension) {
-          mediaCubit.loadMore();
-        }
-
-        return false;
-      },
+    return NearEdgeScrollListener(
+      onNearEnd: mediaCubit.loadMore,
       child: CustomScrollView(
         controller: scrollController,
         slivers: map.entries

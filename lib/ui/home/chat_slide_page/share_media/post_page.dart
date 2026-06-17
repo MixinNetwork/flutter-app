@@ -15,6 +15,7 @@ import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../widgets/message/item/post_message.dart';
 import '../../../../widgets/message/message.dart';
+import '../../../../widgets/near_edge_scroll_listener.dart';
 import '../shared_media_page.dart';
 
 class PostPage extends HookConsumerWidget {
@@ -110,21 +111,8 @@ class PostPage extends HookConsumerWidget {
       );
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is! ScrollUpdateNotification) return false;
-        if (notification.scrollDelta == null) return false;
-        if (notification.scrollDelta! < 0) return false;
-
-        final dimension = notification.metrics.viewportDimension / 2;
-
-        if (notification.metrics.maxScrollExtent - notification.metrics.pixels <
-            dimension) {
-          mediaCubit.loadMore();
-        }
-
-        return false;
-      },
+    return NearEdgeScrollListener(
+      onNearEnd: mediaCubit.loadMore,
       child: CustomScrollView(
         controller: scrollController,
         slivers: map.entries

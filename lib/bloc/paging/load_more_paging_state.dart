@@ -45,15 +45,29 @@ class LoadMorePagingBloc<T>
   final Future<List<T>> Function() reloadData;
   final Future<List<T>> Function(List<T>) loadMoreData;
   final bool Function(T, T) isSameKey;
+  bool _isReloading = false;
+  bool _isLoadingMore = false;
 
   Future<void> _onEvent(
     _LoadMorePagingEvent event,
     Emitter<LoadMorePagingState<T>> emit,
   ) async {
     if (event is _LoadMorePagingInitEvent) {
-      emit(LoadMorePagingState<T>(list: await reloadData()));
+      if (_isReloading) return;
+      _isReloading = true;
+      try {
+        emit(LoadMorePagingState<T>(list: await reloadData()));
+      } finally {
+        _isReloading = false;
+      }
     } else if (event is _LoadMorePagingLoadMoreEvent) {
-      emit(state.copyWith(list: await loadMoreData(state.list)));
+      if (_isReloading || _isLoadingMore) return;
+      _isLoadingMore = true;
+      try {
+        emit(state.copyWith(list: await loadMoreData(state.list)));
+      } finally {
+        _isLoadingMore = false;
+      }
     } else if (event is _LoadMorePagingInsertOrReplaceEvent<T>) {
       if (state.list.isEmpty) return;
       final index = state.list.indexWhere(

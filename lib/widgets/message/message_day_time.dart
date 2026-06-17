@@ -27,14 +27,14 @@ class MessageDayTime extends HookConsumerWidget {
     return Center(
       child: Opacity(
         opacity: hide ? 0 : 1,
-        child: _MessageDayTimeWidget(dateTime: dateTime),
+        child: MessageDayTimeChip(dateTime: dateTime),
       ),
     );
   }
 }
 
-class _MessageDayTimeWidget extends HookConsumerWidget {
-  const _MessageDayTimeWidget({required this.dateTime});
+class MessageDayTimeChip extends HookConsumerWidget {
+  const MessageDayTimeChip({required this.dateTime, super.key});
 
   final DateTime dateTime;
 
@@ -88,7 +88,7 @@ class _CurrentShowingMessages {
     final dayTimeElement =
         !isSameDay(widget.message.createdAt, widget.prev?.createdAt)
         ? element.descendantFirstOf(
-            (e) => e.widget is _MessageDayTimeWidget,
+            (e) => e.widget is MessageDayTimeChip,
           )
         : null;
     if (!reverse) {
@@ -111,37 +111,6 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
     this.reTraversalKey,
     super.key,
   });
-
-  factory MessageDayTimeViewportWidget.chatPage({
-    required Widget child,
-    required ScrollController scrollController,
-    required GlobalKey topKey,
-    required GlobalKey bottomKey,
-    required db.MessageItem? center,
-    required GlobalKey? centerKey,
-    Key? key,
-  }) => MessageDayTimeViewportWidget._create(
-    () {
-      final result = _CurrentShowingMessages();
-
-      topKey.currentContext!.visitChildElements(
-        (e) => result.dumpKeyedSubtree(e, reverse: true),
-      );
-
-      final centerContext = centerKey?.currentContext;
-      if (center != null && centerContext != null && centerContext is Element) {
-        result.dumpKeyedSubtree(centerContext);
-      }
-
-      bottomKey.currentContext!.visitChildElements(result.dumpKeyedSubtree);
-
-      return result;
-    },
-    key: key,
-    scrollController: scrollController,
-    reTraversalKey: centerKey,
-    child: child,
-  );
 
   factory MessageDayTimeViewportWidget.singleList({
     required Widget child,
@@ -334,7 +303,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
                       ),
                       child: Align(
                         alignment: Alignment.topCenter,
-                        child: _MessageDayTimeWidget(
+                        child: MessageDayTimeChip(
                           dateTime: dateTime.value!,
                         ),
                       ),

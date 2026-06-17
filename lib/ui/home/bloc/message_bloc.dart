@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
@@ -19,22 +18,26 @@ import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
+import '../chat/chat_jump_trace.dart';
 
 abstract class _MessageEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class _MessageJumpCurrentEvent extends _MessageEvent {}
-
 class _MessageInitEvent extends _MessageEvent {
-  _MessageInitEvent({this.centerMessageId, this.lastReadMessageId});
+  _MessageInitEvent({
+    this.centerMessageId,
+    this.lastReadMessageId,
+    this.forceLatest = false,
+  });
 
   final String? centerMessageId;
   final String? lastReadMessageId;
+  final bool forceLatest;
 
   @override
-  List<Object?> get props => [centerMessageId, lastReadMessageId];
+  List<Object?> get props => [centerMessageId, lastReadMessageId, forceLatest];
 
   @override
   final stringify = true;
@@ -222,11 +225,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       _onEvent,
       transformer: restartable(),
     );
-    on<_MessageJumpCurrentEvent>(
-      _onEvent,
-      transformer: droppable(),
-    );
-
     add(
       _MessageInitEvent(
         centerMessageId: conversationNotifier.state?.initIndexMessageId,
@@ -277,7 +275,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  final ScrollController scrollController = ScrollController();
   final ConversationStateNotifier conversationNotifier;
   final Database database;
   final MentionCache mentionCache;
@@ -308,10 +305,17 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     }
 
     if (event is _MessageInitEvent) {
+      if (event.centerMessageId != null || event.forceLatest) {
+        traceChatJump(
+          'bloc init center=${shortMessageId(event.centerMessageId)} '
+          'forceLatest=${event.forceLatest} limit=$finalLimit',
+        );
+      }
       final messageState = await _resetMessageList(
         conversationId,
         finalLimit,
-        event.centerMessageId,
+        centerMessageId: event.centerMessageId,
+        forceLatest: event.forceLatest,
       );
       await _preCacheMention(messageState);
       emit(
@@ -345,14 +349,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           emit(_pretreatment(result));
         }
       } else if (event is _MessageScrollEvent) {
+        traceChatJump(
+          'bloc scroll event target=${shortMessageId(event.messageId)}',
+        );
         add(
           _MessageInitEvent(
             centerMessageId: event.messageId,
             lastReadMessageId: state.lastReadMessageId,
           ),
         );
-      } else if (event is _MessageJumpCurrentEvent) {
-        emit(_pretreatment(state._copyWithJumpCurrentState()));
       }
     }
   }
@@ -393,15 +398,25 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   Future<MessageState> _resetMessageList(
     String conversationId,
-    int limit, [
+    int limit, {
     String? centerMessageId,
-  ]) async {
+    bool forceLatest = false,
+  }) async {
     final conversation = conversationNotifier.state?.conversation;
-    final _centerMessageId =
-        centerMessageId ??
-        ((conversation?.unseenMessageCount ?? 0) > 0
-            ? conversation?.lastReadMessageId
-            : null);
+    final _centerMessageId = forceLatest
+        ? null
+        : centerMessageId ??
+              ((conversation?.unseenMessageCount ?? 0) > 0
+                  ? conversation?.lastReadMessageId
+                  : null);
+
+    if (centerMessageId != null || forceLatest) {
+      traceChatJump(
+        'reset list requested=${shortMessageId(centerMessageId)} '
+        'resolved=${shortMessageId(_centerMessageId)} '
+        'forceLatest=$forceLatest unseen=${conversation?.unseenMessageCount}',
+      );
+    }
 
     final state = await _messagesByConversationId(
       conversationId,
@@ -427,6 +442,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .messagesByConversationId(conversationId, limit)
           .get();
 
+      traceChatJump('query recent count=${list.length} limit=$limit');
       return MessageState(
         top: list.reversed.toList(),
         isLatest: true,
@@ -438,6 +454,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
     final info = await messageDao.messageOrderInfo(centerMessageId);
     if (info == null) {
+      traceChatJump(
+        'query center missing-order target=${shortMessageId(centerMessageId)}',
+      );
       return recentMessages();
     }
 
@@ -464,6 +483,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       center = null;
     }
 
+    traceChatJump(
+      'query centered target=${shortMessageId(centerMessageId)} '
+      'top=${topList.length} center=${center != null} '
+      'bottom=${bottomList.length} isLatest=$isLatest isOldest=$isOldest',
+    );
     return MessageState(
       top: topList,
       center: center,
@@ -481,7 +505,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     var center = state.center;
     var bottom = state.bottom.toList();
 
-    var jumpToBottom = false;
+    var jumpToCurrent = false;
     for (final item in list) {
       if (item.conversationId != conversationId) continue;
 
@@ -522,11 +546,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           top = [item, ...top]
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         }
-        final position = scrollController.position;
-        jumpToBottom =
-            currentUserSent ||
-            (position.hasContentDimensions &&
-                position.pixels == position.maxScrollExtent);
+        jumpToCurrent = jumpToCurrent || currentUserSent;
       } else {
         if (currentUserSent && item.status == MessageStatus.sending) {
           add(_MessageInitEvent());
@@ -537,24 +557,28 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
     final result = state.copyWith(top: top, center: center, bottom: bottom);
 
-    if (scrollController.hasClients && jumpToBottom) {
+    if (jumpToCurrent) {
       return result._copyWithJumpCurrentState();
     }
     return result;
   }
 
-  void scrollTo(String messageId) =>
-      add(_MessageScrollEvent(messageId: messageId));
+  void scrollTo(String messageId) {
+    traceChatJump('bloc scrollTo target=${shortMessageId(messageId)}');
+    add(_MessageScrollEvent(messageId: messageId));
+  }
 
   void reload() {
     add(_MessageInitEvent());
   }
 
-  void jumpToCurrent() {
-    if (scrollController.hasClients && state.isLatest) {
-      return add(_MessageJumpCurrentEvent());
-    }
-    return add(_MessageInitEvent());
+  void jumpToLatestWindow() {
+    add(
+      _MessageInitEvent(
+        lastReadMessageId: state.lastReadMessageId,
+        forceLatest: true,
+      ),
+    );
   }
 
   MessageState _pretreatment(MessageState messageState) {
