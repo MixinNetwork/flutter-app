@@ -30,48 +30,70 @@ class ResponsiveNavigatorState extends Equatable {
 }
 
 abstract class AbstractResponsiveNavigatorStateNotifier
-    extends DistinctStateNotifier<ResponsiveNavigatorState> {
+    extends DistinctStateNotifier<ResponsiveNavigatorState>
+    with ResponsiveNavigatorController {
   AbstractResponsiveNavigatorStateNotifier(super.initialState);
 
-  void updateRouteMode(bool routeMode) =>
-      Future(() => state = state.copyWith(routeMode: routeMode));
+  @override
+  ResponsiveNavigatorState get navigatorState => state;
 
-  void onPopPage() {
-    final bool = state.pages.isNotEmpty;
-    if (bool) {
-      state = state.copyWith(pages: state.pages.toList()..removeLast());
-    }
-  }
+  @override
+  set navigatorState(ResponsiveNavigatorState value) => state = value;
+}
+
+mixin ResponsiveNavigatorController {
+  ResponsiveNavigatorState get navigatorState;
+
+  set navigatorState(ResponsiveNavigatorState value);
 
   MaterialPage route(String name, Object? arguments);
 
+  void updateRouteMode(bool routeMode) {
+    if (navigatorState.routeMode == routeMode) return;
+    Future(
+      () => navigatorState = navigatorState.copyWith(routeMode: routeMode),
+    );
+  }
+
+  void onPopPage() {
+    if (navigatorState.pages.isNotEmpty) {
+      navigatorState = navigatorState.copyWith(
+        pages: navigatorState.pages.toList()..removeLast(),
+      );
+    }
+  }
+
   void pushPage(String name, {Object? arguments}) {
     final page = route(name, arguments);
-    var index = -1;
-    index = state.pages.indexWhere(
+    final pages = navigatorState.pages.toList();
+    final index = pages.indexWhere(
       (element) =>
           page.child.key != null && element.child.key == page.child.key,
     );
-    if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
-    if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
-    state = state.copyWith(pages: state.pages.toList()..add(page));
+    if (pages.isNotEmpty && index == pages.length - 1) return;
+    if (index != -1) pages.removeRange(max(index, 0), pages.length);
+    navigatorState = navigatorState.copyWith(pages: [...pages, page]);
   }
 
   void popUntil(bool Function(MaterialPage page) test) {
-    final index = state.pages.indexWhere(test);
+    final index = navigatorState.pages.indexWhere(test);
     if (index == -1) return;
 
-    List<MaterialPage>? list;
-    list = index == 0 ? [] : state.pages.toList()
-      ..sublist(0, index);
-    state = state.copyWith(pages: list);
+    final list = index == 0
+        ? <MaterialPage>[]
+        : navigatorState.pages.sublist(0, index);
+    navigatorState = navigatorState.copyWith(pages: list);
   }
 
   void popWhere(bool Function(MaterialPage page) test) =>
-      state = state.copyWith(pages: state.pages.toList()..removeWhere(test));
+      navigatorState = navigatorState.copyWith(
+        pages: navigatorState.pages.toList()..removeWhere(test),
+      );
 
-  void pop() => state = state.copyWith(
-    pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList(),
+  void pop() => navigatorState = navigatorState.copyWith(
+    pages: navigatorState.pages
+        .sublist(0, max(navigatorState.pages.length - 1, 0))
+        .toList(),
   );
 
   Future<void> replace(String name, {Object? arguments}) async {
@@ -80,5 +102,5 @@ abstract class AbstractResponsiveNavigatorStateNotifier
     pushPage(name, arguments: arguments);
   }
 
-  void clear() => state = state.copyWith(pages: []);
+  void clear() => navigatorState = navigatorState.copyWith(pages: []);
 }

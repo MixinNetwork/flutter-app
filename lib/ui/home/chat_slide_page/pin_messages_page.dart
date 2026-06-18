@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
@@ -20,7 +20,7 @@ import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../provider/conversation_provider.dart';
-import '../chat/chat_page.dart';
+import '../notifier/chat_side_notifier.dart';
 
 class PinMessagesPage extends HookConsumerWidget {
   const PinMessagesPage(this.conversationState, {super.key});
@@ -47,9 +47,16 @@ class PinMessagesPage extends HookConsumerWidget {
       keys: [conversationId],
     ).data;
 
-    final chatSideCubit = useBloc(ChatSideCubit.new);
-    final searchConversationKeywordCubit = useBloc(
-      () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
+    final chatSideNotifier = useMemoized(ChatSideNotifier.new);
+    useEffect(() => chatSideNotifier.dispose, [chatSideNotifier]);
+    final searchConversationKeywordNotifier = useMemoized(
+      () =>
+          SearchConversationKeywordNotifier(chatSideNotifier: chatSideNotifier),
+      [chatSideNotifier],
+    );
+    useEffect(
+      () => searchConversationKeywordNotifier.dispose,
+      [searchConversationKeywordNotifier],
     );
 
     useEffect(() {
@@ -64,7 +71,9 @@ class PinMessagesPage extends HookConsumerWidget {
 
     return MultiProvider(
       providers: [
-        BlocProvider.value(value: searchConversationKeywordCubit),
+        ChangeNotifierProvider<SearchConversationKeywordNotifier>.value(
+          value: searchConversationKeywordNotifier,
+        ),
         Provider(
           create: (_) => AudioMessagesPlayAgent(
             list,
@@ -84,7 +93,7 @@ class PinMessagesPage extends HookConsumerWidget {
               ActionButton(
                 name: Resources.assetsImagesIcCloseSvg,
                 color: context.theme.icon,
-                onTap: () => context.read<ChatSideCubit>().onPopPage(),
+                onTap: () => context.read<ChatSideNotifier>().onPopPage(),
               ),
           ],
         ),

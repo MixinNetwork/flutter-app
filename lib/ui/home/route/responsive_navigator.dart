@@ -1,68 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/responsive_navigator_provider.dart';
-
-abstract class AbstractResponsiveNavigatorCubit
-    extends Cubit<ResponsiveNavigatorState> {
-  AbstractResponsiveNavigatorCubit(super.initialState);
-
-  void updateRouteMode(bool routeMode) =>
-      emit(state.copyWith(routeMode: routeMode));
-
-  void onPopPage() {
-    final bool = state.pages.isNotEmpty;
-    if (bool) {
-      emit(state.copyWith(pages: state.pages.toList()..removeLast()));
-    }
-  }
-
-  MaterialPage route(String name, Object? arguments);
-
-  void pushPage(String name, {Object? arguments}) {
-    final page = route(name, arguments);
-    var index = -1;
-    index = state.pages.indexWhere(
-      (element) =>
-          page.child.key != null && element.child.key == page.child.key,
-    );
-    if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
-    if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
-    emit(state.copyWith(pages: state.pages.toList()..add(page)));
-  }
-
-  void popUntil(bool Function(MaterialPage page) test) {
-    final index = state.pages.indexWhere(test);
-    if (index == -1) return;
-
-    List<MaterialPage>? list;
-    list = index == 0 ? [] : state.pages.toList()
-      ..sublist(0, index);
-    emit(state.copyWith(pages: list));
-  }
-
-  void popWhere(bool Function(MaterialPage page) test) =>
-      emit(state.copyWith(pages: state.pages.toList()..removeWhere(test)));
-
-  void pop() => emit(
-    state.copyWith(
-      pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList(),
-    ),
-  );
-
-  Future<void> replace(String name, {Object? arguments}) async {
-    popWhere((page) => page.name == name);
-    await Future.delayed(Duration.zero);
-    pushPage(name, arguments: arguments);
-  }
-
-  void clear() => emit(state.copyWith(pages: []));
-}
 
 class ResponsiveNavigator extends HookConsumerWidget {
   const ResponsiveNavigator({

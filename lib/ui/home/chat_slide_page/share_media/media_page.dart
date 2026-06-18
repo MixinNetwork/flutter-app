@@ -17,7 +17,7 @@ import '../../../../widgets/message/item/image/image_message.dart';
 import '../../../../widgets/message/item/video/video_message.dart';
 import '../../../../widgets/message/message.dart';
 import '../../../../widgets/near_edge_scroll_listener.dart';
-import '../../chat/chat_page.dart';
+import '../../notifier/chat_side_notifier.dart';
 import '../shared_media_page.dart';
 
 class MediaPage extends HookConsumerWidget {
@@ -33,7 +33,7 @@ class MediaPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final column = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
-    final routeMode = context.read<ChatSideCubit>().state.routeMode;
+    final routeMode = context.read<ChatSideNotifier>().state.routeMode;
     final size = column * (routeMode ? 4 : 3);
 
     final messageDao = context.database.messageDao;

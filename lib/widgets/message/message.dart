@@ -11,25 +11,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gal/gal.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../account/account_server.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
-import '../../bloc/simple_cubit.dart';
 import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
-import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/chat/message_jump.dart';
+import '../../ui/home/notifier/blink_notifier.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
@@ -80,10 +79,6 @@ import 'message_day_time.dart';
 import 'message_name.dart';
 import 'message_style.dart';
 
-class _MessageContextCubit extends SimpleCubit<_MessageContext> {
-  _MessageContextCubit(super.initialState);
-}
-
 class _MessageContext with EquatableMixin {
   _MessageContext({
     required this.isTranscriptPage,
@@ -110,40 +105,40 @@ class _MessageContext with EquatableMixin {
 }
 
 bool useIsTranscriptPage() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.isTranscriptPage,
-    );
+    _useMessageContextConverter((state) => state.isTranscriptPage);
 
 bool useIsPinnedPage() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.isPinnedPage,
-    );
+    _useMessageContextConverter((state) => state.isPinnedPage);
 
-bool useShowNip() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.showNip,
-    );
+bool useShowNip() => _useMessageContextConverter((state) => state.showNip);
 
 bool useIsCurrentUser() =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
-      converter: (state) => state.isCurrentUser,
-    );
+    _useMessageContextConverter((state) => state.isCurrentUser);
 
 MessageItem useMessage() =>
     useMessageConverter<MessageItem>(converter: (state) => state);
 
 T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
-    useBlocStateConverter<_MessageContextCubit, _MessageContext, T>(
-      converter: (state) => converter(state.message),
-    );
+    _useMessageContextConverter((state) => converter(state.message));
+
+T _useMessageContextConverter<T>(T Function(_MessageContext) converter) {
+  final notifier = useContext().read<ValueNotifier<_MessageContext>>();
+  return useListenableConverter<ValueNotifier<_MessageContext>, T>(
+        notifier,
+        converter: (notifier) => converter(notifier.value),
+      ).data
+      as T;
+}
 
 extension MessageContextExtension on BuildContext {
-  MessageItem get message => read<_MessageContextCubit>().state.message;
+  _MessageContext get _messageContext =>
+      read<ValueNotifier<_MessageContext>>().value;
 
-  bool get isPinnedPage => read<_MessageContextCubit>().state.isPinnedPage;
+  MessageItem get message => _messageContext.message;
 
-  bool get isTranscriptPage =>
-      read<_MessageContextCubit>().state.isTranscriptPage;
+  bool get isPinnedPage => _messageContext.isPinnedPage;
+
+  bool get isTranscriptPage => _messageContext.isTranscriptPage;
 }
 
 const _pinArrowWidth = 32.0;
@@ -154,7 +149,7 @@ void _quickReply(BuildContext context) {
   if (!context.message.type.canReply) return;
 
   doubleTap('_quickReply', const Duration(milliseconds: 300), () {
-    context.read<BlinkCubit>().blinkByMessageId(context.message.messageId);
+    context.read<BlinkNotifier>().blinkByMessageId(context.message.messageId);
     context.providerContainer.read(quoteMessageProvider.notifier).state =
         context.message;
   });
@@ -255,29 +250,19 @@ class MessageItemWidget extends HookConsumerWidget {
       userAvatarUrl = message.avatarUrl;
     }
 
-    final showedMenuCubit = useBloc(() => SimpleCubit(false));
+    final showedMenu = useState(false);
     final focusNode = useFocusScopeNode(
       debugLabel: 'message_item_${message.messageId}',
     );
 
-    final blinkCubit = context.read<BlinkCubit>();
+    final blinkNotifier = context.read<BlinkNotifier>();
+    final blinkState = useValueListenable(blinkNotifier);
 
-    final blinkColor =
-        useMemoizedStream(
-          () => Rx.combineLatest2(
-            blinkCubit.stream.startWith(blinkCubit.state),
-            showedMenuCubit.stream.startWith(showedMenuCubit.state),
-            (blinkState, showedMenu) {
-              if (showedMenu) return context.theme.listSelected;
-              if (blinkState.messageId == message.messageId && blink) {
-                return blinkState.color;
-              }
-              return Colors.transparent;
-            },
-          ),
-          keys: [message.messageId],
-        ).data ??
-        Colors.transparent;
+    final blinkColor = showedMenu.value
+        ? context.theme.listSelected
+        : blinkState.messageId == message.messageId && blink
+        ? blinkState.color
+        : Colors.transparent;
 
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
@@ -317,11 +302,11 @@ class MessageItemWidget extends HookConsumerWidget {
                   isVerified: message.isVerified,
                   buildMenus: (request) {
                     request.onShowMenu.addListener(() {
-                      showedMenuCubit.emit(true);
+                      showedMenu.value = true;
                       focusNode.requestFocus();
                     });
                     request.onHideMenu.addListener(() {
-                      showedMenuCubit.emit(false);
+                      showedMenu.value = false;
                     });
 
                     final enable = !ref.read(hasSelectedMessageProvider);
@@ -867,15 +852,20 @@ class MessageContext extends HookConsumerWidget {
       message: message,
     );
 
-    final messageContextCubit = useBloc(
-      () => _MessageContextCubit(newMessageContext()),
+    final messageContext = useMemoized(
+      () => ValueNotifier(newMessageContext()),
     );
+    useEffect(() => messageContext.dispose, [messageContext]);
 
     useEffect(() {
-      messageContextCubit.emit(newMessageContext());
+      messageContext.value = newMessageContext();
+      return null;
     }, [isTranscriptPage, isPinnedPage, showNip, isCurrentUser, message]);
 
-    return Provider.value(value: messageContextCubit, child: child);
+    return ChangeNotifierProvider<ValueNotifier<_MessageContext>>.value(
+      value: messageContext,
+      child: child,
+    );
   }
 }
 

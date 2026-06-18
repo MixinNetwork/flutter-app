@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/chat/chat_page.dart';
+import '../../ui/home/notifier/chat_side_notifier.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -383,7 +383,7 @@ class _UserProfileButtonBar extends StatelessWidget {
             await ConversationStateNotifier.selectUser(
               context,
               user.userId,
-              initialChatSidePage: ChatSideCubit.infoPage,
+              initialChatSidePage: ChatSideNotifier.infoPage,
             );
             Navigator.pop(context);
           },

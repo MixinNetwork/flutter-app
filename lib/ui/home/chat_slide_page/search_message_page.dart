@@ -24,9 +24,9 @@ import '../../../widgets/search_text_field.dart';
 import '../../provider/conversation_provider.dart';
 import '../bloc/conversation_list_bloc.dart';
 import '../bloc/search_message_cubit.dart';
-import '../chat/chat_page.dart';
 import '../chat/message_jump.dart';
 import '../conversation/search_list.dart';
+import '../notifier/chat_side_notifier.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
   const SearchMessagePage(this.conversationState, {super.key});
@@ -77,7 +77,7 @@ class SearchMessagePage extends HookConsumerWidget {
     }, [userMode.value, selectedUser.value]);
 
     useEffect(() {
-      SearchConversationKeywordCubit.updateSelectedUser(
+      SearchConversationKeywordNotifier.updateSelectedUser(
         context,
         selectedUser.value?.userId,
       );
@@ -92,7 +92,7 @@ class SearchMessagePage extends HookConsumerWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: context.theme.icon,
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().onPopPage(),
             ),
         ],
       ),
@@ -159,7 +159,7 @@ class SearchMessagePage extends HookConsumerWidget {
                         if (userMode.value && selectedUser.value == null) {
                           return;
                         }
-                        SearchConversationKeywordCubit.updateKeyword(
+                        SearchConversationKeywordNotifier.updateKeyword(
                           context,
                           keyword,
                         );
@@ -269,15 +269,16 @@ class _SearchMessageList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final (_, initKeyword) = useMemoized(
-      () => context.read<SearchConversationKeywordCubit>().state,
+      () => context.read<SearchConversationKeywordNotifier>().value,
     );
+    final keywordNotifier = context.read<SearchConversationKeywordNotifier>();
+    final keywordStream = useValueNotifierConvertSteam(keywordNotifier);
     final keyword =
         useMemoizedStream(
-          () => context
-              .read<SearchConversationKeywordCubit>()
-              .stream
+          () => keywordStream
               .map((event) => event.$2.trim())
               .debounceTime(const Duration(milliseconds: 150)),
+          keys: [keywordStream],
         ).data ??
         initKeyword.trim();
 
@@ -308,9 +309,9 @@ class _SearchMessageList extends HookConsumerWidget {
           showSender: true,
           onTap: () async {
             await context.jumpToMessageInChat(message.messageId);
-            final chatSideCubit = context.read<ChatSideCubit>();
-            if (chatSideCubit.state.routeMode) {
-              chatSideCubit.clear();
+            final chatSideNotifier = context.read<ChatSideNotifier>();
+            if (chatSideNotifier.state.routeMode) {
+              chatSideNotifier.clear();
             }
           },
         );

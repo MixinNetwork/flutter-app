@@ -3,16 +3,15 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:ogg_opus_player/ogg_opus_player.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants/resources.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/system/audio_session.dart';
@@ -23,23 +22,23 @@ import '../../../widgets/waveform_widget.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
 
-enum RecorderState { idle, recording, recordingStopped }
+enum VoiceRecorderStatus { idle, recording, recordingStopped }
 
-class VoiceRecorderCubitState with EquatableMixin {
-  const VoiceRecorderCubitState({
-    required this.state,
+class VoiceRecorderState with EquatableMixin {
+  const VoiceRecorderState({
+    required this.status,
     this.startTime,
-    this.recodedData,
+    this.recordedData,
   });
 
-  final RecorderState state;
+  final VoiceRecorderStatus status;
 
   final DateTime? startTime;
 
-  final RecordedData? recodedData;
+  final RecordedData? recordedData;
 
   @override
-  List<Object?> get props => [startTime, state];
+  List<Object?> get props => [startTime, status, recordedData];
 }
 
 class RecordedData with EquatableMixin {
@@ -53,9 +52,9 @@ class RecordedData with EquatableMixin {
   List<Object?> get props => [waveform, duration, path];
 }
 
-class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
-  VoiceRecorderCubit(this.audioMessagePlayService)
-    : super(const VoiceRecorderCubitState(state: RecorderState.idle));
+class VoiceRecorderNotifier extends ValueNotifier<VoiceRecorderState> {
+  VoiceRecorderNotifier(this.audioMessagePlayService)
+    : super(const VoiceRecorderState(status: VoiceRecorderStatus.idle));
 
   OggOpusRecorder? _recorder;
   String? _recorderFilePath;
@@ -65,8 +64,17 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
   Completer<void>? _startingCompleter;
 
   Timer? _timer;
+  var _disposed = false;
+
+  VoiceRecorderState get state => value;
+
+  void _setState(VoiceRecorderState state) {
+    if (_disposed) return;
+    value = state;
+  }
 
   Future<void> startRecording() async {
+    if (_disposed) return;
     if (_startingCompleter != null && !_startingCompleter!.isCompleted) {
       d('startRecording: waiting for previous startRecording to complete');
       return;
@@ -87,10 +95,10 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
     _recorder = OggOpusRecorder(path);
     _recorder?.start();
     _timer = Timer(const Duration(seconds: 60), stopRecording);
-    emit(
-      VoiceRecorderCubitState(
+    _setState(
+      VoiceRecorderState(
         startTime: DateTime.now(),
-        state: RecorderState.recording,
+        status: VoiceRecorderStatus.recording,
       ),
     );
     _startingCompleter!.complete();
@@ -131,25 +139,25 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
       path!,
     );
 
-    emit(
-      VoiceRecorderCubitState(
-        state: RecorderState.recordingStopped,
-        recodedData: recodeData,
+    _setState(
+      VoiceRecorderState(
+        status: VoiceRecorderStatus.recordingStopped,
+        recordedData: recodeData,
       ),
     );
     return recodeData;
   }
 
-  Future<void> cancelAndExitRecordeMode() async {
-    if (state.state == RecorderState.idle) {
+  Future<void> cancelAndExitRecordMode() async {
+    if (state.status == VoiceRecorderStatus.idle) {
       return;
     }
-    if (state.state == RecorderState.recordingStopped) {
-      emit(const VoiceRecorderCubitState(state: RecorderState.idle));
+    if (state.status == VoiceRecorderStatus.recordingStopped) {
+      _setState(const VoiceRecorderState(status: VoiceRecorderStatus.idle));
       return;
     }
     final result = await stopRecording(isCanceled: true);
-    emit(const VoiceRecorderCubitState(state: RecorderState.idle));
+    _setState(const VoiceRecorderState(status: VoiceRecorderStatus.idle));
     try {
       await File(result.path).delete();
     } catch (error, stacktrace) {
@@ -158,16 +166,30 @@ class VoiceRecorderCubit extends Cubit<VoiceRecorderCubitState> {
   }
 
   @override
-  Future<void> close() async {
-    if (state.state == RecorderState.recording ||
-        state.state == RecorderState.recordingStopped) {
-      await cancelAndExitRecordeMode();
-    } else if (_startingCompleter != null) {
-      await _startingCompleter?.future;
-      await cancelAndExitRecordeMode();
-    }
+  void dispose() {
+    _disposed = true;
     _timer?.cancel();
-    await super.close();
+    unawaited(_disposeRecording());
+    super.dispose();
+  }
+
+  Future<void> _disposeRecording() async {
+    if (_startingCompleter != null && !_startingCompleter!.isCompleted) {
+      await _startingCompleter?.future;
+    }
+    if (_recorder != null || _recorderFilePath != null) {
+      final result = await stopRecording(isCanceled: true);
+      try {
+        await File(result.path).delete();
+      } catch (error, stacktrace) {
+        e('disposeRecording: failed to delete file. $error $stacktrace');
+      }
+      return;
+    }
+    if (state.status == VoiceRecorderStatus.recording ||
+        state.status == VoiceRecorderStatus.recordingStopped) {
+      await cancelAndExitRecordMode();
+    }
   }
 }
 
@@ -184,53 +206,60 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final voiceRecorderNotifier = context.read<VoiceRecorderNotifier>();
     final isRecorderMode =
-        useBlocStateConverter<
-          VoiceRecorderCubit,
-          VoiceRecorderCubitState,
-          bool
-        >(converter: (state) => state.state != RecorderState.idle);
+        useValueListenable(voiceRecorderNotifier).status !=
+        VoiceRecorderStatus.idle;
     final link = useMemoized(LayerLink.new);
 
     final overlay = Navigator.of(context).overlay ?? Overlay.of(context);
 
     final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
 
-    final voiceRecorderCubit = context.read<VoiceRecorderCubit>();
-
     useEffect(() {
-      recorderBottomBarEntry.value?.remove();
+      final previousEntry = recorderBottomBarEntry.value;
+      if (previousEntry?.mounted ?? false) {
+        previousEntry?.remove();
+      }
       recorderBottomBarEntry.value = null;
       if (!isRecorderMode) {
-        return;
+        return null;
       }
       final entry = OverlayEntry(
-        builder: (context) => MultiBlocProvider(
-          providers: [
-            BlocProvider<VoiceRecorderCubit>.value(
-              value: voiceRecorderCubit,
-            ),
-          ],
-          child: _RecordingInterceptor(
-            child: UnconstrainedBox(
-              child: CompositedTransformFollower(
-                link: link,
-                showWhenUnlinked: false,
-                targetAnchor: Alignment.bottomCenter,
-                followerAnchor: Alignment.bottomCenter,
-                child: SizedBox(
-                  width: layoutWidth,
-                  child: const Material(child: VoiceRecorderBottomBar()),
+        builder: (context) =>
+            ChangeNotifierProvider<VoiceRecorderNotifier>.value(
+              value: voiceRecorderNotifier,
+              child: _RecordingInterceptor(
+                child: UnconstrainedBox(
+                  child: CompositedTransformFollower(
+                    link: link,
+                    showWhenUnlinked: false,
+                    targetAnchor: Alignment.bottomCenter,
+                    followerAnchor: Alignment.bottomCenter,
+                    child: SizedBox(
+                      width: layoutWidth,
+                      child: const Material(child: VoiceRecorderBottomBar()),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
       );
       recorderBottomBarEntry.value = entry;
+      var disposed = false;
       WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+        if (disposed) return;
         overlay.insert(entry);
       });
+      return () {
+        disposed = true;
+        if (entry.mounted) {
+          entry.remove();
+        }
+        if (recorderBottomBarEntry.value == entry) {
+          recorderBottomBarEntry.value = null;
+        }
+      };
     }, [isRecorderMode, layoutWidth]);
 
     return CompositedTransformTarget(link: link, child: child);
@@ -245,11 +274,8 @@ class _RecordingInterceptor extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isRecording =
-        useBlocStateConverter<
-          VoiceRecorderCubit,
-          VoiceRecorderCubitState,
-          bool
-        >(converter: (state) => state.state == RecorderState.recording);
+        useValueListenable(context.read<VoiceRecorderNotifier>()).status ==
+        VoiceRecorderStatus.recording;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -261,7 +287,9 @@ class _RecordingInterceptor extends HookConsumerWidget {
               _showDiscardRecordingWarningAlertOverlay(
                 context,
                 onDiscard: () {
-                  context.read<VoiceRecorderCubit>().cancelAndExitRecordeMode();
+                  context
+                      .read<VoiceRecorderNotifier>()
+                      .cancelAndExitRecordMode();
                 },
               );
             },
@@ -352,24 +380,11 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final startTime =
-        useBlocStateConverter<
-          VoiceRecorderCubit,
-          VoiceRecorderCubitState,
-          DateTime?
-        >(converter: (state) => state.startTime);
-    final isRecording =
-        useBlocStateConverter<
-          VoiceRecorderCubit,
-          VoiceRecorderCubitState,
-          bool
-        >(converter: (state) => state.state == RecorderState.recording);
-    final recordedResult =
-        useBlocStateConverter<
-          VoiceRecorderCubit,
-          VoiceRecorderCubitState,
-          RecordedData?
-        >(converter: (state) => state.recodedData);
+    final recorderNotifier = context.read<VoiceRecorderNotifier>();
+    final recorderState = useValueListenable(recorderNotifier);
+    final startTime = recorderState.startTime;
+    final isRecording = recorderState.status == VoiceRecorderStatus.recording;
+    final recordedResult = recorderState.recordedData;
 
     useEffect(() {
       if (recordedResult == null) {
@@ -404,8 +419,8 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
             onTap: () async {
               final path = recordedResult?.path;
               await context
-                  .read<VoiceRecorderCubit>()
-                  .cancelAndExitRecordeMode();
+                  .read<VoiceRecorderNotifier>()
+                  .cancelAndExitRecordMode();
               if (path != null) {
                 try {
                   await File(path).delete();
@@ -432,8 +447,7 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
               name: Resources.assetsImagesRecordStopSvg,
               color: context.theme.accent,
               onTap: () async {
-                final recorderCubit = context.read<VoiceRecorderCubit>();
-                await recorderCubit.stopRecording();
+                await recorderNotifier.stopRecording();
               },
             )
           else
@@ -442,7 +456,7 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
               color: context.theme.icon,
               onTap: () async {
                 final path = recordedResult?.path;
-                await context.read<VoiceRecorderCubit>().startRecording();
+                await recorderNotifier.startRecording();
                 if (path != null) {
                   try {
                     await File(path).delete();
@@ -459,20 +473,19 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
               final conversationItem = ref.read(conversationProvider);
               final accountServer = context.accountServer;
 
-              final recorderCubit = context.read<VoiceRecorderCubit>();
-
               final RecordedData result;
 
-              if (recorderCubit.state.state == RecorderState.recording) {
-                result = await recorderCubit.stopRecording();
+              if (recorderNotifier.state.status ==
+                  VoiceRecorderStatus.recording) {
+                result = await recorderNotifier.stopRecording();
               } else {
                 if (recordedResult == null) {
-                  e('result is null. ${recorderCubit.state}');
+                  e('result is null. ${recorderNotifier.state}');
                   return;
                 }
                 result = recordedResult;
               }
-              await recorderCubit.cancelAndExitRecordeMode();
+              await recorderNotifier.cancelAndExitRecordMode();
               final audioFile = File(result.path);
               if (!audioFile.existsSync()) {
                 e('audio file does not exist.');

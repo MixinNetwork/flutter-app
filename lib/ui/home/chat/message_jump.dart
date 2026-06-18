@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
-import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../notifier/blink_notifier.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
 
@@ -17,7 +17,7 @@ extension ChatMessageJump on BuildContext {
       'request source=${shortMessageId(sourceMessageId)} '
       'target=${shortMessageId(messageId)}',
     );
-    read<BlinkCubit>().blinkByMessageId(messageId);
+    read<BlinkNotifier>().blinkByMessageId(messageId);
 
     final scrollCoordinator = read<ChatScrollCoordinator>();
     final messageBloc = read<MessageBloc>();

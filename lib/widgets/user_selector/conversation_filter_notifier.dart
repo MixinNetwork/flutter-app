@@ -1,5 +1,6 @@
-import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 
 import '../../../account/account_server.dart';
 import '../../../db/dao/conversation_dao.dart';
@@ -7,16 +8,15 @@ import '../../../db/mixin_database.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/sort.dart';
 
-part 'conversation_filter_state.dart';
-
-class ConversationFilterCubit extends Cubit<ConversationFilterState> {
-  ConversationFilterCubit(
+class ConversationFilterNotifier
+    extends ValueNotifier<ConversationFilterState> {
+  ConversationFilterNotifier(
     this.accountServer,
     this.onlyContact,
     this.filteredIds,
     this.afterInit,
   ) : super(const ConversationFilterState()) {
-    _init();
+    unawaited(_init());
   }
 
   final AccountServer accountServer;
@@ -24,20 +24,21 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
   final Function(ConversationFilterState) afterInit;
   final Iterable<String> filteredIds;
 
-  late List<ConversationItem> conversations;
-  late List<User> friends;
-  late List<User> bots;
+  var _conversations = <ConversationItem>[];
+  var _friends = <User>[];
+  var _bots = <User>[];
+  var _disposed = false;
 
   Future<void> _init() async {
     var contactConversationIds = <String>{};
     var botConversationIds = <String>{};
     if (onlyContact) {
-      conversations = [];
+      _conversations = [];
     } else {
-      conversations = await accountServer.database.conversationDao
+      _conversations = await accountServer.database.conversationDao
           .conversationItems()
           .get();
-      contactConversationIds = conversations
+      contactConversationIds = _conversations
           .where(
             (element) =>
                 element.isContactConversation && element.ownerId != null,
@@ -45,15 +46,15 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
           .map((e) => e.ownerId)
           .nonNulls
           .toSet();
-      botConversationIds = conversations
+      botConversationIds = _conversations
           .where((element) => element.isBotConversation)
           .map((e) => e.appId)
           .nonNulls
           .toSet();
     }
 
-    friends = <User>[];
-    bots = <User>[];
+    _friends = <User>[];
+    _bots = <User>[];
 
     final Iterable<User> users = await accountServer.database.userDao
         .notInFriends([
@@ -65,36 +66,39 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
       e,
     ) {
       if (e.isBot) {
-        bots.add(e);
+        _bots.add(e);
       } else {
-        friends.add(e);
+        _friends.add(e);
       }
     });
 
+    if (_disposed) return;
     _filterList();
-    afterInit(state);
+    if (_disposed) return;
+    afterInit(value);
   }
 
   set keyword(String keyword) {
-    emit(state.copyWith(keyword: keyword));
+    if (_disposed) return;
+    value = value.copyWith(keyword: keyword);
     _filterList();
   }
 
   void _filterList() {
-    if (state.keyword?.isEmpty ?? true) {
-      return emit(
-        state.copyWith(
-          recentConversations: conversations,
-          friends: friends,
-          bots: bots,
-          keyword: state.keyword,
-        ),
+    if (_disposed) return;
+    if (value.keyword?.isEmpty ?? true) {
+      value = value.copyWith(
+        recentConversations: _conversations,
+        friends: _friends,
+        bots: _bots,
+        keyword: value.keyword,
       );
+      return;
     }
-    final keyword = state.keyword!.toLowerCase();
+    final keyword = value.keyword!.toLowerCase();
 
     final recentConversations =
-        conversations
+        _conversations
             .where(
               (element) => element.isGroupConversation
                   ? element.groupName != null &&
@@ -126,16 +130,51 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
       return e.identityNumber.indexOf(keyword);
     });
 
-    final filterFriends = friends.where(where).toList()..sort(sort);
-    final filterBots = bots.where(where).toList()..sort(sort);
+    final filterFriends = _friends.where(where).toList()..sort(sort);
+    final filterBots = _bots.where(where).toList()..sort(sort);
 
-    emit(
-      state.copyWith(
-        recentConversations: recentConversations,
-        friends: filterFriends,
-        bots: filterBots,
-        keyword: state.keyword,
-      ),
+    value = value.copyWith(
+      recentConversations: recentConversations,
+      friends: filterFriends,
+      bots: filterBots,
+      keyword: value.keyword,
     );
   }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+}
+
+class ConversationFilterState {
+  const ConversationFilterState({
+    this.recentConversations = const [],
+    this.friends = const [],
+    this.bots = const [],
+    this.keyword,
+  });
+
+  final List<ConversationItem> recentConversations;
+  final List<User> friends;
+  final List<User> bots;
+  final String? keyword;
+
+  Set<String> get appIds => {
+    ...recentConversations.map((e) => e.ownerId).nonNulls,
+    ...[...bots, ...friends].map((e) => e.userId),
+  };
+
+  ConversationFilterState copyWith({
+    List<ConversationItem>? recentConversations,
+    List<User>? friends,
+    List<User>? bots,
+    String? keyword,
+  }) => ConversationFilterState(
+    recentConversations: recentConversations ?? this.recentConversations,
+    friends: friends ?? this.friends,
+    bots: bots ?? this.bots,
+    keyword: keyword ?? this.keyword,
+  );
 }

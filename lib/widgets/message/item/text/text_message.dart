@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide SelectableRegion;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../ui/home/chat/chat_page.dart';
+import '../../../../ui/home/notifier/chat_side_notifier.dart';
 import '../../../../ui/provider/conversation_provider.dart';
 import '../../../../ui/provider/keyword_provider.dart';
 import '../../../../ui/provider/mention_cache_provider.dart';
@@ -53,18 +53,18 @@ class MessageTextWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userId = useMessageConverter(converter: (state) => state.userId);
 
+    final keywordNotifier = context.read<SearchConversationKeywordNotifier>();
     var keyword =
-        useBlocStateConverter<
-          SearchConversationKeywordCubit,
-          (String?, String),
-          String
-        >(
-          converter: (state) {
+        useListenableConverter<ValueNotifier<(String?, String)>, String>(
+          keywordNotifier,
+          converter: (notifier) {
+            final state = notifier.value;
             if (state.$1 == null || state.$1 == userId) return state.$2;
             return '';
           },
           keys: [userId],
-        );
+        ).data ??
+        '';
 
     final globalKeyword = ref.watch(trimmedKeywordProvider);
     final conversationKeyword = ref.watch(

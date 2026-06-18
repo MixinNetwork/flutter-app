@@ -8,7 +8,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../bloc/simple_cubit.dart';
 import '../../constants/brightness_theme_data.dart';
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
@@ -24,7 +23,7 @@ import '../conversation/badges_widget.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import '../interactive_decorated_box.dart';
-import 'bloc/conversation_filter_cubit.dart';
+import 'conversation_filter_notifier.dart';
 
 String _getConversationName(dynamic item) {
   if (item is ConversationItem) return item.validName;
@@ -165,9 +164,11 @@ class _ConversationSelector extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selector = useBloc(() => SimpleCubit<List<dynamic>>(const []));
+    final selector = useMemoized(() => ValueNotifier<List<dynamic>>(const []));
+    useEffect(() => selector.dispose, [selector]);
+
     void selectItem(dynamic item) {
-      final list = [...selector.state];
+      final list = [...selector.value];
       if (list.contains(item)) {
         list.remove(item);
       } else {
@@ -177,12 +178,13 @@ class _ConversationSelector extends HookConsumerWidget {
         }
         list.add(item);
       }
-      selector.emit(list);
+      selector.value = list;
     }
 
-    final conversationFilterCubit = useBloc(
-      () => ConversationFilterCubit(
-        useContext().accountServer,
+    final accountServer = context.accountServer;
+    final conversationFilterNotifier = useMemoized(
+      () => ConversationFilterNotifier(
+        accountServer,
         onlyContact,
         filteredIds,
         (state) {
@@ -206,13 +208,16 @@ class _ConversationSelector extends HookConsumerWidget {
           });
         },
       ),
-      keys: [useContext().accountServer, onlyContact, filteredIds],
+      [accountServer, onlyContact, filteredIds],
+    );
+    useEffect(
+      () => conversationFilterNotifier.dispose,
+      [conversationFilterNotifier],
     );
 
-    final conversationFilterState =
-        useBlocState<ConversationFilterCubit, ConversationFilterState>(
-          bloc: conversationFilterCubit,
-        );
+    final conversationFilterState = useValueListenable(
+      conversationFilterNotifier,
+    );
 
     final appMap = useMemoizedFuture(
       () async {
@@ -226,19 +231,22 @@ class _ConversationSelector extends HookConsumerWidget {
     ).requireData;
 
     useEffect(
-      () => selector.stream.listen((event) {
-        if (event.isNotEmpty && singleSelect) {
-          final item = event.first;
+      () {
+        void handleSelection() {
+          final selection = selector.value;
+          if (selection.isEmpty || !singleSelect) return;
+          final item = selection.first;
           Navigator.pop(context, [
             ConversationSelector.init(item, context, appMap),
           ]);
         }
-      }).cancel,
-      [selector.stream],
+
+        selector.addListener(handleSelection);
+        return () => selector.removeListener(handleSelection);
+      },
+      [selector, singleSelect, appMap],
     );
-    final selected = useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(
-      bloc: selector,
-    );
+    final selected = useValueListenable(selector);
 
     const boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -322,7 +330,9 @@ class _ConversationSelector extends HookConsumerWidget {
                 ],
               ),
             ),
-            _FilterTextField(conversationFilterCubit: conversationFilterCubit),
+            _FilterTextField(
+              conversationFilterNotifier: conversationFilterNotifier,
+            ),
             AnimatedSize(
               alignment: Alignment.topCenter,
               duration: const Duration(milliseconds: 200),
@@ -467,21 +477,14 @@ class _ConversationSelector extends HookConsumerWidget {
 }
 
 class _FilterTextField extends HookConsumerWidget {
-  const _FilterTextField({required this.conversationFilterCubit});
+  const _FilterTextField({required this.conversationFilterNotifier});
 
-  final ConversationFilterCubit conversationFilterCubit;
+  final ConversationFilterNotifier conversationFilterNotifier;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isTextEmpty =
-        useMemoizedStream(
-          () => conversationFilterCubit.stream
-              .map((event) => event.keyword?.isEmpty ?? true)
-              .distinct(),
-          keys: [conversationFilterCubit],
-        ).data ??
-        conversationFilterCubit.state.keyword?.isEmpty ??
-        true;
+    final filterState = useValueListenable(conversationFilterNotifier);
+    final isTextEmpty = filterState.keyword?.isEmpty ?? true;
     return Container(
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -494,7 +497,7 @@ class _FilterTextField extends HookConsumerWidget {
       child: Stack(
         children: [
           TextField(
-            onChanged: (string) => conversationFilterCubit.keyword = string,
+            onChanged: (string) => conversationFilterNotifier.keyword = string,
             style: TextStyle(color: context.theme.text, fontSize: 14),
             inputFormatters: [
               LengthLimitingTextInputFormatter(kDefaultTextInputLimit),

@@ -23,7 +23,7 @@ import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
 import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
-import '../chat/chat_page.dart';
+import '../notifier/chat_side_notifier.dart';
 import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookConsumerWidget {
@@ -95,7 +95,7 @@ class ChatInfoPage extends HookConsumerWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: context.theme.icon,
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().onPopPage(),
             ),
         ],
         backgroundColor: context.theme.popUp,
@@ -150,8 +150,8 @@ class ChatInfoPage extends HookConsumerWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupParticipants),
-                  onTap: () => context.read<ChatSideCubit>().pushPage(
-                    ChatSideCubit.participants,
+                  onTap: () => context.read<ChatSideNotifier>().pushPage(
+                    ChatSideNotifier.participants,
                   ),
                 ),
               ),
@@ -227,16 +227,16 @@ class ChatInfoPage extends HookConsumerWidget {
                 children: [
                   CellItem(
                     title: Text(context.l10n.sharedMedia),
-                    onTap: () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.sharedMedia,
+                    onTap: () => context.read<ChatSideNotifier>().pushPage(
+                      ChatSideNotifier.sharedMedia,
                     ),
                   ),
                   if (conversationState.userId != null)
                     _SharedApps(userId: conversationState.userId!),
                   CellItem(
                     title: Text(context.l10n.searchConversation, maxLines: 1),
-                    onTap: () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.searchMessageHistory,
+                    onTap: () => context.read<ChatSideNotifier>().pushPage(
+                      ChatSideNotifier.searchMessageHistory,
                     ),
                   ),
                 ],
@@ -258,8 +258,8 @@ class ChatInfoPage extends HookConsumerWidget {
                   trailing: canModifyExpireIn ? const Arrow() : null,
                   onTap: !canModifyExpireIn
                       ? null
-                      : () => context.read<ChatSideCubit>().pushPage(
-                          ChatSideCubit.disappearMessages,
+                      : () => context.read<ChatSideNotifier>().pushPage(
+                          ChatSideNotifier.disappearMessages,
                         ),
                 ),
               ),
@@ -392,8 +392,8 @@ class ChatInfoPage extends HookConsumerWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupsInCommon),
-                  onTap: () => context.read<ChatSideCubit>().pushPage(
-                    ChatSideCubit.groupsInCommon,
+                  onTap: () => context.read<ChatSideNotifier>().pushPage(
+                    ChatSideNotifier.groupsInCommon,
                   ),
                 ),
               ),
@@ -411,8 +411,8 @@ class ChatInfoPage extends HookConsumerWidget {
             CellGroup(
               child: CellItem(
                 title: Text(context.l10n.editConversations),
-                onTap: () => context.read<ChatSideCubit>().pushPage(
-                  ChatSideCubit.circles,
+                onTap: () => context.read<ChatSideNotifier>().pushPage(
+                  ChatSideNotifier.circles,
                 ),
               ),
             ),
@@ -711,8 +711,8 @@ class _SharedApps extends HookConsumerWidget {
           : CellItem(
               title: Text(context.l10n.shareApps),
               trailing: OverlappedAppIcons(apps: data),
-              onTap: () => context.read<ChatSideCubit>().pushPage(
-                ChatSideCubit.sharedApps,
+              onTap: () => context.read<ChatSideNotifier>().pushPage(
+                ChatSideNotifier.sharedApps,
               ),
             ),
     );

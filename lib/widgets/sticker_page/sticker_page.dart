@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -8,7 +7,6 @@ import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../account/account_key_value.dart';
-import '../../bloc/bloc_converter.dart';
 import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
@@ -22,8 +20,6 @@ import '../interactive_decorated_box.dart';
 import '../menu.dart';
 import '../toast.dart';
 import 'add_sticker_dialog.dart';
-import 'bloc/cubit/sticker_albums_cubit.dart';
-import 'bloc/cubit/sticker_cubit.dart';
 import 'emoji_page.dart';
 import 'giphy_page.dart';
 import 'sticker_item.dart';
@@ -36,12 +32,14 @@ class StickerPage extends StatelessWidget {
     required this.tabLength,
     required this.tabController,
     required this.presetStickerGroups,
+    required this.stickerAlbums,
     super.key,
   });
 
   final TabController tabController;
   final int tabLength;
   final List<PresetStickerGroup> presetStickerGroups;
+  final List<StickerAlbum> stickerAlbums;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -124,9 +122,9 @@ class StickerPage extends StatelessWidget {
                   }
                   return _StickerAlbumPage(
                     getStickers: () {
-                      final albumId = BlocProvider.of<StickerAlbumsCubit>(
-                        context,
-                      ).state[index - presetStickerGroups.length].albumId;
+                      final albumId =
+                          stickerAlbums[index - presetStickerGroups.length]
+                              .albumId;
                       return context.database.stickerDao
                           .stickerByAlbumId(albumId)
                           .watchWithStream(
@@ -147,6 +145,7 @@ class StickerPage extends StatelessWidget {
               tabLength: tabLength,
               tabController: tabController,
               presetStickerGroups: presetStickerGroups,
+              stickerAlbums: stickerAlbums,
             ),
           ],
         ),
@@ -171,35 +170,35 @@ class _StickerAlbumPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stickerCubit = useBloc(() => StickerCubit(getStickers()));
-
-    final itemCount = useBlocStateConverter<StickerCubit, List<Sticker>, int>(
-      bloc: stickerCubit,
-      converter: (state) => state.length,
-    );
+    final stickers =
+        useMemoizedStream(
+          getStickers,
+          initialData: const <Sticker>[],
+          keys: [getStickers],
+        ).data ??
+        const <Sticker>[];
+    final itemCount = stickers.length;
     final controller = useMemoized(ScrollController.new);
-    return BlocProvider.value(
-      value: stickerCubit,
-      child: GridView.builder(
-        controller: controller,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-        ),
-        itemCount: canAddSticker ? itemCount + 1 : itemCount,
-        itemBuilder: (context, index) {
-          if (canAddSticker && index == 0) {
-            return const _AddStickerWidget();
-          }
-          return _StickerAlbumPageItem(
-            index: canAddSticker ? index - 1 : index,
-            updateUsedAt: updateUsedAt,
-            delete: delete,
-          );
-        },
+    return GridView.builder(
+      controller: controller,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
       ),
+      itemCount: canAddSticker ? itemCount + 1 : itemCount,
+      itemBuilder: (context, index) {
+        if (canAddSticker && index == 0) {
+          return const _AddStickerWidget();
+        }
+        final stickerIndex = canAddSticker ? index - 1 : index;
+        return _StickerAlbumPageItem(
+          sticker: stickers[stickerIndex],
+          updateUsedAt: updateUsedAt,
+          delete: delete,
+        );
+      },
     );
   }
 }
@@ -257,22 +256,17 @@ class _StickerStoreEmptyPage extends StatelessWidget {
 
 class _StickerAlbumPageItem extends HookConsumerWidget {
   const _StickerAlbumPageItem({
-    required this.index,
+    required this.sticker,
     required this.updateUsedAt,
     this.delete,
   });
 
-  final int index;
+  final Sticker sticker;
   final bool updateUsedAt;
   final void Function(Sticker)? delete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sticker = useBlocStateConverter<StickerCubit, List<Sticker>, Sticker>(
-      converter: (state) => state[index],
-      keys: [index],
-    );
-
     Widget widget = InteractiveDecoratedBox(
       onTap: () async {
         final accountServer = context.accountServer;
@@ -343,11 +337,13 @@ class _StickerAlbumBar extends HookConsumerWidget {
     required this.tabLength,
     required this.tabController,
     required this.presetStickerGroups,
+    required this.stickerAlbums,
   });
 
   final int tabLength;
   final TabController tabController;
   final List<PresetStickerGroup> presetStickerGroups;
+  final List<StickerAlbum> stickerAlbums;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -411,6 +407,7 @@ class _StickerAlbumBar extends HookConsumerWidget {
           (index) => _StickerAlbumBarItem(
             index: index,
             presetStickerGroups: presetStickerGroups,
+            stickerAlbums: stickerAlbums,
           ),
         ),
       ),
@@ -422,10 +419,12 @@ class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
     required this.index,
     required this.presetStickerGroups,
+    required this.stickerAlbums,
   });
 
   final int index;
   final List<PresetStickerGroup> presetStickerGroups;
+  final List<StickerAlbum> stickerAlbums;
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
@@ -464,15 +463,10 @@ class _StickerAlbumBarItem extends StatelessWidget {
                   );
                 }
 
-                return BlocConverter<
-                  StickerAlbumsCubit,
-                  List<StickerAlbum>,
-                  String
-                >(
-                  converter: (state) =>
-                      state[index - presetStickerGroups.length].iconUrl,
-                  builder: (context, iconUrl) =>
-                      StickerGroupIcon(iconUrl: iconUrl, size: 28),
+                return StickerGroupIcon(
+                  iconUrl:
+                      stickerAlbums[index - presetStickerGroups.length].iconUrl,
+                  size: 28,
                 );
               },
             ),

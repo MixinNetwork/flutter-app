@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
@@ -38,17 +37,15 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
-import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
-import 'chat_page.dart';
+import '../notifier/chat_side_notifier.dart';
 import 'files_preview.dart';
 import 'voice_recorder_bottom_bar.dart';
 
@@ -61,10 +58,11 @@ class InputContainer extends HookConsumerWidget {
 
     final hasParticipant = ref.watch(currentConversationHasParticipantProvider);
 
-    final voiceRecorderCubit = useBloc(
-      () => VoiceRecorderCubit(context.audioMessageService),
-      keys: [conversationId],
+    final voiceRecorderNotifier = useMemoized(
+      () => VoiceRecorderNotifier(context.audioMessageService),
+      [conversationId],
     );
+    useEffect(() => voiceRecorderNotifier.dispose, [voiceRecorderNotifier]);
 
     if (!hasParticipant) {
       return Container(
@@ -78,8 +76,8 @@ class InputContainer extends HookConsumerWidget {
       );
     }
 
-    return BlocProvider<VoiceRecorderCubit>.value(
-      value: voiceRecorderCubit,
+    return ChangeNotifierProvider<VoiceRecorderNotifier>.value(
+      value: voiceRecorderNotifier,
       child: LayoutBuilder(
         builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
           layoutWidth: constraints.maxWidth,
@@ -174,11 +172,9 @@ class _InputContainer extends HookConsumerWidget {
       };
     }, []);
 
-    final chatSidePageSize =
-        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, int>(
-          bloc: context.read<ChatSideCubit>(),
-          converter: (state) => state.pages.length,
-        );
+    final chatSidePageSize = useValueListenable(
+      context.read<ChatSideNotifier>(),
+    ).pages.length;
     useEffect(() {
       if (!context.textFieldAutoGainFocus) {
         // Make sure on iPad/Android Pad the text field not get focused when the chat side
@@ -328,7 +324,8 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
             child: ActionButton(
               name: Resources.assetsImagesMicrophoneSvg,
               color: context.theme.icon,
-              onTap: () => context.read<VoiceRecorderCubit>().startRecording(),
+              onTap: () =>
+                  context.read<VoiceRecorderNotifier>().startRecording(),
             ),
           ),
       ],
@@ -751,9 +748,9 @@ class _AnimatedSendTypeButton extends StatelessWidget {
             final position = renderBox.localToGlobal(
               renderBox.paintBounds.topCenter,
             );
-            context.sendMenuPosition(position);
+            context.menuPosition = position;
           } else {
-            context.sendMenuPosition(details.globalPosition);
+            context.menuPosition = details.globalPosition;
           }
         },
         color: context.theme.icon,
@@ -775,14 +772,17 @@ class _StickerButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
 
-    final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(
-        context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
-          eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-          duration: kVerySlowThrottleDuration,
-        ),
-      ),
-    );
+    final stickerAlbums =
+        useMemoizedStream(
+          () => context.database.stickerAlbumDao
+              .systemAddedAlbums()
+              .watchWithStream(
+                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
+                duration: kVerySlowThrottleDuration,
+              ),
+          initialData: const <StickerAlbum>[],
+        ).data ??
+        const <StickerAlbum>[];
 
     final presetStickerGroups = useMemoized(
       () => [
@@ -794,18 +794,10 @@ class _StickerButton extends HookConsumerWidget {
       ],
     );
 
-    final tabLength =
-        useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-          bloc: stickerAlbumsCubit,
-          converter: (state) => state.length + presetStickerGroups.length,
-          keys: [presetStickerGroups],
-        );
+    final tabLength = stickerAlbums.length + presetStickerGroups.length;
 
-    return MultiProvider(
-      providers: [
-        BlocProvider.value(value: stickerAlbumsCubit),
-        ChangeNotifierProvider.value(value: textEditingController),
-      ],
+    return ChangeNotifierProvider.value(
+      value: textEditingController,
       child: DefaultTabController(
         length: tabLength,
         initialIndex: 1,
@@ -846,6 +838,7 @@ class _StickerButton extends HookConsumerWidget {
                 tabController: DefaultTabController.of(context),
                 tabLength: tabLength,
                 presetStickerGroups: presetStickerGroups,
+                stickerAlbums: stickerAlbums,
               ),
             ),
           ),

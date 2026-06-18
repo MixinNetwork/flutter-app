@@ -8,14 +8,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:provider/provider.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
-import '../../../bloc/simple_cubit.dart';
-import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart' hide Offset;
@@ -37,168 +36,21 @@ import '../../../widgets/message/message_day_time.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/window/menus.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
-import '../bloc/blink_cubit.dart';
 import '../bloc/message_bloc.dart';
-import '../chat_slide_page/chat_info_page.dart';
-import '../chat_slide_page/circle_manager_page.dart';
-import '../chat_slide_page/disappear_message_page.dart';
-import '../chat_slide_page/group_participants_page.dart';
-import '../chat_slide_page/groups_in_common_page.dart';
-import '../chat_slide_page/pin_messages_page.dart';
-import '../chat_slide_page/search_message_page.dart';
-import '../chat_slide_page/shared_apps_page.dart';
-import '../chat_slide_page/shared_media_page.dart';
 import '../home.dart';
 import '../hook/pin_message.dart';
-import '../route/responsive_navigator.dart';
+import '../notifier/blink_notifier.dart';
+import '../notifier/chat_side_notifier.dart';
 import 'chat_bar.dart';
 import 'chat_scroll_coordinator.dart';
 import 'files_preview.dart';
 import 'input_container.dart';
 import 'message_jump.dart';
 import 'selection_bottom_bar.dart';
-
-class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
-  ChatSideCubit() : super(const ResponsiveNavigatorState());
-
-  static const infoPage = 'infoPage';
-  static const circles = 'circles';
-  static const searchMessageHistory = 'searchMessageHistory';
-  static const sharedMedia = 'sharedMedia';
-  static const participants = 'participants';
-  static const pinMessages = 'pinMessages';
-  static const sharedApps = 'sharedApps';
-  static const groupsInCommon = 'groupsInCommon';
-  static const disappearMessages = 'disappearMessages';
-
-  @override
-  MaterialPage route(String name, Object? arguments) {
-    switch (name) {
-      case infoPage:
-        return const MaterialPage(
-          key: ValueKey(infoPage),
-          name: infoPage,
-          child: _ChatSidePageBuilder(ChatInfoPage.new),
-        );
-      case circles:
-        return const MaterialPage(
-          key: ValueKey(circles),
-          name: circles,
-          child: _ChatSidePageBuilder(CircleManagerPage.new),
-        );
-      case searchMessageHistory:
-        return const MaterialPage(
-          key: ValueKey(searchMessageHistory),
-          name: searchMessageHistory,
-          child: _ChatSidePageBuilder(SearchMessagePage.new),
-        );
-      case sharedMedia:
-        return const MaterialPage(
-          key: ValueKey(sharedMedia),
-          name: sharedMedia,
-          child: _ChatSidePageBuilder(SharedMediaPage.new),
-        );
-      case participants:
-        return const MaterialPage(
-          key: ValueKey(participants),
-          name: participants,
-          child: _ChatSidePageBuilder(GroupParticipantsPage.new),
-        );
-      case pinMessages:
-        return const MaterialPage(
-          key: ValueKey(pinMessages),
-          name: pinMessages,
-          child: _ChatSidePageBuilder(PinMessagesPage.new),
-        );
-      case sharedApps:
-        return const MaterialPage(
-          key: ValueKey(sharedApps),
-          name: sharedApps,
-          child: _ChatSidePageBuilder(SharedAppsPage.new),
-        );
-      case groupsInCommon:
-        return const MaterialPage(
-          key: ValueKey(groupsInCommon),
-          name: groupsInCommon,
-          child: _ChatSidePageBuilder(GroupsInCommonPage.new),
-        );
-      case disappearMessages:
-        return const MaterialPage(
-          key: ValueKey(disappearMessages),
-          name: disappearMessages,
-          child: _ChatSidePageBuilder(DisappearMessagePage.new),
-        );
-      default:
-        throw ArgumentError('Invalid route');
-    }
-  }
-
-  void toggleInfoPage() {
-    if (state.pages.isEmpty) {
-      return emit(state.copyWith(pages: [route(ChatSideCubit.infoPage, null)]));
-    }
-    return clear();
-  }
-}
-
-class SearchConversationKeywordCubit extends SimpleCubit<(String?, String)>
-    with SubscribeMixin {
-  SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
-    : super(const (null, '')) {
-    addSubscription(
-      chatSideCubit.stream
-          .map(
-            (event) => event.pages.any(
-              (element) => element.name == ChatSideCubit.searchMessageHistory,
-            ),
-          )
-          .distinct()
-          .listen((event) => emit(const (null, ''))),
-    );
-  }
-
-  static void updateKeyword(BuildContext context, String keyword) {
-    final cubit = context.read<SearchConversationKeywordCubit>();
-    cubit.emit((cubit.state.$1, keyword));
-  }
-
-  static void updateSelectedUser(BuildContext context, String? userId) {
-    final cubit = context.read<SearchConversationKeywordCubit>();
-    cubit.emit((userId, cubit.state.$2));
-  }
-}
-
-class _ChatSidePageBuilder extends HookConsumerWidget {
-  const _ChatSidePageBuilder(this.builder);
-
-  final Widget Function(ConversationState conversationState) builder;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final conversationId = useMemoized(
-      () => ref.read(lastConversationIdProvider),
-      [],
-    );
-
-    final filter = useCallback<bool Function(ConversationState?)>(
-      (state) => state?.conversationId == conversationId,
-      [conversationId],
-    );
-
-    final conversationState = ref.watch(filterLastConversationProvider(filter));
-
-    if (conversationId == null || conversationState == null) {
-      return const SizedBox();
-    }
-
-    return builder(conversationState);
-  }
-}
 
 class ChatPage extends HookConsumerWidget {
   const ChatPage({super.key});
@@ -212,27 +64,34 @@ class ChatPage extends HookConsumerWidget {
       ),
     );
 
-    final chatSideCubit = useBloc(ChatSideCubit.new, keys: [conversationId]);
+    final chatSideNotifier = useMemoized(
+      ChatSideNotifier.new,
+      [conversationId],
+    );
+    useEffect(() => chatSideNotifier.dispose, [chatSideNotifier]);
 
-    final searchConversationKeywordCubit = useBloc(
-      () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
-      keys: [conversationId],
+    final searchConversationKeywordNotifier = useMemoized(
+      () => SearchConversationKeywordNotifier(
+        chatSideNotifier: chatSideNotifier,
+      ),
+      [conversationId, chatSideNotifier],
+    );
+    useEffect(
+      () => searchConversationKeywordNotifier.dispose,
+      [searchConversationKeywordNotifier],
     );
 
     useEffect(() {
       if (initialSidePage != null) {
-        chatSideCubit.pushPage(initialSidePage);
+        chatSideNotifier.pushPage(initialSidePage);
       }
-    }, [initialSidePage, chatSideCubit]);
+    }, [initialSidePage, chatSideNotifier]);
 
-    final navigatorState =
-        useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
-          bloc: chatSideCubit,
-        );
+    final navigatorState = useValueListenable(chatSideNotifier);
 
     ref.listen(hasSelectedMessageProvider, (previous, hasSelectedMessage) {
       if (!hasSelectedMessage) return;
-      chatSideCubit.clear();
+      chatSideNotifier.clear();
     });
 
     final chatContainerPage = MaterialPage(
@@ -244,19 +103,24 @@ class ChatPage extends HookConsumerWidget {
     final windowHeight = MediaQuery.sizeOf(context).height;
 
     final tickerProvider = useSingleTickerProvider();
-    final blinkCubit = useBloc(
-      () => BlinkCubit(
+    final blinkNotifier = useMemoized(
+      () => BlinkNotifier(
         tickerProvider,
         context.theme.accent.withValues(alpha: 0.5),
       ),
     );
+    useEffect(() => blinkNotifier.dispose, [blinkNotifier]);
     final pinMessageState = usePinMessageState(conversationId);
 
     return MultiProvider(
       providers: [
-        BlocProvider.value(value: blinkCubit),
-        BlocProvider.value(value: chatSideCubit),
-        BlocProvider.value(value: searchConversationKeywordCubit),
+        ChangeNotifierProvider<BlinkNotifier>.value(value: blinkNotifier),
+        ChangeNotifierProvider<ChatSideNotifier>.value(
+          value: chatSideNotifier,
+        ),
+        ChangeNotifierProvider<SearchConversationKeywordNotifier>.value(
+          value: searchConversationKeywordNotifier,
+        ),
         BlocProvider(
           create: (context) => MessageBloc(
             accountServer: context.accountServer,
@@ -281,7 +145,7 @@ class ChatPage extends HookConsumerWidget {
             final routeMode =
                 boxConstraints.maxWidth <
                 (kResponsiveNavigationMinWidth + kChatSidePageWidth);
-            chatSideCubit.updateRouteMode(routeMode);
+            chatSideNotifier.updateRouteMode(routeMode);
 
             return _ChatMenuHandler(
               child: Row(
@@ -296,14 +160,14 @@ class ChatPage extends HookConsumerWidget {
                     },
                     actions: {
                       EscapeIntent: CallbackAction<EscapeIntent>(
-                        onInvoke: (intent) => chatSideCubit.pop(),
+                        onInvoke: (intent) => chatSideNotifier.pop(),
                       ),
                     },
                     child: _SideRouter(
-                      chatSideCubit: chatSideCubit,
                       constraints: boxConstraints,
+                      routeMode: routeMode,
                       onDidRemovePage: (page) {
-                        chatSideCubit.onPopPage();
+                        chatSideNotifier.onPopPage();
                       },
                       pages: [
                         if (routeMode) chatContainerPage,
@@ -323,34 +187,30 @@ class ChatPage extends HookConsumerWidget {
 
 class _SideRouter extends StatelessWidget {
   const _SideRouter({
-    required this.chatSideCubit,
     required this.pages,
     required this.constraints,
+    required this.routeMode,
     this.onDidRemovePage,
   });
-
-  final ChatSideCubit chatSideCubit;
 
   final List<Page<dynamic>> pages;
 
   final DidRemovePageCallback? onDidRemovePage;
 
   final BoxConstraints constraints;
+  final bool routeMode;
 
   @override
-  Widget build(BuildContext context) {
-    final routeMode = chatSideCubit.state.routeMode;
-    return routeMode
-        ? SizedBox(
-            width: constraints.maxWidth,
-            child: Navigator(pages: pages, onDidRemovePage: onDidRemovePage),
-          )
-        : _AnimatedChatSlide(
-            constraints: constraints,
-            pages: pages,
-            onDidRemovePage: onDidRemovePage,
-          );
-  }
+  Widget build(BuildContext context) => routeMode
+      ? SizedBox(
+          width: constraints.maxWidth,
+          child: Navigator(pages: pages, onDidRemovePage: onDidRemovePage),
+        )
+      : _AnimatedChatSlide(
+          constraints: constraints,
+          pages: pages,
+          onDidRemovePage: onDidRemovePage,
+        );
 }
 
 class _AnimatedChatSlide extends HookConsumerWidget {
@@ -551,7 +411,6 @@ class _List extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messageBloc = context.read<MessageBloc>();
     final scrollCoordinator = context.read<ChatScrollCoordinator>();
-    final hiddenMessageDayTimeBloc = useBloc(HiddenMessageDayTimeBloc.new);
     final state = useBlocState<MessageBloc, MessageState>(
       when: (state) => state.conversationId != null,
     );
@@ -590,20 +449,6 @@ class _List extends HookConsumerWidget {
       syncMessageGlobalKeys(messageKeysRef.value, messageIds);
     }, [messageIdsKey]);
 
-    useEffect(() {
-      void syncHiddenDateTime() {
-        hiddenMessageDayTimeBloc.update(
-          scrollCoordinator.visibleDateTime.value,
-        );
-      }
-
-      scrollCoordinator.visibleDateTime.addListener(syncHiddenDateTime);
-      syncHiddenDateTime();
-      return () {
-        scrollCoordinator.visibleDateTime.removeListener(syncHiddenDateTime);
-      };
-    }, [hiddenMessageDayTimeBloc, scrollCoordinator]);
-
     useEffect(
       () {
         scrollCoordinator.scheduleRestore(
@@ -625,113 +470,83 @@ class _List extends HookConsumerWidget {
       ],
     );
 
-    return BlocProvider.value(
-      value: hiddenMessageDayTimeBloc,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: (notification) =>
-                scrollCoordinator.handleScrollNotification(
-                  notification,
-                  messages: messages,
-                  keysByMessageId: messageKeysRef.value,
-                  loadBefore: messageBloc.before,
-                  loadAfter: messageBloc.after,
-                ),
-            child: ClampingCustomScrollView(
-              key: scrollCoordinator.viewportKey,
-              center: key,
-              controller: scrollCoordinator.scrollController,
-              anchor: 0.3,
-              physics: const ClampingScrollPhysics(),
-              scrollCacheExtent: const ScrollCacheExtent.viewport(
-                ChatScrollCoordinator.loadedJumpViewportCount,
-              ),
-              slivers: [
-                SliverList(
-                  key: scrollCoordinator.topSliverKey,
-                  delegate: SliverChildBuilderDelegate((
-                    context,
-                    index,
-                  ) {
-                    final actualIndex = top.length - index - 1;
-                    final messageItem = top[actualIndex];
-                    return MessageItemWidget(
-                      key: messageKeysRef.value[messageItem.messageId],
-                      prev: top.getOrNull(actualIndex - 1),
-                      message: messageItem,
-                      next:
-                          top.getOrNull(actualIndex + 1) ??
-                          center ??
-                          bottom.lastOrNull,
-                      lastReadMessageId: state.lastReadMessageId,
-                    );
-                  }, childCount: top.length),
-                ),
-                SliverToBoxAdapter(
-                  key: key,
-                  child: Builder(
-                    builder: (context) {
-                      if (center == null) return const SizedBox();
-                      return MessageItemWidget(
-                        key: messageKeysRef.value[center.messageId],
-                        prev: top.lastOrNull,
-                        message: center,
-                        next: bottom.firstOrNull,
-                        lastReadMessageId: state.lastReadMessageId,
-                      );
-                    },
-                  ),
-                ),
-                SliverList(
-                  key: scrollCoordinator.bottomSliverKey,
-                  delegate: SliverChildBuilderDelegate((
-                    context,
-                    index,
-                  ) {
-                    final messageItem = bottom[index];
-                    return MessageItemWidget(
-                      key: messageKeysRef.value[messageItem.messageId],
-                      prev:
-                          bottom.getOrNull(index - 1) ??
-                          center ??
-                          top.lastOrNull,
-                      message: messageItem,
-                      next: bottom.getOrNull(index + 1),
-                      lastReadMessageId: state.lastReadMessageId,
-                    );
-                  }, childCount: bottom.length),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 10)),
-              ],
+    return MessageDayTimeViewportWidget.chatPage(
+      key: key,
+      topKey: scrollCoordinator.topSliverKey,
+      bottomKey: scrollCoordinator.bottomSliverKey,
+      center: center,
+      centerKey: center == null ? null : messageKeysRef.value[center.messageId],
+      scrollController: scrollCoordinator.scrollController,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) =>
+            scrollCoordinator.handleScrollNotification(
+              notification,
+              messages: messages,
+              keysByMessageId: messageKeysRef.value,
+              loadBefore: messageBloc.before,
+              loadAfter: messageBloc.after,
             ),
+        child: ClampingCustomScrollView(
+          key: scrollCoordinator.viewportKey,
+          center: key,
+          controller: scrollCoordinator.scrollController,
+          anchor: 0.3,
+          physics: const ClampingScrollPhysics(),
+          scrollCacheExtent: const ScrollCacheExtent.viewport(
+            ChatScrollCoordinator.loadedJumpViewportCount,
           ),
-          _ChatDateOverlay(scrollCoordinator: scrollCoordinator),
-        ],
+          slivers: [
+            SliverList(
+              key: scrollCoordinator.topSliverKey,
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final actualIndex = top.length - index - 1;
+                final messageItem = top[actualIndex];
+                return MessageItemWidget(
+                  key: messageKeysRef.value[messageItem.messageId],
+                  prev: top.getOrNull(actualIndex - 1),
+                  message: messageItem,
+                  next:
+                      top.getOrNull(actualIndex + 1) ??
+                      center ??
+                      bottom.lastOrNull,
+                  lastReadMessageId: state.lastReadMessageId,
+                );
+              }, childCount: top.length),
+            ),
+            SliverToBoxAdapter(
+              key: key,
+              child: Builder(
+                builder: (context) {
+                  if (center == null) return const SizedBox();
+                  return MessageItemWidget(
+                    key: messageKeysRef.value[center.messageId],
+                    prev: top.lastOrNull,
+                    message: center,
+                    next: bottom.firstOrNull,
+                    lastReadMessageId: state.lastReadMessageId,
+                  );
+                },
+              ),
+            ),
+            SliverList(
+              key: scrollCoordinator.bottomSliverKey,
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final messageItem = bottom[index];
+                return MessageItemWidget(
+                  key: messageKeysRef.value[messageItem.messageId],
+                  prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+                  message: messageItem,
+                  next: bottom.getOrNull(index + 1),
+                  lastReadMessageId: state.lastReadMessageId,
+                );
+              }, childCount: bottom.length),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 10)),
+          ],
+        ),
       ),
     );
   }
-}
-
-class _ChatDateOverlay extends StatelessWidget {
-  const _ChatDateOverlay({required this.scrollCoordinator});
-
-  final ChatScrollCoordinator scrollCoordinator;
-
-  @override
-  Widget build(BuildContext context) => ValueListenableBuilder<DateTime?>(
-    valueListenable: scrollCoordinator.visibleDateTime,
-    builder: (context, dateTime, child) {
-      if (dateTime == null) return const SizedBox();
-      return IgnorePointer(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: MessageDayTimeChip(dateTime: dateTime),
-        ),
-      );
-    },
-  );
 }
 
 class _JumpCurrentButton extends HookConsumerWidget {
@@ -937,13 +752,13 @@ class _PinMessagesBanner extends HookConsumerWidget {
               visible: currentPinMessageIds.isNotEmpty,
               child: InteractiveDecoratedBox(
                 onTap: () {
-                  final cubit = context.read<ChatSideCubit>();
-                  if (cubit.state.pages.lastOrNull?.name ==
-                      ChatSideCubit.pinMessages) {
-                    return cubit.pop();
+                  final notifier = context.read<ChatSideNotifier>();
+                  if (notifier.state.pages.lastOrNull?.name ==
+                      ChatSideNotifier.pinMessages) {
+                    return notifier.pop();
                   }
 
-                  cubit.replace(ChatSideCubit.pinMessages);
+                  notifier.replace(ChatSideNotifier.pinMessages);
                 },
                 child: Container(
                   height: 34,
@@ -1264,18 +1079,18 @@ class _ConversationHandle extends ConversationMenuHandle {
 
   @override
   void showSearch() {
-    final cubit = context.read<ChatSideCubit>();
-    if (cubit.state.pages.lastOrNull?.name ==
-        ChatSideCubit.searchMessageHistory) {
-      return cubit.pop();
+    final notifier = context.read<ChatSideNotifier>();
+    if (notifier.state.pages.lastOrNull?.name ==
+        ChatSideNotifier.searchMessageHistory) {
+      return notifier.pop();
     }
 
-    cubit.replace(ChatSideCubit.searchMessageHistory);
+    notifier.replace(ChatSideNotifier.searchMessageHistory);
   }
 
   @override
   void toggleSideBar() {
-    context.read<ChatSideCubit>().toggleInfoPage();
+    context.read<ChatSideNotifier>().toggleInfoPage();
   }
 
   @override

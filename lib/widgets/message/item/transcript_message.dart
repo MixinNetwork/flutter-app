@@ -2,18 +2,18 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../db/mixin_database.dart';
-import '../../../ui/home/bloc/blink_cubit.dart';
-import '../../../ui/home/chat/chat_page.dart';
+import '../../../ui/home/notifier/blink_notifier.dart';
+import '../../../ui/home/notifier/chat_side_notifier.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -255,18 +255,26 @@ class TranscriptPage extends HookConsumerWidget {
 
     final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
-    final chatSideCubit = useBloc(ChatSideCubit.new);
-    final searchConversationKeywordCubit = useBloc(
-      () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
+    final chatSideNotifier = useMemoized(ChatSideNotifier.new);
+    useEffect(() => chatSideNotifier.dispose, [chatSideNotifier]);
+    final searchConversationKeywordNotifier = useMemoized(
+      () =>
+          SearchConversationKeywordNotifier(chatSideNotifier: chatSideNotifier),
+      [chatSideNotifier],
+    );
+    useEffect(
+      () => searchConversationKeywordNotifier.dispose,
+      [searchConversationKeywordNotifier],
     );
 
     final tickerProvider = useSingleTickerProvider();
-    final blinkCubit = useBloc(
-      () => BlinkCubit(
+    final blinkNotifier = useMemoized(
+      () => BlinkNotifier(
         tickerProvider,
         context.theme.accent.withValues(alpha: 0.5),
       ),
     );
+    useEffect(() => blinkNotifier.dispose, [blinkNotifier]);
 
     final scrollController = useMemoized(ScrollController.new);
     final listKey = useMemoized(
@@ -281,8 +289,10 @@ class TranscriptPage extends HookConsumerWidget {
       ),
       child: MultiProvider(
         providers: [
-          BlocProvider.value(value: searchConversationKeywordCubit),
-          BlocProvider.value(value: blinkCubit),
+          ChangeNotifierProvider<SearchConversationKeywordNotifier>.value(
+            value: searchConversationKeywordNotifier,
+          ),
+          ChangeNotifierProvider<BlinkNotifier>.value(value: blinkNotifier),
           Provider.value(value: vlcService),
           Provider(
             create: (_) => AudioMessagesPlayAgent(
