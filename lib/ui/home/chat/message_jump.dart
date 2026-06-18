@@ -8,6 +8,9 @@ import '../notifier/blink_notifier.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
 
+bool shouldUseLoadedLatestWindowForLatestJump(MessageState state) =>
+    state.isLatest;
+
 extension ChatMessageJump on BuildContext {
   Future<void> jumpToMessageInChat(
     String messageId, {
@@ -54,9 +57,11 @@ extension ChatMessageJump on BuildContext {
   Future<void> jumpToLatestInChat() async {
     traceChatJump('request latest');
     final scrollCoordinator = read<ChatScrollCoordinator>();
-    if (await scrollCoordinator.scrollToBottomIfInLoadedWindow(
-      animated: true,
-    )) {
+    final messageBloc = read<MessageBloc>();
+    if (shouldUseLoadedLatestWindowForLatestJump(messageBloc.state) &&
+        await scrollCoordinator.scrollToBottomIfInLoadedWindow(
+          animated: true,
+        )) {
       traceChatJump('loaded-window latest handled=true');
       return;
     }
@@ -65,7 +70,7 @@ extension ChatMessageJump on BuildContext {
     scrollCoordinator.animateNextRestore(
       direction: ChatScrollRestoreDirection.towardNewer,
     );
-    read<MessageBloc>().jumpToLatestWindow();
+    messageBloc.jumpToLatestWindow();
   }
 
   void popChatSideRouteIfNeeded() {

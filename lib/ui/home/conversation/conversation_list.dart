@@ -80,8 +80,8 @@ class ConversationList extends HookConsumerWidget {
             itemBuilder: (context, index) {
               final conversation = pagingState.map[index];
               if (conversation == null) return const SizedBox(height: 80);
-              final selected =
-                  conversation.conversationId == conversationId && !routeMode;
+              final current = conversation.conversationId == conversationId;
+              final selected = current && !routeMode;
               return ConversationMenuWrapper(
                 conversation: conversation,
                 removeChatFromCircle: true,
@@ -89,7 +89,7 @@ class ConversationList extends HookConsumerWidget {
                   selected: selected,
                   conversation: conversation,
                   onTap: () {
-                    if (selected) {
+                    if (current) {
                       ref.read(pendingJumpLatestProvider.notifier).state =
                           Object();
                       return;

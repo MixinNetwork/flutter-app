@@ -30,8 +30,8 @@ class UnseenConversationList extends HookConsumerWidget {
     return ScrollablePositionedList.builder(
       itemBuilder: (context, index) {
         final conversation = unseenConversations[index];
-        final selected =
-            conversation.conversationId == currentConversationId && !routeMode;
+        final current = conversation.conversationId == currentConversationId;
+        final selected = current && !routeMode;
         return ConversationMenuWrapper(
           conversation: conversation,
           removeChatFromCircle: true,
@@ -39,7 +39,7 @@ class UnseenConversationList extends HookConsumerWidget {
             conversation: conversation,
             selected: selected,
             onTap: () {
-              if (selected) {
+              if (current) {
                 ref.read(pendingJumpLatestProvider.notifier).state = Object();
                 return;
               }
