@@ -1,8 +1,47 @@
-// ignore_for_file: avoid_catching_errors
+import 'dart:convert';
+import 'dart:io';
 
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:synchronized/synchronized.dart';
 
-T? fromHydratedJson<T>(
+class LocalStateStorage {
+  LocalStateStorage._();
+
+  static final _lock = Lock();
+  static late final HiveInterface _hive;
+  static late final Box<dynamic> _box;
+
+  static Future<void> init(String directory) async {
+    _hive = Hive..init(directory);
+    _box = await _hive.openBox<dynamic>('hydrated_box');
+    await _migrateOldStateJson(directory);
+  }
+
+  static dynamic read(String key) => _box.isOpen ? _box.get(key) : null;
+
+  static Future<void> write(String key, dynamic value) async {
+    if (!_box.isOpen) return;
+    await _lock.synchronized(() => _box.put(key, value));
+  }
+
+  static Future<void> _migrateOldStateJson(String directory) async {
+    final file = File('$directory/.hydrated_bloc.json');
+    if (!file.existsSync()) return;
+
+    try {
+      final storageJson = json.decode(await file.readAsString());
+      final cache = (storageJson as Map).cast<String, String>();
+      for (final entry in cache.entries) {
+        try {
+          await _box.put(entry.key, json.decode(entry.value));
+        } catch (_) {}
+      }
+    } catch (_) {}
+    await file.delete();
+  }
+}
+
+T? fromStoredJson<T>(
   dynamic json,
   T Function(Map<String, dynamic>) fromJson,
 ) {
@@ -11,7 +50,7 @@ T? fromHydratedJson<T>(
   return fromJson(castJson ?? <String, dynamic>{});
 }
 
-Map<String, dynamic>? toHydratedJson(Map<String, dynamic> state) =>
+Map<String, dynamic>? toStoredJson(Map<String, dynamic> state) =>
     _cast<Map<String, dynamic>>(_traverseWrite(state).value);
 
 dynamic _traverseRead(dynamic value) {
@@ -109,20 +148,12 @@ _Traversed _traverseWrite(Object? value) {
   if (traversedComplexJson is! NIL) {
     return _Traversed.complex(traversedComplexJson);
   }
-  try {
-    final dynamic customJson = _toEncodable(value);
-    final dynamic traversedCustomJson = _traverseJson(customJson);
-    if (traversedCustomJson is NIL) {
-      throw HydratedUnsupportedError(value);
-    }
-    return _Traversed.complex(traversedCustomJson);
-  } on HydratedCyclicError catch (e, s) {
-    Error.throwWithStackTrace(HydratedUnsupportedError(value, cause: e), s);
-  } on HydratedUnsupportedError {
-    rethrow; // do not stack `HydratedUnsupportedError`
-  } catch (e, s) {
-    Error.throwWithStackTrace(HydratedUnsupportedError(value, cause: e), s);
+  final dynamic customJson = _toEncodable(value);
+  final dynamic traversedCustomJson = _traverseJson(customJson);
+  if (traversedCustomJson is NIL) {
+    throw ArgumentError.value(value, 'value', 'unsupported json value');
   }
+  return _Traversed.complex(traversedCustomJson);
 }
 
 T? _cast<T>(dynamic x) => x is T ? x : null;

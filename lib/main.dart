@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:protocol_handler/protocol_handler.dart';
@@ -18,7 +17,6 @@ import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app.dart';
-import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
 import 'ui/setting/log_page.dart';
 import 'utils/app_lifecycle.dart';
@@ -26,6 +24,7 @@ import 'utils/event_bus.dart';
 import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
+import 'utils/local_state_storage.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
@@ -87,13 +86,7 @@ Future<void> _runApp(List<String> args) async {
   };
 
   Hive.init(mixinDocumentsDirectory.path);
-
-  HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: HydratedStorageDirectory(mixinDocumentsDirectory.path),
-  );
-  if (kDebugMode) {
-    Bloc.observer = CustomBlocObserver();
-  }
+  await LocalStateStorage.init(mixinDocumentsDirectory.path);
 
   runApp(const ProviderScope(child: OverlaySupport.global(child: App())));
 

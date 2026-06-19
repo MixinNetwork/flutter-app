@@ -4,9 +4,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-import '../../utils/hydrated_bloc.dart';
+import '../../utils/local_state_storage.dart';
 import '../../utils/logger.dart';
 
 @Deprecated('Use settingProvider instead')
@@ -274,8 +273,8 @@ class SettingChangeNotifier extends ChangeNotifier {
 
   @override
   void notifyListeners() {
-    HydratedBloc.storage.write(
-      _kSettingCubitKey,
+    LocalStateStorage.write(
+      _settingStorageKey,
       _SettingState(
         brightness: _brightness,
         messageShowAvatar: _messageShowAvatar,
@@ -293,16 +292,16 @@ class SettingChangeNotifier extends ChangeNotifier {
 }
 
 @Deprecated('Use SettingChangeNotifier instead')
-const _kSettingCubitKey = 'SettingCubit';
+const _settingStorageKey = 'SettingCubit';
 
 final settingProvider =
     ChangeNotifierProvider.autoDispose<SettingChangeNotifier>((ref) {
       ref.keepAlive();
 
       //migrate
-      final oldJson = HydratedBloc.storage.read(_kSettingCubitKey);
+      final oldJson = LocalStateStorage.read(_settingStorageKey);
       if (oldJson != null) {
-        final settingState = fromHydratedJson(oldJson, _SettingState.fromMap);
+        final settingState = fromStoredJson(oldJson, _SettingState.fromMap);
         if (settingState == null) return SettingChangeNotifier();
         return SettingChangeNotifier(
           brightness: settingState.brightness,

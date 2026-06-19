@@ -190,7 +190,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final files = useState(initialFiles);
-    final quoteMessageCubit = ref.watch(quoteMessageProvider.notifier);
+    final quoteMessageNotifier = ref.watch(quoteMessageProvider.notifier);
 
     final hasMedia = useMemoized(
       () => files.value.indexWhere((e) => e.isMedia) != -1,
@@ -249,7 +249,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             _sendFile(
               context,
               file,
-              quoteMessageCubit.state?.messageId,
+              quoteMessageNotifier.state?.messageId,
               silent: silent,
               compress: currentTab.value == _TabType.image,
               imageCaption: isOneImage
@@ -258,7 +258,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             ),
           );
         }
-        quoteMessageCubit.state = null;
+        quoteMessageNotifier.state = null;
         Navigator.pop(context);
       } else {
         final zipFilePath = await runLoadBalancer(_archiveFiles, (
@@ -270,12 +270,12 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           _sendFile(
             context,
             _File.normal(zipFilePath),
-            quoteMessageCubit.state?.messageId,
+            quoteMessageNotifier.state?.messageId,
             silent: silent,
             compress: false,
           ),
         );
-        quoteMessageCubit.state = null;
+        quoteMessageNotifier.state = null;
         Navigator.pop(context);
       }
     }

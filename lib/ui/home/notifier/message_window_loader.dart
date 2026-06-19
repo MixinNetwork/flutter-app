@@ -1,4 +1,4 @@
-part of 'message_bloc.dart';
+part of 'message_controller.dart';
 
 typedef RecentMessagesQuery =
     Future<List<MessageItem>> Function(String conversationId, int limit);

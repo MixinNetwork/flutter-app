@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_app/bloc/paging/load_more_paging_state.dart';
+import 'package:flutter_app/ui/home/notifier/load_more_paging_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -9,7 +9,7 @@ void main() {
     final completeLoad = Completer<List<int>>();
     var loadMoreCallCount = 0;
 
-    final bloc = LoadMorePagingBloc<int>(
+    final controller = LoadMorePagingController<int>(
       reloadData: () async => [1],
       loadMoreData: (list) {
         loadMoreCallCount += 1;
@@ -20,11 +20,11 @@ void main() {
       },
       isSameKey: (a, b) => a == b,
     );
-    addTearDown(bloc.close);
+    addTearDown(controller.dispose);
 
-    await bloc.stream.firstWhere((state) => state.list.length == 1);
+    await waitForState(controller, (state) => state.list.length == 1);
 
-    bloc
+    controller
       ..loadMore()
       ..loadMore();
 
@@ -34,10 +34,30 @@ void main() {
     expect(loadMoreCallCount, 1);
 
     completeLoad.complete([1, 2]);
-    final loaded = await bloc.stream.firstWhere(
+    final loaded = await waitForState(
+      controller,
       (state) => state.list.length == 2,
     );
 
     expect(loaded.list, [1, 2]);
   });
+}
+
+Future<LoadMorePagingState<T>> waitForState<T>(
+  LoadMorePagingController<T> controller,
+  bool Function(LoadMorePagingState<T>) test,
+) {
+  final current = controller.value;
+  if (test(current)) return Future.value(current);
+
+  final completer = Completer<LoadMorePagingState<T>>();
+  void listener() {
+    final state = controller.value;
+    if (!test(state)) return;
+    controller.removeListener(listener);
+    completer.complete(state);
+  }
+
+  controller.addListener(listener);
+  return completer.future;
 }

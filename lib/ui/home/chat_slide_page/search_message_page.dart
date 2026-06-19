@@ -22,11 +22,11 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
-import '../bloc/search_message_cubit.dart';
 import '../chat/message_jump.dart';
 import '../conversation/search_list.dart';
 import '../notifier/chat_side_notifier.dart';
+import '../notifier/conversation_list_controller.dart';
+import '../notifier/search_message_controller.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
   const SearchMessagePage(this.conversationState, {super.key});
@@ -282,24 +282,25 @@ class _SearchMessageList extends HookConsumerWidget {
         ).data ??
         initKeyword.trim();
 
-    final searchMessageCubit = useBloc(
-      () => SearchMessageCubit.conversation(
+    final searchMessageController = useMemoized(
+      () => SearchMessageController.conversation(
         database: context.database,
         keyword: keyword,
-        limit: context.read<ConversationListBloc>().limit,
+        limit: context.read<ConversationListController>().limit,
         categories: categories,
         userId: selectedUserId,
         conversationId: conversationId,
       ),
-      keys: [keyword, categories, selectedUserId, conversationId],
+      [keyword, categories, selectedUserId, conversationId],
     );
+    useEffect(() => searchMessageController.dispose, [
+      searchMessageController,
+    ]);
 
-    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-      bloc: searchMessageCubit,
-    );
+    final pageState = useValueListenable(searchMessageController);
 
     return ScrollablePositionedList.builder(
-      itemPositionsListener: searchMessageCubit.itemPositionsListener,
+      itemPositionsListener: searchMessageController.itemPositionsListener,
       itemCount: pageState.items.length,
       itemBuilder: (context, index) {
         final message = pageState.items[index];

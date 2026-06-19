@@ -8,7 +8,7 @@ import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/slide_category_provider.dart';
 
 import '../../provider/unseen_conversations_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
+import '../notifier/conversation_list_controller.dart';
 
 class ConversationHotKey extends StatelessWidget {
   const ConversationHotKey({required this.child, super.key});
@@ -51,7 +51,7 @@ class PreviousConversationIntent extends Intent {
 
 void _navigationConversation(BuildContext context, {required bool forward}) {
   final category = context.providerContainer.read(slideCategoryStateProvider);
-  final conversationListBloc = context.read<ConversationListBloc>();
+  final conversationListController = context.read<ConversationListController>();
 
   if (category.type == SlideCategoryType.setting) return;
 
@@ -83,7 +83,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
     nextConversationId = unseenConversations[nextIndex].conversationId;
   } else {
     var currentConversationIndex = -1;
-    conversationListBloc.state.map.forEach((key, value) {
+    conversationListController.state.map.forEach((key, value) {
       if (value.conversationId == currentConversationId) {
         currentConversationIndex = key;
       }
@@ -96,7 +96,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
         : currentConversationIndex - 1;
 
     final nextConversation =
-        conversationListBloc.state.map[nextConversationIndex];
+        conversationListController.state.map[nextConversationIndex];
     if (nextConversation == null) return;
     nextConversationId = nextConversation.conversationId;
   }
@@ -105,7 +105,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
 
   if (nextConversationIndex == null) return;
 
-  final itemPositions = conversationListBloc
+  final itemPositions = conversationListController
       .itemPositionsListener(category)
       ?.itemPositions
       .value;
@@ -128,7 +128,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
       break;
     }
   }
-  final itemScrollController = conversationListBloc.itemScrollController(
+  final itemScrollController = conversationListController.itemScrollController(
     category,
   );
   if (itemScrollController == null) return;

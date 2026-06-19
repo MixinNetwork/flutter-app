@@ -13,7 +13,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
 import '../../utils/rivepod.dart';
 import '../../widgets/mention_panel.dart';
-import '../home/bloc/subscriber_mixin.dart';
+import '../home/notifier/subscriber_mixin.dart';
 import 'conversation_provider.dart';
 import 'database_provider.dart';
 import 'multi_auth_provider.dart';

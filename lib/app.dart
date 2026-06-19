@@ -3,11 +3,10 @@ import 'dart:io';
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
-    hide Consumer, FutureProvider, Provider;
+    hide ChangeNotifierProvider, Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
@@ -15,9 +14,9 @@ import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
+import 'ui/home/notifier/conversation_list_controller.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
@@ -112,16 +111,12 @@ class _Providers extends HookConsumerWidget {
     if (!asyncAccountServer.hasValue) return app;
     final accountServer = asyncAccountServer.requireValue;
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => ConversationListBloc(
-            ref.read(slideCategoryStateProvider.notifier),
-            accountServer.database,
-            ref.read(mentionCacheProvider),
-          ),
-        ),
-      ],
+    return ChangeNotifierProvider<ConversationListController>(
+      create: (context) => ConversationListController(
+        ref.read(slideCategoryStateProvider.notifier),
+        accountServer.database,
+        ref.read(mentionCacheProvider),
+      ),
       child: Provider<NotificationService>(
         create: (context) => NotificationService(context: context),
         lazy: false,
@@ -233,9 +228,9 @@ class _Home extends HookConsumerWidget {
           }
 
           if (deviceId.toLowerCase() != currentDeviceId.toLowerCase()) {
-            final multiAuthCubit = context.multiAuthChangeNotifier;
+            final multiAuthNotifier = context.multiAuthChangeNotifier;
             await accountServer.signOutAndClear();
-            multiAuthCubit.signOut();
+            multiAuthNotifier.signOut();
           }
         } catch (e) {
           w('checkDeviceId error: $e');
@@ -246,7 +241,7 @@ class _Home extends HookConsumerWidget {
     }, [accountServer]);
 
     if (accountServer != null) {
-      BlocProvider.of<ConversationListBloc>(context)
+      context.read<ConversationListController>()
         ..limit =
             MediaQuery.sizeOf(context).height ~/
             (ConversationPage.conversationItemHeight / 1.75)

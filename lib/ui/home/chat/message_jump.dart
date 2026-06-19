@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
-import '../bloc/message_bloc.dart';
 import '../notifier/blink_notifier.dart';
+import '../notifier/message_controller.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
 
@@ -23,7 +23,7 @@ extension ChatMessageJump on BuildContext {
     read<BlinkNotifier>().blinkByMessageId(messageId);
 
     final scrollCoordinator = read<ChatScrollCoordinator>();
-    final messageBloc = read<MessageBloc>();
+    final messageController = read<MessageController>();
     final handled = await scrollCoordinator.scrollToMessageIfInLoadedWindow(
       messageId,
       animated: true,
@@ -38,7 +38,8 @@ extension ChatMessageJump on BuildContext {
 
     traceChatJump('reload-window target=${shortMessageId(messageId)}');
     final directionSourceMessageId =
-        sourceMessageId ?? _currentWindowSourceMessageId(messageBloc.state);
+        sourceMessageId ??
+        _currentWindowSourceMessageId(messageController.state);
     final direction = await _restoreDirectionFromSource(
       sourceMessageId: directionSourceMessageId,
       targetMessageId: messageId,
@@ -51,14 +52,14 @@ extension ChatMessageJump on BuildContext {
       messageId,
       direction: direction,
     );
-    messageBloc.scrollTo(messageId);
+    messageController.scrollTo(messageId);
   }
 
   Future<void> jumpToLatestInChat() async {
     traceChatJump('request latest');
     final scrollCoordinator = read<ChatScrollCoordinator>();
-    final messageBloc = read<MessageBloc>();
-    if (shouldUseLoadedLatestWindowForLatestJump(messageBloc.state) &&
+    final messageController = read<MessageController>();
+    if (shouldUseLoadedLatestWindowForLatestJump(messageController.state) &&
         await scrollCoordinator.scrollToBottomIfInLoadedWindow(
           animated: true,
         )) {
@@ -70,7 +71,7 @@ extension ChatMessageJump on BuildContext {
     scrollCoordinator.animateNextRestore(
       direction: ChatScrollRestoreDirection.towardNewer,
     );
-    messageBloc.jumpToLatestWindow();
+    messageController.jumpToLatestWindow();
   }
 
   void popChatSideRouteIfNeeded() {

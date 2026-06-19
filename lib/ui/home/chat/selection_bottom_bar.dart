@@ -46,8 +46,8 @@ class SelectionBottomBar extends HookConsumerWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = ref.read(messageSelectionProvider);
-              final messageIds = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messageIds = selection.selectedMessageIds;
 
               await runWithLoading(
                 () => context.accountServer.sendTranscriptMessage(
@@ -57,7 +57,7 @@ class SelectionBottomBar extends HookConsumerWidget {
                   recipientId: result.first.userId,
                 ),
               );
-              cubit.clearSelection();
+              selection.clearSelection();
             },
           ),
           _Button(
@@ -73,8 +73,8 @@ class SelectionBottomBar extends HookConsumerWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = ref.read(messageSelectionProvider);
-              final messageIds = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messageIds = selection.selectedMessageIds;
 
               await runWithLoading(() async {
                 for (final id in messageIds) {
@@ -86,7 +86,7 @@ class SelectionBottomBar extends HookConsumerWidget {
                   );
                 }
               });
-              cubit.clearSelection();
+              selection.clearSelection();
             },
           ),
           _Button(

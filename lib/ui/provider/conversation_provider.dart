@@ -18,8 +18,8 @@ import '../../utils/extension/extension.dart';
 import '../../utils/local_notification_center.dart';
 import '../../utils/rivepod.dart';
 import '../../widgets/toast.dart';
-import '../home/bloc/conversation_list_bloc.dart';
-import '../home/bloc/subscriber_mixin.dart';
+import '../home/notifier/conversation_list_controller.dart';
+import '../home/notifier/subscriber_mixin.dart';
 import 'account_server_provider.dart';
 import 'is_bot_group_provider.dart';
 import 'recent_conversation_provider.dart';
@@ -399,7 +399,7 @@ class ConversationStateNotifier
     String conversationId,
   ) async {
     final conversations = context
-        .read<ConversationListBloc>()
+        .read<ConversationListController>()
         .state
         .map
         .values

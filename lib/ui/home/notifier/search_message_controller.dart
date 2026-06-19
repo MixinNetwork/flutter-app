@@ -1,5 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../db/dao/message_dao.dart';
@@ -20,8 +20,9 @@ class SearchMessageState with EquatableMixin {
   List<Object?> get props => [items, loading];
 }
 
-abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
-  SearchMessageCubit({
+abstract class SearchMessageController
+    extends ValueNotifier<SearchMessageState> {
+  SearchMessageController({
     required this.database,
     required this.keyword,
     required this.limit,
@@ -30,14 +31,14 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
     itemPositionsListener.itemPositions.addListener(_onItemPosition);
   }
 
-  factory SearchMessageCubit.conversation({
+  factory SearchMessageController.conversation({
     required Database database,
     required String keyword,
     required String conversationId,
     required String? userId,
     required List<String>? categories,
     required int limit,
-  }) => _ConversationSearchMessageCubit(
+  }) => _ConversationSearchMessageController(
     database: database,
     keyword: keyword,
     conversationId: conversationId,
@@ -46,12 +47,12 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
     limit: limit,
   );
 
-  factory SearchMessageCubit.slideCategory({
+  factory SearchMessageController.slideCategory({
     required Database database,
     required String keyword,
     required SlideCategoryState category,
     required int limit,
-  }) => _SlideCategorySearchMessageCubit(
+  }) => _SlideCategorySearchMessageController(
     database: database,
     keyword: keyword,
     category: category,
@@ -62,42 +63,42 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
       ItemPositionsListener.create();
 
   final Database database;
-
   final String keyword;
-
   final int limit;
 
   var _hasMore = true;
+  var _disposed = false;
 
-  @override
-  void emit(SearchMessageState state) {
-    if (isClosed) {
-      i('search message cubit: closed, ignore');
+  SearchMessageState get state => value;
+
+  void _setState(SearchMessageState state) {
+    if (_disposed) {
+      i('search message controller: disposed, ignore');
       return;
     }
-    super.emit(state);
+    value = state;
   }
 
   Future<void> _load() async {
     if (state.loading) {
-      w('search message cubit: loading, ignore');
+      w('search message controller: loading, ignore');
       return;
     }
     if (!_hasMore) {
       return;
     }
     final lastMessageId = state.items.lastOrNull?.messageId;
-    emit(SearchMessageState(state.items, true));
+    _setState(SearchMessageState(state.items, true));
     try {
       final items = await _doFuzzySearch(lastMessageId);
       if (items.isEmpty) {
-        d('search message cubit: no more data $lastMessageId');
+        d('search message controller: no more data $lastMessageId');
         _hasMore = false;
       }
-      emit(SearchMessageState([...state.items, ...items], false));
+      _setState(SearchMessageState([...state.items, ...items], false));
     } catch (error, stacktrace) {
-      e('search message cubit: load error', error, stacktrace);
-      emit(SearchMessageState(state.items, false));
+      e('search message controller: load error', error, stacktrace);
+      _setState(SearchMessageState(state.items, false));
       _hasMore = false;
     }
   }
@@ -116,14 +117,15 @@ abstract class SearchMessageCubit extends Cubit<SearchMessageState> {
   }
 
   @override
-  Future<void> close() {
+  void dispose() {
+    _disposed = true;
     itemPositionsListener.itemPositions.removeListener(_onItemPosition);
-    return super.close();
+    super.dispose();
   }
 }
 
-class _ConversationSearchMessageCubit extends SearchMessageCubit {
-  _ConversationSearchMessageCubit({
+class _ConversationSearchMessageController extends SearchMessageController {
+  _ConversationSearchMessageController({
     required this.conversationId,
     required super.database,
     required super.keyword,
@@ -169,8 +171,8 @@ class _ConversationSearchMessageCubit extends SearchMessageCubit {
   }
 }
 
-class _SlideCategorySearchMessageCubit extends SearchMessageCubit {
-  _SlideCategorySearchMessageCubit({
+class _SlideCategorySearchMessageController extends SearchMessageController {
+  _SlideCategorySearchMessageController({
     required this.category,
     required super.database,
     required super.keyword,

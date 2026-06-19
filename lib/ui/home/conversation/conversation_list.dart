@@ -6,7 +6,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key, User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
-import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../enum/message_category.dart';
@@ -27,7 +26,7 @@ import '../../provider/minute_timer_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
 import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
+import '../notifier/conversation_list_controller.dart';
 import 'audio_player_bar.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
@@ -41,21 +40,21 @@ class ConversationList extends HookConsumerWidget {
     final slideCategoryState =
         (key! as PageStorageKey<SlideCategoryState>).value;
 
-    final conversationListBloc = context.read<ConversationListBloc>();
-    final pagingState =
-        useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
-          bloc: conversationListBloc,
-        );
+    final conversationListController = context
+        .read<ConversationListController>();
+    final pagingState = useValueListenable(conversationListController);
     final conversationId = ref.watch(currentConversationIdProvider);
 
     final routeMode = ref.watch(navigatorRouteModeProvider);
 
-    final itemPositionsListener = conversationListBloc.itemPositionsListener(
-      slideCategoryState,
-    );
-    final itemScrollController = conversationListBloc.itemScrollController(
-      slideCategoryState,
-    );
+    final itemPositionsListener = conversationListController
+        .itemPositionsListener(
+          slideCategoryState,
+        );
+    final itemScrollController = conversationListController
+        .itemScrollController(
+          slideCategoryState,
+        );
 
     if (itemPositionsListener == null || itemScrollController == null) {
       return const SizedBox();

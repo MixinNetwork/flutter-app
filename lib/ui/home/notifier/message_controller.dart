@@ -1,14 +1,12 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
-import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../account/account_server.dart';
-import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/database_event_bus.dart';
@@ -21,62 +19,6 @@ import '../../provider/mention_cache_provider.dart';
 import '../chat/chat_jump_trace.dart';
 
 part 'message_window_loader.dart';
-
-abstract class _MessageEvent extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
-
-class _MessageInitEvent extends _MessageEvent {
-  _MessageInitEvent({
-    this.centerMessageId,
-    this.lastReadMessageId,
-    this.forceLatest = false,
-  });
-
-  final String? centerMessageId;
-  final String? lastReadMessageId;
-  final bool forceLatest;
-
-  @override
-  List<Object?> get props => [centerMessageId, lastReadMessageId, forceLatest];
-
-  @override
-  final stringify = true;
-}
-
-class _MessageScrollEvent extends _MessageEvent {
-  _MessageScrollEvent({required this.messageId});
-
-  final String messageId;
-
-  @override
-  List<Object?> get props => [messageId];
-}
-
-class _MessageLoadMoreEvent extends _MessageEvent {}
-
-class _MessageLoadAfterEvent extends _MessageLoadMoreEvent {}
-
-class _MessageLoadBeforeEvent extends _MessageLoadMoreEvent {}
-
-class _MessageInsertOrReplaceEvent extends _MessageEvent {
-  _MessageInsertOrReplaceEvent(this.data);
-
-  final List<MessageItem> data;
-
-  @override
-  List<Object> get props => [data];
-}
-
-class _MessageDeleteEvent extends _MessageEvent {
-  _MessageDeleteEvent(this.messageId);
-
-  final String messageId;
-
-  @override
-  List<Object> get props => [messageId];
-}
 
 class MessageState extends Equatable {
   MessageState({
@@ -194,96 +136,75 @@ class MessageState extends Equatable {
   }
 }
 
-class MessageBloc extends Bloc<_MessageEvent, MessageState>
-    with SubscribeMixin {
-  MessageBloc({
+class MessageController extends ValueNotifier<MessageState> {
+  MessageController({
     required this.conversationNotifier,
     required this.limit,
     required this.database,
     required this.mentionCache,
     required this.accountServer,
   }) : super(MessageState()) {
-    on<_MessageInitEvent>(
-      _onEvent,
-      transformer: restartable(),
-    );
-    on<_MessageLoadAfterEvent>(
-      _onEvent,
-      transformer: droppable(),
-    );
-    on<_MessageLoadBeforeEvent>(
-      _onEvent,
-      transformer: droppable(),
-    );
-    on<_MessageInsertOrReplaceEvent>(
-      _onEvent,
-      transformer: restartable(),
-    );
-    on<_MessageDeleteEvent>(
-      _onEvent,
-      transformer: sequential(),
-    );
-    on<_MessageScrollEvent>(
-      _onEvent,
-      transformer: restartable(),
-    );
-    add(
-      _MessageInitEvent(
-        centerMessageId: conversationNotifier.state?.initIndexMessageId,
-        lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
-      ),
-    );
-    addSubscription(
-      conversationNotifier.stream
-          .where((event) => event?.conversationId != null)
-          .map(
-            (event) => (
-              event?.conversationId,
-              event?.initIndexMessageId,
-              event?.lastReadMessageId,
-              event?.refreshKey,
-            ),
-          )
-          .distinct()
-          .asyncMap(
-            (event) async => _MessageInitEvent(
-              centerMessageId: event.$2,
-              lastReadMessageId: event.$3,
-            ),
-          )
-          .listen(add),
+    _init(
+      centerMessageId: conversationNotifier.state?.initIndexMessageId,
+      lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
     );
 
-    addSubscription(
-      conversationNotifier.stream
-          .startWith(conversationNotifier.state)
-          .map((event) => event?.conversationId)
-          .distinct()
-          .switchMap((conversationId) {
-            if (conversationId == null) {
-              return const Stream<List<MessageItem>>.empty();
-            }
-            return messageDao.watchInsertOrReplaceMessageStream(conversationId);
-          })
-          .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
-    );
-
-    addSubscription(
-      DataBaseEventBus.instance.deleteMessageIdStream.listen((messageIds) {
-        messageIds.forEach((messageId) {
-          add(_MessageDeleteEvent(messageId));
-        });
-      }),
-    );
+    _subscriptions
+      ..add(
+        conversationNotifier.stream
+            .where((event) => event?.conversationId != null)
+            .map(
+              (event) => (
+                event?.conversationId,
+                event?.initIndexMessageId,
+                event?.lastReadMessageId,
+                event?.refreshKey,
+              ),
+            )
+            .distinct()
+            .listen(
+              (event) => _init(
+                centerMessageId: event.$2,
+                lastReadMessageId: event.$3,
+              ),
+            ),
+      )
+      ..add(
+        conversationNotifier.stream
+            .startWith(conversationNotifier.state)
+            .map((event) => event?.conversationId)
+            .distinct()
+            .switchMap((conversationId) {
+              if (conversationId == null) {
+                return const Stream<List<MessageItem>>.empty();
+              }
+              return messageDao.watchInsertOrReplaceMessageStream(
+                conversationId,
+              );
+            })
+            .listen(_insertOrReplaceCurrentConversation),
+      )
+      ..add(
+        DataBaseEventBus.instance.deleteMessageIdStream.listen((messageIds) {
+          messageIds.forEach(_deleteMessage);
+        }),
+      );
   }
 
   final ConversationStateNotifier conversationNotifier;
   final Database database;
   final MentionCache mentionCache;
   final AccountServer accountServer;
+  final List<StreamSubscription?> _subscriptions = [];
   int limit;
+  var _generation = 0;
+  var _loadAfterInFlight = false;
+  var _loadBeforeInFlight = false;
+  var _disposed = false;
   late final MessageWindowLoader _messageWindowLoader =
       MessageWindowLoader.fromDao(messageDao);
+
+  MessageState get state => value;
 
   MessageDao get messageDao => database.messageDao;
 
@@ -305,82 +226,125 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  Future<void> _onEvent(_MessageEvent event, Emitter<MessageState> emit) async {
-    // Avoid value change
-    final finalLimit = limit;
+  @override
+  void dispose() {
+    _disposed = true;
+    _subscriptions
+      ..forEach((subscription) => unawaited(subscription?.cancel()))
+      ..clear();
+    super.dispose();
+  }
 
+  bool _isCurrent(int generation, String conversationId) =>
+      !_disposed &&
+      generation == _generation &&
+      conversationNotifier.state?.conversationId == conversationId;
+
+  void _emit(MessageState nextState) {
+    if (_disposed) return;
+    value = nextState;
+    _warmMentionCache(nextState);
+  }
+
+  void _init({
+    String? centerMessageId,
+    String? lastReadMessageId,
+    bool forceLatest = false,
+  }) {
+    final generation = ++_generation;
+    unawaited(
+      _runInit(
+        generation,
+        centerMessageId: centerMessageId,
+        lastReadMessageId: lastReadMessageId,
+        forceLatest: forceLatest,
+      ).catchError((Object error, StackTrace stackTrace) {
+        e('message init failed: $error $stackTrace');
+      }),
+    );
+  }
+
+  Future<void> _runInit(
+    int generation, {
+    String? centerMessageId,
+    String? lastReadMessageId,
+    bool forceLatest = false,
+  }) async {
+    final finalLimit = limit;
     final conversationId = conversationNotifier.state?.conversationId;
     if (conversationId == null) return;
-    // If the conversationId has changed, then events other than init are ignored
-    if (event is! _MessageInitEvent && state.conversationId != conversationId) {
+
+    if (centerMessageId != null || forceLatest) {
+      traceChatJump(
+        'message init center=${shortMessageId(centerMessageId)} '
+        'forceLatest=$forceLatest limit=$finalLimit',
+      );
+    }
+
+    final messageState = await _resetMessageList(
+      conversationId,
+      finalLimit,
+      centerMessageId: centerMessageId,
+      forceLatest: forceLatest,
+    );
+    if (!_isCurrent(generation, conversationId)) return;
+
+    final nextState = _pretreatment(
+      messageState.copyWith(
+        refreshKey: Object(),
+        lastReadMessageId: lastReadMessageId,
+      ),
+    );
+    _emit(nextState);
+  }
+
+  void after() {
+    if (_loadAfterInFlight || state.isLatest) return;
+    final conversationId = conversationNotifier.state?.conversationId;
+    if (conversationId == null || state.conversationId != conversationId) {
       return;
     }
 
-    if (event is _MessageInitEvent) {
-      if (event.centerMessageId != null || event.forceLatest) {
-        traceChatJump(
-          'bloc init center=${shortMessageId(event.centerMessageId)} '
-          'forceLatest=${event.forceLatest} limit=$finalLimit',
-        );
-      }
-      final messageState = await _resetMessageList(
-        conversationId,
-        finalLimit,
-        centerMessageId: event.centerMessageId,
-        forceLatest: event.forceLatest,
-      );
-      final nextState = _pretreatment(
-        messageState.copyWith(
-          refreshKey: Object(),
-          lastReadMessageId: event.lastReadMessageId,
-        ),
-      );
-      emit(nextState);
-      _warmMentionCache(nextState);
-    } else if (event is _MessageDeleteEvent) {
-      final messageState = state.removeMessage(event.messageId);
-      final nextState = _pretreatment(messageState);
-      emit(nextState);
-      _warmMentionCache(nextState);
-    } else {
-      if (event is _MessageLoadMoreEvent) {
-        if (event is _MessageLoadAfterEvent) {
-          if (state.isLatest) return;
-          final messageState = await _after(conversationId);
-          final nextState = _pretreatment(messageState);
-          emit(nextState);
-          _warmMentionCache(nextState);
-        } else if (event is _MessageLoadBeforeEvent) {
-          if (state.isOldest) return;
-          final messageState = await _before(conversationId);
-          final nextState = _pretreatment(messageState);
-          emit(nextState);
-          _warmMentionCache(nextState);
-        }
-      } else if (event is _MessageInsertOrReplaceEvent) {
-        final result = _insertOrReplace(conversationId, event.data);
-        if (result != null) {
-          final nextState = _pretreatment(result);
-          emit(nextState);
-          _warmMentionCache(nextState);
-        }
-      } else if (event is _MessageScrollEvent) {
-        traceChatJump(
-          'bloc scroll event target=${shortMessageId(event.messageId)}',
-        );
-        add(
-          _MessageInitEvent(
-            centerMessageId: event.messageId,
-            lastReadMessageId: state.lastReadMessageId,
-          ),
-        );
-      }
-    }
+    _loadAfterInFlight = true;
+    final generation = _generation;
+    unawaited(
+      _loadAfter(generation, conversationId)
+          .catchError((Object error, StackTrace stackTrace) {
+            e('message load after failed: $error $stackTrace');
+          })
+          .whenComplete(() => _loadAfterInFlight = false),
+    );
   }
 
-  void after() => add(_MessageLoadAfterEvent());
+  void before() {
+    if (_loadBeforeInFlight || state.isOldest) return;
+    final conversationId = conversationNotifier.state?.conversationId;
+    if (conversationId == null || state.conversationId != conversationId) {
+      return;
+    }
 
-  void before() => add(_MessageLoadBeforeEvent());
+    _loadBeforeInFlight = true;
+    final generation = _generation;
+    unawaited(
+      _loadBefore(generation, conversationId)
+          .catchError((Object error, StackTrace stackTrace) {
+            e('message load before failed: $error $stackTrace');
+          })
+          .whenComplete(() => _loadBeforeInFlight = false),
+    );
+  }
+
+  Future<void> _loadAfter(int generation, String conversationId) async {
+    final messageState = await _after(conversationId);
+    if (!_isCurrent(generation, conversationId)) return;
+    _emit(_pretreatment(messageState));
+  }
+
+  Future<void> _loadBefore(int generation, String conversationId) async {
+    final messageState = await _before(conversationId);
+    if (!_isCurrent(generation, conversationId)) return;
+    _emit(_pretreatment(messageState));
+  }
 
   Future<MessageState> _before(String conversationId) async {
     final topMessageId = state.topMessage?.messageId;
@@ -511,7 +475,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         jumpToCurrent = jumpToCurrent || currentUserSent;
       } else {
         if (currentUserSent && item.status == MessageStatus.sending) {
-          add(_MessageInitEvent());
+          _init();
           return null;
         }
       }
@@ -525,21 +489,43 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     return result;
   }
 
+  void _insertOrReplaceCurrentConversation(List<MessageItem> list) {
+    final conversationId = conversationNotifier.state?.conversationId;
+    if (conversationId == null || state.conversationId != conversationId) {
+      return;
+    }
+
+    final result = _insertOrReplace(conversationId, list);
+    if (result != null) {
+      _emit(_pretreatment(result));
+    }
+  }
+
+  void _deleteMessage(String messageId) {
+    final conversationId = conversationNotifier.state?.conversationId;
+    if (conversationId == null || state.conversationId != conversationId) {
+      return;
+    }
+
+    _emit(_pretreatment(state.removeMessage(messageId)));
+  }
+
   void scrollTo(String messageId) {
-    traceChatJump('bloc scrollTo target=${shortMessageId(messageId)}');
-    add(_MessageScrollEvent(messageId: messageId));
+    traceChatJump('message scrollTo target=${shortMessageId(messageId)}');
+    _init(
+      centerMessageId: messageId,
+      lastReadMessageId: state.lastReadMessageId,
+    );
   }
 
   void reload() {
-    add(_MessageInitEvent());
+    _init();
   }
 
   void jumpToLatestWindow() {
-    add(
-      _MessageInitEvent(
-        lastReadMessageId: state.lastReadMessageId,
-        forceLatest: true,
-      ),
+    _init(
+      lastReadMessageId: state.lastReadMessageId,
+      forceLatest: true,
     );
   }
 

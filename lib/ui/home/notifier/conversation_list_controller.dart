@@ -1,12 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../../bloc/paging/paging_bloc.dart';
-import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/database_event_bus.dart';
@@ -15,19 +13,20 @@ import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/slide_category_provider.dart';
+import 'paging_controller.dart';
 
 const kDefaultLimit = 15;
 
-class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
-    with SubscribeMixin {
-  ConversationListBloc(
+class ConversationListController
+    extends ValueNotifier<PagingState<ConversationItem>> {
+  ConversationListController(
     this.slideCategoryStateNotifier,
     this.database,
     this.mentionCache,
   ) : super(const PagingState<ConversationItem>()) {
-    addSubscription(
+    _subscriptions.add(
       slideCategoryStateNotifier.stream.distinct().listen(
-        (event) => _switchBloc(event, _limit),
+        (event) => _switchController(event, _limit),
       ),
     );
     _initBadge();
@@ -36,13 +35,20 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   final SlideCategoryStateNotifier slideCategoryStateNotifier;
   final Database database;
   final MentionCache mentionCache;
-  final Map<SlideCategoryState, _ConversationListBloc> _map = {};
+  final Map<SlideCategoryState, _ConversationPagingController> _map = {};
+  final List<StreamSubscription?> _subscriptions = [];
 
   int? _limit;
+  VoidCallback? _activeListener;
+  SlideCategoryState? _activeState;
+  _ConversationPagingController? _activeController;
+  var _disposed = false;
+
+  PagingState<ConversationItem> get state => value;
 
   int get limit {
     if (_limit == null) {
-      w('conversation list bloc: limit is null');
+      w('conversation list controller: limit is null');
       return kDefaultLimit;
     }
     return _limit!;
@@ -50,18 +56,15 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   set limit(int limit) {
     if (limit <= 0) {
-      w('conversation list bloc: ignore limit <= 0');
+      w('conversation list controller: ignore limit <= 0');
       return;
     }
 
     _limit = limit;
-    _map.values.forEach((element) {
-      element.limit = limit;
-    });
+    for (final controller in _map.values) {
+      controller.limit = limit;
+    }
   }
-
-  StreamSubscription? streamSubscription;
-  SlideCategoryState? _activeState;
 
   ItemPositionsListener? itemPositionsListener(
     SlideCategoryState slideCategoryState,
@@ -71,16 +74,16 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     SlideCategoryState slideCategoryState,
   ) => _map[slideCategoryState]?.itemScrollController;
 
-  void init() => _switchBloc(slideCategoryStateNotifier.state, _limit);
+  void init() => _switchController(slideCategoryStateNotifier.state, _limit);
 
-  late Stream<void> updateEvent = Rx.merge([
+  late final Stream<void> updateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
     DataBaseEventBus.instance.updateUserIdsStream,
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
     DataBaseEventBus.instance.updateMessageMentionStream,
   ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
 
-  late Stream<void> circleUpdateEvent = Rx.merge([
+  late final Stream<void> circleUpdateEvent = Rx.merge([
     DataBaseEventBus.instance.updateConversationIdStream,
     DataBaseEventBus.instance.updateUserIdsStream,
     DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
@@ -89,7 +92,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     DataBaseEventBus.instance.updateCircleConversationStream,
   ]).throttleTime(kDefaultThrottleDuration).asBroadcastStream();
 
-  void _switchBloc(SlideCategoryState state, int? limit) {
+  void _switchController(SlideCategoryState state, int? limit) {
     final dao = database.conversationDao;
 
     switch (state.type) {
@@ -98,7 +101,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.groups:
       case SlideCategoryType.bots:
       case SlideCategoryType.strangers:
-        _map[state] ??= _ConversationListBloc(
+        _map[state] ??= _ConversationPagingController(
           limit ?? kDefaultLimit,
           () => dao.conversationCountByCategory(state.type),
           (limit, offset) =>
@@ -107,7 +110,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           mentionCache,
         );
       case SlideCategoryType.circle:
-        _map[state] ??= _ConversationListBloc(
+        _map[state] ??= _ConversationPagingController(
           limit ?? kDefaultLimit,
           () => database.conversationDao
               .conversationsCountByCircleId(state.id!)
@@ -121,33 +124,48 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.setting:
         return;
     }
-    final previous = _activeState;
-    if (previous != null && previous != state) {
-      _map[previous]?.deactivate();
-    }
 
-    final bloc = _map[state]!..activate();
+    if (_activeState != null && _activeState != state) {
+      _activeController?.deactivate();
+    }
     _activeState = state;
 
-    emit(bloc.state);
-    streamSubscription?.cancel();
-    streamSubscription = bloc.stream.listen(emit);
+    final controller = _map[state]!..activate();
+    _listenTo(controller);
+    value = controller.value;
+  }
+
+  void _listenTo(_ConversationPagingController controller) {
+    if (_activeController != null && _activeListener != null) {
+      _activeController!.removeListener(_activeListener!);
+    }
+
+    _activeController = controller;
+    _activeListener = () {
+      if (!_disposed) value = controller.value;
+    };
+    controller.addListener(_activeListener!);
   }
 
   @override
-  Future<void> close() async {
-    await streamSubscription?.cancel();
-    _map[_activeState]?.deactivate();
-    await Future.wait(_map.values.map((e) => e.close()));
-    await super.close();
+  void dispose() {
+    _disposed = true;
+    if (_activeController != null && _activeListener != null) {
+      _activeController!.removeListener(_activeListener!);
+    }
+    _activeController?.deactivate();
+    for (final subscription in _subscriptions) {
+      unawaited(subscription?.cancel());
+    }
+    for (final controller in _map.values) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   Future<void> _initBadge() async {
     Future<void> updateBadge(int count) async {
-      if (!kPlatformIsDarwin) {
-        // not work on other platform.
-        return;
-      }
+      if (!kPlatformIsDarwin) return;
       if (count == 0) {
         await FlutterAppIconBadge.removeBadge();
         return;
@@ -159,7 +177,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
         .allUnseenIgnoreMuteMessageCount()
         .getSingle();
     await updateBadge(count);
-    addSubscription(
+    _subscriptions.add(
       database.conversationDao.allUnseenIgnoreMuteMessageCountEvent
           .distinct()
           .asyncBufferMap((event) => updateBadge(event.last))
@@ -168,64 +186,50 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   }
 }
 
-class _ConversationListBloc extends PagingBloc<ConversationItem> {
-  _ConversationListBloc(
+class _ConversationPagingController extends PagingController<ConversationItem> {
+  _ConversationPagingController(
     int limit,
     Future<int> Function() queryCount,
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
     Stream<void> updateEvent,
-    this.mentionCache,
-  ) : _queryCount = queryCount,
-      _queryRange = queryRange,
-      _updateEvent = updateEvent,
+    MentionCache mentionCache,
+  ) : _updateEvent = updateEvent,
       super(
-        initState: const PagingState<ConversationItem>(),
         itemPositionsListener: ItemPositionsListener.create(),
         limit: limit,
+        queryCount: queryCount,
+        queryRange: (limit, offset) async {
+          final list = await queryRange(limit, offset);
+          unawaited(_warmMentionCache(mentionCache, list));
+          return list;
+        },
       );
 
-  final MentionCache mentionCache;
-  final Future<int> Function() _queryCount;
-  final Future<List<ConversationItem>> Function(int limit, int offset)
-  _queryRange;
   final Stream<void> _updateEvent;
+  final ItemScrollController itemScrollController = ItemScrollController();
 
   StreamSubscription<void>? _updateSubscription;
 
-  final ItemScrollController itemScrollController = ItemScrollController();
-
   void activate() {
-    _updateSubscription ??= _updateEvent.listen(
-      (_) => add(PagingUpdateEvent()),
-    );
-    if (state.initialized) {
-      add(PagingUpdateEvent());
-    }
+    _updateSubscription ??= _updateEvent.listen((_) => update());
+    if (value.initialized) update();
   }
 
   void deactivate() {
-    _updateSubscription?.cancel();
+    unawaited(_updateSubscription?.cancel());
     _updateSubscription = null;
   }
 
   @override
-  Future<void> close() async {
+  void dispose() {
     deactivate();
-    await super.close();
+    super.dispose();
   }
 
-  @override
-  Future<int> queryCount() => _queryCount();
-
-  @override
-  Future<List<ConversationItem>> queryRange(int limit, int offset) async {
-    final list = await _queryRange(limit, offset);
-    unawaited(_warmMentionCache(list));
-
-    return list;
-  }
-
-  Future<void> _warmMentionCache(List<ConversationItem> list) async {
+  static Future<void> _warmMentionCache(
+    MentionCache mentionCache,
+    List<ConversationItem> list,
+  ) async {
     try {
       await mentionCache.checkMentionCache(list.map((e) => e.content).toSet());
     } catch (error) {

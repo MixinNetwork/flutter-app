@@ -25,8 +25,6 @@ dependencies:
   async: ^2.13.1
   audio_session: ^0.2.3
   auto_size_text: ^3.0.0
-  bloc: ^9.2.1
-  bloc_concurrency: ^0.3.0
   blurhash_dart: ^1.0.2
   bring_window_to_front:
     git:
@@ -68,7 +66,6 @@ dependencies:
     sdk: flutter
   flutter_animate: ^4.4.0
   flutter_app_icon_badge: ^2.0.0
-  flutter_bloc: ^9.1.1
   flutter_hooks: ^0.21.3
   flutter_local_notifications: ^22.0.1
   flutter_localizations:
@@ -81,11 +78,11 @@ dependencies:
       ref: b42e314284a09c9f0f9fe1e0e76e0c563402449e
   github: ^9.25.1
   hive: ^2.2.3
+  hive_ce: ^2.13.2
   hive_flutter: ^1.0.0
   hooks_riverpod: ^2.5.1
   http: ^1.6.0
   http_client_helper: ^3.0.0
-  hydrated_bloc: ^11.0.0
   image: ^4.8.0
   image_picker: ^1.2.2
   intl: ^0.20.2

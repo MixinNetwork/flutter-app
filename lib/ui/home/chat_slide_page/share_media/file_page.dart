@@ -7,15 +7,14 @@ import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../bloc/paging/load_more_paging_state.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../../utils/hook.dart';
 import '../../../../widgets/message/item/file_message.dart';
 import '../../../../widgets/message/message.dart';
 import '../../../../widgets/near_edge_scroll_listener.dart';
+import '../../notifier/load_more_paging_controller.dart';
 import '../shared_media_page.dart';
 
 class FilePage extends HookConsumerWidget {
@@ -33,8 +32,8 @@ class FilePage extends HookConsumerWidget {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
     final messageDao = context.database.messageDao;
 
-    final mediaCubit = useBloc(
-      () => LoadMorePagingBloc<MessageItem>(
+    final mediaController = useMemoized(
+      () => LoadMorePagingController<MessageItem>(
         reloadData: () =>
             messageDao.fileMessages(conversationId, size, 0).get(),
         loadMoreData: (list) async {
@@ -49,8 +48,9 @@ class FilePage extends HookConsumerWidget {
         },
         isSameKey: (a, b) => a.messageId == b.messageId,
       ),
-      keys: [conversationId],
+      [conversationId],
     );
+    useEffect(() => mediaController.dispose, [mediaController]);
     useEffect(
       () => messageDao
           .watchInsertOrReplaceMessageStream(conversationId)
@@ -65,23 +65,15 @@ class FilePage extends HookConsumerWidget {
               MessageCategory.signalData,
             ].contains(event.type),
           )
-          .listen(mediaCubit.insertOrReplace)
+          .listen(mediaController.insertOrReplace)
           .cancel,
       [conversationId],
     );
-    final map =
-        useBlocStateConverter<
-          LoadMorePagingBloc<MessageItem>,
-          LoadMorePagingState<MessageItem>,
-          Map<DateTime, List<MessageItem>>
-        >(
-          bloc: mediaCubit,
-          converter: (state) =>
-              groupBy<MessageItem, DateTime>(state.list, (messageItem) {
-                final local = messageItem.createdAt.toLocal();
-                return DateTime(local.year, local.month, local.day);
-              }),
-        );
+    final state = useValueListenable(mediaController);
+    final map = groupBy<MessageItem, DateTime>(state.list, (messageItem) {
+      final local = messageItem.createdAt.toLocal();
+      return DateTime(local.year, local.month, local.day);
+    });
 
     final scrollController = useScrollController();
 
@@ -111,7 +103,7 @@ class FilePage extends HookConsumerWidget {
     }
 
     return NearEdgeScrollListener(
-      onNearEnd: mediaCubit.loadMore,
+      onNearEnd: mediaController.loadMore,
       child: CustomScrollView(
         controller: scrollController,
         slivers: map.entries

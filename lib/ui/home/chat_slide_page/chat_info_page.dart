@@ -21,9 +21,9 @@ import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
 import '../notifier/chat_side_notifier.dart';
+import '../notifier/message_controller.dart';
 import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookConsumerWidget {
@@ -491,7 +491,7 @@ class ChatInfoPage extends HookConsumerWidget {
                       await accountServer.deleteMessagesByConversationId(
                         conversationId,
                       );
-                      context.read<MessageBloc>().reload();
+                      context.read<MessageController>().reload();
                     },
                   ),
                   if (isGroupConversation)

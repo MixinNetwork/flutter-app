@@ -40,8 +40,8 @@ import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
 import '../../provider/search_mao_user_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
-import '../bloc/search_message_cubit.dart';
+import '../notifier/conversation_list_controller.dart';
+import '../notifier/search_message_controller.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'unseen_conversation_list.dart';
@@ -63,9 +63,9 @@ class SearchList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keyword =
         useMemoizedStream(() {
-          final keywordCubit = ref.watch(keywordProvider.notifier);
-          return keywordCubit.stream
-              .startWith(keywordCubit.state)
+          final keywordNotifier = ref.watch(keywordProvider.notifier);
+          return keywordNotifier.stream
+              .startWith(keywordNotifier.state)
               .map((event) => event.trim())
               .distinct()
               .debounceTime(const Duration(milliseconds: 150));
@@ -705,19 +705,20 @@ class _SearchMessageList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchMessageCubit = useBloc(
-      () => SearchMessageCubit.slideCategory(
+    final searchMessageController = useMemoized(
+      () => SearchMessageController.slideCategory(
         database: context.database,
         category: categoryState,
         keyword: keyword,
-        limit: context.read<ConversationListBloc>().limit,
+        limit: context.read<ConversationListController>().limit,
       ),
-      keys: [keyword, categoryState],
+      [keyword, categoryState],
     );
+    useEffect(() => searchMessageController.dispose, [
+      searchMessageController,
+    ]);
 
-    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-      bloc: searchMessageCubit,
-    );
+    final pageState = useValueListenable(searchMessageController);
 
     final child = pageState.initializing
         ? Center(
@@ -729,7 +730,8 @@ class _SearchMessageList extends HookConsumerWidget {
         : pageState.items.isEmpty
         ? const SearchEmptyWidget()
         : ScrollablePositionedList.builder(
-            itemPositionsListener: searchMessageCubit.itemPositionsListener,
+            itemPositionsListener:
+                searchMessageController.itemPositionsListener,
             itemCount: pageState.items.length,
             itemBuilder: (context, index) {
               final message = pageState.items[index];

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/chat/message_jump.dart';
+import 'package:flutter_app/ui/home/notifier/message_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

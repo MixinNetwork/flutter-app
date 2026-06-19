@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_app/db/dao/message_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
+import 'package:flutter_app/ui/home/notifier/message_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 

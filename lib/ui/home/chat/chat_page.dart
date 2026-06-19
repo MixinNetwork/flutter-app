@@ -5,7 +5,6 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
@@ -40,11 +39,11 @@ import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../../provider/pending_jump_message_provider.dart';
-import '../bloc/message_bloc.dart';
 import '../home.dart';
 import '../hook/pin_message.dart';
 import '../notifier/blink_notifier.dart';
 import '../notifier/chat_side_notifier.dart';
+import '../notifier/message_controller.dart';
 import 'chat_bar.dart';
 import 'chat_scroll_coordinator.dart';
 import 'files_preview.dart';
@@ -121,8 +120,8 @@ class ChatPage extends HookConsumerWidget {
         ChangeNotifierProvider<SearchConversationKeywordNotifier>.value(
           value: searchConversationKeywordNotifier,
         ),
-        BlocProvider(
-          create: (context) => MessageBloc(
+        ChangeNotifierProvider(
+          create: (context) => MessageController(
             accountServer: context.accountServer,
             database: context.database,
             conversationNotifier: ref.read(conversationProvider.notifier),
@@ -275,7 +274,7 @@ class ChatContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    BlocProvider.of<MessageBloc>(context).limit =
+    context.read<MessageController>().limit =
         MediaQuery.sizeOf(context).height ~/ 20;
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
@@ -409,11 +408,9 @@ class _List extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messageBloc = context.read<MessageBloc>();
+    final messageController = context.read<MessageController>();
     final scrollCoordinator = context.read<ChatScrollCoordinator>();
-    final state = useBlocState<MessageBloc, MessageState>(
-      when: (state) => state.conversationId != null,
-    );
+    final state = useValueListenable(messageController);
 
     final key = ValueKey((state.conversationId, state.refreshKey));
     final top = state.top;
@@ -483,8 +480,8 @@ class _List extends HookConsumerWidget {
               notification,
               messages: messages,
               keysByMessageId: messageKeysRef.value,
-              loadBefore: messageBloc.before,
-              loadAfter: messageBloc.after,
+              loadBefore: messageController.before,
+              loadAfter: messageController.after,
             ),
         child: ClampingCustomScrollView(
           key: scrollCoordinator.viewportKey,
@@ -556,7 +553,7 @@ class _JumpCurrentButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scrollCoordinator = context.read<ChatScrollCoordinator>();
 
-    final state = useBlocState<MessageBloc, MessageState>();
+    final state = useValueListenable(context.read<MessageController>());
     final showJumpToLatest = useValueListenable(
       scrollCoordinator.showJumpToLatest,
     );
@@ -997,12 +994,12 @@ class _ChatMenuHandler extends HookConsumerWidget {
     final conversationId = ref.watch(currentConversationIdProvider);
 
     useEffect(() {
-      final cubit = ref.read(macMenuBarProvider.notifier);
+      final menuBarNotifier = ref.read(macMenuBarProvider.notifier);
       if (conversationId == null) return null;
 
       final handle = _ConversationHandle(context, conversationId);
-      Future(() => cubit.attach(handle));
-      return () => Future(() => cubit.unAttach(handle));
+      Future(() => menuBarNotifier.attach(handle));
+      return () => Future(() => menuBarNotifier.unAttach(handle));
     }, [conversationId]);
 
     return child;

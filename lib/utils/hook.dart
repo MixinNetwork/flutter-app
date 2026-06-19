@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:protocol_handler/protocol_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../app.dart';
@@ -40,56 +38,6 @@ AsyncSnapshot<T> _logSnapshotError<T>(AsyncSnapshot<T> snapshot) {
     }
   }, [snapshot]);
   return snapshot;
-}
-
-T useBloc<T extends BlocBase>(
-  T Function() valueBuilder, {
-  List<Object?> keys = const <Object>[],
-}) {
-  final sink = useMemoized(valueBuilder, keys);
-  useEffect(() => sink.close, keys);
-  return sink;
-}
-
-S useBlocState<B extends BlocBase<S>, S>({
-  B? bloc,
-  List<Object?> keys = const <Object>[],
-  bool preserveState = false,
-  bool Function(S state)? when,
-}) {
-  final (stream, initialData) = useMemoized(() {
-    final b = bloc ?? useContext().read<B>();
-    var stream = b.stream;
-    if (when != null) stream = stream.where(when);
-    return (stream.distinct(), b.state);
-  }, [bloc ?? useContext().read<B>(), ...keys]);
-  return useStream(
-        stream,
-        initialData: initialData,
-        preserveState: preserveState,
-      ).data
-      as S;
-}
-
-T useBlocStateConverter<B extends BlocBase<S>, S, T>({
-  required T Function(S) converter,
-  B? bloc,
-  List<Object?> keys = const <Object>[],
-  bool preserveState = false,
-  bool Function(T)? when,
-}) {
-  final (stream, initialData) = useMemoized(() {
-    final b = bloc ?? useContext().read<B>();
-    var stream = b.stream.map(converter);
-    if (when != null) stream = stream.where(when);
-    return (stream.distinct(), converter(b.state));
-  }, [bloc ?? useContext().read<B>(), ...keys]);
-  return useStream(
-        stream,
-        initialData: initialData,
-        preserveState: preserveState,
-      ).data
-      as T;
 }
 
 Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
