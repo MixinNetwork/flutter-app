@@ -474,10 +474,10 @@ packages:
     dependency: "direct main"
     description:
       name: emojis
-      sha256: "2e4d847c3f1e2670f30dc355909ce6fa7808b4e626c34a4dd503a360995a38bf"
+      sha256: "36d382349255a3d90a33fa5e01b57b5213578d90a493aad98d2955dac79df74f"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.9"
+    version: "3.2.0"
   enum_to_string:
     dependency: transitive
     description:
@@ -1135,10 +1135,10 @@ packages:
     dependency: "direct main"
     description:
       name: libsignal_protocol_dart
-      sha256: "7c974718418a6f164b8e7e7fc5043e6c3b642a38a4dd597458f4c8309c585afa"
+      sha256: "3ed4455f09c7299934a6b9ca0028daff87940d446142056e1ec25997de0e41bf"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.0"
+    version: "0.8.2"
   lints:
     dependency: transitive
     description:
