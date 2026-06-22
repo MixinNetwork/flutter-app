@@ -355,6 +355,43 @@ void main() {
     expect(coordinator.trackingScrollController.jumpCount, 0);
   });
 
+  testWidgets('scheduleRestore completes explicit message jumps after scroll', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+    final targetMessageId = messages[8].messageId;
+    var completed = false;
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+
+    coordinator
+      ..animateNextMessageRestore(
+        targetMessageId,
+        onComplete: () => completed = true,
+      )
+      ..scheduleRestore(
+        messages: messages,
+        keysByMessageId: keysByMessageId,
+        reset: true,
+        isLatest: false,
+        centerMessageId: targetMessageId,
+      );
+    await tester.pump();
+    await tester.pump();
+
+    expect(completed, true);
+  });
+
   testWidgets('scheduleRestore does not stage explicit message jumps', (
     tester,
   ) async {

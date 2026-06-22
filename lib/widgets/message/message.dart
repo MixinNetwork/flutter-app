@@ -40,6 +40,10 @@ export 'message_rows.dart';
 
 const _pinArrowWidth = 32.0;
 
+@visibleForTesting
+bool shouldMarkMentionRead(bool? mentionRead, double visibleFraction) =>
+    mentionRead == false && visibleFraction >= 1;
+
 void _quickReply(BuildContext context) {
   if (context.isPinnedPage) return;
   if (context.isTranscriptPage) return;
@@ -133,73 +137,68 @@ class MessageItemWidget extends HookConsumerWidget {
       children: [
         if (datetime != null)
           MessageDayTime(key: dateTimeKey, dateTime: datetime),
-        _MessageBlinkBackground(
-          messageId: message.messageId,
-          enabled: blink,
-          menuColor: showedMenu.value ? context.theme.listSelected : null,
-          child: Builder(
-            builder: (context) {
-              if (message.type == MessageCategory.systemConversation) {
-                return const SystemMessage();
-              }
+        Builder(
+          builder: (context) {
+            if (message.type == MessageCategory.systemConversation) {
+              return const SystemMessage();
+            }
 
-              if (message.type.isPin) {
-                return const PinMessageWidget();
-              }
+            if (message.type.isPin) {
+              return const PinMessageWidget();
+            }
 
-              if (message.type == MessageCategory.secret) {
-                return const SecretMessage();
-              }
+            if (message.type == MessageCategory.secret) {
+              return const SecretMessage();
+            }
 
-              if (message.type == MessageCategory.stranger) {
-                return const StrangerMessage();
-              }
+            if (message.type == MessageCategory.stranger) {
+              return const StrangerMessage();
+            }
 
-              return _MessageSelectionWrapper(
-                message: message,
-                child: _MessageBubbleMargin(
-                  userName: userName,
-                  userId: userId,
-                  userAvatarUrl: userAvatarUrl,
-                  showAvatar: showAvatar,
-                  isCurrentUser: isCurrentUser,
-                  pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
-                  isBot: message.isBot,
-                  isVerified: message.isVerified,
-                  buildMenus: (request) => buildMessageActionsMenu(
-                    context: context,
-                    ref: ref,
-                    request: request,
-                    message: message,
-                    isTranscriptPage: isTranscriptPage,
-                    isPinnedPage: isPinnedPage,
-                    showedMenu: showedMenu,
-                    focusNode: focusNode,
-                  ),
-                  builder: (_) => MessageContent(message: message),
+            return _MessageSelectionWrapper(
+              message: message,
+              child: _MessageBubbleMargin(
+                userName: userName,
+                userId: userId,
+                userAvatarUrl: userAvatarUrl,
+                showAvatar: showAvatar,
+                isCurrentUser: isCurrentUser,
+                pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
+                isBot: message.isBot,
+                isVerified: message.isVerified,
+                buildMenus: (request) => buildMessageActionsMenu(
+                  context: context,
+                  ref: ref,
+                  request: request,
+                  message: message,
+                  isTranscriptPage: isTranscriptPage,
+                  isPinnedPage: isPinnedPage,
+                  showedMenu: showedMenu,
+                  focusNode: focusNode,
                 ),
-              );
-            },
-          ),
+                builder: (_) => MessageContent(message: message),
+              ),
+            );
+          },
         ),
         if (message.messageId == lastReadMessageId && row.next != null)
           const _UnreadMessageBar(),
       ],
     );
 
-    if (message.mentionRead == false) {
-      child = VisibilityDetector(
-        onVisibilityChanged: (info) {
-          if (info.visibleFraction < 1) return;
-          context.accountServer.markMentionRead(
-            message.messageId,
-            message.conversationId,
-          );
-        },
-        key: ValueKey(message.messageId),
-        child: child,
-      );
-    }
+    child = VisibilityDetector(
+      onVisibilityChanged: (info) {
+        if (!shouldMarkMentionRead(message.mentionRead, info.visibleFraction)) {
+          return;
+        }
+        context.accountServer.markMentionRead(
+          message.messageId,
+          message.conversationId,
+        );
+      },
+      key: ValueKey('message_visibility_${message.messageId}'),
+      child: child,
+    );
 
     return FocusScope(
       node: focusNode,
@@ -209,6 +208,8 @@ class MessageItemWidget extends HookConsumerWidget {
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         message: message,
+        highlightEnabled: blink,
+        menuHighlighted: showedMenu.value,
         child: Builder(
           builder: (context) => GestureDetector(
             onTap: () => _quickReply(context),
@@ -222,65 +223,6 @@ class MessageItemWidget extends HookConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-class _MessageBlinkBackground extends StatefulWidget {
-  const _MessageBlinkBackground({
-    required this.messageId,
-    required this.enabled,
-    required this.child,
-    this.menuColor,
-  });
-
-  final String messageId;
-  final bool enabled;
-  final Color? menuColor;
-  final Widget child;
-
-  @override
-  State<_MessageBlinkBackground> createState() =>
-      _MessageBlinkBackgroundState();
-}
-
-class _MessageBlinkBackgroundState extends State<_MessageBlinkBackground> {
-  BlinkNotifier? _notifier;
-  BlinkState _blinkState = const BlinkState();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final notifier = context.read<BlinkNotifier>();
-    if (identical(_notifier, notifier)) return;
-    _notifier?.removeListener(_onBlinkChanged);
-    _notifier = notifier..addListener(_onBlinkChanged);
-    _blinkState = notifier.value;
-  }
-
-  void _onBlinkChanged() {
-    final next = _notifier!.value;
-    final shouldRebuild =
-        widget.enabled &&
-        (_blinkState.messageId == widget.messageId ||
-            next.messageId == widget.messageId);
-    _blinkState = next;
-    if (shouldRebuild && mounted) setState(() {});
-  }
-
-  @override
-  void dispose() {
-    _notifier?.removeListener(_onBlinkChanged);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        widget.menuColor ??
-        (widget.enabled && _blinkState.messageId == widget.messageId
-            ? _blinkState.color
-            : Colors.transparent);
-    return ColoredBox(color: color, child: widget.child);
   }
 }
 

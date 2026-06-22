@@ -78,6 +78,7 @@ class ChatScrollCoordinator {
 
   _ChatRestoreRequest? _restoreRequest;
   String? _animatedRestoreMessageId;
+  VoidCallback? _animatedRestoreComplete;
   List<MessageItem> _messages = const [];
   Map<String, MessageItem> _messagesById = const {};
   Map<String, GlobalKey> _keysByMessageId = const {};
@@ -116,9 +117,11 @@ class ChatScrollCoordinator {
   void animateNextMessageRestore(
     String messageId, {
     ChatScrollRestoreDirection? direction,
+    VoidCallback? onComplete,
   }) {
     _animatedRestoreMessageId = messageId;
     _animatedRestoreDirection = direction;
+    _animatedRestoreComplete = onComplete;
   }
 
   void animateNextRestore({ChatScrollRestoreDirection? direction}) {
@@ -154,11 +157,13 @@ class ChatScrollCoordinator {
   }) {
     final animatedMessageId = reset ? _animatedRestoreMessageId : null;
     final animatedRestoreDirection = reset ? _animatedRestoreDirection : null;
+    final animatedRestoreComplete = reset ? _animatedRestoreComplete : null;
     final animated =
         reset && (animatedMessageId != null || _animateNextRestore);
     if (reset) {
       _animatedRestoreMessageId = null;
       _animatedRestoreDirection = null;
+      _animatedRestoreComplete = null;
       _animateNextRestore = false;
     }
     _setMessages(messages, keysByMessageId);
@@ -170,6 +175,7 @@ class ChatScrollCoordinator {
       centerMessageId: centerMessageId,
       animatedMessageId: animatedMessageId,
       animatedRestoreDirection: animatedRestoreDirection,
+      animatedRestoreComplete: animatedRestoreComplete,
       animated: animated,
     );
     if (_restoreScheduled) return;
@@ -294,6 +300,7 @@ class ChatScrollCoordinator {
             request.keysByMessageId,
             animated: request.animatedMessageId == request.centerMessageId,
             animatedDirection: request.animatedRestoreDirection,
+            onComplete: request.animatedRestoreComplete,
           )) {
         return;
       }
@@ -320,6 +327,7 @@ class ChatScrollCoordinator {
     Map<String, GlobalKey> keysByMessageId, {
     bool animated = false,
     ChatScrollRestoreDirection? animatedDirection,
+    VoidCallback? onComplete,
   }) {
     final geometry = _messageTargetGeometry(messageId, keysByMessageId);
     if (geometry == null) {
@@ -343,13 +351,14 @@ class ChatScrollCoordinator {
         animated: animated,
         stageDistant: false,
         animationDirection: animated ? animatedDirection : null,
-      ).whenComplete(
-        () => _traceTargetAfterLayout(
+      ).whenComplete(() {
+        _traceTargetAfterLayout(
           'restore-after',
           messageId,
           keysByMessageId,
-        ),
-      ),
+        );
+        onComplete?.call();
+      }),
     );
     return true;
   }
@@ -705,6 +714,7 @@ class _ChatRestoreRequest {
     this.centerMessageId,
     this.animatedMessageId,
     this.animatedRestoreDirection,
+    this.animatedRestoreComplete,
   });
 
   final List<MessageItem> messages;
@@ -715,4 +725,5 @@ class _ChatRestoreRequest {
   final String? centerMessageId;
   final String? animatedMessageId;
   final ChatScrollRestoreDirection? animatedRestoreDirection;
+  final VoidCallback? animatedRestoreComplete;
 }

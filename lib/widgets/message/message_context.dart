@@ -11,6 +11,8 @@ class _MessageContext with EquatableMixin {
     required this.isPinnedPage,
     required this.showNip,
     required this.isCurrentUser,
+    required this.highlightEnabled,
+    required this.menuHighlighted,
     required this.message,
   });
 
@@ -18,6 +20,8 @@ class _MessageContext with EquatableMixin {
   final bool isPinnedPage;
   final bool showNip;
   final bool isCurrentUser;
+  final bool highlightEnabled;
+  final bool menuHighlighted;
   final MessageItem message;
 
   @override
@@ -26,6 +30,8 @@ class _MessageContext with EquatableMixin {
     isPinnedPage,
     showNip,
     isCurrentUser,
+    highlightEnabled,
+    menuHighlighted,
     message,
   ];
 }
@@ -40,6 +46,12 @@ bool useShowNip() => _useMessageContextConverter((state) => state.showNip);
 
 bool useIsCurrentUser() =>
     _useMessageContextConverter((state) => state.isCurrentUser);
+
+bool useMessageHighlightEnabled() =>
+    _useMessageContextConverter((state) => state.highlightEnabled);
+
+bool useMessageMenuHighlighted() =>
+    _useMessageContextConverter((state) => state.menuHighlighted);
 
 T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
     _useMessageContextConverter((state) => converter(state.message));
@@ -68,6 +80,8 @@ class MessageContext extends StatelessWidget {
     required this.message,
     required this.child,
     super.key,
+    this.highlightEnabled = true,
+    this.menuHighlighted = false,
   });
 
   MessageContext.fromMessageItem({
@@ -77,12 +91,16 @@ class MessageContext extends StatelessWidget {
     this.isTranscriptPage = false,
     this.isPinnedPage = false,
     this.showNip = false,
+    this.highlightEnabled = true,
+    this.menuHighlighted = false,
   }) : isCurrentUser = message.relationship == UserRelationship.me;
 
   final bool isTranscriptPage;
   final bool isPinnedPage;
   final bool showNip;
   final bool isCurrentUser;
+  final bool highlightEnabled;
+  final bool menuHighlighted;
   final MessageItem message;
   final Widget child;
 
@@ -93,6 +111,8 @@ class MessageContext extends StatelessWidget {
       isPinnedPage: isPinnedPage,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
+      highlightEnabled: highlightEnabled,
+      menuHighlighted: menuHighlighted,
       message: message,
     ),
     child: child,

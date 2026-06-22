@@ -79,12 +79,7 @@ class ChatPage extends HookConsumerWidget {
     final windowHeight = MediaQuery.sizeOf(context).height;
 
     final tickerProvider = useSingleTickerProvider();
-    final blinkNotifier = useMemoized(
-      () => BlinkNotifier(
-        tickerProvider,
-        context.theme.accent.withValues(alpha: 0.5),
-      ),
-    );
+    final blinkNotifier = useMemoized(() => BlinkNotifier(tickerProvider));
     useEffect(() => blinkNotifier.dispose, [blinkNotifier]);
     final pinMessageState = usePinMessageState(conversationId);
 

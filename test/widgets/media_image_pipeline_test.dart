@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/widgets.dart';
 import 'package:flutter_app/utils/proxy.dart';
 import 'package:flutter_app/widgets/media_image_pipeline.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,4 +37,19 @@ void main() {
     );
   });
 
+  testWidgets('skips file images with empty paths', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NormalizedGifImageGate(
+          image: FileImage(File.fromUri(Uri())),
+          placeholder: () => const SizedBox.shrink(),
+          childBuilder: () => const SizedBox(key: Key('child')),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('child')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

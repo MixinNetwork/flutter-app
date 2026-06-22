@@ -120,7 +120,14 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
       _future = null;
       return;
     }
-    final fileName = image.file.uri.pathSegments.last.toLowerCase();
+    final filePathSegments = image.file.uri.pathSegments;
+    final fileName = filePathSegments.isEmpty
+        ? ''
+        : filePathSegments.last.toLowerCase();
+    if (fileName.isEmpty) {
+      _future = null;
+      return;
+    }
     if (!fileName.endsWith('.gif') && fileName.contains('.')) {
       _future = null;
       return;

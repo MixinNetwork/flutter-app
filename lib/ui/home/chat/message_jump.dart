@@ -34,8 +34,6 @@ class ChatTimelineLocation {
       'request source=${shortMessageId(sourceMessageId)} '
       'target=${shortMessageId(messageId)}',
     );
-    _blinkNotifier.blinkByMessageId(messageId);
-
     final handled = await _scrollCoordinator.scrollToMessageIfInLoadedWindow(
       messageId,
       animated: true,
@@ -45,6 +43,7 @@ class ChatTimelineLocation {
       'handled=$handled',
     );
     if (handled) {
+      _blinkNotifier.blinkByMessageId(messageId);
       _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
       return;
     }
@@ -66,6 +65,7 @@ class ChatTimelineLocation {
     _scrollCoordinator.animateNextMessageRestore(
       messageId,
       direction: direction,
+      onComplete: () => _blinkNotifier.blinkByMessageId(messageId),
     );
     _messageController.loadAroundMessage(messageId);
     _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);

@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../constants/resources.dart';
 import '../../ui/home/chat/message_jump.dart';
+import '../../ui/home/notifier/blink_notifier.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
 import '../toast.dart';
@@ -52,6 +54,8 @@ class MessageBubble extends HookConsumerWidget {
     final showNip = useShowNip();
     final isCurrentUser = useIsCurrentUser();
     final isPinnedPage = useIsPinnedPage();
+    final highlightEnabled = useMessageHighlightEnabled();
+    final menuHighlighted = useMessageMenuHighlighted();
     final isDisappearingMessage = useMessageConverter<bool>(
       converter: (message) => message.expireIn != null && message.expireIn! > 0,
     );
@@ -67,6 +71,13 @@ class MessageBubble extends HookConsumerWidget {
     );
 
     final messageType = useMessageConverter(converter: (state) => state.type);
+    final highlightMedia =
+        !showBubble &&
+        !hasQuoteMessage &&
+        (messageType.isImage ||
+            messageType.isVideo ||
+            messageType.isLive ||
+            messageType.isSticker);
 
     var _child = child;
 
@@ -127,6 +138,18 @@ class MessageBubble extends HookConsumerWidget {
     if (hasQuoteMessage || showBubble) {
       _child = CustomPaint(
         painter: BubblePainter(color: bubbleColor, clipper: clipper),
+        child: _child,
+      );
+    }
+
+    if (highlightEnabled || menuHighlighted) {
+      _child = _MessageBubbleHighlight(
+        messageId: context.message.messageId,
+        enabled: highlightEnabled,
+        clipper: clipper,
+        currentUser: isCurrentUser,
+        media: highlightMedia,
+        menuHighlighted: menuHighlighted,
         child: _child,
       );
     }
@@ -215,6 +238,152 @@ class MessageBubble extends HookConsumerWidget {
       ),
     );
   }
+}
+
+class _MessageBubbleHighlight extends StatefulWidget {
+  const _MessageBubbleHighlight({
+    required this.messageId,
+    required this.enabled,
+    required this.clipper,
+    required this.currentUser,
+    required this.media,
+    required this.menuHighlighted,
+    required this.child,
+  });
+
+  final String messageId;
+  final bool enabled;
+  final CustomClipper<Path> clipper;
+  final bool currentUser;
+  final bool media;
+  final bool menuHighlighted;
+  final Widget child;
+
+  @override
+  State<_MessageBubbleHighlight> createState() =>
+      _MessageBubbleHighlightState();
+}
+
+class _MessageBubbleHighlightState extends State<_MessageBubbleHighlight> {
+  BlinkNotifier? _notifier;
+  BlinkState _blinkState = const BlinkState();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final notifier = provider.Provider.of<BlinkNotifier?>(
+      context,
+      listen: false,
+    );
+    if (identical(_notifier, notifier)) return;
+    _notifier?.removeListener(_onBlinkChanged);
+    notifier?.addListener(_onBlinkChanged);
+    _notifier = notifier;
+    _blinkState = notifier?.value ?? const BlinkState();
+  }
+
+  void _onBlinkChanged() {
+    final next = _notifier!.value;
+    final shouldRebuild =
+        widget.enabled &&
+        (_blinkState.messageId == widget.messageId ||
+            next.messageId == widget.messageId);
+    _blinkState = next;
+    if (shouldRebuild && mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _notifier?.removeListener(_onBlinkChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final opacity = widget.menuHighlighted
+        ? 1.0
+        : widget.enabled && _blinkState.messageId == widget.messageId
+        ? _blinkState.opacity
+        : 0.0;
+    return CustomPaint(
+      foregroundPainter: opacity <= 0
+          ? null
+          : _MessageBubbleHighlightPainter(
+              clipper: widget.clipper,
+              color: _highlightColor(
+                context,
+                currentUser: widget.currentUser,
+                media: widget.media,
+              ),
+              maxOpacity: _highlightOpacity(
+                context,
+                currentUser: widget.currentUser,
+                media: widget.media,
+              ),
+              opacity: opacity,
+            ),
+      child: widget.child,
+    );
+  }
+}
+
+Color _highlightColor(
+  BuildContext context, {
+  required bool currentUser,
+  required bool media,
+}) {
+  if (media || currentUser) return Colors.black;
+  return Color.lerp(Colors.black, Colors.white, context.brightnessValue)!;
+}
+
+double _highlightOpacity(
+  BuildContext context, {
+  required bool currentUser,
+  required bool media,
+}) {
+  if (media) return 0.2;
+  final light = currentUser ? 0.16 : 0.13;
+  final dark = currentUser ? 0.18 : 0.12;
+  return light + (dark - light) * context.brightnessValue;
+}
+
+@visibleForTesting
+double messageHighlightOpacityForTesting(
+  BuildContext context, {
+  required bool currentUser,
+  required bool media,
+}) => _highlightOpacity(context, currentUser: currentUser, media: media);
+
+class _MessageBubbleHighlightPainter extends CustomPainter with EquatableMixin {
+  _MessageBubbleHighlightPainter({
+    required this.clipper,
+    required this.color,
+    required this.maxOpacity,
+    required this.opacity,
+  });
+
+  final CustomClipper<Path> clipper;
+  final Color color;
+  final double maxOpacity;
+  final double opacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final clip = clipper.getClip(size);
+    canvas.drawPath(
+      clip,
+      Paint()
+        ..color = color.withValues(alpha: maxOpacity * opacity)
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _MessageBubbleHighlightPainter oldDelegate) =>
+      this != oldDelegate;
+
+  @override
+  List<Object?> get props => [clipper, color, maxOpacity, opacity];
 }
 
 class MessageBubbleNipPadding extends StatelessWidget {

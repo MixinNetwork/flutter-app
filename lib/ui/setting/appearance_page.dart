@@ -250,12 +250,7 @@ class _ChatTextSizePreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tickerProvider = useSingleTickerProvider();
-    final blinkNotifier = useMemoized(
-      () => BlinkNotifier(
-        tickerProvider,
-        context.theme.accent.withValues(alpha: 0.5),
-      ),
-    );
+    final blinkNotifier = useMemoized(() => BlinkNotifier(tickerProvider));
     useEffect(() => blinkNotifier.dispose, [blinkNotifier]);
     final chatSideNotifier = useMemoized(ChatSideNotifier.new);
     useEffect(() => chatSideNotifier.dispose, [chatSideNotifier]);
