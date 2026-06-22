@@ -89,6 +89,48 @@ class MessageRowModel {
   late final DateTime? dateTime;
 }
 
+class MessageRows {
+  const MessageRows({
+    required this.top,
+    required this.bottom,
+    this.center,
+  });
+
+  factory MessageRows.from({
+    required List<MessageItem> top,
+    required MessageItem? center,
+    required List<MessageItem> bottom,
+  }) => MessageRows(
+    top: [
+      for (var index = 0; index < top.length; index++)
+        MessageRowModel(
+          message: top[index],
+          prev: top.getOrNull(index - 1),
+          next: top.getOrNull(index + 1) ?? center ?? bottom.lastOrNull,
+        ),
+    ],
+    center: center == null
+        ? null
+        : MessageRowModel(
+            message: center,
+            prev: top.lastOrNull,
+            next: bottom.firstOrNull,
+          ),
+    bottom: [
+      for (var index = 0; index < bottom.length; index++)
+        MessageRowModel(
+          message: bottom[index],
+          prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+          next: bottom.getOrNull(index + 1),
+        ),
+    ],
+  );
+
+  final List<MessageRowModel> top;
+  final MessageRowModel? center;
+  final List<MessageRowModel> bottom;
+}
+
 bool useIsTranscriptPage() =>
     _useMessageContextConverter((state) => state.isTranscriptPage);
 

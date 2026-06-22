@@ -159,6 +159,7 @@ class MessageController extends ValueNotifier<MessageState> {
                 event?.initIndexMessageId,
                 event?.lastReadMessageId,
                 event?.refreshKey,
+                event?.forceLatestKey,
               ),
             )
             .distinct()
@@ -166,6 +167,7 @@ class MessageController extends ValueNotifier<MessageState> {
               (event) => _init(
                 centerMessageId: event.$2,
                 lastReadMessageId: event.$3,
+                forceLatest: event.$5 != null,
               ),
             ),
       )

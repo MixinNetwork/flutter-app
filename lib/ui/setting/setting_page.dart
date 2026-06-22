@@ -19,6 +19,7 @@ import '../../widgets/cell.dart';
 import '../../widgets/conversation/badges_widget.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
+import '../home/desktop_shell_layout.dart';
 import '../home/left_rail_controller.dart';
 import '../provider/major_navigation_provider.dart';
 import '../provider/multi_auth_provider.dart';
@@ -189,12 +190,11 @@ class _Item extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final routeMode = DesktopShellLayout.mainRouteModeOf(context);
     final selected = ref.watch(
       majorNavigationProvider.select(
         (value) =>
-            !value.routeMode &&
-            destination != null &&
-            value.contains(destination!),
+            !routeMode && destination != null && value.contains(destination!),
       ),
     );
 

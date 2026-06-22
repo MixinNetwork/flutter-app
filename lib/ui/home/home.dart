@@ -313,6 +313,7 @@ class _CenterPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final routeMode = DesktopShellLayout.mainRouteModeOf(context);
     final isSetting = ref.watch(
       slideCategoryStateProvider.select(
         (value) => value.type == SlideCategoryType.setting,
@@ -326,7 +327,10 @@ class _CenterPage extends HookConsumerWidget {
         majorNavigationProvider.notifier,
       );
 
-      if (majorNavigationNotifier.syncSettingCategory(isSetting)) {
+      if (majorNavigationNotifier.syncSettingCategory(
+        isSetting,
+        routeMode: routeMode,
+      )) {
         ref.read(conversationProvider.notifier).unselected();
       }
     });

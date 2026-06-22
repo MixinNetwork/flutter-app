@@ -11,7 +11,6 @@ import '../../../utils/local_notification_center.dart';
 import '../../../widgets/toast.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/is_bot_group_provider.dart';
-import '../../provider/pending_chat_jump_provider.dart';
 import '../../provider/recent_conversation_provider.dart';
 import '../conversation_info_destination.dart';
 import '../notifier/conversation_list_controller.dart';
@@ -42,9 +41,7 @@ class ConversationFocus {
         initIndexMessageId == null &&
         initialChatSidePage == null &&
         keyword == null) {
-      conversationNotifier.openChatPage();
-      context.providerContainer.read(pendingChatJumpProvider.notifier).state =
-          const PendingChatJump.commandLatest();
+      conversationNotifier.openLatest();
       return;
     }
 

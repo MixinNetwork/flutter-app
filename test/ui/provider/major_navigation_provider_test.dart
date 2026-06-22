@@ -12,13 +12,11 @@ void main() {
     ]);
   });
 
-  test('syncing setting category clears route-mode pages', () async {
+  test('syncing setting category clears route-mode pages', () {
     final notifier = MajorNavigationNotifier()
-      ..open(MajorNavigationDestination.chatPage)
-      ..updateRouteMode(true);
-    await Future<void>.delayed(Duration.zero);
+      ..open(MajorNavigationDestination.chatPage);
 
-    final opened = notifier.syncSettingCategory(true);
+    final opened = notifier.syncSettingCategory(true, routeMode: true);
 
     expect(opened, isFalse);
     expect(notifier.state.entries, isEmpty);

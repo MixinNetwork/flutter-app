@@ -10,7 +10,6 @@ import '../../../../widgets/message/item/image/image_message.dart';
 import '../../../../widgets/message/item/video/video_message.dart';
 import '../../../../widgets/message/message.dart';
 import '../../desktop_shell_layout.dart';
-import '../../notifier/chat_side_notifier.dart';
 import '../shared_media_page.dart';
 import 'shared_media_list.dart';
 
@@ -26,13 +25,13 @@ class MediaPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chatSideNotifier = context.read<ChatSideNotifier>();
+    final routeMode = DesktopShellLayout.chatSideRouteModeOf(context);
     final columnCount = DesktopShellLayout.chatSideMediaColumnCount(
-      routeMode: chatSideNotifier.isRouteMode,
+      routeMode: routeMode,
     );
     final pageSize = DesktopShellLayout.chatSideMediaPageSize(
       maxHeight: maxHeight,
-      routeMode: chatSideNotifier.isRouteMode,
+      routeMode: routeMode,
     );
     final messageDao = context.database.messageDao;
     return SharedMediaList(

@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
+import '../../../db/dao/message_dao.dart';
 import '../../../utils/extension/extension.dart';
+import '../desktop_shell_layout.dart';
 import '../notifier/blink_notifier.dart';
 import '../notifier/chat_side_notifier.dart';
 import '../notifier/message_controller.dart';
@@ -36,26 +38,21 @@ class ChatHistoryLocation {
     required ChatScrollCoordinator scrollCoordinator,
     required MessageController messageController,
     required ChatSideNotifier chatSideNotifier,
-    required Future<ChatScrollRestoreDirection?> Function({
-      required String? sourceMessageId,
-      required String targetMessageId,
-    })
-    restoreDirectionFromSource,
+    required bool chatSideRouteMode,
+    required MessageDao messageDao,
   }) : _blinkNotifier = blinkNotifier,
        _scrollCoordinator = scrollCoordinator,
        _messageController = messageController,
        _chatSideNotifier = chatSideNotifier,
-       _restoreDirectionFromSource = restoreDirectionFromSource;
+       _chatSideRouteMode = chatSideRouteMode,
+       _messageDao = messageDao;
 
   final BlinkNotifier _blinkNotifier;
   final ChatScrollCoordinator _scrollCoordinator;
   final MessageController _messageController;
   final ChatSideNotifier _chatSideNotifier;
-  final Future<ChatScrollRestoreDirection?> Function({
-    required String? sourceMessageId,
-    required String targetMessageId,
-  })
-  _restoreDirectionFromSource;
+  final bool _chatSideRouteMode;
+  final MessageDao _messageDao;
 
   Future<void> jumpTo(ChatJumpTarget target) async {
     switch (target.kind) {
@@ -68,7 +65,7 @@ class ChatHistoryLocation {
         await _jumpToLatest();
     }
     if (target.closeSideAfterJump) {
-      _chatSideNotifier.closeAfterContentJump();
+      _chatSideNotifier.closeAfterContentJump(routeMode: _chatSideRouteMode);
     }
   }
 
@@ -134,6 +131,30 @@ class ChatHistoryLocation {
     if (state.center != null) return state.center!.messageId;
     return state.bottomMessage?.messageId ?? state.topMessage?.messageId;
   }
+
+  Future<ChatScrollRestoreDirection?> _restoreDirectionFromSource({
+    required String? sourceMessageId,
+    required String targetMessageId,
+  }) async {
+    if (sourceMessageId == null || sourceMessageId == targetMessageId) {
+      return null;
+    }
+
+    final results = await Future.wait([
+      _messageDao.messageOrderInfo(sourceMessageId),
+      _messageDao.messageOrderInfo(targetMessageId),
+    ]);
+    final sourceInfo = results[0];
+    final targetInfo = results[1];
+    if (sourceInfo == null || targetInfo == null) return null;
+
+    final sourceAfterTarget = sourceInfo.createdAt == targetInfo.createdAt
+        ? sourceInfo.rowId > targetInfo.rowId
+        : sourceInfo.createdAt > targetInfo.createdAt;
+    return sourceAfterTarget
+        ? ChatScrollRestoreDirection.towardOlder
+        : ChatScrollRestoreDirection.towardNewer;
+  }
 }
 
 extension ChatMessageJump on BuildContext {
@@ -162,31 +183,7 @@ extension ChatMessageJump on BuildContext {
     scrollCoordinator: read<ChatScrollCoordinator>(),
     messageController: read<MessageController>(),
     chatSideNotifier: read<ChatSideNotifier>(),
-    restoreDirectionFromSource: _restoreDirectionFromSource,
+    chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
+    messageDao: database.messageDao,
   );
-
-  Future<ChatScrollRestoreDirection?> _restoreDirectionFromSource({
-    required String? sourceMessageId,
-    required String targetMessageId,
-  }) async {
-    if (sourceMessageId == null || sourceMessageId == targetMessageId) {
-      return null;
-    }
-
-    final messageDao = database.messageDao;
-    final results = await Future.wait([
-      messageDao.messageOrderInfo(sourceMessageId),
-      messageDao.messageOrderInfo(targetMessageId),
-    ]);
-    final sourceInfo = results[0];
-    final targetInfo = results[1];
-    if (sourceInfo == null || targetInfo == null) return null;
-
-    final sourceAfterTarget = sourceInfo.createdAt == targetInfo.createdAt
-        ? sourceInfo.rowId > targetInfo.rowId
-        : sourceInfo.createdAt > targetInfo.createdAt;
-    return sourceAfterTarget
-        ? ChatScrollRestoreDirection.towardOlder
-        : ChatScrollRestoreDirection.towardNewer;
-  }
 }

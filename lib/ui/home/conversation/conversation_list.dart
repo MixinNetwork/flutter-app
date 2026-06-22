@@ -22,10 +22,10 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
 import '../../provider/conversation_provider.dart';
-import '../../provider/major_navigation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
 import '../../provider/slide_category_provider.dart';
+import '../desktop_shell_layout.dart';
 import '../notifier/conversation_list_controller.dart';
 import 'audio_player_bar.dart';
 import 'conversation_focus.dart';
@@ -47,8 +47,8 @@ class ConversationList extends HookConsumerWidget {
     useListenable(conversationListController.avatarCache);
     final conversationId = ref.watch(currentConversationIdProvider);
 
-    final showsConversationSelection = ref.watch(
-      majorNavigationShowsConversationSelectionProvider,
+    final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
+      context,
     );
 
     final itemPositionsListener = conversationListController

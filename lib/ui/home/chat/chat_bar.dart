@@ -17,9 +17,9 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../../provider/conversation_provider.dart';
-import '../../provider/major_navigation_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../conversation_info_destination.dart';
+import '../desktop_shell_layout.dart';
 import '../notifier/chat_side_notifier.dart';
 
 class ChatBar extends HookConsumerWidget {
@@ -30,9 +30,8 @@ class ChatBar extends HookConsumerWidget {
     final actionColor = context.theme.icon;
     final chatSideNotifier = context.read<ChatSideNotifier>();
     useValueListenable(chatSideNotifier);
-    final chatSideRouteMode = chatSideNotifier.isRouteMode;
-
-    final routeMode = ref.watch(majorNavigationRouteModeProvider);
+    final chatSideRouteMode = DesktopShellLayout.chatSideRouteModeOf(context);
+    final routeMode = DesktopShellLayout.mainRouteModeOf(context);
 
     final conversation = ref.watch(conversationProvider);
 
@@ -139,11 +138,8 @@ class ChatBar extends HookConsumerWidget {
               name: Resources.assetsImagesIcSearchSvg,
               color: actionColor,
               onTap: () {
-                final notifier = context.read<ChatSideNotifier>();
-                unawaited(
-                  notifier.toggleDestination(
-                    ConversationInfoDestination.searchMessageHistory,
-                  ),
+                context.read<ChatSideNotifier>().toggleDestination(
+                  ConversationInfoDestination.searchMessageHistory,
                 );
               },
             ),

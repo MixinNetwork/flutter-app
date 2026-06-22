@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../provider/conversation_provider.dart';
-import '../../provider/major_navigation_provider.dart';
 import '../../provider/unseen_conversations_provider.dart';
+import '../desktop_shell_layout.dart';
 import 'conversation_focus.dart';
 import 'conversation_list.dart';
 import 'menu_wrapper.dart';
@@ -19,8 +19,8 @@ class UnseenConversationList extends HookConsumerWidget {
 
     final currentConversationId = ref.watch(currentConversationIdProvider);
 
-    final showsConversationSelection = ref.watch(
-      majorNavigationShowsConversationSelectionProvider,
+    final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
+      context,
     );
 
     if (unseenConversations == null) {

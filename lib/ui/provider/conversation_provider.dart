@@ -31,6 +31,7 @@ class ConversationState extends Equatable {
     this.participant,
     this.initialSidePage,
     this.keyword,
+    this.forceLatestKey,
   });
 
   final String conversationId;
@@ -45,6 +46,7 @@ class ConversationState extends Equatable {
 
   final ConversationInfoDestination? initialSidePage;
   final String? keyword;
+  final Object? forceLatestKey;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -90,6 +92,7 @@ class ConversationState extends Equatable {
     initialSidePage,
     participant,
     keyword,
+    forceLatestKey,
   ];
 
   ConversationState copyWith({
@@ -104,6 +107,7 @@ class ConversationState extends Equatable {
     Object? refreshKey,
     ConversationInfoDestination? initialSidePage,
     String? keyword,
+    Object? forceLatestKey,
   }) => ConversationState(
     conversationId: conversationId ?? this.conversationId,
     userId: userId ?? this.userId,
@@ -116,6 +120,7 @@ class ConversationState extends Equatable {
     initialSidePage: initialSidePage ?? this.initialSidePage,
     participant: participant ?? this.participant,
     keyword: keyword ?? this.keyword,
+    forceLatestKey: forceLatestKey ?? this.forceLatestKey,
   );
 }
 
@@ -243,6 +248,11 @@ class ConversationStateNotifier
 
   void openChatPage() {
     _majorNavigationNotifier.openChatPage();
+  }
+
+  void openLatest() {
+    state = state?.copyWith(forceLatestKey: Object());
+    openChatPage();
   }
 
   void focus(ConversationState nextState) {

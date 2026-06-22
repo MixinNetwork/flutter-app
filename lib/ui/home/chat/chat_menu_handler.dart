@@ -105,11 +105,8 @@ class _ConversationHandle extends ConversationMenuHandle {
 
   @override
   void showSearch() {
-    final notifier = context.read<ChatSideNotifier>();
-    unawaited(
-      notifier.toggleDestination(
-        ConversationInfoDestination.searchMessageHistory,
-      ),
+    context.read<ChatSideNotifier>().toggleDestination(
+      ConversationInfoDestination.searchMessageHistory,
     );
   }
 

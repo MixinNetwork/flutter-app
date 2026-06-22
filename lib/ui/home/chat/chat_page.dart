@@ -118,37 +118,39 @@ class ChatPage extends HookConsumerWidget {
             final routeMode = DesktopShellLayout.useChatSideRouteMode(
               boxConstraints.maxWidth,
             );
-            chatSideNotifier.updateRouteMode(routeMode);
 
-            return ChatMenuHandler(
-              child: Row(
-                children: [
-                  if (!routeMode) Expanded(child: chatContainerPage.child),
-                  if (!routeMode)
-                    Container(width: 1, color: context.theme.divider),
-                  FocusableActionDetector(
-                    shortcuts: const {
-                      SingleActivator(LogicalKeyboardKey.escape):
-                          EscapeIntent(),
-                    },
-                    actions: {
-                      EscapeIntent: CallbackAction<EscapeIntent>(
-                        onInvoke: (intent) => chatSideNotifier.pop(),
-                      ),
-                    },
-                    child: ChatSideRouter(
-                      constraints: boxConstraints,
-                      routeMode: routeMode,
-                      onDidRemovePage: (page) {
-                        chatSideNotifier.onPopPage();
+            return DesktopShellLayout.chatSideRouteMode(
+              routeMode: routeMode,
+              child: ChatMenuHandler(
+                child: Row(
+                  children: [
+                    if (!routeMode) Expanded(child: chatContainerPage.child),
+                    if (!routeMode)
+                      Container(width: 1, color: context.theme.divider),
+                    FocusableActionDetector(
+                      shortcuts: const {
+                        SingleActivator(LogicalKeyboardKey.escape):
+                            EscapeIntent(),
                       },
-                      leadingPages: [
-                        if (routeMode) chatContainerPage,
-                      ],
-                      destinations: chatSideNotifier.state.destinations,
+                      actions: {
+                        EscapeIntent: CallbackAction<EscapeIntent>(
+                          onInvoke: (intent) => chatSideNotifier.pop(),
+                        ),
+                      },
+                      child: ChatSideRouter(
+                        constraints: boxConstraints,
+                        routeMode: routeMode,
+                        onDidRemovePage: (page) {
+                          chatSideNotifier.onPopPage();
+                        },
+                        leadingPages: [
+                          if (routeMode) chatContainerPage,
+                        ],
+                        destinations: chatSideNotifier.state.destinations,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },

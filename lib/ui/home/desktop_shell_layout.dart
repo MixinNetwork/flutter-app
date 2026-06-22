@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 enum DesktopShellLayoutMode { drawer, compactRail, fullRail }
 
 // chat category list min width
@@ -86,4 +88,50 @@ class DesktopShellLayout {
   }) =>
       (maxHeight / 90 * 2).toInt() *
       chatSideMediaColumnCount(routeMode: routeMode);
+
+  static Widget mainRouteMode({
+    required bool routeMode,
+    required Widget child,
+  }) => _MainRouteMode(routeMode: routeMode, child: child);
+
+  static Widget chatSideRouteMode({
+    required bool routeMode,
+    required Widget child,
+  }) => _ChatSideRouteMode(routeMode: routeMode, child: child);
+
+  static bool mainRouteModeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_MainRouteMode>()?.routeMode ??
+      false;
+
+  static bool chatSideRouteModeOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<_ChatSideRouteMode>()
+          ?.routeMode ??
+      false;
+}
+
+class _MainRouteMode extends InheritedWidget {
+  const _MainRouteMode({
+    required this.routeMode,
+    required super.child,
+  });
+
+  final bool routeMode;
+
+  @override
+  bool updateShouldNotify(_MainRouteMode oldWidget) =>
+      routeMode != oldWidget.routeMode;
+}
+
+class _ChatSideRouteMode extends InheritedWidget {
+  const _ChatSideRouteMode({
+    required this.routeMode,
+    required super.child,
+  });
+
+  final bool routeMode;
+
+  @override
+  bool updateShouldNotify(_ChatSideRouteMode oldWidget) =>
+      routeMode != oldWidget.routeMode;
 }

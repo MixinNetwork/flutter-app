@@ -7,22 +7,18 @@ import '../conversation_info_destination.dart';
 class ChatSideState extends Equatable {
   const ChatSideState({
     this.destinations = const [],
-    this.routeMode = false,
   });
 
   final List<ConversationInfoDestination> destinations;
-  final bool routeMode;
 
   ChatSideState copyWith({
     List<ConversationInfoDestination>? destinations,
-    bool? routeMode,
   }) => ChatSideState(
     destinations: destinations ?? this.destinations,
-    routeMode: routeMode ?? this.routeMode,
   );
 
   @override
-  List<Object?> get props => [destinations, routeMode];
+  List<Object?> get props => [destinations];
 }
 
 class ChatSideNotifier extends ValueNotifier<ChatSideState> {
@@ -40,15 +36,8 @@ class ChatSideNotifier extends ValueNotifier<ChatSideState> {
   ConversationInfoDestination? get currentDestination =>
       state.destinations.isEmpty ? null : state.destinations.last;
 
-  bool get isRouteMode => state.routeMode;
-
   bool isCurrentDestination(ConversationInfoDestination destination) =>
       currentDestination == destination;
-
-  void updateRouteMode(bool routeMode) {
-    if (state.routeMode == routeMode) return;
-    Future(() => state = state.copyWith(routeMode: routeMode));
-  }
 
   void openDestination(ConversationInfoDestination destination) {
     final destinations = state.destinations.toList();
@@ -76,30 +65,16 @@ class ChatSideNotifier extends ValueNotifier<ChatSideState> {
     );
   }
 
-  Future<void> replaceDestination(
-    ConversationInfoDestination destination,
-  ) async {
-    state = state.copyWith(
-      destinations: state.destinations
-          .where((item) => item != destination)
-          .toList(),
-    );
-    await Future.delayed(Duration.zero);
-    openDestination(destination);
-  }
-
-  Future<void> toggleDestination(
-    ConversationInfoDestination destination,
-  ) async {
+  void toggleDestination(ConversationInfoDestination destination) {
     if (isCurrentDestination(destination)) {
       pop();
       return;
     }
-    await replaceDestination(destination);
+    openDestination(destination);
   }
 
-  void closeAfterContentJump() {
-    if (isRouteMode) clear();
+  void closeAfterContentJump({required bool routeMode}) {
+    if (routeMode) clear();
   }
 
   void toggleInfoPage() {

@@ -32,27 +32,21 @@ class MajorNavigationEntry extends Equatable {
 class MajorNavigationState extends Equatable {
   const MajorNavigationState({
     this.entries = const [],
-    this.routeMode = false,
   });
 
   final List<MajorNavigationEntry> entries;
-  final bool routeMode;
-
-  bool get showsConversationSelection => !routeMode;
 
   bool contains(MajorNavigationDestination destination) =>
       entries.any((entry) => entry.destination == destination);
 
   MajorNavigationState copyWith({
     List<MajorNavigationEntry>? entries,
-    bool? routeMode,
   }) => MajorNavigationState(
     entries: entries ?? this.entries,
-    routeMode: routeMode ?? this.routeMode,
   );
 
   @override
-  List<Object?> get props => [routeMode, entries];
+  List<Object?> get props => [entries];
 }
 
 class MajorNavigationNotifier
@@ -74,11 +68,6 @@ class MajorNavigationNotifier
     MajorNavigationDestination.securityPage,
   };
 
-  void updateRouteMode(bool routeMode) {
-    if (state.routeMode == routeMode) return;
-    Future(() => state = state.copyWith(routeMode: routeMode));
-  }
-
   void clear() {
     state = state.copyWith(entries: []);
   }
@@ -87,10 +76,10 @@ class MajorNavigationNotifier
     open(MajorNavigationDestination.chatPage);
   }
 
-  bool syncSettingCategory(bool isSetting) {
-    final openSettingPage = isSetting && !state.routeMode;
+  bool syncSettingCategory(bool isSetting, {required bool routeMode}) {
+    final openSettingPage = isSetting && !routeMode;
     _removeWhere((entry) {
-      if (state.routeMode) return true;
+      if (routeMode) return true;
       return settingDestinations.contains(entry.destination);
     });
     if (openSettingPage) {
@@ -125,10 +114,3 @@ final majorNavigationProvider =
       MajorNavigationNotifier,
       MajorNavigationState
     >((ref) => MajorNavigationNotifier());
-
-final majorNavigationRouteModeProvider = majorNavigationProvider.select(
-  (value) => value.routeMode,
-);
-
-final majorNavigationShowsConversationSelectionProvider =
-    majorNavigationProvider.select((value) => value.showsConversationSelection);

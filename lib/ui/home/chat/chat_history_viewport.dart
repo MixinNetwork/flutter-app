@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -7,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
@@ -22,18 +19,24 @@ import 'message_jump.dart';
 @visibleForTesting
 void syncMessageGlobalKeys(
   Map<String, GlobalKey> keysByMessageId,
-  Set<String> messageIds,
-) {
+  Set<String> messageIds, {
+  GlobalKey Function(String messageId) createKey = _messageGlobalKey,
+}) {
   keysByMessageId.removeWhere(
     (messageId, _) => !messageIds.contains(messageId),
   );
   for (final messageId in messageIds) {
     keysByMessageId.putIfAbsent(
       messageId,
-      () => MessageGlobalKey(messageId),
+      () => createKey(messageId),
     );
   }
 }
+
+GlobalKey _messageGlobalKey(String messageId) => MessageGlobalKey(messageId);
+
+GlobalKey _messageDayTimeKey(String messageId) =>
+    GlobalKey(debugLabel: 'message day time $messageId');
 
 class ChatHistoryViewport extends HookConsumerWidget {
   const ChatHistoryViewport({super.key});
@@ -50,7 +53,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
     final bottom = state.bottom;
     final messages = state.list;
     final rows = useMemoized(
-      () => _ChatHistoryRows.from(top: top, center: center, bottom: bottom),
+      () => MessageRows.from(top: top, center: center, bottom: bottom),
       [top, center, bottom],
     );
 
@@ -58,6 +61,10 @@ class ChatHistoryViewport extends HookConsumerWidget {
     final dayTimeKeysRef = useRef<Map<String, GlobalKey>>({});
     final previousConversationIdRef = useRef<String?>(null);
     final previousRefreshKeyRef = useRef<Object?>(null);
+    final viewportKey = useMemoized(
+      () => GlobalKey(debugLabel: 'chat scroll viewport'),
+      [scrollCoordinator],
+    );
 
     final messageIds = messages.map((e) => e.messageId).toSet();
     final messageIdsKey = messages.map((e) => e.messageId).join('|');
@@ -65,28 +72,22 @@ class ChatHistoryViewport extends HookConsumerWidget {
         previousConversationIdRef.value != state.conversationId ||
         previousRefreshKeyRef.value != state.refreshKey;
 
+    useEffect(() {
+      scrollCoordinator.viewportKey = viewportKey;
+      return () => scrollCoordinator.detachViewportKey(viewportKey);
+    }, [scrollCoordinator, viewportKey]);
+
     if (!resetScrollWindow) {
       scrollCoordinator.captureViewportState(messages, messageKeysRef.value);
     }
 
-    ref.listen(pendingChatJumpProvider, (previous, next) {
-      if (next == null || !next.isCommand) return;
-      scheduleMicrotask(() async {
-        if (!context.mounted) return;
-        final messageId = next.messageId;
-        if (messageId == null) {
-          await context.jumpToLatestInChat();
-        } else {
-          await context.jumpToMessageInChat(messageId);
-        }
-        if (!context.mounted) return;
-        ref.read(pendingChatJumpProvider.notifier).state = null;
-      });
-    });
-
     useMemoized(() {
       syncMessageGlobalKeys(messageKeysRef.value, messageIds);
-      syncMessageGlobalKeys(dayTimeKeysRef.value, messageIds);
+      syncMessageGlobalKeys(
+        dayTimeKeysRef.value,
+        messageIds,
+        createKey: _messageDayTimeKey,
+      );
     }, [messageIdsKey]);
 
     final dayTimeEntries = useMemoized(
@@ -129,7 +130,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
               loadAfter: messageController.after,
             ),
         child: ClampingCustomScrollView(
-          key: scrollCoordinator.viewportKey,
+          key: viewportKey,
           center: key,
           controller: scrollCoordinator.scrollController,
           anchor: 0.3,
@@ -209,7 +210,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
 }
 
 List<MessageDayTimeViewportEntry> _dayTimeEntries(
-  _ChatHistoryRows rows,
+  MessageRows rows,
   Map<String, GlobalKey> messageKeys,
   Map<String, GlobalKey> dayTimeKeys,
 ) {
@@ -229,48 +230,6 @@ List<MessageDayTimeViewportEntry> _dayTimeEntries(
     if (rows.center != null) ...mapRows([rows.center!]),
     ...mapRows(rows.bottom),
   ];
-}
-
-class _ChatHistoryRows {
-  const _ChatHistoryRows({
-    required this.top,
-    required this.bottom,
-    this.center,
-  });
-
-  factory _ChatHistoryRows.from({
-    required List<MessageItem> top,
-    required MessageItem? center,
-    required List<MessageItem> bottom,
-  }) => _ChatHistoryRows(
-    top: [
-      for (var index = 0; index < top.length; index++)
-        MessageRowModel(
-          message: top[index],
-          prev: top.getOrNull(index - 1),
-          next: top.getOrNull(index + 1) ?? center ?? bottom.lastOrNull,
-        ),
-    ],
-    center: center == null
-        ? null
-        : MessageRowModel(
-            message: center,
-            prev: top.lastOrNull,
-            next: bottom.firstOrNull,
-          ),
-    bottom: [
-      for (var index = 0; index < bottom.length; index++)
-        MessageRowModel(
-          message: bottom[index],
-          prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-          next: bottom.getOrNull(index + 1),
-        ),
-    ],
-  );
-
-  final List<MessageRowModel> top;
-  final MessageRowModel? center;
-  final List<MessageRowModel> bottom;
 }
 
 class JumpCurrentButton extends HookConsumerWidget {

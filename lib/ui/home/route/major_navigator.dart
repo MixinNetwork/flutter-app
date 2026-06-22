@@ -16,6 +16,7 @@ import '../../setting/storage_page.dart';
 import '../../setting/storage_usage_detail_page.dart';
 import '../../setting/storage_usage_list_page.dart';
 import '../chat/chat_page.dart';
+import '../desktop_shell_layout.dart';
 
 class MajorNavigator extends HookConsumerWidget {
   const MajorNavigator({
@@ -31,32 +32,36 @@ class MajorNavigator extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.watch(majorNavigationProvider.notifier);
     final state = ref.watch(majorNavigationProvider);
 
     return LayoutBuilder(
       builder: (context, boxConstraints) {
         final routeMode = boxConstraints.maxWidth < switchWidth;
-        notifier.updateRouteMode(routeMode);
-        return Row(
-          children: [
-            if (!routeMode) leftPage.child,
-            Expanded(
-              child: ClipRect(
-                child: Navigator(
-                  transitionDelegate: WithoutAnimationDelegate(
-                    routeWithoutAnimation: {leftPage.name, rightEmptyPage.name},
+        return DesktopShellLayout.mainRouteMode(
+          routeMode: routeMode,
+          child: Row(
+            children: [
+              if (!routeMode) leftPage.child,
+              Expanded(
+                child: ClipRect(
+                  child: Navigator(
+                    transitionDelegate: WithoutAnimationDelegate(
+                      routeWithoutAnimation: {
+                        leftPage.name,
+                        rightEmptyPage.name,
+                      },
+                    ),
+                    onDidRemovePage: (page) {},
+                    pages: [
+                      if (routeMode) leftPage,
+                      if (!routeMode && state.entries.isEmpty) rightEmptyPage,
+                      ...state.entries.map(_pageFor),
+                    ],
                   ),
-                  onDidRemovePage: (page) {},
-                  pages: [
-                    if (routeMode) leftPage,
-                    if (!routeMode && state.entries.isEmpty) rightEmptyPage,
-                    ...state.entries.map(_pageFor),
-                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

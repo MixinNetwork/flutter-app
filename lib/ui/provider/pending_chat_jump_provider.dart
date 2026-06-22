@@ -16,26 +16,9 @@ final pendingChatJumpProvider = StateProvider.autoDispose<PendingChatJump?>((
 });
 
 class PendingChatJump {
-  const PendingChatJump.commandMessage(this.messageId)
-    : kind = PendingChatJumpKind.command;
-
-  const PendingChatJump.commandLatest()
-    : kind = PendingChatJumpKind.command,
-      messageId = null;
-
-  const PendingChatJump.returnToMessage(this.messageId)
-    : kind = PendingChatJumpKind.returnTarget;
-
-  final PendingChatJumpKind kind;
+  const PendingChatJump.returnToMessage(this.messageId);
 
   final String? messageId;
 
-  bool get isLatest => messageId == null;
-
-  bool get isCommand => kind == PendingChatJumpKind.command;
-
-  String? get returnMessageId =>
-      kind == PendingChatJumpKind.returnTarget ? messageId : null;
+  String? get returnMessageId => messageId;
 }
-
-enum PendingChatJumpKind { command, returnTarget }

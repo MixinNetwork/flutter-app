@@ -73,7 +73,6 @@ class ChatScrollCoordinator {
   static const loadedJumpViewportCount = 2.0;
 
   final scrollController = ScrollController();
-  final viewportKey = GlobalKey(debugLabel: 'chat scroll viewport');
   final visibleDateTime = ValueNotifier<DateTime?>(null);
   final showJumpToLatest = ValueNotifier<bool>(false);
 
@@ -82,6 +81,7 @@ class ChatScrollCoordinator {
   List<MessageItem> _messages = const [];
   Map<String, MessageItem> _messagesById = const {};
   Map<String, GlobalKey> _keysByMessageId = const {};
+  GlobalKey? _viewportKey;
   final _renderedMessageIds = <String>{};
   bool _pinnedToBottom = true;
   bool _animateNextRestore = false;
@@ -132,6 +132,17 @@ class ChatScrollCoordinator {
 
   void unregisterRenderedMessageId(String messageId) {
     _renderedMessageIds.remove(messageId);
+  }
+
+  GlobalKey get viewportKey =>
+      _viewportKey ??= GlobalKey(debugLabel: 'chat scroll viewport');
+
+  set viewportKey(GlobalKey key) => _viewportKey = key;
+
+  void detachViewportKey(GlobalKey key) {
+    if (_viewportKey == key) {
+      _viewportKey = null;
+    }
   }
 
   void scheduleRestore({
@@ -630,7 +641,7 @@ class ChatScrollCoordinator {
   }
 
   RenderBox? get _viewportRender {
-    final object = viewportKey.currentContext?.findRenderObject();
+    final object = _viewportKey?.currentContext?.findRenderObject();
     return object is RenderBox ? object : null;
   }
 

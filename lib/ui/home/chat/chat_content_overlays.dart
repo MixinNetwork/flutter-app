@@ -190,11 +190,8 @@ class _PinMessagesBanner extends HookConsumerWidget {
               visible: currentPinMessageIds.isNotEmpty,
               child: InteractiveDecoratedBox(
                 onTap: () {
-                  final notifier = context.read<ChatSideNotifier>();
-                  unawaited(
-                    notifier.toggleDestination(
-                      ConversationInfoDestination.pinMessages,
-                    ),
+                  context.read<ChatSideNotifier>().toggleDestination(
+                    ConversationInfoDestination.pinMessages,
                   );
                 },
                 child: Container(

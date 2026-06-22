@@ -3,29 +3,26 @@ import 'package:flutter_app/ui/home/notifier/chat_side_notifier.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('toggles destinations without storing pages in state', () async {
+  test('toggles destinations without storing pages in state', () {
     final notifier = ChatSideNotifier();
     addTearDown(notifier.dispose);
 
-    await notifier.toggleDestination(ConversationInfoDestination.pinMessages);
+    notifier.toggleDestination(ConversationInfoDestination.pinMessages);
     expect(notifier.state.destinations, [
       ConversationInfoDestination.pinMessages,
     ]);
 
-    await notifier.toggleDestination(ConversationInfoDestination.pinMessages);
+    notifier.toggleDestination(ConversationInfoDestination.pinMessages);
     expect(notifier.state.destinations, isEmpty);
   });
 
-  test('route-mode content jump closes the side stack', () async {
+  test('route-mode content jump closes the side stack', () {
     final notifier = ChatSideNotifier();
     addTearDown(notifier.dispose);
 
     notifier
       ..openDestination(ConversationInfoDestination.searchMessageHistory)
-      ..updateRouteMode(true);
-    await Future<void>.delayed(Duration.zero);
-
-    notifier.closeAfterContentJump();
+      ..closeAfterContentJump(routeMode: true);
 
     expect(notifier.state.destinations, isEmpty);
   });
