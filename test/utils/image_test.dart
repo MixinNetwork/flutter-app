@@ -104,26 +104,28 @@ void main() {
     }
   });
 
-  test('normalizeGifFileIfNeeded detects GIF bytes when mime type is missing', (
-  ) async {
-    final file = File(
-      '${Directory.systemTemp.path}/mixin-gif-no-ext-${DateTime.now().microsecondsSinceEpoch}',
-    );
-    await file.writeAsBytes(_gifWithFrameDurations(10, 50));
+  test(
+    'normalizeGifFileIfNeeded detects GIF bytes when mime type is missing',
+    () async {
+      final file = File(
+        '${Directory.systemTemp.path}/mixin-gif-no-ext-${DateTime.now().microsecondsSinceEpoch}',
+      );
+      await file.writeAsBytes(_gifWithFrameDurations(10, 50));
 
-    try {
-      await normalizeGifFileIfNeeded(file, null);
+      try {
+        await normalizeGifFileIfNeeded(file, null);
 
-      final decoded = img.decodeGif(await file.readAsBytes());
+        final decoded = img.decodeGif(await file.readAsBytes());
 
-      expect(decoded, isNotNull);
-      expect(decoded!.frames.map((frame) => frame.frameDuration), [100, 50]);
-    } finally {
-      if (file.existsSync()) {
-        file.deleteSync();
+        expect(decoded, isNotNull);
+        expect(decoded!.frames.map((frame) => frame.frameDuration), [100, 50]);
+      } finally {
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
       }
-    }
-  });
+    },
+  );
 
   test('compressImage preserves transparency for alpha images', () {
     final source = img.Image(width: 2, height: 1, numChannels: 4)
