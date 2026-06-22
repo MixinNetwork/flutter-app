@@ -22,6 +22,7 @@ import '../../widgets/toast.dart';
 import '../crypto_util.dart';
 import '../extension/extension.dart';
 import '../file.dart';
+import '../image.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
 import '../property/setting_property.dart';
@@ -263,15 +264,16 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       attachmentId = content;
     }
 
+    final mediaMimeType =
+        attachmentMessage?.mimeType ??
+        message?.mediaMimeType ??
+        transcriptMessage?.mediaMimeType;
     final file = getAttachmentFile(
       category,
       conversationId,
       messageId,
       message?.name ?? transcriptMessage?.mediaName,
-      mimeType:
-          attachmentMessage?.mimeType ??
-          message?.mediaMimeType ??
-          transcriptMessage?.mediaMimeType,
+      mimeType: mediaMimeType,
       isTranscript: message == null,
     );
     final path = file.absolute.path;
@@ -329,6 +331,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
           (count, total) => notifyListeners(),
         );
 
+        await normalizeGifFileIfNeeded(file, mediaMimeType);
         final fileSize = await file.length();
 
         if (attachmentMessage != null) {

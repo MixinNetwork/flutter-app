@@ -16,6 +16,7 @@ import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/setting_provider.dart';
+import '../../ui/provider/user_cache_provider.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
@@ -508,18 +509,21 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       converter: (m) => m.userIdentityNumber,
     );
     final membership = useMessageConverter(converter: (m) => m.membership);
+    final user = userId == null ? null : ref.watch(userCacheProvider(userId!));
+    final displayName = user?.fullName ?? userName;
+    final displayAvatarUrl = user?.avatarUrl ?? userAvatarUrl;
 
     final messageColumn = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (userName != null && userId != null)
+        if (displayName != null && userId != null)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Flexible(
                 child: MessageName(
-                  userName: userName!,
+                  userName: displayName,
                   userId: userId!,
                   userIdentityNumber: userIdentityNumber,
                   membership: membership,
@@ -541,7 +545,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       ],
     );
 
-    final needShowAvatar = !isCurrentUser && userName != null;
+    final needShowAvatar = !isCurrentUser && displayName != null;
     if (!showAvatar || !needShowAvatar) {
       return Padding(
         padding: EdgeInsets.only(
@@ -559,12 +563,17 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       children: [
         const SizedBox(width: 8),
         InteractiveDecoratedBox(
-          onTap: () => showUserDialog(context, userId),
+          onTap: () async {
+            final uid = userId;
+            if (uid == null) return;
+            await showUserDialog(context, uid);
+            if (context.mounted) ref.invalidate(userCacheProvider(uid));
+          },
           cursor: SystemMouseCursors.click,
           child: AvatarWidget(
             userId: userId,
-            name: userName,
-            avatarUrl: userAvatarUrl,
+            name: displayName,
+            avatarUrl: displayAvatarUrl,
             size: 32,
           ),
         ),

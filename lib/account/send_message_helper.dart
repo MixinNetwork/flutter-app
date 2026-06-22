@@ -32,7 +32,6 @@ import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/send_message_dialog/attachment_extra.dart';
-import '../widgets/mixin_image.dart';
 import 'show_pin_message_key_value.dart';
 
 const jpegMimeType = 'image/jpeg';
@@ -1370,13 +1369,18 @@ class SendMessageHelper {
     }
 
     (Uint8List, ImageType, int, int)? result;
+    File? downloadedImage;
     try {
-      final data = await downloadImage(url);
-      if (data != null) {
-        result = await compressWithIsolate(data);
+      downloadedImage = await downloadImageFile(url);
+      if (downloadedImage != null) {
+        result = await compressFileWithIsolate(downloadedImage);
       }
     } catch (error, stacktrace) {
       e('failed to download image: $error $stacktrace');
+    } finally {
+      if (downloadedImage?.existsSync() == true) {
+        await downloadedImage!.delete();
+      }
     }
     if (result == null) {
       e('failed to get send image bytes. $url');
@@ -1457,13 +1461,13 @@ class SendMessageHelper {
     var mediaSize = await attachment.length();
 
     if (attachment.lengthSync() == 0) {
-      Uint8List? sendImageBytes;
+      File? downloadedImage;
       try {
-        sendImageBytes = await downloadImage(message.mediaUrl!);
+        downloadedImage = await downloadImageFile(message.mediaUrl!);
       } catch (error, stacktrace) {
         e('reUploadGiphyGif: failed to download image: $error $stacktrace');
       }
-      if (sendImageBytes == null) {
+      if (downloadedImage == null) {
         e(
           'reUploadGiphyGif: failed to get send image bytes. ${message.mediaUrl}',
         );
@@ -1473,7 +1477,9 @@ class SendMessageHelper {
         );
         return;
       }
-      await attachment.writeAsBytes(sendImageBytes);
+      await downloadedImage.copy(attachment.path);
+      await downloadedImage.delete();
+      await normalizeGifFileIfNeeded(attachment, message.mediaMimeType);
 
       thumbImage = await attachment.encodeBlurHash();
       mediaSize = await attachment.length();

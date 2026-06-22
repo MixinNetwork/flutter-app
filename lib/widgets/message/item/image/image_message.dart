@@ -189,6 +189,7 @@ class MessageImage extends HookConsumerWidget {
                   isTranscriptPage,
                 ),
               ),
+              placeholder: () => thumbWidget,
               errorBuilder: (_, _, _) => thumbWidget,
             ),
             Center(

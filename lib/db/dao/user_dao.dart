@@ -40,7 +40,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       into(
         db.users,
       ).simpleInsert(user, updateIfConflict: updateIfConflict).then((value) {
-        if (value > 0) {
+        if (updateIfConflict || value > 0) {
           DataBaseEventBus.instance.updateUsers([user.userId]);
         }
         return value;
@@ -48,9 +48,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Future<int> insertSdkUser(sdk.User user) =>
       into(db.users).insertOnConflictUpdate(user.asDbUser).then((value) {
-        if (value > 0) {
-          DataBaseEventBus.instance.updateUsers([user.userId]);
-        }
+        DataBaseEventBus.instance.updateUsers([user.userId]);
         return value;
       });
 
