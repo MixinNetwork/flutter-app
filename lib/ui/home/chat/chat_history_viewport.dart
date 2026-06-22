@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
-import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/message.dart';
-import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../provider/is_bot_group_provider.dart';
-import '../../provider/pending_chat_jump_provider.dart';
 import '../../provider/setting_provider.dart';
 import '../notifier/message_controller.dart';
 import 'chat_scroll_coordinator.dart';
-import 'message_jump.dart';
 
 @visibleForTesting
 void syncMessageGlobalKeys(
@@ -228,62 +222,4 @@ List<MessageDayTimeViewportEntry> _dayTimeEntries(
     if (rows.center != null) ...mapRows([rows.center!]),
     ...mapRows(rows.bottom),
   ];
-}
-
-class JumpCurrentButton extends HookConsumerWidget {
-  const JumpCurrentButton({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final scrollCoordinator = context.read<ChatScrollCoordinator>();
-
-    final state = useValueListenable(context.read<MessageController>());
-    final showJumpToLatest = useValueListenable(
-      scrollCoordinator.showJumpToLatest,
-    );
-
-    final enable = (!state.isEmpty && !state.isLatest) || showJumpToLatest;
-
-    final pendingJumpController = ref.read(pendingChatJumpProvider.notifier);
-
-    if (!enable) {
-      Future(() => pendingJumpController.state = null);
-      return const SizedBox();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: InteractiveDecoratedBox(
-        onTap: () async {
-          final messageId = pendingJumpController.state;
-          if (messageId != null) {
-            await context.jumpToMessageInChat(messageId);
-            pendingJumpController.state = null;
-            return;
-          }
-          await context.jumpToLatestInChat();
-        },
-        child: Container(
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            color: context.messageBubbleColor(false),
-            boxShadow: const [
-              BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.15),
-                offset: Offset(0, 2),
-                blurRadius: 10,
-              ),
-            ],
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: SvgPicture.asset(
-            Resources.assetsImagesJumpCurrentArrowSvg,
-            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
-          ),
-        ),
-      ),
-    );
-  }
 }

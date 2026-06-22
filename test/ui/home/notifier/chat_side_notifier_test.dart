@@ -22,7 +22,8 @@ void main() {
 
     notifier
       ..openDestination(ConversationInfoDestination.searchMessageHistory)
-      ..closeAfterContentJump(routeMode: true);
+      ..routeMode = true
+      ..closeAfterContentJump();
 
     expect(notifier.state.destinations, isEmpty);
   });

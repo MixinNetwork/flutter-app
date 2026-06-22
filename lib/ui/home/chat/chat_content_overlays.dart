@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:super_context_menu/super_context_menu.dart';
@@ -20,10 +21,13 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/pin_bubble.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/pending_chat_jump_provider.dart';
 import '../conversation_info_destination.dart';
 import '../hook/pin_message.dart';
 import '../notifier/chat_side_notifier.dart';
+import '../notifier/message_controller.dart';
 import 'chat_history_viewport.dart';
+import 'chat_scroll_coordinator.dart';
 import 'message_jump.dart';
 
 class ChatContentOverlays extends StatelessWidget {
@@ -45,6 +49,64 @@ class ChatContentOverlays extends StatelessWidget {
       _PinMessagesBanner(),
     ],
   );
+}
+
+class JumpCurrentButton extends HookConsumerWidget {
+  const JumpCurrentButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scrollCoordinator = context.read<ChatScrollCoordinator>();
+
+    final state = useValueListenable(context.read<MessageController>());
+    final showJumpToLatest = useValueListenable(
+      scrollCoordinator.showJumpToLatest,
+    );
+
+    final enable = (!state.isEmpty && !state.isLatest) || showJumpToLatest;
+
+    final pendingJumpController = ref.read(pendingChatJumpProvider.notifier);
+
+    if (!enable) {
+      Future(() => pendingJumpController.state = null);
+      return const SizedBox();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: InteractiveDecoratedBox(
+        onTap: () async {
+          final messageId = pendingJumpController.state;
+          if (messageId != null) {
+            await context.jumpToMessageInChat(messageId);
+            pendingJumpController.state = null;
+            return;
+          }
+          await context.jumpToLatestInChat();
+        },
+        child: Container(
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            color: context.messageBubbleColor(false),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.15),
+                offset: Offset(0, 2),
+                blurRadius: 10,
+              ),
+            ],
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: SvgPicture.asset(
+            Resources.assetsImagesJumpCurrentArrowSvg,
+            colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _BottomBanner extends HookConsumerWidget {

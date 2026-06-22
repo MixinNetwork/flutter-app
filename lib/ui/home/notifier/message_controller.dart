@@ -496,8 +496,10 @@ class MessageController extends ValueNotifier<MessageState> {
     _emit(_pretreatment(state.removeMessage(messageId)));
   }
 
-  void scrollTo(String messageId) {
-    traceChatJump('message scrollTo target=${shortMessageId(messageId)}');
+  void loadAroundMessage(String messageId) {
+    traceChatJump(
+      'message loadAround target=${shortMessageId(messageId)}',
+    );
     _init(
       centerMessageId: messageId,
       lastReadMessageId: state.lastReadMessageId,
@@ -508,7 +510,7 @@ class MessageController extends ValueNotifier<MessageState> {
     _init();
   }
 
-  void jumpToLatestWindow() {
+  void loadLatestWindow() {
     _init(
       lastReadMessageId: state.lastReadMessageId,
       forceLatest: true,

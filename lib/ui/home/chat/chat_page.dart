@@ -118,6 +118,7 @@ class ChatPage extends HookConsumerWidget {
             final routeMode = DesktopShellLayout.useChatSideRouteMode(
               boxConstraints.maxWidth,
             );
+            chatSideNotifier.routeMode = routeMode;
 
             return DesktopShellLayout.chatSideRouteMode(
               routeMode: routeMode,

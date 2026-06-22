@@ -102,27 +102,23 @@ Future<File?> downloadImageFile(
   int maxBytes = _kMaxDownloadedImageBytes,
 }) async {
   final resolved = Uri.base.resolve(url);
-  final client = await createRHttpClient(proxyConfig: proxyConfig);
-  final response = await client.send(http.Request('GET', resolved));
+  final response = await _sendImageRequest(resolved, proxyConfig);
   if (response.statusCode != HttpStatus.ok) return null;
-
-  final contentLength = response.contentLength;
-  if (contentLength != null && contentLength > maxBytes) {
-    throw StateError('NetworkImage is too large: $resolved');
-  }
 
   final file = File(await generateTempFilePath(TempFileType.networkImage));
   final sink = file.openWrite();
-  var received = 0;
   try {
-    await for (final chunk in response.stream) {
-      received += chunk.length;
-      if (received > maxBytes) {
-        throw StateError('NetworkImage is too large: $resolved');
-      }
-      sink.add(chunk);
-    }
+    final received = await _readImageStream(
+      response,
+      resolved,
+      maxBytes,
+      sink.add,
+    );
     await sink.close();
+    if (received == 0) {
+      await file.delete();
+      throw StateError('NetworkImage is an empty file: $resolved');
+    }
   } catch (_) {
     try {
       await sink.close();
@@ -131,12 +127,64 @@ Future<File?> downloadImageFile(
     rethrow;
   }
 
-  if (received == 0) {
-    await file.delete();
-    throw StateError('NetworkImage is an empty file: $resolved');
+  return file;
+}
+
+Future<Uint8List> downloadImageBytes(
+  String url, {
+  ProxyConfig? proxyConfig,
+  int maxBytes = _kMaxDownloadedImageBytes,
+}) async {
+  final resolved = Uri.base.resolve(url);
+  final response = await _sendImageRequest(resolved, proxyConfig);
+  if (response.statusCode != HttpStatus.ok) {
+    throw HttpException(
+      'NetworkImage HTTP ${response.statusCode}',
+      uri: resolved,
+    );
   }
 
-  return file;
+  final builder = BytesBuilder(copy: false);
+  final received = await _readImageStream(
+    response,
+    resolved,
+    maxBytes,
+    builder.add,
+  );
+  if (received == 0) {
+    throw StateError('NetworkImage is an empty file: $resolved');
+  }
+  return builder.takeBytes();
+}
+
+Future<http.StreamedResponse> _sendImageRequest(
+  Uri resolved,
+  ProxyConfig? proxyConfig,
+) async {
+  final client = await createRHttpClient(proxyConfig: proxyConfig);
+  return client.send(http.Request('GET', resolved));
+}
+
+Future<int> _readImageStream(
+  http.StreamedResponse response,
+  Uri resolved,
+  int maxBytes,
+  void Function(List<int> chunk) add,
+) async {
+  final contentLength = response.contentLength;
+  if (contentLength != null && contentLength > maxBytes) {
+    throw StateError('NetworkImage is too large: $resolved');
+  }
+
+  var received = 0;
+  await for (final chunk in response.stream) {
+    received += chunk.length;
+    if (received > maxBytes) {
+      throw StateError('NetworkImage is too large: $resolved');
+    }
+    add(chunk);
+  }
+  return received;
 }
 
 Uint8List normalizeGifBytesIfNeeded(Uint8List data) {

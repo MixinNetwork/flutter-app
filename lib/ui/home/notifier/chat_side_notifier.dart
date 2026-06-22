@@ -25,6 +25,7 @@ class ChatSideNotifier extends ValueNotifier<ChatSideState> {
   ChatSideNotifier() : super(const ChatSideState());
 
   var _disposed = false;
+  bool routeMode = false;
 
   ChatSideState get state => value;
 
@@ -73,7 +74,7 @@ class ChatSideNotifier extends ValueNotifier<ChatSideState> {
     openDestination(destination);
   }
 
-  void closeAfterContentJump({required bool routeMode}) {
+  void closeAfterContentJump() {
     if (routeMode) clear();
   }
 

@@ -49,20 +49,9 @@ class ProxyNetworkImage extends ImageProvider<ProxyNetworkImage> {
     Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
   ) async {
     try {
-      final resolved = Uri.base.resolve(key.url);
-      final client = await createRHttpClient(proxyConfig: key.proxyConfig);
-      final response = await client.get(resolved);
-      if (response.statusCode != HttpStatus.ok) {
-        throw NetworkImageLoadException(
-          statusCode: response.statusCode,
-          uri: resolved,
-        );
-      }
-
-      final bytes = normalizeGifBytesIfNeeded(response.bodyBytes);
-      if (bytes.lengthInBytes == 0) {
-        throw StateError('NetworkImage is an empty file: $resolved');
-      }
+      final bytes = normalizeGifBytesIfNeeded(
+        await downloadImageBytes(key.url, proxyConfig: key.proxyConfig),
+      );
       return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
     } catch (_) {
       scheduleMicrotask(() {

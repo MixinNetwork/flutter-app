@@ -25,6 +25,25 @@ void main() {
     );
   });
 
+  test('downloadImageBytes rejects oversized streaming responses', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(server.close);
+    final subscription = server.listen((request) async {
+      request.response.add([1, 2]);
+      request.response.add([3, 4]);
+      await request.response.close();
+    });
+    addTearDown(subscription.cancel);
+
+    await expectLater(
+      downloadImageBytes(
+        'http://${server.address.host}:${server.port}',
+        maxBytes: 3,
+      ),
+      throwsStateError,
+    );
+  });
+
   test('compressImage normalizes short animated GIF frame durations', () {
     final encoded = _gifWithFrameDurations(10, 50);
     final result = compressImage(encoded);
