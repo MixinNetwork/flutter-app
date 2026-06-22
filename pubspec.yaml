@@ -56,7 +56,7 @@ dependencies:
   drift: ^2.33.0
   sqlite3_flutter_libs: ^0.5.41
   ecache: ^2.2.0
-  emojis: ^0.9.9
+  emojis: ^3.2.0
   equatable: ^2.0.8
   file_picker: ^11.0.2
   file_selector: ^1.1.0
