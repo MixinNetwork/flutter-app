@@ -216,10 +216,26 @@ Uint8List normalizeGifFrameDurations(Uint8List data) {
 }
 
 Future<void> normalizeGifFileIfNeeded(File file, String? mimeType) async {
-  if (mimeType?.toLowerCase() != ImageType.gif.mimeType) return;
+  final normalizedMimeType = mimeType?.toLowerCase();
+  if (normalizedMimeType != null &&
+      normalizedMimeType != ImageType.gif.mimeType) {
+    return;
+  }
   if (!file.existsSync()) return;
 
-  final data = await file.readAsBytes();
+  final opened = await file.open();
+  late final Uint8List data;
+  try {
+    if (normalizedMimeType == null) {
+      final header = await opened.read(6);
+      if (!_isGifBytes(Uint8List.fromList(header))) return;
+      await opened.setPosition(0);
+    }
+    data = await opened.read(await file.length());
+  } finally {
+    await opened.close();
+  }
+
   final normalized = normalizeGifFrameDurations(data);
   if (!identical(normalized, data)) {
     await file.writeAsBytes(normalized, flush: true);

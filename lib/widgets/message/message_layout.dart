@@ -9,15 +9,13 @@ class MessageLayout extends MultiChildRenderObjectWidget {
     required Widget dateAndStatus,
     super.key,
     this.spacing = 0.0,
-    this.clipBehavior = Clip.none,
   }) : super(children: [content, dateAndStatus]);
 
   final double spacing;
-  final Clip clipBehavior;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      _RenderMessageLayout(spacing: spacing, clipBehavior: clipBehavior);
+      _RenderMessageLayout(spacing: spacing);
 
   @override
   void updateRenderObject(
@@ -25,9 +23,7 @@ class MessageLayout extends MultiChildRenderObjectWidget {
     // ignore: library_private_types_in_public_api
     _RenderMessageLayout renderObject,
   ) {
-    renderObject
-      ..spacing = spacing
-      ..clipBehavior = clipBehavior;
+    renderObject.spacing = spacing;
   }
 }
 
@@ -38,9 +34,7 @@ class _RenderMessageLayout extends RenderBox
   _RenderMessageLayout({
     List<RenderBox>? children,
     double spacing = 0.0,
-    Clip clipBehavior = Clip.none,
-  }) : _spacing = spacing,
-       _clipBehavior = clipBehavior {
+  }) : _spacing = spacing {
     addAll(children);
   }
 
@@ -51,17 +45,6 @@ class _RenderMessageLayout extends RenderBox
     if (_spacing == value) return;
     _spacing = value;
     markNeedsLayout();
-  }
-
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-
-  set clipBehavior(Clip value) {
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
-      markNeedsSemanticsUpdate();
-    }
   }
 
   RenderBox get contentChild => firstChild!;
@@ -108,8 +91,6 @@ class _RenderMessageLayout extends RenderBox
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) =>
       defaultComputeDistanceToHighestActualBaseline(baseline);
-
-  final bool _hasVisualOverflow = false;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) =>
@@ -210,23 +191,8 @@ class _RenderMessageLayout extends RenderBox
       defaultHitTestChildren(result, position: position);
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_hasVisualOverflow && clipBehavior != Clip.none) {
-      _clipRectLayer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        Offset.zero & size,
-        defaultPaint,
-        clipBehavior: clipBehavior,
-        oldLayer: _clipRectLayer,
-      );
-    } else {
-      _clipRectLayer = null;
+  void paint(PaintingContext context, Offset offset) =>
       defaultPaint(context, offset);
-    }
-  }
-
-  ClipRectLayer? _clipRectLayer;
 
   bool _calculateRenderParagraphLastLineHasSpace(double widthLimit) {
     final renderParagraph = contentChild.findRenderObject<RenderParagraph>();

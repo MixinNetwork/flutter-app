@@ -8,7 +8,19 @@ import 'package:flutter/widgets.dart';
 import '../utils/image.dart';
 import '../utils/proxy.dart';
 
-final _normalizedGifFiles = <String>{};
+final _checkedImageFiles = <String>{};
+
+bool shouldUseMediaImagePipeline(
+  String url,
+  ProxyConfig? proxyConfig, {
+  bool normalizeGif = false,
+}) => normalizeGif || proxyConfig != null || isLikelyGifUrl(url);
+
+@visibleForTesting
+bool isLikelyGifUrl(String url) {
+  final path = Uri.tryParse(url)?.path ?? url.split('?').first;
+  return path.toLowerCase().endsWith('.gif');
+}
 
 @immutable
 class ProxyNetworkImage extends ImageProvider<ProxyNetworkImage> {
@@ -104,14 +116,18 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
 
   void _start() {
     final image = widget.image;
-    if (image is! FileImage ||
-        !image.file.path.toLowerCase().endsWith('.gif')) {
+    if (image is! FileImage) {
+      _future = null;
+      return;
+    }
+    final fileName = image.file.uri.pathSegments.last.toLowerCase();
+    if (!fileName.endsWith('.gif') && fileName.contains('.')) {
       _future = null;
       return;
     }
 
     final path = image.file.absolute.path;
-    if (_normalizedGifFiles.contains(path)) {
+    if (_checkedImageFiles.contains(path)) {
       _future = null;
       return;
     }
@@ -121,10 +137,10 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
 
   Future<void> _normalize(File file) async {
     try {
-      await normalizeGifFileIfNeeded(file, ImageType.gif.mimeType);
+      await normalizeGifFileIfNeeded(file, null);
       await FileImage(file).evict();
     } finally {
-      _normalizedGifFiles.add(file.absolute.path);
+      _checkedImageFiles.add(file.absolute.path);
     }
   }
 

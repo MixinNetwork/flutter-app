@@ -28,14 +28,6 @@ import 'input_container.dart';
 import 'message_jump.dart';
 import 'selection_bottom_bar.dart';
 
-void handleForceLatestChatJump(
-  Object? forceLatestKey,
-  Future<void> Function() jumpToLatest,
-) {
-  if (forceLatestKey == null) return;
-  unawaited(jumpToLatest());
-}
-
 class ChatPage extends HookConsumerWidget {
   const ChatPage({super.key});
 
@@ -121,7 +113,7 @@ class ChatPage extends HookConsumerWidget {
           dispose: (_, coordinator) => coordinator.dispose(),
         ),
         Provider(
-          create: (context) => MessageViewportController(
+          create: (context) => ChatTimelineLocation(
             blinkNotifier: context.read<BlinkNotifier>(),
             scrollCoordinator: context.read<ChatScrollCoordinator>(),
             messageController: context.read<MessageController>(),
@@ -137,7 +129,6 @@ class ChatPage extends HookConsumerWidget {
             final routeMode = DesktopShellLayout.useChatSideRouteMode(
               boxConstraints.maxWidth,
             );
-            chatSideNotifier.routeMode = routeMode;
 
             return DesktopShellLayout.chatSideRouteMode(
               routeMode: routeMode,
@@ -189,18 +180,18 @@ class ChatContainer extends HookConsumerWidget {
         MediaQuery.sizeOf(context).height ~/ 20;
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
-    final forceLatestKey = ref.watch(
-      conversationProvider.select((value) => value?.forceLatestKey),
+    final latestJumpRequestKey = ref.watch(
+      conversationProvider.select((value) => value?.latestJumpRequestKey),
     );
 
     useEffect(() {
-      if (forceLatestKey == null) return null;
+      if (latestJumpRequestKey == null) return null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        handleForceLatestChatJump(forceLatestKey, context.jumpToLatestInChat);
+        unawaited(context.jumpToLatestInChat());
       });
       return null;
-    }, [forceLatestKey]);
+    }, [latestJumpRequestKey]);
 
     return RepaintBoundary(
       child: FocusableActionDetector(

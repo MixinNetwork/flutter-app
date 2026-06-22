@@ -106,6 +106,7 @@ class StickerItem extends HookConsumerWidget {
             height: height,
             width: width,
             fit: BoxFit.contain,
+            normalizeGif: assetType?.toLowerCase() == 'gif',
             errorBuilder: (context, error, stackTrace) {
               _triggerRefreshJob(context, stickerId);
               return errorWidget ?? const SizedBox();

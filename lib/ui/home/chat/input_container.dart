@@ -341,31 +341,27 @@ void showMaxLengthReachedToast(BuildContext context) =>
 void _sendPostMessage(
   BuildContext context,
   TextEditingController textEditingController,
-) {
-  final text = textEditingController.value.text.trim();
-  if (text.isEmpty) return;
-
-  final conversationItem = context.providerContainer.read(conversationProvider);
-  if (conversationItem == null) return;
-  if (text.length > kMaxTextLength) {
-    showMaxLengthReachedToast(context);
-    return;
-  }
-
-  context.accountServer.sendPostMessage(
-    text,
-    conversationItem.encryptCategory,
-    conversationId: conversationItem.conversationId,
-    recipientId: conversationItem.userId,
-  );
-
-  textEditingController.text = '';
-  context.providerContainer.read(quoteMessageProvider.notifier).state = null;
-}
+) => _sendTextMessage(
+  context,
+  textEditingController,
+  post: true,
+);
 
 void _sendMessage(
   BuildContext context,
   TextEditingController textEditingController, {
+  bool silent = false,
+}) => _sendTextMessage(
+  context,
+  textEditingController,
+  post: false,
+  silent: silent,
+);
+
+void _sendTextMessage(
+  BuildContext context,
+  TextEditingController textEditingController, {
+  required bool post,
   bool silent = false,
 }) {
   final text = textEditingController.value.text.trim();
@@ -378,16 +374,25 @@ void _sendMessage(
     return;
   }
 
-  context.accountServer.sendTextMessage(
-    text,
-    conversationItem.encryptCategory,
-    conversationId: conversationItem.conversationId,
-    recipientId: conversationItem.userId,
-    quoteMessageId: context.providerContainer.read(quoteMessageIdProvider),
-    silent: silent,
-  );
+  if (post) {
+    context.accountServer.sendPostMessage(
+      text,
+      conversationItem.encryptCategory,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  } else {
+    context.accountServer.sendTextMessage(
+      text,
+      conversationItem.encryptCategory,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+      quoteMessageId: context.providerContainer.read(quoteMessageIdProvider),
+      silent: silent,
+    );
+  }
 
-  textEditingController.text = '';
+  textEditingController.clear();
   context.providerContainer.read(quoteMessageProvider.notifier).state = null;
 }
 

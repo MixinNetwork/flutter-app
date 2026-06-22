@@ -41,9 +41,6 @@ bool useShowNip() => _useMessageContextConverter((state) => state.showNip);
 bool useIsCurrentUser() =>
     _useMessageContextConverter((state) => state.isCurrentUser);
 
-MessageItem useMessage() =>
-    useMessageConverter<MessageItem>(converter: (state) => state);
-
 T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
     _useMessageContextConverter((state) => converter(state.message));
 

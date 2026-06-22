@@ -22,10 +22,22 @@ void main() {
 
     notifier
       ..openDestination(ConversationInfoDestination.searchMessageHistory)
-      ..routeMode = true
-      ..closeAfterContentJump();
+      ..closeAfterContentJump(routeMode: true);
 
     expect(notifier.state.destinations, isEmpty);
+  });
+
+  test('wide content jump keeps the side stack', () {
+    final notifier = ChatSideNotifier();
+    addTearDown(notifier.dispose);
+
+    notifier
+      ..openDestination(ConversationInfoDestination.searchMessageHistory)
+      ..closeAfterContentJump(routeMode: false);
+
+    expect(notifier.state.destinations, [
+      ConversationInfoDestination.searchMessageHistory,
+    ]);
   });
 
   test('empty stack pop is ignored', () {

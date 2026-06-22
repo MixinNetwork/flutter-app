@@ -418,8 +418,8 @@ class _QuoteImage extends HookWidget {
         return;
       }
       if (mediaUrl == null) {
+        final messageDao = context.database.messageDao;
         scheduleMicrotask(() async {
-          final messageDao = context.database.messageDao;
           final messageItem = await messageDao.findMessageItemByMessageId(
             quoteMessageId,
           );

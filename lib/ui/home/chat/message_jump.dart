@@ -1,14 +1,15 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
+import '../desktop_shell_layout.dart';
 import '../notifier/blink_notifier.dart';
 import '../notifier/chat_side_notifier.dart';
 import '../notifier/message_controller.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
 
-class MessageViewportController {
-  MessageViewportController({
+class ChatTimelineLocation {
+  ChatTimelineLocation({
     required BlinkNotifier blinkNotifier,
     required ChatScrollCoordinator scrollCoordinator,
     required MessageController messageController,
@@ -27,6 +28,7 @@ class MessageViewportController {
     String messageId, {
     String? sourceMessageId,
     bool closeSideAfterJump = false,
+    bool chatSideRouteMode = false,
   }) async {
     traceChatJump(
       'request source=${shortMessageId(sourceMessageId)} '
@@ -43,7 +45,7 @@ class MessageViewportController {
       'handled=$handled',
     );
     if (handled) {
-      _closeSideIfNeeded(closeSideAfterJump);
+      _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
       return;
     }
 
@@ -66,17 +68,20 @@ class MessageViewportController {
       direction: direction,
     );
     _messageController.loadAroundMessage(messageId);
-    _closeSideIfNeeded(closeSideAfterJump);
+    _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
   }
 
-  Future<void> jumpToLatest({bool closeSideAfterJump = false}) async {
+  Future<void> jumpToLatest({
+    bool closeSideAfterJump = false,
+    bool chatSideRouteMode = false,
+  }) async {
     traceChatJump('request latest');
     if (_messageController.state.isLatest &&
         await _scrollCoordinator.scrollToBottomIfInLoadedWindow(
           animated: true,
         )) {
       traceChatJump('loaded-window latest handled=true');
-      _closeSideIfNeeded(closeSideAfterJump);
+      _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
       return;
     }
 
@@ -85,7 +90,7 @@ class MessageViewportController {
       direction: ChatScrollRestoreDirection.towardNewer,
     );
     _messageController.loadLatestWindow();
-    _closeSideIfNeeded(closeSideAfterJump);
+    _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
   }
 
   String? _currentWindowSourceMessageId(MessageState state) {
@@ -101,9 +106,9 @@ class MessageViewportController {
     null => null,
   };
 
-  void _closeSideIfNeeded(bool closeSideAfterJump) {
+  void _closeSideIfNeeded(bool closeSideAfterJump, bool chatSideRouteMode) {
     if (!closeSideAfterJump) return;
-    _chatSideNotifier.closeAfterContentJump();
+    _chatSideNotifier.closeAfterContentJump(routeMode: chatSideRouteMode);
   }
 }
 
@@ -116,13 +121,14 @@ extension ChatMessageJump on BuildContext {
     messageId,
     sourceMessageId: sourceMessageId,
     closeSideAfterJump: closeSideAfterJump,
+    chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
   );
 
   Future<void> jumpToLatestInChat({bool closeSideAfterJump = false}) =>
       _chatHistoryLocation.jumpToLatest(
         closeSideAfterJump: closeSideAfterJump,
+        chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
       );
 
-  MessageViewportController get _chatHistoryLocation =>
-      read<MessageViewportController>();
+  ChatTimelineLocation get _chatHistoryLocation => read<ChatTimelineLocation>();
 }

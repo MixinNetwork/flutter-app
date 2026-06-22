@@ -41,7 +41,7 @@ class ConversationFocus {
         initIndexMessageId == null &&
         initialChatSidePage == null &&
         keyword == null) {
-      conversationNotifier.openLatest();
+      conversationNotifier.requestLatestJump();
       return;
     }
 
