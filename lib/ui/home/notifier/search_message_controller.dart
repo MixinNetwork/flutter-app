@@ -91,7 +91,7 @@ abstract class SearchMessageController
     _setState(SearchMessageState(state.items, true));
     try {
       final items = await _doFuzzySearch(lastMessageId);
-      if (items.isEmpty) {
+      if (items.length < limit) {
         d('search message controller: no more data $lastMessageId');
         _hasMore = false;
       }
@@ -110,7 +110,9 @@ abstract class SearchMessageController
     if (itemPositionValue.isEmpty) {
       return;
     }
-    final lastIndex = itemPositionValue.last.index;
+    final lastIndex = itemPositionValue
+        .map((position) => position.index)
+        .reduce((a, b) => a > b ? a : b);
     if (lastIndex >= state.items.length - 4) {
       _load();
     }

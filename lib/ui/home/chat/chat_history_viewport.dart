@@ -3,15 +3,19 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
+import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
 import '../../../widgets/message/message_day_time.dart';
+import '../../provider/is_bot_group_provider.dart';
 import '../../provider/pending_chat_jump_provider.dart';
+import '../../provider/setting_provider.dart';
 import '../notifier/message_controller.dart';
 import 'chat_scroll_coordinator.dart';
 import 'message_jump.dart';
@@ -52,6 +56,12 @@ class ChatHistoryViewport extends HookConsumerWidget {
     final center = state.center;
     final bottom = state.bottom;
     final messages = state.list;
+    final conversationId = state.conversationId;
+    final isBotGroupConversation =
+        conversationId != null && ref.watch(isBotGroupProvider(conversationId));
+    final enableShowAvatar = ref.watch(
+      settingProvider.select((value) => value.messageShowAvatar),
+    );
     final rows = useMemoized(
       () => MessageRows.from(top: top, center: center, bottom: bottom),
       [top, center, bottom],
@@ -94,6 +104,28 @@ class ChatHistoryViewport extends HookConsumerWidget {
       () => _dayTimeEntries(rows, messageKeysRef.value, dayTimeKeysRef.value),
       [rows, messageIdsKey],
     );
+
+    Widget buildMessage(MessageRowModel row) {
+      final message = row.message;
+      return ChatRenderedMessage(
+        coordinator: scrollCoordinator,
+        messageId: message.messageId,
+        child: MessageItemWidget(
+          key: messageKeysRef.value[message.messageId],
+          row: row,
+          message: message,
+          lastReadMessageId: state.lastReadMessageId,
+          dateTimeKey: row.dateTime == null
+              ? null
+              : dayTimeKeysRef.value[message.messageId],
+          isGroupOrBotGroupConversation: _isGroupOrBotGroupMessage(
+            message,
+            isBotGroupConversation,
+          ),
+          enableShowAvatar: enableShowAvatar,
+        ),
+      );
+    }
 
     useEffect(
       () {
@@ -143,20 +175,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final actualIndex = top.length - index - 1;
                 final row = rows.top[actualIndex];
-                final messageItem = row.message;
-                return ChatRenderedMessage(
-                  coordinator: scrollCoordinator,
-                  messageId: messageItem.messageId,
-                  child: MessageItemWidget(
-                    key: messageKeysRef.value[messageItem.messageId],
-                    row: row,
-                    message: messageItem,
-                    lastReadMessageId: state.lastReadMessageId,
-                    dateTimeKey: row.dateTime == null
-                        ? null
-                        : dayTimeKeysRef.value[messageItem.messageId],
-                  ),
-                );
+                return buildMessage(row);
               }, childCount: top.length),
             ),
             SliverToBoxAdapter(
@@ -165,40 +184,14 @@ class ChatHistoryViewport extends HookConsumerWidget {
                 builder: (context) {
                   final row = rows.center;
                   if (row == null) return const SizedBox();
-                  final center = row.message;
-                  return ChatRenderedMessage(
-                    coordinator: scrollCoordinator,
-                    messageId: center.messageId,
-                    child: MessageItemWidget(
-                      key: messageKeysRef.value[center.messageId],
-                      row: row,
-                      message: center,
-                      lastReadMessageId: state.lastReadMessageId,
-                      dateTimeKey: row.dateTime == null
-                          ? null
-                          : dayTimeKeysRef.value[center.messageId],
-                    ),
-                  );
+                  return buildMessage(row);
                 },
               ),
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
                 final row = rows.bottom[index];
-                final messageItem = row.message;
-                return ChatRenderedMessage(
-                  coordinator: scrollCoordinator,
-                  messageId: messageItem.messageId,
-                  child: MessageItemWidget(
-                    key: messageKeysRef.value[messageItem.messageId],
-                    row: row,
-                    message: messageItem,
-                    lastReadMessageId: state.lastReadMessageId,
-                    dateTimeKey: row.dateTime == null
-                        ? null
-                        : dayTimeKeysRef.value[messageItem.messageId],
-                  ),
-                );
+                return buildMessage(row);
               }, childCount: bottom.length),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 10)),
@@ -208,6 +201,11 @@ class ChatHistoryViewport extends HookConsumerWidget {
     );
   }
 }
+
+bool _isGroupOrBotGroupMessage(MessageItem message, bool isBotGroup) =>
+    message.conversionCategory == ConversationCategory.group ||
+    message.userId != message.conversationOwnerId ||
+    isBotGroup;
 
 List<MessageDayTimeViewportEntry> _dayTimeEntries(
   MessageRows rows,
@@ -257,7 +255,7 @@ class JumpCurrentButton extends HookConsumerWidget {
       padding: const EdgeInsets.only(top: 8),
       child: InteractiveDecoratedBox(
         onTap: () async {
-          final messageId = pendingJumpController.state?.returnMessageId;
+          final messageId = pendingJumpController.state;
           if (messageId != null) {
             await context.jumpToMessageInChat(messageId);
             pendingJumpController.state = null;

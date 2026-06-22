@@ -76,10 +76,13 @@ class SharedMediaList extends HookConsumerWidget {
     );
 
     final state = useValueListenable(mediaController);
-    final grouped = groupBy<MessageItem, DateTime>(state.list, (messageItem) {
-      final local = messageItem.createdAt.toLocal();
-      return DateTime(local.year, local.month, local.day);
-    });
+    final grouped = useMemoized(
+      () => groupBy<MessageItem, DateTime>(state.list, (messageItem) {
+        final local = messageItem.createdAt.toLocal();
+        return DateTime(local.year, local.month, local.day);
+      }),
+      [state.list],
+    );
     final scrollController = useScrollController();
 
     if (grouped.isEmpty) {

@@ -179,20 +179,12 @@ class ConversationFocus {
     BuildContext context,
     String conversationId,
   ) async {
-    final conversations = context
-        .read<ConversationListController>()
-        .state
-        .map
-        .values
-        .cast<ConversationItem?>()
-        .toList();
-
-    return conversations.firstWhere(
-          (element) => element?.conversationId == conversationId,
-          orElse: () => null,
-        ) ??
-        await context.database.conversationDao
-            .conversationItem(conversationId)
-            .getSingleOrNull();
+    final conversations = context.read<ConversationListController>().state.map;
+    for (final conversation in conversations.values) {
+      if (conversation.conversationId == conversationId) return conversation;
+    }
+    return context.database.conversationDao
+        .conversationItem(conversationId)
+        .getSingleOrNull();
   }
 }

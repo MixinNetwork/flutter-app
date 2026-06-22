@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
@@ -43,7 +43,7 @@ class _ImageEditorDialog extends HookConsumerWidget {
     final boundaryKey = useMemoized(GlobalKey.new);
     final image = useMemoizedFuture<ui.Image?>(
       () async {
-        final bytes = File(path).readAsBytesSync();
+        final bytes = await File(path).readAsBytes();
         final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
         final codec = await PaintingBinding.instance
             .instantiateImageCodecWithSize(buffer);
@@ -99,6 +99,39 @@ class _ImageEditorDialog extends HookConsumerWidget {
       ),
     );
   }
+}
+
+class _ImageTransform {
+  const _ImageTransform({
+    required this.bytes,
+    required this.width,
+    required this.height,
+    required this.flip,
+    required this.rotateDegree,
+  });
+
+  final Uint8List bytes;
+  final int width;
+  final int height;
+  final bool flip;
+  final int rotateDegree;
+}
+
+Uint8List _encodeTransformedPng(_ImageTransform transform) {
+  var imgImage = img.Image.fromBytes(
+    width: transform.width,
+    height: transform.height,
+    bytes: transform.bytes.buffer,
+    order: img.ChannelOrder.rgba,
+  );
+
+  if (transform.flip) {
+    img.flipHorizontal(imgImage);
+  }
+  if (transform.rotateDegree != 0) {
+    imgImage = img.copyRotate(imgImage, angle: transform.rotateDegree);
+  }
+  return Uint8List.fromList(img.encodePng(imgImage));
 }
 
 class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
@@ -313,21 +346,18 @@ class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
     if (bytes == null) {
       return null;
     }
-    var imgImage = img.Image.fromBytes(
-      width: image.width,
-      height: image.height,
-      bytes: bytes.buffer,
-      order: img.ChannelOrder.rgba,
+    return compute(
+      _encodeTransformedPng,
+      _ImageTransform(
+        bytes: bytes,
+        width: image.width,
+        height: image.height,
+        flip: state.flip,
+        rotateDegree: state.rotate == ImageRotate.none
+            ? 0
+            : (360 - state.rotate.degree).toInt(),
+      ),
     );
-
-    if (state.flip) {
-      img.flipHorizontal(imgImage);
-    }
-    if (state.rotate != ImageRotate.none) {
-      imgImage = img.copyRotate(imgImage, angle: 360 - state.rotate.degree);
-    }
-    final data = img.encodePng(imgImage);
-    return Uint8List.fromList(data);
   }
 
   Future<ImageEditorSnapshot?> takeSnapshot() async {

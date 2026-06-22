@@ -18,6 +18,8 @@ void main() {
       final loader = MessageWindowLoader(
         recentMessages: (_, _) => throw StateError('unexpected recent query'),
         messageOrderInfo: (_) async => MessageOrderInfo(rowId: 2, createdAt: 2),
+        beforeMessages: (_, _, _) => throw StateError('unexpected before'),
+        afterMessages: (_, _, _) => throw StateError('unexpected after'),
         beforeMessageIds: (_, _, _) {
           calls.add('beforeIds');
           return beforeIdsCompleter.future;
@@ -60,6 +62,71 @@ void main() {
       expect(state.bottom.map((e) => e.messageId), ['3']);
     },
   );
+
+  test('loadBefore and loadAfter keep MessageState ordering', () async {
+    final loader = MessageWindowLoader(
+      recentMessages: (_, _) => throw StateError('unexpected recent query'),
+      messageOrderInfo: (messageId) async => MessageOrderInfo(
+        rowId: int.parse(messageId),
+        createdAt: int.parse(messageId),
+      ),
+      beforeMessages: (_, _, _) async => [
+        testMessage(2, messageId: '2'),
+        testMessage(1, messageId: '1'),
+      ],
+      afterMessages: (_, _, _) async => [
+        testMessage(4, messageId: '4'),
+        testMessage(5, messageId: '5'),
+      ],
+      beforeMessageIds: (_, _, _) => throw StateError('unexpected before ids'),
+      afterMessageIds: (_, _, _) => throw StateError('unexpected after ids'),
+      messagesByIds: (_) => throw StateError('unexpected hydrate'),
+    );
+
+    final state = MessageState(
+      center: testMessage(3, messageId: '3'),
+    );
+
+    final before = await loader.loadBefore(state, 'conversation', 3);
+    expect(before.top.map((e) => e.messageId), ['1', '2']);
+    expect(before.center?.messageId, '3');
+    expect(before.isOldest, isTrue);
+
+    final after = await loader.loadAfter(before, 'conversation', 3);
+    expect(after.bottom.map((e) => e.messageId), ['4', '5']);
+    expect(after.isLatest, isTrue);
+  });
+
+  test('directionFromSource compares message order', () async {
+    final loader = MessageWindowLoader(
+      recentMessages: (_, _) => throw StateError('unexpected recent query'),
+      messageOrderInfo: (messageId) async => switch (messageId) {
+        'older' => MessageOrderInfo(rowId: 1, createdAt: 1),
+        'newer' => MessageOrderInfo(rowId: 2, createdAt: 1),
+        _ => null,
+      },
+      beforeMessages: (_, _, _) => throw StateError('unexpected before'),
+      afterMessages: (_, _, _) => throw StateError('unexpected after'),
+      beforeMessageIds: (_, _, _) => throw StateError('unexpected before'),
+      afterMessageIds: (_, _, _) => throw StateError('unexpected after'),
+      messagesByIds: (_) => throw StateError('unexpected hydrate'),
+    );
+
+    expect(
+      await loader.directionFromSource(
+        sourceMessageId: 'newer',
+        targetMessageId: 'older',
+      ),
+      MessageWindowDirection.older,
+    );
+    expect(
+      await loader.directionFromSource(
+        sourceMessageId: 'older',
+        targetMessageId: 'newer',
+      ),
+      MessageWindowDirection.newer,
+    );
+  });
 }
 
 MessageItem testMessage(int index, {String? messageId}) => MessageItem(

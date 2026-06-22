@@ -507,10 +507,9 @@ class _QuoteMessageBase extends HookConsumerWidget {
           } catch (_) {}
 
           context.providerContainer
-              .read(pendingChatJumpProvider.notifier)
-              .state = messageId == null
-              ? null
-              : PendingChatJump.returnToMessage(messageId);
+                  .read(pendingChatJumpProvider.notifier)
+                  .state =
+              messageId;
           traceChatJump(
             'quote tap source=${shortMessageId(messageId)} '
             'target=${shortMessageId(quoteMessageId)}',

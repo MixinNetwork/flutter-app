@@ -10,15 +10,25 @@ typedef AroundMessageIdsQuery =
       String conversationId,
       int limit,
     );
+typedef AroundMessagesQuery =
+    Future<List<MessageItem>> Function(
+      MessageOrderInfo anchor,
+      String conversationId,
+      int limit,
+    );
 typedef MessagesByIdsQuery =
     Future<List<MessageItem>> Function(
       List<String> messageIds,
     );
 
+enum MessageWindowDirection { older, newer }
+
 class MessageWindowLoader {
   const MessageWindowLoader({
     required this.recentMessages,
     required this.messageOrderInfo,
+    required this.beforeMessages,
+    required this.afterMessages,
     required this.beforeMessageIds,
     required this.afterMessageIds,
     required this.messagesByIds,
@@ -29,6 +39,12 @@ class MessageWindowLoader {
         recentMessages: (conversationId, limit) =>
             messageDao.messagesByConversationId(conversationId, limit).get(),
         messageOrderInfo: messageDao.messageOrderInfo,
+        beforeMessages: (anchor, conversationId, limit) => messageDao
+            .beforeMessagesByConversationId(anchor, conversationId, limit)
+            .get(),
+        afterMessages: (anchor, conversationId, limit) => messageDao
+            .afterMessagesByConversationId(anchor, conversationId, limit)
+            .get(),
         beforeMessageIds: (anchor, conversationId, limit) => messageDao
             .beforeMessageIdsByConversationId(anchor, conversationId, limit)
             .get(),
@@ -41,9 +57,71 @@ class MessageWindowLoader {
 
   final RecentMessagesQuery recentMessages;
   final MessageOrderInfoQuery messageOrderInfo;
+  final AroundMessagesQuery beforeMessages;
+  final AroundMessagesQuery afterMessages;
   final AroundMessageIdsQuery beforeMessageIds;
   final AroundMessageIdsQuery afterMessageIds;
   final MessagesByIdsQuery messagesByIds;
+
+  Future<MessageState> loadBefore(
+    MessageState state,
+    String conversationId,
+    int limit,
+  ) async {
+    final topMessageId = state.topMessage?.messageId;
+    if (topMessageId == null) return state.copyWith(isOldest: true);
+
+    final info = await messageOrderInfo(topMessageId);
+    if (info == null) return state.copyWith(isOldest: true);
+
+    final messages = await beforeMessages(info, conversationId, limit);
+    return state.copyWith(
+      top: [...messages.reversed, ...state.top],
+      isOldest: messages.length < limit,
+    );
+  }
+
+  Future<MessageState> loadAfter(
+    MessageState state,
+    String conversationId,
+    int limit,
+  ) async {
+    final bottomMessageId = state.bottomMessage?.messageId;
+    if (bottomMessageId == null) return state.copyWith(isLatest: true);
+
+    final info = await messageOrderInfo(bottomMessageId);
+    if (info == null) return state.copyWith(isLatest: true);
+
+    final messages = await afterMessages(info, conversationId, limit);
+    return state.copyWith(
+      bottom: [...state.bottom, ...messages],
+      isLatest: messages.length < limit ? true : null,
+    );
+  }
+
+  Future<MessageWindowDirection?> directionFromSource({
+    required String? sourceMessageId,
+    required String targetMessageId,
+  }) async {
+    if (sourceMessageId == null || sourceMessageId == targetMessageId) {
+      return null;
+    }
+
+    final results = await Future.wait([
+      messageOrderInfo(sourceMessageId),
+      messageOrderInfo(targetMessageId),
+    ]);
+    final sourceInfo = results[0];
+    final targetInfo = results[1];
+    if (sourceInfo == null || targetInfo == null) return null;
+
+    final sourceAfterTarget = sourceInfo.createdAt == targetInfo.createdAt
+        ? sourceInfo.rowId > targetInfo.rowId
+        : sourceInfo.createdAt > targetInfo.createdAt;
+    return sourceAfterTarget
+        ? MessageWindowDirection.older
+        : MessageWindowDirection.newer;
+  }
 
   Future<MessageState> load(
     String conversationId,

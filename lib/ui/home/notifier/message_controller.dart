@@ -348,35 +348,11 @@ class MessageController extends ValueNotifier<MessageState> {
     _emit(_pretreatment(messageState));
   }
 
-  Future<MessageState> _before(String conversationId) async {
-    final topMessageId = state.topMessage?.messageId;
-    assert(topMessageId != null);
-    final info = await messageDao.messageOrderInfo(topMessageId!);
-    final list = await messageDao
-        .beforeMessagesByConversationId(info!, conversationId, limit)
-        .get();
+  Future<MessageState> _before(String conversationId) =>
+      _messageWindowLoader.loadBefore(state, conversationId, limit);
 
-    final isOldest = list.length < limit;
-    return state.copyWith(
-      top: [...list.reversed, ...state.top],
-      isOldest: isOldest,
-    );
-  }
-
-  Future<MessageState> _after(String conversationId) async {
-    final bottomMessageId = state.bottomMessage?.messageId;
-    assert(bottomMessageId != null);
-    final info = await messageDao.messageOrderInfo(bottomMessageId!);
-    final list = await messageDao
-        .afterMessagesByConversationId(info!, conversationId, limit)
-        .get();
-
-    final isLatest = list.length < limit ? true : null;
-    return state.copyWith(
-      bottom: [...state.bottom, ...list],
-      isLatest: isLatest,
-    );
-  }
+  Future<MessageState> _after(String conversationId) =>
+      _messageWindowLoader.loadAfter(state, conversationId, limit);
 
   Future<MessageState> _resetMessageList(
     String conversationId,
@@ -423,6 +399,14 @@ class MessageController extends ValueNotifier<MessageState> {
     limit,
     centerMessageId: centerMessageId,
     trace: traceChatJump,
+  );
+
+  Future<MessageWindowDirection?> restoreDirectionFromSource({
+    required String? sourceMessageId,
+    required String targetMessageId,
+  }) => _messageWindowLoader.directionFromSource(
+    sourceMessageId: sourceMessageId,
+    targetMessageId: targetMessageId,
   );
 
   MessageState? _insertOrReplace(

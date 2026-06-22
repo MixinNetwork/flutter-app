@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key;
-import 'package:provider/provider.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -20,7 +19,6 @@ import '../../ui/provider/setting_provider.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
 import '../menu.dart';
@@ -106,7 +104,7 @@ class MessageRows {
         MessageRowModel(
           message: top[index],
           prev: top.getOrNull(index - 1),
-          next: top.getOrNull(index + 1) ?? center ?? bottom.lastOrNull,
+          next: top.getOrNull(index + 1) ?? center ?? bottom.firstOrNull,
         ),
     ],
     center: center == null
@@ -149,17 +147,12 @@ T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
     _useMessageContextConverter((state) => converter(state.message));
 
 T _useMessageContextConverter<T>(T Function(_MessageContext) converter) {
-  final notifier = useContext().read<ValueNotifier<_MessageContext>>();
-  return useListenableConverter<ValueNotifier<_MessageContext>, T>(
-        notifier,
-        converter: (notifier) => converter(notifier.value),
-      ).data
-      as T;
+  final context = useContext();
+  return converter(_MessageContextScope.watch(context));
 }
 
 extension MessageContextExtension on BuildContext {
-  _MessageContext get _messageContext =>
-      read<ValueNotifier<_MessageContext>>().value;
+  _MessageContext get _messageContext => _MessageContextScope.read(this);
 
   MessageItem get message => _messageContext.message;
 
@@ -194,6 +187,8 @@ class MessageItemWidget extends HookConsumerWidget {
     this.blink = true,
     this.isPinnedPage = false,
     this.dateTimeKey,
+    this.isGroupOrBotGroupConversation,
+    this.enableShowAvatar,
   });
 
   final MessageItem message;
@@ -205,6 +200,8 @@ class MessageItemWidget extends HookConsumerWidget {
   final bool blink;
   final bool isPinnedPage;
   final Key? dateTimeKey;
+  final bool? isGroupOrBotGroupConversation;
+  final bool? enableShowAvatar;
 
   static const primaryFontSize = 16.0;
   static const secondaryFontSize = 14.0;
@@ -221,14 +218,16 @@ class MessageItemWidget extends HookConsumerWidget {
     final isCurrentUser = message.relationship == UserRelationship.me;
 
     final isGroupOrBotGroupConversation =
-        message.conversionCategory == ConversationCategory.group ||
-        message.userId != message.conversationOwnerId ||
-        ref.watch(isBotGroupProvider(message.conversationId));
+        this.isGroupOrBotGroupConversation ??
+        (message.conversionCategory == ConversationCategory.group ||
+            message.userId != message.conversationOwnerId ||
+            ref.watch(isBotGroupProvider(message.conversationId)));
 
-    final enableShowAvatar = ref.watch(
-      settingProvider.select((value) => value.messageShowAvatar),
-    );
-    final showAvatar = isGroupOrBotGroupConversation && enableShowAvatar;
+    final enableShowAvatar =
+        this.enableShowAvatar ??
+        ref.watch(settingProvider.select((value) => value.messageShowAvatar));
+    final showAvatar =
+        isGroupOrBotGroupConversation && enableShowAvatar == true;
 
     final showNip =
         !(row.sameUserNext && row.sameDayNext) &&
@@ -251,23 +250,16 @@ class MessageItemWidget extends HookConsumerWidget {
       debugLabel: 'message_item_${message.messageId}',
     );
 
-    final blinkNotifier = context.read<BlinkNotifier>();
-    final blinkState = useValueListenable(blinkNotifier);
-
-    final blinkColor = showedMenu.value
-        ? context.theme.listSelected
-        : blinkState.messageId == message.messageId && blink
-        ? blinkState.color
-        : Colors.transparent;
-
     Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (datetime != null)
           MessageDayTime(key: dateTimeKey, dateTime: datetime),
-        ColoredBox(
-          color: blinkColor,
+        _MessageBlinkBackground(
+          messageId: message.messageId,
+          enabled: blink,
+          menuColor: showedMenu.value ? context.theme.listSelected : null,
           child: Builder(
             builder: (context) {
               if (message.type == MessageCategory.systemConversation) {
@@ -356,7 +348,66 @@ class MessageItemWidget extends HookConsumerWidget {
   }
 }
 
-class MessageContext extends HookConsumerWidget {
+class _MessageBlinkBackground extends StatefulWidget {
+  const _MessageBlinkBackground({
+    required this.messageId,
+    required this.enabled,
+    required this.child,
+    this.menuColor,
+  });
+
+  final String messageId;
+  final bool enabled;
+  final Color? menuColor;
+  final Widget child;
+
+  @override
+  State<_MessageBlinkBackground> createState() =>
+      _MessageBlinkBackgroundState();
+}
+
+class _MessageBlinkBackgroundState extends State<_MessageBlinkBackground> {
+  BlinkNotifier? _notifier;
+  BlinkState _blinkState = const BlinkState();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final notifier = context.read<BlinkNotifier>();
+    if (identical(_notifier, notifier)) return;
+    _notifier?.removeListener(_onBlinkChanged);
+    _notifier = notifier..addListener(_onBlinkChanged);
+    _blinkState = notifier.value;
+  }
+
+  void _onBlinkChanged() {
+    final next = _notifier!.value;
+    final shouldRebuild =
+        widget.enabled &&
+        (_blinkState.messageId == widget.messageId ||
+            next.messageId == widget.messageId);
+    _blinkState = next;
+    if (shouldRebuild && mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _notifier?.removeListener(_onBlinkChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        widget.menuColor ??
+        (widget.enabled && _blinkState.messageId == widget.messageId
+            ? _blinkState.color
+            : Colors.transparent);
+    return ColoredBox(color: color, child: widget.child);
+  }
+}
+
+class MessageContext extends StatelessWidget {
   const MessageContext({
     required this.isTranscriptPage,
     required this.isPinnedPage,
@@ -384,30 +435,46 @@ class MessageContext extends HookConsumerWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    _MessageContext newMessageContext() => _MessageContext(
+  Widget build(BuildContext context) => _MessageContextScope(
+    value: _MessageContext(
       isTranscriptPage: isTranscriptPage,
       isPinnedPage: isPinnedPage,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       message: message,
-    );
+    ),
+    child: child,
+  );
+}
 
-    final messageContext = useMemoized(
-      () => ValueNotifier(newMessageContext()),
-    );
-    useEffect(() => messageContext.dispose, [messageContext]);
+class _MessageContextScope extends InheritedWidget {
+  const _MessageContextScope({
+    required this.value,
+    required super.child,
+  });
 
-    useEffect(() {
-      messageContext.value = newMessageContext();
-      return null;
-    }, [isTranscriptPage, isPinnedPage, showNip, isCurrentUser, message]);
+  final _MessageContext value;
 
-    return ChangeNotifierProvider<ValueNotifier<_MessageContext>>.value(
-      value: messageContext,
-      child: child,
-    );
+  static _MessageContext watch(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_MessageContextScope>();
+    assert(scope != null, 'No MessageContext found in widget tree.');
+    return scope!.value;
   }
+
+  static _MessageContext read(BuildContext context) {
+    final scope =
+        context
+                .getElementForInheritedWidgetOfExactType<_MessageContextScope>()
+                ?.widget
+            as _MessageContextScope?;
+    assert(scope != null, 'No MessageContext found in widget tree.');
+    return scope!.value;
+  }
+
+  @override
+  bool updateShouldNotify(_MessageContextScope oldWidget) =>
+      value != oldWidget.value;
 }
 
 class _MessageBubbleMargin extends HookConsumerWidget {

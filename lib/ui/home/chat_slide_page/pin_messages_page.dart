@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart'
-    hide ChangeNotifierProvider, Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
@@ -47,18 +46,6 @@ class PinMessagesPage extends HookConsumerWidget {
       keys: [conversationId],
     ).data;
 
-    final chatSideNotifier = useMemoized(ChatSideNotifier.new);
-    useEffect(() => chatSideNotifier.dispose, [chatSideNotifier]);
-    final searchConversationKeywordNotifier = useMemoized(
-      () =>
-          SearchConversationKeywordNotifier(chatSideNotifier: chatSideNotifier),
-      [chatSideNotifier],
-    );
-    useEffect(
-      () => searchConversationKeywordNotifier.dispose,
-      [searchConversationKeywordNotifier],
-    );
-
     useEffect(() {
       if (rawList?.isNotEmpty ?? true) return;
       scheduleMicrotask(() => Navigator.pop(context));
@@ -69,18 +56,11 @@ class PinMessagesPage extends HookConsumerWidget {
     final scrollController = useMemoized(ScrollController.new);
     final listKey = useMemoized(() => GlobalKey(debugLabel: 'PinMessagesPage'));
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<SearchConversationKeywordNotifier>.value(
-          value: searchConversationKeywordNotifier,
-        ),
-        Provider(
-          create: (_) => AudioMessagesPlayAgent(
-            list,
-            (m) => context.accountServer.convertMessageAbsolutePath(m, true),
-          ),
-        ),
-      ],
+    return Provider(
+      create: (_) => AudioMessagesPlayAgent(
+        list,
+        (m) => context.accountServer.convertMessageAbsolutePath(m, true),
+      ),
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
