@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/constants.dart';
 import '../constants/resources.dart';
-import '../ui/home/home.dart';
+import '../ui/home/left_rail_controller.dart';
 import '../ui/provider/conversation_unseen_filter_enabled.dart';
 import '../ui/provider/keyword_provider.dart';
 import '../utils/extension/extension.dart';
@@ -34,7 +34,7 @@ class SearchBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+    final hasDrawer = context.watch<LeftRailController>();
 
     Widget? leading;
     if (hasDrawer.value) {

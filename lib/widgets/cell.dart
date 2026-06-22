@@ -3,7 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../constants/resources.dart';
-import '../ui/provider/responsive_navigator_provider.dart';
+import '../ui/provider/major_navigation_provider.dart';
 import '../utils/extension/extension.dart';
 import 'interactive_decorated_box.dart';
 
@@ -79,7 +79,7 @@ class CellItem extends HookConsumerWidget {
     final dynamicColor = color ?? context.theme.text;
     final backgroundColor = _CellItemStyle.of(context).backgroundColor;
     var selectedBackgroundColor = backgroundColor;
-    if (selected && !ref.watch(navigatorRouteModeProvider)) {
+    if (selected && !ref.watch(majorNavigationRouteModeProvider)) {
       selectedBackgroundColor = Color.alphaBlend(
         context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.05),

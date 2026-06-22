@@ -15,7 +15,7 @@ import '../../../enum/message_category.dart';
 import '../../../ui/home/chat/chat_jump_trace.dart';
 import '../../../ui/home/chat/message_jump.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
-import '../../../ui/provider/pending_jump_message_provider.dart';
+import '../../../ui/provider/pending_chat_jump_provider.dart';
 import '../../../ui/provider/user_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
@@ -499,17 +499,18 @@ class _QuoteMessageBase extends HookConsumerWidget {
                 context.jumpToMessageInChat(
                   quoteMessageId,
                   sourceMessageId: messageId,
+                  closeSideAfterJump: true,
                 ),
               );
-              context.popChatSideRouteIfNeeded();
               return;
             }
           } catch (_) {}
 
           context.providerContainer
-                  .read(pendingJumpMessageProvider.notifier)
-                  .state =
-              messageId;
+              .read(pendingChatJumpProvider.notifier)
+              .state = messageId == null
+              ? null
+              : PendingChatJump.returnToMessage(messageId);
           traceChatJump(
             'quote tap source=${shortMessageId(messageId)} '
             'target=${shortMessageId(quoteMessageId)}',

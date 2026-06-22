@@ -13,6 +13,7 @@ import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/slide_category_provider.dart';
+import '../conversation/conversation_avatar_cache.dart';
 import 'paging_controller.dart';
 
 const kDefaultLimit = 15;
@@ -35,6 +36,9 @@ class ConversationListController
   final SlideCategoryStateNotifier slideCategoryStateNotifier;
   final Database database;
   final MentionCache mentionCache;
+  late final ConversationAvatarCache avatarCache = ConversationAvatarCache(
+    database,
+  );
   final Map<SlideCategoryState, _ConversationPagingController> _map = {};
   final List<StreamSubscription?> _subscriptions = [];
 
@@ -108,6 +112,7 @@ class ConversationListController
               dao.conversationItemsByCategory(state.type, limit, offset).get(),
           updateEvent,
           mentionCache,
+          avatarCache,
         );
       case SlideCategoryType.circle:
         _map[state] ??= _ConversationPagingController(
@@ -120,6 +125,7 @@ class ConversationListController
               .get(),
           circleUpdateEvent,
           mentionCache,
+          avatarCache,
         );
       case SlideCategoryType.setting:
         return;
@@ -160,6 +166,7 @@ class ConversationListController
     for (final controller in _map.values) {
       controller.dispose();
     }
+    avatarCache.dispose();
     super.dispose();
   }
 
@@ -193,6 +200,7 @@ class _ConversationPagingController extends PagingController<ConversationItem> {
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
     Stream<void> updateEvent,
     MentionCache mentionCache,
+    ConversationAvatarCache avatarCache,
   ) : _updateEvent = updateEvent,
       super(
         itemPositionsListener: ItemPositionsListener.create(),
@@ -201,6 +209,7 @@ class _ConversationPagingController extends PagingController<ConversationItem> {
         queryRange: (limit, offset) async {
           final list = await queryRange(limit, offset);
           unawaited(_warmMentionCache(mentionCache, list));
+          unawaited(avatarCache.warm(list));
           return list;
         },
       );

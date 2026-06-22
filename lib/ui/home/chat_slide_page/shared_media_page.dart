@@ -102,7 +102,12 @@ class ShareMediaItemMenuWrapper extends StatelessWidget {
           image: MenuImage.icon(IconFonts.positionToChat),
           title: context.l10n.locateToChat,
           callback: () {
-            unawaited(context.jumpToMessageInChat(messageId));
+            unawaited(
+              context.jumpToMessageInChat(
+                messageId,
+                closeSideAfterJump: true,
+              ),
+            );
           },
         ),
       ],

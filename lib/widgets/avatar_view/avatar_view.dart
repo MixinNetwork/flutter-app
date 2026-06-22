@@ -23,6 +23,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     this.groupIconUrl,
     this.avatarUrl,
     this.category,
+    this.groupAvatarUsers,
   });
 
   final ConversationItem? conversation;
@@ -32,6 +33,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
   final String? groupIconUrl;
   final String? avatarUrl;
   final ConversationCategory? category;
+  final List<User>? groupAvatarUsers;
   final double size;
 
   @override
@@ -49,7 +51,8 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     final list =
         useMemoizedStream(
           () {
-            if (_category == ConversationCategory.group) {
+            if (groupAvatarUsers == null &&
+                _category == ConversationCategory.group) {
               return context.database.participantDao
                   .participantsAvatar(_conversationId!)
                   .watchWithStream(
@@ -63,10 +66,11 @@ class ConversationAvatarWidget extends HookConsumerWidget {
             }
             return const Stream<List<User>>.empty();
           },
-          keys: [_conversationId, _category],
+          keys: [_conversationId, _category, groupAvatarUsers != null],
           initialData: <User>[],
         ).data ??
         <User>[];
+    final users = groupAvatarUsers ?? list;
 
     return SizedBox.fromSize(
       size: Size.square(size),
@@ -78,7 +82,7 @@ class ConversationAvatarWidget extends HookConsumerWidget {
                 avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
                 size: size,
               )
-            : AvatarPuzzlesWidget(list, size),
+            : AvatarPuzzlesWidget(users, size),
       ),
     );
   }

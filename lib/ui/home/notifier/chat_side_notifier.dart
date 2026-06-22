@@ -1,117 +1,119 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-import '../../provider/abstract_responsive_navigator.dart';
-import '../../provider/conversation_provider.dart';
-import '../chat_slide_page/chat_info_page.dart';
-import '../chat_slide_page/circle_manager_page.dart';
-import '../chat_slide_page/disappear_message_page.dart';
-import '../chat_slide_page/group_participants_page.dart';
-import '../chat_slide_page/groups_in_common_page.dart';
-import '../chat_slide_page/pin_messages_page.dart';
-import '../chat_slide_page/search_message_page.dart';
-import '../chat_slide_page/shared_apps_page.dart';
-import '../chat_slide_page/shared_media_page.dart';
+import '../conversation_info_destination.dart';
 
-class ChatSideNotifier extends ValueNotifier<ResponsiveNavigatorState>
-    with ResponsiveNavigatorController {
-  ChatSideNotifier() : super(const ResponsiveNavigatorState());
+class ChatSideState extends Equatable {
+  const ChatSideState({
+    this.destinations = const [],
+    this.routeMode = false,
+  });
 
-  static const infoPage = 'infoPage';
-  static const circles = 'circles';
-  static const searchMessageHistory = 'searchMessageHistory';
-  static const sharedMedia = 'sharedMedia';
-  static const participants = 'participants';
-  static const pinMessages = 'pinMessages';
-  static const sharedApps = 'sharedApps';
-  static const groupsInCommon = 'groupsInCommon';
-  static const disappearMessages = 'disappearMessages';
+  final List<ConversationInfoDestination> destinations;
+  final bool routeMode;
+
+  ChatSideState copyWith({
+    List<ConversationInfoDestination>? destinations,
+    bool? routeMode,
+  }) => ChatSideState(
+    destinations: destinations ?? this.destinations,
+    routeMode: routeMode ?? this.routeMode,
+  );
+
+  @override
+  List<Object?> get props => [destinations, routeMode];
+}
+
+class ChatSideNotifier extends ValueNotifier<ChatSideState> {
+  ChatSideNotifier() : super(const ChatSideState());
 
   var _disposed = false;
 
-  ResponsiveNavigatorState get state => value;
+  ChatSideState get state => value;
 
-  set state(ResponsiveNavigatorState newState) {
+  set state(ChatSideState newState) {
     if (_disposed || newState == value) return;
     value = newState;
   }
 
-  @override
-  ResponsiveNavigatorState get navigatorState => state;
+  ConversationInfoDestination? get currentDestination =>
+      state.destinations.isEmpty ? null : state.destinations.last;
 
-  @override
-  set navigatorState(ResponsiveNavigatorState value) => state = value;
+  bool get isRouteMode => state.routeMode;
 
-  @override
-  MaterialPage route(String name, Object? arguments) {
-    switch (name) {
-      case infoPage:
-        return const MaterialPage(
-          key: ValueKey(infoPage),
-          name: infoPage,
-          child: _ChatSidePageBuilder(ChatInfoPage.new),
-        );
-      case circles:
-        return const MaterialPage(
-          key: ValueKey(circles),
-          name: circles,
-          child: _ChatSidePageBuilder(CircleManagerPage.new),
-        );
-      case searchMessageHistory:
-        return const MaterialPage(
-          key: ValueKey(searchMessageHistory),
-          name: searchMessageHistory,
-          child: _ChatSidePageBuilder(SearchMessagePage.new),
-        );
-      case sharedMedia:
-        return const MaterialPage(
-          key: ValueKey(sharedMedia),
-          name: sharedMedia,
-          child: _ChatSidePageBuilder(SharedMediaPage.new),
-        );
-      case participants:
-        return const MaterialPage(
-          key: ValueKey(participants),
-          name: participants,
-          child: _ChatSidePageBuilder(GroupParticipantsPage.new),
-        );
-      case pinMessages:
-        return const MaterialPage(
-          key: ValueKey(pinMessages),
-          name: pinMessages,
-          child: _ChatSidePageBuilder(PinMessagesPage.new),
-        );
-      case sharedApps:
-        return const MaterialPage(
-          key: ValueKey(sharedApps),
-          name: sharedApps,
-          child: _ChatSidePageBuilder(SharedAppsPage.new),
-        );
-      case groupsInCommon:
-        return const MaterialPage(
-          key: ValueKey(groupsInCommon),
-          name: groupsInCommon,
-          child: _ChatSidePageBuilder(GroupsInCommonPage.new),
-        );
-      case disappearMessages:
-        return const MaterialPage(
-          key: ValueKey(disappearMessages),
-          name: disappearMessages,
-          child: _ChatSidePageBuilder(DisappearMessagePage.new),
-        );
-      default:
-        throw ArgumentError('Invalid route');
+  bool isCurrentDestination(ConversationInfoDestination destination) =>
+      currentDestination == destination;
+
+  void updateRouteMode(bool routeMode) {
+    if (state.routeMode == routeMode) return;
+    Future(() => state = state.copyWith(routeMode: routeMode));
+  }
+
+  void openDestination(ConversationInfoDestination destination) {
+    final destinations = state.destinations.toList();
+    final index = destinations.indexOf(destination);
+    if (destinations.isNotEmpty && index == destinations.length - 1) return;
+    if (index != -1) destinations.removeRange(index, destinations.length);
+    state = state.copyWith(destinations: [...destinations, destination]);
+  }
+
+  void onPopPage() {
+    if (state.destinations.isEmpty) return;
+    state = state.copyWith(
+      destinations: state.destinations.toList()..removeLast(),
+    );
+  }
+
+  void closeDestination() => onPopPage();
+
+  void pop() {
+    if (state.destinations.isEmpty) return;
+    state = state.copyWith(
+      destinations: state.destinations
+          .sublist(0, state.destinations.length - 1)
+          .toList(),
+    );
+  }
+
+  Future<void> replaceDestination(
+    ConversationInfoDestination destination,
+  ) async {
+    state = state.copyWith(
+      destinations: state.destinations
+          .where((item) => item != destination)
+          .toList(),
+    );
+    await Future.delayed(Duration.zero);
+    openDestination(destination);
+  }
+
+  Future<void> toggleDestination(
+    ConversationInfoDestination destination,
+  ) async {
+    if (isCurrentDestination(destination)) {
+      pop();
+      return;
     }
+    await replaceDestination(destination);
+  }
+
+  void closeAfterContentJump() {
+    if (isRouteMode) clear();
   }
 
   void toggleInfoPage() {
-    if (state.pages.isEmpty) {
-      state = state.copyWith(pages: [route(ChatSideNotifier.infoPage, null)]);
+    if (state.destinations.isEmpty) {
+      state = state.copyWith(
+        destinations: [ConversationInfoDestination.infoPage],
+      );
       return;
     }
     clear();
+  }
+
+  void clear() {
+    state = state.copyWith(destinations: []);
   }
 
   @override
@@ -141,9 +143,9 @@ class SearchConversationKeywordNotifier
   VoidCallback? _chatSideListener;
   var _searchPageVisible = false;
 
-  static bool _isSearchPageVisible(ResponsiveNavigatorState state) =>
-      state.pages.any(
-        (element) => element.name == ChatSideNotifier.searchMessageHistory,
+  static bool _isSearchPageVisible(ChatSideState state) =>
+      state.destinations.contains(
+        ConversationInfoDestination.searchMessageHistory,
       );
 
   static void updateKeyword(BuildContext context, String keyword) {
@@ -164,32 +166,5 @@ class SearchConversationKeywordNotifier
       chatSideNotifier.removeListener(chatSideListener);
     }
     super.dispose();
-  }
-}
-
-class _ChatSidePageBuilder extends HookConsumerWidget {
-  const _ChatSidePageBuilder(this.builder);
-
-  final Widget Function(ConversationState conversationState) builder;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final conversationId = useMemoized(
-      () => ref.read(lastConversationIdProvider),
-      [],
-    );
-
-    final filter = useCallback<bool Function(ConversationState?)>(
-      (state) => state?.conversationId == conversationId,
-      [conversationId],
-    );
-
-    final conversationState = ref.watch(filterLastConversationProvider(filter));
-
-    if (conversationId == null || conversationState == null) {
-      return const SizedBox();
-    }
-
-    return builder(conversationState);
   }
 }

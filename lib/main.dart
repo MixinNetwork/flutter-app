@@ -17,7 +17,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
 import 'app.dart';
-import 'ui/home/home.dart';
+import 'ui/home/desktop_shell_layout.dart';
 import 'ui/setting/log_page.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';

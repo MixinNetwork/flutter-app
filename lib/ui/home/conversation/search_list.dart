@@ -33,7 +33,6 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/mixin_image.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
-import '../../provider/conversation_provider.dart';
 import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/keyword_provider.dart';
 import '../../provider/mention_cache_provider.dart';
@@ -42,6 +41,7 @@ import '../../provider/search_mao_user_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../notifier/conversation_list_controller.dart';
 import '../notifier/search_message_controller.dart';
+import 'conversation_focus.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'unseen_conversation_list.dart';
@@ -250,7 +250,7 @@ class SearchList extends HookConsumerWidget {
                   ),
                   keyword: keyword,
                   onTap: () async {
-                    await ConversationStateNotifier.selectUser(
+                    await ConversationFocus.selectUser(
                       context,
                       user.userId,
                       user: user,
@@ -377,7 +377,7 @@ class SearchList extends HookConsumerWidget {
                         ),
                         keyword: keyword,
                         onTap: () async {
-                          await ConversationStateNotifier.selectConversation(
+                          await ConversationFocus.selectConversation(
                             context,
                             conversation.conversationId,
                           );
@@ -506,7 +506,7 @@ class _SearchMaoUserWidget extends StatelessWidget {
           await showUserDialog(context, maoUser.user.userId);
           return;
         }
-        await ConversationStateNotifier.selectUser(
+        await ConversationFocus.selectUser(
           context,
           maoUser.user.userId,
           user: maoUser.user,
@@ -796,7 +796,7 @@ Future Function() _searchMessageItemOnTap(
   BuildContext context,
   SearchMessageDetailItem message,
 ) => () async {
-  await ConversationStateNotifier.selectConversation(
+  await ConversationFocus.selectConversation(
     context,
     message.conversationId,
     initIndexMessageId: message.messageId,

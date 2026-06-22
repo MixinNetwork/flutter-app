@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 
 import '../../db/mixin_database.dart';
-import '../../ui/provider/conversation_provider.dart';
+import '../../ui/home/conversation/conversation_focus.dart';
 import '../../utils/extension/extension.dart';
 import '../avatar_view/avatar_view.dart';
 import '../buttons.dart';
@@ -32,7 +32,7 @@ Future<void> showConversationDialog(
   );
   if (existed) {
     showToast(context.l10n.groupAlreadyIn);
-    await ConversationStateNotifier.selectConversation(
+    await ConversationFocus.selectConversation(
       context,
       conversationResponse.conversationId,
     );
@@ -134,7 +134,7 @@ class _ConversationInfo extends HookConsumerWidget {
       DialogAddOrJoinButton(
         onTap: () => runFutureWithToast(() async {
           await context.accountServer.joinGroup(code);
-          await ConversationStateNotifier.selectConversation(
+          await ConversationFocus.selectConversation(
             context,
             conversationResponse.conversationId,
           );

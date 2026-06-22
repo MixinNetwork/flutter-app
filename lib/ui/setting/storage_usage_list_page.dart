@@ -11,7 +11,7 @@ import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/major_navigation_provider.dart';
 
 class StorageUsageListPage extends HookConsumerWidget {
   const StorageUsageListPage({super.key});
@@ -120,9 +120,9 @@ class _Item extends HookConsumerWidget {
             ],
           ),
           onTap: () => ref
-              .read(responsiveNavigatorProvider.notifier)
-              .pushPage(
-                ResponsiveNavigatorStateNotifier.storageUsageDetail,
+              .read(majorNavigationProvider.notifier)
+              .open(
+                MajorNavigationDestination.storageUsageDetail,
                 arguments: (
                   conversationValidName(item.name, item.fullName),
                   item.conversationId,

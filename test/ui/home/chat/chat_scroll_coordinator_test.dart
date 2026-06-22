@@ -935,12 +935,18 @@ Future<void> pumpScrollableMessages(
               : ScrollCacheExtent.pixels(cacheExtent),
           slivers: [
             SliverList.builder(
-              key: coordinator.topSliverKey,
               itemCount: messages.length,
-              itemBuilder: (context, index) => SizedBox(
-                key: keysByMessageId[messages[index].messageId],
-                height: itemHeight,
-              ),
+              itemBuilder: (context, index) {
+                final messageId = messages[index].messageId;
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -968,9 +974,13 @@ Future<void> pumpFullyBuiltScrollableMessages(
           child: Column(
             children: [
               for (final message in messages)
-                SizedBox(
-                  key: keysByMessageId[message.messageId],
-                  height: 80,
+                ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: message.messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[message.messageId],
+                    height: 80,
+                  ),
                 ),
             ],
           ),

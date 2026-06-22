@@ -14,6 +14,7 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../provider/conversation_provider.dart';
+import 'conversation_focus.dart';
 
 class AudioPlayerBar extends HookConsumerWidget {
   const AudioPlayerBar({super.key});
@@ -53,7 +54,7 @@ class AudioPlayerBar extends HookConsumerWidget {
         if (conversationItem == null) {
           return;
         }
-        ConversationStateNotifier.selectConversation(
+        ConversationFocus.selectConversation(
           context,
           conversationItem.conversationId,
           conversation: conversationItem,

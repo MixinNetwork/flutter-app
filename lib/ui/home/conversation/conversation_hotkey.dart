@@ -6,9 +6,9 @@ import '../../../utils/platform.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/slide_category_provider.dart';
-
 import '../../provider/unseen_conversations_provider.dart';
 import '../notifier/conversation_list_controller.dart';
+import 'conversation_focus.dart';
 
 class ConversationHotKey extends StatelessWidget {
   const ConversationHotKey({required this.child, super.key});
@@ -101,7 +101,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
     nextConversationId = nextConversation.conversationId;
   }
 
-  ConversationStateNotifier.selectConversation(context, nextConversationId);
+  ConversationFocus.selectConversation(context, nextConversationId);
 
   if (nextConversationIndex == null) return;
 

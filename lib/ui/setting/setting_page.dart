@@ -19,16 +19,16 @@ import '../../widgets/cell.dart';
 import '../../widgets/conversation/badges_widget.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
-import '../home/home.dart';
+import '../home/left_rail_controller.dart';
+import '../provider/major_navigation_provider.dart';
 import '../provider/multi_auth_provider.dart';
-import '../provider/responsive_navigator_provider.dart';
 
 class SettingPage extends HookConsumerWidget {
   const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+    final hasDrawer = context.watch<LeftRailController>();
 
     Widget? leading;
     if (hasDrawer.value) {
@@ -70,8 +70,7 @@ class SettingPage extends HookConsumerWidget {
                     CellGroup(
                       child: _Item(
                         leadingAssetName: Resources.assetsImagesIcProfileSvg,
-                        pageName:
-                            ResponsiveNavigatorStateNotifier.editProfilePage,
+                        destination: MajorNavigationDestination.editProfilePage,
                         title: context.l10n.editProfile,
                       ),
                     ),
@@ -84,15 +83,15 @@ class SettingPage extends HookConsumerWidget {
                             _Item(
                               leadingAssetName:
                                   Resources.assetsImagesAccountSvg,
-                              pageName:
-                                  ResponsiveNavigatorStateNotifier.accountPage,
+                              destination:
+                                  MajorNavigationDestination.accountPage,
                               title: context.l10n.account,
                             ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcNotificationSvg,
-                            pageName: ResponsiveNavigatorStateNotifier
-                                .notificationPage,
+                            destination:
+                                MajorNavigationDestination.notificationPage,
                             title: context.l10n.notifications,
                             trailing: hasNotificationPermission == false
                                 ? Padding(
@@ -115,33 +114,31 @@ class SettingPage extends HookConsumerWidget {
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcStorageUsageSvg,
-                            pageName: ResponsiveNavigatorStateNotifier
+                            destination: MajorNavigationDestination
                                 .dataAndStorageUsagePage,
                             title: context.l10n.dataAndStorageUsage,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesShieldSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.securityPage,
+                            destination:
+                                MajorNavigationDestination.securityPage,
                             title: context.l10n.security,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesProxySvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.proxyPage,
+                            destination: MajorNavigationDestination.proxyPage,
                             title: context.l10n.proxy,
                           ),
                           _Item(
                             leadingAssetName:
                                 Resources.assetsImagesIcAppearanceSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.appearancePage,
+                            destination:
+                                MajorNavigationDestination.appearancePage,
                             title: context.l10n.appearance,
                           ),
                           _Item(
                             leadingAssetName: Resources.assetsImagesIcAboutSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.aboutPage,
+                            destination: MajorNavigationDestination.aboutPage,
                             title: context.l10n.about,
                           ),
                         ],
@@ -177,7 +174,7 @@ class _Item extends HookConsumerWidget {
   const _Item({
     required this.title,
     this.leadingAssetName,
-    this.pageName,
+    this.destination,
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
@@ -185,7 +182,7 @@ class _Item extends HookConsumerWidget {
 
   final String? leadingAssetName;
   final String title;
-  final String? pageName;
+  final MajorNavigationDestination? destination;
   final Color? color;
   final VoidCallback? onTap;
   final Widget? trailing;
@@ -193,10 +190,11 @@ class _Item extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(
-      responsiveNavigatorProvider.select(
+      majorNavigationProvider.select(
         (value) =>
             !value.routeMode &&
-            value.pages.any((element) => pageName == element.name),
+            destination != null &&
+            value.contains(destination!),
       ),
     );
 
@@ -216,13 +214,10 @@ class _Item extends HookConsumerWidget {
       color: color ?? context.theme.text,
       selected: selected,
       onTap: () {
-        if (onTap == null && pageName != null) {
-          context.providerContainer.read(responsiveNavigatorProvider.notifier)
-            ..popWhere(
-              (page) => ResponsiveNavigatorStateNotifier.settingPageNameSet
-                  .contains(page.name),
-            )
-            ..pushPage(pageName!);
+        if (onTap == null && destination != null) {
+          context.providerContainer
+              .read(majorNavigationProvider.notifier)
+              .openSetting(destination!);
           return;
         }
 

@@ -139,8 +139,12 @@ class MessageBubble extends HookConsumerWidget {
         name: Resources.assetsImagesPinArrowSvg,
         onTap: () {
           final message = context.message;
-          unawaited(context.jumpToMessageInChat(message.messageId));
-          context.popChatSideRouteIfNeeded();
+          unawaited(
+            context.jumpToMessageInChat(
+              message.messageId,
+              closeSideAfterJump: true,
+            ),
+          );
         },
       );
 

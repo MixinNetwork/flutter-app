@@ -70,28 +70,51 @@ class _CurrentShowingMessages {
   final List<Element> elements = [];
   final List<Element?> dayTimeElements = [];
 
+  void addEntry(MessageDayTimeViewportEntry entry) {
+    final itemElement = entry.messageKey.currentContext;
+    if (itemElement is! Element) return;
+    final dayTimeElement = entry.dayTimeKey?.currentContext;
+    items.add(entry.message);
+    elements.add(itemElement);
+    dayTimeElements.add(dayTimeElement is Element ? dayTimeElement : null);
+  }
+
   void dumpKeyedSubtree(Element element, {bool reverse = false}) {
-    final item = element.descendantFirstOf(
+    final item = element.descendantFirstOfOrNull(
       (e) => e.widget is MessageItemWidget,
     );
+    if (item == null) return;
     final widget = item.widget as MessageItemWidget;
+    final message = widget.row?.message ?? widget.message;
+    final prev = widget.row?.prev ?? widget.prev;
 
-    final dayTimeElement =
-        !isSameDay(widget.message.createdAt, widget.prev?.createdAt)
-        ? element.descendantFirstOf(
+    final dayTimeElement = !isSameDay(message.createdAt, prev?.createdAt)
+        ? element.descendantFirstOfOrNull(
             (e) => e.widget is MessageDayTimeChip,
           )
         : null;
     if (!reverse) {
-      items.add(widget.message);
+      items.add(message);
       elements.add(item);
       dayTimeElements.add(dayTimeElement);
     } else {
-      items.insert(0, widget.message);
+      items.insert(0, message);
       elements.insert(0, item);
       dayTimeElements.insert(0, dayTimeElement);
     }
   }
+}
+
+class MessageDayTimeViewportEntry {
+  const MessageDayTimeViewportEntry({
+    required this.message,
+    required this.messageKey,
+    this.dayTimeKey,
+  });
+
+  final db.MessageItem message;
+  final GlobalKey messageKey;
+  final GlobalKey? dayTimeKey;
 }
 
 class MessageDayTimeViewportWidget extends HookConsumerWidget {
@@ -106,31 +129,17 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   factory MessageDayTimeViewportWidget.chatPage({
     required Widget child,
     required ScrollController scrollController,
-    required GlobalKey topKey,
-    required GlobalKey bottomKey,
-    required db.MessageItem? center,
-    required GlobalKey? centerKey,
+    required List<MessageDayTimeViewportEntry> entries,
     Key? key,
   }) => MessageDayTimeViewportWidget._create(
     () {
       final result = _CurrentShowingMessages();
-
-      topKey.currentContext!.visitChildElements(
-        (element) => result.dumpKeyedSubtree(element, reverse: true),
-      );
-
-      final centerContext = centerKey?.currentContext;
-      if (center != null && centerContext != null && centerContext is Element) {
-        result.dumpKeyedSubtree(centerContext);
-      }
-
-      bottomKey.currentContext!.visitChildElements(result.dumpKeyedSubtree);
-
+      entries.forEach(result.addEntry);
       return result;
     },
     key: key,
     scrollController: scrollController,
-    reTraversalKey: centerKey,
+    reTraversalKey: entries,
     child: child,
   );
 
@@ -145,8 +154,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
     () {
       final result = _CurrentShowingMessages();
       (listKey.currentContext! as Element)
-          .descendantFirstOf((e) => e.widget is SliverList)
-          .visitChildElements((e) {
+          .descendantFirstOfOrNull((e) => e.widget is SliverList)
+          ?.visitChildElements((e) {
             result.dumpKeyedSubtree(e, reverse: reverse);
           });
       return result;
@@ -339,7 +348,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
 }
 
 extension _ElementExt on Element {
-  Element descendantFirstOf(bool Function(Element e) predicate) {
+  Element? descendantFirstOfOrNull(bool Function(Element e) predicate) {
     Element? dump(Element element) {
       if (predicate(element)) {
         return element;
@@ -354,6 +363,6 @@ extension _ElementExt on Element {
       return child;
     }
 
-    return dump(this)!;
+    return dump(this);
   }
 }

@@ -1,13 +1,9 @@
-import 'dart:async';
-
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 
 import '../../account/account_server.dart';
-import '../../crypto/uuid/uuid.dart';
 import '../../db/dao/conversation_dao.dart';
 import '../../db/database.dart';
 import '../../db/database_event_bus.dart';
@@ -17,13 +13,10 @@ import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/local_notification_center.dart';
 import '../../utils/rivepod.dart';
-import '../../widgets/toast.dart';
-import '../home/notifier/conversation_list_controller.dart';
+import '../home/conversation_info_destination.dart';
 import '../home/notifier/subscriber_mixin.dart';
 import 'account_server_provider.dart';
-import 'is_bot_group_provider.dart';
-import 'recent_conversation_provider.dart';
-import 'responsive_navigator_provider.dart';
+import 'major_navigation_provider.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -50,7 +43,7 @@ class ConversationState extends Equatable {
   final Participant? participant;
   final Object refreshKey;
 
-  final String? initialSidePage;
+  final ConversationInfoDestination? initialSidePage;
   final String? keyword;
 
   bool get isLoaded => conversation != null || user != null;
@@ -109,7 +102,7 @@ class ConversationState extends Equatable {
     App? app,
     Participant? participant,
     Object? refreshKey,
-    String? initialSidePage,
+    ConversationInfoDestination? initialSidePage,
     String? keyword,
   }) => ConversationState(
     conversationId: conversationId ?? this.conversationId,
@@ -140,8 +133,8 @@ class ConversationStateNotifier
     with SubscriberMixin {
   ConversationStateNotifier({
     required AccountServer accountServer,
-    required ResponsiveNavigatorStateNotifier responsiveNavigatorStateNotifier,
-  }) : _responsiveNavigatorStateNotifier = responsiveNavigatorStateNotifier,
+    required MajorNavigationNotifier majorNavigationNotifier,
+  }) : _majorNavigationNotifier = majorNavigationNotifier,
        _accountServer = accountServer,
        super(null) {
     addSubscription(
@@ -226,7 +219,7 @@ class ConversationStateNotifier
   }
 
   final AccountServer _accountServer;
-  final ResponsiveNavigatorStateNotifier _responsiveNavigatorStateNotifier;
+  final MajorNavigationNotifier _majorNavigationNotifier;
   late final Database _database = _accountServer.database;
   late final String _currentUserId = _accountServer.userId;
 
@@ -245,174 +238,16 @@ class ConversationStateNotifier
 
   void unselected() {
     state = null;
-    _responsiveNavigatorStateNotifier.clear();
+    _majorNavigationNotifier.clear();
   }
 
-  static Future<void> selectConversation(
-    BuildContext context,
-    String conversationId, {
-    ConversationItem? conversation,
-    String? initIndexMessageId,
-    String? initialChatSidePage,
-    String? keyword,
-    bool sync = false,
-    bool checkCurrentUserExist = false,
-  }) async {
-    context.providerContainer.read(isBotGroupProvider(conversationId));
-
-    final accountServer = context.accountServer;
-    final database = context.database;
-    final conversationNotifier = context.providerContainer.read(
-      conversationProvider.notifier,
-    );
-    final state = conversationNotifier.state;
-
-    ConversationItem? _conversation;
-    String? lastReadMessageId;
-    bool? hasUnreadMessage;
-    if (state?.conversationId == conversationId) {
-      _conversation = state?.conversation;
-
-      hasUnreadMessage = (_conversation?.unseenMessageCount ?? 0) > 0;
-      if (hasUnreadMessage) {
-        lastReadMessageId = state?.lastReadMessageId;
-      }
-    }
-
-    _conversation =
-        conversation ??
-        _conversation ??
-        await _conversationItem(context, conversationId);
-
-    if (_conversation == null && sync) {
-      showToastLoading();
-      await context.accountServer.refreshConversation(
-        conversationId,
-        checkCurrentUserExist: checkCurrentUserExist,
-      );
-      _conversation = await _conversationItem(context, conversationId);
-    }
-
-    hasUnreadMessage ??= (_conversation?.unseenMessageCount ?? 0) > 0;
-
-    if (_conversation == null) {
-      return showToastFailed(null);
-    }
-
-    final _initIndexMessageId =
-        initIndexMessageId ??
-        (hasUnreadMessage ? _conversation.lastReadMessageId : null);
-
-    lastReadMessageId =
-        lastReadMessageId ?? (hasUnreadMessage ? _initIndexMessageId : null);
-
-    final ownerId = _conversation.ownerId;
-
-    final appFuture = (!_conversation.isGroupConversation && ownerId != null)
-        ? database.appDao.findAppById(ownerId)
-        : null;
-
-    final participantFuture = database.participantDao
-        .participantById(conversationId, accountServer.userId)
-        .getSingleOrNull();
-
-    final conversationState = ConversationState(
-      conversationId: conversationId,
-      conversation: _conversation,
-      initIndexMessageId: _initIndexMessageId,
-      lastReadMessageId: lastReadMessageId,
-      userId: _conversation.isGroupConversation ? null : _conversation.ownerId,
-      app: await appFuture,
-      initialSidePage: initialChatSidePage,
-      refreshKey: Object(),
-      participant: await participantFuture,
-      keyword: keyword,
-    );
-
-    Toast.dismiss();
-
-    conversationNotifier.state = conversationState;
-
-    conversationNotifier._responsiveNavigatorStateNotifier.pushPage(
-      ResponsiveNavigatorStateNotifier.chatPage,
-    );
-
-    unawaited(dismissByConversationId(conversationId));
-    context.providerContainer
-        .read(recentConversationIDsProvider.notifier)
-        .add(conversationId);
+  void openChatPage() {
+    _majorNavigationNotifier.openChatPage();
   }
 
-  static Future<void> selectUser(
-    BuildContext context,
-    String userId, {
-    User? user,
-    String? initialChatSidePage,
-  }) async {
-    final accountServer = context.accountServer;
-    final database = context.database;
-    final conversationNotifier = context.providerContainer.read(
-      conversationProvider.notifier,
-    );
-
-    final conversationId = generateConversationId(userId, accountServer.userId);
-
-    context.providerContainer.read(isBotGroupProvider(conversationId));
-
-    final conversation = await _conversationItem(context, conversationId);
-    if (conversation != null) {
-      return selectConversation(
-        context,
-        conversationId,
-        conversation: conversation,
-        initialChatSidePage: initialChatSidePage,
-      );
-    }
-
-    final _user =
-        user ?? await database.userDao.userById(userId).getSingleOrNull();
-
-    if (_user == null) {
-      return showToastFailed(ToastError(context.l10n.userNotFound));
-    }
-
-    final app = await database.appDao.findAppById(userId);
-
-    conversationNotifier.state = ConversationState(
-      conversationId: conversationId,
-      userId: userId,
-      user: _user,
-      app: app,
-      initialSidePage: initialChatSidePage,
-      refreshKey: Object(),
-    );
-
-    conversationNotifier._responsiveNavigatorStateNotifier.pushPage(
-      ResponsiveNavigatorStateNotifier.chatPage,
-    );
-
-    unawaited(dismissByConversationId(conversationId));
-  }
-
-  static Future<ConversationItem?> _conversationItem(
-    BuildContext context,
-    String conversationId,
-  ) async {
-    final conversations = context
-        .read<ConversationListController>()
-        .state
-        .map
-        .values
-        .cast<ConversationItem?>()
-        .toList();
-
-    return conversations.firstWhere(
-          (element) => element?.conversationId == conversationId,
-          orElse: () => null,
-        ) ??
-        await context.database.conversationDao
-            .conversationItem(conversationId)
-            .getSingleOrNull();
+  void focus(ConversationState nextState) {
+    state = nextState;
+    openChatPage();
   }
 }
 
@@ -436,20 +271,20 @@ final conversationProvider =
         throw Exception('accountServer is not ready');
       }
 
-      final responsiveNavigatorNotifier = ref.watch(
-        responsiveNavigatorProvider.notifier,
+      final majorNavigationNotifier = ref.watch(
+        majorNavigationProvider.notifier,
       );
 
       ref
         ..listen(accountServerProvider, (previous, next) => keepAlive.close())
         ..listen(
-          responsiveNavigatorProvider.notifier,
+          majorNavigationProvider.notifier,
           (previous, next) => keepAlive.close(),
         );
 
       return ConversationStateNotifier(
         accountServer: accountServerAsync.requireValue,
-        responsiveNavigatorStateNotifier: responsiveNavigatorNotifier,
+        majorNavigationNotifier: majorNavigationNotifier,
       );
     });
 

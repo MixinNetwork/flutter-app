@@ -92,7 +92,7 @@ class SearchMessagePage extends HookConsumerWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: context.theme.icon,
-              onTap: () => context.read<ChatSideNotifier>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().closeDestination(),
             ),
         ],
       ),
@@ -309,11 +309,10 @@ class _SearchMessageList extends HookConsumerWidget {
           keyword: keyword,
           showSender: true,
           onTap: () async {
-            await context.jumpToMessageInChat(message.messageId);
-            final chatSideNotifier = context.read<ChatSideNotifier>();
-            if (chatSideNotifier.state.routeMode) {
-              chatSideNotifier.clear();
-            }
+            await context.jumpToMessageInChat(
+              message.messageId,
+              closeSideAfterJump: true,
+            );
           },
         );
       },

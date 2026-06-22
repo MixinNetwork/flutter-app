@@ -9,6 +9,7 @@ import '../../../crypto/uuid/uuid.dart';
 import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
+import '../../../ui/home/conversation/conversation_focus.dart';
 import '../../../ui/provider/conversation_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -150,7 +151,7 @@ Future<bool> _sendMessageToUserId(
     context.accountServer.userId,
     userId,
   );
-  await ConversationStateNotifier.selectUser(context, userId);
+  await ConversationFocus.selectUser(context, userId);
   final conversation = context.providerContainer.read(conversationProvider);
   if (conversation == null) {
     return false;

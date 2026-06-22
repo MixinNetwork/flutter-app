@@ -93,7 +93,8 @@ class PinMessagesPage extends HookConsumerWidget {
               ActionButton(
                 name: Resources.assetsImagesIcCloseSvg,
                 color: context.theme.icon,
-                onTap: () => context.read<ChatSideNotifier>().onPopPage(),
+                onTap: () =>
+                    context.read<ChatSideNotifier>().closeDestination(),
               ),
           ],
         ),
@@ -114,9 +115,12 @@ class PinMessagesPage extends HookConsumerWidget {
                     final messageItem = list[index];
                     return MessageItemWidget(
                       key: ValueKey(messageItem.messageId),
-                      prev: list.getOrNull(index + 1),
+                      row: MessageRowModel(
+                        message: messageItem,
+                        prev: list.getOrNull(index + 1),
+                        next: list.getOrNull(index - 1),
+                      ),
                       message: messageItem,
-                      next: list.getOrNull(index - 1),
                       blink: false,
                       isPinnedPage: true,
                     );

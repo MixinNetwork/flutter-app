@@ -8,6 +8,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
+import '../../../db/mixin_database.dart' show User;
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -21,13 +22,13 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/message_status_icon.dart';
 import '../../../widgets/unread_text.dart';
 import '../../provider/conversation_provider.dart';
+import '../../provider/major_navigation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
-import '../../provider/pending_jump_message_provider.dart';
-import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/slide_category_provider.dart';
 import '../notifier/conversation_list_controller.dart';
 import 'audio_player_bar.dart';
+import 'conversation_focus.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'network_status.dart';
@@ -43,9 +44,12 @@ class ConversationList extends HookConsumerWidget {
     final conversationListController = context
         .read<ConversationListController>();
     final pagingState = useValueListenable(conversationListController);
+    useListenable(conversationListController.avatarCache);
     final conversationId = ref.watch(currentConversationIdProvider);
 
-    final routeMode = ref.watch(navigatorRouteModeProvider);
+    final showsConversationSelection = ref.watch(
+      majorNavigationShowsConversationSelectionProvider,
+    );
 
     final itemPositionsListener = conversationListController
         .itemPositionsListener(
@@ -80,20 +84,17 @@ class ConversationList extends HookConsumerWidget {
               final conversation = pagingState.map[index];
               if (conversation == null) return const SizedBox(height: 80);
               final current = conversation.conversationId == conversationId;
-              final selected = current && !routeMode;
+              final selected = current && showsConversationSelection;
               return ConversationMenuWrapper(
                 conversation: conversation,
                 removeChatFromCircle: true,
                 child: ConversationItemWidget(
                   selected: selected,
                   conversation: conversation,
+                  groupAvatarUsers: conversationListController.avatarCache
+                      .usersFor(conversation.conversationId),
                   onTap: () {
-                    if (current) {
-                      ref.read(pendingJumpLatestProvider.notifier).state =
-                          Object();
-                      return;
-                    }
-                    ConversationStateNotifier.selectConversation(
+                    ConversationFocus.selectConversation(
                       context,
                       conversation.conversationId,
                       conversation: conversation,
@@ -152,11 +153,13 @@ class ConversationItemWidget extends StatelessWidget {
     required this.onTap,
     super.key,
     this.selected = false,
+    this.groupAvatarUsers,
   });
 
   final bool selected;
   final ConversationItem conversation;
   final VoidCallback onTap;
+  final List<User>? groupAvatarUsers;
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +184,7 @@ class ConversationItemWidget extends StatelessWidget {
                 children: [
                   ConversationAvatarWidget(
                     conversation: conversation,
+                    groupAvatarUsers: groupAvatarUsers,
                     size: ConversationPage.conversationItemAvatarSize,
                   ),
                   const SizedBox(width: 12),

@@ -174,7 +174,7 @@ class _InputContainer extends HookConsumerWidget {
 
     final chatSidePageSize = useValueListenable(
       context.read<ChatSideNotifier>(),
-    ).pages.length;
+    ).destinations.length;
     useEffect(() {
       if (!context.textFieldAutoGainFocus) {
         // Make sure on iPad/Android Pad the text field not get focused when the chat side

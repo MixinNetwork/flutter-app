@@ -14,6 +14,50 @@ class MessageGlobalKey extends GlobalObjectKey<State<StatefulWidget>> {
   String get messageId => value as String;
 }
 
+class ChatRenderedMessage extends StatefulWidget {
+  const ChatRenderedMessage({
+    required this.coordinator,
+    required this.messageId,
+    required this.child,
+    super.key,
+  });
+
+  final ChatScrollCoordinator coordinator;
+  final String messageId;
+  final Widget child;
+
+  @override
+  State<ChatRenderedMessage> createState() => _ChatRenderedMessageState();
+}
+
+class _ChatRenderedMessageState extends State<ChatRenderedMessage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.coordinator.registerRenderedMessageId(widget.messageId);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatRenderedMessage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.messageId == widget.messageId &&
+        oldWidget.coordinator == widget.coordinator) {
+      return;
+    }
+    oldWidget.coordinator.unregisterRenderedMessageId(oldWidget.messageId);
+    widget.coordinator.registerRenderedMessageId(widget.messageId);
+  }
+
+  @override
+  void dispose() {
+    widget.coordinator.unregisterRenderedMessageId(widget.messageId);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 class ChatScrollCoordinator {
   ChatScrollCoordinator() {
     scrollController.addListener(_scheduleScrollPositionUpdate);
@@ -30,8 +74,6 @@ class ChatScrollCoordinator {
 
   final scrollController = ScrollController();
   final viewportKey = GlobalKey(debugLabel: 'chat scroll viewport');
-  final topSliverKey = GlobalKey(debugLabel: 'chat top sliver');
-  final bottomSliverKey = GlobalKey(debugLabel: 'chat bottom sliver');
   final visibleDateTime = ValueNotifier<DateTime?>(null);
   final showJumpToLatest = ValueNotifier<bool>(false);
 
@@ -40,7 +82,7 @@ class ChatScrollCoordinator {
   List<MessageItem> _messages = const [];
   Map<String, MessageItem> _messagesById = const {};
   Map<String, GlobalKey> _keysByMessageId = const {};
-  String? _centerMessageId;
+  final _renderedMessageIds = <String>{};
   bool _pinnedToBottom = true;
   bool _animateNextRestore = false;
   ChatScrollRestoreDirection? _animatedRestoreDirection;
@@ -84,6 +126,14 @@ class ChatScrollCoordinator {
     _animatedRestoreDirection = direction;
   }
 
+  void registerRenderedMessageId(String messageId) {
+    _renderedMessageIds.add(messageId);
+  }
+
+  void unregisterRenderedMessageId(String messageId) {
+    _renderedMessageIds.remove(messageId);
+  }
+
   void scheduleRestore({
     required List<MessageItem> messages,
     required Map<String, GlobalKey> keysByMessageId,
@@ -100,12 +150,7 @@ class ChatScrollCoordinator {
       _animatedRestoreDirection = null;
       _animateNextRestore = false;
     }
-    _setMessages(
-      messages,
-      keysByMessageId,
-      updateCenterMessageId: true,
-      centerMessageId: centerMessageId,
-    );
+    _setMessages(messages, keysByMessageId);
     _restoreRequest = _ChatRestoreRequest(
       messages: messages,
       keysByMessageId: keysByMessageId,
@@ -505,7 +550,7 @@ class ChatScrollCoordinator {
     String? firstVisibleMessageId;
     double? firstVisibleTop;
 
-    for (final messageId in _renderedMessageIds()) {
+    for (final messageId in _currentRenderedMessageIds()) {
       final geometry = _messageTargetGeometry(messageId, _keysByMessageId);
       if (geometry == null || geometry.bottom <= 0) continue;
       if (firstVisibleTop == null || geometry.top < firstVisibleTop) {
@@ -555,50 +600,24 @@ class ChatScrollCoordinator {
 
   void _setMessages(
     List<MessageItem> messages,
-    Map<String, GlobalKey> keysByMessageId, {
-    bool updateCenterMessageId = false,
-    String? centerMessageId,
-  }) {
+    Map<String, GlobalKey> keysByMessageId,
+  ) {
     if (!identical(_messages, messages)) {
       _messages = messages;
       _messagesById = {
         for (final message in messages) message.messageId: message,
       };
+      _renderedMessageIds.removeWhere((id) => !_messagesById.containsKey(id));
     }
     _keysByMessageId = keysByMessageId;
-    if (updateCenterMessageId) {
-      _centerMessageId = centerMessageId;
+  }
+
+  Iterable<String> _currentRenderedMessageIds() sync* {
+    for (final messageId in _renderedMessageIds) {
+      if (_keysByMessageId[messageId]?.currentContext != null) {
+        yield messageId;
+      }
     }
-  }
-
-  Iterable<String> _renderedMessageIds() sync* {
-    yield* _messageIdsInSliver(topSliverKey);
-    final centerMessageId = _centerMessageId;
-    if (centerMessageId != null) yield centerMessageId;
-    yield* _messageIdsInSliver(bottomSliverKey);
-  }
-
-  Iterable<String> _messageIdsInSliver(GlobalKey sliverKey) sync* {
-    final context = sliverKey.currentContext;
-    if (context is! Element) return;
-
-    final messageIds = <String>[];
-    context.visitChildElements((element) {
-      final key = _messageGlobalKeyInSubtree(element);
-      if (key != null) messageIds.add(key.messageId);
-    });
-    yield* messageIds;
-  }
-
-  MessageGlobalKey? _messageGlobalKeyInSubtree(Element element) {
-    final key = element.widget.key;
-    if (key is MessageGlobalKey) return key;
-
-    MessageGlobalKey? result;
-    element.visitChildElements((child) {
-      result ??= _messageGlobalKeyInSubtree(child);
-    });
-    return result;
   }
 
   RenderBox? _messageRender(
