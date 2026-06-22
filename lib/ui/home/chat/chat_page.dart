@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -25,6 +27,14 @@ import 'chat_side_router.dart';
 import 'input_container.dart';
 import 'message_jump.dart';
 import 'selection_bottom_bar.dart';
+
+void handleForceLatestChatJump(
+  Object? forceLatestKey,
+  Future<void> Function() jumpToLatest,
+) {
+  if (forceLatestKey == null) return;
+  unawaited(jumpToLatest());
+}
 
 class ChatPage extends HookConsumerWidget {
   const ChatPage({super.key});
@@ -179,6 +189,18 @@ class ChatContainer extends HookConsumerWidget {
         MediaQuery.sizeOf(context).height ~/ 20;
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
+    final forceLatestKey = ref.watch(
+      conversationProvider.select((value) => value?.forceLatestKey),
+    );
+
+    useEffect(() {
+      if (forceLatestKey == null) return null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        handleForceLatestChatJump(forceLatestKey, context.jumpToLatestInChat);
+      });
+      return null;
+    }, [forceLatestKey]);
 
     return RepaintBoundary(
       child: FocusableActionDetector(
