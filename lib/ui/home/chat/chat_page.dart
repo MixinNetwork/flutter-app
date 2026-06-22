@@ -23,6 +23,7 @@ import 'chat_menu_handler.dart';
 import 'chat_scroll_coordinator.dart';
 import 'chat_side_router.dart';
 import 'input_container.dart';
+import 'message_jump.dart';
 import 'selection_bottom_bar.dart';
 
 class ChatPage extends HookConsumerWidget {
@@ -108,6 +109,14 @@ class ChatPage extends HookConsumerWidget {
         Provider(
           create: (_) => ChatScrollCoordinator(),
           dispose: (_, coordinator) => coordinator.dispose(),
+        ),
+        Provider(
+          create: (context) => MessageViewportController(
+            blinkNotifier: context.read<BlinkNotifier>(),
+            scrollCoordinator: context.read<ChatScrollCoordinator>(),
+            messageController: context.read<MessageController>(),
+            chatSideNotifier: context.read<ChatSideNotifier>(),
+          ),
         ),
         Provider.value(value: pinMessageState),
       ],

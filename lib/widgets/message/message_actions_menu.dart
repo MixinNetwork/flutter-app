@@ -14,7 +14,6 @@ import '../../blaze/vo/pin_message_minimal.dart';
 import '../../constants/icon_fonts.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Message;
-import '../../enum/media_status.dart';
 import '../../ui/home/chat/message_jump.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
@@ -22,7 +21,6 @@ import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/recall_message_reedit_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
-import '../../utils/platform.dart';
 import '../../utils/system/clipboard.dart';
 import '../menu.dart';
 import '../qr_code.dart';
@@ -31,6 +29,7 @@ import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action_card/action_card_data.dart';
 import 'item/text/selectable.dart';
+import 'message_action_policy.dart';
 import 'message_file_actions.dart';
 
 Menu? buildMessageActionsMenu({
@@ -54,42 +53,21 @@ Menu? buildMessageActionsMenu({
   if (ref.read(hasSelectedMessageProvider)) return null;
 
   final role = ref.read(conversationProvider.select((value) => value?.role));
-
-  final pinEnabled =
-      !isTranscriptPage &&
-      message.type.canReply &&
-      const [
-        MessageStatus.delivered,
-        MessageStatus.read,
-        MessageStatus.sent,
-      ].contains(message.status) &&
-      role != null;
-  final enableReply =
-      !isTranscriptPage && message.type.canReply && !isPinnedPage;
-  final enableForward = !isTranscriptPage && message.canForward;
-  final enableSelect = !isTranscriptPage;
-  final enableSaveMobile =
-      kPlatformIsMobile && (message.type.isImage || message.type.isVideo);
-  final enableSaveDesktop =
-      kPlatformIsDesktop &&
-      message.mediaStatus == MediaStatus.done &&
-      message.mediaUrl?.isNotEmpty == true &&
-      (message.type.isData ||
-          message.type.isImage ||
-          message.type.isVideo ||
-          message.type.isAudio);
-  final enableRecall = !isTranscriptPage && message.canRecall;
-
-  final enableDelete = !isTranscriptPage && !isPinnedPage;
+  final policy = MessageActionPolicy(
+    message: message,
+    isTranscriptPage: isTranscriptPage,
+    isPinnedPage: isPinnedPage,
+    role: role,
+  );
 
   final addStickerMenuAction = [
-    if (message.type.isSticker)
+    if (policy.canAddSticker)
       MenuAction(
         image: MenuImage.icon(IconFonts.sticker),
         title: context.l10n.addSticker,
         callback: () => _onAddSticker(context, message),
       ),
-    if (message.type.isImage && message.canForward)
+    if (policy.canAddImageAsSticker)
       MenuAction(
         image: MenuImage.icon(IconFonts.sticker),
         title: context.l10n.addSticker,
@@ -102,7 +80,7 @@ Menu? buildMessageActionsMenu({
   ];
 
   final replayAction = [
-    if (enableReply)
+    if (policy.canReply)
       MenuAction(
         image: MenuImage.icon(IconFonts.reply),
         title: context.l10n.reply,
@@ -128,7 +106,7 @@ Menu? buildMessageActionsMenu({
           );
         },
       ),
-    if (enableForward)
+    if (policy.canForward)
       MenuAction(
         image: MenuImage.icon(IconFonts.forward),
         title: context.l10n.forward,
@@ -148,7 +126,7 @@ Menu? buildMessageActionsMenu({
           );
         },
       ),
-    if (enableSelect)
+    if (policy.canSelect)
       MenuAction(
         image: MenuImage.icon(IconFonts.select),
         title: context.l10n.select,
@@ -158,7 +136,7 @@ Menu? buildMessageActionsMenu({
               message,
             ),
       ),
-    if (pinEnabled)
+    if (policy.canPin)
       MenuAction(
         image: MenuImage.icon(message.pinned ? IconFonts.unPin : IconFonts.pin),
         title: message.pinned ? context.l10n.unpin : context.l10n.pinTitle,
@@ -291,7 +269,7 @@ Menu? buildMessageActionsMenu({
   }
 
   final saveActions = [
-    if (enableSaveMobile)
+    if (policy.canSaveMobile)
       MenuAction(
         image: MenuImage.icon(IconFonts.download),
         title: context.l10n.saveToCameraRoll,
@@ -302,7 +280,7 @@ Menu? buildMessageActionsMenu({
           isTranscriptPage,
         ),
       ),
-    if (enableSaveDesktop)
+    if (policy.canSaveDesktop)
       MenuAction(
         image: MenuImage.icon(IconFonts.download),
         title: context.l10n.saveAs,
@@ -315,7 +293,7 @@ Menu? buildMessageActionsMenu({
       ),
   ];
   final deleteActions = [
-    if (enableRecall)
+    if (policy.canRecall)
       MenuAction(
         image: MenuImage.icon(IconFonts.recall),
         title: context.l10n.deleteForEveryone,
@@ -334,7 +312,7 @@ Menu? buildMessageActionsMenu({
           }
         },
       ),
-    if (enableDelete)
+    if (policy.canDelete)
       MenuAction(
         image: MenuImage.icon(IconFonts.delete),
         title: context.l10n.deleteForMe,

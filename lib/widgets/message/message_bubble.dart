@@ -82,42 +82,38 @@ class MessageBubble extends HookConsumerWidget {
     if (hasQuoteMessage) {
       final constraintQuoteWidthToMessage =
           messageType.isVideo || messageType.isImage || messageType.isLive;
-      Widget quotedChild = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: constraintQuoteWidthToMessage
-            ? CrossAxisAlignment.stretch
-            : CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: constraintQuoteWidthToMessage ? 0 : null,
-            child: MessageBubbleNipPadding(
-              currentUser: isCurrentUser,
-              child: HookBuilder(
-                builder: (context) {
-                  final quoteContent = useMessageConverter(
-                    converter: (state) => state.quoteContent,
-                  );
-                  final messageId = useMessageConverter(
-                    converter: (state) => state.messageId,
-                  );
+      _child = IntrinsicWidth(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: constraintQuoteWidthToMessage ? 0 : null,
+              child: MessageBubbleNipPadding(
+                currentUser: isCurrentUser,
+                child: HookBuilder(
+                  builder: (context) {
+                    final quoteContent = useMessageConverter(
+                      converter: (state) => state.quoteContent,
+                    );
+                    final messageId = useMessageConverter(
+                      converter: (state) => state.messageId,
+                    );
 
-                  return QuoteMessage(
-                    messageId: messageId,
-                    quoteMessageId: quoteId,
-                    quoteContent: quoteContent,
-                    isTranscriptPage: isTranscriptPage,
-                  );
-                },
+                    return QuoteMessage(
+                      messageId: messageId,
+                      quoteMessageId: quoteId,
+                      quoteContent: quoteContent,
+                      isTranscriptPage: isTranscriptPage,
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          _child,
-        ],
+            _child,
+          ],
+        ),
       );
-      if (constraintQuoteWidthToMessage) {
-        quotedChild = IntrinsicWidth(child: quotedChild);
-      }
-      _child = quotedChild;
     }
 
     final clipper = BubbleClipper(currentUser: isCurrentUser, showNip: showNip);

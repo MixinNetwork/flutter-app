@@ -7,8 +7,8 @@ import '../notifier/message_controller.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
 
-class _ChatHistoryLocation {
-  _ChatHistoryLocation({
+class MessageViewportController {
+  MessageViewportController({
     required BlinkNotifier blinkNotifier,
     required ChatScrollCoordinator scrollCoordinator,
     required MessageController messageController,
@@ -123,10 +123,6 @@ extension ChatMessageJump on BuildContext {
         closeSideAfterJump: closeSideAfterJump,
       );
 
-  _ChatHistoryLocation get _chatHistoryLocation => _ChatHistoryLocation(
-    blinkNotifier: read<BlinkNotifier>(),
-    scrollCoordinator: read<ChatScrollCoordinator>(),
-    messageController: read<MessageController>(),
-    chatSideNotifier: read<ChatSideNotifier>(),
-  );
+  MessageViewportController get _chatHistoryLocation =>
+      read<MessageViewportController>();
 }

@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,70 +28,15 @@ import 'item/stranger_message.dart';
 import 'item/system_message.dart';
 import 'message_actions_menu.dart';
 import 'message_content.dart';
+import 'message_context.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
 import 'message_rows.dart';
 import 'message_style.dart';
 
+export 'message_context.dart';
 export 'message_file_actions.dart';
 export 'message_rows.dart';
-
-class _MessageContext with EquatableMixin {
-  _MessageContext({
-    required this.isTranscriptPage,
-    required this.isPinnedPage,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-  });
-
-  final bool isTranscriptPage;
-  final bool isPinnedPage;
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-
-  @override
-  List<Object?> get props => [
-    isTranscriptPage,
-    isPinnedPage,
-    showNip,
-    isCurrentUser,
-    message,
-  ];
-}
-
-bool useIsTranscriptPage() =>
-    _useMessageContextConverter((state) => state.isTranscriptPage);
-
-bool useIsPinnedPage() =>
-    _useMessageContextConverter((state) => state.isPinnedPage);
-
-bool useShowNip() => _useMessageContextConverter((state) => state.showNip);
-
-bool useIsCurrentUser() =>
-    _useMessageContextConverter((state) => state.isCurrentUser);
-
-MessageItem useMessage() =>
-    useMessageConverter<MessageItem>(converter: (state) => state);
-
-T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
-    _useMessageContextConverter((state) => converter(state.message));
-
-T _useMessageContextConverter<T>(T Function(_MessageContext) converter) {
-  final context = useContext();
-  return converter(_MessageContextScope.watch(context));
-}
-
-extension MessageContextExtension on BuildContext {
-  _MessageContext get _messageContext => _MessageContextScope.read(this);
-
-  MessageItem get message => _messageContext.message;
-
-  bool get isPinnedPage => _messageContext.isPinnedPage;
-
-  bool get isTranscriptPage => _messageContext.isTranscriptPage;
-}
 
 const _pinArrowWidth = 32.0;
 
@@ -338,76 +282,6 @@ class _MessageBlinkBackgroundState extends State<_MessageBlinkBackground> {
             : Colors.transparent);
     return ColoredBox(color: color, child: widget.child);
   }
-}
-
-class MessageContext extends StatelessWidget {
-  const MessageContext({
-    required this.isTranscriptPage,
-    required this.isPinnedPage,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-    required this.child,
-    super.key,
-  });
-
-  MessageContext.fromMessageItem({
-    required this.message,
-    required this.child,
-    super.key,
-    this.isTranscriptPage = false,
-    this.isPinnedPage = false,
-    this.showNip = false,
-  }) : isCurrentUser = message.relationship == UserRelationship.me;
-
-  final bool isTranscriptPage;
-  final bool isPinnedPage;
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => _MessageContextScope(
-    value: _MessageContext(
-      isTranscriptPage: isTranscriptPage,
-      isPinnedPage: isPinnedPage,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      message: message,
-    ),
-    child: child,
-  );
-}
-
-class _MessageContextScope extends InheritedWidget {
-  const _MessageContextScope({
-    required this.value,
-    required super.child,
-  });
-
-  final _MessageContext value;
-
-  static _MessageContext watch(BuildContext context) {
-    final scope = context
-        .dependOnInheritedWidgetOfExactType<_MessageContextScope>();
-    assert(scope != null, 'No MessageContext found in widget tree.');
-    return scope!.value;
-  }
-
-  static _MessageContext read(BuildContext context) {
-    final scope =
-        context
-                .getElementForInheritedWidgetOfExactType<_MessageContextScope>()
-                ?.widget
-            as _MessageContextScope?;
-    assert(scope != null, 'No MessageContext found in widget tree.');
-    return scope!.value;
-  }
-
-  @override
-  bool updateShouldNotify(_MessageContextScope oldWidget) =>
-      value != oldWidget.value;
 }
 
 class _MessageBubbleMargin extends HookConsumerWidget {
