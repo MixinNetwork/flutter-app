@@ -304,6 +304,14 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
+  Future<void> _preCacheMentionSafely(MessageState state) async {
+    try {
+      await _preCacheMention(state);
+    } catch (error) {
+      e('preCacheMention failed: $error');
+    }
+  }
+
   @override
   void dispose() {
     _disposed = true;
@@ -318,10 +326,12 @@ class MessageController extends ValueNotifier<MessageState> {
       generation == _generation &&
       conversationNotifier.state?.conversationId == conversationId;
 
-  void _emit(MessageState nextState) {
+  void _emit(MessageState nextState, {bool warmMentionCache = true}) {
     if (_disposed) return;
     value = nextState;
-    _warmMentionCache(nextState);
+    if (warmMentionCache) {
+      _warmMentionCache(nextState);
+    }
   }
 
   void _init({
@@ -398,7 +408,9 @@ class MessageController extends ValueNotifier<MessageState> {
       'lastRead=${shortMessageId(nextState.lastReadMessageId)} '
       '${_formatWindow(nextState)}',
     );
-    _emit(nextState);
+    await _preCacheMentionSafely(nextState);
+    if (!_isCurrent(generation, conversationId)) return;
+    _emit(nextState, warmMentionCache: false);
   }
 
   MessageWindowAnchor _resolveWindowAnchor({

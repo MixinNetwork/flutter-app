@@ -82,6 +82,36 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     ..where((tbl) => tbl.userId.equals(userId))
     ..limit(1);
 
+  Future<List<MentionUser>> mentionUsersByUserIds(
+    Iterable<String> userIds,
+  ) async {
+    final ids = userIds.toSet().toList();
+    if (ids.isEmpty) return const [];
+
+    final result = <MentionUser>[];
+    for (var offset = 0; offset < ids.length; offset += 800) {
+      final chunk = ids.skip(offset).take(800).toList();
+      result.addAll(
+        await (selectOnly(db.users)
+              ..addColumns([
+                db.users.userId,
+                db.users.identityNumber,
+                db.users.fullName,
+              ])
+              ..where(db.users.userId.isIn(chunk)))
+            .map(
+              (row) => MentionUser(
+                userId: row.read(db.users.userId)!,
+                identityNumber: row.read(db.users.identityNumber)!,
+                fullName: row.read(db.users.fullName),
+              ),
+            )
+            .get(),
+      );
+    }
+    return result;
+  }
+
   Selectable<String?> userFullNameByUserId(String userId) =>
       (selectOnly(db.users)
             ..addColumns([db.users.fullName])

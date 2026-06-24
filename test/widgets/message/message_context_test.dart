@@ -6,7 +6,9 @@ import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
 import 'package:flutter_app/ui/provider/quote_message_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/high_light_text.dart';
 import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_app/widgets/message/message_action_policy.dart';
@@ -14,7 +16,7 @@ import 'package:flutter_app/widgets/message/message_bubble.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart' as provider;
 
 void main() {
@@ -236,6 +238,42 @@ void main() {
     expect(shouldMarkMentionRead(true, 1), isFalse);
     expect(shouldMarkMentionRead(null, 1), isFalse);
   });
+
+  testWidgets(
+    'prewarmed mention provider renders display name on first frame',
+    (
+      tester,
+    ) async {
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWith((ref) => DatabaseOpener()),
+          settingProvider.overrideWith((ref) => SettingChangeNotifier()),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(mentionCacheProvider).cacheUsers([
+        const User(userId: 'user-1', identityNumber: '7001', fullName: 'Alice'),
+      ]);
+      await container.pump();
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            home: BrightnessData(
+              value: 0,
+              brightnessThemeData: lightBrightnessThemeData,
+              child: _MentionTextHarness(content: 'hello @7001'),
+            ),
+          ),
+        ),
+      );
+
+      expect(_richTextPlainText(tester), isNot(contains('@7001')));
+      expect(_richTextPlainText(tester), contains('@Alice'));
+    },
+  );
 }
 
 class _MessageIdText extends HookWidget {
@@ -266,6 +304,36 @@ class _MountCounterState extends State<_MountCounter> {
   @override
   Widget build(BuildContext context) => const SizedBox(width: 80, height: 20);
 }
+
+class _MentionTextHarness extends HookConsumerWidget {
+  const _MentionTextHarness({required this.content});
+
+  final String content;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mentionCache = ref.read(mentionCacheProvider);
+    final mentionMap = useMemoizedFuture(
+      () => mentionCache.checkMentionCache({content}),
+      mentionCache.mentionCache(content),
+      keys: [content],
+    ).requireData;
+
+    return CustomText(
+      content,
+      textMatchers: [
+        MentionTextMatcher(context, mentionMap),
+      ],
+    );
+  }
+}
+
+String _richTextPlainText(WidgetTester tester) => tester
+    .widgetList<RichText>(
+      find.byWidgetPredicate((widget) => widget is RichText),
+    )
+    .map((widget) => widget.text.toPlainText())
+    .join('\n');
 
 MessageItem testMessage(
   String id, {

@@ -10,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../db/mixin_database.dart' hide Offset;
 import '../ui/home/intent.dart';
 import '../ui/provider/conversation_provider.dart';
+import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/mention_provider.dart';
 import '../utils/extension/extension.dart';
 import '../utils/platform.dart';
@@ -84,7 +85,7 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
         ListSelectionSelectedIntent: CallbackAction<Intent>(
           onInvoke: (intent) {
             final state = ref.read(mentionProviderInstance);
-            _select(state.users[state.index]);
+            _select(state.users[state.index], ref.read(mentionCacheProvider));
           },
         ),
       },
@@ -113,7 +114,8 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
               child: _MentionPanel(
                 mentionState: mentionState,
                 scrollController: scrollController,
-                onSelect: _select,
+                onSelect: (user) =>
+                    _select(user, ref.read(mentionCacheProvider)),
               ),
             ),
           ),
@@ -123,7 +125,9 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
     );
   }
 
-  void _select(User user) {
+  void _select(User user, MentionCache mentionCache) {
+    mentionCache.cacheUsers([user]);
+
     final selectionOffset = max(textEditingController.selection.baseOffset, 0);
     final text = textEditingController.text;
 
