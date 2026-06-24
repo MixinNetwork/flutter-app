@@ -251,13 +251,8 @@ class ChatContainer extends HookConsumerWidget {
                                 child: const ChatContentOverlays(),
                               ),
                             ),
-                            AnimatedCrossFade(
-                              firstChild: const InputContainer(),
-                              secondChild: const SelectionBottomBar(),
-                              crossFadeState: inMultiSelectMode
-                                  ? CrossFadeState.showSecond
-                                  : CrossFadeState.showFirst,
-                              duration: const Duration(milliseconds: 300),
+                            ChatBottomBarSwitcher(
+                              inMultiSelectMode: inMultiSelectMode,
                             ),
                           ],
                         ),
@@ -272,4 +267,29 @@ class ChatContainer extends HookConsumerWidget {
       ),
     );
   }
+}
+
+@visibleForTesting
+class ChatBottomBarSwitcher extends StatelessWidget {
+  const ChatBottomBarSwitcher({
+    required this.inMultiSelectMode,
+    this.inputContainer = const InputContainer(),
+    this.selectionBottomBar = const SelectionBottomBar(),
+    super.key,
+  });
+
+  final bool inMultiSelectMode;
+  final Widget inputContainer;
+  final Widget selectionBottomBar;
+
+  @override
+  Widget build(BuildContext context) => AnimatedCrossFade(
+    alignment: Alignment.bottomCenter,
+    firstChild: inputContainer,
+    secondChild: selectionBottomBar,
+    crossFadeState: inMultiSelectMode
+        ? CrossFadeState.showSecond
+        : CrossFadeState.showFirst,
+    duration: const Duration(milliseconds: 300),
+  );
 }
