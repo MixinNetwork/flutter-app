@@ -16,7 +16,6 @@ import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../ui/provider/user_cache_provider.dart';
-import '../../utils/double_tap_util.dart';
 import '../../utils/extension/extension.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
@@ -49,11 +48,26 @@ void _quickReply(BuildContext context) {
   if (context.isTranscriptPage) return;
   if (!context.message.type.canReply) return;
 
-  doubleTap('_quickReply', const Duration(milliseconds: 300), () {
-    context.read<BlinkNotifier>().blinkByMessageId(context.message.messageId);
-    context.providerContainer.read(quoteMessageProvider.notifier).state =
-        context.message;
+  context.read<BlinkNotifier>().blinkByMessageId(context.message.messageId);
+  context.providerContainer.read(quoteMessageProvider.notifier).state =
+      context.message;
+}
+
+@visibleForTesting
+class MessageQuickReplyDetector extends StatelessWidget {
+  const MessageQuickReplyDetector({
+    required this.child,
+    super.key,
   });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.translucent,
+    onDoubleTap: () => _quickReply(context),
+    child: child,
+  );
 }
 
 class MessageItemWidget extends HookConsumerWidget {
@@ -215,8 +229,7 @@ class MessageItemWidget extends HookConsumerWidget {
         highlightEnabled: blink,
         menuHighlighted: showedMenu.value,
         child: Builder(
-          builder: (context) => GestureDetector(
-            onTap: () => _quickReply(context),
+          builder: (context) => MessageQuickReplyDetector(
             child: Padding(
               padding: row.sameUserPrev
                   ? EdgeInsets.zero
@@ -289,10 +302,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
           hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          child: GestureDetector(
-            onTap: () => _quickReply(context),
-            child: Builder(builder: builder),
-          ),
+          child: MessageQuickReplyDetector(child: Builder(builder: builder)),
         ),
       ],
     );

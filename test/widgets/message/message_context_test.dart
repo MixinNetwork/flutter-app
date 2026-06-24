@@ -4,6 +4,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
+import 'package:flutter_app/ui/provider/quote_message_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/message/item/quote_message.dart';
@@ -166,6 +167,39 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     notifier.dispose();
+  });
+
+  testWidgets('double tapping a message starts a quote reply', (tester) async {
+    final blinkNotifier = BlinkNotifier(tester);
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: const MessageQuickReplyDetector(
+            child: MessageBubble(child: SizedBox(width: 80, height: 20)),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MessageQuickReplyDetector)),
+    );
+    expect(container.read(quoteMessageProvider), isNull);
+
+    await tester.tap(find.byType(MessageQuickReplyDetector));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.byType(MessageQuickReplyDetector));
+    await tester.pump();
+
+    expect(container.read(quoteMessageProvider)?.messageId, '1');
+
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
   });
 
   testWidgets('blink keeps bubble content mounted', (tester) async {
