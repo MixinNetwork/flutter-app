@@ -187,6 +187,7 @@ class ChatScrollCoordinator {
       animatedRestoreDirection: animatedRestoreDirection,
       animatedRestoreComplete: animatedRestoreComplete,
       animated: animated,
+      hasCenteredAnchor: hasCenteredAnchor,
       traceTargetMessageId: traceTargetMessageId,
     );
     if (_restoreScheduled) return;
@@ -351,6 +352,7 @@ class ChatScrollCoordinator {
     traceChatJump(
       'restore reset=${request.reset} latest=${request.isLatest} '
       'center=${shortMessageId(request.centerMessageId)} '
+      'centerAnchor=${request.hasCenteredAnchor} '
       'traceTarget=${shortMessageId(request.traceTargetMessageId)} '
       'animated=${request.animated} '
       'animatedMessage=${shortMessageId(request.animatedMessageId)} '
@@ -368,6 +370,10 @@ class ChatScrollCoordinator {
           )) {
         return;
       }
+      if (request.hasCenteredAnchor) {
+        _traceTargetAfterRestore(request);
+        return;
+      }
       if (request.isLatest) {
         unawaited(
           _jumpToBottom(
@@ -376,14 +382,7 @@ class ChatScrollCoordinator {
           ),
         );
       }
-      final traceTargetMessageId = request.traceTargetMessageId;
-      if (traceTargetMessageId != null) {
-        _traceTargetAfterLayout(
-          'restore-anchor-after',
-          traceTargetMessageId,
-          request.keysByMessageId,
-        );
-      }
+      _traceTargetAfterRestore(request);
       return;
     }
 
@@ -767,6 +766,16 @@ class ChatScrollCoordinator {
       }),
     );
   }
+
+  void _traceTargetAfterRestore(_ChatRestoreRequest request) {
+    final traceTargetMessageId = request.traceTargetMessageId;
+    if (traceTargetMessageId == null) return;
+    _traceTargetAfterLayout(
+      'restore-anchor-after',
+      traceTargetMessageId,
+      request.keysByMessageId,
+    );
+  }
 }
 
 class _MessageTargetGeometry {
@@ -794,6 +803,7 @@ class _ChatRestoreRequest {
     required this.reset,
     required this.isLatest,
     required this.animated,
+    required this.hasCenteredAnchor,
     this.centerMessageId,
     this.animatedMessageId,
     this.animatedRestoreDirection,
@@ -806,6 +816,7 @@ class _ChatRestoreRequest {
   final bool reset;
   final bool isLatest;
   final bool animated;
+  final bool hasCenteredAnchor;
   final String? centerMessageId;
   final String? animatedMessageId;
   final ChatScrollRestoreDirection? animatedRestoreDirection;

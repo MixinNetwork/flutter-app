@@ -226,6 +226,43 @@ void main() {
     expect(coordinator.scrollController.offset, 0);
   });
 
+  testWidgets('scheduleRestore keeps centered unread anchors off bottom jump', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(300);
+    await tester.pump();
+
+    coordinator.trackingScrollController
+      ..jumpCount = 0
+      ..jumpOffsets.clear();
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: true,
+      hasCenteredAnchor: true,
+      traceTargetMessageId: messages[8].messageId,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.jumpCount, 0);
+    expect(coordinator.trackingScrollController.jumpOffsets, isEmpty);
+    expect(coordinator.scrollController.offset, 0);
+  });
+
   testWidgets(
     'handleScrollNotification ignores idle notifications',
     (
