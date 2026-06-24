@@ -73,8 +73,8 @@ class ChatScrollCoordinator {
   static const _jumpAnimationCurve = Curves.easeOutCubic;
   static const _maxAnimatedJumpViewportCount = 3.0;
   static const _maxAnimatedJumpDistance = 800.0;
-  static const messageFocusAnchor = 0.3;
-  static const unreadSeparatorAnchor = 0.36;
+  static const messageFocusAnchor = 0.2;
+  static const unreadSeparatorAnchor = messageFocusAnchor;
   static const loadedJumpViewportCount = 2.0;
 
   final scrollController = ScrollController();
