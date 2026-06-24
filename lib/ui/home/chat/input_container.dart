@@ -47,6 +47,7 @@ import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
 import '../notifier/chat_side_notifier.dart';
 import 'files_preview.dart';
+import 'message_jump.dart';
 import 'voice_recorder_bottom_bar.dart';
 
 part 'input_highlight_controller.dart';
@@ -392,6 +393,7 @@ void _sendTextMessage(
     );
   }
 
+  unawaited(context.jumpToLatestInChat());
   textEditingController.clear();
   context.providerContainer.read(quoteMessageProvider.notifier).state = null;
 }
@@ -658,6 +660,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                   recipientId: conversationState.userId,
                   quoteMessageId: quoteMessage.state?.messageId,
                 );
+                unawaited(context.jumpToLatestInChat());
                 quoteMessage.state = null;
               });
             },
@@ -846,6 +849,7 @@ class _StickerButton extends HookConsumerWidget {
                 tabLength: tabLength,
                 presetStickerGroups: presetStickerGroups,
                 stickerAlbums: stickerAlbums,
+                onStickerSent: () => unawaited(context.jumpToLatestInChat()),
               ),
             ),
           ),

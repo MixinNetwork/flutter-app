@@ -46,6 +46,7 @@ import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import 'image_caption_input.dart';
 import 'image_editor.dart';
+import 'message_jump.dart';
 
 part 'files_preview_model.dart';
 
@@ -53,16 +54,28 @@ Future<void> showFilesPreviewDialog(
   BuildContext context,
   List<XFile> files,
 ) async {
+  void jumpToLatestAfterSend() {
+    if (!context.mounted) return;
+    unawaited(context.jumpToLatestInChat());
+  }
+
   await showMixinDialog(
     context: context,
-    child: _FilesPreviewDialog(initialFiles: files.map(_File.auto).toList()),
+    child: _FilesPreviewDialog(
+      initialFiles: files.map(_File.auto).toList(),
+      onFileSent: jumpToLatestAfterSend,
+    ),
   );
 }
 
 class _FilesPreviewDialog extends HookConsumerWidget {
-  const _FilesPreviewDialog({required this.initialFiles});
+  const _FilesPreviewDialog({
+    required this.initialFiles,
+    required this.onFileSent,
+  });
 
   final List<_File> initialFiles;
+  final VoidCallback onFileSent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -136,6 +149,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           );
         }
         quoteMessageNotifier.state = null;
+        onFileSent();
         Navigator.pop(context);
       } else {
         final zipFilePath = await runLoadBalancer(_archiveFiles, (
@@ -153,6 +167,7 @@ class _FilesPreviewDialog extends HookConsumerWidget {
           ),
         );
         quoteMessageNotifier.state = null;
+        onFileSent();
         Navigator.pop(context);
       }
     }

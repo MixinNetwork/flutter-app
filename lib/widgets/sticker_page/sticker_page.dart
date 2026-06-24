@@ -33,6 +33,7 @@ class StickerPage extends StatelessWidget {
     required this.tabController,
     required this.presetStickerGroups,
     required this.stickerAlbums,
+    this.onStickerSent,
     super.key,
   });
 
@@ -40,6 +41,7 @@ class StickerPage extends StatelessWidget {
   final int tabLength;
   final List<PresetStickerGroup> presetStickerGroups;
   final List<StickerAlbum> stickerAlbums;
+  final VoidCallback? onStickerSent;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -85,6 +87,7 @@ class StickerPage extends StatelessWidget {
                                 duration: kVerySlowThrottleDuration,
                               ),
                           updateUsedAt: false,
+                          onStickerSent: onStickerSent,
                         );
                       case PresetStickerGroup.favorite:
                         return _StickerAlbumPage(
@@ -113,6 +116,7 @@ class StickerPage extends StatelessWidget {
                             }
                           },
                           canAddSticker: true,
+                          onStickerSent: onStickerSent,
                         );
                       case PresetStickerGroup.gif:
                         return const AutomaticKeepAliveClientWidget(
@@ -121,6 +125,7 @@ class StickerPage extends StatelessWidget {
                     }
                   }
                   return _StickerAlbumPage(
+                    onStickerSent: onStickerSent,
                     getStickers: () {
                       final albumId =
                           stickerAlbums[index - presetStickerGroups.length]
@@ -160,6 +165,7 @@ class _StickerAlbumPage extends HookConsumerWidget {
     this.updateUsedAt = true,
     this.delete,
     this.canAddSticker = false,
+    this.onStickerSent,
   });
 
   final Stream<List<Sticker>> Function() getStickers;
@@ -167,6 +173,7 @@ class _StickerAlbumPage extends HookConsumerWidget {
   final bool updateUsedAt;
   final void Function(Sticker)? delete;
   final bool canAddSticker;
+  final VoidCallback? onStickerSent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -197,6 +204,7 @@ class _StickerAlbumPage extends HookConsumerWidget {
           sticker: stickers[stickerIndex],
           updateUsedAt: updateUsedAt,
           delete: delete,
+          onStickerSent: onStickerSent,
         );
       },
     );
@@ -259,11 +267,13 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
     required this.sticker,
     required this.updateUsedAt,
     this.delete,
+    this.onStickerSent,
   });
 
   final Sticker sticker;
   final bool updateUsedAt;
   final void Function(Sticker)? delete;
+  final VoidCallback? onStickerSent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -292,6 +302,7 @@ class _StickerAlbumPageItem extends HookConsumerWidget {
             recipientId: conversationItem.user?.userId,
           ),
         ]);
+        onStickerSent?.call();
       },
       hoveringDecoration: BoxDecoration(
         color: context.dynamicColor(
