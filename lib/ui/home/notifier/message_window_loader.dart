@@ -144,8 +144,19 @@ class MessageWindowLoader {
     String conversationId,
     int limit, {
     String? centerMessageId,
+    MessageWindowAnchor? anchor,
     void Function(String message)? trace,
   }) async {
+    final resolvedAnchor =
+        anchor ??
+        (centerMessageId == null
+            ? const LatestMessageWindowAnchor()
+            : AroundMessageWindowAnchor(
+                messageId: centerMessageId,
+                source: MessageWindowJumpSource.conversation,
+              ));
+    final resolvedCenterMessageId = resolvedAnchor.centerMessageId;
+
     Future<MessageState> recent() async {
       final list = await recentMessages(conversationId, limit);
 
@@ -157,19 +168,20 @@ class MessageWindowLoader {
       );
     }
 
-    if (centerMessageId == null) return recent();
+    if (resolvedCenterMessageId == null) return recent();
 
-    final info = await messageOrderInfo(centerMessageId);
+    final info = await messageOrderInfo(resolvedCenterMessageId);
     if (info == null) {
       trace?.call(
-        'query center missing-order target=${shortMessageId(centerMessageId)}',
+        'query center missing-order '
+        'target=${shortMessageId(resolvedCenterMessageId)}',
       );
       return recent();
     }
 
     final halfLimit = limit ~/ 2;
     trace?.call(
-      'query center order target=${shortMessageId(centerMessageId)} '
+      'query center order target=${shortMessageId(resolvedCenterMessageId)} '
       'createdAt=${info.createdAt} rowId=${info.rowId} half=$halfLimit',
     );
     final bottomIdsFuture = afterMessageIds(info, conversationId, halfLimit);
@@ -178,7 +190,7 @@ class MessageWindowLoader {
     final bottomIds = await bottomIdsFuture;
     final topIds = await topIdsFuture;
     trace?.call(
-      'query center ids target=${shortMessageId(centerMessageId)} '
+      'query center ids target=${shortMessageId(resolvedCenterMessageId)} '
       'top=${topIds.length} '
       'topFirst=${shortMessageId(topIds.firstOrNull)} '
       'topLast=${shortMessageId(topIds.lastOrNull)} '
@@ -186,7 +198,11 @@ class MessageWindowLoader {
       'bottomFirst=${shortMessageId(bottomIds.firstOrNull)} '
       'bottomLast=${shortMessageId(bottomIds.lastOrNull)}',
     );
-    final messageIds = [...topIds.reversed, centerMessageId, ...bottomIds];
+    final messageIds = [
+      ...topIds.reversed,
+      resolvedCenterMessageId,
+      ...bottomIds,
+    ];
     final messages = await messagesByIds(messageIds);
     final messagesById = {
       for (final message in messages) message.messageId: message,
@@ -200,7 +216,7 @@ class MessageWindowLoader {
         .map((id) => messagesById[id])
         .nonNulls
         .toList();
-    var center = messagesById[centerMessageId];
+    var center = messagesById[resolvedCenterMessageId];
 
     final isLatest = bottomIds.length < halfLimit;
     final isOldest = topIds.length < halfLimit;
@@ -211,7 +227,7 @@ class MessageWindowLoader {
     }
 
     trace?.call(
-      'query centered target=${shortMessageId(centerMessageId)} '
+      'query centered target=${shortMessageId(resolvedCenterMessageId)} '
       'top=${topList.length} center=${center != null} '
       'bottom=${bottomList.length} isLatest=$isLatest isOldest=$isOldest',
     );
@@ -221,6 +237,7 @@ class MessageWindowLoader {
       bottom: bottomList,
       isLatest: isLatest,
       isOldest: isOldest,
+      anchor: resolvedAnchor,
     );
   }
 }

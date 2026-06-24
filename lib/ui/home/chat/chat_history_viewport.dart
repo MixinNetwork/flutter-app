@@ -91,6 +91,9 @@ class ChatHistoryViewport extends HookConsumerWidget {
     final resetScrollWindow =
         previousConversationIdRef.value != state.conversationId ||
         previousRefreshKeyRef.value != state.refreshKey;
+    final resetCurrentConversation =
+        previousConversationIdRef.value == state.conversationId &&
+        previousRefreshKeyRef.value != state.refreshKey;
 
     useEffect(() {
       scrollCoordinator.viewportKey = viewportKey;
@@ -163,6 +166,11 @@ class ChatHistoryViewport extends HookConsumerWidget {
           reset: resetScrollWindow,
           isLatest: state.isLatest,
           hasCenteredAnchor: anchorUnreadSeparator,
+          animateLatestReset:
+              resetCurrentConversation &&
+              state.isLatest &&
+              center == null &&
+              !anchorUnreadSeparator,
           centerMessageId: anchorUnreadSeparator ? null : center?.messageId,
           traceTargetMessageId: center?.messageId ?? state.lastReadMessageId,
         );

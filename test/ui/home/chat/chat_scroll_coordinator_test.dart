@@ -385,6 +385,39 @@ void main() {
     expect(keysByMessageId.lookupCount, 0);
   });
 
+  testWidgets('jump-to-latest button uses wider threshold than tail follow', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages)
+        message.messageId: MessageGlobalKey(message.messageId),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.updateMessages(messages, keysByMessageId);
+    await tester.pump();
+
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 60,
+    );
+    await tester.pump();
+    expect(coordinator.showJumpToLatest.value, false);
+
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 120,
+    );
+    await tester.pump();
+    expect(coordinator.showJumpToLatest.value, true);
+  });
+
   testWidgets('scheduleRestore does not jump while user is scrolling', (
     tester,
   ) async {
@@ -472,6 +505,144 @@ void main() {
     await tester.pump();
 
     expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets('scheduleRestore animates tail-follow message appends', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final nextMessages = [...messages, testMessage(100)];
+    final keysByMessageId = {
+      for (final message in nextMessages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent,
+    );
+    await tester.pump();
+    coordinator.captureViewportState(messages, keysByMessageId);
+
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      nextMessages,
+      keysByMessageId,
+    );
+    coordinator.trackingScrollController
+      ..animateCount = 0
+      ..jumpCount = 0;
+    coordinator.scheduleRestore(
+      messages: nextMessages,
+      keysByMessageId: keysByMessageId,
+      reset: false,
+      isLatest: true,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.animateCount, 1);
+    expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets(
+    'scheduleRestore restores tail-follow start in centered viewports',
+    (tester) async {
+      final coordinator = TrackingChatScrollCoordinator();
+      final centerKey = GlobalKey();
+      final top = List.generate(8, testMessage);
+      final bottom = List.generate(8, (index) => testMessage(index + 100));
+      final nextBottom = [...bottom, testMessage(200)];
+      final messages = [...top, ...bottom];
+      final nextMessages = [...top, ...nextBottom];
+      final keysByMessageId = {
+        for (final message in nextMessages) message.messageId: GlobalKey(),
+      };
+
+      addTearDown(coordinator.dispose);
+      await pumpCenteredScrollableMessages(
+        tester,
+        coordinator,
+        centerKey: centerKey,
+        top: top,
+        bottom: bottom,
+        keysByMessageId: keysByMessageId,
+      );
+      coordinator.scrollController.jumpTo(
+        coordinator.scrollController.position.maxScrollExtent,
+      );
+      await tester.pump();
+      coordinator.captureViewportState(messages, keysByMessageId);
+
+      await pumpCenteredScrollableMessages(
+        tester,
+        coordinator,
+        centerKey: centerKey,
+        top: top,
+        bottom: nextBottom,
+        keysByMessageId: keysByMessageId,
+      );
+      coordinator.scrollController.jumpTo(
+        coordinator.scrollController.position.maxScrollExtent,
+      );
+      await tester.pump();
+      coordinator.trackingScrollController
+        ..animateCount = 0
+        ..jumpCount = 0
+        ..jumpOffsets.clear()
+        ..animateOffsets.clear();
+      coordinator.scheduleRestore(
+        messages: nextMessages,
+        keysByMessageId: keysByMessageId,
+        reset: false,
+        isLatest: true,
+      );
+      await tester.pump();
+
+      expect(coordinator.trackingScrollController.animateCount, 1);
+      expect(coordinator.trackingScrollController.jumpCount, 1);
+      expect(
+        coordinator.trackingScrollController.jumpOffsets.single,
+        lessThan(coordinator.trackingScrollController.animateOffsets.single),
+      );
+    },
+  );
+
+  testWidgets('scheduleRestore animates requested latest resets', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.trackingScrollController
+      ..animateCount = 0
+      ..jumpCount = 0;
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: true,
+      animateLatestReset: true,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.animateCount, 1);
   });
 
   testWidgets('scheduleRestore animates explicit message jumps', (
@@ -1178,6 +1349,64 @@ Future<void> pumpFullyBuiltScrollableMessages(
                 ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> pumpCenteredScrollableMessages(
+  WidgetTester tester,
+  ChatScrollCoordinator coordinator, {
+  required GlobalKey centerKey,
+  required List<MessageItem> top,
+  required List<MessageItem> bottom,
+  required Map<String, GlobalKey> keysByMessageId,
+  double itemHeight = 80,
+  double viewportHeight = 240,
+}) async {
+  await tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox(
+        width: 320,
+        height: viewportHeight,
+        child: CustomScrollView(
+          key: coordinator.viewportKey,
+          center: centerKey,
+          controller: coordinator.scrollController,
+          anchor: ChatScrollCoordinator.messageFocusAnchor,
+          slivers: [
+            SliverList.builder(
+              itemCount: top.length,
+              itemBuilder: (context, index) {
+                final message = top[top.length - index - 1];
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: message.messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[message.messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
+            ),
+            SliverToBoxAdapter(key: centerKey, child: const SizedBox()),
+            SliverList.builder(
+              itemCount: bottom.length,
+              itemBuilder: (context, index) {
+                final message = bottom[index];
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: message.messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[message.messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     ),

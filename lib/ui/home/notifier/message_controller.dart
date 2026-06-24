@@ -20,6 +20,87 @@ import '../chat/chat_jump_trace.dart';
 
 part 'message_window_loader.dart';
 
+enum MessageWindowJumpSource {
+  conversation,
+  message,
+  quote,
+  pin,
+  mention,
+  search,
+  restore,
+}
+
+sealed class MessageWindowAnchor extends Equatable {
+  const MessageWindowAnchor();
+
+  String? get centerMessageId => null;
+
+  String get debugName;
+}
+
+final class LatestMessageWindowAnchor extends MessageWindowAnchor {
+  const LatestMessageWindowAnchor();
+
+  @override
+  String get debugName => 'latest';
+
+  @override
+  List<Object?> get props => const [];
+}
+
+final class UnreadMessageWindowAnchor extends MessageWindowAnchor {
+  const UnreadMessageWindowAnchor({required this.lastReadMessageId});
+
+  final String lastReadMessageId;
+
+  @override
+  String get centerMessageId => lastReadMessageId;
+
+  @override
+  String get debugName => 'unread';
+
+  @override
+  List<Object?> get props => [lastReadMessageId];
+}
+
+final class AroundMessageWindowAnchor extends MessageWindowAnchor {
+  const AroundMessageWindowAnchor({
+    required this.messageId,
+    required this.source,
+  });
+
+  final String messageId;
+  final MessageWindowJumpSource source;
+
+  @override
+  String get centerMessageId => messageId;
+
+  @override
+  String get debugName => 'message:$source';
+
+  @override
+  List<Object?> get props => [messageId, source];
+}
+
+final class RestoreMessageWindowAnchor extends MessageWindowAnchor {
+  const RestoreMessageWindowAnchor({
+    required this.messageId,
+    required this.offset,
+  });
+
+  final String messageId;
+  final double offset;
+
+  @override
+  String get centerMessageId => messageId;
+
+  @override
+  String get debugName => 'restore';
+
+  @override
+  List<Object?> get props => [messageId, offset];
+}
+
 class MessageState extends Equatable {
   MessageState({
     this.top = const [],
@@ -30,6 +111,7 @@ class MessageState extends Equatable {
     this.isOldest = false,
     this.lastReadMessageId,
     this.refreshKey,
+    this.anchor = const LatestMessageWindowAnchor(),
   }) {
     // check top, center, bottom didn't has same messageId
     assert(() {
@@ -52,6 +134,7 @@ class MessageState extends Equatable {
   final bool isOldest;
   final String? lastReadMessageId;
   final Object? refreshKey;
+  final MessageWindowAnchor anchor;
 
   @override
   List<Object?> get props => [
@@ -63,6 +146,7 @@ class MessageState extends Equatable {
     isOldest,
     lastReadMessageId,
     refreshKey,
+    anchor,
   ];
 
   MessageItem? get bottomMessage =>
@@ -88,6 +172,7 @@ class MessageState extends Equatable {
     bool? isOldest,
     String? lastReadMessageId,
     Object? refreshKey,
+    MessageWindowAnchor? anchor,
   }) => MessageState(
     conversationId: conversationId ?? this.conversationId,
     top: top ?? this.top,
@@ -97,15 +182,7 @@ class MessageState extends Equatable {
     isOldest: isOldest ?? this.isOldest,
     lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
     refreshKey: refreshKey ?? this.refreshKey,
-  );
-
-  MessageState _copyWithJumpCurrentState() => MessageState(
-    top: list.toList(),
-    refreshKey: Object(),
-    conversationId: conversationId,
-    isLatest: isLatest,
-    isOldest: isOldest,
-    lastReadMessageId: lastReadMessageId,
+    anchor: anchor ?? this.anchor,
   );
 
   MessageState removeMessage(String messageId) {
@@ -118,6 +195,7 @@ class MessageState extends Equatable {
         isOldest: isOldest,
         lastReadMessageId: lastReadMessageId,
         refreshKey: refreshKey,
+        anchor: anchor,
       );
     }
 
@@ -250,6 +328,7 @@ class MessageController extends ValueNotifier<MessageState> {
     String? centerMessageId,
     String? lastReadMessageId,
     bool forceLatest = false,
+    MessageWindowAnchor? anchor,
   }) {
     final generation = ++_generation;
     unawaited(
@@ -258,6 +337,7 @@ class MessageController extends ValueNotifier<MessageState> {
         centerMessageId: centerMessageId,
         lastReadMessageId: lastReadMessageId,
         forceLatest: forceLatest,
+        anchor: anchor,
       ).catchError((Object error, StackTrace stackTrace) {
         e('message init failed: $error $stackTrace');
       }),
@@ -269,16 +349,29 @@ class MessageController extends ValueNotifier<MessageState> {
     String? centerMessageId,
     String? lastReadMessageId,
     bool forceLatest = false,
+    MessageWindowAnchor? anchor,
   }) async {
     final finalLimit = limit;
     final conversationId = conversationNotifier.state?.conversationId;
     if (conversationId == null) return;
     final conversation = conversationNotifier.state?.conversation;
+    final windowAnchor =
+        anchor ??
+        _resolveWindowAnchor(
+          requestedCenterMessageId: centerMessageId,
+          forceLatest: forceLatest,
+        );
+    final resolvedLastReadMessageId =
+        lastReadMessageId ??
+        conversation?.lastReadMessageId ??
+        state.lastReadMessageId;
 
     traceChatJump(
       'message init '
       'conv=${shortMessageId(conversationId)} '
       'requestedCenter=${shortMessageId(centerMessageId)} '
+      'anchor=${windowAnchor.debugName} '
+      'anchorCenter=${shortMessageId(windowAnchor.centerMessageId)} '
       'inputLastRead=${shortMessageId(lastReadMessageId)} '
       'stateLastRead=${shortMessageId(state.lastReadMessageId)} '
       'convLastRead=${shortMessageId(conversation?.lastReadMessageId)} '
@@ -289,15 +382,14 @@ class MessageController extends ValueNotifier<MessageState> {
     final messageState = await _resetMessageList(
       conversationId,
       finalLimit,
-      centerMessageId: centerMessageId,
-      forceLatest: forceLatest,
+      anchor: windowAnchor,
     );
     if (!_isCurrent(generation, conversationId)) return;
 
     final nextState = _pretreatment(
       messageState.copyWith(
         refreshKey: Object(),
-        lastReadMessageId: lastReadMessageId,
+        lastReadMessageId: resolvedLastReadMessageId,
       ),
     );
     traceChatJump(
@@ -307,6 +399,26 @@ class MessageController extends ValueNotifier<MessageState> {
       '${_formatWindow(nextState)}',
     );
     _emit(nextState);
+  }
+
+  MessageWindowAnchor _resolveWindowAnchor({
+    required String? requestedCenterMessageId,
+    required bool forceLatest,
+  }) {
+    if (forceLatest) return const LatestMessageWindowAnchor();
+    if (requestedCenterMessageId != null) {
+      return AroundMessageWindowAnchor(
+        messageId: requestedCenterMessageId,
+        source: MessageWindowJumpSource.conversation,
+      );
+    }
+    final conversation = conversationNotifier.state?.conversation;
+    final lastReadMessageId = conversation?.lastReadMessageId;
+    if ((conversation?.unseenMessageCount ?? 0) > 0 &&
+        lastReadMessageId != null) {
+      return UnreadMessageWindowAnchor(lastReadMessageId: lastReadMessageId);
+    }
+    return const LatestMessageWindowAnchor();
   }
 
   void after() {
@@ -366,30 +478,23 @@ class MessageController extends ValueNotifier<MessageState> {
   Future<MessageState> _resetMessageList(
     String conversationId,
     int limit, {
-    String? centerMessageId,
-    bool forceLatest = false,
+    required MessageWindowAnchor anchor,
   }) async {
     final conversation = conversationNotifier.state?.conversation;
-    final _centerMessageId = forceLatest
-        ? null
-        : centerMessageId ??
-              ((conversation?.unseenMessageCount ?? 0) > 0
-                  ? conversation?.lastReadMessageId
-                  : null);
 
     traceChatJump(
       'reset list '
       'conv=${shortMessageId(conversationId)} '
-      'requested=${shortMessageId(centerMessageId)} '
-      'resolved=${shortMessageId(_centerMessageId)} '
+      'anchor=${anchor.debugName} '
+      'resolved=${shortMessageId(anchor.centerMessageId)} '
       'convLastRead=${shortMessageId(conversation?.lastReadMessageId)} '
-      'forceLatest=$forceLatest unseen=${conversation?.unseenMessageCount}',
+      'unseen=${conversation?.unseenMessageCount}',
     );
 
     final state = await _messagesByConversationId(
       conversationId,
       limit,
-      centerMessageId: _centerMessageId,
+      anchor: anchor,
     );
 
     return state.copyWith(
@@ -403,11 +508,11 @@ class MessageController extends ValueNotifier<MessageState> {
   Future<MessageState> _messagesByConversationId(
     String conversationId,
     int limit, {
-    String? centerMessageId,
+    required MessageWindowAnchor anchor,
   }) => _messageWindowLoader.load(
     conversationId,
     limit,
-    centerMessageId: centerMessageId,
+    anchor: anchor,
     trace: traceChatJump,
   );
 
@@ -427,7 +532,6 @@ class MessageController extends ValueNotifier<MessageState> {
     var center = state.center;
     var bottom = state.bottom.toList();
 
-    var jumpToCurrent = false;
     for (final item in list) {
       if (item.conversationId != conversationId) continue;
 
@@ -468,21 +572,19 @@ class MessageController extends ValueNotifier<MessageState> {
           top = [item, ...top]
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         }
-        jumpToCurrent = jumpToCurrent || currentUserSent;
       } else {
         if (currentUserSent && item.status == MessageStatus.sending) {
-          _init();
+          loadLatestWindow();
           return null;
         }
       }
     }
 
-    final result = state.copyWith(top: top, center: center, bottom: bottom);
-
-    if (jumpToCurrent) {
-      return result._copyWithJumpCurrentState();
-    }
-    return result;
+    return state.copyWith(
+      top: top,
+      center: center,
+      bottom: bottom,
+    );
   }
 
   void _insertOrReplaceCurrentConversation(List<MessageItem> list) {
@@ -513,6 +615,10 @@ class MessageController extends ValueNotifier<MessageState> {
     _init(
       centerMessageId: messageId,
       lastReadMessageId: state.lastReadMessageId,
+      anchor: AroundMessageWindowAnchor(
+        messageId: messageId,
+        source: MessageWindowJumpSource.message,
+      ),
     );
   }
 
@@ -523,7 +629,7 @@ class MessageController extends ValueNotifier<MessageState> {
   void loadLatestWindow() {
     _init(
       lastReadMessageId: state.lastReadMessageId,
-      forceLatest: true,
+      anchor: const LatestMessageWindowAnchor(),
     );
   }
 
@@ -568,5 +674,6 @@ class MessageController extends ValueNotifier<MessageState> {
       'bottom=${state.bottom.length} '
       'bottomFirst=${shortMessageId(state.bottom.firstOrNull?.messageId)} '
       'bottomLast=${shortMessageId(state.bottom.lastOrNull?.messageId)} '
-      'latest=${state.isLatest} oldest=${state.isOldest}';
+      'latest=${state.isLatest} oldest=${state.isOldest} '
+      'anchor=${state.anchor.debugName}';
 }

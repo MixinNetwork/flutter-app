@@ -64,7 +64,9 @@ class ChatScrollCoordinator {
     scrollController.addListener(_scheduleScrollPositionUpdate);
   }
 
-  static const _jumpLatestThreshold = 40.0;
+  static const _tailFollowThreshold = 50.0;
+  static const _showJumpToLatestThreshold = 96.0;
+  static const _jumpButtonFreezeUpdateCount = 1;
   static const _preloadViewportCount = 3.0;
   static const _jumpToTolerance = 0.5;
   static const _jumpAnimationDuration = Duration(milliseconds: 300);
@@ -87,7 +89,8 @@ class ChatScrollCoordinator {
   Map<String, GlobalKey> _keysByMessageId = const {};
   GlobalKey? _viewportKey;
   final _renderedMessageIds = <String>{};
-  bool _pinnedToBottom = true;
+  bool _tailFollowEligible = true;
+  _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshot;
   bool _animateNextRestore = false;
   ChatScrollRestoreDirection? _animatedRestoreDirection;
   bool _restoreScheduled = false;
@@ -96,6 +99,7 @@ class ChatScrollCoordinator {
   bool _blockPreloadUntilUserScroll = false;
   bool _disposed = false;
   int _programmaticScrollDepth = 0;
+  int _jumpButtonFrozenUpdates = 0;
 
   void captureViewportState(
     List<MessageItem> messages,
@@ -103,7 +107,10 @@ class ChatScrollCoordinator {
   ) {
     if (!scrollController.hasClients) return;
     _setMessages(messages, keysByMessageId);
-    _pinnedToBottom = _isPinnedToBottom();
+    _tailFollowEligible = _isTailFollowEligible();
+    _tailFollowAnchorSnapshot = _tailFollowEligible
+        ? _tailFollowAnchorSnapshotFromViewport()
+        : null;
   }
 
   void updateMessages(
@@ -158,6 +165,7 @@ class ChatScrollCoordinator {
     required bool reset,
     required bool isLatest,
     bool hasCenteredAnchor = false,
+    bool animateLatestReset = false,
     String? centerMessageId,
     String? traceTargetMessageId,
   }) {
@@ -165,7 +173,10 @@ class ChatScrollCoordinator {
     final animatedRestoreDirection = reset ? _animatedRestoreDirection : null;
     final animatedRestoreComplete = reset ? _animatedRestoreComplete : null;
     final animated =
-        reset && (animatedMessageId != null || _animateNextRestore);
+        reset &&
+        (animatedMessageId != null ||
+            _animateNextRestore ||
+            animateLatestReset);
     if (reset) {
       _animatedRestoreMessageId = null;
       _animatedRestoreDirection = null;
@@ -388,8 +399,13 @@ class ChatScrollCoordinator {
 
     if (scrollController.position.isScrollingNotifier.value) return;
 
-    if (_pinnedToBottom) {
-      unawaited(_jumpToBottom());
+    if (_tailFollowEligible) {
+      unawaited(
+        _jumpToBottom(
+          animated: true,
+          prepareAnimationStart: _restoreTailFollowAnimationStart,
+        ),
+      );
     }
   }
 
@@ -478,17 +494,23 @@ class ChatScrollCoordinator {
   Future<void> _jumpToBottom({
     bool animated = false,
     ChatScrollRestoreDirection? animationDirection,
-  }) => _jumpToClamped(
-    scrollController.position.maxScrollExtent,
-    animated: animated,
-    animationDirection: animated ? animationDirection : null,
-  );
+    VoidCallback? prepareAnimationStart,
+  }) {
+    _clearJumpButtonFreeze();
+    return _jumpToClamped(
+      scrollController.position.maxScrollExtent,
+      animated: animated,
+      animationDirection: animated ? animationDirection : null,
+      prepareAnimationStart: prepareAnimationStart,
+    );
+  }
 
   Future<void> _jumpToClamped(
     double value, {
     bool animated = false,
     bool stageDistant = true,
     ChatScrollRestoreDirection? animationDirection,
+    VoidCallback? prepareAnimationStart,
   }) {
     if (!scrollController.hasClients) return Future<void>.value();
     final position = scrollController.position;
@@ -504,65 +526,64 @@ class ChatScrollCoordinator {
       'distance=${formatDouble(target - position.pixels)} '
       '${formatScrollMetrics(position)}',
     );
-    if (animationDirection == null &&
-        (target - position.pixels).abs() <= _jumpToTolerance) {
-      if (animated) {
-        return _runProgrammaticScroll(
-          () => scrollController.animateTo(
-            target,
-            duration: _jumpAnimationDuration,
-            curve: _jumpAnimationCurve,
-          ),
-        );
+    if (!animated) {
+      if ((target - position.pixels).abs() <= _jumpToTolerance) {
+        return Future<void>.value();
       }
+      scrollController.jumpTo(target);
+      _scheduleViewportStateUpdate();
       return Future<void>.value();
     }
-    if (animated) {
-      return _runProgrammaticScroll(
-        () {
-          final maxAnimatedDistance = _maxAnimatedDistance(position);
-          if (maxAnimatedDistance <= 0) {
-            scrollController.jumpTo(target);
-            return Future<void>.value();
-          }
-          final distance = target - position.pixels;
-          if (animationDirection != null) {
-            _jumpToDirectionalAnimationStart(
-              target,
-              animationDirection,
-              position,
-            );
-            return scrollController.animateTo(
-              target,
-              duration: _jumpAnimationDuration,
-              curve: _jumpAnimationCurve,
-            );
-          }
-          if (stageDistant && distance.abs() > maxAnimatedDistance) {
-            final stagedTarget = target - maxAnimatedDistance * distance.sign;
-            traceChatJump(
-              'jump staged target=${formatDouble(stagedTarget)} '
-              'final=${formatDouble(target)} '
-              'maxAnimated=${formatDouble(maxAnimatedDistance)}',
-            );
-            scrollController.jumpTo(
-              stagedTarget.clamp(
-                position.minScrollExtent,
-                position.maxScrollExtent,
-              ),
-            );
-          }
+    return _runProgrammaticScroll(
+      () {
+        prepareAnimationStart?.call();
+        final position = scrollController.position;
+        final maxAnimatedDistance = _maxAnimatedDistance(position);
+        if (maxAnimatedDistance <= 0) {
+          scrollController.jumpTo(target);
+          return Future<void>.value();
+        }
+        final distance = target - position.pixels;
+        if (animationDirection == null && distance.abs() <= _jumpToTolerance) {
           return scrollController.animateTo(
             target,
             duration: _jumpAnimationDuration,
             curve: _jumpAnimationCurve,
           );
-        },
-      );
-    }
-    scrollController.jumpTo(target);
-    _scheduleViewportStateUpdate();
-    return Future<void>.value();
+        }
+        if (animationDirection != null) {
+          _jumpToDirectionalAnimationStart(
+            target,
+            animationDirection,
+            position,
+          );
+          return scrollController.animateTo(
+            target,
+            duration: _jumpAnimationDuration,
+            curve: _jumpAnimationCurve,
+          );
+        }
+        if (stageDistant && distance.abs() > maxAnimatedDistance) {
+          final stagedTarget = target - maxAnimatedDistance * distance.sign;
+          traceChatJump(
+            'jump staged target=${formatDouble(stagedTarget)} '
+            'final=${formatDouble(target)} '
+            'maxAnimated=${formatDouble(maxAnimatedDistance)}',
+          );
+          scrollController.jumpTo(
+            stagedTarget.clamp(
+              position.minScrollExtent,
+              position.maxScrollExtent,
+            ),
+          );
+        }
+        return scrollController.animateTo(
+          target,
+          duration: _jumpAnimationDuration,
+          curve: _jumpAnimationCurve,
+        );
+      },
+    );
   }
 
   Future<void> _runProgrammaticScroll(Future<void> Function() scroll) async {
@@ -630,11 +651,16 @@ class ChatScrollCoordinator {
     return math.min(viewportDimension * 0.75, maxAnimatedDistance);
   }
 
-  bool _isPinnedToBottom() {
-    if (!scrollController.hasClients) return true;
+  bool _isTailFollowEligible() => _distanceToBottom() <= _tailFollowThreshold;
+
+  bool _shouldShowJumpToLatest() =>
+      _distanceToBottom() > _showJumpToLatestThreshold;
+
+  double _distanceToBottom() {
+    if (!scrollController.hasClients) return 0;
     final position = scrollController.position;
-    if (!position.hasContentDimensions) return true;
-    return position.maxScrollExtent - position.pixels <= _jumpLatestThreshold;
+    if (!position.hasContentDimensions) return 0;
+    return math.max(0, position.maxScrollExtent - position.pixels);
   }
 
   String? _firstVisibleMessageId() {
@@ -651,6 +677,52 @@ class ChatScrollCoordinator {
     }
 
     return firstVisibleMessageId;
+  }
+
+  _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshotFromViewport() {
+    _TailFollowAnchorSnapshot? snapshot;
+    final viewportHeight = scrollController.position.viewportDimension;
+    for (final messageId in _currentRenderedMessageIds()) {
+      final geometry = _messageTargetGeometry(messageId, _keysByMessageId);
+      if (geometry == null ||
+          geometry.bottom <= 0 ||
+          geometry.top >= viewportHeight) {
+        continue;
+      }
+      if (snapshot == null || geometry.bottom > snapshot.bottom) {
+        snapshot = _TailFollowAnchorSnapshot(
+          messageId: messageId,
+          bottom: geometry.bottom,
+        );
+      }
+    }
+    return snapshot;
+  }
+
+  void _restoreTailFollowAnimationStart() {
+    final snapshot = _tailFollowAnchorSnapshot;
+    _tailFollowAnchorSnapshot = null;
+    if (snapshot == null || !scrollController.hasClients) return;
+    final geometry = _messageTargetGeometry(
+      snapshot.messageId,
+      _keysByMessageId,
+    );
+    if (geometry == null) return;
+
+    final delta = geometry.bottom - snapshot.bottom;
+    if (delta.abs() <= _jumpToTolerance) return;
+    final position = scrollController.position;
+    final start = (position.pixels + delta).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if ((start - position.pixels).abs() <= _jumpToTolerance) return;
+    traceChatJump(
+      'tail-follow start anchor=${shortMessageId(snapshot.messageId)} '
+      'delta=${formatDouble(delta)} start=${formatDouble(start)} '
+      '${formatScrollMetrics(position)}',
+    );
+    scrollController.jumpTo(start);
   }
 
   void _scheduleScrollPositionUpdate() {
@@ -674,9 +746,13 @@ class ChatScrollCoordinator {
 
   void _updateViewportState({bool updateVisibleDate = true}) {
     if (!scrollController.hasClients) return;
-    final nextShowJumpToLatest = !_isPinnedToBottom();
-    if (showJumpToLatest.value != nextShowJumpToLatest) {
-      showJumpToLatest.value = nextShowJumpToLatest;
+    if (_jumpButtonFrozenUpdates <= 0) {
+      final nextShowJumpToLatest = _shouldShowJumpToLatest();
+      if (showJumpToLatest.value != nextShowJumpToLatest) {
+        showJumpToLatest.value = nextShowJumpToLatest;
+      }
+    } else {
+      _jumpButtonFrozenUpdates--;
     }
 
     if (!updateVisibleDate) return;
@@ -693,6 +769,7 @@ class ChatScrollCoordinator {
     List<MessageItem> messages,
     Map<String, GlobalKey> keysByMessageId,
   ) {
+    final messageWindowChanged = !_hasSameMessageIds(messages);
     if (!identical(_messages, messages)) {
       _messages = messages;
       _messagesById = {
@@ -700,7 +777,28 @@ class ChatScrollCoordinator {
       };
       _renderedMessageIds.removeWhere((id) => !_messagesById.containsKey(id));
     }
+    if (messageWindowChanged) {
+      _freezeJumpButton();
+    }
     _keysByMessageId = keysByMessageId;
+  }
+
+  bool _hasSameMessageIds(List<MessageItem> messages) {
+    if (identical(_messages, messages)) return true;
+    if (_messages.length != messages.length) return false;
+    for (var i = 0; i < messages.length; i++) {
+      if (_messages[i].messageId != messages[i].messageId) return false;
+    }
+    return true;
+  }
+
+  void _freezeJumpButton() {
+    if (_disposed) return;
+    _jumpButtonFrozenUpdates = _jumpButtonFreezeUpdateCount;
+  }
+
+  void _clearJumpButtonFreeze() {
+    _jumpButtonFrozenUpdates = 0;
   }
 
   Iterable<String> _currentRenderedMessageIds() sync* {
@@ -776,6 +874,16 @@ class ChatScrollCoordinator {
       request.keysByMessageId,
     );
   }
+}
+
+class _TailFollowAnchorSnapshot {
+  const _TailFollowAnchorSnapshot({
+    required this.messageId,
+    required this.bottom,
+  });
+
+  final String messageId;
+  final double bottom;
 }
 
 class _MessageTargetGeometry {
