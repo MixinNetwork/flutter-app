@@ -73,6 +73,93 @@ void main() {
     },
   );
 
+  testWidgets('handleScrollNotification waits for user scroll after reset', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    var loadAfterCount = 0;
+
+    addTearDown(coordinator.dispose);
+    final context = await pumpNotificationContext(tester);
+    final metrics = FixedScrollMetrics(
+      minScrollExtent: 0,
+      maxScrollExtent: 5000,
+      pixels: 3500,
+      viewportDimension: 600,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: 1,
+    );
+
+    coordinator
+      ..scheduleRestore(
+        messages: const [],
+        keysByMessageId: const {},
+        reset: true,
+        isLatest: false,
+      )
+      ..handleScrollNotification(
+        ScrollUpdateNotification(
+          metrics: metrics,
+          context: context,
+          scrollDelta: 1,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      );
+
+    expect(loadAfterCount, 0);
+
+    coordinator
+      ..handleScrollNotification(
+        ScrollEndNotification(metrics: metrics, context: context),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      )
+      ..handleScrollNotification(
+        ScrollUpdateNotification(
+          metrics: metrics,
+          context: context,
+          scrollDelta: 1,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      );
+
+    expect(loadAfterCount, 0);
+
+    coordinator
+      ..handleScrollNotification(
+        UserScrollNotification(
+          metrics: metrics,
+          context: context,
+          direction: ScrollDirection.reverse,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      )
+      ..handleScrollNotification(
+        ScrollUpdateNotification(
+          metrics: metrics,
+          context: context,
+          scrollDelta: 1,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      );
+
+    expect(loadAfterCount, 1);
+  });
+
   testWidgets('scheduleRestore skips no-op jump after data loads', (
     tester,
   ) async {
@@ -104,6 +191,39 @@ void main() {
     await tester.pump();
 
     expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets('scheduleRestore resets centered windows before first paint', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(300);
+    await tester.pump();
+
+    coordinator.trackingScrollController.jumpCount = 0;
+    coordinator.trackingScrollController.jumpOffsets.clear();
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: false,
+      centerMessageId: messages[8].messageId,
+    );
+
+    expect(coordinator.trackingScrollController.jumpOffsets, isEmpty);
+    expect(coordinator.scrollController.offset, 0);
   });
 
   testWidgets(

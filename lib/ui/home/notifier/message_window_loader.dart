@@ -34,26 +34,43 @@ class MessageWindowLoader {
     required this.messagesByIds,
   });
 
-  factory MessageWindowLoader.fromDao(MessageDao messageDao) =>
-      MessageWindowLoader(
-        recentMessages: (conversationId, limit) =>
-            messageDao.messagesByConversationId(conversationId, limit).get(),
-        messageOrderInfo: messageDao.messageOrderInfo,
-        beforeMessages: (anchor, conversationId, limit) => messageDao
-            .beforeMessagesByConversationId(anchor, conversationId, limit)
-            .get(),
-        afterMessages: (anchor, conversationId, limit) => messageDao
-            .afterMessagesByConversationId(anchor, conversationId, limit)
-            .get(),
-        beforeMessageIds: (anchor, conversationId, limit) => messageDao
-            .beforeMessageIdsByConversationId(anchor, conversationId, limit)
-            .get(),
-        afterMessageIds: (anchor, conversationId, limit) => messageDao
-            .afterMessageIdsByConversationId(anchor, conversationId, limit)
-            .get(),
-        messagesByIds: (messageIds) =>
-            messageDao.messageItemByMessageIds(messageIds).get(),
-      );
+  factory MessageWindowLoader.fromDao(MessageDao messageDao) {
+    Future<List<MessageItem>> messagesByIds(List<String> ids) async {
+      if (ids.isEmpty) return const [];
+      final messages = await messageDao.messageItemByMessageIds(ids).get();
+      final messagesById = {
+        for (final message in messages) message.messageId: message,
+      };
+      return ids.map((id) => messagesById[id]).nonNulls.toList();
+    }
+
+    return MessageWindowLoader(
+      recentMessages: (conversationId, limit) =>
+          messageDao.messagesByConversationId(conversationId, limit).get(),
+      messageOrderInfo: messageDao.messageOrderInfo,
+      beforeMessages: (anchor, conversationId, limit) async {
+        final ids = await messageDao.beforeMessageIdsByConversationId(
+          anchor,
+          conversationId,
+          limit,
+        );
+        return messagesByIds(ids);
+      },
+      afterMessages: (anchor, conversationId, limit) async {
+        final ids = await messageDao.afterMessageIdsByConversationId(
+          anchor,
+          conversationId,
+          limit,
+        );
+        return messagesByIds(ids);
+      },
+      beforeMessageIds: (anchor, conversationId, limit) => messageDao
+          .beforeMessageIdsByConversationId(anchor, conversationId, limit),
+      afterMessageIds: (anchor, conversationId, limit) => messageDao
+          .afterMessageIdsByConversationId(anchor, conversationId, limit),
+      messagesByIds: messagesByIds,
+    );
+  }
 
   final RecentMessagesQuery recentMessages;
   final MessageOrderInfoQuery messageOrderInfo;
@@ -151,11 +168,24 @@ class MessageWindowLoader {
     }
 
     final halfLimit = limit ~/ 2;
+    trace?.call(
+      'query center order target=${shortMessageId(centerMessageId)} '
+      'createdAt=${info.createdAt} rowId=${info.rowId} half=$halfLimit',
+    );
     final bottomIdsFuture = afterMessageIds(info, conversationId, halfLimit);
     final topIdsFuture = beforeMessageIds(info, conversationId, halfLimit);
 
     final bottomIds = await bottomIdsFuture;
     final topIds = await topIdsFuture;
+    trace?.call(
+      'query center ids target=${shortMessageId(centerMessageId)} '
+      'top=${topIds.length} '
+      'topFirst=${shortMessageId(topIds.firstOrNull)} '
+      'topLast=${shortMessageId(topIds.lastOrNull)} '
+      'bottom=${bottomIds.length} '
+      'bottomFirst=${shortMessageId(bottomIds.firstOrNull)} '
+      'bottomLast=${shortMessageId(bottomIds.lastOrNull)}',
+    );
     final messageIds = [...topIds.reversed, centerMessageId, ...bottomIds];
     final messages = await messagesByIds(messageIds);
     final messagesById = {

@@ -21,4 +21,12 @@ void main() {
     expect(opened, isFalse);
     expect(notifier.state.entries, isEmpty);
   });
+
+  test('removing popped route clears navigation state', () {
+    final notifier = MajorNavigationNotifier()
+      ..openSetting(MajorNavigationDestination.editProfilePage)
+      ..remove(MajorNavigationDestination.editProfilePage);
+
+    expect(notifier.state.entries, isEmpty);
+  });
 }

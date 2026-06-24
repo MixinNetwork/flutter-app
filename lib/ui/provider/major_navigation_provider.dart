@@ -93,6 +93,10 @@ class MajorNavigationNotifier
     open(destination);
   }
 
+  void remove(MajorNavigationDestination destination) {
+    _removeWhere((entry) => entry.destination == destination);
+  }
+
   void open(MajorNavigationDestination destination, {Object? arguments}) {
     final entry = MajorNavigationEntry(destination, arguments: arguments);
     final entries = state.entries.toList();

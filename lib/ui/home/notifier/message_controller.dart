@@ -273,13 +273,18 @@ class MessageController extends ValueNotifier<MessageState> {
     final finalLimit = limit;
     final conversationId = conversationNotifier.state?.conversationId;
     if (conversationId == null) return;
+    final conversation = conversationNotifier.state?.conversation;
 
-    if (centerMessageId != null || forceLatest) {
-      traceChatJump(
-        'message init center=${shortMessageId(centerMessageId)} '
-        'forceLatest=$forceLatest limit=$finalLimit',
-      );
-    }
+    traceChatJump(
+      'message init '
+      'conv=${shortMessageId(conversationId)} '
+      'requestedCenter=${shortMessageId(centerMessageId)} '
+      'inputLastRead=${shortMessageId(lastReadMessageId)} '
+      'stateLastRead=${shortMessageId(state.lastReadMessageId)} '
+      'convLastRead=${shortMessageId(conversation?.lastReadMessageId)} '
+      'unseen=${conversation?.unseenMessageCount} '
+      'forceLatest=$forceLatest limit=$finalLimit',
+    );
 
     final messageState = await _resetMessageList(
       conversationId,
@@ -294,6 +299,12 @@ class MessageController extends ValueNotifier<MessageState> {
         refreshKey: Object(),
         lastReadMessageId: lastReadMessageId,
       ),
+    );
+    traceChatJump(
+      'message init loaded '
+      'conv=${shortMessageId(conversationId)} '
+      'lastRead=${shortMessageId(nextState.lastReadMessageId)} '
+      '${_formatWindow(nextState)}',
     );
     _emit(nextState);
   }
@@ -366,13 +377,14 @@ class MessageController extends ValueNotifier<MessageState> {
                   ? conversation?.lastReadMessageId
                   : null);
 
-    if (centerMessageId != null || forceLatest) {
-      traceChatJump(
-        'reset list requested=${shortMessageId(centerMessageId)} '
-        'resolved=${shortMessageId(_centerMessageId)} '
-        'forceLatest=$forceLatest unseen=${conversation?.unseenMessageCount}',
-      );
-    }
+    traceChatJump(
+      'reset list '
+      'conv=${shortMessageId(conversationId)} '
+      'requested=${shortMessageId(centerMessageId)} '
+      'resolved=${shortMessageId(_centerMessageId)} '
+      'convLastRead=${shortMessageId(conversation?.lastReadMessageId)} '
+      'forceLatest=$forceLatest unseen=${conversation?.unseenMessageCount}',
+    );
 
     final state = await _messagesByConversationId(
       conversationId,
@@ -547,4 +559,14 @@ class MessageController extends ValueNotifier<MessageState> {
     }
     return _messageState;
   }
+
+  String _formatWindow(MessageState state) =>
+      'top=${state.top.length} '
+      'topFirst=${shortMessageId(state.top.firstOrNull?.messageId)} '
+      'topLast=${shortMessageId(state.top.lastOrNull?.messageId)} '
+      'center=${shortMessageId(state.center?.messageId)} '
+      'bottom=${state.bottom.length} '
+      'bottomFirst=${shortMessageId(state.bottom.firstOrNull?.messageId)} '
+      'bottomLast=${shortMessageId(state.bottom.lastOrNull?.messageId)} '
+      'latest=${state.isLatest} oldest=${state.isOldest}';
 }

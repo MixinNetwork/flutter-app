@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../../db/mixin_database.dart' hide Offset;
 import 'chat_jump_trace.dart';
@@ -70,6 +71,8 @@ class ChatScrollCoordinator {
   static const _jumpAnimationCurve = Curves.easeOutCubic;
   static const _maxAnimatedJumpViewportCount = 3.0;
   static const _maxAnimatedJumpDistance = 800.0;
+  static const messageFocusAnchor = 0.3;
+  static const unreadSeparatorAnchor = 0.36;
   static const loadedJumpViewportCount = 2.0;
 
   final scrollController = ScrollController();
@@ -90,6 +93,7 @@ class ChatScrollCoordinator {
   bool _restoreScheduled = false;
   bool _viewportStateUpdateScheduled = false;
   bool _viewportStateUpdateIncludesVisibleDate = false;
+  bool _blockPreloadUntilUserScroll = false;
   bool _disposed = false;
   int _programmaticScrollDepth = 0;
 
@@ -153,7 +157,9 @@ class ChatScrollCoordinator {
     required Map<String, GlobalKey> keysByMessageId,
     required bool reset,
     required bool isLatest,
+    bool hasCenteredAnchor = false,
     String? centerMessageId,
+    String? traceTargetMessageId,
   }) {
     final animatedMessageId = reset ? _animatedRestoreMessageId : null;
     final animatedRestoreDirection = reset ? _animatedRestoreDirection : null;
@@ -165,6 +171,10 @@ class ChatScrollCoordinator {
       _animatedRestoreDirection = null;
       _animatedRestoreComplete = null;
       _animateNextRestore = false;
+      _blockPreloadUntilUserScroll = true;
+      if (!animated && (hasCenteredAnchor || centerMessageId != null)) {
+        _resetCenteredOffsetBeforePaint();
+      }
     }
     _setMessages(messages, keysByMessageId);
     _restoreRequest = _ChatRestoreRequest(
@@ -177,6 +187,7 @@ class ChatScrollCoordinator {
       animatedRestoreDirection: animatedRestoreDirection,
       animatedRestoreComplete: animatedRestoreComplete,
       animated: animated,
+      traceTargetMessageId: traceTargetMessageId,
     );
     if (_restoreScheduled) return;
     _restoreScheduled = true;
@@ -191,6 +202,16 @@ class ChatScrollCoordinator {
     });
   }
 
+  void _resetCenteredOffsetBeforePaint() {
+    if (!scrollController.hasClients) return;
+    if (scrollController.offset.abs() <= _jumpToTolerance) return;
+    traceChatJump(
+      'restore prepaint-zero '
+      '${formatScrollMetrics(scrollController.position)}',
+    );
+    scrollController.position.correctPixels(0);
+  }
+
   bool handleScrollNotification(
     ScrollNotification notification, {
     required List<MessageItem> messages,
@@ -202,6 +223,7 @@ class ChatScrollCoordinator {
     _scheduleViewportStateUpdate(
       updateVisibleDate: notification is ScrollEndNotification,
     );
+    _unlockPreloadOnUserScrollIntent(notification);
     if (notification is! ScrollUpdateNotification) return false;
     if (_programmaticScrollDepth > 0) {
       traceChatJump(
@@ -213,22 +235,63 @@ class ChatScrollCoordinator {
     }
     final scrollDelta = notification.scrollDelta;
     if (scrollDelta == null || scrollDelta == 0) return false;
+    if (_blockPreloadUntilUserScroll) {
+      if (notification.dragDetails == null) {
+        traceChatJump(
+          'preload blocked delta=${formatDouble(scrollDelta)} '
+          '${formatScrollMetrics(notification.metrics)}',
+        );
+        return false;
+      }
+      traceChatJump(
+        'preload unblocked by drag update '
+        '${formatScrollMetrics(notification.metrics)}',
+      );
+      _blockPreloadUntilUserScroll = false;
+    }
 
     final threshold =
         notification.metrics.viewportDimension * _preloadViewportCount;
     if (scrollDelta > 0) {
       if (notification.metrics.maxScrollExtent - notification.metrics.pixels <=
           threshold) {
+        traceChatJump(
+          'preload after delta=${formatDouble(scrollDelta)} '
+          'threshold=${formatDouble(threshold)} '
+          '${formatScrollMetrics(notification.metrics)}',
+        );
         loadAfter();
       }
     } else {
       if ((notification.metrics.minScrollExtent - notification.metrics.pixels)
               .abs() <=
           threshold) {
+        traceChatJump(
+          'preload before delta=${formatDouble(scrollDelta)} '
+          'threshold=${formatDouble(threshold)} '
+          '${formatScrollMetrics(notification.metrics)}',
+        );
         loadBefore();
       }
     }
     return false;
+  }
+
+  void _unlockPreloadOnUserScrollIntent(ScrollNotification notification) {
+    if (!_blockPreloadUntilUserScroll || _programmaticScrollDepth > 0) return;
+    if (notification is UserScrollNotification &&
+        notification.direction != ScrollDirection.idle) {
+      traceChatJump(
+        'preload unblocked by user direction=${notification.direction}',
+      );
+      _blockPreloadUntilUserScroll = false;
+      return;
+    }
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      traceChatJump('preload unblocked by drag start');
+      _blockPreloadUntilUserScroll = false;
+    }
   }
 
   Future<void> scrollToBottom({bool animated = false}) {
@@ -288,6 +351,7 @@ class ChatScrollCoordinator {
     traceChatJump(
       'restore reset=${request.reset} latest=${request.isLatest} '
       'center=${shortMessageId(request.centerMessageId)} '
+      'traceTarget=${shortMessageId(request.traceTargetMessageId)} '
       'animated=${request.animated} '
       'animatedMessage=${shortMessageId(request.animatedMessageId)} '
       'messages=${request.messages.length} '
@@ -310,6 +374,14 @@ class ChatScrollCoordinator {
             animated: request.animated,
             animationDirection: request.animatedRestoreDirection,
           ),
+        );
+      }
+      final traceTargetMessageId = request.traceTargetMessageId;
+      if (traceTargetMessageId != null) {
+        _traceTargetAfterLayout(
+          'restore-anchor-after',
+          traceTargetMessageId,
+          request.keysByMessageId,
         );
       }
       return;
@@ -377,7 +449,7 @@ class ChatScrollCoordinator {
     final target =
         scrollController.offset +
         top -
-        scrollController.position.viewportDimension * 0.3;
+        scrollController.position.viewportDimension * messageFocusAnchor;
     return _MessageTargetGeometry(
       target: target,
       top: top,
@@ -663,10 +735,21 @@ class ChatScrollCoordinator {
     void trace(String step) {
       if (_disposed || !scrollController.hasClients) return;
       final geometry = _messageTargetGeometry(messageId, keysByMessageId);
+      final viewportDimension = scrollController.position.viewportDimension;
+      final focusY = viewportDimension * messageFocusAnchor;
+      final unreadY = viewportDimension * unreadSeparatorAnchor;
       traceChatJump(
         '$phase $step target=${shortMessageId(messageId)} '
         'rendered=${geometry != null} '
         '${geometry?.format() ?? ''} '
+        'focusY=${formatDouble(focusY)} '
+        'topDelta=${formatDouble(
+          geometry == null ? null : geometry.top - focusY,
+        )} '
+        'unreadY=${formatDouble(unreadY)} '
+        'bottomDelta=${formatDouble(
+          geometry == null ? null : geometry.bottom - unreadY,
+        )} '
         '${formatScrollMetrics(scrollController.position)}',
       );
     }
@@ -715,6 +798,7 @@ class _ChatRestoreRequest {
     this.animatedMessageId,
     this.animatedRestoreDirection,
     this.animatedRestoreComplete,
+    this.traceTargetMessageId,
   });
 
   final List<MessageItem> messages;
@@ -726,4 +810,5 @@ class _ChatRestoreRequest {
   final String? animatedMessageId;
   final ChatScrollRestoreDirection? animatedRestoreDirection;
   final VoidCallback? animatedRestoreComplete;
+  final String? traceTargetMessageId;
 }

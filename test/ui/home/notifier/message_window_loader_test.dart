@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/native.dart';
 import 'package:flutter_app/db/dao/message_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/notifier/message_controller.dart';
@@ -125,6 +126,51 @@ void main() {
         targetMessageId: 'newer',
       ),
       MessageWindowDirection.newer,
+    );
+  });
+
+  test('message id range queries keep same-timestamp rowid ordering', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+
+    final createdAt = DateTime(2026);
+    Future<void> insert(String id, DateTime time) => database
+        .into(database.messages)
+        .insert(
+          Message(
+            messageId: id,
+            conversationId: 'conversation',
+            userId: 'user',
+            category: 'PLAIN_TEXT',
+            status: MessageStatus.read,
+            createdAt: time,
+          ),
+        );
+
+    await insert('older', createdAt.subtract(const Duration(milliseconds: 1)));
+    await insert('same-before', createdAt);
+    await insert('anchor', createdAt);
+    await insert('same-after', createdAt);
+    await insert('newer', createdAt.add(const Duration(milliseconds: 1)));
+
+    final anchor = await database.messageDao.messageOrderInfo('anchor');
+    expect(anchor, isNotNull);
+
+    expect(
+      await database.messageDao.beforeMessageIdsByConversationId(
+        anchor!,
+        'conversation',
+        2,
+      ),
+      ['same-before', 'older'],
+    );
+    expect(
+      await database.messageDao.afterMessageIdsByConversationId(
+        anchor,
+        'conversation',
+        2,
+      ),
+      ['same-after', 'newer'],
     );
   });
 }

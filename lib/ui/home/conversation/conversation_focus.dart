@@ -12,6 +12,7 @@ import '../../../widgets/toast.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/is_bot_group_provider.dart';
 import '../../provider/recent_conversation_provider.dart';
+import '../chat/chat_jump_trace.dart';
 import '../conversation_info_destination.dart';
 import '../notifier/conversation_list_controller.dart';
 
@@ -87,6 +88,17 @@ class ConversationFocus {
     lastReadMessageId =
         lastReadMessageId ??
         (selectedHasUnreadMessage ? selectedInitIndexMessageId : null);
+
+    traceChatJump(
+      'focus conversation '
+      'conv=${shortMessageId(conversationId)} '
+      'explicitInit=${shortMessageId(initIndexMessageId)} '
+      'selectedInit=${shortMessageId(selectedInitIndexMessageId)} '
+      'lastRead=${shortMessageId(lastReadMessageId)} '
+      'convLastRead=${shortMessageId(selectedConversation.lastReadMessageId)} '
+      'unseen=${selectedConversation.unseenMessageCount} '
+      'same=${state?.conversationId == conversationId}',
+    );
 
     final ownerId = selectedConversation.ownerId;
 

@@ -51,7 +51,15 @@ class MajorNavigator extends HookConsumerWidget {
                         rightEmptyPage.name,
                       },
                     ),
-                    onDidRemovePage: (page) {},
+                    onDidRemovePage: (page) {
+                      final key = page.key;
+                      if (key is! ValueKey<MajorNavigationDestination>) {
+                        return;
+                      }
+                      ref
+                          .read(majorNavigationProvider.notifier)
+                          .remove(key.value);
+                    },
                     pages: [
                       if (routeMode) leftPage,
                       if (!routeMode && state.entries.isEmpty) rightEmptyPage,

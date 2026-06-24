@@ -67,6 +67,7 @@ class MessageItemWidget extends HookConsumerWidget {
     this.isTranscriptPage = false,
     this.blink = true,
     this.isPinnedPage = false,
+    this.showUnreadBar = true,
     this.dateTimeKey,
     this.isGroupOrBotGroupConversation,
     this.enableShowAvatar,
@@ -80,6 +81,7 @@ class MessageItemWidget extends HookConsumerWidget {
   final bool isTranscriptPage;
   final bool blink;
   final bool isPinnedPage;
+  final bool showUnreadBar;
   final Key? dateTimeKey;
   final bool? isGroupOrBotGroupConversation;
   final bool? enableShowAvatar;
@@ -181,8 +183,10 @@ class MessageItemWidget extends HookConsumerWidget {
             );
           },
         ),
-        if (message.messageId == lastReadMessageId && row.next != null)
-          const _UnreadMessageBar(),
+        if (showUnreadBar &&
+            message.messageId == lastReadMessageId &&
+            row.next != null)
+          const UnreadMessageBar(),
       ],
     );
 
@@ -337,8 +341,8 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   }
 }
 
-class _UnreadMessageBar extends StatelessWidget {
-  const _UnreadMessageBar();
+class UnreadMessageBar extends StatelessWidget {
+  const UnreadMessageBar({super.key});
 
   @override
   Widget build(BuildContext context) => Container(
