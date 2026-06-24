@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../provider/chat_navigation_intent_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/message_selection_provider.dart';
@@ -176,7 +177,9 @@ class ChatContainer extends HookConsumerWidget {
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
     final latestJumpRequestKey = ref.watch(
-      conversationProvider.select((value) => value?.latestJumpRequestKey),
+      chatNavigationIntentProvider.select(
+        (value) => value.latestJumpRequestKey,
+      ),
     );
 
     useEffect(() {

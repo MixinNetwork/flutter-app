@@ -16,6 +16,7 @@ import '../../utils/rivepod.dart';
 import '../home/conversation_info_destination.dart';
 import '../home/notifier/subscriber_mixin.dart';
 import 'account_server_provider.dart';
+import 'chat_navigation_intent_provider.dart';
 import 'major_navigation_provider.dart';
 
 class ConversationState extends Equatable {
@@ -31,7 +32,6 @@ class ConversationState extends Equatable {
     this.participant,
     this.initialSidePage,
     this.keyword,
-    this.latestJumpRequestKey,
   });
 
   final String conversationId;
@@ -46,7 +46,6 @@ class ConversationState extends Equatable {
 
   final ConversationInfoDestination? initialSidePage;
   final String? keyword;
-  final Object? latestJumpRequestKey;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -92,7 +91,6 @@ class ConversationState extends Equatable {
     initialSidePage,
     participant,
     keyword,
-    latestJumpRequestKey,
   ];
 
   ConversationState copyWith({
@@ -107,7 +105,6 @@ class ConversationState extends Equatable {
     Object? refreshKey,
     ConversationInfoDestination? initialSidePage,
     String? keyword,
-    Object? latestJumpRequestKey,
   }) => ConversationState(
     conversationId: conversationId ?? this.conversationId,
     userId: userId ?? this.userId,
@@ -120,7 +117,6 @@ class ConversationState extends Equatable {
     initialSidePage: initialSidePage ?? this.initialSidePage,
     participant: participant ?? this.participant,
     keyword: keyword ?? this.keyword,
-    latestJumpRequestKey: latestJumpRequestKey ?? this.latestJumpRequestKey,
   );
 }
 
@@ -139,7 +135,9 @@ class ConversationStateNotifier
   ConversationStateNotifier({
     required AccountServer accountServer,
     required MajorNavigationNotifier majorNavigationNotifier,
+    required ChatNavigationIntentNotifier chatNavigationIntentNotifier,
   }) : _majorNavigationNotifier = majorNavigationNotifier,
+       _chatNavigationIntentNotifier = chatNavigationIntentNotifier,
        _accountServer = accountServer,
        super(null) {
     addSubscription(
@@ -225,6 +223,7 @@ class ConversationStateNotifier
 
   final AccountServer _accountServer;
   final MajorNavigationNotifier _majorNavigationNotifier;
+  final ChatNavigationIntentNotifier _chatNavigationIntentNotifier;
   late final Database _database = _accountServer.database;
   late final String _currentUserId = _accountServer.userId;
 
@@ -251,7 +250,7 @@ class ConversationStateNotifier
   }
 
   void requestLatestJump() {
-    state = state?.copyWith(latestJumpRequestKey: Object());
+    _chatNavigationIntentNotifier.requestLatestJump();
     openChatPage();
   }
 
@@ -284,6 +283,9 @@ final conversationProvider =
       final majorNavigationNotifier = ref.watch(
         majorNavigationProvider.notifier,
       );
+      final chatNavigationIntentNotifier = ref.watch(
+        chatNavigationIntentProvider.notifier,
+      );
 
       ref
         ..listen(accountServerProvider, (previous, next) => keepAlive.close())
@@ -295,6 +297,7 @@ final conversationProvider =
       return ConversationStateNotifier(
         accountServer: accountServerAsync.requireValue,
         majorNavigationNotifier: majorNavigationNotifier,
+        chatNavigationIntentNotifier: chatNavigationIntentNotifier,
       );
     });
 

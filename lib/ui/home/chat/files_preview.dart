@@ -44,9 +44,9 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/mixin_image.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
+import 'chat_send_outcome.dart';
 import 'image_caption_input.dart';
 import 'image_editor.dart';
-import 'message_jump.dart';
 
 part 'files_preview_model.dart';
 
@@ -56,7 +56,7 @@ Future<void> showFilesPreviewDialog(
 ) async {
   void jumpToLatestAfterSend() {
     if (!context.mounted) return;
-    unawaited(context.jumpToLatestInChat());
+    context.completeOutgoingChatSend();
   }
 
   await showMixinDialog(
@@ -148,7 +148,6 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             ),
           );
         }
-        quoteMessageNotifier.state = null;
         onFileSent();
         Navigator.pop(context);
       } else {
@@ -166,7 +165,6 @@ class _FilesPreviewDialog extends HookConsumerWidget {
             compress: false,
           ),
         );
-        quoteMessageNotifier.state = null;
         onFileSent();
         Navigator.pop(context);
       }

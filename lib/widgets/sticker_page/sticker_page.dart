@@ -9,7 +9,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../account/account_key_value.dart';
 import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
-import '../../db/database_event_bus.dart';
+import '../../core/read_model/sticker_read_model.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../utils/extension/extension.dart';
@@ -33,6 +33,7 @@ class StickerPage extends StatelessWidget {
     required this.tabController,
     required this.presetStickerGroups,
     required this.stickerAlbums,
+    required this.readModel,
     this.onStickerSent,
     super.key,
   });
@@ -41,6 +42,7 @@ class StickerPage extends StatelessWidget {
   final int tabLength;
   final List<PresetStickerGroup> presetStickerGroups;
   final List<StickerAlbum> stickerAlbums;
+  final StickerReadModel readModel;
   final VoidCallback? onStickerSent;
 
   @override
@@ -78,27 +80,13 @@ class StickerPage extends StatelessWidget {
                         );
                       case PresetStickerGroup.recent:
                         return _StickerAlbumPage(
-                          getStickers: () => context.database.stickerDao
-                              .recentUsedStickers()
-                              .watchWithStream(
-                                eventStreams: [
-                                  DataBaseEventBus.instance.updateStickerStream,
-                                ],
-                                duration: kVerySlowThrottleDuration,
-                              ),
+                          getStickers: readModel.recentUsedStickers,
                           updateUsedAt: false,
                           onStickerSent: onStickerSent,
                         );
                       case PresetStickerGroup.favorite:
                         return _StickerAlbumPage(
-                          getStickers: () => context.database.stickerDao
-                              .personalStickers()
-                              .watchWithStream(
-                                eventStreams: [
-                                  DataBaseEventBus.instance.updateStickerStream,
-                                ],
-                                duration: kVerySlowThrottleDuration,
-                              ),
+                          getStickers: readModel.personalStickers,
                           delete: (sticker) {
                             final ctx = Navigator.of(context).context;
                             showToastLoading(context: ctx);
@@ -130,17 +118,7 @@ class StickerPage extends StatelessWidget {
                       final albumId =
                           stickerAlbums[index - presetStickerGroups.length]
                               .albumId;
-                      return context.database.stickerDao
-                          .stickerByAlbumId(albumId)
-                          .watchWithStream(
-                            eventStreams: [
-                              DataBaseEventBus.instance
-                                  .watchUpdateStickerStream(
-                                    albumIds: [albumId],
-                                  ),
-                            ],
-                            duration: kVerySlowThrottleDuration,
-                          );
+                      return readModel.albumStickers(albumId);
                     },
                   );
                 }),

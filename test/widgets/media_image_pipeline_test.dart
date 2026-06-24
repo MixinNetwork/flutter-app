@@ -37,6 +37,35 @@ void main() {
     );
   });
 
+  test('resolves network image provider only when pipeline is needed', () {
+    const png = NetworkImage('https://example.com/a.png');
+    expect(
+      resolveMediaImageProvider(image: png, proxyConfig: null),
+      same(png),
+    );
+
+    expect(
+      resolveMediaImageProvider(
+        image: const NetworkImage('https://example.com/a.gif'),
+        proxyConfig: null,
+      ),
+      isA<ProxyNetworkImage>(),
+    );
+
+    expect(
+      resolveMediaImageProvider(
+        image: const NetworkImage('https://example.com/a.png'),
+        proxyConfig: ProxyConfig(
+          type: ProxyType.http,
+          host: '127.0.0.1',
+          port: 8080,
+          id: 'test',
+        ),
+      ),
+      isA<ProxyNetworkImage>(),
+    );
+  });
+
   testWidgets('skips file images with empty paths', (tester) async {
     await tester.pumpWidget(
       Directionality(

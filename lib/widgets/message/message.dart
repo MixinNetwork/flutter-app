@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key;
 import 'package:super_context_menu/super_context_menu.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -30,6 +29,7 @@ import 'message_content.dart';
 import 'message_context.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
+import 'message_presentation.dart';
 import 'message_rows.dart';
 import 'message_style.dart';
 
@@ -112,35 +112,27 @@ class MessageItemWidget extends HookConsumerWidget {
         this.row ??
         MessageRowModel(message: this.message, prev: prev, next: next);
     final message = row.message;
-    final isCurrentUser = message.relationship == UserRelationship.me;
 
     final isGroupOrBotGroupConversation =
         this.isGroupOrBotGroupConversation ??
-        (message.conversionCategory == ConversationCategory.group ||
-            message.userId != message.conversationOwnerId ||
-            ref.watch(isBotGroupProvider(message.conversationId)));
+        resolveGroupOrBotGroupConversation(
+          message: message,
+          isBotGroupConversation: ref.watch(
+            isBotGroupProvider(message.conversationId),
+          ),
+        );
 
     final enableShowAvatar =
         this.enableShowAvatar ??
         ref.watch(settingProvider.select((value) => value.messageShowAvatar));
-    final showAvatar =
-        isGroupOrBotGroupConversation && enableShowAvatar == true;
-
-    final showNip =
-        !(row.sameUserNext && row.sameDayNext) &&
-        (!showAvatar || isCurrentUser);
+    final presentation = MessagePresentation.fromRow(
+      row: row,
+      isGroupOrBotGroupConversation: isGroupOrBotGroupConversation,
+      enableShowAvatar: enableShowAvatar == true,
+      canShowUnreadBar: showUnreadBar,
+      lastReadMessageId: lastReadMessageId,
+    );
     final datetime = row.dateTime;
-    String? userName;
-    String? userId;
-    String? userAvatarUrl;
-
-    if (isGroupOrBotGroupConversation &&
-        !isCurrentUser &&
-        (!row.sameUserPrev || !row.sameDayPrev)) {
-      userName = message.userFullName;
-      userId = message.userId;
-      userAvatarUrl = message.avatarUrl;
-    }
 
     final showedMenu = useState(false);
     final focusNode = useFocusScopeNode(
@@ -174,11 +166,11 @@ class MessageItemWidget extends HookConsumerWidget {
             return _MessageSelectionWrapper(
               message: message,
               child: _MessageBubbleMargin(
-                userName: userName,
-                userId: userId,
-                userAvatarUrl: userAvatarUrl,
-                showAvatar: showAvatar,
-                isCurrentUser: isCurrentUser,
+                userName: presentation.userName,
+                userId: presentation.userId,
+                userAvatarUrl: presentation.userAvatarUrl,
+                showAvatar: presentation.showAvatar,
+                isCurrentUser: presentation.isCurrentUser,
                 pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                 isBot: message.isBot,
                 isVerified: message.isVerified,
@@ -197,10 +189,7 @@ class MessageItemWidget extends HookConsumerWidget {
             );
           },
         ),
-        if (showUnreadBar &&
-            message.messageId == lastReadMessageId &&
-            row.next != null)
-          const UnreadMessageBar(),
+        if (presentation.showUnreadBar) const UnreadMessageBar(),
       ],
     );
 
@@ -223,8 +212,8 @@ class MessageItemWidget extends HookConsumerWidget {
       child: MessageContext(
         isTranscriptPage: isTranscriptPage,
         isPinnedPage: isPinnedPage,
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
+        showNip: presentation.showNip,
+        isCurrentUser: presentation.isCurrentUser,
         message: message,
         highlightEnabled: blink,
         menuHighlighted: showedMenu.value,

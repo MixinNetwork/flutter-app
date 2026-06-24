@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import '../utils/image.dart';
 import '../utils/proxy.dart';
 
+typedef PlaceholderWidgetBuilder = Widget Function();
+
 final _checkedImageFiles = <String>{};
 
 bool shouldUseMediaImagePipeline(
@@ -20,6 +22,83 @@ bool shouldUseMediaImagePipeline(
 bool isLikelyGifUrl(String url) {
   final path = Uri.tryParse(url)?.path ?? url.split('?').first;
   return path.toLowerCase().endsWith('.gif');
+}
+
+ImageProvider resolveMediaImageProvider({
+  required ImageProvider image,
+  required ProxyConfig? proxyConfig,
+  bool normalizeGif = false,
+}) {
+  if (image is NetworkImage &&
+      shouldUseMediaImagePipeline(
+        image.url,
+        proxyConfig,
+        normalizeGif: normalizeGif,
+      )) {
+    return ProxyNetworkImage(
+      image.url,
+      scale: image.scale,
+      proxyConfig: proxyConfig,
+    );
+  }
+  return image;
+}
+
+class MediaImagePipeline extends StatelessWidget {
+  const MediaImagePipeline({
+    required this.image,
+    super.key,
+    this.proxyConfig,
+    this.placeholder,
+    this.errorBuilder,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+    this.isAntiAlias = false,
+    this.normalizeGif = false,
+  });
+
+  final ImageProvider image;
+  final ProxyConfig? proxyConfig;
+  final PlaceholderWidgetBuilder? placeholder;
+  final ImageErrorWidgetBuilder? errorBuilder;
+  final double? width;
+  final double? height;
+  final BoxFit? fit;
+  final bool isAntiAlias;
+  final bool normalizeGif;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedImage = resolveMediaImageProvider(
+      image: image,
+      proxyConfig: proxyConfig,
+      normalizeGif: normalizeGif,
+    );
+
+    Widget fallback() =>
+        placeholder?.call() ?? SizedBox(width: width, height: height);
+
+    Widget imageView() => Image(
+      image: resolvedImage,
+      width: width,
+      height: height,
+      fit: fit,
+      isAntiAlias: isAntiAlias,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded || frame != null) return child;
+        return fallback();
+      },
+      errorBuilder: (context, error, stackTrace) =>
+          errorBuilder?.call(context, error, stackTrace) ?? fallback(),
+    );
+
+    return NormalizedGifImageGate(
+      image: resolvedImage,
+      placeholder: fallback,
+      childBuilder: imageView,
+    );
+  }
 }
 
 @immutable

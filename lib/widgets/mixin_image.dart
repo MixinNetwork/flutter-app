@@ -6,8 +6,6 @@ import 'package:flutter/widgets.dart';
 import '../utils/extension/extension.dart';
 import 'media_image_pipeline.dart';
 
-typedef PlaceholderWidgetBuilder = Widget Function();
-
 class MixinImage extends StatelessWidget {
   const MixinImage({
     required this.image,
@@ -79,48 +77,15 @@ class MixinImage extends StatelessWidget {
   final bool normalizeGif;
 
   @override
-  Widget build(BuildContext context) {
-    final resolvedImage = _resolveImage(context);
-
-    Widget fallback() =>
-        placeholder?.call() ?? SizedBox(width: width, height: height);
-
-    Widget imageView() => Image(
-      image: resolvedImage,
-      width: width,
-      height: height,
-      fit: fit,
-      isAntiAlias: isAntiAlias,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded || frame != null) return child;
-        return fallback();
-      },
-      errorBuilder: (context, error, stackTrace) =>
-          errorBuilder?.call(context, error, stackTrace) ?? fallback(),
-    );
-
-    return NormalizedGifImageGate(
-      image: resolvedImage,
-      placeholder: fallback,
-      childBuilder: imageView,
-    );
-  }
-
-  ImageProvider _resolveImage(BuildContext context) {
-    final image = this.image;
-    final proxyConfig = context.database.settingProperties.activatedProxy;
-    if (image is NetworkImage &&
-        shouldUseMediaImagePipeline(
-          image.url,
-          proxyConfig,
-          normalizeGif: normalizeGif,
-        )) {
-      return ProxyNetworkImage(
-        image.url,
-        scale: image.scale,
-        proxyConfig: proxyConfig,
-      );
-    }
-    return image;
-  }
+  Widget build(BuildContext context) => MediaImagePipeline(
+    image: image,
+    proxyConfig: context.database.settingProperties.activatedProxy,
+    placeholder: placeholder,
+    errorBuilder: errorBuilder,
+    width: width,
+    height: height,
+    fit: fit,
+    isAntiAlias: isAntiAlias,
+    normalizeGif: normalizeGif,
+  );
 }

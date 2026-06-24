@@ -20,7 +20,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
-import '../../../db/database_event_bus.dart';
+import '../../../core/read_model/sticker_read_model.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
@@ -46,8 +46,8 @@ import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
 import '../notifier/chat_side_notifier.dart';
+import 'chat_send_outcome.dart';
 import 'files_preview.dart';
-import 'message_jump.dart';
 import 'voice_recorder_bottom_bar.dart';
 
 part 'input_highlight_controller.dart';
@@ -393,9 +393,8 @@ void _sendTextMessage(
     );
   }
 
-  unawaited(context.jumpToLatestInChat());
   textEditingController.clear();
-  context.providerContainer.read(quoteMessageProvider.notifier).state = null;
+  context.completeOutgoingChatSend();
 }
 
 class _SendTextField extends HookConsumerWidget {
@@ -660,8 +659,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                   recipientId: conversationState.userId,
                   quoteMessageId: quoteMessage.state?.messageId,
                 );
-                unawaited(context.jumpToLatestInChat());
-                quoteMessage.state = null;
+                context.completeOutgoingChatSend();
               });
             },
           ),
@@ -781,15 +779,17 @@ class _StickerButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
+    final stickerReadModel = useMemoized(
+      () => StickerReadModel(
+        stickerDao: context.database.stickerDao,
+        stickerAlbumDao: context.database.stickerAlbumDao,
+      ),
+      [context.database],
+    );
 
     final stickerAlbums =
         useMemoizedStream(
-          () => context.database.stickerAlbumDao
-              .systemAddedAlbums()
-              .watchWithStream(
-                eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-                duration: kVerySlowThrottleDuration,
-              ),
+          stickerReadModel.systemAddedAlbums,
           initialData: const <StickerAlbum>[],
         ).data ??
         const <StickerAlbum>[];
@@ -849,7 +849,8 @@ class _StickerButton extends HookConsumerWidget {
                 tabLength: tabLength,
                 presetStickerGroups: presetStickerGroups,
                 stickerAlbums: stickerAlbums,
-                onStickerSent: () => unawaited(context.jumpToLatestInChat()),
+                readModel: stickerReadModel,
+                onStickerSent: context.completeOutgoingChatSend,
               ),
             ),
           ),

@@ -14,6 +14,7 @@ import '../../provider/setting_provider.dart';
 import '../notifier/message_controller.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
+import 'chat_timeline_window.dart';
 
 @visibleForTesting
 void syncMessageGlobalKeys(
@@ -45,38 +46,17 @@ class ChatHistoryViewport extends HookConsumerWidget {
     final messageController = context.read<MessageController>();
     final scrollCoordinator = context.read<ChatScrollCoordinator>();
     final state = useValueListenable(messageController);
+    final timelineWindow = ChatTimelineWindow(state);
 
     final key = ValueKey((state.conversationId, state.refreshKey));
-    final top = state.top;
-    final center = state.center;
-    final bottom = state.bottom;
-    final messages = state.list;
-    final anchorUnreadSeparator =
-        center != null &&
-        center.messageId == state.lastReadMessageId &&
-        bottom.isNotEmpty;
+    final messages = timelineWindow.messages;
+    final rows = timelineWindow.rows;
     final conversationId = state.conversationId;
     final isBotGroupConversation =
         conversationId != null && ref.watch(isBotGroupProvider(conversationId));
     final enableShowAvatar = ref.watch(
       settingProvider.select((value) => value.messageShowAvatar),
     );
-    final rows = useMemoized(
-      () {
-        final centerMessage = center;
-        final renderTop = anchorUnreadSeparator && centerMessage != null
-            ? [...top, centerMessage]
-            : top;
-        final renderCenter = anchorUnreadSeparator ? null : centerMessage;
-        return MessageRows.from(
-          top: renderTop,
-          center: renderCenter,
-          bottom: bottom,
-        );
-      },
-      [top, center, bottom, anchorUnreadSeparator],
-    );
-
     final messageKeysRef = useRef<Map<String, GlobalKey>>({});
     final dayTimeKeysRef = useRef<Map<String, GlobalKey>>({});
     final previousConversationIdRef = useRef<String?>(null);
@@ -88,12 +68,10 @@ class ChatHistoryViewport extends HookConsumerWidget {
 
     final messageIds = messages.map((e) => e.messageId).toSet();
     final messageIdsKey = messages.map((e) => e.messageId).join('|');
-    final resetScrollWindow =
-        previousConversationIdRef.value != state.conversationId ||
-        previousRefreshKeyRef.value != state.refreshKey;
-    final resetCurrentConversation =
-        previousConversationIdRef.value == state.conversationId &&
-        previousRefreshKeyRef.value != state.refreshKey;
+    final resetScrollWindow = timelineWindow.resetScrollWindow(
+      previousConversationId: previousConversationIdRef.value,
+      previousRefreshKey: previousRefreshKeyRef.value,
+    );
 
     useEffect(() {
       scrollCoordinator.viewportKey = viewportKey;
@@ -121,7 +99,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
     Widget buildMessage(MessageRowModel row) {
       final message = row.message;
       final showUnreadBar =
-          !anchorUnreadSeparator ||
+          !timelineWindow.anchorUnreadSeparator ||
           message.messageId != state.lastReadMessageId;
       return ChatRenderedMessage(
         coordinator: scrollCoordinator,
@@ -146,18 +124,15 @@ class ChatHistoryViewport extends HookConsumerWidget {
 
     useEffect(
       () {
-        final restoreAnchor = anchorUnreadSeparator
-            ? ChatScrollCoordinator.unreadSeparatorAnchor
-            : ChatScrollCoordinator.messageFocusAnchor;
         traceChatJump(
           'viewport restore-input '
           'conv=${shortMessageId(state.conversationId)} '
           'reset=$resetScrollWindow '
-          'unreadAnchor=$anchorUnreadSeparator '
-          'anchor=${formatDouble(restoreAnchor)} '
+          'unreadAnchor=${timelineWindow.anchorUnreadSeparator} '
+          'anchor=${formatDouble(timelineWindow.scrollAnchor)} '
           'lastRead=${shortMessageId(state.lastReadMessageId)} '
-          'center=${shortMessageId(center?.messageId)} '
-          'top=${top.length} bottom=${bottom.length} '
+          'center=${shortMessageId(state.center?.messageId)} '
+          'top=${state.top.length} bottom=${state.bottom.length} '
           'messages=${messages.length} latest=${state.isLatest}',
         );
         scrollCoordinator.scheduleRestore(
@@ -165,14 +140,13 @@ class ChatHistoryViewport extends HookConsumerWidget {
           keysByMessageId: messageKeysRef.value,
           reset: resetScrollWindow,
           isLatest: state.isLatest,
-          hasCenteredAnchor: anchorUnreadSeparator,
-          animateLatestReset:
-              resetCurrentConversation &&
-              state.isLatest &&
-              center == null &&
-              !anchorUnreadSeparator,
-          centerMessageId: anchorUnreadSeparator ? null : center?.messageId,
-          traceTargetMessageId: center?.messageId ?? state.lastReadMessageId,
+          hasCenteredAnchor: timelineWindow.anchorUnreadSeparator,
+          animateLatestReset: timelineWindow.animateLatestReset(
+            previousConversationId: previousConversationIdRef.value,
+            previousRefreshKey: previousRefreshKeyRef.value,
+          ),
+          centerMessageId: timelineWindow.restoreCenterMessageId,
+          traceTargetMessageId: timelineWindow.traceTargetMessageId,
         );
         previousConversationIdRef.value = state.conversationId;
         previousRefreshKeyRef.value = state.refreshKey;
@@ -203,9 +177,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
           key: viewportKey,
           center: key,
           controller: scrollCoordinator.scrollController,
-          anchor: anchorUnreadSeparator
-              ? ChatScrollCoordinator.unreadSeparatorAnchor
-              : ChatScrollCoordinator.messageFocusAnchor,
+          anchor: timelineWindow.scrollAnchor,
           physics: const ClampingScrollPhysics(),
           scrollCacheExtent: const ScrollCacheExtent.viewport(
             ChatScrollCoordinator.loadedJumpViewportCount,
@@ -222,7 +194,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
               key: key,
               child: Builder(
                 builder: (context) {
-                  if (anchorUnreadSeparator) {
+                  if (timelineWindow.anchorUnreadSeparator) {
                     return const UnreadMessageBar();
                   }
                   final row = rows.center;
@@ -235,7 +207,7 @@ class ChatHistoryViewport extends HookConsumerWidget {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final row = rows.bottom[index];
                 return buildMessage(row);
-              }, childCount: bottom.length),
+              }, childCount: rows.bottom.length),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 10)),
           ],

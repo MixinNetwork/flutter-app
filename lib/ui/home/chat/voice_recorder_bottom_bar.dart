@@ -21,7 +21,7 @@ import '../../../widgets/toast.dart';
 import '../../../widgets/waveform_widget.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
-import 'message_jump.dart';
+import 'chat_send_outcome.dart';
 
 part 'voice_recorder_state.dart';
 
@@ -330,7 +330,6 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
               if (conversationItem == null) return;
 
               final quoteMessageId = ref.read(quoteMessageIdProvider);
-              ref.read(quoteMessageProvider.notifier).state = null;
               await accountServer.sendAudioMessage(
                 audioFile.xFile,
                 result.duration,
@@ -340,7 +339,7 @@ class VoiceRecorderBottomBar extends HookConsumerWidget {
                 recipientId: conversationItem.userId,
                 quoteMessageId: quoteMessageId,
               );
-              unawaited(context.jumpToLatestInChat());
+              context.completeOutgoingChatSend();
             },
           ),
         ],
