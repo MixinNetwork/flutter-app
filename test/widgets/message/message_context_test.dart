@@ -10,6 +10,8 @@ import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
+import 'package:flutter_app/widgets/message/item/action/action_data.dart';
+import 'package:flutter_app/widgets/message/item/action/action_message.dart';
 import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:flutter_app/widgets/message/item/text/selectable.dart'
     as message_selectable;
@@ -154,14 +156,7 @@ void main() {
     );
     await tester.pump();
 
-    final highlightPainters = tester
-        .widgetList<CustomPaint>(find.byType(CustomPaint))
-        .where(
-          (paint) =>
-              paint.foregroundPainter.runtimeType.toString() ==
-              '_MessageBubbleHighlightPainter',
-        )
-        .toList();
+    final highlightPainters = _highlightPainters(tester);
     final opacity = messageHighlightOpacityForTesting(
       tester.element(find.byType(MessageBubble)),
       currentUser: true,
@@ -173,6 +168,63 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     notifier.dispose();
+  });
+
+  testWidgets(
+    'showBubble false wrapper does not blink without a bubble surface',
+    (
+      tester,
+    ) async {
+      final notifier = BlinkNotifier(tester)..blinkByMessageId('1');
+
+      await tester.pumpWidget(
+        _MessageTestScope(
+          blinkNotifier: notifier,
+          child: MessageContext.fromMessageItem(
+            message: testMessage('1'),
+            child: const MessageBubble(
+              showBubble: false,
+              padding: EdgeInsets.zero,
+              child: SizedBox(width: 80, height: 20),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final highlightPainters = _highlightPainters(tester);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      notifier.dispose();
+
+      expect(highlightPainters, isEmpty);
+    },
+  );
+
+  testWidgets('action buttons blink their bubble surface', (tester) async {
+    final notifier = BlinkNotifier(tester)..blinkByMessageId('1');
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: notifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: Center(
+            child: ActionMessageButton(
+              action: ActionData('Open', '#000000', 'https://example.com'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final highlightPainters = _highlightPainters(tester);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    notifier.dispose();
+
+    expect(highlightPainters, hasLength(1));
   });
 
   testWidgets('double tapping a message starts a quote reply', (tester) async {
@@ -542,6 +594,15 @@ String _richTextPlainText(WidgetTester tester) => tester
     )
     .map((widget) => widget.text.toPlainText())
     .join('\n');
+
+List<CustomPaint> _highlightPainters(WidgetTester tester) => tester
+    .widgetList<CustomPaint>(find.byType(CustomPaint))
+    .where(
+      (paint) =>
+          paint.foregroundPainter.runtimeType.toString() ==
+          '_MessageBubbleHighlightPainter',
+    )
+    .toList();
 
 MessageItem testMessage(
   String id, {

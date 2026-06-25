@@ -74,9 +74,11 @@ class _Bubble extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final isCurrentUser = useIsCurrentUser();
+    final highlightEnabled = useMessageHighlightEnabled();
+    final menuHighlighted = useMessageMenuHighlighted();
     final clipper = BubbleClipper(currentUser: isCurrentUser, showNip: true);
     final bubbleColor = context.messageBubbleColor(isCurrentUser);
-    return CustomPaint(
+    Widget bubble = CustomPaint(
       painter: BubblePainter(color: bubbleColor, clipper: clipper),
       child: ClipPath(
         clipper: clipper,
@@ -86,6 +88,18 @@ class _Bubble extends HookWidget {
         ),
       ),
     );
+    if (highlightEnabled || menuHighlighted) {
+      bubble = MessageBubbleHighlight(
+        messageId: context.message.messageId,
+        enabled: highlightEnabled,
+        clipper: clipper,
+        currentUser: isCurrentUser,
+        media: false,
+        menuHighlighted: menuHighlighted,
+        child: bubble,
+      );
+    }
+    return bubble;
   }
 }
 

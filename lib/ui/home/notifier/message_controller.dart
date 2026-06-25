@@ -615,9 +615,19 @@ class MessageController extends ValueNotifier<MessageState> {
       return;
     }
 
+    traceChatScroll(
+      'insert current conv=${shortMessageId(conversationId)} '
+      'incoming=${list.length} '
+      'ids=${list.map((e) => shortMessageId(e.messageId)).join(',')} '
+      'stateLatest=${state.isLatest} '
+      'stateBottom=${shortMessageId(state.bottomMessage?.messageId)}',
+    );
     final result = _insertOrReplace(conversationId, list);
     if (result != null) {
+      traceChatScroll('insert emit ${_formatWindow(result)}');
       _emit(_pretreatment(result));
+    } else {
+      traceChatScroll('insert reload-latest requested');
     }
   }
 

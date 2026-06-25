@@ -55,7 +55,7 @@ class ActionMessage extends HookConsumerWidget {
   }
 }
 
-class ActionMessageButton extends ConsumerWidget {
+class ActionMessageButton extends HookConsumerWidget {
   const ActionMessageButton({required this.action, super.key});
 
   final ActionData action;
@@ -67,6 +67,68 @@ class ActionMessageButton extends ConsumerWidget {
       showNip: false,
       nipPadding: false,
     );
+    final highlightEnabled = useMessageHighlightEnabled();
+    final menuHighlighted = useMessageMenuHighlighted();
+    Widget button = CustomPaint(
+      painter: BubblePainter(
+        color: context.theme.primary,
+        clipper: bubbleClipper,
+      ),
+      child: IntrinsicWidth(
+        child: Stack(
+          fit: StackFit.passthrough,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              child: Text(
+                action.label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: context.messageStyle.secondaryFontSize,
+                  color: colorHex(action.color) ?? Colors.black,
+                  height: 1,
+                ),
+              ),
+            ),
+            if (action.isSendUserLink)
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesLinkSendSvg,
+                    width: 8,
+                    height: 8,
+                  ),
+                ),
+              )
+            else if (action.isExternalLink)
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesExternalLinkSvg,
+                    width: 6,
+                    height: 6,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (highlightEnabled || menuHighlighted) {
+      button = MessageBubbleHighlight(
+        messageId: context.message.messageId,
+        enabled: highlightEnabled,
+        clipper: bubbleClipper,
+        currentUser: false,
+        media: true,
+        menuHighlighted: menuHighlighted,
+        child: button,
+      );
+    }
     return InteractiveDecoratedBox.color(
       cursor: SystemMouseCursors.click,
       onTap: () {
@@ -78,58 +140,7 @@ class ActionMessageButton extends ConsumerWidget {
           conversationId: ref.read(currentConversationIdProvider),
         );
       },
-      child: CustomPaint(
-        painter: BubblePainter(
-          color: context.theme.primary,
-          clipper: bubbleClipper,
-        ),
-        child: IntrinsicWidth(
-          child: Stack(
-            fit: StackFit.passthrough,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                child: Text(
-                  action.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: context.messageStyle.secondaryFontSize,
-                    color: colorHex(action.color) ?? Colors.black,
-                    height: 1,
-                  ),
-                ),
-              ),
-              if (action.isSendUserLink)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesLinkSendSvg,
-                      width: 8,
-                      height: 8,
-                    ),
-                  ),
-                )
-              else if (action.isExternalLink)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesExternalLinkSvg,
-                      width: 6,
-                      height: 6,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+      child: button,
     );
   }
 }

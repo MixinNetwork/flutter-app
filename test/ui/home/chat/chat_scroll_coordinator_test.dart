@@ -603,7 +603,7 @@ void main() {
   });
 
   testWidgets(
-    'scheduleRestore restores tail-follow start in centered viewports',
+    'scheduleRestore animates tail-follow without jump notifications',
     (tester) async {
       final coordinator = TrackingChatScrollCoordinator();
       final centerKey = GlobalKey();
@@ -647,7 +647,8 @@ void main() {
         ..animateCount = 0
         ..jumpCount = 0
         ..jumpOffsets.clear()
-        ..animateOffsets.clear();
+        ..animateOffsets.clear()
+        ..animationCompleter = Completer<void>();
       coordinator.scheduleRestore(
         messages: nextMessages,
         keysByMessageId: keysByMessageId,
@@ -657,9 +658,9 @@ void main() {
       await tester.pump();
 
       expect(coordinator.trackingScrollController.animateCount, 1);
-      expect(coordinator.trackingScrollController.jumpCount, 1);
+      expect(coordinator.trackingScrollController.jumpCount, 0);
       expect(
-        coordinator.trackingScrollController.jumpOffsets.single,
+        coordinator.scrollController.offset,
         lessThan(coordinator.trackingScrollController.animateOffsets.single),
       );
     },
