@@ -1,6 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
@@ -10,6 +11,9 @@ import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
 import 'package:flutter_app/widgets/message/item/quote_message.dart';
+import 'package:flutter_app/widgets/message/item/text/selectable.dart'
+    as message_selectable;
+import 'package:flutter_app/widgets/message/item/text/text_message.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_app/widgets/message/message_action_policy.dart';
 import 'package:flutter_app/widgets/message/message_bubble.dart';
@@ -195,6 +199,210 @@ void main() {
     await tester.tap(find.byType(MessageQuickReplyDetector));
     await tester.pump(const Duration(milliseconds: 50));
     await tester.tap(find.byType(MessageQuickReplyDetector));
+    await tester.pump();
+
+    expect(container.read(quoteMessageProvider)?.messageId, '1');
+
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
+  testWidgets('double tapping tappable bubble content starts a quote reply', (
+    tester,
+  ) async {
+    const bodyKey = ValueKey('tappable-body');
+    final blinkNotifier = BlinkNotifier(tester);
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: MessageQuickReplyDetector(
+            child: MessageBubble(
+              child: GestureDetector(
+                key: bodyKey,
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: const SizedBox(width: 80, height: 20),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MessageQuickReplyDetector)),
+    );
+    expect(container.read(quoteMessageProvider), isNull);
+
+    await tester.tap(find.byKey(bodyKey));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.byKey(bodyKey));
+    await tester.pump();
+
+    expect(container.read(quoteMessageProvider)?.messageId, '1');
+
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
+  testWidgets('double tapping selectable text does not start a quote reply', (
+    tester,
+  ) async {
+    final blinkNotifier = BlinkNotifier(tester);
+    final selectedText = ValueNotifier<String?>(null);
+    final focusNode = FocusNode(debugLabel: 'test_selection_focus');
+    addTearDown(focusNode.dispose);
+    addTearDown(selectedText.dispose);
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: MessageQuickReplyDetector(
+            child: MessageBubble(
+              child: message_selectable.SelectableRegion(
+                focusNode: focusNode,
+                selectionControls: desktopTextSelectionHandleControls,
+                contextMenuBuilder: (context, state) => const SizedBox(),
+                onSelectionChanged: (content) =>
+                    selectedText.value = content?.plainText,
+                child: const CustomText('hello world'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MessageQuickReplyDetector)),
+    );
+
+    final text = find.byWidgetPredicate(
+      (widget) =>
+          widget is RichText && widget.text.toPlainText() == 'hello world',
+    );
+
+    final firstWordPosition =
+        tester.getRect(text).centerLeft + const Offset(12, 0);
+
+    await tester.tapAt(firstWordPosition, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(firstWordPosition, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+
+    expect(container.read(quoteMessageProvider), isNull);
+    expect(selectedText.value, 'hello');
+
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
+  testWidgets('double tapping outside selectable text starts a quote reply', (
+    tester,
+  ) async {
+    const outsideTextKey = ValueKey('outside-selectable-text');
+    final blinkNotifier = BlinkNotifier(tester);
+    final focusNode = FocusNode(debugLabel: 'test_selection_focus');
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: MessageQuickReplyDetector(
+            child: MessageBubble(
+              child: MessageSelectionArea(
+                focusNode: focusNode,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomText('hello world'),
+                    SizedBox(
+                      key: outsideTextKey,
+                      width: 48,
+                      height: 24,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MessageQuickReplyDetector)),
+    );
+    expect(container.read(quoteMessageProvider), isNull);
+
+    final outsideTextPosition = tester.getCenter(find.byKey(outsideTextKey));
+
+    await tester.tapAt(outsideTextPosition, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(outsideTextPosition, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+
+    expect(container.read(quoteMessageProvider)?.messageId, '1');
+
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
+  testWidgets('double tapping selectable line end starts a quote reply', (
+    tester,
+  ) async {
+    final blinkNotifier = BlinkNotifier(tester);
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: const MessageQuickReplyDetector(
+            child: MessageBubble(
+              child: MessageSelectionArea(
+                child: SizedBox(
+                  width: 240,
+                  child: CustomText('first line\nx'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MessageQuickReplyDetector)),
+    );
+    final text = find.byWidgetPredicate(
+      (widget) =>
+          widget is RichText && widget.text.toPlainText() == 'first line\nx',
+    );
+    final textRect = tester.getRect(text);
+    final secondLineEnd = Offset(
+      textRect.right - 8,
+      textRect.top + textRect.height * 0.75,
+    );
+
+    await tester.tapAt(secondLineEnd, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(secondLineEnd, kind: PointerDeviceKind.mouse);
     await tester.pump();
 
     expect(container.read(quoteMessageProvider)?.messageId, '1');

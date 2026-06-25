@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
@@ -54,7 +56,7 @@ void _quickReply(BuildContext context) {
 }
 
 @visibleForTesting
-class MessageQuickReplyDetector extends StatelessWidget {
+class MessageQuickReplyDetector extends HookWidget {
   const MessageQuickReplyDetector({
     required this.child,
     super.key,
@@ -63,11 +65,79 @@ class MessageQuickReplyDetector extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    behavior: HitTestBehavior.translucent,
-    onDoubleTap: () => _quickReply(context),
-    child: child,
-  );
+  Widget build(BuildContext context) {
+    final lastPrimaryDownTime = useRef<Duration?>(null);
+    final lastPrimaryDownPosition = useRef<Offset?>(null);
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) {
+        if ((event.buttons & kPrimaryButton) == 0 ||
+            _hitsSelectableText(context, event.position)) {
+          lastPrimaryDownTime.value = null;
+          lastPrimaryDownPosition.value = null;
+          return;
+        }
+
+        final previousTime = lastPrimaryDownTime.value;
+        final previousPosition = lastPrimaryDownPosition.value;
+        lastPrimaryDownTime.value = event.timeStamp;
+        lastPrimaryDownPosition.value = event.position;
+        if (previousTime == null || previousPosition == null) return;
+
+        final withinTimeout =
+            event.timeStamp - previousTime <= kDoubleTapTimeout;
+        final withinSlop =
+            (event.position - previousPosition).distance <= kDoubleTapSlop;
+        if (!withinTimeout || !withinSlop) return;
+
+        lastPrimaryDownTime.value = null;
+        lastPrimaryDownPosition.value = null;
+        _quickReply(context);
+      },
+      child: child,
+    );
+  }
+}
+
+bool _hitsSelectableText(BuildContext context, Offset globalPosition) {
+  var hit = false;
+
+  void visit(Element element) {
+    if (hit) return;
+    final renderObject = element.renderObject;
+    if (renderObject is RenderParagraph &&
+        renderObject.registrar != null &&
+        renderObject.attached &&
+        _paragraphHitsText(renderObject, globalPosition)) {
+      hit = true;
+      return;
+    }
+    element.visitChildren(visit);
+  }
+
+  context.visitChildElements(visit);
+  return hit;
+}
+
+bool _paragraphHitsText(RenderParagraph paragraph, Offset globalPosition) {
+  final localPosition = paragraph.globalToLocal(globalPosition);
+  if (!paragraph.paintBounds.contains(localPosition)) return false;
+
+  final text = paragraph.text.toPlainText(includeSemanticsLabels: false);
+  if (text.isEmpty) return false;
+
+  final offset = paragraph.getPositionForOffset(localPosition).offset;
+  for (final index in {offset, offset - 1}) {
+    if (index < 0 || index >= text.length) continue;
+    if (text.substring(index, index + 1).trim().isEmpty) continue;
+
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: index, extentOffset: index + 1),
+    );
+    if (boxes.any((box) => box.toRect().contains(localPosition))) return true;
+  }
+  return false;
 }
 
 class MessageItemWidget extends HookConsumerWidget {
