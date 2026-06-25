@@ -101,6 +101,16 @@ final class RestoreMessageWindowAnchor extends MessageWindowAnchor {
   List<Object?> get props => [messageId, offset];
 }
 
+@visibleForTesting
+String? resolveMessageWindowLastReadMessageId({
+  required String? requestedLastReadMessageId,
+  required int? unseenMessageCount,
+  required String? conversationLastReadMessageId,
+}) {
+  if (requestedLastReadMessageId != null) return requestedLastReadMessageId;
+  return (unseenMessageCount ?? 0) > 0 ? conversationLastReadMessageId : null;
+}
+
 class MessageState extends Equatable {
   MessageState({
     this.top = const [],
@@ -371,10 +381,11 @@ class MessageController extends ValueNotifier<MessageState> {
           requestedCenterMessageId: centerMessageId,
           forceLatest: forceLatest,
         );
-    final resolvedLastReadMessageId =
-        lastReadMessageId ??
-        conversation?.lastReadMessageId ??
-        state.lastReadMessageId;
+    final resolvedLastReadMessageId = resolveMessageWindowLastReadMessageId(
+      requestedLastReadMessageId: lastReadMessageId,
+      unseenMessageCount: conversation?.unseenMessageCount,
+      conversationLastReadMessageId: conversation?.lastReadMessageId,
+    );
 
     traceChatJump(
       'message init '
@@ -575,7 +586,6 @@ class MessageController extends ValueNotifier<MessageState> {
       }
 
       final currentUserSent = item.relationship == UserRelationship.me;
-
       if (state.isLatest) {
         if (center?.createdAt.isBefore(item.createdAt) ?? true) {
           bottom = [...bottom, item]
