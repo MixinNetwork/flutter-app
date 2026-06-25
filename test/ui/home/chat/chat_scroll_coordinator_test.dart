@@ -551,6 +551,57 @@ void main() {
     expect(coordinator.trackingScrollController.jumpCount, 0);
   });
 
+  testWidgets('latest request follows new bottom during animation', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final nextMessages = [...messages, testMessage(100)];
+    final keysByMessageId = {
+      for (final message in nextMessages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 120,
+    );
+    await tester.pump();
+    coordinator.captureViewportState(messages, keysByMessageId);
+
+    unawaited(coordinator.scrollToBottomIfInLoadedWindow(animated: true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      coordinator.scrollController.position.isScrollingNotifier.value,
+      true,
+    );
+
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      nextMessages,
+      keysByMessageId,
+    );
+    coordinator.scheduleRestore(
+      messages: nextMessages,
+      keysByMessageId: keysByMessageId,
+      reset: false,
+      isLatest: true,
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      coordinator.scrollController.offset,
+      coordinator.scrollController.position.maxScrollExtent,
+    );
+  });
+
   testWidgets(
     'scheduleRestore restores tail-follow start in centered viewports',
     (tester) async {

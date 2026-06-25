@@ -99,7 +99,9 @@ class ChatScrollCoordinator {
   bool _blockPreloadUntilUserScroll = false;
   bool _disposed = false;
   int _programmaticScrollDepth = 0;
+  int _programmaticBottomScrollDepth = 0;
   int _jumpButtonFrozenUpdates = 0;
+  bool _followTailAfterProgrammaticScroll = false;
 
   void captureViewportState(
     List<MessageItem> messages,
@@ -397,7 +399,12 @@ class ChatScrollCoordinator {
       return;
     }
 
-    if (scrollController.position.isScrollingNotifier.value) return;
+    if (scrollController.position.isScrollingNotifier.value) {
+      if (_programmaticBottomScrollDepth > 0 && request.isLatest) {
+        _followTailAfterProgrammaticScroll = true;
+      }
+      return;
+    }
 
     if (_tailFollowEligible) {
       unawaited(
@@ -495,14 +502,19 @@ class ChatScrollCoordinator {
     bool animated = false,
     ChatScrollRestoreDirection? animationDirection,
     VoidCallback? prepareAnimationStart,
-  }) {
+  }) async {
     _clearJumpButtonFreeze();
-    return _jumpToClamped(
-      scrollController.position.maxScrollExtent,
-      animated: animated,
-      animationDirection: animated ? animationDirection : null,
-      prepareAnimationStart: prepareAnimationStart,
-    );
+    _programmaticBottomScrollDepth++;
+    try {
+      await _jumpToClamped(
+        scrollController.position.maxScrollExtent,
+        animated: animated,
+        animationDirection: animated ? animationDirection : null,
+        prepareAnimationStart: prepareAnimationStart,
+      );
+    } finally {
+      _programmaticBottomScrollDepth--;
+    }
   }
 
   Future<void> _jumpToClamped(
@@ -596,6 +608,16 @@ class ChatScrollCoordinator {
         traceChatJump(
           'jump done ${formatScrollMetrics(scrollController.position)}',
         );
+        if (_programmaticScrollDepth == 0 &&
+            _followTailAfterProgrammaticScroll) {
+          _followTailAfterProgrammaticScroll = false;
+          unawaited(
+            _jumpToBottom(
+              animated: true,
+              prepareAnimationStart: _restoreTailFollowAnimationStart,
+            ),
+          );
+        }
       }
       _scheduleViewportStateUpdate();
     }
