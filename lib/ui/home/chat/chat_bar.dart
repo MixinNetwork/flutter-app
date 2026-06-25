@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -5,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/web_view/web_view_interface.dart';
 import '../../../widgets/action_button.dart';
@@ -15,11 +16,11 @@ import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/message_selection_provider.dart';
-import '../../provider/responsive_navigator_provider.dart';
-import 'chat_page.dart';
+import '../conversation_info_destination.dart';
+import '../desktop_shell_layout.dart';
+import '../notifier/chat_side_notifier.dart';
 
 class ChatBar extends HookConsumerWidget {
   const ChatBar({super.key});
@@ -27,15 +28,10 @@ class ChatBar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final actionColor = context.theme.icon;
-    final chatSideCubit = context.read<ChatSideCubit>();
-
-    final chatSideRouteMode =
-        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
-          bloc: chatSideCubit,
-          converter: (state) => state.routeMode,
-        );
-
-    final routeMode = ref.watch(navigatorRouteModeProvider);
+    final chatSideNotifier = context.read<ChatSideNotifier>();
+    useValueListenable(chatSideNotifier);
+    final chatSideRouteMode = DesktopShellLayout.chatSideRouteModeOf(context);
+    final routeMode = DesktopShellLayout.mainRouteModeOf(context);
 
     final conversation = ref.watch(conversationProvider);
 
@@ -51,7 +47,7 @@ class ChatBar extends HookConsumerWidget {
           if (inMultiSelectMode) {
             return;
           }
-          chatSideCubit.toggleInfoPage();
+          chatSideNotifier.toggleInfoPage();
         },
         onLongPress: longPressToShareLog
             ? (details) {
@@ -142,12 +138,9 @@ class ChatBar extends HookConsumerWidget {
               name: Resources.assetsImagesIcSearchSvg,
               color: actionColor,
               onTap: () {
-                final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.lastOrNull?.name ==
-                    ChatSideCubit.searchMessageHistory) {
-                  return cubit.pop();
-                }
-                cubit.replace(ChatSideCubit.searchMessageHistory);
+                context.read<ChatSideNotifier>().toggleDestination(
+                  ConversationInfoDestination.searchMessageHistory,
+                );
               },
             ),
           ),
@@ -160,7 +153,7 @@ class ChatBar extends HookConsumerWidget {
                   : ActionButton(
                       name: Resources.assetsImagesIcScreenSvg,
                       color: actionColor,
-                      onTap: chatSideCubit.toggleInfoPage,
+                      onTap: chatSideNotifier.toggleInfoPage,
                     ),
             ),
           ),

@@ -3,9 +3,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../provider/conversation_provider.dart';
-import '../../provider/pending_jump_message_provider.dart';
-import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/unseen_conversations_provider.dart';
+import '../desktop_shell_layout.dart';
+import 'conversation_focus.dart';
 import 'conversation_list.dart';
 import 'menu_wrapper.dart';
 import 'search_list.dart';
@@ -19,7 +19,9 @@ class UnseenConversationList extends HookConsumerWidget {
 
     final currentConversationId = ref.watch(currentConversationIdProvider);
 
-    final routeMode = ref.watch(navigatorRouteModeProvider);
+    final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
+      context,
+    );
 
     if (unseenConversations == null) {
       return const SizedBox();
@@ -30,8 +32,8 @@ class UnseenConversationList extends HookConsumerWidget {
     return ScrollablePositionedList.builder(
       itemBuilder: (context, index) {
         final conversation = unseenConversations[index];
-        final selected =
-            conversation.conversationId == currentConversationId && !routeMode;
+        final current = conversation.conversationId == currentConversationId;
+        final selected = current && showsConversationSelection;
         return ConversationMenuWrapper(
           conversation: conversation,
           removeChatFromCircle: true,
@@ -39,11 +41,7 @@ class UnseenConversationList extends HookConsumerWidget {
             conversation: conversation,
             selected: selected,
             onTap: () {
-              if (selected) {
-                ref.read(pendingJumpLatestProvider.notifier).state = Object();
-                return;
-              }
-              ConversationStateNotifier.selectConversation(
+              ConversationFocus.selectConversation(
                 context,
                 conversation.conversationId,
                 conversation: conversation,

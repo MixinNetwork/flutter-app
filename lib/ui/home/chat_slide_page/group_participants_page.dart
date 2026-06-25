@@ -22,6 +22,7 @@ import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
+import '../conversation/conversation_focus.dart';
 import 'group_invite/group_invite_dialog.dart';
 
 /// The participants of group.
@@ -257,7 +258,7 @@ class _ParticipantMenuEntry extends HookConsumerWidget {
                 participant.fullName ?? '?',
               ),
               callback: () {
-                ConversationStateNotifier.selectUser(
+                ConversationFocus.selectUser(
                   context,
                   participant.userId,
                 );

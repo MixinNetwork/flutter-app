@@ -73,6 +73,93 @@ void main() {
     },
   );
 
+  testWidgets('handleScrollNotification waits for user scroll after reset', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    var loadAfterCount = 0;
+
+    addTearDown(coordinator.dispose);
+    final context = await pumpNotificationContext(tester);
+    final metrics = FixedScrollMetrics(
+      minScrollExtent: 0,
+      maxScrollExtent: 5000,
+      pixels: 3500,
+      viewportDimension: 600,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: 1,
+    );
+
+    coordinator
+      ..scheduleRestore(
+        messages: const [],
+        keysByMessageId: const {},
+        reset: true,
+        isLatest: false,
+      )
+      ..handleScrollNotification(
+        ScrollUpdateNotification(
+          metrics: metrics,
+          context: context,
+          scrollDelta: 1,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      );
+
+    expect(loadAfterCount, 0);
+
+    coordinator
+      ..handleScrollNotification(
+        ScrollEndNotification(metrics: metrics, context: context),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      )
+      ..handleScrollNotification(
+        ScrollUpdateNotification(
+          metrics: metrics,
+          context: context,
+          scrollDelta: 1,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      );
+
+    expect(loadAfterCount, 0);
+
+    coordinator
+      ..handleScrollNotification(
+        UserScrollNotification(
+          metrics: metrics,
+          context: context,
+          direction: ScrollDirection.reverse,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      )
+      ..handleScrollNotification(
+        ScrollUpdateNotification(
+          metrics: metrics,
+          context: context,
+          scrollDelta: 1,
+        ),
+        messages: const [],
+        keysByMessageId: const {},
+        loadBefore: () {},
+        loadAfter: () => loadAfterCount++,
+      );
+
+    expect(loadAfterCount, 1);
+  });
+
   testWidgets('scheduleRestore skips no-op jump after data loads', (
     tester,
   ) async {
@@ -104,6 +191,76 @@ void main() {
     await tester.pump();
 
     expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets('scheduleRestore resets centered windows before first paint', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(300);
+    await tester.pump();
+
+    coordinator.trackingScrollController.jumpCount = 0;
+    coordinator.trackingScrollController.jumpOffsets.clear();
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: false,
+      centerMessageId: messages[8].messageId,
+    );
+
+    expect(coordinator.trackingScrollController.jumpOffsets, isEmpty);
+    expect(coordinator.scrollController.offset, 0);
+  });
+
+  testWidgets('scheduleRestore keeps centered unread anchors off bottom jump', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(300);
+    await tester.pump();
+
+    coordinator.trackingScrollController
+      ..jumpCount = 0
+      ..jumpOffsets.clear();
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: true,
+      hasCenteredAnchor: true,
+      traceTargetMessageId: messages[8].messageId,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.jumpCount, 0);
+    expect(coordinator.trackingScrollController.jumpOffsets, isEmpty);
+    expect(coordinator.scrollController.offset, 0);
   });
 
   testWidgets(
@@ -181,6 +338,84 @@ void main() {
 
     expect(coordinator.visibleDateTime.value, testMessage(500).createdAt);
     expect(keysByMessageId.lookupCount, lessThan(50));
+  });
+
+  testWidgets('scroll updates do not resolve visible date geometry', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(1000, testMessage);
+    final keysByMessageId = CountingKeyMap({
+      for (final message in messages)
+        message.messageId: MessageGlobalKey(message.messageId),
+    });
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+      cacheExtent: 0,
+    );
+    coordinator.scrollController.jumpTo(80.0 * 500);
+    await tester.pump();
+
+    keysByMessageId.lookupCount = 0;
+    coordinator.handleScrollNotification(
+      ScrollUpdateNotification(
+        metrics: FixedScrollMetrics(
+          minScrollExtent: 0,
+          maxScrollExtent: 80000,
+          pixels: 80.0 * 500,
+          viewportDimension: 240,
+          axisDirection: AxisDirection.down,
+          devicePixelRatio: 1,
+        ),
+        context: tester.element(find.byType(CustomScrollView)),
+        scrollDelta: 10,
+      ),
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      loadBefore: () {},
+      loadAfter: () {},
+    );
+    await tester.pump();
+
+    expect(keysByMessageId.lookupCount, 0);
+  });
+
+  testWidgets('jump-to-latest button uses wider threshold than tail follow', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages)
+        message.messageId: MessageGlobalKey(message.messageId),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.updateMessages(messages, keysByMessageId);
+    await tester.pump();
+
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 60,
+    );
+    await tester.pump();
+    expect(coordinator.showJumpToLatest.value, false);
+
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 120,
+    );
+    await tester.pump();
+    expect(coordinator.showJumpToLatest.value, true);
   });
 
   testWidgets('scheduleRestore does not jump while user is scrolling', (
@@ -272,6 +507,195 @@ void main() {
     expect(coordinator.trackingScrollController.jumpCount, 0);
   });
 
+  testWidgets('scheduleRestore animates tail-follow message appends', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final nextMessages = [...messages, testMessage(100)];
+    final keysByMessageId = {
+      for (final message in nextMessages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent,
+    );
+    await tester.pump();
+    coordinator.captureViewportState(messages, keysByMessageId);
+
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      nextMessages,
+      keysByMessageId,
+    );
+    coordinator.trackingScrollController
+      ..animateCount = 0
+      ..jumpCount = 0;
+    coordinator.scheduleRestore(
+      messages: nextMessages,
+      keysByMessageId: keysByMessageId,
+      reset: false,
+      isLatest: true,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.animateCount, 1);
+    expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets('latest request follows new bottom during animation', (
+    tester,
+  ) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final nextMessages = [...messages, testMessage(100)];
+    final keysByMessageId = {
+      for (final message in nextMessages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 120,
+    );
+    await tester.pump();
+    coordinator.captureViewportState(messages, keysByMessageId);
+
+    unawaited(coordinator.scrollToBottomIfInLoadedWindow(animated: true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      coordinator.scrollController.position.isScrollingNotifier.value,
+      true,
+    );
+
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      nextMessages,
+      keysByMessageId,
+    );
+    coordinator.scheduleRestore(
+      messages: nextMessages,
+      keysByMessageId: keysByMessageId,
+      reset: false,
+      isLatest: true,
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      coordinator.scrollController.offset,
+      coordinator.scrollController.position.maxScrollExtent,
+    );
+  });
+
+  testWidgets(
+    'scheduleRestore restores tail-follow start in centered viewports',
+    (tester) async {
+      final coordinator = TrackingChatScrollCoordinator();
+      final centerKey = GlobalKey();
+      final top = List.generate(8, testMessage);
+      final bottom = List.generate(8, (index) => testMessage(index + 100));
+      final nextBottom = [...bottom, testMessage(200)];
+      final messages = [...top, ...bottom];
+      final nextMessages = [...top, ...nextBottom];
+      final keysByMessageId = {
+        for (final message in nextMessages) message.messageId: GlobalKey(),
+      };
+
+      addTearDown(coordinator.dispose);
+      await pumpCenteredScrollableMessages(
+        tester,
+        coordinator,
+        centerKey: centerKey,
+        top: top,
+        bottom: bottom,
+        keysByMessageId: keysByMessageId,
+      );
+      coordinator.scrollController.jumpTo(
+        coordinator.scrollController.position.maxScrollExtent,
+      );
+      await tester.pump();
+      coordinator.captureViewportState(messages, keysByMessageId);
+
+      await pumpCenteredScrollableMessages(
+        tester,
+        coordinator,
+        centerKey: centerKey,
+        top: top,
+        bottom: nextBottom,
+        keysByMessageId: keysByMessageId,
+      );
+      coordinator.scrollController.jumpTo(
+        coordinator.scrollController.position.maxScrollExtent,
+      );
+      await tester.pump();
+      coordinator.trackingScrollController
+        ..animateCount = 0
+        ..jumpCount = 0
+        ..jumpOffsets.clear()
+        ..animateOffsets.clear();
+      coordinator.scheduleRestore(
+        messages: nextMessages,
+        keysByMessageId: keysByMessageId,
+        reset: false,
+        isLatest: true,
+      );
+      await tester.pump();
+
+      expect(coordinator.trackingScrollController.animateCount, 1);
+      expect(coordinator.trackingScrollController.jumpCount, 1);
+      expect(
+        coordinator.trackingScrollController.jumpOffsets.single,
+        lessThan(coordinator.trackingScrollController.animateOffsets.single),
+      );
+    },
+  );
+
+  testWidgets('scheduleRestore animates requested latest resets', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.trackingScrollController
+      ..animateCount = 0
+      ..jumpCount = 0;
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: true,
+      animateLatestReset: true,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.animateCount, 1);
+  });
+
   testWidgets('scheduleRestore animates explicit message jumps', (
     tester,
   ) async {
@@ -308,6 +732,43 @@ void main() {
       const Duration(milliseconds: 300),
     );
     expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets('scheduleRestore completes explicit message jumps after scroll', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final keysByMessageId = {
+      for (final message in messages) message.messageId: GlobalKey(),
+    };
+    final targetMessageId = messages[8].messageId;
+    var completed = false;
+
+    addTearDown(coordinator.dispose);
+    await pumpScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+
+    coordinator
+      ..animateNextMessageRestore(
+        targetMessageId,
+        onComplete: () => completed = true,
+      )
+      ..scheduleRestore(
+        messages: messages,
+        keysByMessageId: keysByMessageId,
+        reset: true,
+        isLatest: false,
+        centerMessageId: targetMessageId,
+      );
+    await tester.pump();
+    await tester.pump();
+
+    expect(completed, true);
   });
 
   testWidgets('scheduleRestore does not stage explicit message jumps', (
@@ -890,12 +1351,18 @@ Future<void> pumpScrollableMessages(
               : ScrollCacheExtent.pixels(cacheExtent),
           slivers: [
             SliverList.builder(
-              key: coordinator.topSliverKey,
               itemCount: messages.length,
-              itemBuilder: (context, index) => SizedBox(
-                key: keysByMessageId[messages[index].messageId],
-                height: itemHeight,
-              ),
+              itemBuilder: (context, index) {
+                final messageId = messages[index].messageId;
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -923,12 +1390,74 @@ Future<void> pumpFullyBuiltScrollableMessages(
           child: Column(
             children: [
               for (final message in messages)
-                SizedBox(
-                  key: keysByMessageId[message.messageId],
-                  height: 80,
+                ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: message.messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[message.messageId],
+                    height: 80,
+                  ),
                 ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> pumpCenteredScrollableMessages(
+  WidgetTester tester,
+  ChatScrollCoordinator coordinator, {
+  required GlobalKey centerKey,
+  required List<MessageItem> top,
+  required List<MessageItem> bottom,
+  required Map<String, GlobalKey> keysByMessageId,
+  double itemHeight = 80,
+  double viewportHeight = 240,
+}) async {
+  await tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox(
+        width: 320,
+        height: viewportHeight,
+        child: CustomScrollView(
+          key: coordinator.viewportKey,
+          center: centerKey,
+          controller: coordinator.scrollController,
+          anchor: ChatScrollCoordinator.messageFocusAnchor,
+          slivers: [
+            SliverList.builder(
+              itemCount: top.length,
+              itemBuilder: (context, index) {
+                final message = top[top.length - index - 1];
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: message.messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[message.messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
+            ),
+            SliverToBoxAdapter(key: centerKey, child: const SizedBox()),
+            SliverList.builder(
+              itemCount: bottom.length,
+              itemBuilder: (context, index) {
+                final message = bottom[index];
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: message.messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[message.messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     ),

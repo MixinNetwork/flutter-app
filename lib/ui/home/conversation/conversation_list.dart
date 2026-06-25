@@ -6,9 +6,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key, User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
-import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
+import '../../../db/mixin_database.dart' show User;
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -24,11 +24,11 @@ import '../../../widgets/unread_text.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
-import '../../provider/pending_jump_message_provider.dart';
-import '../../provider/responsive_navigator_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
+import '../desktop_shell_layout.dart';
+import '../notifier/conversation_list_controller.dart';
 import 'audio_player_bar.dart';
+import 'conversation_focus.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'network_status.dart';
@@ -41,21 +41,24 @@ class ConversationList extends HookConsumerWidget {
     final slideCategoryState =
         (key! as PageStorageKey<SlideCategoryState>).value;
 
-    final conversationListBloc = context.read<ConversationListBloc>();
-    final pagingState =
-        useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
-          bloc: conversationListBloc,
-        );
+    final conversationListController = context
+        .read<ConversationListController>();
+    final pagingState = useValueListenable(conversationListController);
+    useListenable(conversationListController.avatarCache);
     final conversationId = ref.watch(currentConversationIdProvider);
 
-    final routeMode = ref.watch(navigatorRouteModeProvider);
+    final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
+      context,
+    );
 
-    final itemPositionsListener = conversationListBloc.itemPositionsListener(
-      slideCategoryState,
-    );
-    final itemScrollController = conversationListBloc.itemScrollController(
-      slideCategoryState,
-    );
+    final itemPositionsListener = conversationListController
+        .itemPositionsListener(
+          slideCategoryState,
+        );
+    final itemScrollController = conversationListController
+        .itemScrollController(
+          slideCategoryState,
+        );
 
     if (itemPositionsListener == null || itemScrollController == null) {
       return const SizedBox();
@@ -80,21 +83,18 @@ class ConversationList extends HookConsumerWidget {
             itemBuilder: (context, index) {
               final conversation = pagingState.map[index];
               if (conversation == null) return const SizedBox(height: 80);
-              final selected =
-                  conversation.conversationId == conversationId && !routeMode;
+              final current = conversation.conversationId == conversationId;
+              final selected = current && showsConversationSelection;
               return ConversationMenuWrapper(
                 conversation: conversation,
                 removeChatFromCircle: true,
                 child: ConversationItemWidget(
                   selected: selected,
                   conversation: conversation,
+                  groupAvatarUsers: conversationListController.avatarCache
+                      .usersFor(conversation.conversationId),
                   onTap: () {
-                    if (selected) {
-                      ref.read(pendingJumpLatestProvider.notifier).state =
-                          Object();
-                      return;
-                    }
-                    ConversationStateNotifier.selectConversation(
+                    ConversationFocus.selectConversation(
                       context,
                       conversation.conversationId,
                       conversation: conversation,
@@ -153,11 +153,13 @@ class ConversationItemWidget extends StatelessWidget {
     required this.onTap,
     super.key,
     this.selected = false,
+    this.groupAvatarUsers,
   });
 
   final bool selected;
   final ConversationItem conversation;
   final VoidCallback onTap;
+  final List<User>? groupAvatarUsers;
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +184,7 @@ class ConversationItemWidget extends StatelessWidget {
                 children: [
                   ConversationAvatarWidget(
                     conversation: conversation,
+                    groupAvatarUsers: groupAvatarUsers,
                     size: ConversationPage.conversationItemAvatarSize,
                   ),
                   const SizedBox(width: 12),

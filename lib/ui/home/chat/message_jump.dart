@@ -1,27 +1,40 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
-import '../bloc/blink_cubit.dart';
-import '../bloc/message_bloc.dart';
+import '../desktop_shell_layout.dart';
+import '../notifier/blink_notifier.dart';
+import '../notifier/chat_side_notifier.dart';
+import '../notifier/message_controller.dart';
 import 'chat_jump_trace.dart';
 import 'chat_scroll_coordinator.dart';
 
-extension ChatMessageJump on BuildContext {
-  Future<void> jumpToMessageInChat(
+class ChatTimelineLocation {
+  ChatTimelineLocation({
+    required BlinkNotifier blinkNotifier,
+    required ChatScrollCoordinator scrollCoordinator,
+    required MessageController messageController,
+    required ChatSideNotifier chatSideNotifier,
+  }) : _blinkNotifier = blinkNotifier,
+       _scrollCoordinator = scrollCoordinator,
+       _messageController = messageController,
+       _chatSideNotifier = chatSideNotifier;
+
+  final BlinkNotifier _blinkNotifier;
+  final ChatScrollCoordinator _scrollCoordinator;
+  final MessageController _messageController;
+  final ChatSideNotifier _chatSideNotifier;
+
+  Future<void> jumpToMessage(
     String messageId, {
     String? sourceMessageId,
+    bool closeSideAfterJump = false,
+    bool chatSideRouteMode = false,
   }) async {
     traceChatJump(
       'request source=${shortMessageId(sourceMessageId)} '
       'target=${shortMessageId(messageId)}',
     );
-    read<BlinkCubit>().blinkByMessageId(messageId);
-
-    final scrollCoordinator = read<ChatScrollCoordinator>();
-    final messageBloc = read<MessageBloc>();
-    final handled = await scrollCoordinator.scrollToMessageIfInLoadedWindow(
+    final handled = await _scrollCoordinator.scrollToMessageIfInLoadedWindow(
       messageId,
       animated: true,
     );
@@ -30,47 +43,54 @@ extension ChatMessageJump on BuildContext {
       'handled=$handled',
     );
     if (handled) {
+      _blinkNotifier.blinkByMessageId(messageId);
+      _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
       return;
     }
 
     traceChatJump('reload-window target=${shortMessageId(messageId)}');
     final directionSourceMessageId =
-        sourceMessageId ?? _currentWindowSourceMessageId(messageBloc.state);
-    final direction = await _restoreDirectionFromSource(
-      sourceMessageId: directionSourceMessageId,
-      targetMessageId: messageId,
+        sourceMessageId ??
+        _currentWindowSourceMessageId(_messageController.state);
+    final direction = _toScrollDirection(
+      await _messageController.restoreDirectionFromSource(
+        sourceMessageId: directionSourceMessageId,
+        targetMessageId: messageId,
+      ),
     );
     traceChatJump(
       'restore direction source=${shortMessageId(directionSourceMessageId)} '
       'target=${shortMessageId(messageId)} direction=$direction',
     );
-    scrollCoordinator.animateNextMessageRestore(
+    _scrollCoordinator.animateNextMessageRestore(
       messageId,
       direction: direction,
+      onComplete: () => _blinkNotifier.blinkByMessageId(messageId),
     );
-    messageBloc.scrollTo(messageId);
+    _messageController.loadAroundMessage(messageId);
+    _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
   }
 
-  Future<void> jumpToLatestInChat() async {
+  Future<void> jumpToLatest({
+    bool closeSideAfterJump = false,
+    bool chatSideRouteMode = false,
+  }) async {
     traceChatJump('request latest');
-    final scrollCoordinator = read<ChatScrollCoordinator>();
-    if (await scrollCoordinator.scrollToBottomIfInLoadedWindow(
-      animated: true,
-    )) {
+    if (_messageController.state.isLatest &&
+        await _scrollCoordinator.scrollToBottomIfInLoadedWindow(
+          animated: true,
+        )) {
       traceChatJump('loaded-window latest handled=true');
+      _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
       return;
     }
 
     traceChatJump('reload-window latest');
-    scrollCoordinator.animateNextRestore(
+    _scrollCoordinator.animateNextRestore(
       direction: ChatScrollRestoreDirection.towardNewer,
     );
-    read<MessageBloc>().jumpToLatestWindow();
-  }
-
-  void popChatSideRouteIfNeeded() {
-    if (ModalRoute.of(this)?.canPop != true) return;
-    unawaited(Navigator.maybePop(this));
+    _messageController.loadLatestWindow();
+    _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
   }
 
   String? _currentWindowSourceMessageId(MessageState state) {
@@ -78,28 +98,37 @@ extension ChatMessageJump on BuildContext {
     return state.bottomMessage?.messageId ?? state.topMessage?.messageId;
   }
 
-  Future<ChatScrollRestoreDirection?> _restoreDirectionFromSource({
-    required String? sourceMessageId,
-    required String targetMessageId,
-  }) async {
-    if (sourceMessageId == null || sourceMessageId == targetMessageId) {
-      return null;
-    }
+  ChatScrollRestoreDirection? _toScrollDirection(
+    MessageWindowDirection? direction,
+  ) => switch (direction) {
+    MessageWindowDirection.older => ChatScrollRestoreDirection.towardOlder,
+    MessageWindowDirection.newer => ChatScrollRestoreDirection.towardNewer,
+    null => null,
+  };
 
-    final messageDao = database.messageDao;
-    final results = await Future.wait([
-      messageDao.messageOrderInfo(sourceMessageId),
-      messageDao.messageOrderInfo(targetMessageId),
-    ]);
-    final sourceInfo = results[0];
-    final targetInfo = results[1];
-    if (sourceInfo == null || targetInfo == null) return null;
-
-    final sourceAfterTarget = sourceInfo.createdAt == targetInfo.createdAt
-        ? sourceInfo.rowId > targetInfo.rowId
-        : sourceInfo.createdAt > targetInfo.createdAt;
-    return sourceAfterTarget
-        ? ChatScrollRestoreDirection.towardOlder
-        : ChatScrollRestoreDirection.towardNewer;
+  void _closeSideIfNeeded(bool closeSideAfterJump, bool chatSideRouteMode) {
+    if (!closeSideAfterJump) return;
+    _chatSideNotifier.closeAfterContentJump(routeMode: chatSideRouteMode);
   }
+}
+
+extension ChatMessageJump on BuildContext {
+  Future<void> jumpToMessageInChat(
+    String messageId, {
+    String? sourceMessageId,
+    bool closeSideAfterJump = false,
+  }) => _chatHistoryLocation.jumpToMessage(
+    messageId,
+    sourceMessageId: sourceMessageId,
+    closeSideAfterJump: closeSideAfterJump,
+    chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
+  );
+
+  Future<void> jumpToLatestInChat({bool closeSideAfterJump = false}) =>
+      _chatHistoryLocation.jumpToLatest(
+        closeSideAfterJump: closeSideAfterJump,
+        chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
+      );
+
+  ChatTimelineLocation get _chatHistoryLocation => read<ChatTimelineLocation>();
 }

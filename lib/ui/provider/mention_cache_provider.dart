@@ -1,103 +1,64 @@
+import 'dart:async';
+
 import 'package:ecache/ecache.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 
 import '../../db/dao/user_dao.dart';
+import '../../db/database_event_bus.dart';
+import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
 import 'database_provider.dart';
 
 class MentionCache {
-  MentionCache(this._userDao);
+  MentionCache(this._userDao, {DataBaseEventBus? eventBus}) {
+    final userDao = _userDao;
+    if (userDao == null) return;
+
+    _updateUserSubscription = (eventBus ?? DataBaseEventBus.instance)
+        .updateUserIdsStream
+        .listen((
+          userIds,
+        ) {
+          unawaited(
+            _refreshUsers(userIds).catchError((
+              Object error,
+              StackTrace stackTrace,
+            ) {
+              e('mention user cache refresh failed: $error');
+            }),
+          );
+        });
+  }
 
   final UserDao? _userDao;
 
-  final _contentMentionLruCache = LruCache<int, Map<String, MentionUser>>(
+  StreamSubscription<List<String>>? _updateUserSubscription;
+
+  final _contentMentionLruCache = LruCache<String, List<String>>(
     storage: SimpleStorage(),
     capacity: 1024 * 4,
   );
   final _userLruCache = LruCache<String, MentionUser>(
     storage: SimpleStorage(),
-    capacity: 1024,
+    capacity: 1024 * 8,
   );
+  final _cachedUserIds = <String>{};
 
   Map<String, MentionUser> mentionCache(String? content) {
     if (content == null) return {};
-    return _contentMentionLruCache.get(content.hashCode) ?? {};
+    return _cachedIdentityNumbers(_identityNumbersForContent(content));
   }
 
   Future<Map<String, MentionUser>> checkMentionCache(
     Set<String?> _contents,
   ) async {
-    final userDao = _userDao;
-    if (userDao == null) return {};
-
-    final map = <String, MentionUser>{};
-    final noCacheContents = <String>{};
-
-    final contents = _contents.nonNulls.toSet();
-
-    for (final element in contents) {
-      final cache = _contentMentionLruCache.get(element.hashCode);
-      if (cache != null) {
-        map.addAll(cache);
-      } else {
-        noCacheContents.add(element);
-      }
-    }
-
-    if (noCacheContents.isEmpty) return map;
-
-    final noCacheContentUserIdMap = Map.fromEntries(
-      noCacheContents.map(
-        (e) => MapEntry(
-          e,
-          mentionNumberRegExp.allMatchesAndSort(e).map((e) => e[1]!),
-        ),
-      ),
-    );
-
-    var userNumbers = <String>{
-      for (final item in noCacheContentUserIdMap.values) ...item,
+    final userNumbers = <String>{
+      for (final content in _contents.nonNulls)
+        ..._identityNumbersForContent(content),
     };
-
-    if (userNumbers.isEmpty) {
-      for (final e in noCacheContents) {
-        _contentMentionLruCache.set(e.hashCode, {});
-      }
-    } else {
-      userNumbers = userNumbers
-          .where((element) => _userLruCache.get(element) == null)
-          .toSet();
-
-      final list = await userDao
-          .userByIdentityNumbers(userNumbers.toList())
-          .get();
-
-      list.where((element) => element.fullName?.isNotEmpty ?? false).forEach((
-        element,
-      ) {
-        _userLruCache.set(element.identityNumber, element);
-        map[element.identityNumber] = element;
-      });
-
-      for (final element in noCacheContentUserIdMap.entries) {
-        element.value.forEach((element) {
-          if (map[element] != null) return;
-          final mentionUser = _userLruCache.get(element);
-          if (mentionUser == null) return;
-          map[element] = mentionUser;
-        });
-
-        _contentMentionLruCache.set(
-          element.key.hashCode,
-          Map.fromEntries(
-            map.entries.where((entry) => element.value.contains(entry.key)),
-          ),
-        );
-      }
-    }
-
-    return map;
+    return checkIdentityNumbers(userNumbers);
   }
 
   String? replaceMention(String? s, Map<String, MentionUser> _mentionMap) {
@@ -119,39 +80,90 @@ class MentionCache {
   MentionUser? identityNumberCache(String identityNumber) =>
       _userLruCache.get(identityNumber);
 
+  void cacheUsers(Iterable<User> users) {
+    cacheMentionUsers(users.map(_mentionUserFromUser));
+  }
+
+  void cacheMentionUsers(Iterable<MentionUser> users) {
+    for (final user in users) {
+      if (user.fullName?.isNotEmpty != true) {
+        _userLruCache.remove(user.identityNumber);
+        _cachedUserIds.remove(user.userId);
+        continue;
+      }
+      _userLruCache.set(user.identityNumber, user);
+      _cachedUserIds.add(user.userId);
+    }
+  }
+
+  Future<void> _refreshUsers(Iterable<String> userIds) async {
+    final userDao = _userDao;
+    if (userDao == null) return;
+
+    final cachedUserIds = userIds.where(_cachedUserIds.contains).toSet();
+    if (cachedUserIds.isEmpty) return;
+
+    cacheMentionUsers(await userDao.mentionUsersByUserIds(cachedUserIds));
+  }
+
+  void dispose() {
+    unawaited(_updateUserSubscription?.cancel());
+    _updateUserSubscription = null;
+  }
+
   Future<Map<String, MentionUser>> checkIdentityNumbers(
     Set<String> identityNumbers,
   ) async {
-    final userDao = _userDao;
-    if (userDao == null) return {};
-
     final toChecks = identityNumbers
         .where((element) => _userLruCache.get(element) == null)
         .toSet();
 
-    final mentionUsers = identityNumbers.map(_userLruCache.get).nonNulls;
-    final map = Map.fromIterables(
-      mentionUsers.map((e) => e.identityNumber),
-      mentionUsers,
-    );
+    final map = _cachedIdentityNumbers(identityNumbers);
 
-    if (toChecks.isEmpty) return map;
+    final userDao = _userDao;
+    if (toChecks.isEmpty || userDao == null) return map;
 
     final list = await userDao.userByIdentityNumbers(toChecks.toList()).get();
 
-    list.where((element) => element.fullName?.isNotEmpty ?? false).forEach((
-      element,
-    ) {
-      _userLruCache.set(element.identityNumber, element);
-      map[element.identityNumber] = element;
-    });
+    cacheMentionUsers(list);
+    map.addAll(_cachedIdentityNumbers(toChecks));
 
     return map;
   }
+
+  List<String> _identityNumbersForContent(String content) {
+    final cache = _contentMentionLruCache.get(content);
+    if (cache != null) return cache;
+
+    final identityNumbers = mentionNumberRegExp
+        .allMatchesAndSort(content)
+        .map((e) => e[1]!)
+        .toSet()
+        .toList(growable: false);
+    _contentMentionLruCache.set(content, identityNumbers);
+    return identityNumbers;
+  }
+
+  Map<String, MentionUser> _cachedIdentityNumbers(
+    Iterable<String> identityNumbers,
+  ) => Map.fromEntries(
+    identityNumbers
+        .map(_userLruCache.get)
+        .nonNulls
+        .map((user) => MapEntry(user.identityNumber, user)),
+  );
+
+  MentionUser _mentionUserFromUser(User user) => MentionUser(
+    userId: user.userId,
+    identityNumber: user.identityNumber,
+    fullName: user.fullName,
+  );
 }
 
-final mentionCacheProvider = Provider.autoDispose(
-  (ref) => MentionCache(
+final mentionCacheProvider = Provider((ref) {
+  final mentionCache = MentionCache(
     ref.watch(databaseProvider.select((value) => value.valueOrNull?.userDao)),
-  ),
-);
+  );
+  ref.onDispose(mentionCache.dispose);
+  return mentionCache;
+});

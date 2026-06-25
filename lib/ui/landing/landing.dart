@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../account/account_key_value.dart';
 import '../../crypto/signal/signal_database.dart';
@@ -24,12 +24,6 @@ import 'landing_qrcode.dart';
 
 enum LandingMode { qrcode, mobile }
 
-class LandingModeCubit extends Cubit<LandingMode> {
-  LandingModeCubit() : super(LandingMode.qrcode);
-
-  void changeMode(LandingMode mode) => emit(mode);
-}
-
 class LandingPage extends HookConsumerWidget {
   const LandingPage({super.key});
 
@@ -39,8 +33,11 @@ class LandingPage extends HookConsumerWidget {
       accountServerProvider.select((value) => value.hasError),
     );
 
-    final modeCubit = useBloc(LandingModeCubit.new);
-    final mode = useBlocState<LandingModeCubit, LandingMode>(bloc: modeCubit);
+    final modeNotifier = useMemoized(
+      () => ValueNotifier(LandingMode.qrcode),
+    );
+    useEffect(() => modeNotifier.dispose, [modeNotifier]);
+    final mode = useValueListenable(modeNotifier);
 
     Widget child;
     switch (mode) {
@@ -52,8 +49,8 @@ class LandingPage extends HookConsumerWidget {
     if (accountServerHasError) {
       child = const _LoginFailed();
     }
-    return BlocProvider.value(
-      value: modeCubit,
+    return provider.ChangeNotifierProvider<ValueNotifier<LandingMode>>.value(
+      value: modeNotifier,
       child: LandingScaffold(child: child),
     );
   }
@@ -228,7 +225,11 @@ class LandingModeSwitchButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mode = useBlocState<LandingModeCubit, LandingMode>();
+    final modeNotifier = provider.Provider.of<ValueNotifier<LandingMode>>(
+      context,
+      listen: false,
+    );
+    final mode = useValueListenable(modeNotifier);
     final String buttonText;
     switch (mode) {
       case LandingMode.qrcode:
@@ -238,12 +239,11 @@ class LandingModeSwitchButton extends HookConsumerWidget {
     }
     return TextButton(
       onPressed: () {
-        final modeCubit = context.read<LandingModeCubit>();
         switch (mode) {
           case LandingMode.qrcode:
-            modeCubit.changeMode(LandingMode.mobile);
+            modeNotifier.value = LandingMode.mobile;
           case LandingMode.mobile:
-            modeCubit.changeMode(LandingMode.qrcode);
+            modeNotifier.value = LandingMode.qrcode;
         }
       },
       child: Text(

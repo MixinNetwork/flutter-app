@@ -20,7 +20,7 @@ class PinMessageState extends Equatable {
   List<Object?> get props => [messageIds, lastMessage];
 }
 
-extension PinMessageCubitExtension on BuildContext {
+extension PinMessageStateExtension on BuildContext {
   List<String> get currentPinMessageIds => read<PinMessageState>().messageIds;
 
   List<String> get watchCurrentPinMessageIds =>

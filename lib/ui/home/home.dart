@@ -21,8 +21,8 @@ import '../../widgets/protocol_handler.dart';
 import '../../widgets/toast.dart';
 import '../landing/landing.dart';
 import '../provider/conversation_provider.dart';
+import '../provider/major_navigation_provider.dart';
 import '../provider/multi_auth_provider.dart';
-import '../provider/responsive_navigator_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
@@ -30,19 +30,10 @@ import '../setting/setting_page.dart';
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
-import 'route/responsive_navigator.dart';
+import 'desktop_shell_layout.dart';
+import 'left_rail_controller.dart';
+import 'route/major_navigator.dart';
 import 'slide_page.dart';
-
-// chat category list min width
-const kSlidePageMinWidth = 64.0;
-// chat category and chat list max width
-const kSlidePageMaxWidth = 176.0;
-// chat page min width, message list, setting page etc.
-const kResponsiveNavigationMinWidth = 320.0;
-// conversation list fixed width, conversation list, setting list etc.
-const kConversationListWidth = 300.0;
-// chat side page fixed width, chat info page etc.
-const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
 
@@ -220,10 +211,6 @@ class _SetupNameWidget extends HookConsumerWidget {
   }
 }
 
-class HasDrawerValueNotifier extends ValueNotifier<bool> {
-  HasDrawerValueNotifier(super.value);
-}
-
 class _HomePage extends HookConsumerWidget {
   const _HomePage({required this.constraints});
 
@@ -231,33 +218,25 @@ class _HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final maxWidth = constraints.maxWidth;
-    final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth).clamp(
-      kSlidePageMinWidth,
-      kSlidePageMaxWidth,
-    );
-
     final userCollapse = ref.watch(
       settingProvider.select((value) => value.collapsedSidebar),
     );
 
-    final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
-    final collapse = userCollapse || autoCollapse;
-
-    var targetWidth = collapse ? kSlidePageMinWidth : kSlidePageMaxWidth;
-    if (clampSlideWidth <= kSlidePageMinWidth || kPlatformIsIphone) {
-      targetWidth = 0;
-    }
-
-    final hasDrawerValueNotifier = useMemoized(
-      () => HasDrawerValueNotifier(targetWidth == 0),
+    final shellLayout = DesktopShellLayout.resolve(
+      maxWidth: constraints.maxWidth,
+      userCollapse: userCollapse,
+      isPhone: kPlatformIsIphone,
     );
 
-    final hasDrawer = useListenable(hasDrawerValueNotifier);
+    final leftRailController = useMemoized(
+      () => LeftRailController(shellLayout),
+    );
+
+    final hasDrawer = useListenable(leftRailController);
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: hasDrawerValueNotifier),
+        ChangeNotifierProvider.value(value: leftRailController),
         Provider(
           create: (context) => AudioMessagePlayService(context.accountServer),
           dispose: (context, service) => service.dispose(),
@@ -266,7 +245,7 @@ class _HomePage extends HookConsumerWidget {
       child: Scaffold(
         backgroundColor: context.theme.primary,
         drawerEnableOpenDragGesture: false,
-        drawer: hasDrawer.value && targetWidth == 0
+        drawer: hasDrawer.value && shellLayout.hasDrawer
             ? Drawer(
                 child: Container(
                   width: kSlidePageMaxWidth,
@@ -280,9 +259,9 @@ class _HomePage extends HookConsumerWidget {
             child: Row(
               children: [
                 TweenAnimationBuilder(
-                  tween: Tween<double>(end: targetWidth),
+                  tween: Tween<double>(end: shellLayout.slideWidth),
                   duration: const Duration(milliseconds: 200),
-                  onEnd: () => hasDrawerValueNotifier.value = targetWidth == 0,
+                  onEnd: () => leftRailController.sync(shellLayout),
                   builder: (context, value, child) => SizedBox(
                     width: value,
                     child: value == 0 ? null : child,
@@ -290,14 +269,15 @@ class _HomePage extends HookConsumerWidget {
                   child: OverflowBox(
                     alignment: Alignment.centerLeft,
                     minWidth: kSlidePageMinWidth,
-                    maxWidth: collapse ? kSlidePageMinWidth : clampSlideWidth,
-                    child: SlidePage(showCollapse: !autoCollapse),
+                    maxWidth: shellLayout.slideMaxWidth,
+                    child: SlidePage(
+                      showCollapse: shellLayout.showCollapseControl,
+                    ),
                   ),
                 ),
                 Expanded(
-                  child: ResponsiveNavigator(
-                    switchWidth:
-                        kResponsiveNavigationMinWidth + kConversationListWidth,
+                  child: MajorNavigator(
+                    switchWidth: DesktopShellLayout.mainRouteSwitchWidth,
                     leftPage: MaterialPage(
                       key: const ValueKey('center'),
                       name: 'center',
@@ -333,6 +313,7 @@ class _CenterPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final routeMode = DesktopShellLayout.mainRouteModeOf(context);
     final isSetting = ref.watch(
       slideCategoryStateProvider.select(
         (value) => value.type == SlideCategoryType.setting,
@@ -342,23 +323,15 @@ class _CenterPage extends HookConsumerWidget {
     ref.listen(slideCategoryStateProvider, (previous, next) {
       final isSetting = next.type == SlideCategoryType.setting;
 
-      final responsiveNavigatorNotifier = context.providerContainer.read(
-        responsiveNavigatorProvider.notifier,
+      final majorNavigationNotifier = context.providerContainer.read(
+        majorNavigationProvider.notifier,
       );
 
-      responsiveNavigatorNotifier.popWhere((page) {
-        if (responsiveNavigatorNotifier.state.routeMode) return true;
-
-        return ResponsiveNavigatorStateNotifier.settingPageNameSet.contains(
-          page.name,
-        );
-      });
-
-      if (isSetting && !responsiveNavigatorNotifier.state.routeMode) {
+      if (majorNavigationNotifier.syncSettingCategory(
+        isSetting,
+        routeMode: routeMode,
+      )) {
         ref.read(conversationProvider.notifier).unselected();
-        responsiveNavigatorNotifier.pushPage(
-          ResponsiveNavigatorStateNotifier.settingPageNameSet.first,
-        );
       }
     });
 

@@ -6,7 +6,7 @@ import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
 import '../enum/encrypt_category.dart';
-import '../ui/provider/conversation_provider.dart';
+import '../ui/home/conversation/conversation_focus.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
@@ -85,7 +85,7 @@ Future<bool> openUri(
             return false;
           }
 
-          await ConversationStateNotifier.selectConversation(
+          await ConversationFocus.selectConversation(
             context,
             conversation.conversationId,
             conversation: conversation,
@@ -291,12 +291,12 @@ Future<bool> _selectConversation(
       showToastFailed(null);
       return false;
     } else {
-      await ConversationStateNotifier.selectUser(context, userId);
+      await ConversationFocus.selectUser(context, userId);
       return true;
     }
   }
 
-  await ConversationStateNotifier.selectConversation(
+  await ConversationFocus.selectConversation(
     context,
     conversationId,
     sync: true,

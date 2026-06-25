@@ -113,6 +113,7 @@ Future<void> initMixinDocumentsDirectory() async {
 enum TempFileType {
   pasteboardImage('mixin_paste_board_image', '.png'),
   editImage('image_edit', '.png'),
+  networkImage('network_image', '.img'),
   voiceRecord('voice_record', '.ogg'),
   logZip('log', '.zip'),
   // video thumbnail

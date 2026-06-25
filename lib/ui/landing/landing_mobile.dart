@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
@@ -27,7 +28,6 @@ import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
 import '../../widgets/user/verification_dialog.dart';
 import '../provider/multi_auth_provider.dart';
-import 'bloc/landing_cubit.dart';
 import 'landing.dart';
 
 class LoginWithMobileWidget extends HookConsumerWidget {
@@ -42,13 +42,20 @@ class LoginWithMobileWidget extends HookConsumerWidget {
     if (userAgent == null || deviceId == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return BlocProvider<LandingMobileCubit>(
-      create: (_) => LandingMobileCubit(
-        context.multiAuthChangeNotifier,
-        locale,
-        userAgent: userAgent,
-        deviceId: deviceId,
+    final client = useMemoized(
+      () => Client(
+        dioOptions: BaseOptions(
+          headers: {
+            'Accept-Language': locale.languageCode,
+            'User-Agent': userAgent,
+            'Mixin-Device-Id': deviceId,
+          },
+        ),
       ),
+      [locale, userAgent, deviceId],
+    );
+    return provider.Provider<Client>.value(
+      value: client,
       child: Navigator(
         onDidRemovePage: (page) {},
         pages: const [MaterialPage(child: _PhoneNumberInputScene())],
@@ -169,7 +176,7 @@ class _CodeInputScene extends HookConsumerWidget {
           sessionSecret: sessionSecret,
           pin: '',
         );
-        final client = context.read<LandingMobileCubit>().client;
+        final client = provider.Provider.of<Client>(context, listen: false);
         final response = await client.accountApi.create(
           verification.value.id,
           accountRequest,
@@ -309,8 +316,8 @@ Future<VerificationResponse> _requestVerificationCode({
     hCaptchaResponse: captcha?.$1 == CaptchaType.hCaptcha ? captcha?.$2 : null,
   );
   try {
-    final cubit = context.read<LandingMobileCubit>();
-    final response = await cubit.client.accountApi.verification(request);
+    final client = provider.Provider.of<Client>(context, listen: false);
+    final response = await client.accountApi.verification(request);
     return response.data;
   } on MixinApiError catch (error) {
     final mixinError = error.error! as MixinError;

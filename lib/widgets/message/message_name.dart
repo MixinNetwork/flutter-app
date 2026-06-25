@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../ui/provider/setting_provider.dart';
+import '../../ui/provider/user_cache_provider.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../conversation/badges_widget.dart';
@@ -75,7 +76,10 @@ class MessageName extends ConsumerWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: InteractiveDecoratedBox(
-        onTap: () => showUserDialog(context, userId),
+        onTap: () async {
+          await showUserDialog(context, userId);
+          if (context.mounted) ref.invalidate(userCacheProvider(userId));
+        },
         cursor: SystemMouseCursors.click,
         child: Padding(
           padding: const EdgeInsets.only(left: 10, bottom: 2),

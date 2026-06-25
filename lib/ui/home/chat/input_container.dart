@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
@@ -21,7 +20,7 @@ import 'package:super_context_menu/super_context_menu.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
-import '../../../db/database_event_bus.dart';
+import '../../../core/read_model/sticker_read_model.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/app_lifecycle.dart';
@@ -38,19 +37,20 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
-import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
-import '../../provider/abstract_responsive_navigator.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
-import 'chat_page.dart';
+import '../notifier/chat_side_notifier.dart';
+import 'chat_send_outcome.dart';
 import 'files_preview.dart';
 import 'voice_recorder_bottom_bar.dart';
+
+part 'input_highlight_controller.dart';
 
 class InputContainer extends HookConsumerWidget {
   const InputContainer({super.key});
@@ -61,10 +61,11 @@ class InputContainer extends HookConsumerWidget {
 
     final hasParticipant = ref.watch(currentConversationHasParticipantProvider);
 
-    final voiceRecorderCubit = useBloc(
-      () => VoiceRecorderCubit(context.audioMessageService),
-      keys: [conversationId],
+    final voiceRecorderNotifier = useMemoized(
+      () => VoiceRecorderNotifier(context.audioMessageService),
+      [conversationId],
     );
+    useEffect(() => voiceRecorderNotifier.dispose, [voiceRecorderNotifier]);
 
     if (!hasParticipant) {
       return Container(
@@ -78,8 +79,8 @@ class InputContainer extends HookConsumerWidget {
       );
     }
 
-    return BlocProvider<VoiceRecorderCubit>.value(
-      value: voiceRecorderCubit,
+    return ChangeNotifierProvider<VoiceRecorderNotifier>.value(
+      value: voiceRecorderNotifier,
       child: LayoutBuilder(
         builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
           layoutWidth: constraints.maxWidth,
@@ -174,11 +175,9 @@ class _InputContainer extends HookConsumerWidget {
       };
     }, []);
 
-    final chatSidePageSize =
-        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, int>(
-          bloc: context.read<ChatSideCubit>(),
-          converter: (state) => state.pages.length,
-        );
+    final chatSidePageSize = useValueListenable(
+      context.read<ChatSideNotifier>(),
+    ).destinations.length;
     useEffect(() {
       if (!context.textFieldAutoGainFocus) {
         // Make sure on iPad/Android Pad the text field not get focused when the chat side
@@ -328,7 +327,8 @@ class _AnimatedSendOrVoiceButton extends HookConsumerWidget {
             child: ActionButton(
               name: Resources.assetsImagesMicrophoneSvg,
               color: context.theme.icon,
-              onTap: () => context.read<VoiceRecorderCubit>().startRecording(),
+              onTap: () =>
+                  context.read<VoiceRecorderNotifier>().startRecording(),
             ),
           ),
       ],
@@ -342,31 +342,27 @@ void showMaxLengthReachedToast(BuildContext context) =>
 void _sendPostMessage(
   BuildContext context,
   TextEditingController textEditingController,
-) {
-  final text = textEditingController.value.text.trim();
-  if (text.isEmpty) return;
-
-  final conversationItem = context.providerContainer.read(conversationProvider);
-  if (conversationItem == null) return;
-  if (text.length > kMaxTextLength) {
-    showMaxLengthReachedToast(context);
-    return;
-  }
-
-  context.accountServer.sendPostMessage(
-    text,
-    conversationItem.encryptCategory,
-    conversationId: conversationItem.conversationId,
-    recipientId: conversationItem.userId,
-  );
-
-  textEditingController.text = '';
-  context.providerContainer.read(quoteMessageProvider.notifier).state = null;
-}
+) => _sendTextMessage(
+  context,
+  textEditingController,
+  post: true,
+);
 
 void _sendMessage(
   BuildContext context,
   TextEditingController textEditingController, {
+  bool silent = false,
+}) => _sendTextMessage(
+  context,
+  textEditingController,
+  post: false,
+  silent: silent,
+);
+
+void _sendTextMessage(
+  BuildContext context,
+  TextEditingController textEditingController, {
+  required bool post,
   bool silent = false,
 }) {
   final text = textEditingController.value.text.trim();
@@ -379,17 +375,26 @@ void _sendMessage(
     return;
   }
 
-  context.accountServer.sendTextMessage(
-    text,
-    conversationItem.encryptCategory,
-    conversationId: conversationItem.conversationId,
-    recipientId: conversationItem.userId,
-    quoteMessageId: context.providerContainer.read(quoteMessageIdProvider),
-    silent: silent,
-  );
+  if (post) {
+    context.accountServer.sendPostMessage(
+      text,
+      conversationItem.encryptCategory,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  } else {
+    context.accountServer.sendTextMessage(
+      text,
+      conversationItem.encryptCategory,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+      quoteMessageId: context.providerContainer.read(quoteMessageIdProvider),
+      silent: silent,
+    );
+  }
 
-  textEditingController.text = '';
-  context.providerContainer.read(quoteMessageProvider.notifier).state = null;
+  textEditingController.clear();
+  context.completeOutgoingChatSend();
 }
 
 class _SendTextField extends HookConsumerWidget {
@@ -654,7 +659,7 @@ class _SendActionTypeButton extends HookConsumerWidget {
                   recipientId: conversationState.userId,
                   quoteMessageId: quoteMessage.state?.messageId,
                 );
-                quoteMessage.state = null;
+                context.completeOutgoingChatSend();
               });
             },
           ),
@@ -751,9 +756,9 @@ class _AnimatedSendTypeButton extends StatelessWidget {
             final position = renderBox.localToGlobal(
               renderBox.paintBounds.topCenter,
             );
-            context.sendMenuPosition(position);
+            context.menuPosition = position;
           } else {
-            context.sendMenuPosition(details.globalPosition);
+            context.menuPosition = details.globalPosition;
           }
         },
         color: context.theme.icon,
@@ -774,15 +779,20 @@ class _StickerButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
-
-    final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(
-        context.database.stickerAlbumDao.systemAddedAlbums().watchWithStream(
-          eventStreams: [DataBaseEventBus.instance.updateStickerStream],
-          duration: kVerySlowThrottleDuration,
-        ),
+    final stickerReadModel = useMemoized(
+      () => StickerReadModel(
+        stickerDao: context.database.stickerDao,
+        stickerAlbumDao: context.database.stickerAlbumDao,
       ),
+      [context.database],
     );
+
+    final stickerAlbums =
+        useMemoizedStream(
+          stickerReadModel.systemAddedAlbums,
+          initialData: const <StickerAlbum>[],
+        ).data ??
+        const <StickerAlbum>[];
 
     final presetStickerGroups = useMemoized(
       () => [
@@ -794,18 +804,10 @@ class _StickerButton extends HookConsumerWidget {
       ],
     );
 
-    final tabLength =
-        useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-          bloc: stickerAlbumsCubit,
-          converter: (state) => state.length + presetStickerGroups.length,
-          keys: [presetStickerGroups],
-        );
+    final tabLength = stickerAlbums.length + presetStickerGroups.length;
 
-    return MultiProvider(
-      providers: [
-        BlocProvider.value(value: stickerAlbumsCubit),
-        ChangeNotifierProvider.value(value: textEditingController),
-      ],
+    return ChangeNotifierProvider.value(
+      value: textEditingController,
       child: DefaultTabController(
         length: tabLength,
         initialIndex: 1,
@@ -846,6 +848,9 @@ class _StickerButton extends HookConsumerWidget {
                 tabController: DefaultTabController.of(context),
                 tabLength: tabLength,
                 presetStickerGroups: presetStickerGroups,
+                stickerAlbums: stickerAlbums,
+                readModel: stickerReadModel,
+                onStickerSent: context.completeOutgoingChatSend,
               ),
             ),
           ),
@@ -879,101 +884,6 @@ class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(
     covariant _StickerPagePositionedLayoutDelegate oldDelegate,
   ) => position != oldDelegate.position;
-}
-
-class MentionTextMatcher extends TextMatcher implements EquatableMixin {
-  MentionTextMatcher(this.mentionCache, this.highlightTextStyle)
-    : super.regExp(
-        regExp: mentionNumberRegExp,
-        matchBuilder: (span, displayString, linkString) {
-          if (displayString != linkString) return TextSpan(text: linkString);
-
-          final identityNumber = linkString.substring(1);
-          final user = mentionCache.identityNumberCache(identityNumber);
-          final valid = user != null;
-
-          if (displayString != linkString) return TextSpan(text: linkString);
-
-          return TextSpan(
-            text: displayString,
-            style: valid
-                ? (span.style ?? const TextStyle()).merge(
-                    highlightTextStyle,
-                  )
-                : span.style,
-          );
-        },
-      );
-
-  final MentionCache mentionCache;
-  final TextStyle highlightTextStyle;
-
-  @override
-  List<Object?> get props => [mentionCache, highlightTextStyle];
-
-  @override
-  bool? get stringify => true;
-}
-
-class _HighlightTextEditingController extends TextEditingController {
-  _HighlightTextEditingController({
-    required this.highlightTextStyle,
-    required this.mentionCache,
-    String? initialText,
-  }) : super(text: initialText) {
-    mentionsStreamController.stream
-        .distinct()
-        .asyncBufferMap(
-          (event) => mentionCache.checkMentionCache(event.toSet()),
-        )
-        .distinct(mapEquals)
-        .listen((event) => notifyListeners());
-  }
-
-  final TextStyle highlightTextStyle;
-  final MentionCache mentionCache;
-  final mentionsStreamController = StreamController<String>();
-
-  @override
-  Future<void> dispose() async {
-    await mentionsStreamController.close();
-    return super.dispose();
-  }
-
-  @override
-  TextSpan buildTextSpan({
-    required BuildContext context,
-    required bool withComposing,
-    TextStyle? style,
-  }) {
-    mentionsStreamController.add(text);
-    if (!value.isComposingRangeValid || !withComposing) {
-      return _buildTextSpan(text, style);
-    }
-
-    return TextSpan(
-      style: style,
-      children: <TextSpan>[
-        _buildTextSpan(value.composing.textBefore(value.text), style),
-        _buildTextSpan(
-          value.composing.textInside(value.text),
-          style?.merge(const TextStyle(decoration: TextDecoration.underline)),
-        ),
-        _buildTextSpan(value.composing.textAfter(value.text), style),
-      ],
-    );
-  }
-
-  TextSpan _buildTextSpan(String text, TextStyle? style) => TextSpan(
-    style: style,
-    children: TextMatcher.applyTextMatchers(
-      [TextSpan(text: text, style: style)],
-      [
-        MentionTextMatcher(mentionCache, highlightTextStyle),
-        EmojiTextMatcher(),
-      ],
-    ).toList(),
-  );
 }
 
 class _SendMessageIntent extends Intent {

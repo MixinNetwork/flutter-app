@@ -1,16 +1,15 @@
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image/image.dart' as img;
+import 'package:provider/provider.dart';
 
-import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
@@ -20,6 +19,8 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/toast.dart';
+
+part 'image_editor_model.dart';
 
 Future<ImageEditorSnapshot?> showImageEditor(
   BuildContext context, {
@@ -42,7 +43,7 @@ class _ImageEditorDialog extends HookConsumerWidget {
     final boundaryKey = useMemoized(GlobalKey.new);
     final image = useMemoizedFuture<ui.Image?>(
       () async {
-        final bytes = File(path).readAsBytesSync();
+        final bytes = await File(path).readAsBytes();
         final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
         final codec = await PaintingBinding.instance
             .instantiateImageCodecWithSize(buffer);
@@ -60,9 +61,15 @@ class _ImageEditorDialog extends HookConsumerWidget {
       assert(false, 'image is null');
       return const SizedBox();
     }
-    return BlocProvider<_ImageEditorBloc>(
-      create: (context) =>
-          _ImageEditorBloc(path: path, image: uiImage, snapshot: snapshot),
+    final editorNotifier = useMemoized(
+      () =>
+          _ImageEditorNotifier(path: path, image: uiImage, snapshot: snapshot),
+      [path, uiImage, snapshot],
+    );
+    useEffect(() => editorNotifier.dispose, [editorNotifier]);
+
+    return ChangeNotifierProvider<_ImageEditorNotifier>.value(
+      value: editorNotifier,
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: ColoredBox(
@@ -94,108 +101,41 @@ class _ImageEditorDialog extends HookConsumerWidget {
   }
 }
 
-class CustomDrawLine extends Equatable {
-  const CustomDrawLine(this.path, this.color, this.width, this.eraser);
-
-  final Path path;
-  final Color color;
-  final double width;
-  final bool eraser;
-
-  @override
-  List<Object?> get props => [path, color, width, eraser];
-}
-
-enum DrawMode { none, brush, eraser }
-
-class ImageEditorSnapshot {
-  ImageEditorSnapshot({
-    required this.imageRotate,
+class _ImageTransform {
+  const _ImageTransform({
+    required this.bytes,
+    required this.width,
+    required this.height,
     required this.flip,
-    required this.customDrawLines,
-    required this.cropRect,
-    required this.rawImagePath,
-    required this.imagePath,
+    required this.rotateDegree,
   });
 
-  final ImageRotate imageRotate;
+  final Uint8List bytes;
+  final int width;
+  final int height;
   final bool flip;
-  final List<CustomDrawLine> customDrawLines;
-  final Rect cropRect;
-  final String rawImagePath;
-  final String imagePath;
+  final int rotateDegree;
 }
 
-class _ImageEditorState extends Equatable with EquatableMixin {
-  const _ImageEditorState({
-    required this.rotate,
-    required this.flip,
-    required this.drawLines,
-    required this.drawColor,
-    required this.drawMode,
-    required this.canRedo,
-    required this.cropRect,
-    required this.image,
-  });
-
-  final ImageRotate rotate;
-
-  final bool flip;
-
-  final DrawMode drawMode;
-
-  final List<CustomDrawLine> drawLines;
-
-  /// Crop area of the image. zero means no crop.
-  final Rect cropRect;
-
-  final Color drawColor;
-
-  final bool canRedo;
-
-  final ui.Image image;
-
-  bool get canReset =>
-      rotate != ImageRotate.none ||
-      drawLines.isNotEmpty ||
-      flip ||
-      cropRect.width.round() != image.width ||
-      cropRect.height.round() != image.height;
-
-  @override
-  List<Object?> get props => [
-    rotate,
-    flip,
-    drawLines,
-    drawColor,
-    drawMode,
-    canRedo,
-    cropRect,
-    image,
-  ];
-
-  _ImageEditorState copyWith({
-    ImageRotate? rotate,
-    bool? flip,
-    List<CustomDrawLine>? drawLines,
-    Color? drawColor,
-    DrawMode? drawMode,
-    bool? canRedo,
-    Rect? cropRect,
-  }) => _ImageEditorState(
-    rotate: rotate ?? this.rotate,
-    flip: flip ?? this.flip,
-    drawLines: drawLines ?? this.drawLines,
-    drawColor: drawColor ?? this.drawColor,
-    drawMode: drawMode ?? this.drawMode,
-    canRedo: canRedo ?? this.canRedo,
-    cropRect: cropRect ?? this.cropRect,
-    image: image,
+Uint8List _encodeTransformedPng(_ImageTransform transform) {
+  var imgImage = img.Image.fromBytes(
+    width: transform.width,
+    height: transform.height,
+    bytes: transform.bytes.buffer,
+    order: img.ChannelOrder.rgba,
   );
+
+  if (transform.flip) {
+    img.flipHorizontal(imgImage);
+  }
+  if (transform.rotateDegree != 0) {
+    imgImage = img.copyRotate(imgImage, angle: transform.rotateDegree);
+  }
+  return Uint8List.fromList(img.encodePng(imgImage));
 }
 
-class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
-  _ImageEditorBloc({
+class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
+  _ImageEditorNotifier({
     required this.path,
     required this.image,
     ImageEditorSnapshot? snapshot,
@@ -220,8 +160,17 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       _customDrawLines.addAll(snapshot.customDrawLines);
       setCropRect(snapshot.cropRect);
       _notifyCustomDrawUpdated();
-      emit(state.copyWith(rotate: snapshot.imageRotate, flip: snapshot.flip));
+      _setState(
+        state.copyWith(rotate: snapshot.imageRotate, flip: snapshot.flip),
+      );
     }
+  }
+
+  _ImageEditorState get state => value;
+
+  void _setState(_ImageEditorState state) {
+    if (state == value) return;
+    value = state;
   }
 
   final String path;
@@ -254,18 +203,18 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       }
     }
 
-    emit(state.copyWith(rotate: next()));
+    _setState(state.copyWith(rotate: next()));
   }
 
   void flip() {
-    emit(state.copyWith(flip: !state.flip));
+    _setState(state.copyWith(flip: !state.flip));
   }
 
   void enterDrawMode(DrawMode mode) {
     _backupDrawLines
       ..clear()
       ..addAll(_customDrawLines);
-    emit(state.copyWith(drawMode: mode));
+    _setState(state.copyWith(drawMode: mode));
   }
 
   void exitDrawingMode({bool applyTempDraw = false}) {
@@ -278,7 +227,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
       _backupDrawLines.clear();
       _notifyCustomDrawUpdated();
     }
-    emit(state.copyWith(drawMode: DrawMode.none));
+    _setState(state.copyWith(drawMode: DrawMode.none));
   }
 
   void startDrawEvent(Offset position) {
@@ -323,7 +272,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }
 
   void _notifyCustomDrawUpdated() {
-    emit(
+    _setState(
       state.copyWith(
         drawLines: [
           ..._customDrawLines,
@@ -341,7 +290,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }
 
   void setCustomDrawColor(Color color) {
-    emit(state.copyWith(drawColor: color));
+    _setState(state.copyWith(drawColor: color));
   }
 
   void redoDraw() {
@@ -370,7 +319,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
 
   void setCropRatio(double? ratio) {
     if (ratio == null) {
-      emit(
+      _setState(
         state.copyWith(
           cropRect: Rect.fromLTWH(
             0,
@@ -389,7 +338,7 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     final height = width / ratio;
     final x = (image.width.toDouble() - width) / 2;
     final y = (image.height.toDouble() - height) / 2;
-    emit(state.copyWith(cropRect: Rect.fromLTWH(x, y, width, height)));
+    _setState(state.copyWith(cropRect: Rect.fromLTWH(x, y, width, height)));
   }
 
   Future<Uint8List?> _flipAndRotateImage(ui.Image image) async {
@@ -397,21 +346,18 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
     if (bytes == null) {
       return null;
     }
-    var imgImage = img.Image.fromBytes(
-      width: image.width,
-      height: image.height,
-      bytes: bytes.buffer,
-      order: img.ChannelOrder.rgba,
+    return compute(
+      _encodeTransformedPng,
+      _ImageTransform(
+        bytes: bytes,
+        width: image.width,
+        height: image.height,
+        flip: state.flip,
+        rotateDegree: state.rotate == ImageRotate.none
+            ? 0
+            : (360 - state.rotate.degree).toInt(),
+      ),
     );
-
-    if (state.flip) {
-      img.flipHorizontal(imgImage);
-    }
-    if (state.rotate != ImageRotate.none) {
-      imgImage = img.copyRotate(imgImage, angle: 360 - state.rotate.degree);
-    }
-    final data = img.encodePng(imgImage);
-    return Uint8List.fromList(data);
   }
 
   Future<ImageEditorSnapshot?> takeSnapshot() async {
@@ -498,14 +444,14 @@ class _ImageEditorBloc extends Cubit<_ImageEditorState> with SubscribeMixin {
   }
 
   void setCropRect(Rect cropRect) {
-    emit(state.copyWith(cropRect: cropRect));
+    _setState(state.copyWith(cropRect: cropRect));
   }
 
   void reset() {
     _redoDrawLines.addAll(_customDrawLines);
     _customDrawLines.clear();
     _notifyCustomDrawUpdated();
-    emit(
+    _setState(
       state.copyWith(
         cropRect: Rect.fromLTWH(
           0,
@@ -538,20 +484,12 @@ class _Preview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isFlip =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.flip,
-        );
-
-    final rotate =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, ImageRotate>(
-          converter: (state) => state.rotate,
-        );
-
-    final drawMode =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
-          converter: (state) => state.drawMode,
-        );
+    final editorState = useValueListenable(
+      context.read<_ImageEditorNotifier>(),
+    );
+    final isFlip = editorState.flip;
+    final rotate = editorState.rotate;
+    final drawMode = editorState.drawMode;
 
     final transformedViewPortSize = rotate.apply(viewPortSize);
     final scale = math.min<double>(
@@ -683,10 +621,9 @@ class _CropRectWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cropRect =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Rect>(
-          converter: (state) => state.cropRect,
-        );
+    final cropRect = useValueListenable(
+      context.read<_ImageEditorNotifier>(),
+    ).cropRect;
 
     final transformedRect = useMemoized(() {
       if (cropRect.isEmpty || cropRect.isInfinite) {
@@ -712,94 +649,88 @@ class _CropRectWidget extends HookConsumerWidget {
       cacheTransformedRect.value = transformedRect;
     }, [transformedRect]);
 
+    final hoverDragArea = useState<_ImageDragArea?>(null);
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        GestureDetector(
-          onPanStart: (details) {
-            final offset = details.localPosition;
-            const cornerSize = 30.0;
+        MouseRegion(
+          cursor: hoverDragArea.value.cursor,
+          onHover: (event) {
+            hoverDragArea.value = _hitTestImageDragArea(
+              transformedRect,
+              event.localPosition,
+            );
+          },
+          onExit: (_) => hoverDragArea.value = null,
+          child: GestureDetector(
+            onPanStart: (details) {
+              trackingRectCorner.value = _hitTestImageDragArea(
+                transformedRect,
+                details.localPosition,
+              );
+            },
+            onPanUpdate: (details) {
+              final corner = trackingRectCorner.value;
+              if (corner == null) {
+                return;
+              }
+              final delta = details.delta;
+              final imageRect = Offset.zero & rotate.apply(scaledImageSize);
+              // Use cacheTransformedRect to track mouse/gesture change.
+              // Cannot use transformedRect because transformedRect update by build method
+              // which may slow than gesture update.
+              final currentCropRect = cacheTransformedRect.value;
+              Rect cropRect;
+              switch (corner) {
+                case _ImageDragArea.topLeft:
+                  cropRect = Rect.fromPoints(
+                    currentCropRect.topLeft + delta,
+                    currentCropRect.bottomRight,
+                  ).ensureInside(imageRect);
+                case _ImageDragArea.topRight:
+                  cropRect = Rect.fromPoints(
+                    currentCropRect.bottomLeft,
+                    currentCropRect.topRight + delta,
+                  ).ensureInside(imageRect);
+                case _ImageDragArea.bottomLeft:
+                  cropRect = Rect.fromPoints(
+                    currentCropRect.bottomLeft + delta,
+                    currentCropRect.topRight,
+                  ).ensureInside(imageRect);
+                case _ImageDragArea.bottomRight:
+                  cropRect = Rect.fromPoints(
+                    currentCropRect.topLeft,
+                    currentCropRect.bottomRight + delta,
+                  ).ensureInside(imageRect);
+                case _ImageDragArea.center:
+                  cropRect = currentCropRect
+                      .shift(delta)
+                      .ensureShiftInside(imageRect);
+              }
 
-            if (!transformedRect.contains(offset)) {
+              if (cropRect.isEmpty) {
+                return;
+              }
+              cacheTransformedRect.value = cropRect;
+              final rect = transformInsideRect(
+                cropRect.flipHorizontalInParent(imageRect, isFlip),
+                imageRect,
+                rotate.radius,
+              ).scaled(1 / scale);
+              context.read<_ImageEditorNotifier>().setCropRect(rect);
+            },
+            onPanEnd: (details) {
               trackingRectCorner.value = null;
-              return;
-            }
-            if (offset.dx < transformedRect.left + cornerSize &&
-                offset.dy < transformedRect.top + cornerSize) {
-              trackingRectCorner.value = _ImageDragArea.topLeft;
-            } else if (offset.dx > transformedRect.right - cornerSize &&
-                offset.dy < transformedRect.top + cornerSize) {
-              trackingRectCorner.value = _ImageDragArea.topRight;
-            } else if (offset.dx < transformedRect.left + cornerSize &&
-                offset.dy > transformedRect.bottom - cornerSize) {
-              trackingRectCorner.value = _ImageDragArea.bottomLeft;
-            } else if (offset.dx > transformedRect.right - cornerSize &&
-                offset.dy > transformedRect.bottom - cornerSize) {
-              trackingRectCorner.value = _ImageDragArea.bottomRight;
-            } else {
-              trackingRectCorner.value = _ImageDragArea.center;
-            }
-          },
-          onPanUpdate: (details) {
-            final corner = trackingRectCorner.value;
-            if (corner == null) {
-              return;
-            }
-            final delta = details.delta;
-            final imageRect = Offset.zero & rotate.apply(scaledImageSize);
-            // Use cacheTransformedRect to track mouse/gesture change.
-            // Cannot use transformedRect because transformedRect update by build method
-            // which may slow than gesture update.
-            final currentCropRect = cacheTransformedRect.value;
-            Rect cropRect;
-            switch (corner) {
-              case _ImageDragArea.topLeft:
-                cropRect = Rect.fromPoints(
-                  currentCropRect.topLeft + delta,
-                  currentCropRect.bottomRight,
-                ).ensureInside(imageRect);
-              case _ImageDragArea.topRight:
-                cropRect = Rect.fromPoints(
-                  currentCropRect.bottomLeft,
-                  currentCropRect.topRight + delta,
-                ).ensureInside(imageRect);
-              case _ImageDragArea.bottomLeft:
-                cropRect = Rect.fromPoints(
-                  currentCropRect.bottomLeft + delta,
-                  currentCropRect.topRight,
-                ).ensureInside(imageRect);
-              case _ImageDragArea.bottomRight:
-                cropRect = Rect.fromPoints(
-                  currentCropRect.topLeft,
-                  currentCropRect.bottomRight + delta,
-                ).ensureInside(imageRect);
-              case _ImageDragArea.center:
-                cropRect = currentCropRect
-                    .shift(delta)
-                    .ensureShiftInside(imageRect);
-            }
-
-            if (cropRect.isEmpty) {
-              return;
-            }
-            cacheTransformedRect.value = cropRect;
-            final rect = transformInsideRect(
-              cropRect.flipHorizontalInParent(imageRect, isFlip),
-              imageRect,
-              rotate.radius,
-            ).scaled(1 / scale);
-            context.read<_ImageEditorBloc>().setCropRect(rect);
-          },
-          onPanEnd: (details) {
-            trackingRectCorner.value = null;
-          },
-          child: CustomPaint(
-            painter: _CropShadowOverlayPainter(
-              cropRect: cacheTransformedRect.value,
-              overlayColor: Colors.black.withValues(alpha: 0.4),
-              lineColor: Colors.white,
+            },
+            child: CustomPaint(
+              painter: _CropShadowOverlayPainter(
+                cropRect: cacheTransformedRect.value,
+                overlayColor: Colors.black.withValues(alpha: 0.4),
+                lineColor: Colors.white,
+              ),
+              child: const SizedBox.expand(),
             ),
-            child: const SizedBox.expand(),
           ),
         ),
       ],
@@ -945,14 +876,8 @@ class _CustomDrawingWidget extends HookConsumerWidget {
 
     final scaledImageSize = Size(image.width * scale, image.height * scale);
 
-    final editorBloc = context.read<_ImageEditorBloc>();
-
-    final lines =
-        useBlocStateConverter<
-          _ImageEditorBloc,
-          _ImageEditorState,
-          List<CustomDrawLine>
-        >(bloc: editorBloc, converter: (state) => state.drawLines);
+    final editorNotifier = context.read<_ImageEditorNotifier>();
+    final lines = useValueListenable(editorNotifier).drawLines;
 
     Offset screenToImage(Offset position) {
       final center = viewPortSize.center(Offset.zero);
@@ -984,12 +909,12 @@ class _CustomDrawingWidget extends HookConsumerWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onPanStart: (details) {
-        editorBloc.startDrawEvent(screenToImage(details.localPosition));
+        editorNotifier.startDrawEvent(screenToImage(details.localPosition));
       },
       onPanUpdate: (details) {
-        editorBloc.updateDrawEvent(screenToImage(details.localPosition));
+        editorNotifier.updateDrawEvent(screenToImage(details.localPosition));
       },
-      onPanEnd: (details) => editorBloc.endDrawEvent(),
+      onPanEnd: (details) => editorNotifier.endDrawEvent(),
       child: OverflowBox(
         maxWidth: scaledImageSize.width,
         maxHeight: scaledImageSize.height,
@@ -1004,51 +929,42 @@ class _CustomDrawingWidget extends HookConsumerWidget {
 
 enum _ImageDragArea { topLeft, topRight, bottomLeft, bottomRight, center }
 
-enum ImageRotate { none, quarter, half, threeQuarter }
+const _kImageCropHandleSize = 30.0;
 
-extension _ImageRotateExt on ImageRotate {
-  double get radius {
-    switch (this) {
-      case ImageRotate.none:
-        return 0;
-      case ImageRotate.quarter:
-        return math.pi / 2;
-      case ImageRotate.half:
-        return math.pi;
-      case ImageRotate.threeQuarter:
-        return math.pi * 3 / 2;
-    }
+_ImageDragArea? _hitTestImageDragArea(Rect rect, Offset offset) {
+  if (!rect.contains(offset)) return null;
+  if (offset.dx < rect.left + _kImageCropHandleSize &&
+      offset.dy < rect.top + _kImageCropHandleSize) {
+    return _ImageDragArea.topLeft;
   }
-
-  double get degree {
-    switch (this) {
-      case ImageRotate.none:
-        return 0;
-      case ImageRotate.quarter:
-        return 90;
-      case ImageRotate.half:
-        return 180;
-      case ImageRotate.threeQuarter:
-        return 270;
-    }
+  if (offset.dx > rect.right - _kImageCropHandleSize &&
+      offset.dy < rect.top + _kImageCropHandleSize) {
+    return _ImageDragArea.topRight;
   }
-
-  Size apply(Size size) {
-    if (!_boundRotated) {
-      return size;
-    }
-    return Size(size.height, size.width);
+  if (offset.dx < rect.left + _kImageCropHandleSize &&
+      offset.dy > rect.bottom - _kImageCropHandleSize) {
+    return _ImageDragArea.bottomLeft;
   }
+  if (offset.dx > rect.right - _kImageCropHandleSize &&
+      offset.dy > rect.bottom - _kImageCropHandleSize) {
+    return _ImageDragArea.bottomRight;
+  }
+  return _ImageDragArea.center;
+}
 
-  bool get _boundRotated {
+extension _ImageDragAreaCursor on _ImageDragArea? {
+  MouseCursor get cursor {
     switch (this) {
-      case ImageRotate.none:
-        return false;
-      case ImageRotate.quarter:
-      case ImageRotate.threeQuarter:
-        return true;
-      case ImageRotate.half:
-        return false;
+      case _ImageDragArea.topLeft:
+      case _ImageDragArea.bottomRight:
+        return SystemMouseCursors.resizeUpLeftDownRight;
+      case _ImageDragArea.topRight:
+      case _ImageDragArea.bottomLeft:
+        return SystemMouseCursors.resizeUpRightDownLeft;
+      case _ImageDragArea.center:
+        return SystemMouseCursors.move;
+      case null:
+        return SystemMouseCursors.basic;
     }
   }
 }
@@ -1159,16 +1075,15 @@ class _NormalColorTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentColor =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, Color>(
-          converter: (state) => state.drawColor,
-        );
+    final currentColor = useValueListenable(
+      context.read<_ImageEditorNotifier>(),
+    ).drawColor;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: InkResponse(
         radius: 18,
         onTap: () {
-          context.read<_ImageEditorBloc>().setCustomDrawColor(color);
+          context.read<_ImageEditorNotifier>().setCustomDrawColor(color);
         },
         child: SizedBox(
           width: 28,
@@ -1275,7 +1190,7 @@ class _CustomColorBar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final initialHue = useMemoized(() {
-      final color = context.read<_ImageEditorBloc>().state.drawColor;
+      final color = context.read<_ImageEditorNotifier>().state.drawColor;
       return HSLColor.fromColor(color).hue;
     });
     const maxSlideOffset = 256.0 - 12 - 9.0;
@@ -1322,7 +1237,7 @@ class _CustomColorBar extends HookConsumerWidget {
                 }
                 final color = sliderOffsetToColor(sliderOffset.value);
                 onColorSelected(color);
-                context.read<_ImageEditorBloc>().setCustomDrawColor(color);
+                context.read<_ImageEditorNotifier>().setCustomDrawColor(color);
               },
               child: Material(
                 color: Colors.white,
@@ -1344,17 +1259,16 @@ class _ResetButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canReset =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.canReset,
-        );
+    final canReset = useValueListenable(
+      context.read<_ImageEditorNotifier>(),
+    ).canReset;
     return SizedBox(
       height: 38,
       child: canReset
           ? TextButton(
               child: Text(context.l10n.reset),
               onPressed: () {
-                context.read<_ImageEditorBloc>().reset();
+                context.read<_ImageEditorNotifier>().reset();
               },
             )
           : null,
@@ -1367,10 +1281,9 @@ class _OperationButtons extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final drawMode =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
-          converter: (state) => state.drawMode,
-        );
+    final drawMode = useValueListenable(
+      context.read<_ImageEditorNotifier>(),
+    ).drawMode;
     return Column(
       children: [
         if (drawMode != DrawMode.none)
@@ -1392,29 +1305,15 @@ class _NormalOperationBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final imageEditorBloc = context.read<_ImageEditorBloc>();
+    final imageEditorNotifier = context.read<_ImageEditorNotifier>();
+    final editorState = useValueListenable(imageEditorNotifier);
 
-    final rotated =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.rotate != ImageRotate.none,
-        );
-    final flipped =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.flip,
-        );
-    final hasCustomDraw =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.drawLines.isNotEmpty,
-        );
+    final rotated = editorState.rotate != ImageRotate.none;
+    final flipped = editorState.flip;
+    final hasCustomDraw = editorState.drawLines.isNotEmpty;
     final hasCrop =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) {
-            final width = imageEditorBloc.image.width;
-            final height = imageEditorBloc.image.height;
-            return state.cropRect.width.round() != width ||
-                state.cropRect.height.round() != height;
-          },
-        );
+        editorState.cropRect.width.round() != imageEditorNotifier.image.width ||
+        editorState.cropRect.height.round() != imageEditorNotifier.image.height;
     return Material(
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       color: context.theme.stickerPlaceholderColor,
@@ -1425,7 +1324,7 @@ class _NormalOperationBar extends HookConsumerWidget {
           children: [
             TextButton(
               onPressed: () async {
-                if (imageEditorBloc.state.canReset) {
+                if (editorState.canReset) {
                   final result = await showConfirmMixinDialog(
                     context,
                     context.l10n.editImageClearWarning,
@@ -1442,13 +1341,13 @@ class _NormalOperationBar extends HookConsumerWidget {
             ActionButton(
               color: rotated ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageRotateSvg,
-              onTap: imageEditorBloc.rotate,
+              onTap: imageEditorNotifier.rotate,
             ),
             const SizedBox(width: 4),
             ActionButton(
               color: flipped ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageFlipSvg,
-              onTap: imageEditorBloc.flip,
+              onTap: imageEditorNotifier.flip,
             ),
             const SizedBox(width: 4),
             CustomPopupMenuButton<double>(
@@ -1468,9 +1367,9 @@ class _NormalOperationBar extends HookConsumerWidget {
               ],
               onSelected: (value) {
                 if (value == 0) {
-                  imageEditorBloc.setCropRatio(null);
+                  imageEditorNotifier.setCropRatio(null);
                 } else {
-                  imageEditorBloc.setCropRatio(value);
+                  imageEditorNotifier.setCropRatio(value);
                 }
               },
               color: hasCrop ? context.theme.accent : context.theme.icon,
@@ -1481,15 +1380,13 @@ class _NormalOperationBar extends HookConsumerWidget {
               color: hasCustomDraw ? context.theme.accent : context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
-                context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
+                imageEditorNotifier.enterDrawMode(DrawMode.brush);
               },
             ),
             TextButton(
               onPressed: () async {
                 showToastLoading();
-                final snapshot = await context
-                    .read<_ImageEditorBloc>()
-                    .takeSnapshot();
+                final snapshot = await imageEditorNotifier.takeSnapshot();
                 if (snapshot == null) {
                   showToastFailed(null);
                   return;
@@ -1511,18 +1408,11 @@ class _DrawOperationBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final drawMode =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, DrawMode>(
-          converter: (state) => state.drawMode,
-        );
-    final canRedo =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.canRedo,
-        );
-    final canUndo =
-        useBlocStateConverter<_ImageEditorBloc, _ImageEditorState, bool>(
-          converter: (state) => state.drawLines.isNotEmpty,
-        );
+    final imageEditorNotifier = context.read<_ImageEditorNotifier>();
+    final editorState = useValueListenable(imageEditorNotifier);
+    final drawMode = editorState.drawMode;
+    final canRedo = editorState.canRedo;
+    final canUndo = editorState.drawLines.isNotEmpty;
     return Material(
       borderRadius: const BorderRadius.all(Radius.circular(8)),
       color: context.theme.stickerPlaceholderColor,
@@ -1532,9 +1422,7 @@ class _DrawOperationBar extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
-              onPressed: () {
-                context.read<_ImageEditorBloc>().exitDrawingMode();
-              },
+              onPressed: imageEditorNotifier.exitDrawingMode,
               child: Text(
                 context.l10n.cancel,
                 style: TextStyle(color: context.theme.text),
@@ -1545,9 +1433,7 @@ class _DrawOperationBar extends HookConsumerWidget {
                   ? context.theme.icon
                   : context.theme.icon.withValues(alpha: 0.2),
               name: Resources.assetsImagesEditImageUndoSvg,
-              onTap: () {
-                context.read<_ImageEditorBloc>().undoDraw();
-              },
+              onTap: imageEditorNotifier.undoDraw,
             ),
             const SizedBox(width: 4),
             ActionButton(
@@ -1555,9 +1441,7 @@ class _DrawOperationBar extends HookConsumerWidget {
                   ? context.theme.icon
                   : context.theme.icon.withValues(alpha: 0.2),
               name: Resources.assetsImagesEditImageRedoSvg,
-              onTap: () {
-                context.read<_ImageEditorBloc>().redoDraw();
-              },
+              onTap: imageEditorNotifier.redoDraw,
             ),
             const SizedBox(width: 4),
             ActionButton(
@@ -1566,7 +1450,7 @@ class _DrawOperationBar extends HookConsumerWidget {
                   : context.theme.icon,
               name: Resources.assetsImagesEditImageDrawSvg,
               onTap: () {
-                context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.brush);
+                imageEditorNotifier.enterDrawMode(DrawMode.brush);
               },
             ),
             ActionButton(
@@ -1575,14 +1459,12 @@ class _DrawOperationBar extends HookConsumerWidget {
                   : context.theme.icon,
               name: Resources.assetsImagesEditImageEraseSvg,
               onTap: () {
-                context.read<_ImageEditorBloc>().enterDrawMode(DrawMode.eraser);
+                imageEditorNotifier.enterDrawMode(DrawMode.eraser);
               },
             ),
             TextButton(
               onPressed: () {
-                context.read<_ImageEditorBloc>().exitDrawingMode(
-                  applyTempDraw: true,
-                );
+                imageEditorNotifier.exitDrawingMode(applyTempDraw: true);
               },
               child: Text(context.l10n.done),
             ),

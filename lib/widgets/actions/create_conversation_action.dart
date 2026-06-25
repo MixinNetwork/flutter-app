@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../ui/provider/conversation_provider.dart';
+import '../../ui/home/conversation/conversation_focus.dart';
 import '../../utils/extension/extension.dart';
 import '../user_selector/conversation_selector.dart';
 import 'actions.dart';
@@ -23,6 +23,6 @@ class CreateConversationAction extends Action<CreateConversationIntent> {
     }
     final userId = list.first.userId!;
 
-    await ConversationStateNotifier.selectUser(context, userId);
+    await ConversationFocus.selectUser(context, userId);
   }
 }

@@ -10,6 +10,7 @@ import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
 import '../generated/l10n.dart';
 
+import '../ui/home/conversation/conversation_focus.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/slide_category_provider.dart';
@@ -198,7 +199,7 @@ class NotificationService {
 
           final conversationId =
               event.queryParameters[_keyConversationId] ?? event.host;
-          ConversationStateNotifier.selectConversation(
+          ConversationFocus.selectConversation(
             context,
             conversationId,
             initIndexMessageId: event.path,
