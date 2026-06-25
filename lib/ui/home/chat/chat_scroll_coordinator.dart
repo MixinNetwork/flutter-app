@@ -102,6 +102,9 @@ class ChatScrollCoordinator {
   int _programmaticBottomScrollDepth = 0;
   int _jumpButtonFrozenUpdates = 0;
   bool _followTailAfterProgrammaticScroll = false;
+  double _lastTracedScrollPixels = double.nan;
+  double _lastTracedScrollMax = double.nan;
+  double _lastTracedScrollDistanceToBottom = double.nan;
 
   void captureViewportState(
     List<MessageItem> messages,
@@ -113,6 +116,12 @@ class ChatScrollCoordinator {
     _tailFollowAnchorSnapshot = _tailFollowEligible
         ? _tailFollowAnchorSnapshotFromViewport()
         : null;
+    traceChatScroll(
+      'capture tailEligible=$_tailFollowEligible '
+      'anchor=${shortMessageId(_tailFollowAnchorSnapshot?.messageId)} '
+      'anchorBottom=${formatDouble(_tailFollowAnchorSnapshot?.bottom)} '
+      '${_formatScrollState()}',
+    );
   }
 
   void updateMessages(
@@ -237,6 +246,16 @@ class ChatScrollCoordinator {
     _scheduleViewportStateUpdate(
       updateVisibleDate: notification is ScrollEndNotification,
     );
+    if (notification is ScrollStartNotification ||
+        notification is ScrollEndNotification ||
+        notification is UserScrollNotification) {
+      traceChatScroll(
+        'notification ${notification.runtimeType} '
+        'direction=${notification is UserScrollNotification ? notification.direction : '-'} '
+        'drag=${notification is ScrollStartNotification ? notification.dragDetails != null : '-'} '
+        '${formatScrollMetrics(notification.metrics)}',
+      );
+    }
     _unlockPreloadOnUserScrollIntent(notification);
     if (notification is! ScrollUpdateNotification) return false;
     if (_programmaticScrollDepth > 0) {
@@ -505,6 +524,10 @@ class ChatScrollCoordinator {
   }) async {
     _clearJumpButtonFreeze();
     _programmaticBottomScrollDepth++;
+    traceChatScroll(
+      'bottom-jump start animated=$animated '
+      'direction=$animationDirection ${_formatScrollState()}',
+    );
     try {
       await _jumpToClamped(
         scrollController.position.maxScrollExtent,
@@ -514,6 +537,7 @@ class ChatScrollCoordinator {
       );
     } finally {
       _programmaticBottomScrollDepth--;
+      traceChatScroll('bottom-jump done ${_formatScrollState()}');
     }
   }
 
@@ -744,10 +768,16 @@ class ChatScrollCoordinator {
       'delta=${formatDouble(delta)} start=${formatDouble(start)} '
       '${formatScrollMetrics(position)}',
     );
-    scrollController.jumpTo(start);
+    traceChatScroll(
+      'tail-follow start anchor=${shortMessageId(snapshot.messageId)} '
+      'delta=${formatDouble(delta)} start=${formatDouble(start)} '
+      '${_formatScrollState()}',
+    );
+    scrollController.position.correctPixels(start);
   }
 
   void _scheduleScrollPositionUpdate() {
+    _traceScrollPosition();
     _scheduleViewportStateUpdate(updateVisibleDate: false);
   }
 
@@ -791,6 +821,13 @@ class ChatScrollCoordinator {
     List<MessageItem> messages,
     Map<String, GlobalKey> keysByMessageId,
   ) {
+    final previousCount = _messages.length;
+    final previousBottomMessageId = _messages.isEmpty
+        ? null
+        : _messages.last.messageId;
+    final nextBottomMessageId = messages.isEmpty
+        ? null
+        : messages.last.messageId;
     final messageWindowChanged = !_hasSameMessageIds(messages);
     if (!identical(_messages, messages)) {
       _messages = messages;
@@ -801,6 +838,12 @@ class ChatScrollCoordinator {
     }
     if (messageWindowChanged) {
       _freezeJumpButton();
+      traceChatScroll(
+        'messages changed count=$previousCount->${messages.length} '
+        'bottom=${shortMessageId(previousBottomMessageId)}'
+        '->${shortMessageId(nextBottomMessageId)} '
+        '${_formatScrollState()}',
+      );
     }
     _keysByMessageId = keysByMessageId;
   }
@@ -843,6 +886,40 @@ class ChatScrollCoordinator {
   RenderBox? get _viewportRender {
     final object = _viewportKey?.currentContext?.findRenderObject();
     return object is RenderBox ? object : null;
+  }
+
+  void _traceScrollPosition() {
+    if (!chatScrollTraceEnabled || !scrollController.hasClients) return;
+    final position = scrollController.position;
+    if (!position.hasContentDimensions) return;
+    final distanceToBottom = _distanceToBottom();
+    final pixels = position.pixels;
+    final max = position.maxScrollExtent;
+    final shouldTrace =
+        _lastTracedScrollPixels.isNaN ||
+        (pixels - _lastTracedScrollPixels).abs() >= 1 ||
+        (max - _lastTracedScrollMax).abs() >= 1 ||
+        (distanceToBottom - _lastTracedScrollDistanceToBottom).abs() >= 1;
+    if (!shouldTrace) return;
+    _lastTracedScrollPixels = pixels;
+    _lastTracedScrollMax = max;
+    _lastTracedScrollDistanceToBottom = distanceToBottom;
+    traceChatScroll(
+      'position distanceBottom=${formatDouble(distanceToBottom)} '
+      'programmatic=$_programmaticScrollDepth '
+      'bottomProgrammatic=$_programmaticBottomScrollDepth '
+      'followPending=$_followTailAfterProgrammaticScroll '
+      '${formatScrollMetrics(position)}',
+    );
+  }
+
+  String _formatScrollState() {
+    if (!scrollController.hasClients) return 'no-scroll-client';
+    return 'distanceBottom=${formatDouble(_distanceToBottom())} '
+        'programmatic=$_programmaticScrollDepth '
+        'bottomProgrammatic=$_programmaticBottomScrollDepth '
+        'messages=${_messages.length} '
+        '${formatScrollMetrics(scrollController.position)}';
   }
 
   void _traceTargetAfterLayout(
