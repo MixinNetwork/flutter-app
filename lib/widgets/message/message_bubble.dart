@@ -142,8 +142,9 @@ class MessageBubble extends HookConsumerWidget {
       );
     }
 
-    if (highlightEnabled || menuHighlighted) {
-      _child = _MessageBubbleHighlight(
+    final hasHighlightSurface = hasQuoteMessage || showBubble || highlightMedia;
+    if (hasHighlightSurface && (highlightEnabled || menuHighlighted)) {
+      _child = MessageBubbleHighlight(
         messageId: context.message.messageId,
         enabled: highlightEnabled,
         clipper: clipper,
@@ -240,8 +241,8 @@ class MessageBubble extends HookConsumerWidget {
   }
 }
 
-class _MessageBubbleHighlight extends StatefulWidget {
-  const _MessageBubbleHighlight({
+class MessageBubbleHighlight extends StatefulWidget {
+  const MessageBubbleHighlight({
     required this.messageId,
     required this.enabled,
     required this.clipper,
@@ -249,6 +250,7 @@ class _MessageBubbleHighlight extends StatefulWidget {
     required this.media,
     required this.menuHighlighted,
     required this.child,
+    super.key,
   });
 
   final String messageId;
@@ -260,11 +262,10 @@ class _MessageBubbleHighlight extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_MessageBubbleHighlight> createState() =>
-      _MessageBubbleHighlightState();
+  State<MessageBubbleHighlight> createState() => _MessageBubbleHighlightState();
 }
 
-class _MessageBubbleHighlightState extends State<_MessageBubbleHighlight> {
+class _MessageBubbleHighlightState extends State<MessageBubbleHighlight> {
   BlinkNotifier? _notifier;
   BlinkState _blinkState = const BlinkState();
 
