@@ -9,7 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart';
 import 'package:super_context_menu/src/default_builder/group_intrinsic_width.dart';
@@ -19,10 +20,8 @@ import 'package:super_context_menu/src/scaffold/desktop/menu_widget_builder.dart
 import 'package:super_context_menu/src/scaffold/mobile/menu_widget_builder.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
-import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
 import '../utils/platform.dart';
 import 'action_button.dart';
 import 'hover_overlay.dart';
@@ -43,14 +42,11 @@ class MenusWithSeparator extends Menu {
        );
 }
 
-class _OffsetCubit extends SimpleCubit<Offset?> {
-  _OffsetCubit(super.state);
-}
-
 extension ContextMenuPortalEntrySender on BuildContext {
-  void sendMenuPosition(Offset offset) => read<_OffsetCubit>().emit(offset);
+  set menuPosition(Offset offset) =>
+      read<ValueNotifier<Offset?>>().value = offset;
 
-  void closeMenu() => read<_OffsetCubit?>()?.emit(null);
+  void closeMenu() => read<ValueNotifier<Offset?>?>()?.value = null;
 }
 
 typedef CustomPopupMenuItemBuilder<T> =
@@ -65,7 +61,6 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
     this.icon,
     this.color,
     this.alignment,
-    this.useActionButton = true,
   });
 
   final CustomPopupMenuItemBuilder<T> itemBuilder;
@@ -74,59 +69,43 @@ class CustomPopupMenuButton<T> extends HookConsumerWidget {
   final Widget? child;
   final Color? color;
   final Alignment? alignment;
-  final bool useActionButton;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    void showMenu(TapUpDetails details, BuildContext buildContext) {
-      d('onTapUp: $alignment');
-      final targetAlignment = alignment;
-      if (targetAlignment == null) {
-        buildContext.sendMenuPosition(details.globalPosition);
-        return;
-      }
-      final renderBox = buildContext.findRenderObject() as RenderBox?;
-      if (renderBox != null) {
-        var position = targetAlignment.withinRect(renderBox.paintBounds);
-        position = renderBox.localToGlobal(position);
-        buildContext.sendMenuPosition(position);
-      } else {
-        buildContext.sendMenuPosition(details.globalPosition);
-      }
-    }
-
-    return ContextMenuPortalEntry(
-      interactive: false,
-      buildMenus: () => itemBuilder(context)
-          .map(
-            (e) => ContextMenu(
-              title: e.title,
-              onTap: () => onSelected?.call(e.value),
-              isDestructiveAction: e.isDestructiveAction,
-              icon: e.icon,
-            ),
-          )
-          .toList(),
-      child: Builder(
-        builder: (context) {
-          final triggerChild = child;
-          if (!useActionButton && triggerChild != null) {
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTapUp: (details) => showMenu(details, context),
-              child: triggerChild,
-            );
+  Widget build(BuildContext context, WidgetRef ref) => ContextMenuPortalEntry(
+    interactive: false,
+    buildMenus: () => itemBuilder(context)
+        .map(
+          (e) => ContextMenu(
+            title: e.title,
+            onTap: () => onSelected?.call(e.value),
+            isDestructiveAction: e.isDestructiveAction,
+            icon: e.icon,
+          ),
+        )
+        .toList(),
+    child: Builder(
+      builder: (context) => ActionButton(
+        name: icon,
+        color: color ?? context.theme.icon,
+        onTapUp: (details) {
+          d('onTapUp: $alignment');
+          if (alignment == null) {
+            context.menuPosition = details.globalPosition;
+            return;
           }
-          return ActionButton(
-            name: icon,
-            color: color ?? context.theme.icon,
-            onTapUp: (details) => showMenu(details, context),
-            child: child,
-          );
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            var position = alignment!.withinRect(renderBox.paintBounds);
+            position = renderBox.localToGlobal(position);
+            context.menuPosition = position;
+          } else {
+            context.menuPosition = details.globalPosition;
+          }
         },
+        child: child,
       ),
-    );
-  }
+    ),
+  );
 }
 
 class CustomPopupMenuItem<T> {
@@ -165,15 +144,10 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final offsetCubit = useBloc(() => _OffsetCubit(null));
-    final offset = useBlocState<_OffsetCubit, Offset?>(
-      bloc: offsetCubit,
-      when: (state) => state != null,
-    );
-    final visible = useBlocStateConverter<_OffsetCubit, Offset?, bool>(
-      bloc: offsetCubit,
-      converter: (state) => state != null,
-    );
+    final offsetNotifier = useMemoized(() => ValueNotifier<Offset?>(null));
+    useEffect(() => offsetNotifier.dispose, [offsetNotifier]);
+    final offset = useValueListenable(offsetNotifier);
+    final visible = offset != null;
 
     useEffect(() {
       showedMenu?.call(visible);
@@ -181,18 +155,18 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
 
     useEffect(() {
       if (!enable) {
-        offsetCubit.emit(null);
+        offsetNotifier.value = null;
       }
-    }, [enable]);
+    }, [enable, offsetNotifier]);
 
     if (!enable) {
       return child;
     }
-    return Provider.value(
-      value: offsetCubit,
+    return ChangeNotifierProvider.value(
+      value: offsetNotifier,
       child: Barrier(
         visible: visible,
-        onClose: () => offsetCubit.emit(null),
+        onClose: () => offsetNotifier.value = null,
         child: PortalTarget(
           visible: visible,
           portalFollower: Builder(
@@ -212,14 +186,14 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
               if (!interactive) {
                 return;
               }
-              offsetCubit.emit(event.globalPosition);
+              offsetNotifier.value = event.globalPosition;
             },
             onLongPress: (details) {
               if (!interactive) {
                 return;
               }
               if (Platform.isAndroid || Platform.isIOS) {
-                offsetCubit.emit(details.globalPosition);
+                offsetNotifier.value = details.globalPosition;
               }
             },
             onTap: onTap,
@@ -227,7 +201,7 @@ class ContextMenuPortalEntry extends HookConsumerWidget {
               onKeyEvent: (node, key) {
                 final show = offset != null && visible;
                 if (show && key.logicalKey == LogicalKeyboardKey.escape) {
-                  offsetCubit.emit(null);
+                  offsetNotifier.value = null;
                   return KeyEventResult.handled;
                 }
                 return KeyEventResult.ignored;

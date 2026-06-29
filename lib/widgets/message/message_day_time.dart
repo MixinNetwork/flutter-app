@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
+import 'package:provider/provider.dart';
 
 import '../../db/mixin_database.dart' as db;
 import '../../ui/provider/minute_timer_provider.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import 'message.dart';
 import 'message_style.dart';
@@ -19,47 +19,19 @@ class MessageDayTime extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hide =
-        useBlocStateConverter<HiddenMessageDayTimeBloc, DateTime?, bool>(
-          converter: (state) => isSameDay(state, dateTime),
-          keys: [dateTime],
-        );
+    final hiddenDateTime = context.read<ValueNotifier<DateTime?>>();
+    final hide = isSameDay(useValueListenable(hiddenDateTime), dateTime);
     return Center(
       child: Opacity(
         opacity: hide ? 0 : 1,
-        child: _MessageDayTimeWidget(dateTime: dateTime),
+        child: MessageDayTimeChip(dateTime: dateTime),
       ),
     );
   }
 }
 
-class MessageDayTimeItem extends StatelessWidget {
-  const MessageDayTimeItem({
-    required this.dateTime,
-    required this.child,
-    super.key,
-    this.prevDateTime,
-  });
-
-  final DateTime dateTime;
-  final DateTime? prevDateTime;
-  final Widget child;
-
-  bool get showDayTime => !isSameDay(prevDateTime, dateTime);
-
-  @override
-  Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      if (showDayTime) MessageDayTime(dateTime: dateTime),
-      child,
-    ],
-  );
-}
-
-class _MessageDayTimeWidget extends HookConsumerWidget {
-  const _MessageDayTimeWidget({required this.dateTime});
+class MessageDayTimeChip extends HookConsumerWidget {
+  const MessageDayTimeChip({required this.dateTime, super.key});
 
   final DateTime dateTime;
 
@@ -91,10 +63,29 @@ class _MessageDayTimeWidget extends HookConsumerWidget {
   }
 }
 
-class HiddenMessageDayTimeBloc extends Cubit<DateTime?> {
-  HiddenMessageDayTimeBloc() : super(null);
+class MessageDayTimeItem extends StatelessWidget {
+  const MessageDayTimeItem({
+    required this.dateTime,
+    required this.child,
+    super.key,
+    this.prevDateTime,
+  });
 
-  void update(DateTime? dateTime) => emit(dateTime);
+  final DateTime dateTime;
+  final DateTime? prevDateTime;
+  final Widget child;
+
+  bool get showDayTime => !isSameDay(prevDateTime, dateTime);
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (showDayTime) MessageDayTime(dateTime: dateTime),
+      child,
+    ],
+  );
 }
 
 class _CurrentShowingMessages {
@@ -104,32 +95,38 @@ class _CurrentShowingMessages {
   final List<Element> elements = [];
   final List<Element?> dayTimeElements = [];
 
-  void dumpKeyedSubtree(Element element, {bool reverse = false}) {
-    final item = element.descendantFirstWhere((e) {
-      final widget = e.widget;
-      return widget is MessageItemWidget || widget is MessageDayTimeItem;
-    });
-    if (item == null) {
-      return;
-    }
-    final widget = item.widget;
+  void addEntry(MessageDayTimeViewportEntry entry) {
+    final itemElement = entry.messageKey.currentContext;
+    if (itemElement is! Element) return;
+    final dayTimeElement = entry.dayTimeKey?.currentContext;
+    items.add(entry.message.createdAt);
+    elements.add(itemElement);
+    dayTimeElements.add(dayTimeElement is Element ? dayTimeElement : null);
+  }
 
+  void dumpKeyedSubtree(Element element, {bool reverse = false}) {
+    final item = element.descendantFirstOfOrNull(
+      (e) => e.widget is MessageItemWidget || e.widget is MessageDayTimeItem,
+    );
+    if (item == null) return;
+    final widget = item.widget;
     late final DateTime createdAt;
     DateTime? prevCreatedAt;
-
     if (widget is MessageDayTimeItem) {
       createdAt = widget.dateTime;
       prevCreatedAt = widget.prevDateTime;
     } else if (widget is MessageItemWidget) {
-      createdAt = widget.message.createdAt;
-      prevCreatedAt = widget.prev?.createdAt;
+      final message = widget.row?.message ?? widget.message;
+      final prev = widget.row?.prev ?? widget.prev;
+      createdAt = message.createdAt;
+      prevCreatedAt = prev?.createdAt;
     } else {
       return;
     }
 
     final dayTimeElement = !isSameDay(createdAt, prevCreatedAt)
-        ? element.descendantFirstWhere(
-            (e) => e.widget is _MessageDayTimeWidget,
+        ? element.descendantFirstOfOrNull(
+            (e) => e.widget is MessageDayTimeChip,
           )
         : null;
     if (!reverse) {
@@ -144,6 +141,18 @@ class _CurrentShowingMessages {
   }
 }
 
+class MessageDayTimeViewportEntry {
+  const MessageDayTimeViewportEntry({
+    required this.message,
+    required this.messageKey,
+    this.dayTimeKey,
+  });
+
+  final db.MessageItem message;
+  final GlobalKey messageKey;
+  final GlobalKey? dayTimeKey;
+}
+
 class MessageDayTimeViewportWidget extends HookConsumerWidget {
   const MessageDayTimeViewportWidget._create(
     this._traversalCurrentShowingMessageElements, {
@@ -156,31 +165,17 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   factory MessageDayTimeViewportWidget.chatPage({
     required Widget child,
     required ScrollController scrollController,
-    required GlobalKey topKey,
-    required GlobalKey bottomKey,
-    required db.MessageItem? center,
-    required GlobalKey? centerKey,
+    required List<MessageDayTimeViewportEntry> entries,
     Key? key,
   }) => MessageDayTimeViewportWidget._create(
     () {
       final result = _CurrentShowingMessages();
-
-      topKey.currentContext!.visitChildElements(
-        (e) => result.dumpKeyedSubtree(e, reverse: true),
-      );
-
-      final centerContext = centerKey?.currentContext;
-      if (center != null && centerContext != null && centerContext is Element) {
-        result.dumpKeyedSubtree(centerContext);
-      }
-
-      bottomKey.currentContext!.visitChildElements(result.dumpKeyedSubtree);
-
+      entries.forEach(result.addEntry);
       return result;
     },
     key: key,
     scrollController: scrollController,
-    reTraversalKey: centerKey,
+    reTraversalKey: entries,
     child: child,
   );
 
@@ -194,11 +189,11 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   }) => MessageDayTimeViewportWidget._create(
     () {
       final result = _CurrentShowingMessages();
-      final listElement = (listKey.currentContext! as Element)
-          .descendantFirstWhere((e) => e.widget is SliverList);
-      listElement?.visitChildElements((e) {
-        result.dumpKeyedSubtree(e, reverse: reverse);
-      });
+      (listKey.currentContext! as Element)
+          .descendantFirstOfOrNull((e) => e.widget is SliverList)
+          ?.visitChildElements((e) {
+            result.dumpKeyedSubtree(e, reverse: reverse);
+          });
       return result;
     },
     key: key,
@@ -220,10 +215,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dateTime = useState<DateTime?>(null);
     final dateTimeTopOffset = useState<double>(0);
-
-    final bloc = useBloc<HiddenMessageDayTimeBloc>(
-      HiddenMessageDayTimeBloc.new,
-    );
+    final hiddenDateTime = useMemoized(() => ValueNotifier<DateTime?>(null));
+    useEffect(() => hiddenDateTime.dispose, [hiddenDateTime]);
 
     void doTraversal() {
       final result = _traversalCurrentShowingMessageElements();
@@ -303,7 +296,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
         if (offset.dy < render.size.height / 2) {
           // up
           firstInScreenIndex = closestToTopDayTimeIndex;
-          bloc.update(items[closestToTopDayTimeIndex]);
+          hiddenDateTime.value = items[closestToTopDayTimeIndex];
           dateTimeTopOffset.value = 0;
         } else {
           // down
@@ -323,16 +316,16 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
               }
               return true;
             }());
-            bloc.update(null);
+            hiddenDateTime.value = null;
             dateTimeTopOffset.value = offset.dy - render.size.height * 1.5;
           } else {
             firstInScreenIndex = -1;
             dateTimeTopOffset.value = 0;
-            bloc.update(null);
+            hiddenDateTime.value = null;
           }
         }
       } else {
-        bloc.update(null);
+        hiddenDateTime.value = null;
         dateTimeTopOffset.value = 0;
       }
 
@@ -360,8 +353,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
               doTraversal();
             });
           }, [constraints]);
-          return BlocProvider.value(
-            value: bloc,
+          return ChangeNotifierProvider<ValueNotifier<DateTime?>>.value(
+            value: hiddenDateTime,
             child: ClipRect(
               child: Stack(
                 fit: StackFit.expand,
@@ -375,7 +368,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
                       ),
                       child: Align(
                         alignment: Alignment.topCenter,
-                        child: _MessageDayTimeWidget(
+                        child: MessageDayTimeChip(
                           dateTime: dateTime.value!,
                         ),
                       ),
@@ -391,7 +384,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
 }
 
 extension _ElementExt on Element {
-  Element? descendantFirstWhere(bool Function(Element e) predicate) {
+  Element? descendantFirstOfOrNull(bool Function(Element e) predicate) {
     Element? dump(Element element) {
       if (predicate(element)) {
         return element;

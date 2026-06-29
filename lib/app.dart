@@ -3,11 +3,10 @@ import 'dart:io';
 import 'package:drift/isolate.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart' hide AnimatedTheme;
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
-    hide Consumer, FutureProvider, Provider;
+    hide ChangeNotifierProvider, Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
 
 import 'account/account_key_value.dart';
@@ -15,9 +14,9 @@ import 'account/notification_service.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
-import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/conversation/conversation_page.dart';
 import 'ui/home/home.dart';
+import 'ui/home/notifier/conversation_list_controller.dart';
 import 'ui/landing/landing.dart';
 import 'ui/landing/landing_failed.dart';
 import 'ui/provider/account_server_provider.dart';
@@ -26,6 +25,7 @@ import 'ui/provider/mention_cache_provider.dart';
 import 'ui/provider/multi_auth_provider.dart';
 import 'ui/provider/setting_provider.dart';
 import 'ui/provider/slide_category_provider.dart';
+import 'utils/app_lifecycle.dart';
 import 'utils/extension/extension.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
@@ -112,16 +112,12 @@ class _Providers extends HookConsumerWidget {
     if (!asyncAccountServer.hasValue) return app;
     final accountServer = asyncAccountServer.requireValue;
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => ConversationListBloc(
-            ref.read(slideCategoryStateProvider.notifier),
-            accountServer.database,
-            ref.read(mentionCacheProvider),
-          ),
-        ),
-      ],
+    return ChangeNotifierProvider<ConversationListController>(
+      create: (context) => ConversationListController(
+        ref.read(slideCategoryStateProvider.notifier),
+        accountServer.database,
+        ref.read(mentionCacheProvider),
+      ),
       child: Provider<NotificationService>(
         create: (context) => NotificationService(context: context),
         lazy: false,
@@ -138,66 +134,75 @@ class _App extends HookConsumerWidget {
   final Widget home;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => WindowShortcuts(
-    child: GlobalMoveWindow(
-      child: MaterialApp(
-        title: 'Mixin',
-        navigatorObservers: [rootRouteObserver],
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          Localization.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [...Localization.delegate.supportedLocales],
-        theme: ThemeData(
-          colorScheme: ColorScheme.light(
-            primary: lightBrightnessThemeData.text,
-          ),
-          textSelectionTheme: TextSelectionThemeData(
-            cursorColor: lightBrightnessThemeData.accent,
-          ),
-          useMaterial3: true,
-        ).withFallbackFonts(),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.dark(
-            primary: darkBrightnessThemeData.text,
-          ),
-          textSelectionTheme: TextSelectionThemeData(
-            cursorColor: darkBrightnessThemeData.accent,
-          ),
-          useMaterial3: true,
-        ).withFallbackFonts(),
-        themeMode: ref.watch(settingProvider).themeMode,
-        builder: (context, child) {
-          try {
-            context.accountServer.language = Localizations.localeOf(
-              context,
-            ).languageCode;
-          } catch (_) {}
-          final mediaQueryData = MediaQuery.of(context);
-          return BrightnessObserver(
-            lightThemeData: lightBrightnessThemeData,
-            darkThemeData: darkBrightnessThemeData,
-            forceBrightness: ref.watch(settingProvider).brightness,
-            child: MediaQuery(
-              data: mediaQueryData.copyWith(
-                // Different linux distro change the value, e.g. 1.2
-                textScaler: Platform.isLinux
-                    ? TextScaler.noScaling
-                    : mediaQueryData.textScaler,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appActive = useValueListenable(appActiveListener);
+
+    return TickerMode(
+      enabled: appActive,
+      child: WindowShortcuts(
+        child: GlobalMoveWindow(
+          child: MaterialApp(
+            title: 'Mixin',
+            navigatorObservers: [rootRouteObserver],
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: const [
+              Localization.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: [...Localization.delegate.supportedLocales],
+            theme: ThemeData(
+              colorScheme: ColorScheme.light(
+                primary: lightBrightnessThemeData.text,
               ),
-              child: SystemTrayWidget(
-                child: TextInputActionHandler(child: AuthGuard(child: child!)),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: lightBrightnessThemeData.accent,
               ),
-            ),
-          );
-        },
-        home: MixinAppActions(child: MacosMenuBar(child: home)),
+              useMaterial3: true,
+            ).withFallbackFonts(),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.dark(
+                primary: darkBrightnessThemeData.text,
+              ),
+              textSelectionTheme: TextSelectionThemeData(
+                cursorColor: darkBrightnessThemeData.accent,
+              ),
+              useMaterial3: true,
+            ).withFallbackFonts(),
+            themeMode: ref.watch(settingProvider).themeMode,
+            builder: (context, child) {
+              try {
+                context.accountServer.language = Localizations.localeOf(
+                  context,
+                ).languageCode;
+              } catch (_) {}
+              final mediaQueryData = MediaQuery.of(context);
+              return BrightnessObserver(
+                lightThemeData: lightBrightnessThemeData,
+                darkThemeData: darkBrightnessThemeData,
+                forceBrightness: ref.watch(settingProvider).brightness,
+                child: MediaQuery(
+                  data: mediaQueryData.copyWith(
+                    // Different linux distro change the value, e.g. 1.2
+                    textScaler: Platform.isLinux
+                        ? TextScaler.noScaling
+                        : mediaQueryData.textScaler,
+                  ),
+                  child: SystemTrayWidget(
+                    child: TextInputActionHandler(
+                      child: AuthGuard(child: child!),
+                    ),
+                  ),
+                ),
+              );
+            },
+            home: MixinAppActions(child: MacosMenuBar(child: home)),
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _Home extends HookConsumerWidget {
@@ -233,9 +238,9 @@ class _Home extends HookConsumerWidget {
           }
 
           if (deviceId.toLowerCase() != currentDeviceId.toLowerCase()) {
-            final multiAuthCubit = context.multiAuthChangeNotifier;
+            final multiAuthNotifier = context.multiAuthChangeNotifier;
             await accountServer.signOutAndClear();
-            multiAuthCubit.signOut();
+            multiAuthNotifier.signOut();
           }
         } catch (e) {
           w('checkDeviceId error: $e');
@@ -246,7 +251,7 @@ class _Home extends HookConsumerWidget {
     }, [accountServer]);
 
     if (accountServer != null) {
-      BlocProvider.of<ConversationListBloc>(context)
+      context.read<ConversationListController>()
         ..limit =
             MediaQuery.sizeOf(context).height ~/
             (ConversationPage.conversationItemHeight / 1.75)

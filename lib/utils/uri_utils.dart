@@ -6,7 +6,7 @@ import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
 import '../enum/encrypt_category.dart';
-import '../ui/provider/conversation_provider.dart';
+import '../ui/home/conversation/conversation_focus.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
@@ -85,7 +85,7 @@ Future<bool> openUri(
             return false;
           }
 
-          await ConversationStateNotifier.selectConversation(
+          await ConversationFocus.selectConversation(
             context,
             conversation.conversationId,
             conversation: conversation,
@@ -291,47 +291,18 @@ Future<bool> _selectConversation(
       showToastFailed(null);
       return false;
     } else {
-      await ConversationStateNotifier.selectUser(context, userId);
+      await ConversationFocus.selectUser(context, userId);
       return true;
     }
   }
 
-  final initIndexMessageId = await _validatedMessageIdOfConversation(
+  await ConversationFocus.selectConversation(
     context,
     conversationId,
-    uri.messageIdOfConversation,
-  );
-  if (uri.messageIdOfConversation != null && initIndexMessageId == null) {
-    showToastFailed(null);
-    return false;
-  }
-
-  await ConversationStateNotifier.selectConversation(
-    context,
-    conversationId,
-    initIndexMessageId: initIndexMessageId,
     sync: true,
     checkCurrentUserExist: true,
   );
   return true;
-}
-
-Future<String?> _validatedMessageIdOfConversation(
-  BuildContext context,
-  String conversationId,
-  String? messageId,
-) async {
-  final trimmedMessageId = messageId?.trim();
-  if (trimmedMessageId == null || trimmedMessageId.isEmpty) {
-    return null;
-  }
-
-  final messageConversationId = await context.database.messageDao
-      .findConversationIdByMessageId(trimmedMessageId);
-  if (messageConversationId != conversationId) {
-    return null;
-  }
-  return trimmedMessageId;
 }
 
 extension MixinUriExt on Uri {
@@ -405,11 +376,6 @@ extension _MixinUriExtension on Uri {
   String? get startTextOfConversation {
     if (!isMixin) return null;
     return queryParameters['start'];
-  }
-
-  String? get messageIdOfConversation {
-    if (!isMixin) return null;
-    return queryParameters['message_id'];
   }
 
   String? get userOfSend {

@@ -216,13 +216,10 @@ class _CircleList extends HookConsumerWidget {
         Expanded(
           child: ReorderableList(
             controller: controller,
-            onReorder: (oldIndex, newIndex) {
+            onReorderItem: (oldIndex, newIndex) {
               final newList = list.value.toList();
-
-              final _newIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
               final oldItem = newList.removeAt(oldIndex);
-              newList.insert(_newIndex, oldItem);
-
+              newList.insert(newIndex, oldItem);
               list.value = newList;
               context.database.circleDao.updateOrders(list.value);
             },

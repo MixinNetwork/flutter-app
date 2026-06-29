@@ -40,7 +40,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       into(
         db.users,
       ).simpleInsert(user, updateIfConflict: updateIfConflict).then((value) {
-        if (value > 0) {
+        if (updateIfConflict || value > 0) {
           DataBaseEventBus.instance.updateUsers([user.userId]);
         }
         return value;
@@ -48,9 +48,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Future<int> insertSdkUser(sdk.User user) =>
       into(db.users).insertOnConflictUpdate(user.asDbUser).then((value) {
-        if (value > 0) {
-          DataBaseEventBus.instance.updateUsers([user.userId]);
-        }
+        DataBaseEventBus.instance.updateUsers([user.userId]);
         return value;
       });
 
@@ -83,6 +81,36 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   SimpleSelectStatement<Users, User> userById(String userId) => select(db.users)
     ..where((tbl) => tbl.userId.equals(userId))
     ..limit(1);
+
+  Future<List<MentionUser>> mentionUsersByUserIds(
+    Iterable<String> userIds,
+  ) async {
+    final ids = userIds.toSet().toList();
+    if (ids.isEmpty) return const [];
+
+    final result = <MentionUser>[];
+    for (var offset = 0; offset < ids.length; offset += 800) {
+      final chunk = ids.skip(offset).take(800).toList();
+      result.addAll(
+        await (selectOnly(db.users)
+              ..addColumns([
+                db.users.userId,
+                db.users.identityNumber,
+                db.users.fullName,
+              ])
+              ..where(db.users.userId.isIn(chunk)))
+            .map(
+              (row) => MentionUser(
+                userId: row.read(db.users.userId)!,
+                identityNumber: row.read(db.users.identityNumber)!,
+                fullName: row.read(db.users.fullName),
+              ),
+            )
+            .get(),
+      );
+    }
+    return result;
+  }
 
   Selectable<String?> userFullNameByUserId(String userId) =>
       (selectOnly(db.users)

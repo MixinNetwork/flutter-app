@@ -10,9 +10,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
+import '../../ui/home/conversation/conversation_focus.dart';
 import '../../ui/home/conversation/search_list.dart';
 import '../../ui/home/intent.dart';
-import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/recent_conversation_provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -179,9 +179,9 @@ _NavigationState _useNavigationState({
 
     final item = items[selectedIndex.value];
     if (item.type == 'GROUP' || item.type == 'CONTACT') {
-      ConversationStateNotifier.selectConversation(context, item.id);
+      ConversationFocus.selectConversation(context, item.id);
     } else {
-      ConversationStateNotifier.selectUser(context, item.id);
+      ConversationFocus.selectUser(context, item.id);
     }
     Navigator.pop(context);
   }, [items]);

@@ -32,7 +32,7 @@ on:
       - 'v*'
 
 env:
-  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version || '3.41.6' }}
+  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
   FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
 
 jobs:
@@ -56,11 +56,28 @@ jobs:
       - run: sudo apt-get install libstdc++6
 
       - uses: actions/checkout@v4
+
+      - name: Resolve Flutter version
+        id: flutter-version
+        shell: bash
+        run: |
+          if [ -n "$FLUTTER_VERSION" ]; then
+            echo "version=$FLUTTER_VERSION" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          version="$(curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | python3 -c 'import json, sys; data = json.load(sys.stdin); stable = data["current_release"]["stable"]; print(next(release["version"] for release in data["releases"] if release["hash"] == stable))')"
+          if [ -z "$version" ]; then
+            echo "Failed to resolve latest stable Flutter version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - uses: subosito/flutter-action@v2
         with:
           # https://github.com/subosito/flutter-action/issues/345#issuecomment-2657332687
           channel: 'master'
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -273,7 +290,7 @@ jobs:
           overwrite: true
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     if: contains(github.event.inputs.platforms, 'windows') || github.event.inputs.platforms == ''
     steps:
       - uses: actions/checkout@v4

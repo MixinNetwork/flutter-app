@@ -6,8 +6,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/chat/chat_page.dart';
-import '../../ui/provider/conversation_provider.dart';
+import '../../ui/home/conversation/conversation_focus.dart';
+import '../../ui/home/conversation_info_destination.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
@@ -161,8 +161,8 @@ class _UserProfileBody extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              final copy = HardwareKeyboard.instance.logicalKeysPressed
-                  .contains(LogicalKeyboardKey.altLeft);
+              final copy =
+                  HardwareKeyboard.instance.logicalKeysPressed.hasAltKey;
               if (copy) {
                 Clipboard.setData(
                   ClipboardData(text: 'mixin://users/${user.userId}'),
@@ -370,7 +370,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               // skip self.
               return;
             }
-            await ConversationStateNotifier.selectUser(context, user.userId);
+            await ConversationFocus.selectUser(context, user.userId);
             Navigator.pop(context);
           },
           color: context.theme.icon,
@@ -380,10 +380,10 @@ class _UserProfileButtonBar extends StatelessWidget {
           name: Resources.assetsImagesInformationSvg,
           size: 30,
           onTap: () async {
-            await ConversationStateNotifier.selectUser(
+            await ConversationFocus.selectUser(
               context,
               user.userId,
-              initialChatSidePage: ChatSideCubit.infoPage,
+              initialChatSidePage: ConversationInfoDestination.infoPage,
             );
             Navigator.pop(context);
           },

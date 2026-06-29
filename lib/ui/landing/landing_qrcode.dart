@@ -1,34 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../utils/platform.dart';
 import '../../widgets/qr_code.dart';
-import 'bloc/landing_cubit.dart';
-import 'bloc/landing_state.dart';
 import 'landing.dart';
+import 'landing_state.dart';
+import 'notifier/landing_qrcode_notifier.dart';
 
 class LandingQrCodeWidget extends HookConsumerWidget {
   const LandingQrCodeWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = useMemoized(() => Localizations.localeOf(context));
+    final locale = Localizations.localeOf(context);
+    final multiAuthChangeNotifier = context.multiAuthChangeNotifier;
 
-    final landingCubit = useBloc(
-      () => LandingQrCodeCubit(context.multiAuthChangeNotifier, locale),
+    final landingNotifier = useMemoized(
+      () => LandingQrCodeNotifier(multiAuthChangeNotifier, locale),
+      [multiAuthChangeNotifier, locale],
     );
+    useEffect(() => landingNotifier.dispose, [landingNotifier]);
 
-    final status =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, LandingStatus>(
-          bloc: landingCubit,
-          converter: (state) => state.status,
-        );
+    final status = useValueListenable(landingNotifier).status;
 
     final Widget child;
     if (status == LandingStatus.init) {
@@ -61,7 +59,10 @@ class LandingQrCodeWidget extends HookConsumerWidget {
         ],
       );
     }
-    return BlocProvider.value(value: landingCubit, child: child);
+    return provider.ChangeNotifierProvider<LandingQrCodeNotifier>.value(
+      value: landingNotifier,
+      child: child,
+    );
   }
 }
 
@@ -70,20 +71,14 @@ class _QrCode extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final url =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-          converter: (state) => state.authUrl,
-        );
-
-    final visible =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, bool>(
-          converter: (state) => state.status == LandingStatus.needReload,
-        );
-
-    final errorMessage =
-        useBlocStateConverter<LandingQrCodeCubit, LandingState, String?>(
-          converter: (state) => state.errorMessage,
-        );
+    final landingNotifier = provider.Provider.of<LandingQrCodeNotifier>(
+      context,
+      listen: false,
+    );
+    final state = useValueListenable(landingNotifier);
+    final url = state.authUrl;
+    final visible = state.status == LandingStatus.needReload;
+    final errorMessage = state.errorMessage;
 
     Widget? qrCode;
 
@@ -111,8 +106,7 @@ class _QrCode extends HookConsumerWidget {
                   visible: visible,
                   child: _Retry(
                     errorMessage: errorMessage,
-                    onTap: () =>
-                        context.read<LandingQrCodeCubit>().requestAuthUrl(),
+                    onTap: landingNotifier.requestAuthUrl,
                   ),
                 ),
               ],

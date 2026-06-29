@@ -6,14 +6,12 @@ import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../db/dao/user_dao.dart';
-import '../../db/database_event_bus.dart';
+import '../../core/read_model/mention_read_model.dart';
 import '../../db/mixin_database.dart';
-import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
 import '../../utils/rivepod.dart';
 import '../../widgets/mention_panel.dart';
-import '../home/bloc/subscriber_mixin.dart';
+import '../home/notifier/subscriber_mixin.dart';
 import 'conversation_provider.dart';
 import 'database_provider.dart';
 import 'multi_auth_provider.dart';
@@ -39,7 +37,7 @@ class MentionState extends Equatable {
 class MentionStateNotifier extends DistinctStateNotifier<MentionState>
     with SubscriberMixin {
   MentionStateNotifier({
-    required this.userDao,
+    required this.readModel,
     required this.multiAuthChangeNotifier,
     required this.textEditingValueStream,
     required String conversationId,
@@ -69,72 +67,40 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
             }
             if (keyword.isEmpty) {
               if (isBot) {
-                return userDao
-                    .friends()
-                    .watchWithStream(
-                      eventStreams: [
-                        DataBaseEventBus.instance.updateUserIdsStream,
-                      ],
-                      duration: kVerySlowThrottleDuration,
-                    )
-                    .map((value) => _resultToMentionState(keyword, value));
+                return readModel.friends().map(
+                  (value) => _resultToMentionState(keyword, value),
+                );
               }
               if (isGroup ?? false) {
-                return userDao
-                    .groupParticipants(conversationId)
-                    .watchWithStream(
-                      eventStreams: [
-                        DataBaseEventBus.instance.watchUpdateParticipantStream(
-                          conversationIds: [conversationId],
-                        ),
-                      ],
-                      duration: kVerySlowThrottleDuration,
+                return readModel
+                    .groupParticipants(
+                      conversationId: conversationId,
+                      currentUserId:
+                          multiAuthChangeNotifier.current?.userId ?? '',
                     )
                     .map(
-                      (value) => _resultToMentionState(
-                        keyword,
-                        value..removeWhere(
-                          (element) =>
-                              element.userId ==
-                              multiAuthChangeNotifier.current!.userId,
-                        ),
-                      ),
+                      (value) => _resultToMentionState(keyword, value),
                     );
               }
             }
 
             if (isBot) {
-              return userDao
-                  .fuzzySearchBotGroupUser(
+              return readModel
+                  .searchBotGroupUsers(
                     currentUserId:
                         multiAuthChangeNotifier.current?.userId ?? '',
                     conversationId: conversationId,
                     keyword: keyword,
                   )
-                  .watchWithStream(
-                    eventStreams: [
-                      DataBaseEventBus.instance.updateUserIdsStream,
-                      DataBaseEventBus.instance.insertOrReplaceMessageIdsStream,
-                      DataBaseEventBus.instance.deleteMessageIdStream,
-                    ],
-                    duration: kVerySlowThrottleDuration,
-                  )
                   .map((value) => _resultToMentionState(keyword, value));
             }
             if (isGroup ?? false) {
-              return userDao
-                  .fuzzySearchGroupUser(
-                    multiAuthChangeNotifier.current?.userId ?? '',
-                    conversationId,
-                    keyword,
-                  )
-                  .watchWithStream(
-                    eventStreams: [
-                      DataBaseEventBus.instance.watchUpdateParticipantStream(
-                        conversationIds: [conversationId],
-                      ),
-                    ],
-                    duration: kVerySlowThrottleDuration,
+              return readModel
+                  .searchGroupUsers(
+                    currentUserId:
+                        multiAuthChangeNotifier.current?.userId ?? '',
+                    conversationId: conversationId,
+                    keyword: keyword,
                   )
                   .map((value) => _resultToMentionState(keyword, value));
             }
@@ -145,7 +111,7 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
   }
 
   MentionStateNotifier.idle({
-    required this.userDao,
+    required this.readModel,
     required this.multiAuthChangeNotifier,
     required this.textEditingValueStream,
   }) : super(const MentionState());
@@ -202,7 +168,7 @@ class MentionStateNotifier extends DistinctStateNotifier<MentionState>
     }
   }
 
-  final UserDao userDao;
+  final MentionReadModel readModel;
   final MultiAuthStateNotifier multiAuthChangeNotifier;
   final Stream<TextEditingValue> textEditingValueStream;
 
@@ -247,14 +213,14 @@ final mentionProvider = StateNotifierProvider.autoDispose
 
       if (conversationId == null) {
         return MentionStateNotifier.idle(
-          userDao: userDao,
+          readModel: MentionReadModel(userDao: userDao),
           multiAuthChangeNotifier: authStateNotifier,
           textEditingValueStream: stream,
         );
       }
 
       return MentionStateNotifier(
-        userDao: userDao,
+        readModel: MentionReadModel(userDao: userDao),
         multiAuthChangeNotifier: authStateNotifier,
         textEditingValueStream: stream,
         conversationId: conversationId,

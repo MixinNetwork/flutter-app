@@ -326,13 +326,10 @@ class _StickerAlbumManagePage extends HookConsumerWidget {
           child: ReorderableList(
             controller: controller,
             itemCount: list.value.length,
-            onReorder: (oldIndex, newIndex) {
+            onReorderItem: (oldIndex, newIndex) {
               final newList = list.value.toList();
-
-              final _newIndex = oldIndex < newIndex ? newIndex - 1 : newIndex;
               final oldItem = newList.removeAt(oldIndex);
-              newList.insert(_newIndex, oldItem);
-
+              newList.insert(newIndex, oldItem);
               list.value = newList;
               context.database.stickerAlbumDao.updateOrders(list.value);
             },

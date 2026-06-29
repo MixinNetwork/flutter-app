@@ -24,9 +24,10 @@ import '../../provider/ai_assistant_thread_provider.dart';
 import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/ai_input_mode_provider.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/blink_cubit.dart';
-import '../bloc/message_bloc.dart';
-import '../chat/chat_page.dart';
+import '../chat/message_jump.dart';
+import '../conversation_info_destination.dart';
+import '../desktop_shell_layout.dart';
+import '../notifier/chat_side_notifier.dart';
 import 'ai_assistant/composer.dart';
 import 'ai_assistant/constants.dart';
 import 'ai_assistant/helpers.dart';
@@ -171,14 +172,15 @@ class AiAssistantPage extends HookConsumerWidget {
         actions: [
           _AiAssistantActions(
             addEnabled: !isNewThreadPage,
-            onOpenThreads: () => context.read<ChatSideCubit>().pushPage(
-              ChatSideCubit.aiAssistantThreadsPage,
-            ),
+            onOpenThreads: () =>
+                context.read<ChatSideNotifier>().openDestination(
+                  ConversationInfoDestination.aiAssistantThreads,
+                ),
             onNewThread: openNewThreadPage,
           ),
           if (!Navigator.of(context).canPop())
             MixinCloseButton(
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().onPopPage(),
             ),
         ],
       ),
@@ -219,13 +221,10 @@ class AiAssistantPage extends HookConsumerWidget {
 }
 
 void _jumpToAttachedMessage(BuildContext context, MessageItem message) {
-  context.read<MessageBloc>().scrollTo(message.messageId);
-  context.read<BlinkCubit>().blinkByMessageId(message.messageId);
-
-  final chatSideCubit = context.read<ChatSideCubit>();
-  if (chatSideCubit.state.routeMode) {
-    chatSideCubit.pop();
-  }
+  context.jumpToMessageInChat(message.messageId);
+  context.read<ChatSideNotifier>().closeAfterContentJump(
+    routeMode: DesktopShellLayout.chatSideRouteModeOf(context),
+  );
 }
 
 class AiAssistantThreadsPage extends HookConsumerWidget {
@@ -261,7 +260,7 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
         actions: [
           if (!Navigator.of(context).canPop())
             MixinCloseButton(
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().onPopPage(),
             ),
         ],
       ),
@@ -298,7 +297,7 @@ class AiAssistantThreadsPage extends HookConsumerWidget {
                   onTap: () {
                     threadSelectionNotifier.state =
                         AiAssistantThreadSelection.existing(thread.id);
-                    context.read<ChatSideCubit>().pop();
+                    context.read<ChatSideNotifier>().pop();
                   },
                 );
               },

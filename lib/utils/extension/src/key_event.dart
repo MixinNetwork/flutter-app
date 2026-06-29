@@ -84,6 +84,14 @@ final _modifierKeys = {
   LogicalKeyboardKey.fn,
 };
 
+final _altKeys = {
+  LogicalKeyboardKey.alt,
+  LogicalKeyboardKey.altLeft,
+  LogicalKeyboardKey.altRight,
+};
+
 extension SetExtension on Set<LogicalKeyboardKey> {
   bool get hasModifierKey => any(_modifierKeys.contains);
+
+  bool get hasAltKey => any(_altKeys.contains);
 }

@@ -6,10 +6,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 
 import '../../db/database.dart';
 import '../../db/mixin_database.dart';
-import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/message_bloc.dart';
+import '../../ui/home/chat/message_jump.dart';
+import '../../ui/home/conversation/conversation_focus.dart';
 import '../../ui/provider/ai_context_attachment_provider.dart';
-import '../../ui/provider/conversation_provider.dart';
 import '../extension/extension.dart';
 
 class MixinMcpBridge {
@@ -49,7 +48,7 @@ class MixinMcpBridge {
 
   Future<void> openConversation(String conversationId) async {
     final context = _requireContext();
-    await ConversationStateNotifier.selectConversation(context, conversationId);
+    await ConversationFocus.selectConversation(context, conversationId);
   }
 
   Future<void> revealMessage({
@@ -57,7 +56,7 @@ class MixinMcpBridge {
     required String messageId,
   }) async {
     final context = _requireContext();
-    await ConversationStateNotifier.selectConversation(
+    await ConversationFocus.selectConversation(
       context,
       conversationId,
       initIndexMessageId: messageId,
@@ -65,8 +64,7 @@ class MixinMcpBridge {
     unawaited(
       Future<void>.delayed(const Duration(milliseconds: 120), () {
         try {
-          context.read<MessageBloc>().scrollTo(messageId);
-          context.read<BlinkCubit>().blinkByMessageId(messageId);
+          context.jumpToMessageInChat(messageId);
         } catch (_) {}
       }),
     );

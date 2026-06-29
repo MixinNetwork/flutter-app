@@ -11,6 +11,7 @@ import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../provider/conversation_provider.dart';
+import '../conversation/conversation_focus.dart';
 import '../conversation/conversation_page.dart';
 
 class GroupsInCommonPage extends HookConsumerWidget {
@@ -100,7 +101,7 @@ class _GroupConversationItemWidget extends StatelessWidget {
     height: ConversationPage.conversationItemHeight,
     child: InteractiveDecoratedBox(
       onTap: () {
-        ConversationStateNotifier.selectConversation(
+        ConversationFocus.selectConversation(
           context,
           group.conversationId,
         );

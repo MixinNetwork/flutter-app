@@ -22,11 +22,11 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/blink_cubit.dart';
-import '../bloc/conversation_list_bloc.dart';
-import '../bloc/search_message_cubit.dart';
-import '../chat/chat_page.dart';
+import '../chat/message_jump.dart';
 import '../conversation/search_list.dart';
+import '../notifier/chat_side_notifier.dart';
+import '../notifier/conversation_list_controller.dart';
+import '../notifier/search_message_controller.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
   const SearchMessagePage(this.conversationState, {super.key});
@@ -77,7 +77,7 @@ class SearchMessagePage extends HookConsumerWidget {
     }, [userMode.value, selectedUser.value]);
 
     useEffect(() {
-      SearchConversationKeywordCubit.updateSelectedUser(
+      SearchConversationKeywordNotifier.updateSelectedUser(
         context,
         selectedUser.value?.userId,
       );
@@ -92,7 +92,7 @@ class SearchMessagePage extends HookConsumerWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: context.theme.icon,
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().closeDestination(),
             ),
         ],
       ),
@@ -159,7 +159,7 @@ class SearchMessagePage extends HookConsumerWidget {
                         if (userMode.value && selectedUser.value == null) {
                           return;
                         }
-                        SearchConversationKeywordCubit.updateKeyword(
+                        SearchConversationKeywordNotifier.updateKeyword(
                           context,
                           keyword,
                         );
@@ -269,36 +269,38 @@ class _SearchMessageList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final (_, initKeyword) = useMemoized(
-      () => context.read<SearchConversationKeywordCubit>().state,
+      () => context.read<SearchConversationKeywordNotifier>().value,
     );
+    final keywordNotifier = context.read<SearchConversationKeywordNotifier>();
+    final keywordStream = useValueNotifierConvertSteam(keywordNotifier);
     final keyword =
         useMemoizedStream(
-          () => context
-              .read<SearchConversationKeywordCubit>()
-              .stream
+          () => keywordStream
               .map((event) => event.$2.trim())
               .debounceTime(const Duration(milliseconds: 150)),
+          keys: [keywordStream],
         ).data ??
         initKeyword.trim();
 
-    final searchMessageCubit = useBloc(
-      () => SearchMessageCubit.conversation(
+    final searchMessageController = useMemoized(
+      () => SearchMessageController.conversation(
         database: context.database,
         keyword: keyword,
-        limit: context.read<ConversationListBloc>().limit,
+        limit: context.read<ConversationListController>().limit,
         categories: categories,
         userId: selectedUserId,
         conversationId: conversationId,
       ),
-      keys: [keyword, categories, selectedUserId, conversationId],
+      [keyword, categories, selectedUserId, conversationId],
     );
+    useEffect(() => searchMessageController.dispose, [
+      searchMessageController,
+    ]);
 
-    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-      bloc: searchMessageCubit,
-    );
+    final pageState = useValueListenable(searchMessageController);
 
     return ScrollablePositionedList.builder(
-      itemPositionsListener: searchMessageCubit.itemPositionsListener,
+      itemPositionsListener: searchMessageController.itemPositionsListener,
       itemCount: pageState.items.length,
       itemBuilder: (context, index) {
         final message = pageState.items[index];
@@ -306,17 +308,11 @@ class _SearchMessageList extends HookConsumerWidget {
           message: message,
           keyword: keyword,
           showSender: true,
-          onTap: () {
-            ConversationStateNotifier.selectConversation(
-              context,
-              message.conversationId,
-              initIndexMessageId: message.messageId,
+          onTap: () async {
+            await context.jumpToMessageInChat(
+              message.messageId,
+              closeSideAfterJump: true,
             );
-            context.read<BlinkCubit>().blinkByMessageId(message.messageId);
-            final chatSideCubit = context.read<ChatSideCubit>();
-            if (chatSideCubit.state.routeMode) {
-              chatSideCubit.clear();
-            }
           },
         );
       },

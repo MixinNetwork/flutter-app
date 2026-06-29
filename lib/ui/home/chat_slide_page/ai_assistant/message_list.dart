@@ -40,9 +40,6 @@ class AiAssistantMessageList extends HookWidget {
     final topKey = useMemoized(
       () => GlobalKey(debugLabel: 'ai list top'),
     );
-    final bottomKey = useMemoized(
-      () => GlobalKey(debugLabel: 'ai list bottom'),
-    );
     final scrollController = useScrollController();
     final lastMessage = messages.lastOrNull;
     final shouldStickToBottomRef = useRef(true);
@@ -200,13 +197,12 @@ class AiAssistantMessageList extends HookWidget {
         }
         return false;
       },
-      child: MessageDayTimeViewportWidget.chatPage(
+      child: MessageDayTimeViewportWidget.singleList(
         key: ValueKey('$conversationId-$threadId'),
-        bottomKey: bottomKey,
-        center: null,
-        topKey: topKey,
+        listKey: topKey,
         scrollController: scrollController,
-        centerKey: null,
+        reverse: true,
+        reTraversalKey: messages,
         child: ClampingCustomScrollView(
           key: centerKey,
           center: centerKey,
@@ -242,10 +238,7 @@ class AiAssistantMessageList extends HookWidget {
               ),
             ),
             SliverToBoxAdapter(key: centerKey),
-            SliverPadding(
-              key: bottomKey,
-              padding: const EdgeInsets.only(bottom: 20),
-            ),
+            const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
           ],
         ),
       ),

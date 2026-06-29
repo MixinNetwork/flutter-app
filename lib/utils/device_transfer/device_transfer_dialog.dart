@@ -1,8 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../constants/resources.dart';
 import '../../widgets/app_bar.dart';
@@ -11,7 +11,6 @@ import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../event_bus.dart';
 import '../extension/extension.dart';
-import '../hook.dart';
 import '../logger.dart';
 import 'device_transfer_widget.dart';
 
@@ -29,8 +28,7 @@ enum _DeviceTransferPageType {
   restore,
   backup,
   restoreWaitingConnect,
-  backupWaitingConnect
-  ;
+  backupWaitingConnect;
 
   Widget build() {
     switch (this) {
@@ -48,25 +46,22 @@ enum _DeviceTransferPageType {
   }
 }
 
-class _NavigatorState with EquatableMixin {
-  _NavigatorState(this.pages);
+class _DeviceTransferNavigator extends ChangeNotifier {
+  final List<_DeviceTransferPageType> _pages = [
+    _DeviceTransferPageType.deviceTransfer,
+  ];
 
-  final List<_DeviceTransferPageType> pages;
-
-  @override
-  List<Object?> get props => [pages];
-}
-
-class _NavigatorCubit extends Cubit<_NavigatorState> {
-  _NavigatorCubit()
-    : super(_NavigatorState([_DeviceTransferPageType.deviceTransfer]));
+  List<_DeviceTransferPageType> get pages => _pages;
 
   void push(_DeviceTransferPageType page) {
-    emit(_NavigatorState([...state.pages, page]));
+    _pages.add(page);
+    notifyListeners();
   }
 
   void pop() {
-    emit(_NavigatorState([...state.pages]..removeLast()));
+    if (_pages.length <= 1) return;
+    _pages.removeLast();
+    notifyListeners();
   }
 }
 
@@ -75,14 +70,15 @@ class _Navigator extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cubit = useBloc(_NavigatorCubit.new);
-    final pages = useBlocState<_NavigatorCubit, _NavigatorState>(bloc: cubit);
-    return BlocProvider.value(
-      value: cubit,
+    final navigator = useMemoized(_DeviceTransferNavigator.new);
+    useEffect(() => navigator.dispose, [navigator]);
+    useListenable(navigator);
+    return provider.ChangeNotifierProvider<_DeviceTransferNavigator>.value(
+      value: navigator,
       child: AnimatedSize(
         duration: const Duration(milliseconds: 150),
         alignment: Alignment.topCenter,
-        child: pages.pages.lastOrNull?.build() ?? const SizedBox.shrink(),
+        child: navigator.pages.lastOrNull?.build() ?? const SizedBox.shrink(),
       ),
     );
   }
@@ -111,9 +107,10 @@ class _DeviceTransferPage extends StatelessWidget {
         child: CellItem(
           title: const Text('sync from other device'),
           onTap: () {
-            context.read<_NavigatorCubit>().push(
-              _DeviceTransferPageType.restore,
-            );
+            provider.Provider.of<_DeviceTransferNavigator>(
+              context,
+              listen: false,
+            ).push(_DeviceTransferPageType.restore);
           },
         ),
       ),
@@ -123,9 +120,10 @@ class _DeviceTransferPage extends StatelessWidget {
         child: CellItem(
           title: const Text('sync to other device'),
           onTap: () {
-            context.read<_NavigatorCubit>().push(
-              _DeviceTransferPageType.backup,
-            );
+            provider.Provider.of<_DeviceTransferNavigator>(
+              context,
+              listen: false,
+            ).push(_DeviceTransferPageType.backup);
           },
         ),
       ),
@@ -141,17 +139,19 @@ class _DialogBackButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canPopup =
-        useBlocStateConverter<_NavigatorCubit, _NavigatorState, bool>(
-          converter: (state) => state.pages.length > 1,
-        );
+    final navigator = provider.Provider.of<_DeviceTransferNavigator>(
+      context,
+      listen: false,
+    );
+    useListenable(navigator);
+    final canPopup = navigator.pages.length > 1;
     return !canPopup
         ? const SizedBox.shrink()
         : Center(
             child: MixinBackButton(
               onTap: () {
                 onTapped?.call();
-                context.read<_NavigatorCubit>().pop();
+                navigator.pop();
               },
             ),
           );
@@ -195,9 +195,10 @@ class _RestorePage extends StatelessWidget {
           trailing: null,
           onTap: () {
             EventBus.instance.fire(DeviceTransferCommand.pullToRemote);
-            context.read<_NavigatorCubit>().push(
-              _DeviceTransferPageType.restoreWaitingConnect,
-            );
+            provider.Provider.of<_DeviceTransferNavigator>(
+              context,
+              listen: false,
+            ).push(_DeviceTransferPageType.restoreWaitingConnect);
           },
         ),
       ),
@@ -303,9 +304,10 @@ class _BackupPage extends StatelessWidget {
           trailing: null,
           onTap: () {
             EventBus.instance.fire(DeviceTransferCommand.pushToRemote);
-            context.read<_NavigatorCubit>().push(
-              _DeviceTransferPageType.backupWaitingConnect,
-            );
+            provider.Provider.of<_DeviceTransferNavigator>(
+              context,
+              listen: false,
+            ).push(_DeviceTransferPageType.backupWaitingConnect);
           },
         ),
       ),

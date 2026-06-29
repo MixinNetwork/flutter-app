@@ -21,9 +21,11 @@ import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
-import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
-import '../chat/chat_page.dart';
+import '../conversation/conversation_focus.dart';
+import '../conversation_info_destination.dart';
+import '../notifier/chat_side_notifier.dart';
+import '../notifier/message_controller.dart';
 import 'shared_apps_page.dart';
 
 class ChatInfoPage extends HookConsumerWidget {
@@ -95,7 +97,7 @@ class ChatInfoPage extends HookConsumerWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: context.theme.icon,
-              onTap: () => context.read<ChatSideCubit>().onPopPage(),
+              onTap: () => context.read<ChatSideNotifier>().closeDestination(),
             ),
         ],
         backgroundColor: context.theme.popUp,
@@ -106,9 +108,9 @@ class ChatInfoPage extends HookConsumerWidget {
           children: [
             const SizedBox(height: 8),
             GestureDetector(
-              onLongPress: () {
-                final copy = HardwareKeyboard.instance.logicalKeysPressed
-                    .contains(LogicalKeyboardKey.altLeft);
+              onTap: () {
+                final copy =
+                    HardwareKeyboard.instance.logicalKeysPressed.hasAltKey;
                 if (copy) {
                   Clipboard.setData(
                     ClipboardData(
@@ -150,8 +152,8 @@ class ChatInfoPage extends HookConsumerWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupParticipants),
-                  onTap: () => context.read<ChatSideCubit>().pushPage(
-                    ChatSideCubit.participants,
+                  onTap: () => context.read<ChatSideNotifier>().openDestination(
+                    ConversationInfoDestination.participants,
                   ),
                 ),
               ),
@@ -227,17 +229,19 @@ class ChatInfoPage extends HookConsumerWidget {
                 children: [
                   CellItem(
                     title: Text(context.l10n.sharedMedia),
-                    onTap: () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.sharedMedia,
-                    ),
+                    onTap: () =>
+                        context.read<ChatSideNotifier>().openDestination(
+                          ConversationInfoDestination.sharedMedia,
+                        ),
                   ),
                   if (conversationState.userId != null)
                     _SharedApps(userId: conversationState.userId!),
                   CellItem(
                     title: Text(context.l10n.searchConversation, maxLines: 1),
-                    onTap: () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.searchMessageHistory,
-                    ),
+                    onTap: () =>
+                        context.read<ChatSideNotifier>().openDestination(
+                          ConversationInfoDestination.searchMessageHistory,
+                        ),
                   ),
                 ],
               ),
@@ -258,8 +262,8 @@ class ChatInfoPage extends HookConsumerWidget {
                   trailing: canModifyExpireIn ? const Arrow() : null,
                   onTap: !canModifyExpireIn
                       ? null
-                      : () => context.read<ChatSideCubit>().pushPage(
-                          ChatSideCubit.disappearMessages,
+                      : () => context.read<ChatSideNotifier>().openDestination(
+                          ConversationInfoDestination.disappearMessages,
                         ),
                 ),
               ),
@@ -392,8 +396,8 @@ class ChatInfoPage extends HookConsumerWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(context.l10n.groupsInCommon),
-                  onTap: () => context.read<ChatSideCubit>().pushPage(
-                    ChatSideCubit.groupsInCommon,
+                  onTap: () => context.read<ChatSideNotifier>().openDestination(
+                    ConversationInfoDestination.groupsInCommon,
                   ),
                 ),
               ),
@@ -411,8 +415,8 @@ class ChatInfoPage extends HookConsumerWidget {
             CellGroup(
               child: CellItem(
                 title: Text(context.l10n.editConversations),
-                onTap: () => context.read<ChatSideCubit>().pushPage(
-                  ChatSideCubit.circles,
+                onTap: () => context.read<ChatSideNotifier>().openDestination(
+                  ConversationInfoDestination.circles,
                 ),
               ),
             ),
@@ -491,7 +495,7 @@ class ChatInfoPage extends HookConsumerWidget {
                       await accountServer.deleteMessagesByConversationId(
                         conversationId,
                       );
-                      context.read<MessageBloc>().reload();
+                      context.read<MessageController>().reload();
                     },
                   ),
                   if (isGroupConversation)
@@ -510,7 +514,7 @@ class ChatInfoPage extends HookConsumerWidget {
                             accountServer.exitGroup(conversationId),
                           );
 
-                          await ConversationStateNotifier.selectConversation(
+                          await ConversationFocus.selectConversation(
                             context,
                             conversationId,
                           );
@@ -711,8 +715,8 @@ class _SharedApps extends HookConsumerWidget {
           : CellItem(
               title: Text(context.l10n.shareApps),
               trailing: OverlappedAppIcons(apps: data),
-              onTap: () => context.read<ChatSideCubit>().pushPage(
-                ChatSideCubit.sharedApps,
+              onTap: () => context.read<ChatSideNotifier>().openDestination(
+                ConversationInfoDestination.sharedApps,
               ),
             ),
     );

@@ -24,10 +24,35 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Mixin uses your camera to take photos and videos to share with your contacts.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Mixin uses your microphone to record voice messages to share with your contacts.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Mixin uses the photo library to set profile photo, and send photo to your contact in chat.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Mixin uses speech recognition to convert your voice to text.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

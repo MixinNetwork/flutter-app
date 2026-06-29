@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
+import 'package:hooks_riverpod/hooks_riverpod.dart'
+    hide ChangeNotifierProvider, Provider;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -10,15 +10,14 @@ import 'package:uuid/uuid.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/message/item/text/text_message.dart';
 import '../../widgets/message/message.dart';
 import '../../widgets/message/message_day_time.dart';
 import '../../widgets/radio.dart';
-import '../home/bloc/blink_cubit.dart';
-import '../home/chat/chat_page.dart';
+import '../home/notifier/blink_notifier.dart';
+import '../home/notifier/chat_side_notifier.dart';
 import '../provider/setting_provider.dart';
 
 class AppearancePage extends StatelessWidget {
@@ -251,16 +250,21 @@ class _ChatTextSizePreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tickerProvider = useSingleTickerProvider();
-    final blinkCubit = useMemoized(
-      () => BlinkCubit(
-        tickerProvider,
-        context.theme.accent.withValues(alpha: 0.5),
-      ),
+    final blinkNotifier = useMemoized(() => BlinkNotifier(tickerProvider));
+    useEffect(() => blinkNotifier.dispose, [blinkNotifier]);
+    final chatSideNotifier = useMemoized(ChatSideNotifier.new);
+    useEffect(() => chatSideNotifier.dispose, [chatSideNotifier]);
+    final searchConversationKeywordNotifier = useMemoized(
+      () =>
+          SearchConversationKeywordNotifier(chatSideNotifier: chatSideNotifier),
+      [chatSideNotifier],
     );
-    final chatSideCubit = useBloc(ChatSideCubit.new);
-    final searchConversationKeywordCubit = useBloc(
-      () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
+    useEffect(
+      () => searchConversationKeywordNotifier.dispose,
+      [searchConversationKeywordNotifier],
     );
+    final hiddenDateTime = useMemoized(() => ValueNotifier<DateTime?>(null));
+    useEffect(() => hiddenDateTime.dispose, [hiddenDateTime]);
 
     final messageHi = useMemoized(
       () => _buildFakeTextMessage(context.l10n.sayHi),
@@ -271,9 +275,13 @@ class _ChatTextSizePreview extends HookConsumerWidget {
 
     return MultiProvider(
       providers: [
-        BlocProvider.value(value: searchConversationKeywordCubit),
-        Provider<BlinkCubit>.value(value: blinkCubit),
-        BlocProvider(create: (_) => HiddenMessageDayTimeBloc()),
+        ChangeNotifierProvider<SearchConversationKeywordNotifier>.value(
+          value: searchConversationKeywordNotifier,
+        ),
+        ChangeNotifierProvider<BlinkNotifier>.value(value: blinkNotifier),
+        ChangeNotifierProvider<ValueNotifier<DateTime?>>.value(
+          value: hiddenDateTime,
+        ),
       ],
       child: IgnorePointer(
         child: Container(

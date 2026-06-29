@@ -33,15 +33,15 @@ import '../../../widgets/message/item/system_message.dart';
 import '../../../widgets/mixin_image.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user/user_dialog.dart';
-import '../../provider/conversation_provider.dart';
 import '../../provider/conversation_unseen_filter_enabled.dart';
 import '../../provider/keyword_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../../provider/minute_timer_provider.dart';
 import '../../provider/search_mao_user_provider.dart';
 import '../../provider/slide_category_provider.dart';
-import '../bloc/conversation_list_bloc.dart';
-import '../bloc/search_message_cubit.dart';
+import '../notifier/conversation_list_controller.dart';
+import '../notifier/search_message_controller.dart';
+import 'conversation_focus.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
 import 'unseen_conversation_list.dart';
@@ -63,9 +63,9 @@ class SearchList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keyword =
         useMemoizedStream(() {
-          final keywordCubit = ref.watch(keywordProvider.notifier);
-          return keywordCubit.stream
-              .startWith(keywordCubit.state)
+          final keywordNotifier = ref.watch(keywordProvider.notifier);
+          return keywordNotifier.stream
+              .startWith(keywordNotifier.state)
               .map((event) => event.trim())
               .distinct()
               .debounceTime(const Duration(milliseconds: 150));
@@ -250,7 +250,7 @@ class SearchList extends HookConsumerWidget {
                   ),
                   keyword: keyword,
                   onTap: () async {
-                    await ConversationStateNotifier.selectUser(
+                    await ConversationFocus.selectUser(
                       context,
                       user.userId,
                       user: user,
@@ -377,7 +377,7 @@ class SearchList extends HookConsumerWidget {
                         ),
                         keyword: keyword,
                         onTap: () async {
-                          await ConversationStateNotifier.selectConversation(
+                          await ConversationFocus.selectConversation(
                             context,
                             conversation.conversationId,
                           );
@@ -506,7 +506,7 @@ class _SearchMaoUserWidget extends StatelessWidget {
           await showUserDialog(context, maoUser.user.userId);
           return;
         }
-        await ConversationStateNotifier.selectUser(
+        await ConversationFocus.selectUser(
           context,
           maoUser.user.userId,
           user: maoUser.user,
@@ -705,19 +705,20 @@ class _SearchMessageList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchMessageCubit = useBloc(
-      () => SearchMessageCubit.slideCategory(
+    final searchMessageController = useMemoized(
+      () => SearchMessageController.slideCategory(
         database: context.database,
         category: categoryState,
         keyword: keyword,
-        limit: context.read<ConversationListBloc>().limit,
+        limit: context.read<ConversationListController>().limit,
       ),
-      keys: [keyword, categoryState],
+      [keyword, categoryState],
     );
+    useEffect(() => searchMessageController.dispose, [
+      searchMessageController,
+    ]);
 
-    final pageState = useBlocState<SearchMessageCubit, SearchMessageState>(
-      bloc: searchMessageCubit,
-    );
+    final pageState = useValueListenable(searchMessageController);
 
     final child = pageState.initializing
         ? Center(
@@ -729,7 +730,8 @@ class _SearchMessageList extends HookConsumerWidget {
         : pageState.items.isEmpty
         ? const SearchEmptyWidget()
         : ScrollablePositionedList.builder(
-            itemPositionsListener: searchMessageCubit.itemPositionsListener,
+            itemPositionsListener:
+                searchMessageController.itemPositionsListener,
             itemCount: pageState.items.length,
             itemBuilder: (context, index) {
               final message = pageState.items[index];
@@ -794,7 +796,7 @@ Future Function() _searchMessageItemOnTap(
   BuildContext context,
   SearchMessageDetailItem message,
 ) => () async {
-  await ConversationStateNotifier.selectConversation(
+  await ConversationFocus.selectConversation(
     context,
     message.conversationId,
     initIndexMessageId: message.messageId,

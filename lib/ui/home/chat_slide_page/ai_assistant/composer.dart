@@ -365,7 +365,6 @@ class _AiModeChip<T> extends StatelessWidget {
       itemBuilder: (_) => items,
       onSelected: onSelected,
       color: Colors.transparent,
-      useActionButton: false,
       child: child,
     );
   }

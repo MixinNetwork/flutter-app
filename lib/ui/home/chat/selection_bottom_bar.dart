@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,8 +17,8 @@ import '../../provider/ai_context_attachment_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/message_selection_provider.dart';
 import '../chat_slide_page/ai_assistant/constants.dart';
-import '../route/responsive_navigator.dart';
-import 'chat_side_route_names.dart';
+import '../conversation_info_destination.dart';
+import '../notifier/chat_side_notifier.dart';
 
 class SelectionBottomBar extends HookConsumerWidget {
   const SelectionBottomBar({super.key});
@@ -56,8 +54,8 @@ class SelectionBottomBar extends HookConsumerWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = ref.read(messageSelectionProvider);
-              final messageIds = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messageIds = selection.selectedMessageIds;
 
               await runWithLoading(
                 () => context.accountServer.sendTranscriptMessage(
@@ -67,7 +65,7 @@ class SelectionBottomBar extends HookConsumerWidget {
                   recipientId: result.first.userId,
                 ),
               );
-              cubit.clearSelection();
+              selection.clearSelection();
             },
           ),
           _Button(
@@ -83,8 +81,8 @@ class SelectionBottomBar extends HookConsumerWidget {
               );
               if (result == null || result.isEmpty) return;
 
-              final cubit = ref.read(messageSelectionProvider);
-              final messageIds = cubit.selectedMessageIds;
+              final selection = ref.read(messageSelectionProvider);
+              final messageIds = selection.selectedMessageIds;
 
               await runWithLoading(() async {
                 for (final id in messageIds) {
@@ -96,7 +94,7 @@ class SelectionBottomBar extends HookConsumerWidget {
                   );
                 }
               });
-              cubit.clearSelection();
+              selection.clearSelection();
             },
           ),
           _Button(
@@ -155,10 +153,8 @@ class SelectionBottomBar extends HookConsumerWidget {
                   .read(aiContextAttachmentProvider(conversationId).notifier)
                   .attachMessages(messages);
               selection.clearSelection();
-              unawaited(
-                context.read<AbstractResponsiveNavigatorCubit>().replace(
-                  chatSideAiAssistantPage,
-                ),
+              context.read<ChatSideNotifier>().openDestination(
+                ConversationInfoDestination.aiAssistant,
               );
             },
           ),

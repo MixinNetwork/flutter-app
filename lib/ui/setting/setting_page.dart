@@ -12,32 +12,20 @@ import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/local_notification_center.dart';
-import '../../widgets/action_button.dart';
-import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/conversation/badges_widget.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/toast.dart';
-import '../home/home.dart';
+import '../home/desktop_shell_layout.dart';
+import '../provider/major_navigation_provider.dart';
 import '../provider/multi_auth_provider.dart';
-import '../provider/responsive_navigator_provider.dart';
 
 class SettingPage extends HookConsumerWidget {
   const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasDrawer = context.watch<HasDrawerValueNotifier>();
-
-    Widget? leading;
-    if (hasDrawer.value) {
-      leading = ActionButton(
-        onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        child: Icon(Icons.menu, size: 20, color: context.theme.icon),
-      );
-    }
-
     final appActive = useValueListenable(appActiveListener);
     final hasNotificationPermission = useMemoizedFuture(
       requestNotificationPermission,
@@ -50,132 +38,131 @@ class SettingPage extends HookConsumerWidget {
       authProvider.select((value) => value?.account.hasPin == true),
     );
 
-    return Column(
-      children: [
-        MixinAppBar(
-          leading: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 150),
-            child: leading ?? const SizedBox(),
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            controller: controller,
-            child: Column(
-              children: [
-                const _UserProfile(),
-                const SizedBox(height: 24),
-                Column(
-                  children: [
-                    CellGroup(
-                      child: _Item(
-                        leadingAssetName: Resources.assetsImagesIcProfileSvg,
-                        pageName:
-                            ResponsiveNavigatorStateNotifier.editProfilePage,
-                        title: context.l10n.editProfile,
+    return ColoredBox(
+      color: context.theme.background,
+      child: Column(
+        children: [
+          const SizedBox(height: 64),
+          Expanded(
+            child: SingleChildScrollView(
+              controller: controller,
+              child: Column(
+                children: [
+                  const _UserProfile(),
+                  const SizedBox(height: 24),
+                  Column(
+                    children: [
+                      CellGroup(
+                        child: _Item(
+                          leadingAssetName: Resources.assetsImagesIcProfileSvg,
+                          destination:
+                              MajorNavigationDestination.editProfilePage,
+                          title: context.l10n.editProfile,
+                        ),
                       ),
-                    ),
-                    CellGroup(
-                      child: Column(
-                        children: [
-                          if (Platform.isIOS &&
-                              userHasPin &&
-                              AccountKeyValue.instance.primarySessionId == null)
+                      CellGroup(
+                        child: Column(
+                          children: [
+                            if (Platform.isIOS &&
+                                userHasPin &&
+                                AccountKeyValue.instance.primarySessionId ==
+                                    null)
+                              _Item(
+                                leadingAssetName:
+                                    Resources.assetsImagesAccountSvg,
+                                destination:
+                                    MajorNavigationDestination.accountPage,
+                                title: context.l10n.account,
+                              ),
                             _Item(
                               leadingAssetName:
-                                  Resources.assetsImagesAccountSvg,
-                              pageName:
-                                  ResponsiveNavigatorStateNotifier.accountPage,
-                              title: context.l10n.account,
-                            ),
-                          _Item(
-                            leadingAssetName:
-                                Resources.assetsImagesIcNotificationSvg,
-                            pageName: ResponsiveNavigatorStateNotifier
-                                .notificationPage,
-                            title: context.l10n.notifications,
-                            trailing: hasNotificationPermission == false
-                                ? Padding(
-                                    padding: const EdgeInsets.all(4),
-                                    child: SvgPicture.asset(
-                                      Resources.assetsImagesTriangleWarningSvg,
-                                      colorFilter: ColorFilter.mode(
-                                        context.theme.red,
-                                        BlendMode.srcIn,
+                                  Resources.assetsImagesIcNotificationSvg,
+                              destination:
+                                  MajorNavigationDestination.notificationPage,
+                              title: context.l10n.notifications,
+                              trailing: hasNotificationPermission == false
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(4),
+                                      child: SvgPicture.asset(
+                                        Resources
+                                            .assetsImagesTriangleWarningSvg,
+                                        colorFilter: ColorFilter.mode(
+                                          context.theme.red,
+                                          BlendMode.srcIn,
+                                        ),
+                                        width: 22,
+                                        height: 22,
                                       ),
-                                      width: 22,
-                                      height: 22,
-                                    ),
-                                  )
-                                : const Arrow(),
-                            color: hasNotificationPermission == false
-                                ? context.theme.red
-                                : context.theme.text,
-                          ),
-                          _Item(
-                            leadingAssetName:
-                                Resources.assetsImagesIcStorageUsageSvg,
-                            pageName: ResponsiveNavigatorStateNotifier
-                                .dataAndStorageUsagePage,
-                            title: context.l10n.dataAndStorageUsage,
-                          ),
-                          _Item(
-                            leadingAssetName: Resources.assetsImagesShieldSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.securityPage,
-                            title: context.l10n.security,
-                          ),
-                          _Item(
-                            leadingAssetName: Resources.assetsImagesProxySvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.proxyPage,
-                            title: context.l10n.proxy,
-                          ),
-                          _Item(
-                            leadingAssetName:
-                                Resources.assetsImagesIcAppearanceSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.appearancePage,
-                            title: context.l10n.appearance,
-                          ),
-                          const _Item(
-                            leadingAssetName:
-                                Resources.assetsImagesIcAppearanceSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.aiSettingsPage,
-                            title: 'AI Settings',
-                          ),
-                          _Item(
-                            leadingAssetName: Resources.assetsImagesIcAboutSvg,
-                            pageName:
-                                ResponsiveNavigatorStateNotifier.aboutPage,
-                            title: context.l10n.about,
-                          ),
-                        ],
+                                    )
+                                  : const Arrow(),
+                              color: hasNotificationPermission == false
+                                  ? context.theme.red
+                                  : context.theme.text,
+                            ),
+                            _Item(
+                              leadingAssetName:
+                                  Resources.assetsImagesIcStorageUsageSvg,
+                              destination: MajorNavigationDestination
+                                  .dataAndStorageUsagePage,
+                              title: context.l10n.dataAndStorageUsage,
+                            ),
+                            _Item(
+                              leadingAssetName: Resources.assetsImagesShieldSvg,
+                              destination:
+                                  MajorNavigationDestination.securityPage,
+                              title: context.l10n.security,
+                            ),
+                            _Item(
+                              leadingAssetName: Resources.assetsImagesProxySvg,
+                              destination: MajorNavigationDestination.proxyPage,
+                              title: context.l10n.proxy,
+                            ),
+                            _Item(
+                              leadingAssetName:
+                                  Resources.assetsImagesIcAppearanceSvg,
+                              destination:
+                                  MajorNavigationDestination.appearancePage,
+                              title: context.l10n.appearance,
+                            ),
+                            const _Item(
+                              leadingAssetName:
+                                  Resources.assetsImagesIcAppearanceSvg,
+                              destination:
+                                  MajorNavigationDestination.aiSettingsPage,
+                              title: 'AI Settings',
+                            ),
+                            _Item(
+                              leadingAssetName:
+                                  Resources.assetsImagesIcAboutSvg,
+                              destination: MajorNavigationDestination.aboutPage,
+                              title: context.l10n.about,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                CellGroup(
-                  child: _Item(
-                    leadingAssetName: Resources.assetsImagesIcSignOutSvg,
-                    title: context.l10n.signOut,
-                    onTap: () async {
-                      final succeed = await runFutureWithToast(
-                        context.accountServer.signOutAndClear(),
-                      );
-                      if (!succeed) return;
-                      context.multiAuthChangeNotifier.signOut();
-                    },
-                    color: context.theme.red,
-                    trailing: const SizedBox(),
+                    ],
                   ),
-                ),
-              ],
+                  CellGroup(
+                    child: _Item(
+                      leadingAssetName: Resources.assetsImagesIcSignOutSvg,
+                      title: context.l10n.signOut,
+                      onTap: () async {
+                        final succeed = await runFutureWithToast(
+                          context.accountServer.signOutAndClear(),
+                        );
+                        if (!succeed) return;
+                        context.multiAuthChangeNotifier.signOut();
+                      },
+                      color: context.theme.red,
+                      trailing: const SizedBox(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -184,7 +171,7 @@ class _Item extends HookConsumerWidget {
   const _Item({
     required this.title,
     this.leadingAssetName,
-    this.pageName,
+    this.destination,
     this.color,
     this.onTap,
     this.trailing = const Arrow(),
@@ -192,18 +179,18 @@ class _Item extends HookConsumerWidget {
 
   final String? leadingAssetName;
   final String title;
-  final String? pageName;
+  final MajorNavigationDestination? destination;
   final Color? color;
   final VoidCallback? onTap;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final routeMode = DesktopShellLayout.mainRouteModeOf(context);
     final selected = ref.watch(
-      responsiveNavigatorProvider.select(
+      majorNavigationProvider.select(
         (value) =>
-            !value.routeMode &&
-            value.pages.any((element) => pageName == element.name),
+            !routeMode && destination != null && value.contains(destination!),
       ),
     );
 
@@ -223,13 +210,10 @@ class _Item extends HookConsumerWidget {
       color: color ?? context.theme.text,
       selected: selected,
       onTap: () {
-        if (onTap == null && pageName != null) {
-          context.providerContainer.read(responsiveNavigatorProvider.notifier)
-            ..popWhere(
-              (page) => ResponsiveNavigatorStateNotifier.settingPageNameSet
-                  .contains(page.name),
-            )
-            ..pushPage(pageName!);
+        if (onTap == null && destination != null) {
+          context.providerContainer
+              .read(majorNavigationProvider.notifier)
+              .openSetting(destination!);
           return;
         }
 

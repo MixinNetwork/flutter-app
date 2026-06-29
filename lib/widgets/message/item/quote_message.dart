@@ -12,11 +12,10 @@ import '../../../db/dao/message_dao.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
-import '../../../ui/home/bloc/blink_cubit.dart';
-import '../../../ui/home/bloc/message_bloc.dart';
-import '../../../ui/provider/conversation_provider.dart';
+import '../../../ui/home/chat/chat_jump_trace.dart';
+import '../../../ui/home/chat/message_jump.dart';
 import '../../../ui/provider/mention_cache_provider.dart';
-import '../../../ui/provider/pending_jump_message_provider.dart';
+import '../../../ui/provider/pending_chat_jump_provider.dart';
 import '../../../ui/provider/user_cache_provider.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
@@ -419,8 +418,8 @@ class _QuoteImage extends HookWidget {
         return;
       }
       if (mediaUrl == null) {
+        final messageDao = context.database.messageDao;
         scheduleMicrotask(() async {
-          final messageDao = context.database.messageDao;
           final messageItem = await messageDao.findMessageItemByMessageId(
             quoteMessageId,
           );
@@ -494,24 +493,33 @@ class _QuoteMessageBase extends HookConsumerWidget {
             onTap!();
             return;
           }
-          context.read<BlinkCubit>().blinkByMessageId(quoteMessageId);
-
           try {
             if (context.isPinnedPage) {
-              ConversationStateNotifier.selectConversation(
-                context,
-                context.message.conversationId,
-                initIndexMessageId: quoteMessageId,
+              unawaited(
+                context.jumpToMessageInChat(
+                  quoteMessageId,
+                  sourceMessageId: messageId,
+                  closeSideAfterJump: true,
+                ),
               );
               return;
             }
           } catch (_) {}
 
           context.providerContainer
-                  .read(pendingJumpMessageProvider.notifier)
+                  .read(pendingChatJumpProvider.notifier)
                   .state =
               messageId;
-          context.read<MessageBloc>().scrollTo(quoteMessageId);
+          traceChatJump(
+            'quote tap source=${shortMessageId(messageId)} '
+            'target=${shortMessageId(quoteMessageId)}',
+          );
+          unawaited(
+            context.jumpToMessageInChat(
+              quoteMessageId,
+              sourceMessageId: messageId,
+            ),
+          );
         },
         behavior: HitTestBehavior.opaque,
         child: Container(

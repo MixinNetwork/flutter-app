@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/major_navigation_provider.dart';
 import '../provider/setting_provider.dart';
 
 class StoragePage extends HookConsumerWidget {
@@ -95,9 +95,9 @@ class StoragePage extends HookConsumerWidget {
                 child: CellItem(
                   title: Text(context.l10n.storageUsage),
                   onTap: () => ref
-                      .read(responsiveNavigatorProvider.notifier)
-                      .pushPage(
-                        ResponsiveNavigatorStateNotifier.storageUsage,
+                      .read(majorNavigationProvider.notifier)
+                      .open(
+                        MajorNavigationDestination.storageUsage,
                       ),
                 ),
               ),

@@ -53,8 +53,7 @@ enum AiPromptVariable {
     'firstUnreadMessageId',
     'First Unread Message ID',
     'Message ID of the first unread message.',
-  )
-  ;
+  );
 
   const AiPromptVariable(this.placeholder, this.title, this.description);
 

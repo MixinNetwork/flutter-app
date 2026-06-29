@@ -5,11 +5,10 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../utils/hydrated_bloc.dart';
+import '../../utils/local_state_storage.dart';
 import '../../utils/rivepod.dart';
 
 class AuthState extends Equatable {
@@ -123,14 +122,14 @@ class MultiAuthStateNotifier extends DistinctStateNotifier<MultiAuthState> {
   @override
   @protected
   set state(MultiAuthState value) {
-    final hydratedJson = toHydratedJson(state.toMap());
-    HydratedBloc.storage.write(_kMultiAuthCubitKey, hydratedJson);
+    final storedJson = toStoredJson(value.toMap());
+    LocalStateStorage.write(_multiAuthStorageKey, storedJson);
     super.state = value;
   }
 }
 
 @Deprecated('Use multiAuthNotifierProvider instead')
-const _kMultiAuthCubitKey = 'MultiAuthCubit';
+const _multiAuthStorageKey = 'MultiAuthCubit';
 
 final multiAuthStateNotifierProvider =
     StateNotifierProvider.autoDispose<MultiAuthStateNotifier, MultiAuthState>((
@@ -138,9 +137,9 @@ final multiAuthStateNotifierProvider =
     ) {
       ref.keepAlive();
 
-      final oldJson = HydratedBloc.storage.read(_kMultiAuthCubitKey);
+      final oldJson = LocalStateStorage.read(_multiAuthStorageKey);
       if (oldJson != null) {
-        final multiAuthState = fromHydratedJson(
+        final multiAuthState = fromStoredJson(
           oldJson,
           MultiAuthState.fromMap,
         );

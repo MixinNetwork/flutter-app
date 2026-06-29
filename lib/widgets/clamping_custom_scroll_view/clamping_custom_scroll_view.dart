@@ -20,7 +20,7 @@ class ClampingCustomScrollView extends CustomScrollView {
     super.shrinkWrap,
     super.center,
     double anchor = 0.0,
-    super.cacheExtent,
+    super.scrollCacheExtent,
     super.slivers,
     super.semanticChildCount,
     super.dragStartBehavior,
@@ -53,7 +53,7 @@ class ClampingCustomScrollView extends CustomScrollView {
       axisDirection: axisDirection,
       offset: offset,
       slivers: slivers,
-      cacheExtent: cacheExtent,
+      scrollCacheExtent: scrollCacheExtent,
       center: center,
       anchor: anchor,
     );

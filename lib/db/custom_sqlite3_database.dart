@@ -183,6 +183,17 @@ parameter: $parameters
   Pointer<void> leak() => database.leak();
 
   @override
+  PreparedStatement statementFromPointer({
+    required Pointer<void> statement,
+    required String sql,
+    bool borrowed = false,
+  }) => database.statementFromPointer(
+    statement: statement,
+    sql: sql,
+    borrowed: borrowed,
+  );
+
+  @override
   bool get autocommit => database.autocommit;
 
   @override
@@ -271,4 +282,7 @@ class _PreparedStatementWrapper implements PreparedStatement {
 
   @override
   bool get isReadOnly => stmt.isReadOnly;
+
+  @override
+  Pointer<void> leak() => stmt.leak();
 }

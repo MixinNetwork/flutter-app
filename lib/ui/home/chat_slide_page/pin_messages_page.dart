@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
@@ -20,7 +19,7 @@ import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_day_time.dart';
 import '../../provider/conversation_provider.dart';
-import '../chat/chat_page.dart';
+import '../notifier/chat_side_notifier.dart';
 
 class PinMessagesPage extends HookConsumerWidget {
   const PinMessagesPage(this.conversationState, {super.key});
@@ -47,11 +46,6 @@ class PinMessagesPage extends HookConsumerWidget {
       keys: [conversationId],
     ).data;
 
-    final chatSideCubit = useBloc(ChatSideCubit.new);
-    final searchConversationKeywordCubit = useBloc(
-      () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
-    );
-
     useEffect(() {
       if (rawList?.isNotEmpty ?? true) return;
       scheduleMicrotask(() => Navigator.pop(context));
@@ -62,16 +56,11 @@ class PinMessagesPage extends HookConsumerWidget {
     final scrollController = useMemoized(ScrollController.new);
     final listKey = useMemoized(() => GlobalKey(debugLabel: 'PinMessagesPage'));
 
-    return MultiProvider(
-      providers: [
-        BlocProvider.value(value: searchConversationKeywordCubit),
-        Provider(
-          create: (_) => AudioMessagesPlayAgent(
-            list,
-            (m) => context.accountServer.convertMessageAbsolutePath(m, true),
-          ),
-        ),
-      ],
+    return Provider(
+      create: (_) => AudioMessagesPlayAgent(
+        list,
+        (m) => context.accountServer.convertMessageAbsolutePath(m, true),
+      ),
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
@@ -84,7 +73,8 @@ class PinMessagesPage extends HookConsumerWidget {
               ActionButton(
                 name: Resources.assetsImagesIcCloseSvg,
                 color: context.theme.icon,
-                onTap: () => context.read<ChatSideCubit>().onPopPage(),
+                onTap: () =>
+                    context.read<ChatSideNotifier>().closeDestination(),
               ),
           ],
         ),
@@ -105,9 +95,12 @@ class PinMessagesPage extends HookConsumerWidget {
                     final messageItem = list[index];
                     return MessageItemWidget(
                       key: ValueKey(messageItem.messageId),
-                      prev: list.getOrNull(index + 1),
+                      row: MessageRowModel(
+                        message: messageItem,
+                        prev: list.getOrNull(index + 1),
+                        next: list.getOrNull(index - 1),
+                      ),
                       message: messageItem,
-                      next: list.getOrNull(index - 1),
                       blink: false,
                       isPinnedPage: true,
                     );

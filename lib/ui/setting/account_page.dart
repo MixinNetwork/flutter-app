@@ -5,7 +5,7 @@ import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/user/change_number_dialog.dart';
-import '../provider/responsive_navigator_provider.dart';
+import '../provider/major_navigation_provider.dart';
 
 class AccountPage extends HookConsumerWidget {
   const AccountPage({super.key});
@@ -32,9 +32,9 @@ class AccountPage extends HookConsumerWidget {
               child: CellItem(
                 title: Text(context.l10n.deleteMyAccount),
                 onTap: () => ref
-                    .read(responsiveNavigatorProvider.notifier)
-                    .pushPage(
-                      ResponsiveNavigatorStateNotifier.accountDeletePage,
+                    .read(majorNavigationProvider.notifier)
+                    .open(
+                      MajorNavigationDestination.accountDeletePage,
                     ),
               ),
             ),

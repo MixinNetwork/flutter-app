@@ -54,6 +54,47 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     return query.get();
   }
 
+  Future<Map<String, List<User>>> participantsAvatarByConversationIds(
+    Iterable<String> conversationIds,
+  ) async {
+    final ids = conversationIds.toSet().toList(growable: false);
+    if (ids.isEmpty) return const {};
+
+    final expandedIds = List.filled(ids.length, '?').join(',');
+    final rows = await customSelect(
+      '''
+SELECT *
+FROM (
+  SELECT
+    participant.conversation_id,
+    user.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY participant.conversation_id
+      ORDER BY participant.created_at ASC
+    ) AS avatar_rank
+  FROM participants AS participant
+  INNER JOIN users AS user ON participant.user_id = user.user_id
+  WHERE participant.conversation_id IN ($expandedIds)
+)
+WHERE avatar_rank <= 4
+ORDER BY conversation_id ASC, avatar_rank ASC
+''',
+      variables: [for (final id in ids) Variable<String>(id)],
+      readsFrom: {db.participants, db.users},
+    ).get();
+
+    final result = {for (final id in ids) id: <User>[]};
+    for (final row in rows) {
+      final conversationId = row.read<String>('conversation_id');
+      result
+          .putIfAbsent(conversationId, () => <User>[])
+          .add(
+            await db.users.mapFromRow(row),
+          );
+    }
+    return result;
+  }
+
   Future<String?> findJoinedConversationId(String userId) async =>
       _joinedConversationId(userId).getSingleOrNull();
 

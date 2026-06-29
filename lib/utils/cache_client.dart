@@ -1,12 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../widgets/mixin_image.dart';
 import 'proxy.dart';
 
 class CacheClient extends BaseClient {
@@ -20,7 +21,7 @@ class CacheClient extends BaseClient {
 
   @override
   Future<Response> get(Uri url, {Map<String, String>? headers}) async {
-    final cacheKey = keyToMd5(url.toString());
+    final cacheKey = _keyToMd5(url.toString());
 
     final cache = await _loadCache(cacheKey);
     if (cache != null) {
@@ -72,3 +73,5 @@ class CacheClient extends BaseClient {
     await file.writeAsBytes(bytes);
   }
 }
+
+String _keyToMd5(String key) => md5.convert(utf8.encode(key)).toString();
