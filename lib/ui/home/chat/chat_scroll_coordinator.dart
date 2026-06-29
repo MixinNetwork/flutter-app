@@ -532,8 +532,12 @@ class ChatScrollCoordinator {
     if (render == null || viewport == null) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportTop = viewport.localToGlobal(Offset.zero).dy;
-    final top = render.localToGlobal(Offset.zero).dy - viewportTop;
+    final viewportOrigin = _globalOrigin(viewport);
+    final renderOrigin = _globalOrigin(render);
+    if (viewportOrigin == null || renderOrigin == null) return null;
+
+    final viewportTop = viewportOrigin.dy;
+    final top = renderOrigin.dy - viewportTop;
     final height = render.size.height;
     final target =
         scrollController.offset +
@@ -556,8 +560,23 @@ class ChatScrollCoordinator {
     if (render == null || viewport == null) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportTop = viewport.localToGlobal(Offset.zero).dy;
-    return render.localToGlobal(Offset.zero).dy - viewportTop;
+    final viewportOrigin = _globalOrigin(viewport);
+    final renderOrigin = _globalOrigin(render);
+    if (viewportOrigin == null || renderOrigin == null) return null;
+
+    return renderOrigin.dy - viewportOrigin.dy;
+  }
+
+  Offset? _globalOrigin(RenderBox render) {
+    try {
+      return render.localToGlobal(Offset.zero);
+    } catch (error) {
+      if (error is StateError &&
+          error.message.contains('RenderBox was not laid out')) {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   bool _isTargetInLoadedJumpWindow(double target) {
