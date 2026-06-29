@@ -195,7 +195,10 @@ class ChatHistoryViewport extends HookConsumerWidget {
               child: Builder(
                 builder: (context) {
                   if (timelineWindow.anchorUnreadSeparator) {
-                    return const UnreadMessageBar();
+                    return UnreadMessageBar(
+                      conversationId: state.conversationId!,
+                      lastReadMessageId: state.lastReadMessageId,
+                    );
                   }
                   final row = rows.center;
                   if (row == null) return const SizedBox();

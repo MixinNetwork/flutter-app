@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../provider/conversation_provider.dart';
+import '../chat_slide_page/ai_assistant_page.dart';
 import '../chat_slide_page/chat_info_page.dart';
 import '../chat_slide_page/circle_manager_page.dart';
 import '../chat_slide_page/disappear_message_page.dart';
@@ -106,6 +107,18 @@ MaterialPage _pageFor(ConversationInfoDestination destination) {
         name: 'disappearMessages',
         child: _ChatSidePageBuilder(DisappearMessagePage.new),
       );
+    case ConversationInfoDestination.aiAssistant:
+      return const MaterialPage(
+        key: ValueKey(ConversationInfoDestination.aiAssistant),
+        name: 'aiAssistant',
+        child: _ChatSidePageBuilder(AiAssistantPage.new),
+      );
+    case ConversationInfoDestination.aiAssistantThreads:
+      return const MaterialPage(
+        key: ValueKey(ConversationInfoDestination.aiAssistantThreads),
+        name: 'aiAssistantThreads',
+        child: _ChatSidePageBuilder(AiAssistantThreadsPage.new),
+      );
   }
 }
 
@@ -167,11 +180,14 @@ class _AnimatedChatSlide extends HookWidget {
       return null;
     }, [pages, controller]);
 
+    final chatSidePageWidth = displayedPages.value.any(_isAiAssistantPage)
+        ? kAiAssistantChatSidePageWidth
+        : kChatSidePageWidth;
+
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) => SizedBox(
-        width:
-            kChatSidePageWidth * Curves.easeInOut.transform(controller.value),
+        width: chatSidePageWidth * Curves.easeInOut.transform(controller.value),
         height: constraints.maxHeight,
         child: controller.value != 0 ? child : null,
       ),
@@ -180,8 +196,8 @@ class _AnimatedChatSlide extends HookWidget {
           alignment: AlignmentDirectional.centerStart,
           maxHeight: constraints.maxHeight,
           minHeight: constraints.maxHeight,
-          maxWidth: kChatSidePageWidth,
-          minWidth: kChatSidePageWidth,
+          maxWidth: chatSidePageWidth,
+          minWidth: chatSidePageWidth,
           child: Navigator(
             pages: displayedPages.value,
             onDidRemovePage: onDidRemovePage,
@@ -191,3 +207,7 @@ class _AnimatedChatSlide extends HookWidget {
     );
   }
 }
+
+bool _isAiAssistantPage(Page<dynamic> page) =>
+    page.key == const ValueKey(ConversationInfoDestination.aiAssistant) ||
+    page.key == const ValueKey(ConversationInfoDestination.aiAssistantThreads);

@@ -123,6 +123,87 @@ class BrightnessData extends InheritedWidget {
 }
 
 @immutable
+class AiColorScheme {
+  const AiColorScheme({
+    required this.avatarBackground,
+    required this.accent,
+    required this.onAccent,
+    required this.surface,
+    required this.surfaceBorder,
+    required this.surfaceVariant,
+    required this.userBubble,
+    required this.assistantBubble,
+    required this.errorBubble,
+    required this.error,
+  });
+
+  final Color avatarBackground;
+  final Color accent;
+  final Color onAccent;
+  final Color surface;
+  final Color surfaceBorder;
+  final Color surfaceVariant;
+  final Color userBubble;
+  final Color assistantBubble;
+  final Color errorBubble;
+  final Color error;
+
+  static AiColorScheme lerp(
+    AiColorScheme begin,
+    AiColorScheme end,
+    double t,
+  ) => AiColorScheme(
+    avatarBackground: Color.lerp(
+      begin.avatarBackground,
+      end.avatarBackground,
+      t,
+    )!,
+    accent: Color.lerp(begin.accent, end.accent, t)!,
+    onAccent: Color.lerp(begin.onAccent, end.onAccent, t)!,
+    surface: Color.lerp(begin.surface, end.surface, t)!,
+    surfaceBorder: Color.lerp(begin.surfaceBorder, end.surfaceBorder, t)!,
+    surfaceVariant: Color.lerp(
+      begin.surfaceVariant,
+      end.surfaceVariant,
+      t,
+    )!,
+    userBubble: Color.lerp(begin.userBubble, end.userBubble, t)!,
+    assistantBubble: Color.lerp(begin.assistantBubble, end.assistantBubble, t)!,
+    errorBubble: Color.lerp(begin.errorBubble, end.errorBubble, t)!,
+    error: Color.lerp(begin.error, end.error, t)!,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AiColorScheme &&
+          runtimeType == other.runtimeType &&
+          avatarBackground == other.avatarBackground &&
+          accent == other.accent &&
+          onAccent == other.onAccent &&
+          surface == other.surface &&
+          surfaceBorder == other.surfaceBorder &&
+          surfaceVariant == other.surfaceVariant &&
+          userBubble == other.userBubble &&
+          assistantBubble == other.assistantBubble &&
+          errorBubble == other.errorBubble &&
+          error == other.error;
+
+  @override
+  int get hashCode =>
+      avatarBackground.hashCode ^
+      accent.hashCode ^
+      onAccent.hashCode ^
+      surface.hashCode ^
+      surfaceBorder.hashCode ^
+      surfaceVariant.hashCode ^
+      userBubble.hashCode ^
+      assistantBubble.hashCode ^
+      errorBubble.hashCode ^
+      error.hashCode;
+}
+
+@immutable
 class BrightnessThemeData {
   const BrightnessThemeData({
     required this.primary,
@@ -147,6 +228,7 @@ class BrightnessThemeData {
     required this.waveformBackground,
     required this.waveformForeground,
     required this.settingCellBackgroundColor,
+    required this.ai,
   });
 
   final Color primary;
@@ -171,6 +253,7 @@ class BrightnessThemeData {
   final Color waveformBackground;
   final Color waveformForeground;
   final Color settingCellBackgroundColor;
+  final AiColorScheme ai;
 
   static BrightnessThemeData lerp(
     BrightnessThemeData begin,
@@ -219,6 +302,7 @@ class BrightnessThemeData {
       end.settingCellBackgroundColor,
       t,
     )!,
+    ai: AiColorScheme.lerp(begin.ai, end.ai, t),
   );
 
   @override
@@ -246,7 +330,8 @@ class BrightnessThemeData {
           stickerPlaceholderColor == other.stickerPlaceholderColor &&
           waveformBackground == other.waveformBackground &&
           waveformForeground == other.waveformForeground &&
-          settingCellBackgroundColor == other.settingCellBackgroundColor;
+          settingCellBackgroundColor == other.settingCellBackgroundColor &&
+          ai == other.ai;
 
   @override
   int get hashCode =>
@@ -270,5 +355,6 @@ class BrightnessThemeData {
       stickerPlaceholderColor.hashCode ^
       waveformBackground.hashCode ^
       waveformForeground.hashCode ^
-      waveformForeground.hashCode;
+      settingCellBackgroundColor.hashCode ^
+      ai.hashCode;
 }

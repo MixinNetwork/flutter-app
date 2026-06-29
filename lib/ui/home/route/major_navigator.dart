@@ -6,6 +6,7 @@ import '../../provider/major_navigation_provider.dart';
 import '../../setting/about_page.dart';
 import '../../setting/account_delete_page.dart';
 import '../../setting/account_page.dart';
+import '../../setting/ai_settings_page.dart';
 import '../../setting/appearance_page.dart';
 import '../../setting/backup_page.dart';
 import '../../setting/edit_profile_page.dart';
@@ -163,6 +164,12 @@ MaterialPage _pageFor(MajorNavigationEntry entry) {
         key: ValueKey(MajorNavigationDestination.securityPage),
         name: 'securityPage',
         child: SecurityPage(key: ValueKey('securityPage')),
+      );
+    case MajorNavigationDestination.aiSettingsPage:
+      return const MaterialPage(
+        key: ValueKey(MajorNavigationDestination.aiSettingsPage),
+        name: 'aiSettingsPage',
+        child: AiSettingsPage(key: ValueKey('aiSettingsPage')),
       );
   }
 }

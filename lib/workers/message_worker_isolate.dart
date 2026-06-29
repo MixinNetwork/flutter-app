@@ -16,6 +16,7 @@ import 'package:stream_channel/isolate_channel.dart';
 
 import '../blaze/blaze.dart';
 import '../crypto/signal/signal_protocol.dart';
+import '../db/ai_database.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/fts_database.dart';
@@ -149,6 +150,7 @@ class _MessageProcessRunner {
     database = Database(
       await connectToDatabase(identityNumber, readCount: 4),
       await FtsDatabase.connect(identityNumber),
+      await AiDatabase.connect(identityNumber),
     );
 
     client = createClient(

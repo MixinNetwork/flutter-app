@@ -11,12 +11,14 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions = const [],
     this.backgroundColor,
     this.leading,
+    this.leadingWidth,
   });
 
   final Widget? title;
   final List<Widget> actions;
   final Color? backgroundColor;
   final Widget? leading;
+  final double? leadingWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         centerTitle: true,
         backgroundColor: backgroundColor ?? context.theme.primary,
+        leadingWidth: leadingWidth,
         leading: MoveWindowBarrier(
           child: Builder(
             builder: (context) =>

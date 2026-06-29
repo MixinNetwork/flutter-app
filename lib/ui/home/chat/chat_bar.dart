@@ -27,6 +27,8 @@ class ChatBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useListenable(context.database.settingProperties);
+
     final actionColor = context.theme.icon;
     final chatSideNotifier = context.read<ChatSideNotifier>();
     useValueListenable(chatSideNotifier);
@@ -36,6 +38,11 @@ class ChatBar extends HookConsumerWidget {
     final conversation = ref.watch(conversationProvider);
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
+    final hasAvailableAiModel =
+        context.database.settingProperties.selectedAiProvider?.model
+            .trim()
+            .isNotEmpty ==
+        true;
 
     MoveWindowBarrier toggleInfoPageWrapper({
       required Widget child,
@@ -133,6 +140,22 @@ class ChatBar extends HookConsumerWidget {
             ),
           )
         else ...[
+          if (hasAvailableAiModel)
+            MoveWindowBarrier(
+              child: ActionButton(
+                color: actionColor,
+                onTap: () {
+                  chatSideNotifier.toggleDestination(
+                    ConversationInfoDestination.aiAssistant,
+                  );
+                },
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 20,
+                  color: actionColor,
+                ),
+              ),
+            ),
           MoveWindowBarrier(
             child: ActionButton(
               name: Resources.assetsImagesIcSearchSvg,

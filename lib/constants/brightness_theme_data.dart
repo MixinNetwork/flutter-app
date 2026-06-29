@@ -25,6 +25,18 @@ const lightBrightnessThemeData = BrightnessThemeData(
   waveformBackground: Color.fromRGBO(221, 221, 221, 1),
   waveformForeground: Color.fromRGBO(155, 155, 155, 1),
   settingCellBackgroundColor: Colors.white,
+  ai: AiColorScheme(
+    avatarBackground: Color(0xFFE0E7FF),
+    accent: Color(0xFF4F46E5),
+    onAccent: Colors.white,
+    surface: Color(0xFFF5F3FF),
+    surfaceBorder: Color(0xFFE0E7FF),
+    surfaceVariant: Color(0xFFEDE9FE),
+    userBubble: Color(0xFFF1F5F9),
+    assistantBubble: Color(0xFFEEF2FF),
+    errorBubble: Color(0xFFFEF2F2),
+    error: Color(0xFFEF4444),
+  ),
 );
 
 const darkBrightnessThemeData = BrightnessThemeData(
@@ -50,6 +62,18 @@ const darkBrightnessThemeData = BrightnessThemeData(
   waveformBackground: Color.fromRGBO(255, 255, 255, 0.4),
   waveformForeground: Color.fromRGBO(255, 255, 255, 1),
   settingCellBackgroundColor: Color.fromRGBO(255, 255, 255, 0.06),
+  ai: AiColorScheme(
+    avatarBackground: Color(0xFF312E81),
+    accent: Color(0xFFA5B4FC),
+    onAccent: Color(0xFF1E1B4B),
+    surface: Color(0xFF282836),
+    surfaceBorder: Color(0xFF3F3F5A),
+    surfaceVariant: Color(0xFF312E4A),
+    userBubble: Color(0xFF334155),
+    assistantBubble: Color(0xFF2D2B4A),
+    errorBubble: Color(0xFF450A0A),
+    error: Color(0xFFFCA5A5),
+  ),
 );
 
 final circleColors = [

@@ -11,6 +11,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart' hide Message, Offset;
 import '../../enum/message_category.dart';
+import '../../ui/home/chat_slide_page/ai_assistant/unread_summary.dart';
 import '../../ui/home/notifier/blink_notifier.dart';
 import '../../ui/provider/is_bot_group_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
@@ -27,6 +28,7 @@ import 'item/secret_message.dart';
 import 'item/stranger_message.dart';
 import 'item/system_message.dart';
 import 'message_actions_menu.dart';
+import 'message_ai_assist.dart';
 import 'message_content.dart';
 import 'message_context.dart';
 import 'message_day_time.dart';
@@ -204,6 +206,23 @@ class MessageItemWidget extends HookConsumerWidget {
     );
     final datetime = row.dateTime;
 
+    useListenable(context.database.settingProperties);
+
+    final inlineAiState = useState(readInlineMessageAiState(message.messageId));
+    useEffect(() {
+      inlineAiState.value = readInlineMessageAiState(message.messageId);
+      return null;
+    }, [message.messageId]);
+
+    void updateInlineAiState(
+      MessageAiAction action,
+      InlineMessageAiEntry entry,
+    ) {
+      final nextState = inlineAiState.value.put(action, entry);
+      inlineAiState.value = nextState;
+      writeInlineMessageAiState(message.messageId, nextState);
+    }
+
     final showedMenu = useState(false);
     final focusNode = useFocusScopeNode(
       debugLabel: 'message_item_${message.messageId}',
@@ -253,13 +272,29 @@ class MessageItemWidget extends HookConsumerWidget {
                   isPinnedPage: isPinnedPage,
                   showedMenu: showedMenu,
                   focusNode: focusNode,
+                  onInlineAiStateChanged: updateInlineAiState,
+                ),
+                aiSection: MessageInlineAiSection(
+                  state: inlineAiState.value,
+                  leadingPadding: presentation.isCurrentUser
+                      ? kInlineMessageAiLeadingPadding
+                      : 0,
+                  onClose: (action) {
+                    final nextState = inlineAiState.value.remove(action);
+                    inlineAiState.value = nextState;
+                    writeInlineMessageAiState(message.messageId, nextState);
+                  },
                 ),
                 builder: (_) => MessageContent(message: message),
               ),
             );
           },
         ),
-        if (presentation.showUnreadBar) const UnreadMessageBar(),
+        if (presentation.showUnreadBar)
+          UnreadMessageBar(
+            conversationId: message.conversationId,
+            lastReadMessageId: lastReadMessageId,
+          ),
       ],
     );
 
@@ -314,6 +349,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
     required this.showAvatar,
     required this.isBot,
     required this.isVerified,
+    required this.aiSection,
   });
 
   final bool isCurrentUser;
@@ -326,6 +362,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   final bool showAvatar;
   final bool isBot;
   final bool isVerified;
+  final Widget aiSection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -363,6 +400,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
           child: MessageQuickReplyDetector(child: Builder(builder: builder)),
         ),
+        aiSection,
       ],
     );
 
@@ -410,23 +448,70 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   }
 }
 
-class UnreadMessageBar extends StatelessWidget {
-  const UnreadMessageBar({super.key});
+class UnreadMessageBar extends HookConsumerWidget {
+  const UnreadMessageBar({
+    required this.conversationId,
+    required this.lastReadMessageId,
+    super.key,
+  });
+
+  final String conversationId;
+  final String? lastReadMessageId;
 
   @override
-  Widget build(BuildContext context) => Container(
-    color: context.theme.background,
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    margin: const EdgeInsets.symmetric(vertical: 6),
-    alignment: Alignment.center,
-    child: Text(
-      context.l10n.unreadMessages,
-      style: TextStyle(
-        color: context.theme.secondaryText,
-        fontSize: context.messageStyle.secondaryFontSize,
+  Widget build(BuildContext context, WidgetRef ref) {
+    useListenable(context.database.settingProperties);
+
+    final hasAiModel = hasAvailableAiModel(context);
+    return Container(
+      color: context.theme.background,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          const SizedBox(width: 44),
+          Expanded(
+            child: Text(
+              context.l10n.unreadMessages,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.theme.secondaryText,
+                fontSize: context.messageStyle.secondaryFontSize,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 44,
+            child: hasAiModel
+                ? Align(
+                    child: Tooltip(
+                      message: 'Summarize unread messages',
+                      child: InteractiveDecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        onTap: () => summarizeUnreadMessagesWithAi(
+                          context: context,
+                          conversationId: conversationId,
+                          lastReadMessageId: lastReadMessageId,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 16,
+                            color: context.theme.accent,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _MessageSelectionWrapper extends HookConsumerWidget {

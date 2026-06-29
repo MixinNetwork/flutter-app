@@ -8,4 +8,6 @@ enum ConversationInfoDestination {
   sharedApps,
   groupsInCommon,
   disappearMessages,
+  aiAssistant,
+  aiAssistantThreads,
 }

@@ -124,6 +124,13 @@ class SettingPage extends HookConsumerWidget {
                                   MajorNavigationDestination.appearancePage,
                               title: context.l10n.appearance,
                             ),
+                            const _Item(
+                              leadingAssetName:
+                                  Resources.assetsImagesIcAppearanceSvg,
+                              destination:
+                                  MajorNavigationDestination.aiSettingsPage,
+                              title: 'AI Settings',
+                            ),
                             _Item(
                               leadingAssetName:
                                   Resources.assetsImagesIcAboutSvg,

@@ -17,6 +17,7 @@ enum MajorNavigationDestination {
   storageUsageDetail,
   proxyPage,
   securityPage,
+  aiSettingsPage,
 }
 
 class MajorNavigationEntry extends Equatable {
@@ -66,6 +67,7 @@ class MajorNavigationNotifier
     MajorNavigationDestination.accountDeletePage,
     MajorNavigationDestination.proxyPage,
     MajorNavigationDestination.securityPage,
+    MajorNavigationDestination.aiSettingsPage,
   };
 
   void clear() {

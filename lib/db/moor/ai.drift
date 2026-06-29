@@ -1,0 +1,54 @@
+import '../converter/millis_date_converter.dart';
+
+CREATE TABLE ai_chat_messages (
+    id TEXT NOT NULL,
+    thread_id TEXT NOT NULL DEFAULT '',
+    conversation_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    status TEXT NOT NULL,
+    model TEXT,
+    error_text TEXT,
+    metadata TEXT,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE ai_chat_threads (
+    id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    title TEXT,
+    summary TEXT,
+    last_message_preview TEXT,
+    message_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'active',
+    pinned_at INTEGER MAPPED BY `const MillisDateConverter()`,
+    archived_at INTEGER MAPPED BY `const MillisDateConverter()`,
+    last_message_at INTEGER MAPPED BY `const MillisDateConverter()`,
+    metadata TEXT,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE image_ocr_results (
+    message_id TEXT NOT NULL,
+    conversation_id TEXT NOT NULL,
+    media_fingerprint TEXT NOT NULL,
+    engine TEXT NOT NULL,
+    status TEXT NOT NULL,
+    recognized_text TEXT NOT NULL DEFAULT '',
+    lines_json TEXT,
+    error_text TEXT,
+    created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    updated_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`,
+    PRIMARY KEY(message_id)
+);
+
+CREATE INDEX IF NOT EXISTS index_ai_chat_messages_conversation_id_created_at ON ai_chat_messages(conversation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_ai_chat_messages_thread_id_created_at ON ai_chat_messages(thread_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_updated_at ON ai_chat_threads(conversation_id, status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS index_ai_chat_threads_conversation_id_last_message_at ON ai_chat_threads(conversation_id, status, last_message_at DESC);
+CREATE INDEX IF NOT EXISTS index_image_ocr_results_conversation_id_updated_at ON image_ocr_results(conversation_id, updated_at DESC);

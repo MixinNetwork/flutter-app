@@ -12,11 +12,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
+import 'package:mixin_logger/mixin_logger.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
+import '../../../ai/ai_chat_controller.dart';
+import '../../../ai/model/ai_prompt_template.dart';
+import '../../../ai/model/ai_provider_config.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
 import '../../../constants/resources.dart';
@@ -27,6 +31,7 @@ import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/mcp/mixin_mcp_bridge.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/system/clipboard.dart';
@@ -46,6 +51,7 @@ import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
 import '../notifier/chat_side_notifier.dart';
+import 'ai_draft_assist_panel.dart';
 import 'chat_send_outcome.dart';
 import 'files_preview.dart';
 import 'voice_recorder_bottom_bar.dart';
@@ -118,11 +124,82 @@ class _InputContainer extends HookConsumerWidget {
         );
     }, [conversationId]);
 
+    useEffect(() {
+      final currentConversationId = conversationId;
+      if (currentConversationId == null) return null;
+      MixinMcpBridge.instance.bindInputController(
+        currentConversationId,
+        textEditingController,
+      );
+      return () => MixinMcpBridge.instance.unbindInputController(
+        currentConversationId,
+        textEditingController,
+      );
+    }, [conversationId, textEditingController]);
+
     final textEditingValueStream = useValueNotifierConvertSteam(
       textEditingController,
     );
 
     final mentionProviderInstance = mentionProvider(textEditingValueStream);
+    final aiDraftAssistState = useState(AiDraftAssistViewState.idle);
+    final aiDraftAssistRequestVersion = useState(0);
+
+    Future<String> handleAiDraftRequest(
+      AiDraftAction action,
+      String original,
+    ) async {
+      final currentConversationId = conversationId;
+      if (currentConversationId == null) {
+        throw ToastError('Conversation unavailable');
+      }
+
+      final requestId = aiDraftAssistRequestVersion.value + 1;
+      aiDraftAssistRequestVersion.value = requestId;
+      aiDraftAssistState.value = AiDraftAssistViewState(
+        phase: AiDraftAssistPhase.loading,
+        action: action,
+        original: original,
+      );
+
+      try {
+        final result = await _requestAiDraftAction(
+          context,
+          action: action,
+          conversationId: currentConversationId,
+          original: original,
+        );
+        if (aiDraftAssistRequestVersion.value == requestId) {
+          aiDraftAssistState.value = AiDraftAssistViewState(
+            phase: AiDraftAssistPhase.result,
+            action: action,
+            original: original,
+            result: result,
+          );
+        }
+        return result;
+      } catch (error) {
+        if (aiDraftAssistRequestVersion.value == requestId) {
+          aiDraftAssistState.value = AiDraftAssistViewState(
+            phase: AiDraftAssistPhase.error,
+            action: action,
+            original: original,
+            error: '$error',
+          );
+        }
+        rethrow;
+      }
+    }
+
+    void dismissAiDraftAssist() {
+      aiDraftAssistRequestVersion.value += 1;
+      aiDraftAssistState.value = AiDraftAssistViewState.idle;
+    }
+
+    useEffect(() {
+      dismissAiDraftAssist();
+      return null;
+    }, [conversationId]);
 
     useEffect(() {
       final updateDraft = context.database.conversationDao.updateDraft;
@@ -204,26 +281,104 @@ class _InputContainer extends HookConsumerWidget {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const _SendActionTypeButton(),
-                    const SizedBox(width: 6),
-                    _StickerButton(
-                      textEditingController: textEditingController,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _SendTextField(
-                        focusNode: focusNode,
-                        textEditingController: textEditingController,
-                        mentionProviderInstance: mentionProviderInstance,
+                    if (!aiDraftAssistState.value.isIdle)
+                      AiDraftAssistInlineCandidate(
+                        viewState: aiDraftAssistState.value,
+                        onDismiss: dismissAiDraftAssist,
+                        onCopy: () {
+                          final result = aiDraftAssistState.value.result;
+                          if (result == null) return;
+                          Clipboard.setData(ClipboardData(text: result));
+                          showToastSuccessful(context: context);
+                        },
+                        onInsert: () {
+                          final result = aiDraftAssistState.value.result;
+                          if (result == null) return;
+                          applyAiDraftAssistResult(
+                            textEditingController,
+                            result,
+                            replace: false,
+                          );
+                          dismissAiDraftAssist();
+                        },
+                        onUseAndSend: () {
+                          final result = aiDraftAssistState.value.result;
+                          if (result == null) return;
+                          textEditingController.value = TextEditingValue(
+                            text: result,
+                            selection: TextSelection.collapsed(
+                              offset: result.length,
+                            ),
+                          );
+                          dismissAiDraftAssist();
+                          _sendMessage(context, textEditingController);
+                        },
+                        onReplace: () {
+                          final result = aiDraftAssistState.value.result;
+                          if (result == null) return;
+                          applyAiDraftAssistResult(
+                            textEditingController,
+                            result,
+                            replace: true,
+                          );
+                          dismissAiDraftAssist();
+                        },
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    _AnimatedSendOrVoiceButton(
-                      textEditingController: textEditingController,
-                      textEditingValueStream: textEditingValueStream,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const _SendActionTypeButton(),
+                        const SizedBox(width: 6),
+                        _StickerButton(
+                          textEditingController: textEditingController,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _SendTextField(
+                            focusNode: focusNode,
+                            textEditingController: textEditingController,
+                            mentionProviderInstance: mentionProviderInstance,
+                          ),
+                        ),
+                        if (context.database.settingProperties.aiProviders
+                            .whereType<AiProviderConfig>()
+                            .any((provider) => provider.enabled)) ...[
+                          const SizedBox(width: 8),
+                          AiDraftAssistButton(
+                            enabled:
+                                context
+                                    .database
+                                    .settingProperties
+                                    .selectedAiProvider !=
+                                null,
+                            textEditingController: textEditingController,
+                            viewState: aiDraftAssistState.value,
+                            onSelected: (action) => unawaited(
+                              handleAiDraftRequest(
+                                action,
+                                textEditingController.text.trim(),
+                              ),
+                            ),
+                            onStop: () {
+                              final currentConversationId = conversationId;
+                              if (currentConversationId != null) {
+                                AiChatController(
+                                  context.database,
+                                ).stop(currentConversationId);
+                              }
+                              dismissAiDraftAssist();
+                            },
+                          ),
+                        ],
+                        const SizedBox(width: 16),
+                        _AnimatedSendOrVoiceButton(
+                          textEditingController: textEditingController,
+                          textEditingValueStream: textEditingValueStream,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -234,6 +389,59 @@ class _InputContainer extends HookConsumerWidget {
       ),
     );
   }
+}
+
+Future<String> _requestAiDraftAction(
+  BuildContext context, {
+  required AiDraftAction action,
+  required String conversationId,
+  required String original,
+}) async {
+  if (action != AiDraftAction.replyWithContext && original.isEmpty) {
+    throw ToastError('Please type a message first');
+  }
+
+  final language = _currentLanguageTag(context);
+  final templateKey = switch (action) {
+    AiDraftAction.polish => AiPromptTemplateKey.draftPolish,
+    AiDraftAction.shorten => AiPromptTemplateKey.draftShorten,
+    AiDraftAction.polite => AiPromptTemplateKey.draftPolite,
+    AiDraftAction.translate => AiPromptTemplateKey.draftTranslate,
+    AiDraftAction.replyWithContext => AiPromptTemplateKey.draftReplyWithContext,
+  };
+  final instruction = renderAiPromptTemplate(
+    context.database.settingProperties.aiPromptTemplate(templateKey),
+    buildAiPromptTemplateVariables(
+      conversationId: conversationId,
+      input: original,
+      language: language,
+    ),
+  );
+  final title = aiDraftActionTitle(action);
+
+  try {
+    final provider = action == AiDraftAction.translate
+        ? context.database.settingProperties.selectedAiTranslatorProvider
+        : context.database.settingProperties.selectedAiProvider;
+    final result = await AiChatController(context.database).assistText(
+      instruction: instruction,
+      language: language,
+      input: action == AiDraftAction.replyWithContext ? null : original,
+      conversationId: conversationId,
+      provider: provider,
+    );
+    return result.trim();
+  } catch (error, stackTrace) {
+    e('AI draft assist failed: $title: $error, $stackTrace');
+    rethrow;
+  }
+}
+
+String _currentLanguageTag(BuildContext context) {
+  final locale = Localizations.localeOf(context);
+  final countryCode = locale.countryCode;
+  if (countryCode == null || countryCode.isEmpty) return locale.languageCode;
+  return '${locale.languageCode}-$countryCode';
 }
 
 class _AnimatedSendOrVoiceButton extends HookConsumerWidget {

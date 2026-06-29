@@ -63,10 +63,35 @@ class MessageDayTimeChip extends HookConsumerWidget {
   }
 }
 
+class MessageDayTimeItem extends StatelessWidget {
+  const MessageDayTimeItem({
+    required this.dateTime,
+    required this.child,
+    super.key,
+    this.prevDateTime,
+  });
+
+  final DateTime dateTime;
+  final DateTime? prevDateTime;
+  final Widget child;
+
+  bool get showDayTime => !isSameDay(prevDateTime, dateTime);
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (showDayTime) MessageDayTime(dateTime: dateTime),
+      child,
+    ],
+  );
+}
+
 class _CurrentShowingMessages {
   _CurrentShowingMessages();
 
-  final List<db.MessageItem> items = [];
+  final List<DateTime> items = [];
   final List<Element> elements = [];
   final List<Element?> dayTimeElements = [];
 
@@ -74,31 +99,42 @@ class _CurrentShowingMessages {
     final itemElement = entry.messageKey.currentContext;
     if (itemElement is! Element) return;
     final dayTimeElement = entry.dayTimeKey?.currentContext;
-    items.add(entry.message);
+    items.add(entry.message.createdAt);
     elements.add(itemElement);
     dayTimeElements.add(dayTimeElement is Element ? dayTimeElement : null);
   }
 
   void dumpKeyedSubtree(Element element, {bool reverse = false}) {
     final item = element.descendantFirstOfOrNull(
-      (e) => e.widget is MessageItemWidget,
+      (e) => e.widget is MessageItemWidget || e.widget is MessageDayTimeItem,
     );
     if (item == null) return;
-    final widget = item.widget as MessageItemWidget;
-    final message = widget.row?.message ?? widget.message;
-    final prev = widget.row?.prev ?? widget.prev;
+    final widget = item.widget;
+    late final DateTime createdAt;
+    DateTime? prevCreatedAt;
+    if (widget is MessageDayTimeItem) {
+      createdAt = widget.dateTime;
+      prevCreatedAt = widget.prevDateTime;
+    } else if (widget is MessageItemWidget) {
+      final message = widget.row?.message ?? widget.message;
+      final prev = widget.row?.prev ?? widget.prev;
+      createdAt = message.createdAt;
+      prevCreatedAt = prev?.createdAt;
+    } else {
+      return;
+    }
 
-    final dayTimeElement = !isSameDay(message.createdAt, prev?.createdAt)
+    final dayTimeElement = !isSameDay(createdAt, prevCreatedAt)
         ? element.descendantFirstOfOrNull(
             (e) => e.widget is MessageDayTimeChip,
           )
         : null;
     if (!reverse) {
-      items.add(message);
+      items.add(createdAt);
       elements.add(item);
       dayTimeElements.add(dayTimeElement);
     } else {
-      items.insert(0, message);
+      items.insert(0, createdAt);
       elements.insert(0, item);
       dayTimeElements.insert(0, dayTimeElement);
     }
@@ -260,7 +296,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
         if (offset.dy < render.size.height / 2) {
           // up
           firstInScreenIndex = closestToTopDayTimeIndex;
-          hiddenDateTime.value = items[closestToTopDayTimeIndex].createdAt;
+          hiddenDateTime.value = items[closestToTopDayTimeIndex];
           dateTimeTopOffset.value = 0;
         } else {
           // down
@@ -270,8 +306,8 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
                 e('firstInScreenIndex > closestToTopDayTimeIndex');
               }
               if (isSameDay(
-                items[firstInScreenIndex].createdAt,
-                items[closestToTopDayTimeIndex].createdAt,
+                items[firstInScreenIndex],
+                items[closestToTopDayTimeIndex],
               )) {
                 e(
                   'there is a day time item but is the same day.'
@@ -293,7 +329,7 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
         dateTimeTopOffset.value = 0;
       }
 
-      dateTime.value = items.getOrNull(firstInScreenIndex)?.createdAt;
+      dateTime.value = items.getOrNull(firstInScreenIndex);
     }
 
     useEffect(() {

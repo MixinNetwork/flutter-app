@@ -4,6 +4,7 @@ library;
 import 'dart:async';
 
 import 'package:drift/native.dart';
+import 'package:flutter_app/db/ai_database.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -26,6 +27,7 @@ void main() {
     final database = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
+      AiDatabase(NativeDatabase.memory()),
     );
     addTearDown(database.dispose);
 
@@ -75,6 +77,7 @@ void main() {
     final database = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
+      AiDatabase(NativeDatabase.memory()),
     );
     addTearDown(database.dispose);
 

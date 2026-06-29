@@ -51,53 +51,79 @@ class MessageDatetimeAndStatus extends HookConsumerWidget {
       converter: (state) => state.createdAt,
     );
 
+    return MessageMetaRow(
+      color: color,
+      dateTime: createdAt,
+      leading: [
+        if (pinned)
+          _ChatIcon(
+            color: color,
+            assetName: Resources.assetsImagesMessagePinSvg,
+          ),
+        if (isSecret)
+          _ChatIcon(
+            color: color,
+            assetName: Resources.assetsImagesMessageSecretSvg,
+          ),
+        if (isRepresentative)
+          _ChatIcon(
+            color: color,
+            assetName: Resources.assetsImagesMessageRepresentativeSvg,
+          ),
+      ],
+      trailing:
+          isCurrentUser && !isTranscriptPage && !isPinnedPage && !hideStatus
+          ? HookBuilder(
+              builder: (context) {
+                final status = useMessageConverter(
+                  converter: (state) => state.status,
+                );
+                return MessageStatusIcon(status: status, color: color);
+              },
+            )
+          : null,
+    );
+  }
+}
+
+class MessageMetaRow extends StatelessWidget {
+  const MessageMetaRow({
+    required this.dateTime,
+    super.key,
+    this.color,
+    this.leading = const [],
+    this.trailing,
+    this.trailingSpacing = 8,
+  });
+
+  final DateTime dateTime;
+  final Color? color;
+  final List<Widget> leading;
+  final Widget? trailing;
+  final double trailingSpacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final children = <Widget>[
+      for (final widget in leading)
+        Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: widget,
+        ),
+      _MessageDatetime(dateTime: dateTime, color: color),
+      if (trailing != null)
+        Padding(
+          padding: EdgeInsets.only(left: trailingSpacing),
+          child: trailing,
+        ),
+    ];
+
     return SelectionContainer.disabled(
       child: SizedBox(
         height: 12,
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            if (pinned)
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: _ChatIcon(
-                  color: color,
-                  assetName: Resources.assetsImagesMessagePinSvg,
-                ),
-              ),
-            if (isSecret)
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: _ChatIcon(
-                  color: color,
-                  assetName: Resources.assetsImagesMessageSecretSvg,
-                ),
-              ),
-            if (isRepresentative)
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: _ChatIcon(
-                  color: color,
-                  assetName: Resources.assetsImagesMessageRepresentativeSvg,
-                ),
-              ),
-            _MessageDatetime(dateTime: createdAt, color: color),
-            if (isCurrentUser &&
-                !isTranscriptPage &&
-                !isPinnedPage &&
-                !hideStatus)
-              HookBuilder(
-                builder: (context) {
-                  final status = useMessageConverter(
-                    converter: (state) => state.status,
-                  );
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: MessageStatusIcon(status: status, color: color),
-                  );
-                },
-              ),
-          ],
+          children: children,
         ),
       ),
     );

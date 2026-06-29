@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter_app/db/ai_database.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -169,6 +170,7 @@ void main() {
     receiverDatabase = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
+      AiDatabase(NativeDatabase.memory()),
     );
 
     final userId = const Uuid().v4();
@@ -205,6 +207,7 @@ void main() {
     senderDatabase = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
+      AiDatabase(NativeDatabase.memory()),
     )..addTestData(userId);
     final senderDeviceId = const Uuid().v4();
 

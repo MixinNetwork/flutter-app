@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
+import '../../db/ai_database.dart';
 import '../../db/database.dart';
 import '../../db/fts_database.dart';
 import '../../db/mixin_database.dart';
@@ -52,6 +53,8 @@ class DatabaseOpener extends DistinctStateNotifier<AsyncValue<Database>> {
       final db = Database(
         mixinDatabase,
         await FtsDatabase.connect(identityNumber, fromMainIsolate: true),
+        await AiDatabase.connect(identityNumber, fromMainIsolate: true),
+        identityNumber: identityNumber,
       );
       // Do a database query, to ensure database has properly initialized.
       await mixinDatabase.doInitVerify();

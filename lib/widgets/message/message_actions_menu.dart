@@ -15,6 +15,10 @@ import '../../constants/icon_fonts.dart';
 import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Message;
 import '../../ui/home/chat/message_jump.dart';
+import '../../ui/home/chat_slide_page/ai_assistant/constants.dart';
+import '../../ui/home/conversation_info_destination.dart';
+import '../../ui/home/notifier/chat_side_notifier.dart';
+import '../../ui/provider/ai_context_attachment_provider.dart';
 import '../../ui/provider/conversation_provider.dart';
 import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
@@ -30,6 +34,7 @@ import '../user_selector/conversation_selector.dart';
 import 'item/action_card/action_card_data.dart';
 import 'item/text/selectable.dart';
 import 'message_action_policy.dart';
+import 'message_ai_assist.dart';
 import 'message_file_actions.dart';
 
 Menu? buildMessageActionsMenu({
@@ -41,6 +46,8 @@ Menu? buildMessageActionsMenu({
   required bool isPinnedPage,
   required ValueNotifier<bool> showedMenu,
   required FocusNode focusNode,
+  required void Function(MessageAiAction, InlineMessageAiEntry)
+  onInlineAiStateChanged,
 }) {
   request.onShowMenu.addListener(() {
     showedMenu.value = true;
@@ -320,6 +327,60 @@ Menu? buildMessageActionsMenu({
       ),
   ];
 
+  final hasEnabledAiProvider = context.database.settingProperties.aiProviders
+      .any((provider) => provider.enabled);
+  final aiText = hasEnabledAiProvider ? messageAiText(message) : null;
+  final aiActions = [
+    if (hasEnabledAiProvider && !isTranscriptPage && !isPinnedPage)
+      MenuAction(
+        image: MenuImage.icon(Icons.auto_awesome_rounded),
+        title: aiAssistantAttachToAi,
+        callback: () => _attachMessagesToAi(context, ref, [message]),
+      ),
+    if (aiText != null)
+      MenuAction(
+        image: MenuImage.icon(Icons.translate),
+        title: 'Translate',
+        callback: () => unawaited(
+          runMessageAiAction(
+            context,
+            message: message,
+            input: aiText,
+            action: MessageAiAction.translate,
+            onStateChanged: onInlineAiStateChanged,
+          ),
+        ),
+      ),
+    if (aiText != null)
+      MenuAction(
+        image: MenuImage.icon(Icons.psychology_alt),
+        title: 'Explain',
+        callback: () => unawaited(
+          runMessageAiAction(
+            context,
+            message: message,
+            input: aiText,
+            action: MessageAiAction.explain,
+            onStateChanged: onInlineAiStateChanged,
+          ),
+        ),
+      ),
+    if (aiText != null && !isTranscriptPage)
+      MenuAction(
+        image: MenuImage.icon(Icons.auto_awesome),
+        title: 'Suggest replies',
+        callback: () => unawaited(
+          runMessageAiAction(
+            context,
+            message: message,
+            input: aiText,
+            action: MessageAiAction.suggestReplies,
+            onStateChanged: onInlineAiStateChanged,
+          ),
+        ),
+      ),
+  ];
+
   final devActions = [
     if (!kReleaseMode)
       MenuAction(
@@ -334,12 +395,28 @@ Menu? buildMessageActionsMenu({
     childrens: [
       replayAction,
       copyActions,
+      aiActions,
       messageActions,
       saveActions,
       addStickerMenuAction,
       deleteActions,
       devActions,
     ],
+  );
+}
+
+void _attachMessagesToAi(
+  BuildContext context,
+  WidgetRef ref,
+  List<MessageItem> messages,
+) {
+  final conversationId = ref.read(currentConversationIdProvider);
+  if (conversationId == null) return;
+  ref
+      .read(aiContextAttachmentProvider(conversationId).notifier)
+      .attachMessages(messages);
+  context.read<ChatSideNotifier>().openDestination(
+    ConversationInfoDestination.aiAssistant,
   );
 }
 

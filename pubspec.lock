@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  anthropic_sdk_dart:
+    dependency: transitive
+    description:
+      name: anthropic_sdk_dart
+      sha256: b0e91039942930341b24e3871d5b9481b6d31528b711eb752f413f4d1f5980eb
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   archive:
     dependency: "direct main"
     description:
@@ -219,7 +227,7 @@ packages:
     source: hosted
     version: "1.1.2"
   code_assets:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: code_assets
       sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
@@ -319,8 +327,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/data_detector"
-      ref: "08c1ce40eb6abfad6049fb6aad8bd30312ec5319"
-      resolved-ref: "08c1ce40eb6abfad6049fb6aad8bd30312ec5319"
+      ref: "821be771429135163704ede47acf95be5ba82095"
+      resolved-ref: "821be771429135163704ede47acf95be5ba82095"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
@@ -470,6 +478,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  email_validator:
+    dependency: transitive
+    description:
+      name: email_validator
+      sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   emojis:
     dependency: "direct main"
     description:
@@ -712,6 +728,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_math_fork:
+    dependency: transitive
+    description:
+      name: flutter_math_fork
+      sha256: "6d5f2f1aa57ae539ffb0a04bb39d2da67af74601d685a161aff7ce5bda5fa407"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.4"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -787,6 +811,38 @@ packages:
       url: "https://github.com/boyan01/gal.git"
     source: git
     version: "2.1.3"
+  genkit:
+    dependency: "direct main"
+    description:
+      name: genkit
+      sha256: ccc84935593e6f12447c8d4b27034fceb4573cbc3d51b76d32aa9bbbf8d3badd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.1"
+  genkit_anthropic:
+    dependency: "direct main"
+    description:
+      name: genkit_anthropic
+      sha256: "3a902993fdd4cefca4d10ee76df3cf064622247d74c5d0f2b619e5c2b6022727"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
+  genkit_google_genai:
+    dependency: "direct main"
+    description:
+      name: genkit_google_genai
+      sha256: "95f798f10776e9078251f7e6ae91e4e5c9cb0b960fc22d50a6baf59fdbcecfbc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
+  genkit_openai:
+    dependency: "direct main"
+    description:
+      name: genkit_openai
+      sha256: "398b3d7a5bc08fb6764ea0a5244151cca31263e67ba9598981e81238109874d1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
   get_it:
     dependency: transitive
     description:
@@ -860,7 +916,7 @@ packages:
     source: hosted
     version: "1.1.0"
   hooks:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: hooks
       sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
@@ -1091,6 +1147,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.12.0"
+  json_schema_builder:
+    dependency: transitive
+    description:
+      name: json_schema_builder
+      sha256: "9c45a80bc25d3b091e96a5a5da49dc7f80d5b0c8496cff60409f9739331ccefb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.5"
   json_serializable:
     dependency: "direct dev"
     description:
@@ -1243,6 +1307,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  mcp_server:
+    dependency: "direct main"
+    description:
+      name: mcp_server
+      sha256: d5b2603a51b524c60753ea9031c52759f80b53dd6606f38ae70305b5eaa28d4d
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   meta:
     dependency: transitive
     description:
@@ -1275,6 +1347,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.3"
+  mixin_markdown_widget:
+    dependency: "direct main"
+    description:
+      name: mixin_markdown_widget
+      sha256: "4b4f6430c3be9be5766ae06b0d6c78ab6bd3059c1f2df076ef325028b6f030d5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   msix:
     dependency: "direct dev"
     description:
@@ -1288,10 +1368,10 @@ packages:
     dependency: transitive
     description:
       name: native_toolchain_c
-      sha256: f59351d28f49520cd3a74eb1f41c5f19ae15e53c65a3231d14af672e46510a96
+      sha256: "6ba77bb18063eebe9de401f5e6437e95e1438af0a87a3a39084fbd37c90df572"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.1"
+    version: "0.17.6"
   nested:
     dependency: transitive
     description:
@@ -1328,10 +1408,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "77c341fce45bb3865a7bc3ddee4201605799e3de2f7af200e8dae26369d210ea"
+      sha256: "6cb691c686fa2838c6deb34980d426145c2a5d537491cb83d463c33cdbc726ed"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "9.4.1"
   octo_image:
     dependency: "direct main"
     description:
@@ -1412,6 +1492,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  openai_dart:
+    dependency: transitive
+    description:
+      name: openai_dart
+      sha256: "13763068d8bf87f7e0ebdb8bf365bada7a7538696380e68ec5d37644d97ff519"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  opentelemetry:
+    dependency: transitive
+    description:
+      name: opentelemetry
+      sha256: "92d63a2e0731d34a7548add82420b8f3819ccda569f9bdfdcc4b25e00fe88da4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.11"
   optional:
     dependency: transitive
     description:
@@ -1556,6 +1652,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
+  platform_ocr:
+    dependency: "direct main"
+    description:
+      name: platform_ocr
+      sha256: a50c7ac0d8667b3d2a1a3900f1b221b966d9602539ddc2351565d3de43e881e3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -1588,6 +1692,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
+  pretext:
+    dependency: transitive
+    description:
+      name: pretext
+      sha256: "414ef08acce07d877ec62348a56c998d8d45eab4cc6bfab35a7287520c6e4c7c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   pretty_qr_code:
     dependency: "direct main"
     description:
@@ -1684,6 +1796,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.2"
   rational:
     dependency: transitive
     description:
@@ -1692,6 +1812,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.3"
+  re_highlight:
+    dependency: transitive
+    description:
+      name: re_highlight
+      sha256: "6c4ac3f76f939fb7ca9df013df98526634e17d8f7460e028bd23a035870024f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   recase:
     dependency: "direct main"
     description:
@@ -1732,6 +1860,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  schemantic:
+    dependency: "direct main"
+    description:
+      name: schemantic
+      sha256: b593e339f89658b68ebaac3151379c65da487364512a6269daeddbce2407a70d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   screen_retriever:
     dependency: transitive
     description:
@@ -2009,6 +2145,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.0"
+  toon_format:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "51fa0e9311837b84c24e30827b53891041378448"
+      resolved-ref: "51fa0e9311837b84c24e30827b53891041378448"
+      url: "https://github.com/toon-format/toon-dart.git"
+    source: git
+    version: "0.1.0"
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -2358,4 +2511,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.12.0 <4.0.0"
-  flutter: ">=3.44.0"
+  flutter: ">=3.44.0 <4.0.0"

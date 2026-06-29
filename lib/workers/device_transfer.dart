@@ -18,6 +18,7 @@ import '../blaze/blaze_message.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/ai_database.dart';
 import '../db/database.dart';
 import '../db/fts_database.dart';
 import '../db/mixin_database.dart';
@@ -160,6 +161,7 @@ Future<void> _deviceTransferIsolateEntryPoint(
   final database = Database(
     await connectToDatabase(params.identityNumber, readCount: 1),
     await FtsDatabase.connect(params.identityNumber),
+    await AiDatabase.connect(params.identityNumber),
   );
   final deviceTransfer = await DeviceTransfer.create(
     database: database,
