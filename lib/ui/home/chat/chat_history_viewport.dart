@@ -182,6 +182,10 @@ class ChatHistoryViewport extends HookConsumerWidget {
           scrollCacheExtent: const ScrollCacheExtent.viewport(
             ChatScrollCoordinator.loadedJumpViewportCount,
           ),
+          scrollOffsetCorrection:
+              scrollCoordinator.takeViewportAnchorCorrection,
+          suppressAutoBottomTracking:
+              scrollCoordinator.shouldSuppressAutoBottomTracking,
           slivers: [
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
