@@ -80,7 +80,7 @@ dependencies:
   hive: ^2.2.3
   hive_ce: ^2.13.2
   hive_flutter: ^1.0.0
-  hooks_riverpod: ^2.5.1
+  hooks_riverpod: ^3.3.2
   http: ^1.6.0
   http_client_helper: ^3.0.0
   image: ^4.8.0
