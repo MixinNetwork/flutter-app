@@ -91,6 +91,8 @@ class ChatScrollCoordinator {
   final _renderedMessageIds = <String>{};
   bool _tailFollowEligible = true;
   _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshot;
+  bool _tailFollowMessageWindowChanged = false;
+  _ViewportAnchorSnapshot? _viewportAnchorSnapshot;
   bool _animateNextRestore = false;
   ChatScrollRestoreDirection? _animatedRestoreDirection;
   bool _restoreScheduled = false;
@@ -111,15 +113,25 @@ class ChatScrollCoordinator {
     Map<String, GlobalKey> keysByMessageId,
   ) {
     if (!scrollController.hasClients) return;
+    final messageWindowChanged = !_hasSameMessageIds(messages);
     _setMessages(messages, keysByMessageId);
     _tailFollowEligible = _isTailFollowEligible();
     _tailFollowAnchorSnapshot = _tailFollowEligible
         ? _tailFollowAnchorSnapshotFromViewport()
         : null;
+    _tailFollowMessageWindowChanged =
+        _tailFollowEligible &&
+        messageWindowChanged &&
+        _tailFollowAnchorSnapshot != null;
+    _viewportAnchorSnapshot = _tailFollowEligible
+        ? null
+        : _viewportAnchorSnapshotFromViewport();
     traceChatScroll(
       'capture tailEligible=$_tailFollowEligible '
       'anchor=${shortMessageId(_tailFollowAnchorSnapshot?.messageId)} '
       'anchorBottom=${formatDouble(_tailFollowAnchorSnapshot?.bottom)} '
+      'viewportAnchor=${shortMessageId(_viewportAnchorSnapshot?.messageId)} '
+      'viewportTop=${formatDouble(_viewportAnchorSnapshot?.top)} '
       '${_formatScrollState()}',
     );
   }
@@ -189,6 +201,9 @@ class ChatScrollCoordinator {
             _animateNextRestore ||
             animateLatestReset);
     if (reset) {
+      _tailFollowAnchorSnapshot = null;
+      _tailFollowMessageWindowChanged = false;
+      _viewportAnchorSnapshot = null;
       _animatedRestoreMessageId = null;
       _animatedRestoreDirection = null;
       _animatedRestoreComplete = null;
@@ -371,6 +386,38 @@ class ChatScrollCoordinator {
     return true;
   }
 
+  double? takeViewportAnchorCorrection() {
+    final snapshot = _viewportAnchorSnapshot;
+    _viewportAnchorSnapshot = null;
+    if (snapshot == null || !scrollController.hasClients) return null;
+    final top = _messageTopInViewport(
+      snapshot.messageId,
+      _keysByMessageId,
+    );
+    if (top == null) {
+      traceChatJump(
+        'viewport-anchor missing anchor=${shortMessageId(snapshot.messageId)} '
+        '${formatScrollMetrics(scrollController.position)}',
+      );
+      return null;
+    }
+
+    final delta = top - snapshot.top;
+    if (delta.abs() <= _jumpToTolerance) return null;
+    traceChatJump(
+      'viewport-anchor correction anchor=${shortMessageId(snapshot.messageId)} '
+      'delta=${formatDouble(delta)} ${formatScrollMetrics(scrollController.position)}',
+    );
+    traceChatScroll(
+      'viewport-anchor correction anchor=${shortMessageId(snapshot.messageId)} '
+      'delta=${formatDouble(delta)} ${_formatScrollState()}',
+    );
+    return delta;
+  }
+
+  bool shouldSuppressAutoBottomTracking() =>
+      _tailFollowMessageWindowChanged && _tailFollowAnchorSnapshot != null;
+
   void dispose() {
     _disposed = true;
     scrollController
@@ -483,9 +530,14 @@ class ChatScrollCoordinator {
     final render = _messageRender(messageId, keysByMessageId);
     final viewport = _viewportRender;
     if (render == null || viewport == null) return null;
+    if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportTop = viewport.localToGlobal(Offset.zero).dy;
-    final top = render.localToGlobal(Offset.zero).dy - viewportTop;
+    final viewportOrigin = _globalOrigin(viewport);
+    final renderOrigin = _globalOrigin(render);
+    if (viewportOrigin == null || renderOrigin == null) return null;
+
+    final viewportTop = viewportOrigin.dy;
+    final top = renderOrigin.dy - viewportTop;
     final height = render.size.height;
     final target =
         scrollController.offset +
@@ -497,6 +549,34 @@ class ChatScrollCoordinator {
       bottom: top + height,
       height: height,
     );
+  }
+
+  double? _messageTopInViewport(
+    String messageId,
+    Map<String, GlobalKey> keysByMessageId,
+  ) {
+    final render = _messageRender(messageId, keysByMessageId);
+    final viewport = _viewportRender;
+    if (render == null || viewport == null) return null;
+    if (!render.hasSize || !viewport.hasSize) return null;
+
+    final viewportOrigin = _globalOrigin(viewport);
+    final renderOrigin = _globalOrigin(render);
+    if (viewportOrigin == null || renderOrigin == null) return null;
+
+    return renderOrigin.dy - viewportOrigin.dy;
+  }
+
+  Offset? _globalOrigin(RenderBox render) {
+    try {
+      return render.localToGlobal(Offset.zero);
+    } catch (error) {
+      if (error is StateError &&
+          error.message.contains('RenderBox was not laid out')) {
+        return null;
+      }
+      rethrow;
+    }
   }
 
   bool _isTargetInLoadedJumpWindow(double target) {
@@ -745,9 +825,30 @@ class ChatScrollCoordinator {
     return snapshot;
   }
 
+  _ViewportAnchorSnapshot? _viewportAnchorSnapshotFromViewport() {
+    _ViewportAnchorSnapshot? snapshot;
+    final viewportHeight = scrollController.position.viewportDimension;
+    for (final messageId in _currentRenderedMessageIds()) {
+      final geometry = _messageTargetGeometry(messageId, _keysByMessageId);
+      if (geometry == null ||
+          geometry.bottom <= 0 ||
+          geometry.top >= viewportHeight) {
+        continue;
+      }
+      if (snapshot == null || geometry.top < snapshot.top) {
+        snapshot = _ViewportAnchorSnapshot(
+          messageId: messageId,
+          top: geometry.top,
+        );
+      }
+    }
+    return snapshot;
+  }
+
   void _restoreTailFollowAnimationStart() {
     final snapshot = _tailFollowAnchorSnapshot;
     _tailFollowAnchorSnapshot = null;
+    _tailFollowMessageWindowChanged = false;
     if (snapshot == null || !scrollController.hasClients) return;
     final geometry = _messageTargetGeometry(
       snapshot.messageId,
@@ -983,6 +1084,16 @@ class _TailFollowAnchorSnapshot {
 
   final String messageId;
   final double bottom;
+}
+
+class _ViewportAnchorSnapshot {
+  const _ViewportAnchorSnapshot({
+    required this.messageId,
+    required this.top,
+  });
+
+  final String messageId;
+  final double top;
 }
 
 class _MessageTargetGeometry {
