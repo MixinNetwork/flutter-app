@@ -21,8 +21,7 @@ class AiMcpSettingsPage extends HookConsumerWidget {
     final mcpServer = useListenable(MixinMcpServer.instance);
     final settings = database.settingProperties;
     final enableMcpServer = settings.enableMcpServer;
-    final mcpEndpoint =
-        mcpServer.endpoint?.toString() ?? _defaultMcpEndpointText;
+    final mcpEndpoint = mcpServer.endpoint?.toString();
     final mcpToken = settings.mcpServerToken;
     final mcpError = mcpServer.lastStartError;
     final tools = MixinMcpServer.toolInfos(database);
@@ -67,7 +66,9 @@ class AiMcpSettingsPage extends HookConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Exposes Mixin desktop tools to local MCP clients at $_defaultMcpEndpointText. It never sends messages.',
+                            mcpServer.isRunning
+                                ? 'Exposes Mixin desktop tools to local MCP clients at $mcpEndpoint. It never sends messages.'
+                                : 'Exposes Mixin desktop tools to local MCP clients after the server starts. It never sends messages.',
                             style: TextStyle(
                               color: context.theme.secondaryText,
                               fontSize: 14,
@@ -115,19 +116,21 @@ class AiMcpSettingsPage extends HookConsumerWidget {
                             title: const Text('Endpoint'),
                             description: Expanded(
                               child: Text(
-                                mcpEndpoint,
+                                mcpEndpoint ?? 'Not running',
                                 textAlign: TextAlign.end,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             trailing: IconButton(
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: mcpEndpoint),
-                                );
-                                showToastSuccessful();
-                              },
+                              onPressed: mcpEndpoint == null
+                                  ? null
+                                  : () {
+                                      Clipboard.setData(
+                                        ClipboardData(text: mcpEndpoint),
+                                      );
+                                      showToastSuccessful();
+                                    },
                               icon: Icon(
                                 Icons.copy_rounded,
                                 color: context.theme.icon,
@@ -374,8 +377,5 @@ String _serverStatusText({
   if (running) return 'Running';
   if (!enabled) return 'Off';
   if (error != null) return 'Error';
-  return 'On';
+  return 'Starting';
 }
-
-const _defaultMcpEndpointText =
-    'http://127.0.0.1:${MixinMcpServer.defaultPort}/mcp';

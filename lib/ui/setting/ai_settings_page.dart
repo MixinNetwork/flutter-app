@@ -43,11 +43,11 @@ class AiSettingsPage extends HookConsumerWidget {
     final mcpServer = useListenable(MixinMcpServer.instance);
     final mcpTools = MixinMcpServer.toolInfos(database);
     final enabledMcpToolCount = mcpTools.where((tool) => tool.enabled).length;
-    final mcpStatus = mcpServer.isRunning
-        ? 'Running'
-        : database.settingProperties.enableMcpServer
-        ? 'On'
-        : 'Off';
+    final mcpStatus = _mcpStatusText(
+      enabled: database.settingProperties.enableMcpServer,
+      running: mcpServer.isRunning,
+      error: mcpServer.lastStartError,
+    );
 
     return Scaffold(
       backgroundColor: context.theme.background,
@@ -287,6 +287,17 @@ class AiSettingsPage extends HookConsumerWidget {
       ),
     );
   }
+}
+
+String _mcpStatusText({
+  required bool enabled,
+  required bool running,
+  required Object? error,
+}) {
+  if (running) return 'Running';
+  if (!enabled) return 'Off';
+  if (error != null) return 'Error';
+  return 'Starting';
 }
 
 class _TranslatorProviderDialog extends HookConsumerWidget {

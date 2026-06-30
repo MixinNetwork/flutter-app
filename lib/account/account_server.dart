@@ -38,6 +38,7 @@ import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/logger.dart';
+import '../utils/mcp/mixin_mcp_server.dart';
 import '../utils/mixin_api_client.dart';
 import '../utils/web_view/web_view_interface.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -68,6 +69,9 @@ class AccountServer {
   final Database database;
   final GetCurrentConversationId currentConversationId;
   Timer? checkSignalKeyTimer;
+  VoidCallback? _mcpServerSettingListener;
+  bool? _mcpServerEnabled;
+  Future<void> _mcpServerUpdate = Future.value();
 
   bool get _loginByPhoneNumber =>
       AccountKeyValue.instance.primarySessionId == null;
@@ -119,6 +123,7 @@ class AccountServer {
     }
 
     unawaited(_start());
+    _setupMcpServerLifecycle();
 
     DownloadKeyValue.instance.messageIds.forEach((messageId) {
       attachmentUtil.downloadAttachment(messageId: messageId);
@@ -339,6 +344,8 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
+    _removeMcpServerSettingListener();
+    await MixinMcpServer.instance.stop();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
     try {
       await client.accountApi.logout(LogoutRequest(sessionId));
@@ -364,6 +371,44 @@ class AccountServer {
     }
 
     MixinWebView.instance.clearWebViewCacheAndCookies();
+  }
+
+  void _setupMcpServerLifecycle() {
+    final listener = _mcpServerSettingListener ??= _syncMcpServerSetting;
+    database.settingProperties.addListener(listener);
+    _syncMcpServerSetting();
+  }
+
+  void _syncMcpServerSetting() {
+    final enabled = database.settingProperties.enableMcpServer;
+    if (_mcpServerEnabled == enabled) {
+      return;
+    }
+    _mcpServerEnabled = enabled;
+    _mcpServerUpdate = _mcpServerUpdate
+        .then<void>((_) async {
+          if (enabled) {
+            await MixinMcpServer.instance.start(
+              database: database,
+              userId: userId,
+              currentConversationId: currentConversationId,
+            );
+          } else {
+            await MixinMcpServer.instance.stop();
+          }
+        })
+        .catchError((Object error, StackTrace stacktrace) {
+          e('sync MCP server setting failed: $error', stacktrace);
+        });
+  }
+
+  void _removeMcpServerSettingListener() {
+    final listener = _mcpServerSettingListener;
+    if (listener == null) {
+      return;
+    }
+    database.settingProperties.removeListener(listener);
+    _mcpServerSettingListener = null;
   }
 
   Future<void> sendTextMessage(
@@ -790,6 +835,9 @@ class AccountServer {
   }
 
   Future<void> stop() async {
+    _removeMcpServerSettingListener();
+    await _mcpServerUpdate;
+    await MixinMcpServer.instance.stop();
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
