@@ -21,6 +21,8 @@ class ClampingCustomScrollView extends CustomScrollView {
     super.center,
     double anchor = 0.0,
     super.scrollCacheExtent,
+    this.scrollOffsetCorrection,
+    this.suppressAutoBottomTracking,
     super.slivers,
     super.semanticChildCount,
     super.dragStartBehavior,
@@ -29,6 +31,8 @@ class ClampingCustomScrollView extends CustomScrollView {
   // [CustomScrollView] enforces constraints on [CustomScrollView.anchor], so
   // we need our own version.
   final double _anchor;
+  final ScrollOffsetCorrectionCallback? scrollOffsetCorrection;
+  final bool Function()? suppressAutoBottomTracking;
 
   @override
   double get anchor => _anchor;
@@ -56,6 +60,8 @@ class ClampingCustomScrollView extends CustomScrollView {
       scrollCacheExtent: scrollCacheExtent,
       center: center,
       anchor: anchor,
+      scrollOffsetCorrection: scrollOffsetCorrection,
+      suppressAutoBottomTracking: suppressAutoBottomTracking,
     );
   }
 }
