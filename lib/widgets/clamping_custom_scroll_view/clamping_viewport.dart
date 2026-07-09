@@ -4,8 +4,11 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+typedef ScrollOffsetCorrectionCallback = double? Function();
 
 /// A render object that is bigger on the inside.
 ///
@@ -22,11 +25,15 @@ class ClampingViewport extends Viewport {
     super.center,
     super.scrollCacheExtent,
     super.slivers,
+    this.scrollOffsetCorrection,
+    this.suppressAutoBottomTracking,
   }) : _anchor = anchor;
 
   // [Viewport] enforces constraints on [Viewport.anchor], so we need our own
   // version.
   final double _anchor;
+  final ScrollOffsetCorrectionCallback? scrollOffsetCorrection;
+  final bool Function()? suppressAutoBottomTracking;
 
   @override
   double get anchor => _anchor;
@@ -41,7 +48,22 @@ class ClampingViewport extends Viewport {
         anchor: anchor,
         offset: offset,
         scrollCacheExtent: scrollCacheExtent,
+        scrollOffsetCorrection: scrollOffsetCorrection,
+        suppressAutoBottomTracking: suppressAutoBottomTracking,
       );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderViewport renderObject,
+  ) {
+    super.updateRenderObject(context, renderObject);
+    if (renderObject is ClampingRenderViewport) {
+      renderObject
+        ..scrollOffsetCorrection = scrollOffsetCorrection
+        ..suppressAutoBottomTracking = suppressAutoBottomTracking;
+    }
+  }
 }
 
 /// A render object that is bigger on the inside.
@@ -62,6 +84,8 @@ class ClampingRenderViewport extends RenderViewport {
     super.children,
     super.center,
     super.scrollCacheExtent,
+    this.scrollOffsetCorrection,
+    this.suppressAutoBottomTracking,
   }) : _anchor = anchor;
 
   static const int _maxLayoutCycles = 10;
@@ -72,6 +96,8 @@ class ClampingRenderViewport extends RenderViewport {
   late double _minScrollExtent;
   late double _maxScrollExtent;
   bool _hasVisualOverflow = false;
+  ScrollOffsetCorrectionCallback? scrollOffsetCorrection;
+  bool Function()? suppressAutoBottomTracking;
 
   /// This value is set during layout based on the [CacheExtentStyle].
   ///
@@ -216,6 +242,7 @@ class ClampingRenderViewport extends RenderViewport {
         final suppressBottomTracking = _suppressBottomTracking;
         try {
           if (!suppressBottomTracking &&
+              suppressAutoBottomTracking?.call() != true &&
               maxScrollOffsetChanged &&
               _lastPositionIsBottom &&
               correction > 0) {
@@ -225,6 +252,20 @@ class ClampingRenderViewport extends RenderViewport {
         } finally {
           _lastPositionIsBottom = !suppressBottomTracking && positionIsBottom;
           _lastMaxScrollOffset = maxScrollOffset;
+        }
+
+        final anchorCorrection = scrollOffsetCorrection?.call();
+        if (anchorCorrection != null &&
+            anchorCorrection.abs() > precisionErrorTolerance) {
+          final correctedOffset = (offset.pixels + anchorCorrection)
+              .clamp(minScrollOffset, maxScrollOffset)
+              .toDouble();
+          final appliedCorrection = correctedOffset - offset.pixels;
+          if (appliedCorrection.abs() > precisionErrorTolerance) {
+            offset.correctBy(appliedCorrection);
+            count += 1;
+            continue;
+          }
         }
 
         if (offset.applyContentDimensions(

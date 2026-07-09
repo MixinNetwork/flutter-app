@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/ui/home/chat/chat_scroll_coordinator.dart';
+import 'package:flutter_app/widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -507,6 +508,66 @@ void main() {
     expect(coordinator.trackingScrollController.jumpCount, 0);
   });
 
+  testWidgets(
+    'scheduleRestore preserves visible message position during non-reset paging',
+    (tester) async {
+      final coordinator = TrackingChatScrollCoordinator();
+      final centerKey = GlobalKey();
+      final messages = List.generate(30, testMessage);
+      final prependedMessages = List.generate(
+        3,
+        (index) => testMessage(-3 + index),
+      );
+      final nextMessages = [...prependedMessages, ...messages];
+      final keysByMessageId = {
+        for (final message in nextMessages) message.messageId: GlobalKey(),
+      };
+      final anchorMessageId = messages[10].messageId;
+
+      addTearDown(coordinator.dispose);
+      await pumpAnchorCorrectingMessages(
+        tester,
+        coordinator,
+        messages,
+        keysByMessageId,
+        centerKey: centerKey,
+      );
+      coordinator.scrollController.jumpTo(800);
+      await tester.pump();
+
+      final beforeTop = messageTop(
+        coordinator,
+        keysByMessageId[anchorMessageId]!,
+      );
+      coordinator.captureViewportState(messages, keysByMessageId);
+
+      await pumpAnchorCorrectingMessages(
+        tester,
+        coordinator,
+        nextMessages,
+        keysByMessageId,
+        centerKey: centerKey,
+      );
+      expect(
+        messageTop(coordinator, keysByMessageId[anchorMessageId]!),
+        moreOrLessEquals(beforeTop, epsilon: 0.1),
+      );
+
+      coordinator.scheduleRestore(
+        messages: nextMessages,
+        keysByMessageId: keysByMessageId,
+        reset: false,
+        isLatest: false,
+      );
+      await tester.pump();
+
+      expect(
+        messageTop(coordinator, keysByMessageId[anchorMessageId]!),
+        moreOrLessEquals(beforeTop, epsilon: 0.1),
+      );
+    },
+  );
+
   testWidgets('scheduleRestore animates tail-follow message appends', (
     tester,
   ) async {
@@ -716,6 +777,57 @@ void main() {
       );
     },
   );
+
+  testWidgets('tail-follow append keeps old bottom until restore animates', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final centerKey = GlobalKey();
+    final top = List.generate(8, testMessage);
+    final bottom = List.generate(8, (index) => testMessage(index + 100));
+    final nextBottom = [...bottom, testMessage(200)];
+    final messages = [...top, ...bottom];
+    final nextMessages = [...top, ...nextBottom];
+    final keysByMessageId = {
+      for (final message in nextMessages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpCenteredScrollableMessages(
+      tester,
+      coordinator,
+      centerKey: centerKey,
+      top: top,
+      bottom: bottom,
+      keysByMessageId: keysByMessageId,
+      useClampingViewport: true,
+      suppressAutoBottomTracking: coordinator.shouldSuppressAutoBottomTracking,
+    );
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent,
+    );
+    await tester.pump();
+    final oldBottomOffset = coordinator.scrollController.offset;
+    coordinator.captureViewportState(messages, keysByMessageId);
+
+    await pumpCenteredScrollableMessages(
+      tester,
+      coordinator,
+      centerKey: centerKey,
+      top: top,
+      bottom: nextBottom,
+      keysByMessageId: keysByMessageId,
+      useClampingViewport: true,
+      suppressAutoBottomTracking: coordinator.shouldSuppressAutoBottomTracking,
+    );
+    await tester.pump();
+
+    expect(coordinator.scrollController.offset, oldBottomOffset);
+    expect(
+      coordinator.scrollController.position.maxScrollExtent,
+      greaterThan(oldBottomOffset),
+    );
+  });
 
   testWidgets('scheduleRestore animates requested latest resets', (
     tester,
@@ -1380,6 +1492,14 @@ class CountingKeyMap extends MapBase<String, GlobalKey> {
   GlobalKey? remove(Object? key) => _delegate.remove(key);
 }
 
+double messageTop(ChatScrollCoordinator coordinator, GlobalKey key) {
+  final render = key.currentContext!.findRenderObject()! as RenderBox;
+  final viewport =
+      coordinator.viewportKey.currentContext!.findRenderObject()! as RenderBox;
+  return render.localToGlobal(Offset.zero).dy -
+      viewport.localToGlobal(Offset.zero).dy;
+}
+
 Future<void> pumpScrollableMessages(
   WidgetTester tester,
   ChatScrollCoordinator coordinator,
@@ -1402,6 +1522,49 @@ Future<void> pumpScrollableMessages(
               ? null
               : ScrollCacheExtent.pixels(cacheExtent),
           slivers: [
+            SliverList.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final messageId = messages[index].messageId;
+                return ChatRenderedMessage(
+                  coordinator: coordinator,
+                  messageId: messageId,
+                  child: SizedBox(
+                    key: keysByMessageId[messageId],
+                    height: itemHeight,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Future<void> pumpAnchorCorrectingMessages(
+  WidgetTester tester,
+  ChatScrollCoordinator coordinator,
+  List<MessageItem> messages,
+  Map<String, GlobalKey> keysByMessageId, {
+  required GlobalKey centerKey,
+  double itemHeight = 80,
+  double viewportHeight = 600,
+}) async {
+  await tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: SizedBox(
+        width: 320,
+        height: viewportHeight,
+        child: ClampingCustomScrollView(
+          key: coordinator.viewportKey,
+          center: centerKey,
+          controller: coordinator.scrollController,
+          scrollOffsetCorrection: coordinator.takeViewportAnchorCorrection,
+          slivers: [
+            SliverToBoxAdapter(key: centerKey, child: const SizedBox()),
             SliverList.builder(
               itemCount: messages.length,
               itemBuilder: (context, index) {
@@ -1465,52 +1628,64 @@ Future<void> pumpCenteredScrollableMessages(
   required List<MessageItem> top,
   required List<MessageItem> bottom,
   required Map<String, GlobalKey> keysByMessageId,
+  bool useClampingViewport = false,
+  bool Function()? suppressAutoBottomTracking,
   double itemHeight = 80,
   double viewportHeight = 240,
 }) async {
+  final slivers = [
+    SliverList.builder(
+      itemCount: top.length,
+      itemBuilder: (context, index) {
+        final message = top[top.length - index - 1];
+        return ChatRenderedMessage(
+          coordinator: coordinator,
+          messageId: message.messageId,
+          child: SizedBox(
+            key: keysByMessageId[message.messageId],
+            height: itemHeight,
+          ),
+        );
+      },
+    ),
+    SliverToBoxAdapter(key: centerKey, child: const SizedBox()),
+    SliverList.builder(
+      itemCount: bottom.length,
+      itemBuilder: (context, index) {
+        final message = bottom[index];
+        return ChatRenderedMessage(
+          coordinator: coordinator,
+          messageId: message.messageId,
+          child: SizedBox(
+            key: keysByMessageId[message.messageId],
+            height: itemHeight,
+          ),
+        );
+      },
+    ),
+  ];
   await tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
       child: SizedBox(
         width: 320,
         height: viewportHeight,
-        child: CustomScrollView(
-          key: coordinator.viewportKey,
-          center: centerKey,
-          controller: coordinator.scrollController,
-          anchor: ChatScrollCoordinator.messageFocusAnchor,
-          slivers: [
-            SliverList.builder(
-              itemCount: top.length,
-              itemBuilder: (context, index) {
-                final message = top[top.length - index - 1];
-                return ChatRenderedMessage(
-                  coordinator: coordinator,
-                  messageId: message.messageId,
-                  child: SizedBox(
-                    key: keysByMessageId[message.messageId],
-                    height: itemHeight,
-                  ),
-                );
-              },
-            ),
-            SliverToBoxAdapter(key: centerKey, child: const SizedBox()),
-            SliverList.builder(
-              itemCount: bottom.length,
-              itemBuilder: (context, index) {
-                final message = bottom[index];
-                return ChatRenderedMessage(
-                  coordinator: coordinator,
-                  messageId: message.messageId,
-                  child: SizedBox(
-                    key: keysByMessageId[message.messageId],
-                    height: itemHeight,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+        child: useClampingViewport
+            ? ClampingCustomScrollView(
+                key: coordinator.viewportKey,
+                center: centerKey,
+                controller: coordinator.scrollController,
+                anchor: ChatScrollCoordinator.messageFocusAnchor,
+                suppressAutoBottomTracking: suppressAutoBottomTracking,
+                slivers: slivers,
+              )
+            : CustomScrollView(
+                key: coordinator.viewportKey,
+                center: centerKey,
+                controller: coordinator.scrollController,
+                anchor: ChatScrollCoordinator.messageFocusAnchor,
+                slivers: slivers,
+              ),
       ),
     ),
   );
