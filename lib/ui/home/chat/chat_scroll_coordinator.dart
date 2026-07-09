@@ -189,6 +189,7 @@ class ChatScrollCoordinator {
             _animateNextRestore ||
             animateLatestReset);
     if (reset) {
+      _cancelProgrammaticScrollBeforeReset();
       _animatedRestoreMessageId = null;
       _animatedRestoreDirection = null;
       _animatedRestoreComplete = null;
@@ -223,6 +224,19 @@ class ChatScrollCoordinator {
       _restore(request);
       _updateViewportState();
     });
+  }
+
+  void _cancelProgrammaticScrollBeforeReset() {
+    _followTailAfterProgrammaticScroll = false;
+    _tailFollowAnchorSnapshot = null;
+    if (!scrollController.hasClients) return;
+    if (_programmaticScrollDepth <= 0 && _programmaticBottomScrollDepth <= 0) {
+      return;
+    }
+    final position = scrollController.position;
+    if (!position.isScrollingNotifier.value) return;
+    traceChatJump('cancel programmatic scroll before reset');
+    scrollController.jumpTo(position.pixels);
   }
 
   void _resetCenteredOffsetBeforePaint() {

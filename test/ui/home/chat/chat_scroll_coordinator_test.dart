@@ -602,6 +602,57 @@ void main() {
     );
   });
 
+  testWidgets('reset restore cancels pending latest animation', (tester) async {
+    final coordinator = ChatScrollCoordinator();
+    final messages = List.generate(30, testMessage);
+    final top = List.generate(8, testMessage);
+    final bottom = List.generate(8, (index) => testMessage(index + 100));
+    final nextMessages = [...top, ...bottom];
+    final keysByMessageId = {
+      for (final message in [...messages, ...nextMessages])
+        message.messageId: GlobalKey(),
+    };
+    final centerKey = GlobalKey();
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scrollController.jumpTo(
+      coordinator.scrollController.position.maxScrollExtent - 120,
+    );
+
+    unawaited(coordinator.scrollToBottomIfInLoadedWindow(animated: true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      coordinator.scrollController.position.isScrollingNotifier.value,
+      true,
+    );
+
+    await pumpCenteredScrollableMessages(
+      tester,
+      coordinator,
+      centerKey: centerKey,
+      top: top,
+      bottom: bottom,
+      keysByMessageId: keysByMessageId,
+    );
+    coordinator.scheduleRestore(
+      messages: nextMessages,
+      keysByMessageId: keysByMessageId,
+      reset: true,
+      isLatest: false,
+      hasCenteredAnchor: true,
+      traceTargetMessageId: bottom.first.messageId,
+    );
+    await tester.pumpAndSettle();
+
+    expect(coordinator.scrollController.offset, 0);
+  });
+
   testWidgets(
     'scheduleRestore animates tail-follow without jump notifications',
     (tester) async {
