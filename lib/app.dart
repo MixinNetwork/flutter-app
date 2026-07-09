@@ -191,7 +191,9 @@ class _App extends HookConsumerWidget {
                   ),
                   child: SystemTrayWidget(
                     child: TextInputActionHandler(
-                      child: AuthGuard(child: child!),
+                      child: _WindowsTitleBarDivider(
+                        child: AuthGuard(child: child!),
+                      ),
                     ),
                   ),
                 ),
@@ -203,6 +205,26 @@ class _App extends HookConsumerWidget {
       ),
     );
   }
+}
+
+class _WindowsTitleBarDivider extends StatelessWidget {
+  const _WindowsTitleBarDivider({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      if (Platform.isWindows && context.brightness == Brightness.light)
+        Container(
+          height: 1,
+          color: context.theme.divider,
+        ),
+      Expanded(
+        child: child,
+      ),
+    ],
+  );
 }
 
 class _Home extends HookConsumerWidget {
