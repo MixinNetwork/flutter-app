@@ -103,9 +103,9 @@ class _LatestJumpEffect extends HookConsumerWidget {
     useEffect(() {
       if (request.latestJumpRequestKey != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(chatNavigationIntentProvider.notifier)
-            .takeLatestJump(request.latestJumpRequestKey!, 'conversation-1');
+          ref
+              .read(chatNavigationIntentProvider.notifier)
+              .takeLatestJump(request.latestJumpRequestKey!, 'conversation-1');
         });
       }
       return null;
