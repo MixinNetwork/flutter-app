@@ -17,12 +17,16 @@ class ConversationAvatarCache extends ChangeNotifier {
         .instance
         .updateParticipantIdStream
         .listen(_handleParticipantUpdate);
+    _userSubscription = DataBaseEventBus.instance.updateUserIdsStream.listen(
+      _handleUserUpdate,
+    );
   }
 
   final Database database;
   final Map<String, List<User>> _avatars = {};
   final Set<String> _loadedGroupIds = {};
   StreamSubscription<List<MiniParticipantItem>>? _participantSubscription;
+  StreamSubscription<List<String>>? _userSubscription;
   var _disposed = false;
 
   List<User>? usersFor(String conversationId) => _avatars[conversationId];
@@ -69,10 +73,23 @@ class ConversationAvatarCache extends ChangeNotifier {
     unawaited(_refresh(changedGroupIds));
   }
 
+  void _handleUserUpdate(List<String> userIds) {
+    final changedUserIds = userIds.toSet();
+    final changedGroupIds = _avatars.entries
+        .where(
+          (entry) => entry.value.any(
+            (user) => changedUserIds.contains(user.userId),
+          ),
+        )
+        .map((entry) => entry.key);
+    unawaited(_refresh(changedGroupIds));
+  }
+
   @override
   void dispose() {
     _disposed = true;
     unawaited(_participantSubscription?.cancel());
+    unawaited(_userSubscription?.cancel());
     super.dispose();
   }
 }

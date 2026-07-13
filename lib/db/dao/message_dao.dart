@@ -171,17 +171,15 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  final Map<String, void Function()> _conversationUnseenTaskRunner = {};
-
-  void _updateConversationUnseenCount(
+  Future<void> _updateConversationUnseenCount(
     Message message,
     String currentUserId, {
     bool cleanDraft = true,
-  }) {
+  }) async {
     final conversationId = message.conversationId;
 
     if (message.userId == currentUserId) {
-      db.conversationDao.updateLastSentMessage(
+      await db.conversationDao.updateLastSentMessage(
         conversationId,
         message.messageId,
         message.createdAt,
@@ -190,38 +188,38 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return;
     }
 
-    Future<void> _update(String conversationId) async {
-      final latest = await messagesByConversationId(
-        conversationId,
-        1,
-      ).getSingleOrNull();
-      if (latest == null) {
-        e(
-          'failed to update conversation last message, latest message is null $conversationId',
-        );
-        return;
-      }
-
-      await db.conversationDao.updateUnseenMessageCountAndLastMessageId(
-        conversationId,
-        currentUserId,
-        latest.messageId,
-        latest.createdAt,
+    final messages = db.messages;
+    final latest =
+        await (selectOnly(messages)
+              ..addColumns([messages.messageId, messages.createdAt])
+              ..where(messages.conversationId.equals(conversationId))
+              ..orderBy([
+                OrderingTerm.desc(messages.createdAt),
+                OrderingTerm.desc(messages.rowId),
+              ])
+              ..limit(1))
+            .map(
+              (row) => (
+                messageId: row.read(messages.messageId)!,
+                createdAt: messages.createdAt.converter.fromSql(
+                  row.read(messages.createdAt),
+                ),
+              ),
+            )
+            .getSingleOrNull();
+    if (latest == null) {
+      e(
+        'failed to update conversation last message, latest message is null $conversationId',
       );
+      return;
     }
 
-    if (_conversationUnseenTaskRunner[conversationId] != null) {
-      _conversationUnseenTaskRunner[conversationId] = () =>
-          _update(conversationId);
-      return;
-    } else {
-      _conversationUnseenTaskRunner[conversationId] = () =>
-          _update(conversationId);
-      Future.delayed(kDefaultThrottleDuration).then((value) {
-        final runner = _conversationUnseenTaskRunner.remove(conversationId);
-        runner?.call();
-      });
-    }
+    await db.conversationDao.updateUnseenMessageCountAndLastMessageId(
+      conversationId,
+      currentUserId,
+      latest.messageId,
+      latest.createdAt,
+    );
   }
 
   Future<int> insert(
@@ -241,7 +239,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    _updateConversationUnseenCount(
+    await _updateConversationUnseenCount(
       message,
       currentUserId,
       cleanDraft: cleanDraft,
@@ -1393,20 +1391,30 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String mediaUrl,
     int mediaSize,
     String? thumbImage,
-  ) => (db.update(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
-      .write(
+  ) async {
+    await _sendInsertOrReplaceEventWithFuture(
+      [messageId],
+      (db.update(
+        db.messages,
+      )..where((tbl) => tbl.messageId.equals(messageId))).write(
         MessagesCompanion(
           mediaUrl: Value(mediaUrl),
           mediaSize: Value(mediaSize),
           thumbImage: Value(thumbImage),
         ),
-      );
+      ),
+    );
+  }
 
-  Future<void> updateCategoryById(String messageId, String category) =>
+  Future<void> updateCategoryById(String messageId, String category) async {
+    await _sendInsertOrReplaceEventWithFuture(
+      [messageId],
       (db.update(db.messages)..where(
             (tbl) => tbl.messageId.equals(messageId),
           ))
-          .write(MessagesCompanion(category: Value(category)));
+          .write(MessagesCompanion(category: Value(category))),
+    );
+  }
 
   Future<List<(int, Message)>> getMessages(int? rowid, int limit) async {
     final messages =

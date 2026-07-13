@@ -148,25 +148,14 @@ class ConversationStateNotifier
     );
     addSubscription(
       stream
-          .map((event) => (event?.conversationId, event?.userId))
-          .where((event) => event.$1 != null)
+          .map((event) => event?.conversationId)
+          .where((conversationId) => conversationId != null)
           .distinct()
-          .switchMap((event) {
-            final (String? conversationId, String? userId) = event;
-            return _database.conversationDao
-                .conversationItem(conversationId!)
-                .watchSingleOrNullWithStream(
-                  eventStreams: [
-                    DataBaseEventBus.instance.watchUpdateConversationStream([
-                      conversationId,
-                    ]),
-                    if (userId != null)
-                      DataBaseEventBus.instance.watchUpdateUserStream([userId]),
-                  ],
-                  duration: kSlowThrottleDuration,
-                  prepend: false,
-                );
-          })
+          .switchMap(
+            (conversationId) => _accountServer.conversationListStore.events.map(
+              (_) => _accountServer.conversationListStore.item(conversationId!),
+            ),
+          )
           .listen((event) {
             String? userId;
             if (event != null && !event.isGroupConversation) {
@@ -250,7 +239,9 @@ class ConversationStateNotifier
   }
 
   void requestLatestJump() {
-    _chatNavigationIntentNotifier.requestLatestJump();
+    final conversationId = state?.conversationId;
+    if (conversationId == null) return;
+    _chatNavigationIntentNotifier.requestLatestJump(conversationId);
     openChatPage();
   }
 

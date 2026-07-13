@@ -176,20 +176,31 @@ class ChatContainer extends HookConsumerWidget {
         MediaQuery.sizeOf(context).height ~/ 20;
 
     final inMultiSelectMode = ref.watch(hasSelectedMessageProvider);
-    final latestJumpRequestKey = ref.watch(
+    final latestJumpRequest = ref.watch(
       chatNavigationIntentProvider.select(
-        (value) => value.latestJumpRequestKey,
+        (value) => (
+          value.latestJumpRequestKey,
+          value.latestJumpConversationId,
+        ),
       ),
     );
 
     useEffect(() {
+      final latestJumpRequestKey = latestJumpRequest.$1;
       if (latestJumpRequestKey == null) return null;
+      if (latestJumpRequest.$2 !=
+          ref.read(conversationProvider)?.conversationId) {
+        return null;
+      }
+      ref
+          .read(chatNavigationIntentProvider.notifier)
+          .consumeLatestJump(latestJumpRequestKey);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         unawaited(context.jumpToLatestInChat());
       });
       return null;
-    }, [latestJumpRequestKey]);
+    }, [latestJumpRequest]);
 
     return RepaintBoundary(
       child: FocusableActionDetector(

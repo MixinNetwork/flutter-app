@@ -117,6 +117,7 @@ class _Providers extends HookConsumerWidget {
         ref.read(slideCategoryStateProvider.notifier),
         accountServer.database,
         ref.read(mentionCacheProvider),
+        accountServer.conversationListStore,
       ),
       child: Provider<NotificationService>(
         create: (context) => NotificationService(context: context),
