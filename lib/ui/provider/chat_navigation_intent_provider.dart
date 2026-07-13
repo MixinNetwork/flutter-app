@@ -28,7 +28,8 @@ class ChatNavigationIntentNotifier
     );
   }
 
-  bool takeLatestJump(String conversationId) {
+  bool takeLatestJump(Object requestKey, String conversationId) {
+    if (!identical(state.latestJumpRequestKey, requestKey)) return false;
     final matches =
         state.latestJumpRequestKey != null &&
         state.latestJumpConversationId == conversationId;
