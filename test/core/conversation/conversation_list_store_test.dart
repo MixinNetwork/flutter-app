@@ -1,8 +1,10 @@
 @TestOn('linux || mac-os')
 library;
 
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_app/core/conversation/conversation_list_store.dart';
+import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,6 +82,54 @@ void main() {
     expect(store.items.map((item) => item.conversationId), ['newer']);
   });
 
+  test('publishes one delta for a batch of conversation changes', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    final store = ConversationListStore(database);
+    addTearDown(() async {
+      await store.close();
+      await database.close();
+    });
+
+    final now = DateTime(2026);
+    await database.batch((batch) {
+      batch
+        ..insertAll(database.users, [
+          const User(userId: 'owner-1', identityNumber: '1', fullName: 'One'),
+          const User(userId: 'owner-2', identityNumber: '2', fullName: 'Two'),
+        ])
+        ..insertAll(database.conversations, [
+          Conversation(
+            conversationId: 'one',
+            ownerId: 'owner-1',
+            category: ConversationCategory.contact,
+            createdAt: now,
+            status: ConversationStatus.success,
+          ),
+          Conversation(
+            conversationId: 'two',
+            ownerId: 'owner-2',
+            category: ConversationCategory.contact,
+            createdAt: now,
+            status: ConversationStatus.success,
+          ),
+        ]);
+    });
+    await store.start();
+
+    final deltaFuture = store.events
+        .where((event) => event is ConversationListDelta)
+        .cast<ConversationListDelta>()
+        .first;
+    await (database.update(database.conversations)..where(
+          (row) => row.conversationId.isIn(['one', 'two']),
+        ))
+        .write(const ConversationsCompanion(draft: Value('draft')));
+    DataBaseEventBus.instance.updateConversations(['one', 'two']);
+
+    final delta = await deltaFuture;
+    expect(delta.changedIds, {'one', 'two'});
+  });
+
   test('publishes an incoming message delta without a fixed delay', () async {
     final database = MixinDatabase(NativeDatabase.memory());
     final store = ConversationListStore(database);
@@ -139,6 +189,72 @@ void main() {
     expect(stopwatch.elapsed, lessThan(const Duration(milliseconds: 200)));
     expect(store.items.single.content, 'hello');
     expect(store.items.single.unseenMessageCount, 1);
+  });
+
+  test('coalesces an incoming message burst into one projection', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    final store = ConversationListStore(database);
+    addTearDown(() async {
+      await store.close();
+      await database.close();
+    });
+
+    final now = DateTime(2026);
+    await database.batch((batch) {
+      batch
+        ..insertAll(database.users, [
+          const User(userId: 'me', identityNumber: '1', fullName: 'Me'),
+          const User(
+            userId: 'sender',
+            identityNumber: '2',
+            fullName: 'Sender',
+          ),
+        ])
+        ..insert(
+          database.conversations,
+          Conversation(
+            conversationId: 'conversation',
+            ownerId: 'sender',
+            category: ConversationCategory.contact,
+            createdAt: now,
+            status: ConversationStatus.success,
+          ),
+        );
+    });
+    await store.start();
+
+    var projectionEvents = 0;
+    final subscription = DataBaseEventBus.instance.updateConversationIdStream
+        .where((ids) => ids.contains('conversation'))
+        .listen((_) => projectionEvents++);
+    addTearDown(subscription.cancel);
+    final deltaFuture = store.events
+        .where((event) => event is ConversationListDelta)
+        .cast<ConversationListDelta>()
+        .first
+        .timeout(const Duration(milliseconds: 200));
+
+    await Future.wait([
+      for (var index = 0; index < 3; index++)
+        database.messageDao.insert(
+          Message(
+            messageId: 'message-$index',
+            conversationId: 'conversation',
+            userId: 'sender',
+            category: 'PLAIN_TEXT',
+            content: 'message $index',
+            status: MessageStatus.delivered,
+            createdAt: now.add(Duration(minutes: index + 1)),
+          ),
+          'me',
+          silent: true,
+        ),
+    ]);
+    await deltaFuture;
+
+    expect(projectionEvents, 1);
+    expect(store.items.single.content, 'message 2');
+    expect(store.items.single.unseenMessageCount, 3);
   });
 
   test('updates a group before the message sender user arrives', () async {
@@ -405,10 +521,20 @@ void main() {
         .cast<ConversationListDelta>()
         .first
         .timeout(const Duration(milliseconds: 200));
+    final mentionEventFuture = DataBaseEventBus
+        .instance
+        .updateMessageMentionStream
+        .where(
+          (events) => events.any(
+            (event) => event.conversationId == 'conversation',
+          ),
+        )
+        .first
+        .timeout(const Duration(milliseconds: 200));
     await database.messageMentionDao.clearMessageMentionByConversationId(
       'conversation',
     );
-    await deltaFuture;
+    await Future.wait([deltaFuture, mentionEventFuture]);
 
     expect(store.items.single.mentionCount, 0);
   });

@@ -1,9 +1,6 @@
 part of '../extension.dart';
 
-extension IterableExtension<T> on Iterable<T> {
-  T? firstWhereOrNull(bool Function(T? element) test) =>
-      cast<T?>().firstWhere(test, orElse: () => null);
-
+extension AppIterableExtension<T> on Iterable<T> {
   List<T> joinList(T separator) {
     final iterator = this.iterator;
     if (!iterator.moveNext()) return [];
@@ -25,50 +22,8 @@ extension IterableExtension<T> on Iterable<T> {
   }
 }
 
-extension ListExtension<T> on List<T> {
-  T? getOrNull(int index) {
-    if (index < 0) return null;
-    if (isEmpty) return null;
-    if (length < index + 1) return null;
-    return this[index];
-  }
-
-  T? get lastOrNull {
-    try {
-      return last;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  T? get firstOrNull {
-    try {
-      return first;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  T? firstWhereOrNull(bool Function(T element) test) {
-    for (final element in this) {
-      if (test(element)) return element;
-    }
-    return null;
-  }
-
-  List<List<T>> chunked(int size) {
-    if (size <= 1) {
-      throw ArgumentError('size must be greater than 1');
-    }
-    final result = <List<T>>[];
-    var i = 0;
-    while (i < length) {
-      final end = min(i + size, length);
-      result.add(sublist(i, end));
-      i = end;
-    }
-    return result;
-  }
+extension AppListExtension<T> on List<T> {
+  T? getOrNull(int index) => index < 0 || index >= length ? null : this[index];
 }
 
 Future<void> futureForEachIndexed<T>(

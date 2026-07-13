@@ -114,7 +114,7 @@ void main() {
     categories.select(SlideCategoryType.contacts);
     await contactsChanged.future;
     expect(
-      controller.state.map.values.map((item) => item.conversationId),
+      controller.state.items.map((item) => item.conversationId),
       ['friend-chat'],
     );
 
@@ -122,7 +122,7 @@ void main() {
     categories.select(SlideCategoryType.circle, 'circle');
     await circleChanged.future;
     expect(
-      controller.state.map.values.map((item) => item.conversationId),
+      controller.state.items.map((item) => item.conversationId),
       ['friend-chat'],
     );
 
@@ -136,7 +136,7 @@ void main() {
     );
     await circleMembershipChanged.future;
     expect(
-      controller.state.map.values.map((item) => item.conversationId),
+      controller.state.items.map((item) => item.conversationId),
       ['friend-chat', 'group-chat'],
     );
 
@@ -147,7 +147,7 @@ void main() {
     await mixinDatabase.conversationDao.pin('group-chat');
     await changed.future;
     expect(
-      controller.state.map.values.map((item) => item.conversationId),
+      controller.state.items.map((item) => item.conversationId),
       ['group-chat', 'friend-chat', 'stranger-chat'],
     );
   });

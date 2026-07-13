@@ -28,6 +28,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
   MessageDao(super.db);
 
+  final Map<String, _PendingConversationProjection> _pendingProjections = {};
+  Timer? _projectionTimer;
+
   Stream<List<MessageItem>> watchInsertOrReplaceMessageStream(
     String conversationId,
   ) =>
@@ -47,7 +50,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                 .reduce((value, element) => [...value, ...element])
                 .toList();
             final messages = <MessageItem>[];
-            final chunked = miniMessageItems.chunked(kMarkLimit);
+            final chunked = miniMessageItems.slices(kMarkLimit);
             for (final miniMessageItems in chunked) {
               messages.addAll(
                 await _baseMessageItems(
@@ -168,26 +171,54 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     if (result is int && result <= 0) return result;
     final miniMessage = await miniMessageByIds(messageIds).get();
     DataBaseEventBus.instance.insertOrReplaceMessages(miniMessage);
+    miniMessage
+        .map((message) => message.conversationId)
+        .toSet()
+        .forEach(DataBaseEventBus.instance.updateConversation);
     return result;
   }
 
-  Future<void> _updateConversationUnseenCount(
+  void _scheduleConversationProjection(
     Message message,
     String currentUserId, {
     bool cleanDraft = true,
-  }) async {
-    final conversationId = message.conversationId;
+  }) {
+    _pendingProjections.update(
+      message.conversationId,
+      (pending) => pending.merge(
+        hasIncoming: message.userId != currentUserId,
+        cleanDraft: cleanDraft && message.userId == currentUserId,
+      ),
+      ifAbsent: () => _PendingConversationProjection(
+        currentUserId: currentUserId,
+        hasIncoming: message.userId != currentUserId,
+        cleanDraft: cleanDraft && message.userId == currentUserId,
+      ),
+    );
+    _projectionTimer ??= Timer(Duration.zero, _flushConversationProjections);
+  }
 
-    if (message.userId == currentUserId) {
-      await db.conversationDao.updateLastSentMessage(
-        conversationId,
-        message.messageId,
-        message.createdAt,
-        cleanDraft: cleanDraft,
-      );
-      return;
+  Future<void> _flushConversationProjections() async {
+    _projectionTimer = null;
+    final pending = Map.of(_pendingProjections);
+    _pendingProjections.clear();
+    try {
+      await Future.wait([
+        for (final entry in pending.entries)
+          _updateConversationProjection(entry.key, entry.value),
+      ]);
+    } catch (error, stackTrace) {
+      e('conversation projection failed: $error $stackTrace');
     }
+    if (_pendingProjections.isNotEmpty) {
+      _projectionTimer = Timer(Duration.zero, _flushConversationProjections);
+    }
+  }
 
+  Future<void> _updateConversationProjection(
+    String conversationId,
+    _PendingConversationProjection pending,
+  ) async {
     final messages = db.messages;
     final latest =
         await (selectOnly(messages)
@@ -214,9 +245,23 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return;
     }
 
+    if (!pending.hasIncoming) {
+      await db.conversationDao.updateLastSentMessage(
+        conversationId,
+        latest.messageId,
+        latest.createdAt,
+        cleanDraft: pending.cleanDraft,
+      );
+      return;
+    }
+    if (pending.cleanDraft) {
+      await (db.update(db.conversations)
+            ..where((row) => row.conversationId.equals(conversationId)))
+          .write(const ConversationsCompanion(draft: Value('')));
+    }
     await db.conversationDao.updateUnseenMessageCountAndLastMessageId(
       conversationId,
-      currentUserId,
+      pending.currentUserId,
       latest.messageId,
       latest.createdAt,
     );
@@ -239,7 +284,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ];
     final result = (await Future.wait(futures)).first as int;
 
-    await _updateConversationUnseenCount(
+    _scheduleConversationProjection(
       message,
       currentUserId,
       cleanDraft: cleanDraft,
@@ -634,7 +679,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     bool updateExpired = true,
   }) async {
     final messageIds = miniMessageItems.map((e) => e.messageId);
-    final chunked = messageIds.toList().chunked(kMarkLimit);
+    final chunked = messageIds.slices(kMarkLimit);
 
     for (final messageIds in chunked) {
       await (db.update(db.messages)..where(
@@ -1279,7 +1324,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     if (messageIds.isEmpty) return;
 
-    final chunked = messageIds.toList().chunked(kMarkLimit);
+    final chunked = messageIds.slices(kMarkLimit);
 
     for (final ids in chunked) {
       await (db.update(messages)..where(
@@ -1489,4 +1534,25 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return predicate;
     }, (m, c, u, o) => Limit(limit, null)).get();
   }
+}
+
+class _PendingConversationProjection {
+  const _PendingConversationProjection({
+    required this.currentUserId,
+    required this.hasIncoming,
+    required this.cleanDraft,
+  });
+
+  final String currentUserId;
+  final bool hasIncoming;
+  final bool cleanDraft;
+
+  _PendingConversationProjection merge({
+    required bool hasIncoming,
+    required bool cleanDraft,
+  }) => _PendingConversationProjection(
+    currentUserId: currentUserId,
+    hasIncoming: this.hasIncoming || hasIncoming,
+    cleanDraft: this.cleanDraft || cleanDraft,
+  );
 }

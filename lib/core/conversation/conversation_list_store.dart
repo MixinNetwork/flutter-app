@@ -1,20 +1,17 @@
 import 'dart:async';
 
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    show ConversationCategory, ConversationStatus;
-
 import '../../db/dao/conversation_dao.dart';
 import '../../db/database_event_bus.dart';
+import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
+import '../../utils/logger.dart';
 
 sealed class ConversationListEvent {
   const ConversationListEvent();
 }
 
 class ConversationListSnapshot extends ConversationListEvent {
-  const ConversationListSnapshot(this.items);
-
-  final List<ConversationItem> items;
+  const ConversationListSnapshot();
 }
 
 class ConversationListDelta extends ConversationListEvent {
@@ -41,9 +38,11 @@ class ConversationListStore {
   final List<ConversationItem> _sortedItems = [];
   final Map<String, Set<String>> _circleConversationIds = {};
   final Set<String> _pendingIds = {};
+  final Set<String> _pendingUserIds = {};
 
   final List<StreamSubscription<void>> _subscriptions = [];
   Timer? _flushTimer;
+  Timer? _userFlushTimer;
   bool _initialized = false;
   bool _flushing = false;
   bool _closed = false;
@@ -58,9 +57,7 @@ class ConversationListStore {
   int get unseenCountIgnoringMuted {
     final now = DateTime.now();
     return _items.values.fold(0, (count, item) {
-      final muteUntil = item.category == ConversationCategory.group
-          ? item.muteUntil
-          : item.ownerMuteUntil;
+      final muteUntil = item.validMuteUntil;
       if (muteUntil?.isAfter(now) == true) return count;
       return count + (item.unseenMessageCount ?? 0);
     });
@@ -69,7 +66,7 @@ class ConversationListStore {
   Stream<ConversationListEvent> get events => Stream.multi(
     (controller) {
       if (_initialized) {
-        controller.add(ConversationListSnapshot(items));
+        controller.add(const ConversationListSnapshot());
       }
       final subscription = _changes.stream.listen(
         controller.add,
@@ -87,18 +84,6 @@ class ConversationListStore {
       ..add(
         _eventBus.updateConversationIdStream.listen(_schedule),
       )
-      ..add(
-        _eventBus.insertOrReplaceMessageIdsStream.listen(
-          (messages) =>
-              _schedule(messages.map((message) => message.conversationId)),
-        ),
-      )
-      ..add(
-        _eventBus.updateMessageMentionStream.listen(
-          (messages) =>
-              _schedule(messages.map((message) => message.conversationId)),
-        ),
-      )
       ..add(_eventBus.updateUserIdsStream.listen(_handleUserUpdate))
       ..add(
         _eventBus.updateCircleConversationStream.listen(
@@ -106,19 +91,22 @@ class ConversationListStore {
         ),
       );
     final items = await _database.conversationDao.conversationItems().get();
+    if (_closed) return;
     await _reloadCircleConversations(notify: false);
+    if (_closed) return;
     _items
       ..clear()
       ..addEntries(items.map((item) => MapEntry(item.conversationId, item)));
     _resort();
     _initialized = true;
-    _changes.add(ConversationListSnapshot(this.items));
+    _changes.add(const ConversationListSnapshot());
     if (_pendingIds.isNotEmpty) _schedule(const []);
   }
 
   Future<void> close() async {
     _closed = true;
     _flushTimer?.cancel();
+    _userFlushTimer?.cancel();
     await Future.wait(
       _subscriptions.map((subscription) => subscription.cancel()),
     );
@@ -133,11 +121,26 @@ class ConversationListStore {
   }
 
   void _handleUserUpdate(List<String> userIds) {
-    unawaited(
-      _database.conversationDao
-          .conversationIdsAffectedByUsers(userIds)
-          .then(_schedule),
+    if (_closed) return;
+    _pendingUserIds.addAll(userIds);
+    _userFlushTimer ??= Timer(
+      const Duration(milliseconds: 16),
+      _flushUserUpdates,
     );
+  }
+
+  Future<void> _flushUserUpdates() async {
+    _userFlushTimer = null;
+    final ids = _pendingUserIds.toList();
+    _pendingUserIds.clear();
+    if (ids.isEmpty || _closed) return;
+    try {
+      _schedule(
+        await _database.conversationDao.conversationIdsAffectedByUsers(ids),
+      );
+    } catch (error, stackTrace) {
+      e('conversation user refresh failed: $error $stackTrace');
+    }
   }
 
   Future<void> _reloadCircleConversations({bool notify = true}) async {
@@ -151,7 +154,7 @@ class ConversationListStore {
           .add(relationship.conversationId);
     }
     if (notify && _initialized && !_closed) {
-      _changes.add(ConversationListSnapshot(items));
+      _changes.add(const ConversationListSnapshot());
     }
   }
 
@@ -166,19 +169,15 @@ class ConversationListStore {
     }
 
     try {
-      final results = await Future.wait(
-        ids.map(
-          (id) async => (
-            id,
-            await _database.conversationDao
-                .conversationItem(id)
-                .getSingleOrNull(),
-          ),
-        ),
-      );
+      final results = {
+        for (final item
+            in await _database.conversationDao.conversationItemsByIds(ids))
+          item.conversationId: item,
+      };
       final changedIds = <String>{};
       final removedIds = <String>{};
-      for (final (id, item) in results) {
+      for (final id in ids) {
+        final item = results[id];
         if (item == null) {
           if (_items.remove(id) != null) removedIds.add(id);
         } else if (_items[id] != item) {
@@ -195,6 +194,8 @@ class ConversationListStore {
           ),
         );
       }
+    } catch (error, stackTrace) {
+      e('conversation refresh failed: $error $stackTrace');
     } finally {
       _flushing = false;
       if (_pendingIds.isNotEmpty) _schedule(const []);
@@ -204,28 +205,7 @@ class ConversationListStore {
   void _resort() {
     _sortedItems
       ..clear()
-      ..addAll(_items.values)
-      ..sort((a, b) {
-        final pin = _compareNullableDateDescending(a.pinTime, b.pinTime);
-        if (pin != 0) return pin;
-        if (_hasDraft(a) != _hasDraft(b)) return _hasDraft(a) ? -1 : 1;
-        final lastMessage = _compareNullableDateDescending(
-          a.lastMessageCreatedAt,
-          b.lastMessageCreatedAt,
-        );
-        if (lastMessage != 0) return lastMessage;
-        final createdAt = b.createdAt.compareTo(a.createdAt);
-        if (createdAt != 0) return createdAt;
-        return a.conversationId.compareTo(b.conversationId);
-      });
-  }
-
-  static bool _hasDraft(ConversationItem item) =>
-      item.status != ConversationStatus.quit && item.draft?.isNotEmpty == true;
-
-  static int _compareNullableDateDescending(DateTime? a, DateTime? b) {
-    if (a == null) return b == null ? 0 : 1;
-    if (b == null) return -1;
-    return b.compareTo(a);
+      ..addAll(_items.values);
+    _database.conversationDao.sortConversationItems(_sortedItems);
   }
 }

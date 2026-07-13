@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    show ConversationCategory, UserRelationship;
+    show ConversationCategory;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../core/conversation/conversation_list_store.dart';
 import '../../../db/dao/conversation_dao.dart';
 import '../../../db/database.dart';
+import '../../../db/extension/conversation.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../provider/mention_cache_provider.dart';
@@ -17,34 +18,33 @@ import '../conversation/conversation_avatar_cache.dart';
 
 const kDefaultLimit = 15;
 
-class PagingState<T> {
-  const PagingState({
-    this.map = const {},
-    this.count = 0,
+class ConversationListState {
+  const ConversationListState({
+    this.items = const [],
     this.initialized = false,
-    this.hasData = false,
   });
 
-  final Map<int, T> map;
-  final int count;
+  final List<ConversationItem> items;
   final bool initialized;
-  final bool hasData;
+
+  int get count => items.length;
+
+  bool get hasData => items.isNotEmpty;
 }
 
-class ConversationListController
-    extends ValueNotifier<PagingState<ConversationItem>> {
+class ConversationListController extends ValueNotifier<ConversationListState> {
   ConversationListController(
     this.slideCategoryStateNotifier,
     Database database,
     this.mentionCache,
     this.store,
   ) : avatarCache = ConversationAvatarCache(database),
-      super(const PagingState<ConversationItem>()) {
+      super(const ConversationListState()) {
     _subscriptions
       ..add(
         slideCategoryStateNotifier.stream.distinct().listen(_switchCategory),
       )
-      ..add(store.events.listen((_) => _rebuild()));
+      ..add(store.events.listen(_rebuild));
   }
 
   final SlideCategoryStateNotifier slideCategoryStateNotifier;
@@ -59,7 +59,7 @@ class ConversationListController
   SlideCategoryState? _activeState;
   var _disposed = false;
 
-  PagingState<ConversationItem> get state => value;
+  ConversationListState get state => value;
 
   int get limit => _limit ?? kDefaultLimit;
 
@@ -83,23 +83,32 @@ class ConversationListController
 
   void _switchCategory(SlideCategoryState state) {
     if (state.type == SlideCategoryType.setting) return;
-    _views.putIfAbsent(state, _ConversationListView.new);
+    _views.putIfAbsent(
+      state,
+      () => _ConversationListView(
+        (indices) => _warmVisible(state, indices),
+      ),
+    );
     _activeState = state;
-    _rebuild();
+    _rebuild(const ConversationListSnapshot());
   }
 
-  void _rebuild() {
+  void _rebuild(ConversationListEvent event) {
     if (_disposed) return;
     final activeState = _activeState;
     if (activeState == null) return;
     final items = _itemsFor(activeState);
-    value = PagingState(
-      map: {for (final (index, item) in items.indexed) index: item},
-      count: items.length,
+    value = ConversationListState(
+      items: items,
       initialized: true,
-      hasData: items.isNotEmpty,
     );
-    unawaited(_warm(items));
+    final warmItems = switch (event) {
+      ConversationListDelta(:final changedIds) => items.where(
+        (item) => changedIds.contains(item.conversationId),
+      ),
+      ConversationListSnapshot() => items.take(limit),
+    };
+    unawaited(_warm(warmItems));
     final badgeCount = store.unseenCountIgnoringMuted;
     if (_badgeCount != badgeCount) {
       _badgeCount = badgeCount;
@@ -112,18 +121,9 @@ class ConversationListController
     return switch (state.type) {
       SlideCategoryType.chats => items,
       SlideCategoryType.contacts =>
-        items
-            .where(
-              (item) =>
-                  item.category == ConversationCategory.contact &&
-                  item.relationship == UserRelationship.friend &&
-                  item.appId == null,
-            )
-            .toList(),
+        items.where((item) => item.isContactConversation).toList(),
       SlideCategoryType.groups =>
-        items
-            .where((item) => item.category == ConversationCategory.group)
-            .toList(),
+        items.where((item) => item.isGroupConversation).toList(),
       SlideCategoryType.bots =>
         items
             .where(
@@ -133,14 +133,7 @@ class ConversationListController
             )
             .toList(),
       SlideCategoryType.strangers =>
-        items
-            .where(
-              (item) =>
-                  item.category == ConversationCategory.contact &&
-                  item.relationship == UserRelationship.stranger &&
-                  item.appId == null,
-            )
-            .toList(),
+        items.where((item) => item.isStrangerConversation).toList(),
       SlideCategoryType.circle =>
         items
             .where(
@@ -153,13 +146,26 @@ class ConversationListController
     };
   }
 
-  Future<void> _warm(List<ConversationItem> items) async {
+  void _warmVisible(SlideCategoryState state, Set<int> indices) {
+    final items = _itemsFor(state);
+    unawaited(
+      _warm(
+        indices
+            .where((index) => index >= 0 && index < items.length)
+            .map((index) => items[index]),
+      ),
+    );
+  }
+
+  Future<void> _warm(Iterable<ConversationItem> items) async {
+    final list = items.toList();
+    if (list.isEmpty) return;
     try {
       await Future.wait([
         mentionCache.checkMentionCache(
-          items.map((item) => item.content).toSet(),
+          list.map((item) => item.content).toSet(),
         ),
-        avatarCache.warm(items),
+        avatarCache.warm(list),
       ]);
     } catch (error) {
       e('conversation list cache warm failed: $error');
@@ -185,13 +191,28 @@ class ConversationListController
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
+    for (final view in _views.values) {
+      view.dispose();
+    }
     avatarCache.dispose();
     super.dispose();
   }
 }
 
 class _ConversationListView {
+  _ConversationListView(this.onVisible) {
+    itemPositionsListener.itemPositions.addListener(_onPositionsChanged);
+  }
+
+  final void Function(Set<int> indices) onVisible;
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
   final ItemScrollController itemScrollController = ItemScrollController();
+
+  void _onPositionsChanged() => onVisible(
+    itemPositionsListener.itemPositions.value.map((item) => item.index).toSet(),
+  );
+
+  void dispose() =>
+      itemPositionsListener.itemPositions.removeListener(_onPositionsChanged);
 }

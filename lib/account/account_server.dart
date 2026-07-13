@@ -121,7 +121,7 @@ class AccountServer {
       rethrow;
     }
 
-    await conversationListStore.start();
+    unawaited(conversationListStore.start());
     unawaited(_start());
 
     DownloadKeyValue.instance.messageIds.forEach((messageId) {
@@ -749,7 +749,7 @@ class AccountServer {
 
     if (ids.isEmpty) return;
 
-    final chunked = ids.chunked(kMarkLimit);
+    final chunked = ids.slices(kMarkLimit);
 
     for (final ids in chunked) {
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);

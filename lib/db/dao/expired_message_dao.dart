@@ -44,7 +44,7 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
   Future<void> onMessageRead(Iterable<String> messageIds) async {
     final chunkedMessageIds = messageIds
         .toList(growable: false)
-        .chunked(kMarkLimit);
+        .slices(kMarkLimit);
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     for (final ids in chunkedMessageIds) {
       await _markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));

@@ -19,6 +19,31 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationDaoMixin {
   ConversationDao(super.db);
 
+  void sortConversationItems(List<ConversationItem> items) {
+    items.sort((a, b) {
+      final pin = _compareNullableDateDescending(a.pinTime, b.pinTime);
+      if (pin != 0) return pin;
+      if (_hasDraft(a) != _hasDraft(b)) return _hasDraft(a) ? -1 : 1;
+      final lastMessage = _compareNullableDateDescending(
+        a.lastMessageCreatedAt,
+        b.lastMessageCreatedAt,
+      );
+      if (lastMessage != 0) return lastMessage;
+      final createdAt = b.createdAt.compareTo(a.createdAt);
+      if (createdAt != 0) return createdAt;
+      return a.conversationId.compareTo(b.conversationId);
+    });
+  }
+
+  static bool _hasDraft(ConversationItem item) =>
+      item.status != ConversationStatus.quit && item.draft?.isNotEmpty == true;
+
+  static int _compareNullableDateDescending(DateTime? a, DateTime? b) {
+    if (a == null) return b == null ? 0 : 1;
+    if (b == null) return -1;
+    return b.compareTo(a);
+  }
+
   Future<int> insert(Conversation conversation) =>
       into(
         db.conversations,
@@ -134,6 +159,14 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     final ids = userIds.toSet().toList();
     if (ids.isEmpty) return const [];
 
+    final result = <String>{};
+    for (final chunk in ids.slices(300)) {
+      result.addAll(await _conversationIdsAffectedByUsers(chunk));
+    }
+    return result.toList();
+  }
+
+  Future<List<String>> _conversationIdsAffectedByUsers(List<String> ids) async {
     final conversations = db.conversations;
     final lastMessage = alias(db.messages, 'affectedUserLastMessage');
     final rows =
@@ -154,6 +187,46 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             .map((row) => row.read(conversations.conversationId))
             .get();
     return rows.nonNulls.toList();
+  }
+
+  Future<List<ConversationItem>> conversationItemsByIds(
+    Iterable<String> conversationIds,
+  ) async {
+    final result = <ConversationItem>[];
+    for (final ids in conversationIds.toSet().slices(300)) {
+      result.addAll(
+        await _baseConversationItems(
+          (
+            conversation,
+            owner,
+            lastMessage,
+            lastMessageSender,
+            snapshot,
+            participant,
+            em,
+          ) => conversation.conversationId.isIn(ids),
+          (
+            conversation,
+            owner,
+            lastMessage,
+            lastMessageSender,
+            snapshot,
+            participant,
+            em,
+          ) => _baseConversationItemOrder(conversation),
+          (
+            conversation,
+            owner,
+            lastMessage,
+            lastMessageSender,
+            snapshot,
+            participant,
+            em,
+          ) => maxLimit,
+        ).get(),
+      );
+    }
+    return result;
   }
 
   Future<List<String>> conversationIdsByCircleId(

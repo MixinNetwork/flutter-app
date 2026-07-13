@@ -33,7 +33,8 @@ import '../audio_message_player/audio_message_service.dart';
 import '../platform.dart';
 import '../synchronized.dart';
 
-export 'package:collection/collection.dart' show IterableNullableExtension;
+export 'package:collection/collection.dart'
+    show IterableExtension, IterableNullableExtension, ListExtensions;
 export 'package:provider/provider.dart' show ReadContext, WatchContext;
 
 export '../../crypto/attachment/crypto_attachment.dart'

@@ -43,7 +43,7 @@ class ConversationList extends HookConsumerWidget {
 
     final conversationListController = context
         .read<ConversationListController>();
-    final pagingState = useValueListenable(conversationListController);
+    final listState = useValueListenable(conversationListController);
     useListenable(conversationListController.avatarCache);
     final conversationId = ref.watch(currentConversationIdProvider);
 
@@ -66,8 +66,8 @@ class ConversationList extends HookConsumerWidget {
 
     Widget child;
 
-    child = pagingState.count == 0
-        ? pagingState.hasData
+    child = listState.count == 0
+        ? listState.hasData
               ? Center(
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
@@ -78,11 +78,10 @@ class ConversationList extends HookConsumerWidget {
         : ScrollablePositionedList.builder(
             key: PageStorageKey(slideCategoryState),
             itemPositionsListener: itemPositionsListener,
-            itemCount: pagingState.count,
+            itemCount: listState.count,
             itemScrollController: itemScrollController,
             itemBuilder: (context, index) {
-              final conversation = pagingState.map[index];
-              if (conversation == null) return const SizedBox(height: 80);
+              final conversation = listState.items[index];
               final current = conversation.conversationId == conversationId;
               final selected = current && showsConversationSelection;
               return ConversationMenuWrapper(

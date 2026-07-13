@@ -28,9 +28,12 @@ class ChatNavigationIntentNotifier
     );
   }
 
-  void consumeLatestJump(Object requestKey) {
-    if (!identical(state.latestJumpRequestKey, requestKey)) return;
+  bool takeLatestJump(String conversationId) {
+    final matches =
+        state.latestJumpRequestKey != null &&
+        state.latestJumpConversationId == conversationId;
     state = const ChatNavigationIntentState();
+    return matches;
   }
 }
 

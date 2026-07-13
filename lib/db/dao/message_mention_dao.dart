@@ -26,6 +26,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
             messageId: messageMention.messageId,
           ),
         ]);
+        DataBaseEventBus.instance.updateConversation(
+          messageMention.conversationId,
+        );
         return value;
       });
 
@@ -41,6 +44,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
                 messageId: messageMention.messageId,
               ),
             ]);
+            DataBaseEventBus.instance.updateConversation(
+              messageMention.conversationId,
+            );
             return value;
           });
 
@@ -109,6 +115,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
               messageId: messageId,
             ),
           ]);
+          DataBaseEventBus.instance.updateConversation(
+            messageMention.conversationId,
+          );
           return value;
         });
   }
@@ -136,6 +145,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
         value,
       ) {
         if (value > 0) {
+          DataBaseEventBus.instance.updateMessageMentionsForConversation(
+            conversationId,
+          );
           DataBaseEventBus.instance.updateConversation(conversationId);
         }
       });

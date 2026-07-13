@@ -3,11 +3,34 @@ import 'dart:async';
 import 'package:ogg_opus_player/ogg_opus_player.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../db/mixin_database.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
-import 'audio_message_service.dart';
 
-class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
+class MessageMedia {
+  const MessageMedia(
+    this.messageItem, {
+    required this.convertMessageAbsolutePath,
+  });
+
+  final MessageItem messageItem;
+  final String Function(MessageItem) convertMessageAbsolutePath;
+
+  String get mediaPath => convertMessageAbsolutePath(messageItem);
+}
+
+enum PlaybackState {
+  idle,
+  playing,
+  paused,
+  completed;
+
+  bool get isPlaying => this == PlaybackState.playing;
+
+  bool get isCompleted => this == PlaybackState.completed;
+}
+
+class AudioMessagePlayer {
   final _currentPlaying = BehaviorSubject<MessageMedia?>();
 
   OggOpusPlayer? _player;
@@ -20,26 +43,20 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
 
   final _playbackSpeed = BehaviorSubject<double>.seeded(1);
 
-  @override
   Stream<MessageMedia?> get currentStream => _currentPlaying.stream;
 
-  @override
   Stream<double> get playbackSpeedStream => _playbackSpeed.stream;
 
-  @override
   void dispose() {
     stop();
     _medias.clear();
     _index = -1;
   }
 
-  @override
   PlaybackState get playbackState => _playbackState.value;
 
-  @override
   MessageMedia? get current => _medias.getOrNull(_index);
 
-  @override
   void play(List<MessageMedia> media, {bool resetPlaySpeed = true}) {
     stop();
     _medias.clear();
@@ -106,7 +123,6 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     }
   }
 
-  @override
   Stream<PlaybackState> get playbackStream => _playbackState.stream;
 
   void _disposeCurrentPlayer() {
@@ -115,18 +131,15 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     _player = null;
   }
 
-  @override
   void stop() {
     _disposeCurrentPlayer();
     _playbackState.value = PlaybackState.idle;
   }
 
-  @override
   void pause() {
     _player?.pause();
   }
 
-  @override
   void resume() {
     if (_player == null) {
       e('resume failed, player is null.');
@@ -140,11 +153,9 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     _playbackState.value = PlaybackState.playing;
   }
 
-  @override
   Duration currentPosition() =>
       Duration(milliseconds: ((_player?.currentPosition ?? 0) * 1000).toInt());
 
-  @override
   void setPlaybackSpeed(double speed) {
     _playbackSpeed.value = speed;
     _player?.setPlaybackRate(speed);

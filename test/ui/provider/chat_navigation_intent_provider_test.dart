@@ -14,8 +14,16 @@ void main() {
     expect(notifier.state.latestJumpRequestKey, isNot(same(firstKey)));
     expect(notifier.state.latestJumpConversationId, 'conversation-1');
 
-    final requestKey = notifier.state.latestJumpRequestKey!;
-    notifier.consumeLatestJump(requestKey);
+    expect(notifier.takeLatestJump('conversation-1'), isTrue);
+    expect(notifier.state.latestJumpRequestKey, isNull);
+    expect(notifier.state.latestJumpConversationId, isNull);
+  });
+
+  test('takeLatestJump consumes a request for another conversation', () {
+    final notifier = ChatNavigationIntentNotifier()
+      ..requestLatestJump('conversation-1');
+
+    expect(notifier.takeLatestJump('conversation-2'), isFalse);
     expect(notifier.state.latestJumpRequestKey, isNull);
     expect(notifier.state.latestJumpConversationId, isNull);
   });

@@ -186,17 +186,19 @@ class ChatContainer extends HookConsumerWidget {
     );
 
     useEffect(() {
-      final latestJumpRequestKey = latestJumpRequest.$1;
-      if (latestJumpRequestKey == null) return null;
-      if (latestJumpRequest.$2 !=
-          ref.read(conversationProvider)?.conversationId) {
+      if (latestJumpRequest.$1 == null) return null;
+      final conversationId = ref.read(conversationProvider)?.conversationId;
+      if (conversationId == null ||
+          !ref
+              .read(chatNavigationIntentProvider.notifier)
+              .takeLatestJump(conversationId)) {
         return null;
       }
-      ref
-          .read(chatNavigationIntentProvider.notifier)
-          .consumeLatestJump(latestJumpRequestKey);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
+        if (ref.read(conversationProvider)?.conversationId != conversationId) {
+          return;
+        }
         unawaited(context.jumpToLatestInChat());
       });
       return null;
