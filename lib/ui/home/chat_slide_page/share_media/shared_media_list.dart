@@ -11,7 +11,6 @@ import '../../../../db/dao/message_dao.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/near_edge_scroll_listener.dart';
-import '../../notifier/load_more_paging_controller.dart';
 
 typedef SharedMediaInitialLoader =
     Future<List<MessageItem>> Function(int pageSize);
@@ -47,20 +46,15 @@ class SharedMediaList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messageDao = context.database.messageDao;
-    final mediaController = useMemoized(
-      () => LoadMorePagingController<MessageItem>(
-        reloadData: () => reloadData(pageSize),
-        loadMoreData: (list) async {
-          if (list.isEmpty) return [];
-          final info = await messageDao.messageOrderInfo(list.last.messageId);
-          if (info == null) return [];
-          return [...list, ...await loadBefore(info, pageSize)];
-        },
-        isSameKey: (a, b) => a.messageId == b.messageId,
-      ),
-      [conversationId, pageSize],
-    );
-    useEffect(() => mediaController.dispose, [mediaController]);
+    final messages = useState(const <MessageItem>[]);
+    final loading = useRef(false);
+    useEffect(() {
+      var active = true;
+      reloadData(pageSize).then((value) {
+        if (active) messages.value = value;
+      });
+      return () => active = false;
+    }, [conversationId, pageSize]);
     useEffect(
       () => messageDao
           .watchInsertOrReplaceMessageStream(conversationId)
@@ -70,18 +64,24 @@ class SharedMediaList extends HookConsumerWidget {
             }
           })
           .where((event) => categories.contains(event.type))
-          .listen(mediaController.insertOrReplace)
+          .listen((item) {
+            final index = messages.value.indexWhere(
+              (message) => message.messageId == item.messageId,
+            );
+            messages.value =
+                index == -1 ? [item, ...messages.value] : [...messages.value]
+                  ..[index] = item;
+          })
           .cancel,
-      [conversationId, mediaController],
+      [conversationId],
     );
 
-    final state = useValueListenable(mediaController);
     final grouped = useMemoized(
-      () => groupBy<MessageItem, DateTime>(state.list, (messageItem) {
+      () => groupBy<MessageItem, DateTime>(messages.value, (messageItem) {
         final local = messageItem.createdAt.toLocal();
         return DateTime(local.year, local.month, local.day);
       }),
-      [state.list],
+      [messages.value],
     );
     final scrollController = useScrollController();
 
@@ -111,7 +111,22 @@ class SharedMediaList extends HookConsumerWidget {
     }
 
     return NearEdgeScrollListener(
-      onNearEnd: mediaController.loadMore,
+      onNearEnd: () async {
+        if (loading.value || messages.value.isEmpty) return;
+        loading.value = true;
+        try {
+          final info = await messageDao.messageOrderInfo(
+            messages.value.last.messageId,
+          );
+          if (info == null) return;
+          messages.value = [
+            ...messages.value,
+            ...await loadBefore(info, pageSize),
+          ];
+        } finally {
+          loading.value = false;
+        }
+      },
       child: CustomScrollView(
         controller: scrollController,
         slivers: grouped.entries

@@ -8,10 +8,12 @@ import 'package:lottie/lottie.dart';
 import '../../app.dart';
 import '../../db/extension/job.dart';
 import '../../utils/app_lifecycle.dart';
+import '../../utils/cache_client.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../cache_lottie.dart';
 import '../mixin_image.dart';
+
+const _cacheLottieFolderName = 'cache_lottie';
 
 void _triggerRefreshJob(BuildContext context, String? stickerId) {
   if (stickerId == null || stickerId.isEmpty) return;
@@ -84,9 +86,12 @@ class StickerItem extends HookConsumerWidget {
 
     final child = isJson
         ? LottieBuilder(
-            lottie: CachedNetworkLottie(
+            lottie: NetworkLottie(
               assetUrl,
-              proxyConfig: context.database.settingProperties.activatedProxy,
+              client: CacheClient(
+                context.database.settingProperties.activatedProxy,
+                _cacheLottieFolderName,
+              ),
             ),
             controller: controller,
             height: height,

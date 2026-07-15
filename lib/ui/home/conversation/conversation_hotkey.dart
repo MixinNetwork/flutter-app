@@ -82,12 +82,10 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
 
     nextConversationId = unseenConversations[nextIndex].conversationId;
   } else {
-    var currentConversationIndex = -1;
-    conversationListController.state.map.forEach((key, value) {
-      if (value.conversationId == currentConversationId) {
-        currentConversationIndex = key;
-      }
-    });
+    final conversations = conversationListController.state.items;
+    final currentConversationIndex = conversations.indexWhere(
+      (conversation) => conversation.conversationId == currentConversationId,
+    );
 
     if (currentConversationIndex == -1) return;
 
@@ -95,9 +93,11 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
         ? currentConversationIndex + 1
         : currentConversationIndex - 1;
 
-    final nextConversation =
-        conversationListController.state.map[nextConversationIndex];
-    if (nextConversation == null) return;
+    if (nextConversationIndex < 0 ||
+        nextConversationIndex >= conversations.length) {
+      return;
+    }
+    final nextConversation = conversations[nextConversationIndex];
     nextConversationId = nextConversation.conversationId;
   }
 

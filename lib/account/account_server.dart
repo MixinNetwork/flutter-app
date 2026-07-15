@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 import '../blaze/blaze.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../constants/constants.dart';
+import '../core/conversation/conversation_list_store.dart';
 import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
@@ -67,6 +68,8 @@ class AccountServer {
   final SettingChangeNotifier settingChangeNotifier;
   final Database database;
   final GetCurrentConversationId currentConversationId;
+  late final ConversationListStore conversationListStore =
+      ConversationListStore(database.mixinDatabase);
   Timer? checkSignalKeyTimer;
 
   bool get _loginByPhoneNumber =>
@@ -118,6 +121,7 @@ class AccountServer {
       rethrow;
     }
 
+    unawaited(conversationListStore.start());
     unawaited(_start());
 
     DownloadKeyValue.instance.messageIds.forEach((messageId) {
@@ -745,7 +749,7 @@ class AccountServer {
 
     if (ids.isEmpty) return;
 
-    final chunked = ids.chunked(kMarkLimit);
+    final chunked = ids.slices(kMarkLimit);
 
     for (final ids in chunked) {
       final expireAt = await database.expiredMessageDao.getMessageExpireAt(ids);
@@ -793,6 +797,7 @@ class AccountServer {
     appActiveListener.removeListener(onActive);
     checkSignalKeyTimer?.cancel();
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
+    await conversationListStore.close();
   }
 
   void release() {

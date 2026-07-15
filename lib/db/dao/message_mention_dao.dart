@@ -26,6 +26,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
             messageId: messageMention.messageId,
           ),
         ]);
+        DataBaseEventBus.instance.updateConversation(
+          messageMention.conversationId,
+        );
         return value;
       });
 
@@ -41,6 +44,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
                 messageId: messageMention.messageId,
               ),
             ]);
+            DataBaseEventBus.instance.updateConversation(
+              messageMention.conversationId,
+            );
             return value;
           });
 
@@ -109,6 +115,9 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
               messageId: messageId,
             ),
           ]);
+          DataBaseEventBus.instance.updateConversation(
+            messageMention.conversationId,
+          );
           return value;
         });
   }
@@ -132,5 +141,14 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
   Future<void> clearMessageMentionByConversationId(String conversationId) =>
       (db.delete(
         db.messageMentions,
-      )..where((tbl) => tbl.conversationId.equals(conversationId))).go();
+      )..where((tbl) => tbl.conversationId.equals(conversationId))).go().then((
+        value,
+      ) {
+        if (value > 0) {
+          DataBaseEventBus.instance.updateMessageMentionsForConversation(
+            conversationId,
+          );
+          DataBaseEventBus.instance.updateConversation(conversationId);
+        }
+      });
 }

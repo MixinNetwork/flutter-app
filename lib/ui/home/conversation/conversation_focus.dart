@@ -191,8 +191,11 @@ class ConversationFocus {
     BuildContext context,
     String conversationId,
   ) async {
-    final conversations = context.read<ConversationListController>().state.map;
-    for (final conversation in conversations.values) {
+    final conversations = context
+        .read<ConversationListController>()
+        .state
+        .items;
+    for (final conversation in conversations) {
       if (conversation.conversationId == conversationId) return conversation;
     }
     return context.database.conversationDao

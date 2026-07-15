@@ -10,13 +10,13 @@ import '../../enum/media_status.dart';
 import '../extension/extension.dart';
 import '../hook.dart';
 import '../system/audio_session.dart';
-import 'audio_message_player.dart';
+import 'ogg_opus_audio_player.dart';
 
-export 'audio_message_player.dart';
+export 'ogg_opus_audio_player.dart' show MessageMedia, PlaybackState;
 
 class AudioMessagePlayService {
   AudioMessagePlayService(this._accountServer) {
-    _player = AudioMessagePlayer.oggOpus();
+    _player = AudioMessagePlayer();
     initListen();
   }
 

@@ -128,11 +128,16 @@ class DataBaseEventBus {
   );
 
   void updateConversation(String conversationId) {
-    if (conversationId.trim().isEmpty) {
+    updateConversations([conversationId]);
+  }
+
+  void updateConversations(Iterable<String> conversationIds) {
+    final ids = conversationIds.where((id) => id.trim().isNotEmpty).toSet();
+    if (ids.isEmpty) {
       w('DatabaseEvent: insertOrReplaceConversation conversationId is empty');
       return;
     }
-    _send(_DatabaseEvent.updateConversation, [conversationId]);
+    _send(_DatabaseEvent.updateConversation, ids.toList());
   }
 
   // participant
@@ -274,6 +279,13 @@ class DataBaseEventBus {
       return;
     }
     _send(_DatabaseEvent.updateMessageMention, newMessageEvents.toList());
+  }
+
+  void updateMessageMentionsForConversation(String conversationId) {
+    if (conversationId.trim().isEmpty) return;
+    _send(_DatabaseEvent.updateMessageMention, [
+      MiniMessageItem(conversationId: conversationId, messageId: ''),
+    ]);
   }
 
   // pinMessage
