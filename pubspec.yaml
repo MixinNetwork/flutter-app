@@ -128,11 +128,11 @@ dependencies:
       path: packages/ui_device
   ulid: ^2.0.0
   url_launcher: ^6.3.2
-  uuid: ^4.5.3
+  uuid: ^4.6.0
   visibility_detector: ^0.4.0+2
   watcher: ^1.2.1
   web_socket_channel: ^3.0.3
-  webview_flutter: ^4.14.0
+  webview_flutter: ^4.14.1
   win32: ^5.15.0
   win_toast: ^0.4.0
   window_manager: 0.5.1
