@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 import '../../blaze/blaze_message.dart';
 import '../../blaze/blaze_message_param.dart';
 import '../../blaze/vo/message_result.dart';
+import '../../blaze/vo/recall_message.dart';
 import '../../constants/constants.dart';
 import '../../crypto/encrypted/encrypted_protocol.dart';
 import '../../crypto/signal/signal_protocol.dart';
@@ -37,6 +38,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     required this.sessionId,
     required this.privateKey,
     required this.signalProtocol,
+    required this.deleteAttachment,
   });
 
   final String userId;
@@ -44,6 +46,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   final String sessionId;
   final ed.PrivateKey privateKey;
   late SignalProtocol signalProtocol;
+  final Future<void> Function(Message message) deleteAttachment;
 
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
 
@@ -103,12 +106,20 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   }
 
   Future<void> _runRecallJob(Job job) async {
+    final recallMessage = RecallMessage.fromJson(
+      jsonDecode(job.blazeMessage!) as Map<String, dynamic>,
+    );
+    if (job.runCount > 0) {
+      await _finishRecallJob(job, recallMessage);
+      return;
+    }
+
     final list = await utf8EncodeWithIsolate(job.blazeMessage!);
     final data = await base64EncodeWithIsolate(list);
 
     final blazeParam = BlazeMessageParam(
       conversationId: job.conversationId,
-      messageId: const Uuid().v4(),
+      messageId: job.jobId,
       category: MessageCategory.messageRecall,
       data: data,
     );
@@ -119,12 +130,31 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     );
     try {
       final result = await sender.deliver(blazeMessage);
+      if (result.success && result.errorCode == null) {
+        await database.jobDao.insert(job.copyWith(runCount: 1));
+        await _finishRecallJob(job, recallMessage);
+        return;
+      }
       if (result.success || result.errorCode == badData) {
         await database.jobDao.deleteJobById(job.jobId);
       }
     } catch (e, s) {
       w('Send recall error: $e, stack: $s');
     }
+  }
+
+  Future<void> _finishRecallJob(Job job, RecallMessage recallMessage) async {
+    final message = await database.messageDao.findMessageByMessageId(
+      recallMessage.messageId,
+    );
+    if (message?.category.isAttachment == true) {
+      await deleteAttachment(message!);
+    }
+    await database.recallMessage(
+      job.conversationId!,
+      recallMessage.messageId,
+    );
+    await database.jobDao.deleteJobById(job.jobId);
   }
 
   Future<void> _runSendJob(Job job) async {

@@ -335,8 +335,14 @@ class AccountServer {
         await attachmentUtil.checkSyncMessageMedia(messageId);
       }
     } else if (request is AttachmentDeleteRequest) {
-      await attachmentUtil.removeAttachmentJob(request.message.messageId);
-      await _deleteMessageAttachment(request.message);
+      try {
+        await attachmentUtil.removeAttachmentJob(request.message.messageId);
+        await _deleteMessageAttachment(request.message);
+        request.resultPort?.send(null);
+      } catch (error) {
+        request.resultPort?.send(error.toString());
+        if (request.resultPort == null) rethrow;
+      }
     } else {
       assert(false, 'unexpected request: $request');
     }
@@ -569,16 +575,10 @@ class AccountServer {
     List<String> messageIds, {
     String? conversationId,
     String? recipientId,
-  }) async {
-    await Future.forEach(
-      messageIds,
-      (id) => attachmentUtil.cancelProgressAttachmentJob(id),
-    );
-    return _sendMessageHelper.sendRecallMessage(
-      await _initConversation(conversationId, recipientId),
-      messageIds,
-    );
-  }
+  }) async => _sendMessageHelper.sendRecallMessage(
+    await _initConversation(conversationId, recipientId),
+    messageIds,
+  );
 
   Future<void> sendAppCardMessage({
     required AppCardData data,

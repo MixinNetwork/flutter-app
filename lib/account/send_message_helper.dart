@@ -14,7 +14,6 @@ import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/transcript_minimal.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
-import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
 import '../db/dao/pin_message_dao.dart';
 import '../db/dao/transcript_message_dao.dart';
@@ -42,7 +41,6 @@ class SendMessageHelper {
 
   final Database _database;
   late final MessageDao _messageDao = _database.messageDao;
-  late final MessageMentionDao _messageMentionDao = _database.messageMentionDao;
   late final ParticipantDao _participantDao = _database.participantDao;
   late final JobDao _jobDao = _database.jobDao;
   late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
@@ -701,48 +699,11 @@ class SendMessageHelper {
     List<String> messageIds,
   ) async {
     await Future.wait(
-      messageIds.map((messageId) async {
-        final message = await _messageDao.findMessageByMessageId(messageId);
-
-        await _messageDao.recallMessage(conversationId, messageId);
-
-        unawaited(_database.ftsDatabase.deleteByMessageId(messageId));
-
-        await Future.wait([
-          (() async {
-            if (message?.category.isAttachment == true) {
-              final file = File(message!.mediaUrl!);
-              final exists = file.existsSync();
-              if (exists) {
-                await file.delete();
-              }
-            }
-          })(),
-          _messageMentionDao.deleteMessageMention(
-            MessageMention(
-              messageId: messageId,
-              conversationId: conversationId,
-            ),
-          ),
-          (() async => _addSendingJob(
-            await createSendRecallJob(conversationId, messageId),
-          ))(),
-          (() async {
-            final quoteMessage = await _messageDao.findMessageItemById(
-              conversationId,
-              messageId,
-            );
-
-            if (quoteMessage != null) {
-              await _messageDao.updateQuoteContentByQuoteId(
-                conversationId,
-                messageId,
-                quoteMessage.toJson(),
-              );
-            }
-          })(),
-        ]);
-      }),
+      messageIds.map(
+        (messageId) async => _addSendingJob(
+          await createSendRecallJob(conversationId, messageId),
+        ),
+      ),
     );
   }
 

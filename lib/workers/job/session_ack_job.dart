@@ -69,8 +69,6 @@ class SessionAckJob extends JobQueue<List<Job>, List<Job>> {
     final encode = await base64EncodeWithIsolate(
       await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)),
     );
-    // TODO check if safety to use a primary session.
-    // final primarySessionId = AccountKeyValue.instance.primarySessionId;
     final param = createPlainJsonParam(
       conversationId,
       userId,

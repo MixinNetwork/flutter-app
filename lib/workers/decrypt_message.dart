@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
@@ -471,10 +470,6 @@ class DecryptMessage extends Injector {
 
   Future<void> _processAppButton(BlazeMessageData data) async {
     final content = _decode(data.data);
-    // final apps = (await _decode(data.data) as List)
-    //     .map((e) =>
-    //         e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
-    //     .toList();
     // todo check
     final message = Message(
       messageId: data.messageId,
@@ -517,14 +512,11 @@ class DecryptMessage extends Injector {
     );
 
     if (pinMessage.action == PinMessagePayloadAction.pin) {
-      await futureForEachIndexed(pinMessage.messageIds, (
-        index,
-        messageId,
-      ) async {
+      for (final (index, messageId) in pinMessage.messageIds.indexed) {
         final message = await database.messageDao.findMessageByMessageId(
           messageId,
         );
-        if (message == null) return;
+        if (message == null) continue;
         final pinMessageMinimal = PinMessageMinimal(
           type: message.category,
           messageId: message.messageId,
@@ -550,7 +542,7 @@ class DecryptMessage extends Injector {
           ),
           accountId,
         );
-      });
+      }
       _isolateEventSender(
         WorkerIsolateEventType.showPinMessage,
         data.conversationId,
@@ -572,48 +564,15 @@ class DecryptMessage extends Injector {
       recallMessage.messageId,
     );
 
-    await database.messageDao.recallMessage(
-      data.conversationId,
-      recallMessage.messageId,
-    );
-
-    unawaited(database.ftsDatabase.deleteByMessageId(recallMessage.messageId));
+    if (message != null && message.category.isAttachment) {
+      _isolateEventSender(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentDeleteRequest(message: message),
+      );
+    }
 
     await Future.wait([
-      (() async {
-        if (message != null && message.category.isAttachment) {
-          _isolateEventSender(
-            WorkerIsolateEventType.requestDownloadAttachment,
-            AttachmentCancelRequest(messageId: message.messageId),
-          );
-          if (message.mediaUrl?.isNotEmpty ?? false) {
-            final file = File(message.mediaUrl!);
-            final exists = file.existsSync();
-            if (exists) {
-              await file.delete();
-            }
-          }
-        }
-      })(),
-      (() async {
-        final quoteMessage = await database.messageDao.findMessageItemById(
-          data.conversationId,
-          recallMessage.messageId,
-        );
-        if (quoteMessage != null) {
-          await database.messageDao.updateQuoteContentByQuoteId(
-            data.conversationId,
-            recallMessage.messageId,
-            quoteMessage.toJson(),
-          );
-        }
-      })(),
-      database.messageMentionDao.deleteMessageMention(
-        MessageMention(
-          messageId: recallMessage.messageId,
-          conversationId: data.conversationId,
-        ),
-      ),
+      database.recallMessage(data.conversationId, recallMessage.messageId),
       database.messageHistoryDao.insert(
         MessagesHistoryData(messageId: data.messageId),
       ),

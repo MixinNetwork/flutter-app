@@ -64,50 +64,9 @@ extension DoubleCurrencyExtension on num {
   Decimal get asDecimal => Decimal.parse('$this');
 }
 
-// extension AssetResultExtension on AssetResult {
-//   Decimal get amountOfUsd => balance.asDecimal * priceUsd.asDecimal;
-//
-//   Decimal get amountOfBtc => balance.asDecimal * priceBtc.asDecimal;
-//
-//   Decimal get amountOfCurrentCurrency =>
-//       balance.asDecimal * priceUsd.asDecimal * fiatRate.asDecimal;
-//
-//   Decimal get usdUnitPrice => priceUsd.asDecimal * fiatRate.asDecimal;
-//
-//   bool get needShowMemo => tag?.isNotEmpty == true;
-//
-//   bool get needShowReserve => (int.tryParse(reserve ?? '0') ?? 0) > 0;
-//
-//   String getTip(BuildContext context) {
-//     switch (chainId) {
-//       case bitcoin:
-//         return context.l10n.depositTipBtc;
-//       case ethereum:
-//         return context.l10n.depositTipEth;
-//       case eos:
-//         return context.l10n.depositTipEos;
-//       case tron:
-//         return context.l10n.depositTipTron;
-//       default:
-//         return context.l10n.depositTip(symbol);
-//     }
-//   }
-// }
-//
 extension SnapshotItemExtension on SnapshotItem {
   Decimal amountOfCurrentCurrency() =>
       amount.asDecimal * priceUsd!.asDecimal * fiatRate!.asDecimal;
 
   bool get isPositive => (double.tryParse(amount) ?? 0) > 0;
 }
-
-//
-// extension AddressExtension on Addresse {
-//   String displayAddress() {
-//     if (tag == null || tag?.isEmpty == true) {
-//       return '$destination$tag';
-//     } else {
-//       return destination;
-//     }
-//   }
-// }
