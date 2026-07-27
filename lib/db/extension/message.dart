@@ -82,14 +82,17 @@ extension MessageItemExtension on MessageItem {
   bool get canRecall => _canRecallBase && relationship == UserRelationship.me;
 
   /// Whether the current user can recall this message given their participant
-  /// [role] in the conversation. Owners and admins of a group can recall
-  /// messages sent by other members; everyone can recall their own.
+  /// [role] in the conversation. Everyone can recall their own messages; in a
+  /// 1:1 conversation either party's messages can be recalled; owners and
+  /// admins of a group can recall messages sent by other members.
   bool canRecallByRole(ParticipantRole? role) {
     if (canRecall) return true;
-    final isGroupAdmin =
-        conversionCategory == ConversationCategory.group &&
+    if (!_canRecallBase) return false;
+    // 1:1 conversation: allow recalling the other party's messages too.
+    if (conversionCategory == ConversationCategory.contact) return true;
+    // group: owners and admins can recall other members' messages.
+    return conversionCategory == ConversationCategory.group &&
         (role == ParticipantRole.owner || role == ParticipantRole.admin);
-    return _canRecallBase && isGroupAdmin;
   }
 }
 
