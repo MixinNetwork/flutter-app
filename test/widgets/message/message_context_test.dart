@@ -2,9 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
+import 'package:flutter_app/ui/provider/message_selection_provider.dart';
 import 'package:flutter_app/ui/provider/quote_message_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/utils/hook.dart';
@@ -49,7 +51,7 @@ void main() {
       message: message,
       isTranscriptPage: false,
       isPinnedPage: false,
-      role: Object(),
+      role: ParticipantRole.owner,
     );
     expect(chatPolicy.canReply, isTrue);
     expect(chatPolicy.canPin, isTrue);
@@ -59,10 +61,162 @@ void main() {
       message: message,
       isTranscriptPage: false,
       isPinnedPage: true,
-      role: Object(),
+      role: ParticipantRole.owner,
     );
     expect(pinnedPolicy.canReply, isFalse);
     expect(pinnedPolicy.canDelete, isFalse);
+  });
+
+  test(
+    'MessageActionPolicy allows recalling peer messages in direct chats',
+    () {
+      final policy = MessageActionPolicy(
+        message: testMessage(
+          '1',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          conversionCategory: ConversationCategory.contact,
+        ),
+        isTranscriptPage: false,
+        isPinnedPage: false,
+        role: ParticipantRole.owner,
+      );
+
+      expect(policy.canRecall, isTrue);
+    },
+  );
+
+  test('MessageActionPolicy enforces the group recall role hierarchy', () {
+    MessageActionPolicy policy(
+      ParticipantRole? actorRole,
+      ParticipantRole? senderRole, {
+      String? senderParticipantId = 'member',
+      String senderUserId = 'sender',
+      String conversationOwnerId = 'owner',
+    }) => MessageActionPolicy(
+      message: testMessage(
+        '1',
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        conversionCategory: ConversationCategory.group,
+        conversationOwnerId: conversationOwnerId,
+        senderParticipantId: senderParticipantId,
+        senderRole: senderRole,
+        userId: senderUserId,
+      ),
+      isTranscriptPage: false,
+      isPinnedPage: false,
+      role: actorRole,
+    );
+
+    expect(
+      policy(ParticipantRole.owner, ParticipantRole.admin).canRecall,
+      true,
+    );
+    expect(policy(ParticipantRole.admin, null).canRecall, true);
+    expect(
+      policy(ParticipantRole.admin, ParticipantRole.admin).canRecall,
+      false,
+    );
+    expect(
+      policy(ParticipantRole.admin, ParticipantRole.owner).canRecall,
+      false,
+    );
+    expect(
+      policy(
+        ParticipantRole.admin,
+        null,
+        senderUserId: 'owner',
+      ).canRecall,
+      false,
+    );
+    expect(
+      policy(
+        ParticipantRole.admin,
+        null,
+        senderParticipantId: null,
+      ).canRecall,
+      false,
+    );
+    expect(policy(null, null).canRecall, false);
+  });
+
+  test('MessageActionPolicy keeps recall message constraints', () {
+    MessageActionPolicy policy(MessageItem message) => MessageActionPolicy(
+      message: message,
+      isTranscriptPage: false,
+      isPinnedPage: false,
+      role: ParticipantRole.owner,
+    );
+
+    expect(
+      policy(
+        testMessage(
+          'valid',
+          createdAt: DateTime.now().subtract(const Duration(days: 29)),
+          relationship: UserRelationship.me,
+        ),
+      ).canRecall,
+      true,
+    );
+    expect(
+      policy(
+        testMessage(
+          'expired',
+          createdAt: DateTime.now().subtract(
+            const Duration(days: 30, seconds: 1),
+          ),
+          relationship: UserRelationship.me,
+        ),
+      ).canRecall,
+      false,
+    );
+    expect(
+      policy(
+        testMessage(
+          'sending',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          relationship: UserRelationship.me,
+          status: MessageStatus.sending,
+        ),
+      ).canRecall,
+      false,
+    );
+    expect(
+      policy(
+        testMessage(
+          'unsupported',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          relationship: UserRelationship.me,
+          type: MessageCategory.systemUser,
+        ),
+      ).canRecall,
+      false,
+    );
+  });
+
+  test('MessageSelectionNotifier applies recall roles to added messages', () {
+    final selection = MessageSelectionNotifier(role: ParticipantRole.admin);
+    addTearDown(selection.dispose);
+    final createdAt = DateTime.now().subtract(const Duration(days: 1));
+
+    selection
+      ..selectMessage(
+        testMessage(
+          '1',
+          createdAt: createdAt,
+          conversionCategory: ConversationCategory.group,
+          senderParticipantId: 'member-1',
+        ),
+      )
+      ..toggleSelection(
+        testMessage(
+          '2',
+          createdAt: createdAt,
+          conversionCategory: ConversationCategory.group,
+          senderParticipantId: 'member-2',
+        ),
+      );
+
+    expect(selection.canRecall, isTrue);
   });
 
   testWidgets('MessageContext updates const children through inherited state', (
@@ -606,20 +760,31 @@ List<CustomPaint> _highlightPainters(WidgetTester tester) => tester
 
 MessageItem testMessage(
   String id, {
+  String type = MessageCategory.plainText,
   String userId = 'user',
   UserRelationship relationship = UserRelationship.friend,
+  MessageStatus status = MessageStatus.read,
+  DateTime? createdAt,
+  ConversationCategory? conversionCategory,
+  String? conversationOwnerId,
+  String? senderParticipantId,
+  ParticipantRole? senderRole,
   String? quoteId,
   String? quoteContent,
   bool? mentionRead,
 }) => MessageItem(
   messageId: id,
   conversationId: 'conversation',
-  type: 'PLAIN_TEXT',
+  type: type,
   content: 'body',
-  createdAt: DateTime(2026),
-  status: MessageStatus.read,
+  createdAt: createdAt ?? DateTime(2026),
+  status: status,
   userId: userId,
   relationship: relationship,
+  conversionCategory: conversionCategory,
+  conversationOwnerId: conversationOwnerId,
+  senderParticipantId: senderParticipantId,
+  senderRole: senderRole,
   userIdentityNumber: '0',
   isVerified: false,
   sharedUserIsVerified: false,

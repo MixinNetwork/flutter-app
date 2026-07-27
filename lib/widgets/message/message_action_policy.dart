@@ -49,8 +49,7 @@ class MessageActionPolicy {
           message.type.isVideo ||
           message.type.isAudio);
 
-  bool get canRecall =>
-      !isTranscriptPage && message.canRecallByRole(role);
+  bool get canRecall => !isTranscriptPage && message.canRecallByRole(role);
 
   bool get canDelete => !isTranscriptPage && !isPinnedPage;
 

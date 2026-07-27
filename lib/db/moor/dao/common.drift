@@ -28,6 +28,8 @@ SELECT message.message_id AS messageId,
     sender.identity_number AS userIdentityNumber,
     sender.app_id AS appId,
     sender.relationship AS relationship,
+    senderParticipant.user_id AS senderParticipantId,
+    senderParticipant.role AS senderRole,
     sender.avatar_url AS avatarUrl,
     sender.membership as membership,
     COALESCE(sender.is_verified, FALSE) AS isVerified,
@@ -64,6 +66,9 @@ SELECT message.message_id AS messageId,
     CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned
 FROM messages message
          INNER JOIN users sender ON message.user_id = sender.user_id
+         LEFT JOIN participants senderParticipant
+ON message.conversation_id = senderParticipant.conversation_id
+    AND message.user_id = senderParticipant.user_id
          LEFT JOIN users participant ON message.participant_id = participant.user_id
          LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
          LEFT JOIN safe_snapshots safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id
@@ -109,6 +114,8 @@ SELECT message.message_id AS messageId,
     sender.identity_number AS userIdentityNumber,
     sender.app_id AS appId,
     sender.relationship AS relationship,
+    senderParticipant.user_id AS senderParticipantId,
+    senderParticipant.role AS senderRole,
     sender.avatar_url AS avatarUrl,
     sender.membership as membership,
     COALESCE(sender.is_verified, FALSE) AS isVerified,
@@ -147,6 +154,9 @@ SELECT message.message_id AS messageId,
 FROM pin_messages pinMessage
          INNER JOIN messages message ON message.message_id = pinMessage.message_id
          INNER JOIN users sender ON message.user_id = sender.user_id
+         LEFT JOIN participants senderParticipant
+ON message.conversation_id = senderParticipant.conversation_id
+    AND message.user_id = senderParticipant.user_id
          LEFT JOIN users participant ON message.participant_id = participant.user_id
          LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
          LEFT JOIN safe_snapshots safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id

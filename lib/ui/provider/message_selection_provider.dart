@@ -63,7 +63,7 @@ class MessageSelectionNotifier extends ChangeNotifier {
       if (message.type.isTranscript) {
         _messageCannotCombineForward.add(messageId);
       }
-      if (!message.canRecall) {
+      if (!message.canRecallByRole(role)) {
         _messageCannotRecall.add(message.messageId);
       }
     }
