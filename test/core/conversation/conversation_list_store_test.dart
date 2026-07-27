@@ -385,6 +385,18 @@ void main() {
     await mediaDeltaFuture;
 
     expect(store.items.single.mediaUrl, 'media-url');
+
+    final recallDeltaFuture = store.events
+        .where((event) => event is ConversationListDelta)
+        .cast<ConversationListDelta>()
+        .first
+        .timeout(const Duration(milliseconds: 200));
+    await database.messageDao.recallMessage('conversation', 'message');
+    await recallDeltaFuture;
+
+    expect(store.items.single.contentType, 'MESSAGE_RECALL');
+    expect(store.items.single.content, isNull);
+    expect(store.items.single.mediaUrl, isNull);
   });
 
   test('refreshes contact metadata from user events', () async {

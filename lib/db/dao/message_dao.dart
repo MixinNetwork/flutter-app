@@ -1386,6 +1386,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     );
 
     DataBaseEventBus.instance.insertOrReplaceMessages([miniMessageItem]);
+    DataBaseEventBus.instance.updateConversation(conversationId);
     DataBaseEventBus.instance.notificationMessage(
       MiniNotificationMessage(
         messageId: messageId,
