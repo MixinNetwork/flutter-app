@@ -70,15 +70,27 @@ extension MessageItemExtension on MessageItem {
         (type.isTranscript && mediaStatus == MediaStatus.done);
   }
 
-  bool get canRecall =>
+  bool get _canRecallBase =>
       [
         MessageStatus.sent,
         MessageStatus.delivered,
         MessageStatus.read,
       ].contains(status) &&
-      relationship == UserRelationship.me &&
       type.canRecall &&
-      DateTime.now().isBefore(createdAt.add(const Duration(minutes: 60)));
+      DateTime.now().isBefore(createdAt.add(const Duration(days: 30)));
+
+  bool get canRecall => _canRecallBase && relationship == UserRelationship.me;
+
+  /// Whether the current user can recall this message given their participant
+  /// [role] in the conversation. Owners and admins of a group can recall
+  /// messages sent by other members; everyone can recall their own.
+  bool canRecallByRole(ParticipantRole? role) {
+    if (canRecall) return true;
+    final isGroupAdmin =
+        conversionCategory == ConversationCategory.group &&
+        (role == ParticipantRole.owner || role == ParticipantRole.admin);
+    return _canRecallBase && isGroupAdmin;
+  }
 }
 
 extension QuoteMessageItemExtension on QuoteMessageItem {

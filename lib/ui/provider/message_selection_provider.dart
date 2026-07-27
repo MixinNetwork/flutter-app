@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/extension/message.dart';
 import '../../db/extension/message_category.dart';
@@ -7,7 +8,9 @@ import '../../db/mixin_database.dart';
 import 'conversation_provider.dart';
 
 class MessageSelectionNotifier extends ChangeNotifier {
-  MessageSelectionNotifier();
+  MessageSelectionNotifier({this.role});
+
+  final ParticipantRole? role;
 
   final Set<String> _selectedMessageIds = {};
   final Set<String> _messageCannotForward = {};
@@ -35,7 +38,7 @@ class MessageSelectionNotifier extends ChangeNotifier {
       _messageCannotForward.add(message.messageId);
       _messageCannotCombineForward.add(message.messageId);
     }
-    if (!message.canRecall) {
+    if (!message.canRecallByRole(role)) {
       _messageCannotRecall.add(message.messageId);
     }
     if (message.type.isTranscript) {
@@ -80,7 +83,8 @@ class MessageSelectionNotifier extends ChangeNotifier {
 
 final messageSelectionProvider = ChangeNotifierProvider.autoDispose((ref) {
   ref.watch(currentConversationIdProvider);
-  return MessageSelectionNotifier();
+  final role = ref.watch(conversationProvider.select((value) => value?.role));
+  return MessageSelectionNotifier(role: role);
 });
 
 final hasSelectedMessageProvider = messageSelectionProvider.select(

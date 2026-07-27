@@ -22,7 +22,7 @@ class MessageActionPolicy {
   final MessageItem message;
   final bool isTranscriptPage;
   final bool isPinnedPage;
-  final Object? role;
+  final ParticipantRole? role;
 
   bool get canPin =>
       !isTranscriptPage &&
@@ -49,7 +49,8 @@ class MessageActionPolicy {
           message.type.isVideo ||
           message.type.isAudio);
 
-  bool get canRecall => !isTranscriptPage && message.canRecall;
+  bool get canRecall =>
+      !isTranscriptPage && message.canRecallByRole(role);
 
   bool get canDelete => !isTranscriptPage && !isPinnedPage;
 
