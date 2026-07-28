@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 5.1.2+557
+version: 5.2.0+560
 
 environment:
   sdk: "^3.10.0"
@@ -50,7 +50,7 @@ dependencies:
   dio_smart_retry: ^7.0.1
   dio_compatibility_layer: ^0.1.1
   rhttp: ^0.18.0
-  drift: ^2.33.0
+  drift: ^2.34.3
   sqlite3_flutter_libs: ^0.5.41
   ecache: ^2.2.0
   emojis: ^3.2.0
@@ -163,7 +163,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.34.0
+  drift_dev: ^2.34.5
   flutter_test:
     sdk: flutter
   intl_utils: ^2.8.16

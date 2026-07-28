@@ -285,4 +285,8 @@ class _PreparedStatementWrapper implements PreparedStatement {
 
   @override
   Pointer<void> leak() => stmt.leak();
+
+  @override
+  // ignore: experimental_member_use
+  RawPreparedStatement get raw => stmt.raw;
 }
