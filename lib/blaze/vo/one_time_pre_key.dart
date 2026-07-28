@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'one_time_pre_key.g.dart';
 
 @JsonSerializable()
-class OneTimePreKey with EquatableMixin {
+class OneTimePreKey with Equatable {
   OneTimePreKey(this.keyId, this.pubKey);
 
   factory OneTimePreKey.fromJson(Map<String, dynamic> json) =>

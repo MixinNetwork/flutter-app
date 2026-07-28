@@ -11,7 +11,7 @@ import '../mixin_database.dart';
 
 part 'job_dao.g.dart';
 
-class MiniJobItem with EquatableMixin {
+class MiniJobItem with Equatable {
   const MiniJobItem({required this.jobId, required this.action});
 
   final String jobId;

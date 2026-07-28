@@ -491,7 +491,7 @@ class SymbolIconWithBorder extends StatelessWidget {
   );
 }
 
-class _SymbolCustomClipper extends CustomClipper<Path> with EquatableMixin {
+class _SymbolCustomClipper extends CustomClipper<Path> with Equatable {
   _SymbolCustomClipper({this.chainPlaceholderSize = 12});
 
   final double chainPlaceholderSize;

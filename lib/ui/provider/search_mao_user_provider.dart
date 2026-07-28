@@ -7,7 +7,7 @@ import '../../db/mixin_database.dart';
 import 'account_server_provider.dart';
 import 'database_provider.dart';
 
-class MaoUser with EquatableMixin {
+class MaoUser with Equatable {
   MaoUser({required this.user, required this.mao});
 
   final User user;

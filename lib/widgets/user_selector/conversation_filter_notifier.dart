@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../account/account_server.dart';
-import '../../../db/dao/conversation_dao.dart';
-import '../../../db/mixin_database.dart';
-import '../../../utils/extension/extension.dart';
-import '../../../utils/sort.dart';
+import '../../account/account_server.dart';
+import '../../db/dao/conversation_dao.dart';
+import '../../db/mixin_database.dart';
+import '../../utils/extension/extension.dart';
+import '../../utils/sort.dart';
 
 class ConversationFilterNotifier
     extends ValueNotifier<ConversationFilterState> {

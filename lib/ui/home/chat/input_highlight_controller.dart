@@ -1,6 +1,6 @@
 part of 'input_container.dart';
 
-class MentionTextMatcher extends TextMatcher implements EquatableMixin {
+class MentionTextMatcher extends TextMatcher implements Equatable {
   MentionTextMatcher(this.mentionCache, this.highlightTextStyle)
     : super.regExp(
         regExp: mentionNumberRegExp,

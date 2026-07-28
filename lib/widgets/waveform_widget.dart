@@ -80,7 +80,7 @@ class WaveformWidget extends StatelessWidget {
   }
 }
 
-class _WaveformPainter extends CustomPainter with EquatableMixin {
+class _WaveformPainter extends CustomPainter with Equatable {
   _WaveformPainter({
     required this.value,
     required this.waveform,

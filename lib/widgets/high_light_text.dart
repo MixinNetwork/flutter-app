@@ -513,7 +513,7 @@ class _MatchedSpans {
   }
 }
 
-class UrlTextMatcher extends TextMatcher implements EquatableMixin {
+class UrlTextMatcher extends TextMatcher implements Equatable {
   UrlTextMatcher(BuildContext context)
     : super.textRangesFromText(
         textRangesFromText: (text) {
@@ -548,7 +548,7 @@ class UrlTextMatcher extends TextMatcher implements EquatableMixin {
   bool? get stringify => true;
 }
 
-class MailTextMatcher extends TextMatcher implements EquatableMixin {
+class MailTextMatcher extends TextMatcher implements Equatable {
   MailTextMatcher(BuildContext context)
     : super.regExp(
         regExp: mailRegExp,
@@ -568,7 +568,7 @@ class MailTextMatcher extends TextMatcher implements EquatableMixin {
   bool? get stringify => true;
 }
 
-class EmojiTextMatcher extends TextMatcher implements EquatableMixin {
+class EmojiTextMatcher extends TextMatcher implements Equatable {
   EmojiTextMatcher()
     : super.regExp(
         regExp: emojiRegex,
@@ -592,7 +592,7 @@ class EmojiTextMatcher extends TextMatcher implements EquatableMixin {
   bool? get stringify => true;
 }
 
-class KeyWordTextMatcher extends TextMatcher implements EquatableMixin {
+class KeyWordTextMatcher extends TextMatcher implements Equatable {
   KeyWordTextMatcher(this.keyword, {this.style, this.caseSensitive = true})
     : super.regExp(
         regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
@@ -620,7 +620,7 @@ class KeyWordTextMatcher extends TextMatcher implements EquatableMixin {
   bool? get stringify => true;
 }
 
-class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
+class MultiKeyWordTextMatcher extends TextMatcher implements Equatable {
   MultiKeyWordTextMatcher(
     this.keywords, {
     this.style,
@@ -699,7 +699,7 @@ class MultiKeyWordTextMatcher extends TextMatcher implements EquatableMixin {
   }
 }
 
-class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
+class BotNumberTextMatcher extends TextMatcher implements Equatable {
   BotNumberTextMatcher(BuildContext context)
     : super.regExp(
         regExp: botNumberRegExp,
@@ -719,7 +719,7 @@ class BotNumberTextMatcher extends TextMatcher implements EquatableMixin {
   bool? get stringify => true;
 }
 
-class MentionTextMatcher extends TextMatcher implements EquatableMixin {
+class MentionTextMatcher extends TextMatcher implements Equatable {
   MentionTextMatcher(BuildContext context, this.map)
     : super.regExp(
         regExp: mentionNumberRegExp,

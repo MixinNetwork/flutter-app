@@ -355,7 +355,7 @@ double messageHighlightOpacityForTesting(
   required bool media,
 }) => _highlightOpacity(context, currentUser: currentUser, media: media);
 
-class _MessageBubbleHighlightPainter extends CustomPainter with EquatableMixin {
+class _MessageBubbleHighlightPainter extends CustomPainter with Equatable {
   _MessageBubbleHighlightPainter({
     required this.clipper,
     required this.color,
@@ -407,7 +407,7 @@ class MessageBubbleNipPadding extends StatelessWidget {
   );
 }
 
-class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
+class BubbleClipper extends CustomClipper<Path> with Equatable {
   BubbleClipper({
     required this.currentUser,
     required this.showNip,
@@ -576,7 +576,7 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   List<Object?> get props => [currentUser, showNip];
 }
 
-class BubblePainter extends CustomPainter with EquatableMixin {
+class BubblePainter extends CustomPainter with Equatable {
   BubblePainter({
     required this.clipper,
     required Color color,

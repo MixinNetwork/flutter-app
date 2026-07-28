@@ -15,7 +15,7 @@ const kTransferCommandActionCancel = 'cancel';
 const kDeviceTransferProtocolVersion = 3;
 
 @JsonSerializable()
-class TransferDataCommand with EquatableMixin {
+class TransferDataCommand with Equatable {
   TransferDataCommand({
     required this.deviceId,
     required this.action,

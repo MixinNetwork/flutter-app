@@ -8,7 +8,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../provider/slide_category_provider.dart';
 
-class SearchMessageState with EquatableMixin {
+class SearchMessageState with Equatable {
   const SearchMessageState(this.items, this.loading);
 
   final List<SearchMessageDetailItem> items;

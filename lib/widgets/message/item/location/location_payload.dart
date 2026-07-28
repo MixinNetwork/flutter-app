@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'location_payload.g.dart';
 
 @JsonSerializable()
-class LocationPayload with EquatableMixin {
+class LocationPayload with Equatable {
   LocationPayload({
     required this.latitude,
     required this.longitude,

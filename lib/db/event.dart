@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class MiniNotificationMessage with EquatableMixin {
+class MiniNotificationMessage with Equatable {
   MiniNotificationMessage({
     required this.conversationId,
     required this.messageId,
@@ -25,7 +25,7 @@ class MiniNotificationMessage with EquatableMixin {
   ];
 }
 
-class MiniSticker with EquatableMixin {
+class MiniSticker with Equatable {
   MiniSticker({this.stickerId, this.albumId});
 
   final String? stickerId;
@@ -35,7 +35,7 @@ class MiniSticker with EquatableMixin {
   List<Object?> get props => [stickerId, albumId];
 }
 
-class MiniTranscriptMessage with EquatableMixin {
+class MiniTranscriptMessage with Equatable {
   MiniTranscriptMessage({required this.transcriptId, this.messageId});
 
   final String transcriptId;

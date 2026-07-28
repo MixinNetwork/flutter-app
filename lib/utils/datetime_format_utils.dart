@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-import '../../generated/l10n.dart';
+import '../generated/l10n.dart';
 
 extension DateTimeExtension on DateTime {
   String get format {

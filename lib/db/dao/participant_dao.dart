@@ -9,7 +9,7 @@ import '../mixin_database.dart';
 
 part 'participant_dao.g.dart';
 
-class MiniParticipantItem with EquatableMixin {
+class MiniParticipantItem with Equatable {
   MiniParticipantItem({required this.conversationId, required this.userId});
 
   final String conversationId;

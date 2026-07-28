@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'giphy_image.g.dart';
 
 @JsonSerializable()
-class GiphyImage with EquatableMixin {
+class GiphyImage with Equatable {
   GiphyImage({
     required this.url,
     required this.width,

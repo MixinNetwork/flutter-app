@@ -6,7 +6,7 @@ import 'giphy_image.dart';
 part 'giphy_image_set.g.dart';
 
 @JsonSerializable()
-class GiphyImageSet with EquatableMixin {
+class GiphyImageSet with Equatable {
   GiphyImageSet({
     required this.fixedHeight,
     required this.fixedHeightStill,

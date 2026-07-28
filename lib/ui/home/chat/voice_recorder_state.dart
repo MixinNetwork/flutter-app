@@ -2,7 +2,7 @@ part of 'voice_recorder_bottom_bar.dart';
 
 enum VoiceRecorderStatus { idle, recording, recordingStopped }
 
-class VoiceRecorderState with EquatableMixin {
+class VoiceRecorderState with Equatable {
   const VoiceRecorderState({
     required this.status,
     this.startTime,
@@ -17,7 +17,7 @@ class VoiceRecorderState with EquatableMixin {
   List<Object?> get props => [startTime, status, recordedData];
 }
 
-class RecordedData with EquatableMixin {
+class RecordedData with Equatable {
   RecordedData(this.waveform, this.duration, this.path);
 
   final List<int> waveform;

@@ -16,7 +16,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
-class _StickerData with EquatableMixin {
+class _StickerData with Equatable {
   _StickerData({
     required this.assetUrl,
     required this.assetWidth,

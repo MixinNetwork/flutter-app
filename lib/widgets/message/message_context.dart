@@ -5,7 +5,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../db/mixin_database.dart' hide Message;
 
-class _MessageContext with EquatableMixin {
+class _MessageContext with Equatable {
   _MessageContext({
     required this.isTranscriptPage,
     required this.isPinnedPage,

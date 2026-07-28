@@ -32,7 +32,7 @@ class ImageEditorSnapshot {
   final String imagePath;
 }
 
-class _ImageEditorState extends Equatable with EquatableMixin {
+class _ImageEditorState extends Equatable {
   const _ImageEditorState({
     required this.rotate,
     required this.flip,

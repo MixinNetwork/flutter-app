@@ -114,7 +114,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
   ),
 );
 
-class ConversationSelector with EquatableMixin {
+class ConversationSelector with Equatable {
   const ConversationSelector({
     required this.conversationId,
     required this.userId,

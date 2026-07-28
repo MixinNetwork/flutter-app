@@ -6,7 +6,7 @@ import 'giphy_image_set.dart';
 part 'giphy_gif.g.dart';
 
 @JsonSerializable()
-class GiphyGif with EquatableMixin {
+class GiphyGif with Equatable {
   GiphyGif({required this.id, required this.type, required this.images});
 
   factory GiphyGif.fromJson(Map<String, dynamic> json) =>

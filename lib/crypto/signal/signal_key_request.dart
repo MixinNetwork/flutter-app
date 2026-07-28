@@ -10,7 +10,7 @@ import '../../blaze/vo/signed_pre_key.dart';
 part 'signal_key_request.g.dart';
 
 @JsonSerializable()
-class SignalKeyRequest with EquatableMixin {
+class SignalKeyRequest with Equatable {
   SignalKeyRequest(this.identityKey, this.signedPreKey, this.oneTimePreKeys);
 
   factory SignalKeyRequest.from(

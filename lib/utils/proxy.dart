@@ -16,7 +16,7 @@ part 'proxy.g.dart';
 enum ProxyType { http, socks5 }
 
 @JsonSerializable()
-class ProxyConfig with EquatableMixin {
+class ProxyConfig with Equatable {
   ProxyConfig({
     required this.type,
     required this.host,
