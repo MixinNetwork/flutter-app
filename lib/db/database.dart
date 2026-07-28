@@ -120,6 +120,25 @@ class Database {
   Future<T> transaction<T>(Future<T> Function() action) =>
       mixinDatabase.transaction<T>(action);
 
+  Future<void> recallMessage(String conversationId, String messageId) async {
+    await ftsDatabase.deleteByMessageId(messageId);
+    await messageMentionDao.deleteMessageMention(
+      MessageMention(messageId: messageId, conversationId: conversationId),
+    );
+    await messageDao.recallMessage(conversationId, messageId);
+    final quoteMessage = await messageDao.findMessageItemById(
+      conversationId,
+      messageId,
+    );
+    if (quoteMessage != null) {
+      await messageDao.updateQuoteContentByQuoteId(
+        conversationId,
+        messageId,
+        quoteMessage.toJson(),
+      );
+    }
+  }
+
   /// [conversationIds] empty to search all conversations.
   Future<List<SearchMessageDetailItem>> fuzzySearchMessage({
     required String query,

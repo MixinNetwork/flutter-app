@@ -299,7 +299,8 @@ Menu? buildMessageActionsMenu({
         title: context.l10n.deleteForEveryone,
         callback: () async {
           String? content;
-          if (message.type.isText) {
+          if (message.type.isText &&
+              message.relationship == UserRelationship.me) {
             content = message.content;
           }
           await context.accountServer.sendRecallMessage([

@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import '../db/mixin_database.dart';
 
 enum MainIsolateEventType {
@@ -73,7 +75,8 @@ class AttachmentCancelRequest extends AttachmentRequest {
 }
 
 class AttachmentDeleteRequest extends AttachmentRequest {
-  AttachmentDeleteRequest({required this.message});
+  AttachmentDeleteRequest({required this.message, this.resultPort});
 
   final Message message;
+  final SendPort? resultPort;
 }

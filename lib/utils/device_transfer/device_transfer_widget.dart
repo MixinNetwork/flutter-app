@@ -67,8 +67,6 @@ class DeviceTransferEventBus {
         (event) => event.action == action,
       );
 
-  Stream<DeviceTransferCallbackEvent> events() => _eventBus.on.whereType();
-
   void fire(DeviceTransferCallbackType action, [dynamic payload]) {
     _eventBus.fire(DeviceTransferCallbackEvent(action, payload));
   }
@@ -76,73 +74,45 @@ class DeviceTransferEventBus {
 
 enum _Status { start, succeed, failed }
 
-final _backupBehavior = () {
-  final subject = StreamController<_Status>.broadcast();
-  DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onBackupServerCreated) {
-      subject.add(_Status.start);
-    } else if (event.action == DeviceTransferCallbackType.onBackupSucceed) {
-      subject.add(_Status.succeed);
-    } else if (event.action == DeviceTransferCallbackType.onBackupFailed) {
-      subject.add(_Status.failed);
-    }
-  });
-  return subject;
-}();
+final _backupBehavior = Rx.merge([
+  DeviceTransferEventBus.instance
+      .on(DeviceTransferCallbackType.onBackupServerCreated)
+      .map((_) => _Status.start),
+  DeviceTransferEventBus.instance
+      .on(DeviceTransferCallbackType.onBackupSucceed)
+      .map((_) => _Status.succeed),
+  DeviceTransferEventBus.instance
+      .on(DeviceTransferCallbackType.onBackupFailed)
+      .map((_) => _Status.failed),
+]).asBroadcastStream();
 
-final _restoreBehavior = () {
-  final subject = StreamController<_Status>.broadcast();
-  DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onRestoreConnected) {
-      subject.add(_Status.start);
-    } else if (event.action == DeviceTransferCallbackType.onRestoreSucceed) {
-      subject.add(_Status.succeed);
-    } else if (event.action == DeviceTransferCallbackType.onRestoreFailed) {
-      subject.add(_Status.failed);
-    }
-  });
-  return subject;
-}();
+final _restoreBehavior = Rx.merge([
+  DeviceTransferEventBus.instance
+      .on(DeviceTransferCallbackType.onRestoreConnected)
+      .map((_) => _Status.start),
+  DeviceTransferEventBus.instance
+      .on(DeviceTransferCallbackType.onRestoreSucceed)
+      .map((_) => _Status.succeed),
+  DeviceTransferEventBus.instance
+      .on(DeviceTransferCallbackType.onRestoreFailed)
+      .map((_) => _Status.failed),
+]).asBroadcastStream();
 
-final _backupProgressBehavior = () {
-  final subject = PublishSubject<double>();
-  DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onBackupProgress) {
-      subject.add(event.payload as double);
-    }
-  });
-  return subject;
-}();
+final _backupProgressBehavior = DeviceTransferEventBus.instance
+    .on(DeviceTransferCallbackType.onBackupProgress)
+    .map((event) => event.payload as double);
 
-final _restoreProgressBehavior = () {
-  final subject = PublishSubject<double>();
-  DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onRestoreProgress) {
-      subject.add(event.payload as double);
-    }
-  });
-  return subject;
-}();
+final _restoreProgressBehavior = DeviceTransferEventBus.instance
+    .on(DeviceTransferCallbackType.onRestoreProgress)
+    .map((event) => event.payload as double);
 
-final _backupNetworkSpeedBehavior = () {
-  final subject = PublishSubject<double>();
-  DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onBackupNetworkSpeed) {
-      subject.add(event.payload as double);
-    }
-  });
-  return subject;
-}();
+final _backupNetworkSpeedBehavior = DeviceTransferEventBus.instance
+    .on(DeviceTransferCallbackType.onBackupNetworkSpeed)
+    .map((event) => event.payload as double);
 
-final _restoreNetworkSpeedBehavior = () {
-  final subject = PublishSubject<double>();
-  DeviceTransferEventBus.instance.events().listen((event) {
-    if (event.action == DeviceTransferCallbackType.onRestoreNetworkSpeed) {
-      subject.add(event.payload as double);
-    }
-  });
-  return subject;
-}();
+final _restoreNetworkSpeedBehavior = DeviceTransferEventBus.instance
+    .on(DeviceTransferCallbackType.onRestoreNetworkSpeed)
+    .map((event) => event.payload as double);
 
 void _useTransferStatus(
   Stream<_Status> Function() streamBuilder, {
@@ -226,7 +196,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     _useTransferStatus(
-      () => _restoreBehavior.stream,
+      () => _restoreBehavior,
       progressBuilder: (context) => const _RestoreProcessingDialog(),
       succeedBuilder: (context) =>
           _ConfirmDialog(message: context.l10n.transferCompleted),
@@ -234,7 +204,7 @@ class DeviceTransferHandlerWidget extends HookConsumerWidget {
           _ConfirmDialog(message: context.l10n.deviceTransferFailed),
     );
     _useTransferStatus(
-      () => _backupBehavior.stream,
+      () => _backupBehavior,
       progressBuilder: (context) => const _BackupProcessingDialog(),
       succeedBuilder: (context) =>
           _ConfirmDialog(message: context.l10n.transferCompleted),

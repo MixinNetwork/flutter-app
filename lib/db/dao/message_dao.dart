@@ -54,11 +54,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             for (final miniMessageItems in chunked) {
               messages.addAll(
                 await _baseMessageItems(
-                  (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+                  (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
                       message.messageId.isIn(
                         miniMessageItems.map((e) => e.messageId),
                       ),
-                  (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+                  (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
                       Limit(miniMessageItems.length, 0),
                 ).get(),
               );
@@ -70,6 +70,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     Expression<bool> Function(
       Messages message,
       Users sender,
+      Participants senderParticipant,
       Users participant,
       Snapshots snapshot,
       SafeSnapshots safeSnapshot,
@@ -88,6 +89,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     Limit Function(
       Messages message,
       Users sender,
+      Participants senderParticipant,
       Users participant,
       Snapshots snapshot,
       SafeSnapshots safeSnapshot,
@@ -106,6 +108,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     OrderBy Function(
       Messages message,
       Users sender,
+      Participants senderParticipant,
       Users participant,
       Snapshots snapshot,
       SafeSnapshots safeSnapshot,
@@ -125,6 +128,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     (
       message,
       sender,
+      senderParticipant,
       participant,
       snapshot,
       ss,
@@ -142,6 +146,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         order?.call(
           message,
           sender,
+          senderParticipant,
           participant,
           snapshot,
           ss,
@@ -714,9 +719,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int limit, [
     int offset = 0,
   ]) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
   );
 
   Selectable<int> messageCountByConversationId(String conversationId) {
@@ -1053,10 +1058,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int limit,
     int offset,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(_mediaMessageTypes),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
   );
 
   Selectable<MessageItem> mediaMessagesBefore(
@@ -1064,14 +1069,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(_mediaMessageTypes) &
         (message.createdAt.isSmallerThanValue(anchor.createdAt) |
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId))),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Limit(limit, 0),
-    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Limit(limit, 0),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
       OrderingTerm.desc(message.createdAt),
       OrderingTerm.desc(message.rowId),
     ]),
@@ -1082,14 +1087,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(_mediaMessageTypes) &
         (message.createdAt.isBiggerThanValue(anchor.createdAt) |
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isBiggerThanValue(anchor.rowId))),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Limit(limit, 0),
-    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Limit(limit, 0),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
       OrderingTerm.asc(message.createdAt),
       OrderingTerm.asc(message.rowId),
     ]),
@@ -1100,10 +1105,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int limit,
     int offset,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
   );
 
   Selectable<MessageItem> postMessagesBefore(
@@ -1111,14 +1116,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']) &
         (message.createdAt.isSmallerThanValue(anchor.createdAt) |
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId))),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
-    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
       OrderingTerm.desc(message.createdAt),
       OrderingTerm.desc(message.rowId),
     ]),
@@ -1129,10 +1134,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int limit,
     int offset,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, offset),
   );
 
   Selectable<MessageItem> fileMessagesBefore(
@@ -1140,14 +1145,14 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']) &
         (message.createdAt.isSmallerThanValue(anchor.createdAt) |
             message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId)),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
-    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => OrderBy([
       OrderingTerm.desc(message.createdAt),
       OrderingTerm.desc(message.rowId),
     ]),
@@ -1158,16 +1163,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         (message.createdAt.isSmallerThanValue(anchor.createdAt) |
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isSmallerThanValue(anchor.rowId))),
-    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
       OrderingTerm.desc(message.createdAt),
       OrderingTerm.desc(message.rowId),
     ]),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
   );
 
   Future<List<String>> beforeMessageIdsByConversationId(
@@ -1211,13 +1216,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit,
   ) => _baseMessageItems(
-    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+    (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
         message.conversationId.equals(conversationId) &
         (message.createdAt.isBiggerThanValue(anchor.createdAt) |
             (message.createdAt.equals(anchor.createdAt) &
                 message.rowId.isBiggerThanValue(anchor.rowId))),
-    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
-    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+    (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(limit, 0),
+    order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
       OrderingTerm.asc(message.createdAt),
       OrderingTerm.asc(message.rowId),
     ]),
@@ -1261,17 +1266,17 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<MessageItem> messageItemByMessageId(String messageId) =>
       _baseMessageItems(
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+        (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
             message.messageId.equals(messageId),
-        (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(1, 0),
+        (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(1, 0),
       );
 
   Selectable<MessageItem> messageItemByMessageIds(List<String> messageIds) =>
       _baseMessageItems(
-        (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+        (message, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
             message.messageId.isIn(messageIds),
-        (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => maxLimit,
-        order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
+        (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => maxLimit,
+        order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) =>
             OrderBy([OrderingTerm.asc(message.createdAt)]),
       );
 
@@ -1285,7 +1290,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return null;
     }
     return _baseMessageItems(
-      (message, _, _, _, _, _, _, _, _, _, _, conversation, _, _, em) =>
+      (message, _, _, _, _, _, _, _, _, _, _, _, conversation, _, _, em) =>
           conversation.conversationId.equals(conversationId) &
           message.category.isIn([
             MessageCategory.signalAudio,
@@ -1295,8 +1300,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           (message.createdAt.isBiggerThanValue(info.createdAt) |
               (message.createdAt.equals(info.createdAt) &
                   message.rowId.isBiggerThanValue(info.rowId))),
-      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(1, 0),
-      order: (message, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
+      (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => Limit(1, 0),
+      order: (message, _, _, _, _, _, _, _, _, _, _, _, _, _, em) => OrderBy([
         OrderingTerm.asc(message.createdAt),
         OrderingTerm.asc(message.rowId),
       ]),
@@ -1381,6 +1386,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     );
 
     DataBaseEventBus.instance.insertOrReplaceMessages([miniMessageItem]);
+    DataBaseEventBus.instance.updateConversation(conversationId);
     DataBaseEventBus.instance.notificationMessage(
       MiniNotificationMessage(
         messageId: messageId,

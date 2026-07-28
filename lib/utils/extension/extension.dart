@@ -66,5 +66,3 @@ part 'src/regexp.dart';
 part 'src/stream.dart';
 part 'src/string.dart';
 part 'src/ui.dart';
-
-void importExtension() {}

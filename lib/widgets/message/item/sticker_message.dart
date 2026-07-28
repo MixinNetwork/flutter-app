@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';

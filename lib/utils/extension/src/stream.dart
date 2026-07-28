@@ -41,10 +41,6 @@ extension ThrottleExtensions<T> on Stream<T> {
   }
 }
 
-extension StreamExtensionWhereNotNull<T> on Stream<T?> {
-  Stream<T> whereNotNull() => where((e) => e != null).cast<T>();
-}
-
 extension StreamExtension<T> on Stream<T> {
   StreamSubscription<T> asyncDropListen<E>(
     Future<void> Function(T event) convert,

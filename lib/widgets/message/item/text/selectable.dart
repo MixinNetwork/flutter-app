@@ -246,16 +246,6 @@ class SelectableRegionState extends State<SelectableRegion>
   }
 
   void _updateSelectionStatus() {
-    // final TextSelection selection;
-    // final geometry = _selectionDelegate.value;
-    // switch (geometry.status) {
-    //   case SelectionStatus.uncollapsed:
-    //   case SelectionStatus.collapsed:
-    //     selection = const TextSelection(baseOffset: 0, extentOffset: 1);
-    //   case SelectionStatus.none:
-    //     selection = const TextSelection.collapsed(offset: 1);
-    // }
-    // textEditingValue = TextEditingValue(text: '__', selection: selection);
     if (_hasSelectionOverlayGeometry) {
       _updateSelectionOverlay();
     } else {

@@ -25,14 +25,3 @@ extension AppIterableExtension<T> on Iterable<T> {
 extension AppListExtension<T> on List<T> {
   T? getOrNull(int index) => index < 0 || index >= length ? null : this[index];
 }
-
-Future<void> futureForEachIndexed<T>(
-  Iterable<T> iterable,
-  FutureOr<void> Function(int index, T element) action,
-) async {
-  var index = 0;
-  for (final element in iterable) {
-    await action(index, element);
-    index++;
-  }
-}
