@@ -46,14 +46,7 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
 
     final overlay = Navigator.of(context).overlay ?? Overlay.of(context);
 
-    final recorderBottomBarEntry = useRef<OverlayEntry?>(null);
-
     useEffect(() {
-      final previousEntry = recorderBottomBarEntry.value;
-      if (previousEntry?.mounted ?? false) {
-        previousEntry?.remove();
-      }
-      recorderBottomBarEntry.value = null;
       if (!isRecorderMode) {
         return null;
       }
@@ -77,19 +70,17 @@ class VoiceRecorderBarOverlayComposition extends HookConsumerWidget {
               ),
             ),
       );
-      recorderBottomBarEntry.value = entry;
       var disposed = false;
+      var inserted = false;
       WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
         if (disposed) return;
         overlay.insert(entry);
+        inserted = true;
       });
       return () {
         disposed = true;
-        if (entry.mounted) {
+        if (inserted) {
           entry.remove();
-        }
-        if (recorderBottomBarEntry.value == entry) {
-          recorderBottomBarEntry.value = null;
         }
       };
     }, [isRecorderMode, layoutWidth]);
