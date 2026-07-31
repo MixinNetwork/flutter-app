@@ -23,11 +23,15 @@ AppDir:
       - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports main restricted universe multiverse
       - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted universe multiverse
     include:
-      - libgtk-3-0
-      - libwebkit2gtk-4.1-0
       - libsdl2-2.0-0
       - libopus0
     exclude:
+      # Use the host GTK stack so its ibus/fcitx input method modules are available.
+      - libgtk-3-0
+      - libgtk-3-common
+      - libwebkit2gtk-4.1-0
+      - libjavascriptcoregtk-4.1-0
+      - libglib2.0-0
       - humanity-icon-theme
       - hicolor-icon-theme
       - adwaita-icon-theme
@@ -41,7 +45,6 @@ AppDir:
       - usr/share/doc/*/TODO.*
   runtime:
     env:
-      GIO_MODULE_DIR: $APPDIR/usr/lib/aarch64-linux-gnu/gio/modules/
       # Needed by Wayland
       GDK_BACKEND: x11
   test:
