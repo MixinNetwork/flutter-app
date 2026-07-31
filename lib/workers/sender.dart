@@ -366,6 +366,7 @@ class Sender {
         participants: <ParticipantRequest>[
           ParticipantRequest(userId: conversation.ownerId!),
         ],
+        randomId: const Uuid().v4(),
       ),
     );
 
