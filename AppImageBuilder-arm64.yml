@@ -45,6 +45,10 @@ AppDir:
       - usr/share/doc/*/TODO.*
   runtime:
     env:
+      # appimage-builder sets these to $APPDIR/usr even when GTK is not bundled.
+      # Unset them so system GTK uses its native multiarch input method path.
+      GTK_EXE_PREFIX: ""
+      GTK_DATA_PREFIX: ""
       # Needed by Wayland
       GDK_BACKEND: x11
   test:
