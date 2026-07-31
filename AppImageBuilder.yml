@@ -5,6 +5,9 @@ script:
   - cp -r build/linux/x64/release/bundle AppDir
   - mkdir -p AppDir/usr/share/icons/hicolor/64x64/apps/
   - cp ./dist/deb/usr/share/icons/hicolor/128x128/apps/mixin_desktop.png AppDir/usr/share/icons/hicolor/64x64/apps/
+  - mkdir -p AppDir/usr/bin
+  - cp ./dist/appimage_launcher.sh AppDir/usr/bin/mixin-desktop-appimage
+  - chmod +x AppDir/usr/bin/mixin-desktop-appimage
 AppDir:
   path: ./AppDir
   app_info:
@@ -12,7 +15,7 @@ AppDir:
     name: Mixin Messenger
     icon: mixin_desktop
     version: latest
-    exec: mixin_desktop
+    exec: usr/bin/mixin-desktop-appimage
     exec_args: $@
   apt:
     arch: amd64
@@ -44,14 +47,14 @@ AppDir:
       - usr/share/doc/*/TODO.*
   after_bundle:
     # Package extraction does not run Debian's GTK cache trigger. Generate the
-    # cache from the bundled modules and make its paths relocatable by GTK_EXE_PREFIX.
+    # cache from the bundled modules. The launcher resolves the placeholder to
+    # the AppImage's runtime mount point before GTK starts.
     - LD_LIBRARY_PATH=AppDir/lib/x86_64-linux-gnu:AppDir/usr/lib/x86_64-linux-gnu AppDir/usr/lib/x86_64-linux-gnu/libgtk-3-0/gtk-query-immodules-3.0 AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules/*.so > AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
-    - sed -i 's#"AppDir/usr/#"/usr/#' AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
+    - sed -i 's#".*/AppDir/usr/#"@APPDIR@/usr/#' AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
   runtime:
     env:
       GIO_MODULE_DIR: $APPDIR/usr/lib/x86_64-linux-gnu/gio/modules/
       GTK_PATH: $APPDIR/usr/lib/x86_64-linux-gnu/gtk-3.0
-      GTK_IM_MODULE_FILE: $APPDIR/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
       # Needed by Wayland
       GDK_BACKEND: x11
   test:
