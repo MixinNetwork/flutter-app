@@ -311,6 +311,17 @@ class _MessagePreview extends StatelessWidget {
       children: [
         if (!hasDraft) _MessageStatusIcon(conversation: conversation),
         if (!hasDraft) const SizedBox(width: 2),
+        if ((conversation.expireIn ?? 0) > 0)
+          SvgPicture.asset(
+            Resources.assetsImagesDisappearingMessageIndicatorSvg,
+            colorFilter: ColorFilter.mode(
+              context.theme.secondaryText,
+              BlendMode.srcIn,
+            ),
+            width: 14,
+            height: 14,
+          ),
+        if ((conversation.expireIn ?? 0) > 0) const SizedBox(width: 2),
         Expanded(
           child: _MessageContent(
             conversation: conversation,

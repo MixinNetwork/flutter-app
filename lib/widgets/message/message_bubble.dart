@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
 
@@ -13,7 +11,6 @@ import '../../ui/home/chat/message_jump.dart';
 import '../../ui/home/notifier/blink_notifier.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';
-import '../toast.dart';
 import 'item/quote_message.dart';
 import 'message.dart';
 
@@ -56,9 +53,6 @@ class MessageBubble extends HookConsumerWidget {
     final isPinnedPage = useIsPinnedPage();
     final highlightEnabled = useMessageHighlightEnabled();
     final menuHighlighted = useMessageMenuHighlighted();
-    final isDisappearingMessage = useMessageConverter<bool>(
-      converter: (message) => message.expireIn != null && message.expireIn! > 0,
-    );
 
     final quoteId = useMessageConverter(converter: (state) => state.quoteId);
 
@@ -176,49 +170,6 @@ class MessageBubble extends HookConsumerWidget {
           if (isCurrentUser) pinArrow,
           Flexible(child: _child),
           if (!isCurrentUser) pinArrow,
-        ],
-      );
-    }
-
-    if (isDisappearingMessage) {
-      Widget icon = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: SvgPicture.asset(
-          context.brightness == Brightness.dark
-              ? Resources.assetsImagesExpiringDarkSvg
-              : Resources.assetsImagesExpiringSvg,
-          width: 16,
-          height: 16,
-        ),
-      );
-
-      if (!kReleaseMode) {
-        icon = GestureDetector(
-          child: icon,
-          onTap: () async {
-            final message = context.message;
-            final expireAt = await context
-                .accountServer
-                .database
-                .expiredMessageDao
-                .getMessageExpireAt([message.messageId]);
-            final time =
-                (expireAt[message.messageId] ?? 0) -
-                DateTime.now().millisecondsSinceEpoch ~/ 1000;
-            showToast(
-              'expire in: ${message.expireIn}. '
-              'will delete after: ${time < 0 ? 0 : time} seconds',
-            );
-          },
-        );
-      }
-
-      _child = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isCurrentUser) icon,
-          Flexible(child: _child),
-          if (!isCurrentUser) icon,
         ],
       );
     }

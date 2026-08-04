@@ -149,6 +149,10 @@ class Resources {
   static const String assetsImagesDisappearingMessageSvg =
       'assets/images/disappearing_message.svg';
 
+  /// {@macro assets_generator.assetsImagesDisappearingMessageIndicatorSvg.preview}
+  static const String assetsImagesDisappearingMessageIndicatorSvg =
+      'assets/images/disappearing_message_indicator.svg';
+
   /// {@macro assets_generator.assetsImagesDownloadSvg.preview}
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
 
@@ -237,13 +241,6 @@ class Resources {
 
   /// {@macro assets_generator.assetsImagesExpandedSvg.preview}
   static const String assetsImagesExpandedSvg = 'assets/images/expanded.svg';
-
-  /// {@macro assets_generator.assetsImagesExpiringSvg.preview}
-  static const String assetsImagesExpiringSvg = 'assets/images/expiring.svg';
-
-  /// {@macro assets_generator.assetsImagesExpiringDarkSvg.preview}
-  static const String assetsImagesExpiringDarkSvg =
-      'assets/images/expiring_dark.svg';
 
   /// {@macro assets_generator.assetsImagesExternalLinkSvg.preview}
   static const String assetsImagesExternalLinkSvg =

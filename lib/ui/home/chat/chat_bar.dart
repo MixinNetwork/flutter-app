@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../constants/resources.dart';
@@ -250,6 +251,19 @@ class ConversationName extends StatelessWidget {
           ),
         ),
       ),
+      if ((conversationState.conversation?.expireIn ?? 0) > 0)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SvgPicture.asset(
+            Resources.assetsImagesDisappearingMessageIndicatorSvg,
+            colorFilter: ColorFilter.mode(
+              context.theme.icon,
+              BlendMode.srcIn,
+            ),
+            width: 14,
+            height: 14,
+          ),
+        ),
       BadgesWidget(
         verified: conversationState.isVerified,
         isBot: conversationState.isBot,
