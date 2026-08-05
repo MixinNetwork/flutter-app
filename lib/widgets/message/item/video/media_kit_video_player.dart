@@ -54,7 +54,12 @@ class MediaKitVideoPlayer extends ChangeNotifier {
       player.stream.width.listen(_notify),
       player.stream.height.listen(_notify),
     ]);
-    unawaited(_open(path, autoPlay: autoPlay, looping: looping, muted: muted));
+    _initialized = _open(
+      path,
+      autoPlay: autoPlay,
+      looping: looping,
+      muted: muted,
+    );
   }
 
   final Player player;
@@ -62,6 +67,7 @@ class MediaKitVideoPlayer extends ChangeNotifier {
   late final VideoController controller;
 
   final _subscriptions = <StreamSubscription<dynamic>>[];
+  late final Future<void> _initialized;
   var _disposed = false;
 
   MediaKitVideoValue get value {
@@ -84,12 +90,12 @@ class MediaKitVideoPlayer extends ChangeNotifier {
     required bool muted,
   }) async {
     try {
+      if (muted) {
+        await player.setVolume(0);
+      }
       await player.open(Media(path), play: autoPlay);
       if (looping) {
         await player.setPlaylistMode(PlaylistMode.single);
-      }
-      if (muted) {
-        await player.setVolume(0);
       }
     } catch (error, stackTrace) {
       if (!_disposed) {
@@ -98,7 +104,10 @@ class MediaKitVideoPlayer extends ChangeNotifier {
     }
   }
 
-  Future<void> play() => player.play();
+  Future<void> play() async {
+    await _initialized;
+    await player.play();
+  }
 
   Future<void> pause() => player.pause();
 

@@ -104,8 +104,8 @@ class AudioMessagePlayer {
 
   Future<void> _open(MessageMedia media) async {
     try {
-      await _player.open(Media(media.mediaPath));
       await _player.setRate(_playbackSpeed.value);
+      await _player.open(Media(media.mediaPath));
     } catch (error, stacktrace) {
       e('play ${media.mediaPath} failed: $error $stacktrace');
       stop();
