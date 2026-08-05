@@ -400,7 +400,7 @@ class _Bar extends ConsumerWidget {
   );
 }
 
-class VideoFrame extends ConsumerWidget {
+class VideoFrame extends HookConsumerWidget {
   const VideoFrame({super.key});
 
   @override
@@ -409,11 +409,35 @@ class VideoFrame extends ConsumerWidget {
       videoPlayerProvider.select((value) => value.value.aspectRatio),
     );
     final controller = ref.watch(videoPlayerProvider.select((value) => value));
+    final firstFrameRendered = useState(false);
+
+    useEffect(() {
+      var disposed = false;
+      unawaited(() async {
+        try {
+          await controller.controller.waitUntilFirstFrameRendered;
+          if (!disposed) {
+            firstFrameRendered.value = true;
+          }
+        } catch (_) {
+          // Keep the transparent placeholder when the native video output fails.
+        }
+      }());
+      return () {
+        disposed = true;
+      };
+    }, [controller]);
+
+    if (!firstFrameRendered.value) {
+      return const SizedBox.expand();
+    }
+
     return Center(
       child: AspectRatio(
         aspectRatio: aspect,
         child: Video(
           controller: controller.controller,
+          fill: Colors.transparent,
           controls: null,
         ),
       ),
