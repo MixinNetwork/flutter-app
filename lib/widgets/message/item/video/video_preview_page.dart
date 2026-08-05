@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -9,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
@@ -19,6 +18,7 @@ import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
+import 'media_kit_video_player.dart';
 import 'progress_bar.dart';
 import 'slider.dart';
 
@@ -37,7 +37,7 @@ Future<void> showVideoPreviewPage(
   barrierDismissible: false,
 );
 
-final videoPlayerProvider = ChangeNotifierProvider<VideoPlayerController>((
+final videoPlayerProvider = ChangeNotifierProvider<MediaKitVideoPlayer>((
   ref,
 ) {
   throw UnimplementedError();
@@ -122,12 +122,9 @@ class _VideoPreviewPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = useMemoized(() {
-      final controller = VideoPlayerController.file(File(path));
-      return controller
-        ..initialize()
-        ..play();
-    });
+    final controller = useMemoized(
+      () => MediaKitVideoPlayer(path, autoPlay: true),
+    );
 
     useEffect(() => controller.dispose, [controller]);
 
@@ -273,9 +270,6 @@ class _PlayerShortcuts extends HookConsumerWidget {
         ),
         _CloseIntent: CallbackAction<_CloseIntent>(
           onInvoke: (intent) {
-            ref.read(videoPlayerProvider)
-              ..pause()
-              ..dispose();
             Navigator.pop(context);
           },
         ),
@@ -416,7 +410,13 @@ class VideoFrame extends ConsumerWidget {
     );
     final controller = ref.watch(videoPlayerProvider.select((value) => value));
     return Center(
-      child: AspectRatio(aspectRatio: aspect, child: VideoPlayer(controller)),
+      child: AspectRatio(
+        aspectRatio: aspect,
+        child: Video(
+          controller: controller.controller,
+          controls: null,
+        ),
+      ),
     );
   }
 }
