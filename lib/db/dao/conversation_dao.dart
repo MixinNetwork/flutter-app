@@ -113,6 +113,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     return predicate;
   }
 
+  Expression<bool> _sendableConversationPredicate(Conversations conversation) =>
+      conversation.category.equalsValue(ConversationCategory.group).not() |
+      conversation.status.equalsValue(ConversationStatus.quit).not();
+
   Future<int> conversationCountByCategory(SlideCategoryType category) =>
       _baseConversationItemCount(
         (conversation, owner, circle) =>
@@ -501,22 +505,24 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       return _fuzzySearchConversationInCircle(
         query.trim().escapeSql(),
         category!.id,
-        (conversation, owner, message, _, cc, _) => filterUnseen
-            ? conversation.unseenMessageCount.isBiggerThanValue(0)
-            : ignoreWhere,
+        (conversation, owner, message, _, cc, _) =>
+            _sendableConversationPredicate(conversation) &
+            (filterUnseen
+                ? conversation.unseenMessageCount.isBiggerThanValue(0)
+                : ignoreWhere),
         (conversation, owner, message, _, cc, _) => Limit(limit, null),
       );
     }
     return _fuzzySearchConversation(
       query.trim().escapeSql(),
       (conversation, owner, message, _, _) {
-        Expression<bool> predicate = ignoreWhere;
+        var predicate = _sendableConversationPredicate(conversation);
         switch (category?.type) {
           case SlideCategoryType.contacts:
           case SlideCategoryType.groups:
           case SlideCategoryType.bots:
           case SlideCategoryType.strangers:
-            predicate = _conversationPredicateByCategory(
+            predicate &= _conversationPredicateByCategory(
               category!.type,
               conversation,
               owner,
@@ -559,19 +565,24 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       db.fuzzySearchConversationItem(
         keyword.trim(),
         (conversation, user) =>
-            (conversation.category.equalsValue(ConversationCategory.group))
-            //
-            |
-            //
-            (conversation.category.equalsValue(ConversationCategory.contact) &
-                user.relationship.equalsValue(UserRelationship.stranger)),
+            _sendableConversationPredicate(conversation) &
+            ((conversation.category.equalsValue(ConversationCategory.group))
+                //
+                |
+                //
+                (conversation.category.equalsValue(
+                      ConversationCategory.contact,
+                    ) &
+                    user.relationship.equalsValue(UserRelationship.stranger))),
         (conversation, user) => maxLimit,
       );
 
   Selectable<SearchItem> fuzzySearchConversationItemByIds(List<String> ids) =>
       db.fuzzySearchConversationItem(
         '',
-        (conversation, user) => conversation.conversationId.isIn(ids),
+        (conversation, user) =>
+            _sendableConversationPredicate(conversation) &
+            conversation.conversationId.isIn(ids),
         (conversation, user) => maxLimit,
       );
 
