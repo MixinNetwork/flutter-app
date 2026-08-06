@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ogg_opus_player/ogg_opus_player.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../db/mixin_database.dart';
@@ -31,9 +31,19 @@ enum PlaybackState {
 }
 
 class AudioMessagePlayer {
+  AudioMessagePlayer() {
+    _subscriptions.addAll([
+      _player.stream.playing.listen(_handlePlaying),
+      _player.stream.completed.listen(_handleCompleted),
+      _player.stream.error.listen(_handleError),
+    ]);
+  }
+
   final _currentPlaying = BehaviorSubject<MessageMedia?>();
 
-  OggOpusPlayer? _player;
+  final Player _player = Player();
+
+  final _subscriptions = <StreamSubscription<dynamic>>[];
 
   final List<MessageMedia> _medias = [];
 
@@ -49,6 +59,10 @@ class AudioMessagePlayer {
 
   void dispose() {
     stop();
+    for (final subscription in _subscriptions) {
+      unawaited(subscription.cancel());
+    }
+    unawaited(_player.dispose());
     _medias.clear();
     _index = -1;
   }
@@ -75,8 +89,6 @@ class AudioMessagePlayer {
 
   void _playNext() {
     if (_index >= _medias.length - 1) {
-      // play ended.
-      _disposeCurrentPlayer();
       _playbackState.value = PlaybackState.completed;
       return;
     }
@@ -85,79 +97,64 @@ class AudioMessagePlayer {
     } else {
       _index++;
     }
-    _disposeCurrentPlayer();
     final media = _medias[_index];
-    final player = OggOpusPlayer(media.mediaPath);
-    assert(_player == null);
-    _player = player;
-    player.state.addListener(_handlePlayerState);
-    player
-      ..play()
-      ..setPlaybackRate(_playbackSpeed.value);
     _currentPlaying.value = current;
+    unawaited(_open(media));
   }
 
-  void _handlePlayerState() {
-    final player = _player;
-    if (player == null) {
-      return;
-    }
-    const interceptedEventType = {
-      PlayerState.idle,
-      PlayerState.error,
-      PlayerState.ended,
-    };
-    final state = player.state.value;
-    if (!interceptedEventType.contains(state)) {
-      if (state == PlayerState.paused) {
-        _playbackState.value = PlaybackState.paused;
-      } else if (state == PlayerState.playing) {
-        _playbackState.value = PlaybackState.playing;
-      }
-    }
-    if (state == PlayerState.ended) {
-      _playNext();
-    } else if (state == PlayerState.error) {
-      i('play ${current?.mediaPath} failed.');
+  Future<void> _open(MessageMedia media) async {
+    try {
+      await _player.setRate(_playbackSpeed.value);
+      await _player.open(Media(media.mediaPath));
+    } catch (error, stacktrace) {
+      e('play ${media.mediaPath} failed: $error $stacktrace');
       stop();
     }
   }
 
-  Stream<PlaybackState> get playbackStream => _playbackState.stream;
-
-  void _disposeCurrentPlayer() {
-    _player?.state.removeListener(_handlePlayerState);
-    _player?.dispose();
-    _player = null;
+  void _handlePlaying(bool playing) {
+    if (playing) {
+      _playbackState.value = PlaybackState.playing;
+    } else if (_playbackState.value == PlaybackState.playing) {
+      _playbackState.value = PlaybackState.paused;
+    }
   }
 
+  void _handleCompleted(bool completed) {
+    if (completed) {
+      _playNext();
+    }
+  }
+
+  void _handleError(String error) {
+    e('play ${current?.mediaPath} failed: $error');
+    stop();
+  }
+
+  Stream<PlaybackState> get playbackStream => _playbackState.stream;
+
   void stop() {
-    _disposeCurrentPlayer();
+    unawaited(_player.stop());
     _playbackState.value = PlaybackState.idle;
   }
 
   void pause() {
-    _player?.pause();
+    unawaited(_player.pause());
   }
 
   void resume() {
-    if (_player == null) {
-      e('resume failed, player is null.');
-      return;
-    }
     assert(
       _playbackState.value == PlaybackState.paused,
       'resume failed, player is not paused.',
     );
-    _player?.play();
+    unawaited(_player.play());
     _playbackState.value = PlaybackState.playing;
   }
 
-  Duration currentPosition() =>
-      Duration(milliseconds: ((_player?.currentPosition ?? 0) * 1000).toInt());
+  Duration currentPosition() => _player.state.position;
 
   void setPlaybackSpeed(double speed) {
     _playbackSpeed.value = speed;
-    _player?.setPlaybackRate(speed);
+    unawaited(_player.setRate(speed));
   }
 }

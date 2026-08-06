@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -6,14 +5,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../../../constants/resources.dart';
 import '../../../../enum/media_status.dart';
 import '../../../../utils/extension/extension.dart';
-import '../../../../utils/platform.dart';
-import '../../../../utils/uri_utils.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../../mixin_image.dart';
@@ -112,18 +108,12 @@ class MessageVideo extends HookConsumerWidget {
             message,
             isTranscriptPage,
           );
-          if (kPlatformIsDarwin) {
-            showVideoPreviewPage(
-              context,
-              path,
-              message: message,
-              isTranscriptPage: isTranscriptPage,
-            );
-          } else if (Platform.isIOS || Platform.isAndroid) {
-            OpenFile.open(path);
-          } else {
-            openUri(context, Uri.file(path).toString());
-          }
+          showVideoPreviewPage(
+            context,
+            path,
+            message: message,
+            isTranscriptPage: isTranscriptPage,
+          );
         } else if (message.mediaStatus == MediaStatus.pending) {
           context.accountServer.cancelProgressAttachmentJob(message.messageId);
         } else if (message.type.isLive && message.mediaUrl != null) {
