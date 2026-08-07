@@ -20,6 +20,7 @@ import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 
 class Sender {
   Sender(
@@ -28,8 +29,9 @@ class Sender {
     this.client,
     this.sessionId,
     this.accountId,
-    this.database,
-  );
+    this.database, {
+    required this.upgradeGate,
+  });
 
   final SignalProtocol signalProtocol;
   final Blaze blaze;
@@ -37,8 +39,12 @@ class Sender {
   final String sessionId;
   final String accountId;
   final Database database;
+  final ApiUpgradeGate upgradeGate;
 
   Future<MessageResult> deliver(BlazeMessage blazeMessage) async {
+    if (upgradeGate.isRequired) {
+      throw const ApiUpgradeRequiredException();
+    }
     final params = blazeMessage.params as BlazeMessageParam;
     final cid = params.conversationId;
     if (cid != null) {
@@ -47,6 +53,9 @@ class Sender {
     }
     i('deliver blazeMessage: ${blazeMessage.id}');
     final bm = await blaze.sendMessage(blazeMessage);
+    if (upgradeGate.isRequired) {
+      throw const ApiUpgradeRequiredException();
+    }
     if (bm == null) {
       await _sleep(1);
       return deliver(blazeMessage);
@@ -75,7 +84,13 @@ class Sender {
   }
 
   Future<BlazeMessage?> signalKeysChannel(BlazeMessage blazeMessage) async {
+    if (upgradeGate.isRequired) {
+      throw const ApiUpgradeRequiredException();
+    }
     final bm = await blaze.sendMessage(blazeMessage);
+    if (upgradeGate.isRequired) {
+      throw const ApiUpgradeRequiredException();
+    }
     if (bm == null) {
       await _sleep(1);
       return signalKeysChannel(blazeMessage);

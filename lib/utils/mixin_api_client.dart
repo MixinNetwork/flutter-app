@@ -19,6 +19,31 @@ const kRequestTimeStampKey = 'requestTimeStamp';
 Future<String?> _userAgent = generateUserAgent();
 Future<String?> _deviceId = getDeviceId();
 
+class ApiUpgradeRequiredException implements Exception {
+  const ApiUpgradeRequiredException();
+
+  @override
+  String toString() => 'API upgrade required';
+}
+
+class ApiUpgradeGate {
+  bool _required = false;
+
+  bool get isRequired => _required;
+
+  bool require() {
+    if (_required) return false;
+    _required = true;
+    return true;
+  }
+
+  DioException error(RequestOptions options) => DioException(
+    requestOptions: options,
+    type: DioExceptionType.cancel,
+    error: const ApiUpgradeRequiredException(),
+  );
+}
+
 Client createClient({
   required String userId,
   required String sessionId,
@@ -26,6 +51,8 @@ Client createClient({
   // Hive didn't support multi isolate.
   required bool loginByPhoneNumber,
   List<Interceptor> interceptors = const [],
+  ApiUpgradeGate? upgradeGate,
+  void Function()? onUpgradeRequired,
 }) {
   final client = Client(
     userId: userId,
@@ -41,6 +68,23 @@ Client createClient({
     // httpLogLevel: HttpLogLevel.none,
     jsonDecodeCallback: jsonDecode,
     interceptors: [
+      if (upgradeGate != null)
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            if (upgradeGate.isRequired) {
+              handler.reject(upgradeGate.error(options));
+              return;
+            }
+            handler.next(options);
+          },
+          onError: (error, handler) {
+            final mixinError = error is MixinApiError ? error.error : null;
+            if (mixinError is MixinError && mixinError.code == oldVersion) {
+              if (upgradeGate.require()) onUpgradeRequired?.call();
+            }
+            handler.next(error);
+          },
+        ),
       ...interceptors,
       InterceptorsWrapper(
         onRequest: (options, handler) {

@@ -60,6 +60,7 @@ class AccountServer {
   });
 
   static String? sid;
+  static final _upgradeGate = ApiUpgradeGate();
 
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
@@ -111,7 +112,9 @@ class AccountServer {
     } on MixinApiError catch (e) {
       final err = e.error;
       if (err is MixinError && err.code == oldVersion) {
-        _isUpdateRequired.value = true;
+        checkSignalKeyTimer?.cancel();
+        checkSignalKeyTimer = null;
+        _requireUpgrade();
       }
       return;
     } catch (e, s) {
@@ -133,6 +136,14 @@ class AccountServer {
   final BehaviorSubject<bool> _isUpdateRequired = BehaviorSubject<bool>();
 
   ValueStream<bool> get isUpdateRequired => _isUpdateRequired;
+
+  void _requireUpgrade() {
+    if (!_upgradeGate.require()) return;
+    _isUpdateRequired.value = true;
+    if (_isolateChannel != null) {
+      _sendEventToWorkerIsolate(MainIsolateEventType.requireUpgrade);
+    }
+  }
 
   Future<void> _onClientRequestError(DioException e) async {
     if (e is MixinApiError) {
@@ -165,7 +176,7 @@ class AccountServer {
         await signOutAndClear();
         multiAuthNotifier.signOut();
       } else if (mixinError.code == oldVersion) {
-        _isUpdateRequired.value = true;
+        _requireUpgrade();
       }
     }
   }
@@ -190,6 +201,8 @@ class AccountServer {
           },
         ),
       ],
+      upgradeGate: _upgradeGate,
+      onUpgradeRequired: _requireUpgrade,
     )..configProxySetting(database.settingProperties);
 
     attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
@@ -287,6 +300,8 @@ class AccountServer {
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
       case WorkerIsolateEventType.onApiRequestedError:
         _onClientRequestError(event.argument as DioException);
+      case WorkerIsolateEventType.onUpgradeRequired:
+        _requireUpgrade();
       case WorkerIsolateEventType.requestDownloadAttachment:
         final request = event.argument as AttachmentRequest;
         _onAttachmentDownloadRequest(request);

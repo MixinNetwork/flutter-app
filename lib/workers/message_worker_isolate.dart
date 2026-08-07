@@ -130,6 +130,10 @@ class _MessageProcessRunner {
   late Blaze blaze;
   late Sender _sender;
   late SignalProtocol signalProtocol;
+  final _upgradeGate = ApiUpgradeGate();
+  var _upgradeHandled = false;
+  var _blazeReady = false;
+  var _jobsReady = false;
 
   late SendingJob _sendingJob;
   late AckJob _ackJob;
@@ -167,6 +171,8 @@ class _MessageProcessRunner {
         ),
       ],
       loginByPhoneNumber: initParams.loginByPhoneNumber,
+      upgradeGate: _upgradeGate,
+      onUpgradeRequired: _onUpgradeRequired,
     )..configProxySetting(database.settingProperties);
 
     _ackJob = AckJob(database: database, client: client);
@@ -185,7 +191,10 @@ class _MessageProcessRunner {
       await generateUserAgent(),
       _ackJob,
       _floodJob,
+      upgradeGate: _upgradeGate,
+      onUpgradeRequired: _onUpgradeRequired,
     );
+    _blazeReady = true;
 
     blaze.connectedStateStream.listen((event) {
       _sendEventToMainIsolate(
@@ -203,6 +212,7 @@ class _MessageProcessRunner {
       sessionId,
       userId,
       database,
+      upgradeGate: _upgradeGate,
     );
 
     _sendingJob = SendingJob(
@@ -229,6 +239,8 @@ class _MessageProcessRunner {
       database: database,
       client: client,
     );
+    _jobsReady = true;
+    if (_upgradeGate.isRequired) _stopJobs();
 
     MigrateFtsJob(database: database);
     DeleteOldFtsRecordJob(database: database);
@@ -276,6 +288,30 @@ class _MessageProcessRunner {
       _syncInscriptionMessageJob,
     );
     _floodJob.start();
+  }
+
+  void _onUpgradeRequired() {
+    _upgradeGate.require();
+    if (_upgradeHandled) return;
+    _upgradeHandled = true;
+    if (_blazeReady) blaze.stopForUpgrade();
+    _stopJobs();
+    _sendEventToMainIsolate(WorkerIsolateEventType.onUpgradeRequired);
+  }
+
+  void _stopJobs() {
+    if (_jobsReady) {
+      _ackJob.stop();
+      _floodJob.stop();
+      _sendingJob.stop();
+      _sessionAckJob.stop();
+      _updateAssetJob.stop();
+      _updateTokenJob.stop();
+      _updateStickerJob.stop();
+      _syncInscriptionMessageJob.stop();
+    }
+    _nextExpiredMessageRunner?.cancel();
+    _nextExpiredMessageRunner = null;
   }
 
   Function(FloodMessage floodMessage)? getProcessFloodJob() =>
@@ -379,7 +415,10 @@ class _MessageProcessRunner {
         _decryptMessage?.conversationId = conversationId;
       case MainIsolateEventType.disconnectBlazeWithTime:
         blaze.waitSyncTime();
+      case MainIsolateEventType.requireUpgrade:
+        _onUpgradeRequired();
       case MainIsolateEventType.reconnectBlaze:
+        if (_upgradeGate.isRequired) return;
         i('message worker isolate: reconnect blaze');
         blaze.reconnect();
       case MainIsolateEventType.addAckJobs:
@@ -403,6 +442,7 @@ class _MessageProcessRunner {
   }
 
   void dispose() {
+    _stopJobs();
     blaze.dispose();
     database.dispose();
     jobSubscribers.forEach((subscription) => subscription.cancel());
