@@ -5,6 +5,7 @@ import '../db/mixin_database.dart';
 enum MainIsolateEventType {
   reconnectBlaze,
   disconnectBlazeWithTime,
+  requireUpgrade,
   updateSelectedConversation,
   addAckJobs,
   addSessionAckJobs,
@@ -29,6 +30,8 @@ enum WorkerIsolateEventType {
 
   /// args: DioException
   onApiRequestedError,
+
+  onUpgradeRequired,
 
   /// args: [AttachmentRequest]
   requestDownloadAttachment,
