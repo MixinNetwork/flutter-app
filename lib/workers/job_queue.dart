@@ -15,6 +15,7 @@ abstract class JobQueue<AddType, RunType> {
 
   @protected
   bool isRunning = false;
+  bool _stopped = false;
 
   @protected
   bool get enable => true;
@@ -34,21 +35,28 @@ abstract class JobQueue<AddType, RunType> {
   @protected
   bool isValid(RunType job);
 
-  void start() => unawaited(_run());
+  void start() {
+    if (_stopped) return;
+    unawaited(_run());
+  }
+
+  void stop() => _stopped = true;
 
   Future<void> add(AddType job) async {
+    if (_stopped) return;
     await insertJob(job);
+    if (_stopped) return;
     unawaited(_run());
   }
 
   Future<void> _run() async {
-    if (!enable) return;
+    if (_stopped || !enable) return;
     if (isRunning) return;
     isRunning = true;
 
-    while (true) {
+    while (!_stopped) {
       final list = await fetchJobs();
-      if (!isValid(list)) break;
+      if (_stopped || !isValid(list)) break;
       try {
         await run(list);
       } catch (err) {

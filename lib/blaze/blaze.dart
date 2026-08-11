@@ -14,6 +14,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../utils/extension/extension.dart';
 import '../utils/logger.dart';
+import '../utils/mixin_api_client.dart';
 import '../utils/proxy.dart';
 import '../workers/job/ack_job.dart';
 import '../workers/job/flood_job.dart';
@@ -51,8 +52,10 @@ class Blaze {
     this.client,
     this.userAgent,
     this.ackJob,
-    this.floodJob,
-  ) {
+    this.floodJob, {
+    required this.upgradeGate,
+    this.onUpgradeRequired,
+  }) {
     database.settingProperties.addListener(_onProxySettingChanged);
     proxyConfig = database.settingProperties.activatedProxy;
 
@@ -69,6 +72,8 @@ class Blaze {
   final Client client;
   final AckJob ackJob;
   final FloodJob floodJob;
+  final ApiUpgradeGate upgradeGate;
+  final void Function()? onUpgradeRequired;
 
   final String? userAgent;
 
@@ -113,6 +118,7 @@ class Blaze {
 
   Timer? _checkTimeoutTimer;
   Timer? _reconnectTimer;
+  bool _stoppedForUpgrade = false;
 
   // --- Event Stream ---
   final StreamController<_ConnectionEvent> _eventController =
@@ -124,6 +130,10 @@ class Blaze {
   // ==========================================================================
 
   void _handleConnectionEvent(_ConnectionEvent event) {
+    if (_stoppedForUpgrade) {
+      i('Ignoring connection event after upgrade requirement: $event');
+      return;
+    }
     i(
       '[_handleConnectionEvent] Received event: $event, Current state: $_connectedState',
     );
@@ -180,7 +190,9 @@ class Blaze {
   void _scheduleRetry() {
     _reconnectTimer?.cancel(); // Cancel previous timer
     // Ensure we're in a state that should retry
-    if (_connectedState != ConnectedState.reconnecting) {
+    if (_stoppedForUpgrade ||
+        upgradeGate.isRequired ||
+        _connectedState != ConnectedState.reconnecting) {
       i('Not scheduling retry, state is $_connectedState');
       return;
     }
@@ -196,6 +208,7 @@ class Blaze {
   }
 
   void _connect() {
+    if (_stoppedForUpgrade || upgradeGate.isRequired) return;
     i('reconnecting set false, ${StackTrace.current}');
     _connectedState = ConnectedState.connecting;
 
@@ -229,6 +242,15 @@ class Blaze {
           .asyncMap(parseBlazeMessage)
           .listen(
             (blazeMessage) async {
+              if (blazeMessage.action == kErrorAction &&
+                  blazeMessage.error?.code == oldVersion) {
+                final transaction = transactions.remove(blazeMessage.id);
+                transaction?.error(blazeMessage);
+                if (upgradeGate.require()) onUpgradeRequired?.call();
+                stopForUpgrade();
+                return;
+              }
+
               _connectedState = ConnectedState.connected;
               d('blazeMessage receive: ${blazeMessage.toJson()}');
 
@@ -412,6 +434,7 @@ class Blaze {
         .getSingleOrNull();
     var status = offset != null ? offset.epochNano : DateTime.now().epochNano;
     for (;;) {
+      if (_stoppedForUpgrade || upgradeGate.isRequired) return;
       final response = await client.messageApi.messageStatusOffset(status);
       final blazeMessages = response.data;
       if (blazeMessages.isEmpty) {
@@ -461,6 +484,9 @@ class Blaze {
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
+    if (_stoppedForUpgrade || upgradeGate.isRequired) {
+      throw const ApiUpgradeRequiredException();
+    }
     if (_connectedState != ConnectedState.connected) {
       w('Cannot send message, not connected. State: $_connectedState');
       return null;
@@ -488,6 +514,7 @@ class Blaze {
 
   Future<void> connect() async {
     i('Public connect called. Current state: $_connectedState');
+    if (_stoppedForUpgrade || upgradeGate.isRequired) return;
     if (_connectedState == ConnectedState.connecting ||
         _connectedState == ConnectedState.reconnecting) {
       return;
@@ -498,6 +525,7 @@ class Blaze {
 
   Future<void> reconnect() async {
     i('Public reconnect called. Current state: $_connectedState');
+    if (_stoppedForUpgrade || upgradeGate.isRequired) return;
     if (_connectedState == ConnectedState.connecting ||
         _connectedState == ConnectedState.reconnecting) {
       return;
@@ -514,6 +542,7 @@ class Blaze {
       _eventController.add(_ConnectionEvent.connect);
     } catch (e) {
       w('ws ping error: $e');
+      if (_stoppedForUpgrade || upgradeGate.isRequired) return;
       if (e is MixinApiError &&
           e.error != null &&
           e.error is MixinError &&
@@ -524,6 +553,12 @@ class Blaze {
       i('Triggering ERROR event: HTTP ping failed');
       _eventController.add(_ConnectionEvent.error);
     }
+  }
+
+  void stopForUpgrade() {
+    if (_stoppedForUpgrade) return;
+    _stoppedForUpgrade = true;
+    _disconnect();
   }
 
   void _onProxySettingChanged() {
