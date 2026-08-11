@@ -30,7 +30,7 @@ AppDir:
       - fcitx5-frontend-gtk3
       - libsdl2-2.0-0
       - libopus0
-      - libmpv2
+      - libmpv1
     exclude:
       - humanity-icon-theme
       - hicolor-icon-theme
