@@ -306,6 +306,20 @@ class _Menus extends HookConsumerWidget {
           ),
         ],
       ),
+      PlatformMenu(
+        label: context.l10n.edit,
+        menus: [
+          PlatformMenuItem(
+            label: 'Emoji & Symbols',
+            shortcut: const SingleActivator(
+              LogicalKeyboardKey.space,
+              control: true,
+              meta: true,
+            ),
+            onSelected: () => methodChannel.invokeMethod('showEmojiAndSymbols'),
+          ),
+        ],
+      ),
       buildConversationMenu(),
       PlatformMenu(
         label: context.l10n.window,
