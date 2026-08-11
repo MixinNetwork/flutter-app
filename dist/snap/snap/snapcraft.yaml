@@ -39,3 +39,4 @@ parts:
       - libgtk-3-0
       - libwebkit2gtk-4.1-0
       - libopus0
+      - libmpv2

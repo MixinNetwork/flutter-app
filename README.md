@@ -38,6 +38,11 @@ sudo apt-get install libopus-dev libogg-dev
 sudo apt-get install libmpv-dev mpv
 ```
 
+### Portable archive runtime
+
+The portable Linux archive uses the system's shared libraries. Install the
+`libmpv` runtime before using it (`libmpv2` on Debian and Ubuntu).
+
 
 # License
 

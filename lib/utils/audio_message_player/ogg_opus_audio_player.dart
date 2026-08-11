@@ -115,7 +115,8 @@ class AudioMessagePlayer {
   void _handlePlaying(bool playing) {
     if (playing) {
       _playbackState.value = PlaybackState.playing;
-    } else if (_playbackState.value == PlaybackState.playing) {
+    } else if (_playbackState.value == PlaybackState.playing &&
+        !_player.state.completed) {
       _playbackState.value = PlaybackState.paused;
     }
   }
