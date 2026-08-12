@@ -153,3 +153,4 @@ CREATE INDEX IF NOT EXISTS index_message_conversation_id_status_user_id ON messa
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages(conversation_id, quote_message_id);
 CREATE INDEX IF NOT EXISTS index_tokens_kernel_asset_id ON tokens(kernel_asset_id);
 CREATE INDEX IF NOT EXISTS index_tokens_collection_hash ON tokens(collection_hash);
+CREATE INDEX IF NOT EXISTS index_expired_messages_expire_at ON expired_messages(expire_at) WHERE expire_at IS NOT NULL;

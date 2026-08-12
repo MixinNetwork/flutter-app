@@ -1,7 +1,7 @@
 import '../mixin.drift';
 
 getExpiredMessages:
-SELECT * FROM expired_messages WHERE expire_at <= :currentTime ORDER BY expire_at ASC;
+SELECT * FROM expired_messages WHERE expire_at <= :currentTime ORDER BY expire_at ASC LIMIT 100;
 
 getFirstExpiredMessage:
 SELECT * FROM expired_messages WHERE expire_at IS NOT NULL ORDER BY expire_at ASC LIMIT 1;
