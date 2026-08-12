@@ -12,6 +12,10 @@ void match(RegExp regExp, String text, String uri) {
 
 void main() {
   final bigText = List.generate(1024 * 64, (index) => 'a').join();
+  final botNumberNonMatchText = List.generate(
+    1024 * 8,
+    (index) => index.isEven ? '7000U' : '70001054151',
+  ).join();
 
   group('uri', () {
     test('speed', () {
@@ -76,7 +80,9 @@ void main() {
   group('bot number', () {
     test('speed', () {
       final timer = Stopwatch()..start();
-      final matches = botNumberRegExp.allMatches(bigText).toList();
+      final matches = botNumberRegExp
+          .allMatches(botNumberNonMatchText)
+          .toList();
       timer.stop();
 
       expect(timer.elapsedMilliseconds, lessThan(10));
@@ -87,27 +93,58 @@ void main() {
       }
     });
 
-    const botNumbers = ['7000', '7000105415'];
+    const cases = <String, List<String>>{
+      '7000105415': ['7000105415'],
+      'foo7000105415bar': ['7000105415'],
+      '福7000105415报': ['7000105415'],
+      '@7000105415': ['7000105415'],
+      '@7000105415U': ['7000105415'],
+      '7000': ['7000'],
+      ' 7000 ': ['7000'],
+      '\t7000\t': ['7000'],
+      '\n7000\r\n': ['7000'],
+      '\u30007000\u00a0': ['7000'],
+      '@7000': ['7000'],
+      '@7000U': ['7000'],
+      '@7000hello': ['7000'],
+      'hello@7000world': ['7000'],
+      '中文@7000中文': ['7000'],
+      '@7000，': ['7000'],
+      '@@7000': ['7000'],
+      '@7000U 7000 7000105415 @7000': [
+        '7000',
+        '7000',
+        '7000105415',
+        '7000',
+      ],
+      '7000U': [],
+      'U7000': [],
+      'foo7000bar': [],
+      '转7000': [],
+      '7000转': [],
+      '_7000': [],
+      '7000_': [],
+      '(7000)': [],
+      ':7000,': [],
+      '7000。': [],
+      '7000\u200b': [],
+      '70001': [],
+      '@70001': [],
+      '17000105415': [],
+      '70001054151': [],
+      '@70001054151': [],
+    };
 
-    test('syntax', () {
-      for (final botNumber in botNumbers) {
-        match(botNumberRegExp, botNumber, botNumber);
-      }
-    });
-
-    test('accuracy', () {
-      for (final botNumber in botNumbers) {
-        match(botNumberRegExp, '($botNumber)', botNumber);
-        match(botNumberRegExp, 'foo${botNumber}bar', botNumber);
-        match(botNumberRegExp, '福$botNumber报', botNumber);
-        match(botNumberRegExp, ':$botNumber,', botNumber);
-        match(botNumberRegExp, '：$botNumber。', botNumber);
-      }
-    });
-
-    test('does not match partial numbers', () {
-      for (final text in ['70001', '70001054151']) {
-        expect(botNumberRegExp.hasMatch(text), isFalse, reason: text);
+    test('matches configured bot-number cases', () {
+      for (final entry in cases.entries) {
+        expect(
+          botNumberRegExp
+              .allMatches(entry.key)
+              .map((match) => match[0])
+              .toList(),
+          entry.value,
+          reason: entry.key,
+        );
       }
     });
   });
