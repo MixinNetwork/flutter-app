@@ -270,7 +270,9 @@ jobs:
       - name: Install appimage-builder
         run: |
           python3 -m venv "${{ runner.temp }}/appimage-builder-venv"
-          "${{ runner.temp }}/appimage-builder-venv/bin/pip" install appimage-builder==1.1.0
+          # appimage-builder 1.1.0 relies on LegacyVersion when comparing
+          # Debian-style versions such as 1.22.6ubuntu6.
+          "${{ runner.temp }}/appimage-builder-venv/bin/pip" install appimage-builder==1.1.0 "packaging<22"
 
       - name: Build AppImage
         run: |
