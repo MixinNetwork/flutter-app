@@ -18884,6 +18884,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     'index_tokens_collection_hash',
     'CREATE INDEX IF NOT EXISTS index_tokens_collection_hash ON tokens (collection_hash)',
   );
+  late final Index indexExpiredMessagesExpireAt = Index(
+    'index_expired_messages_expire_at',
+    'CREATE INDEX IF NOT EXISTS index_expired_messages_expire_at ON expired_messages (expire_at) WHERE expire_at IS NOT NULL',
+  );
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -19447,6 +19451,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     indexMessagesConversationIdQuoteMessageId,
     indexTokensKernelAssetId,
     indexTokensCollectionHash,
+    indexExpiredMessagesExpireAt,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([

@@ -46,7 +46,7 @@ mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<ExpiredMessage> getExpiredMessages(int? currentTime) {
     return customSelect(
-      'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC',
+      'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC LIMIT 100',
       variables: [Variable<int>(currentTime)],
       readsFrom: {expiredMessages},
     ).asyncMap(expiredMessages.mapFromRow);
