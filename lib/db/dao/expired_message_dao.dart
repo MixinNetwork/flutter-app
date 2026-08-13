@@ -46,10 +46,16 @@ class ExpiredMessageDao extends DatabaseAccessor<MixinDatabase>
         .toList(growable: false)
         .slices(kMarkLimit);
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
+    var updated = 0;
     for (final ids in chunkedMessageIds) {
-      await _markExpiredMessageRead(now, (em) => em.messageId.isIn(ids));
+      updated += await _markExpiredMessageRead(
+        now,
+        (em) => em.messageId.isIn(ids),
+      );
     }
-    DataBaseEventBus.instance.updateExpiredMessageTable();
+    if (updated > 0) {
+      DataBaseEventBus.instance.updateExpiredMessageTable();
+    }
   }
 
   @override
