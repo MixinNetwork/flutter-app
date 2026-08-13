@@ -664,7 +664,8 @@ extension on SingleActivator {
   String stringRepresentation() => [
     if (control) 'Ctrl',
     if (alt) 'Alt',
-    if (meta) defaultTargetPlatform == TargetPlatform.macOS ? 'Cmd' : 'Meta',
+    if (meta)
+      if (defaultTargetPlatform == TargetPlatform.macOS) 'Cmd' else 'Meta',
     if (shift) 'Shift',
     trigger.keyLabel,
   ].join('+');

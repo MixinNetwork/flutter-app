@@ -1634,7 +1634,7 @@ class AccountServer {
     try {
       final user = await client.userApi.getUserById(id);
       await _injector.insertUpdateUsers([user.data]);
-      return database.appDao.findAppById(id);
+      return await database.appDao.findAppById(id);
     } catch (error, stackTrace) {
       d('get app and check user error: $error, $stackTrace');
       return null;
