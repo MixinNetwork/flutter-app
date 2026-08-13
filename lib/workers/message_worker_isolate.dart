@@ -8,6 +8,7 @@ import 'package:ansicolor/ansicolor.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rhttp/rhttp.dart';
@@ -16,6 +17,7 @@ import 'package:stream_channel/isolate_channel.dart';
 
 import '../blaze/blaze.dart';
 import '../crypto/signal/signal_protocol.dart';
+import '../db/dao/expired_message_dao.dart';
 import '../db/database.dart';
 import '../db/database_event_bus.dart';
 import '../db/fts_database.dart';
@@ -101,6 +103,33 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
 }
 
 final Map<String, MessageStatus> pendingMessageStatusMap = {};
+
+@visibleForTesting
+Future<Timer?> runExpiredMessageScheduler({
+  required ExpiredMessageDao expiredMessageDao,
+  required Future<void> Function(ExpiredMessage message) expireMessage,
+  required void Function() onTimer,
+  Timer? previousTimer,
+}) async {
+  final messages = await expiredMessageDao.getCurrentExpiredMessages();
+  for (final message in messages) {
+    await expireMessage(message);
+  }
+
+  final firstExpiredMessage = await expiredMessageDao
+      .getFirstExpiredMessage()
+      .getSingleOrNull();
+  previousTimer?.cancel();
+  if (firstExpiredMessage == null) return null;
+
+  final delaySeconds =
+      firstExpiredMessage.expireAt! -
+      DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  return Timer(
+    Duration(seconds: delaySeconds > 0 ? delaySeconds : 0),
+    onTimer,
+  );
+}
 
 class _MessageProcessRunner {
   _MessageProcessRunner({
@@ -362,49 +391,32 @@ class _MessageProcessRunner {
 
   Future<void> _scheduleExpiredJob() async {
     d('_scheduleExpiredJob');
-    final messages = await database.expiredMessageDao
-        .getCurrentExpiredMessages();
-    if (messages.isEmpty) return;
-
-    for (final em in messages) {
-      // cancel attachment download.
-      final message = await database.messageDao.findMessageByMessageId(
-        em.messageId,
-      );
-      if (message == null) {
-        e('message is null, messageId: ${em.messageId} ${em.expireAt}');
-        await database.expiredMessageDao.deleteByMessageId(em.messageId);
-        continue;
-      }
-      await database.messageDao.deleteMessage(
-        message.conversationId,
-        em.messageId,
-      );
-      unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
-      if (message.category.isAttachment || message.category.isTranscript) {
-        _sendEventToMainIsolate(
-          WorkerIsolateEventType.requestDownloadAttachment,
-          AttachmentDeleteRequest(message: message),
+    _nextExpiredMessageRunner = await runExpiredMessageScheduler(
+      expiredMessageDao: database.expiredMessageDao,
+      previousTimer: _nextExpiredMessageRunner,
+      onTimer: DataBaseEventBus.instance.updateExpiredMessageTable,
+      expireMessage: (em) async {
+        // cancel attachment download.
+        final message = await database.messageDao.findMessageByMessageId(
+          em.messageId,
         );
-      }
-    }
-
-    final firstExpiredMessage = await database.expiredMessageDao
-        .getFirstExpiredMessage()
-        .getSingleOrNull();
-    if (firstExpiredMessage == null) {
-      _nextExpiredMessageRunner?.cancel();
-      _nextExpiredMessageRunner = null;
-      return;
-    }
-    _nextExpiredMessageRunner?.cancel();
-    _nextExpiredMessageRunner = Timer(
-      Duration(
-        seconds:
-            firstExpiredMessage.expireAt! -
-            DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      ),
-      _scheduleExpiredJob,
+        if (message == null) {
+          e('message is null, messageId: ${em.messageId} ${em.expireAt}');
+          await database.expiredMessageDao.deleteByMessageId(em.messageId);
+          return;
+        }
+        await database.messageDao.deleteMessage(
+          message.conversationId,
+          em.messageId,
+        );
+        unawaited(database.ftsDatabase.deleteByMessageId(em.messageId));
+        if (message.category.isAttachment || message.category.isTranscript) {
+          _sendEventToMainIsolate(
+            WorkerIsolateEventType.requestDownloadAttachment,
+            AttachmentDeleteRequest(message: message),
+          );
+        }
+      },
     );
   }
 
