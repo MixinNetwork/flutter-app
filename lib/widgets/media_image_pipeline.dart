@@ -140,7 +140,7 @@ class ProxyNetworkImage extends ImageProvider<ProxyNetworkImage> {
       final bytes = normalizeGifBytesIfNeeded(
         await downloadImageBytes(key.url, proxyConfig: key.proxyConfig),
       );
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+      return await decode(await ui.ImmutableBuffer.fromUint8List(bytes));
     } catch (_) {
       scheduleMicrotask(() {
         PaintingBinding.instance.imageCache.evict(key);
