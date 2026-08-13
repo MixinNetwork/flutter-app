@@ -92,7 +92,7 @@ class SendMessageHelper {
 
     if (content.startsWith('@7000')) {
       final botNumber = botNumberRegExp.firstMatch(content)?[0];
-      if (botNumber != null && content.startsWith('@$botNumber ')) {
+      if (botNumber != null && botNumber.isNotEmpty) {
         recipientId = await _participantDao
             .userIdByIdentityNumber(conversationId, botNumber)
             .getSingleOrNull();
