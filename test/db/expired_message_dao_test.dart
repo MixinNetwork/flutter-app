@@ -121,6 +121,22 @@ void main() {
     expect(updated, 1);
     await notified.future.timeout(const Duration(seconds: 1));
   });
+
+  test('does not notify the scheduler when reading a normal message', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+
+    var notified = false;
+    final subscription = DataBaseEventBus
+        .instance
+        .updateExpiredMessageTableStream
+        .listen((_) => notified = true);
+    addTearDown(subscription.cancel);
+
+    await database.expiredMessageDao.onMessageRead(['normal-message']);
+
+    expect(notified, isFalse);
+  });
 }
 
 Future<String> _indexSql(MixinDatabase database) async {
