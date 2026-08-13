@@ -1,14 +1,20 @@
 @TestOn('linux || mac-os')
 library;
 
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _indexName = 'index_expired_messages_expire_at';
 
 void main() {
+  setUpAll(EventBus.initialize);
+
   test('creates a partial expire_at index for new databases', () async {
     final database = MixinDatabase(NativeDatabase.memory());
     addTearDown(database.close);
@@ -87,6 +93,33 @@ void main() {
     final secondBatch = await database.expiredMessageDao
         .getCurrentExpiredMessages();
     expect(secondBatch.map((message) => message.messageId), ['expired-100']);
+  });
+
+  test('notifies the scheduler when an expiration time is set', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+
+    await database.expiredMessageDao.insert(
+      messageId: 'pending-expiration',
+      expireIn: 60,
+    );
+
+    final notified = Completer<void>();
+    final subscription = DataBaseEventBus
+        .instance
+        .updateExpiredMessageTableStream
+        .listen((_) {
+          if (!notified.isCompleted) notified.complete();
+        });
+    addTearDown(subscription.cancel);
+
+    final updated = await database.expiredMessageDao.updateMessageExpireAt(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000 + 60,
+      'pending-expiration',
+    );
+
+    expect(updated, 1);
+    await notified.future.timeout(const Duration(seconds: 1));
   });
 }
 

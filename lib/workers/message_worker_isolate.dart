@@ -364,7 +364,6 @@ class _MessageProcessRunner {
     d('_scheduleExpiredJob');
     final messages = await database.expiredMessageDao
         .getCurrentExpiredMessages();
-    if (messages.isEmpty) return;
 
     for (final em in messages) {
       // cancel attachment download.
@@ -397,14 +396,13 @@ class _MessageProcessRunner {
       _nextExpiredMessageRunner = null;
       return;
     }
+    final delaySeconds =
+        firstExpiredMessage.expireAt! -
+        DateTime.now().millisecondsSinceEpoch ~/ 1000;
     _nextExpiredMessageRunner?.cancel();
     _nextExpiredMessageRunner = Timer(
-      Duration(
-        seconds:
-            firstExpiredMessage.expireAt! -
-            DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      ),
-      _scheduleExpiredJob,
+      Duration(seconds: delaySeconds > 0 ? delaySeconds : 0),
+      DataBaseEventBus.instance.updateExpiredMessageTable,
     );
   }
 
