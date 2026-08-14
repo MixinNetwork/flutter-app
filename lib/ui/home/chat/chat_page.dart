@@ -113,7 +113,6 @@ class ChatPage extends HookConsumerWidget {
             blinkNotifier: context.read<BlinkNotifier>(),
             scrollCoordinator: context.read<ChatScrollCoordinator>(),
             messageController: context.read<MessageController>(),
-            chatSideNotifier: context.read<ChatSideNotifier>(),
           ),
         ),
         Provider.value(value: pinMessageState),

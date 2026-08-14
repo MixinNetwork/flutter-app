@@ -13,19 +13,17 @@ class ChatTimelineLocation {
     required BlinkNotifier blinkNotifier,
     required ChatScrollCoordinator scrollCoordinator,
     required MessageController messageController,
-    required ChatSideNotifier chatSideNotifier,
   }) : _blinkNotifier = blinkNotifier,
        _scrollCoordinator = scrollCoordinator,
-       _messageController = messageController,
-       _chatSideNotifier = chatSideNotifier;
+       _messageController = messageController;
 
   final BlinkNotifier _blinkNotifier;
   final ChatScrollCoordinator _scrollCoordinator;
   final MessageController _messageController;
-  final ChatSideNotifier _chatSideNotifier;
 
   Future<void> jumpToMessage(
     String messageId, {
+    required ChatSideNotifier chatSideNotifier,
     String? sourceMessageId,
     bool closeSideAfterJump = false,
     bool chatSideRouteMode = false,
@@ -44,7 +42,11 @@ class ChatTimelineLocation {
     );
     if (handled) {
       _blinkNotifier.blinkByMessageId(messageId);
-      _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
+      _closeSideIfNeeded(
+        closeSideAfterJump,
+        chatSideRouteMode,
+        chatSideNotifier,
+      );
       return;
     }
 
@@ -68,10 +70,15 @@ class ChatTimelineLocation {
       onComplete: () => _blinkNotifier.blinkByMessageId(messageId),
     );
     _messageController.loadAroundMessage(messageId);
-    _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
+    _closeSideIfNeeded(
+      closeSideAfterJump,
+      chatSideRouteMode,
+      chatSideNotifier,
+    );
   }
 
   Future<void> jumpToLatest({
+    required ChatSideNotifier chatSideNotifier,
     bool closeSideAfterJump = false,
     bool chatSideRouteMode = false,
   }) async {
@@ -81,7 +88,11 @@ class ChatTimelineLocation {
           animated: true,
         )) {
       traceChatJump('loaded-window latest handled=true');
-      _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
+      _closeSideIfNeeded(
+        closeSideAfterJump,
+        chatSideRouteMode,
+        chatSideNotifier,
+      );
       return;
     }
 
@@ -90,7 +101,11 @@ class ChatTimelineLocation {
       direction: ChatScrollRestoreDirection.towardNewer,
     );
     _messageController.loadLatestWindow();
-    _closeSideIfNeeded(closeSideAfterJump, chatSideRouteMode);
+    _closeSideIfNeeded(
+      closeSideAfterJump,
+      chatSideRouteMode,
+      chatSideNotifier,
+    );
   }
 
   String? _currentWindowSourceMessageId(MessageState state) {
@@ -106,9 +121,13 @@ class ChatTimelineLocation {
     null => null,
   };
 
-  void _closeSideIfNeeded(bool closeSideAfterJump, bool chatSideRouteMode) {
+  void _closeSideIfNeeded(
+    bool closeSideAfterJump,
+    bool chatSideRouteMode,
+    ChatSideNotifier chatSideNotifier,
+  ) {
     if (!closeSideAfterJump) return;
-    _chatSideNotifier.closeAfterContentJump(routeMode: chatSideRouteMode);
+    chatSideNotifier.closeAfterContentJump(routeMode: chatSideRouteMode);
   }
 }
 
@@ -117,18 +136,26 @@ extension ChatMessageJump on BuildContext {
     String messageId, {
     String? sourceMessageId,
     bool closeSideAfterJump = false,
-  }) => _chatHistoryLocation.jumpToMessage(
-    messageId,
-    sourceMessageId: sourceMessageId,
-    closeSideAfterJump: closeSideAfterJump,
-    chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
-  );
+  }) {
+    final routeMode = DesktopShellLayout.chatSideRouteModeOf(this);
+    final chatSideNotifier = read<ChatSideNotifier>();
+    return _chatHistoryLocation.jumpToMessage(
+      messageId,
+      sourceMessageId: sourceMessageId,
+      closeSideAfterJump: closeSideAfterJump,
+      chatSideRouteMode: routeMode,
+      chatSideNotifier: chatSideNotifier,
+    );
+  }
 
-  Future<void> jumpToLatestInChat({bool closeSideAfterJump = false}) =>
-      _chatHistoryLocation.jumpToLatest(
-        closeSideAfterJump: closeSideAfterJump,
-        chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
-      );
+  Future<void> jumpToLatestInChat({bool closeSideAfterJump = false}) {
+    final chatSideNotifier = read<ChatSideNotifier>();
+    return _chatHistoryLocation.jumpToLatest(
+      closeSideAfterJump: closeSideAfterJump,
+      chatSideRouteMode: DesktopShellLayout.chatSideRouteModeOf(this),
+      chatSideNotifier: chatSideNotifier,
+    );
+  }
 
   ChatTimelineLocation get _chatHistoryLocation => read<ChatTimelineLocation>();
 }
