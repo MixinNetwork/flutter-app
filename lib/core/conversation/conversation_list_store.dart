@@ -49,6 +49,8 @@ class ConversationListStore {
 
   List<ConversationItem> get items => List.unmodifiable(_sortedItems);
 
+  bool get initialized => _initialized;
+
   ConversationItem? item(String conversationId) => _items[conversationId];
 
   Set<String> conversationIdsInCircle(String circleId) =>
