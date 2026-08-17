@@ -73,55 +73,47 @@ class SearchList extends HookConsumerWidget {
         '';
 
     final accountServer = context.accountServer;
+    final conversationListController = context
+        .read<ConversationListController>();
+    useValueListenable(conversationListController);
 
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
 
     final maoUser = ref.watch(searchMaoUserProvider(keyword)).valueOrNull;
 
     final users =
-        useMemoizedStream(() {
-          if (keyword.trim().isEmpty || filterUnseen) {
-            return Stream.value(<User>[]);
-          }
-          return accountServer.database.userDao
-              .fuzzySearchUser(
-                id: accountServer.userId,
-                username: keyword,
-                identityNumber: keyword,
-                category: slideCategoryState,
-                isIncludeConversation: true,
-              )
-              .watchWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.updateConversationIdStream,
-                  DataBaseEventBus.instance.updateUserIdsStream,
-                ],
-                duration: kSlowThrottleDuration,
-              );
-        }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
+        useMemoizedStream(
+          () {
+            if (keyword.trim().isEmpty || filterUnseen) {
+              return Stream.value(<User>[]);
+            }
+            return accountServer.database.userDao
+                .fuzzySearchUser(
+                  id: accountServer.userId,
+                  username: keyword,
+                  identityNumber: keyword,
+                  category: slideCategoryState,
+                  isIncludeConversation: true,
+                )
+                .watchWithStream(
+                  eventStreams: [
+                    DataBaseEventBus.instance.updateConversationIdStream,
+                    DataBaseEventBus.instance.updateUserIdsStream,
+                  ],
+                  duration: kSlowThrottleDuration,
+                );
+          },
+          keys: [keyword, filterUnseen, slideCategoryState],
+          preserveState: false,
+        ).data ??
         [];
 
     final conversations =
-        useMemoizedStream(() {
-          if (keyword.trim().isEmpty) {
-            return Stream.value(<SearchConversationItem>[]);
-          }
-          return accountServer.database.conversationDao
-              .fuzzySearchConversation(
-                keyword,
-                32,
-                filterUnseen: filterUnseen,
-                category: slideCategoryState,
-              )
-              .watchWithStream(
-                eventStreams: [
-                  DataBaseEventBus.instance.updateConversationIdStream,
-                  DataBaseEventBus.instance.updateUserIdsStream,
-                ],
-                duration: kSlowThrottleDuration,
-              );
-        }, keys: [keyword, filterUnseen, slideCategoryState]).data ??
-        [];
+        conversationListController.search(
+          keyword,
+          filterUnseen: filterUnseen,
+        ) ??
+        const <ConversationItem>[];
 
     final messages =
         useMemoizedFuture<List<SearchMessageDetailItem>>(
@@ -135,6 +127,7 @@ class SearchList extends HookConsumerWidget {
                 ),
           [],
           keys: [keyword, filterUnseen, slideCategoryState],
+          preserveState: false,
         ).data ??
         [];
 
@@ -357,7 +350,7 @@ class SearchList extends HookConsumerWidget {
                     ).data;
 
                     return ConversationMenuWrapper(
-                      searchConversation: conversation,
+                      conversation: conversation,
                       child: SearchItemWidget(
                         avatar: ConversationAvatarWidget(
                           conversationId: conversation.conversationId,
@@ -371,7 +364,7 @@ class SearchList extends HookConsumerWidget {
                         name: conversation.validName,
                         description: description,
                         trailing: BadgesWidget(
-                          verified: conversation.isVerified,
+                          verified: conversation.ownerVerified,
                           isBot: conversation.appId != null,
                           membership: conversation.membership,
                         ),

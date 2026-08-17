@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    show ConversationCategory;
+    show ConversationCategory, ConversationStatus;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../core/conversation/conversation_list_store.dart';
@@ -80,6 +80,40 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
   ) => _views[slideCategoryState]?.itemScrollController;
 
   void init() => _switchCategory(slideCategoryStateNotifier.state);
+
+  List<ConversationItem>? search(String query, {required bool filterUnseen}) {
+    if (!store.initialized) return null;
+
+    final normalizedQuery = query.toLowerCase();
+    final matches =
+        state.items.where((item) {
+          final name = item.isGroupConversation ? item.groupName : item.name;
+          return (item.isGroupConversation &&
+                      item.status != ConversationStatus.quit ||
+                  item.isStrangerConversation) &&
+              name?.toLowerCase().contains(normalizedQuery) == true &&
+              (!filterUnseen || (item.unseenMessageCount ?? 0) > 0);
+        }).toList()..sort((a, b) {
+          final aName = a.isGroupConversation ? a.groupName : a.name;
+          final bName = b.isGroupConversation ? b.groupName : b.name;
+          final aExact = aName?.toLowerCase() == normalizedQuery;
+          final bExact = bName?.toLowerCase() == normalizedQuery;
+          if (aExact != bExact) return aExact ? -1 : 1;
+          final pin = _compareNullableDateDescending(a.pinTime, b.pinTime);
+          if (pin != 0) return pin;
+          return _compareNullableDateDescending(
+            a.lastMessageCreatedAt,
+            b.lastMessageCreatedAt,
+          );
+        });
+    return matches;
+  }
+
+  static int _compareNullableDateDescending(DateTime? a, DateTime? b) {
+    if (a == null) return b == null ? 0 : 1;
+    if (b == null) return -1;
+    return b.compareTo(a);
+  }
 
   void _switchCategory(SlideCategoryState state) {
     if (state.type == SlideCategoryType.setting) return;

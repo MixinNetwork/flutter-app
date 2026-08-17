@@ -58,13 +58,13 @@ void main() {
           const User(
             userId: 'friend',
             identityNumber: '1',
-            fullName: 'Friend',
+            fullName: '主好友',
             relationship: UserRelationship.friend,
           ),
           const User(
             userId: 'stranger',
             identityNumber: '2',
-            fullName: 'Stranger',
+            fullName: '主陌生人',
             relationship: UserRelationship.stranger,
           ),
           const User(
@@ -92,6 +92,7 @@ void main() {
             conversationId: 'group-chat',
             ownerId: 'group-owner',
             category: ConversationCategory.group,
+            name: '主',
             createdAt: now,
             status: ConversationStatus.success,
           ),
@@ -106,9 +107,21 @@ void main() {
         );
     });
 
-    await store.start();
     controller.init();
+    expect(controller.search('主', filterUnseen: false), isNull);
+
+    final initialized = controller.addListenerCompleter();
+    await store.start();
+    await initialized.future;
     expect(controller.state.count, 3);
+    expect(
+      controller
+          .search('主', filterUnseen: false)!
+          .map(
+            (item) => item.conversationId,
+          ),
+      ['group-chat', 'stranger-chat'],
+    );
 
     final contactsChanged = controller.addListenerCompleter();
     categories.select(SlideCategoryType.contacts);
@@ -117,6 +130,7 @@ void main() {
       controller.state.items.map((item) => item.conversationId),
       ['friend-chat'],
     );
+    expect(controller.search('主', filterUnseen: false), isEmpty);
 
     final circleChanged = controller.addListenerCompleter();
     categories.select(SlideCategoryType.circle, 'circle');
