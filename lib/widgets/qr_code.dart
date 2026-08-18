@@ -17,13 +17,30 @@ class QrCode extends StatelessWidget {
     height: dimension,
     color: Colors.white,
     padding: const EdgeInsets.all(8),
-    child: PrettyQrView.data(
-      errorCorrectLevel: QrErrorCorrectLevel.Q,
-      decoration: PrettyQrDecoration(
-        image: image == null ? null : PrettyQrDecorationImage(image: image!),
+    child: _buildQrCode(
+      QrErrorCorrectLevel.Q,
+      errorBuilder: (_, _, _) => _buildQrCode(
+        QrErrorCorrectLevel.L,
+        errorBuilder: (context, _, _) => Center(
+          child: Text(
+            context.l10n.canNotRecognizeQrCode,
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
-      data: data,
     ),
+  );
+
+  Widget _buildQrCode(
+    int errorCorrectLevel, {
+    ImageErrorWidgetBuilder? errorBuilder,
+  }) => PrettyQrView.data(
+    errorCorrectLevel: errorCorrectLevel,
+    decoration: PrettyQrDecoration(
+      image: image == null ? null : PrettyQrDecorationImage(image: image!),
+    ),
+    errorBuilder: errorBuilder,
+    data: data,
   );
 }
 
