@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isolate/isolate.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:rhttp/rhttp.dart';
@@ -43,6 +44,7 @@ Future<void> _runApp(List<String> args) async {
   await Rhttp.init();
 
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
 
   await loadFallbackFonts();
 

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../../../utils/logger.dart';
+import 'media_kit_video_player.dart';
 
 /// From project: https://github.com/fluttercommunity/chewie
 class CupertinoVideoProgressBar extends StatelessWidget {
@@ -16,7 +16,7 @@ class CupertinoVideoProgressBar extends StatelessWidget {
     super.key,
   });
 
-  final VideoPlayerController controller;
+  final MediaKitVideoPlayer controller;
   final ChewieProgressColors? colors;
   final Function()? onDragStart;
   final Function()? onDragEnd;
@@ -72,7 +72,7 @@ class VideoProgressBar extends StatefulWidget {
     super.key,
   }) : colors = colors ?? ChewieProgressColors();
 
-  final VideoPlayerController controller;
+  final MediaKitVideoPlayer controller;
   final ChewieProgressColors colors;
   final Function()? onDragStart;
   final Function()? onDragEnd;
@@ -96,7 +96,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
 
   Offset? _latestDraggableOffset;
 
-  VideoPlayerController get controller => widget.controller;
+  MediaKitVideoPlayer get controller => widget.controller;
 
   @override
   void initState() {
@@ -190,7 +190,7 @@ class StaticProgressBar extends StatelessWidget {
   });
 
   final Offset? latestDraggableOffset;
-  final VideoPlayerValue value;
+  final MediaKitVideoValue value;
   final ChewieProgressColors colors;
 
   final double barHeight;
@@ -224,7 +224,7 @@ class _ProgressBarPainter extends CustomPainter {
     required this.draggableValue,
   });
 
-  VideoPlayerValue value;
+  MediaKitVideoValue value;
   ChewieProgressColors colors;
 
   final double barHeight;
@@ -260,30 +260,30 @@ class _ProgressBarPainter extends CustomPainter {
     final playedPart = playedPartPercent > 1
         ? size.width
         : playedPartPercent * size.width;
-    for (final range in value.buffered) {
-      final start = range.startFraction(value.duration) * size.width;
-      final end = range.endFraction(value.duration) * size.width;
-      canvas.drawRRect(
+    final bufferedPart =
+        value.buffer.inMilliseconds / value.duration.inMilliseconds;
+    final bufferedEnd = bufferedPart.clamp(0.0, 1.0) * size.width;
+    canvas
+      ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromPoints(
-            Offset(start, baseOffset),
-            Offset(end, baseOffset + barHeight),
+            Offset(0, baseOffset),
+            Offset(bufferedEnd, baseOffset + barHeight),
           ),
           const Radius.circular(4),
         ),
         colors.bufferedPaint,
-      );
-    }
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromPoints(
-          Offset(0, baseOffset),
-          Offset(playedPart, baseOffset + barHeight),
+      )
+      ..drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromPoints(
+            Offset(0, baseOffset),
+            Offset(playedPart, baseOffset + barHeight),
+          ),
+          const Radius.circular(4),
         ),
-        const Radius.circular(4),
-      ),
-      colors.playedPaint,
-    );
+        colors.playedPaint,
+      );
 
     if (drawShadow) {
       final shadowPath = Path()

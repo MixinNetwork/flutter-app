@@ -45,10 +45,10 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
             flutter_arch: x64
           - arch: arm64
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
             flutter_arch: arm64
     steps:
       - run: g++ --version
@@ -95,6 +95,7 @@ jobs:
           sudo apt-get install -y libsdl2-dev
           sudo apt-get install -y libwebkit2gtk-4.1-dev
           sudo apt-get install -y libopus-dev libogg-dev
+          sudo apt-get install -y libmpv-dev mpv
           sudo apt-get install -y libcurl4-openssl-dev
           flutter doctor
 
@@ -169,11 +170,11 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
             flutter_arch: x64
             artifact_suffix: ""
           - arch: arm64
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
             flutter_arch: arm64
             artifact_suffix: "-arm64"
     steps:
@@ -227,13 +228,13 @@ jobs:
       matrix:
         include:
           - arch: amd64
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
             flutter_arch: x64
             appimage_arch: x86_64
             recipe: ./AppImageBuilder.yml
             artifact_suffix: ""
           - arch: arm64
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
             flutter_arch: arm64
             appimage_arch: aarch64
             recipe: ./AppImageBuilder-arm64.yml
@@ -255,7 +256,7 @@ jobs:
       - name: Install appimage-builder dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace binutils coreutils
+          sudo apt-get install -y python3-venv patchelf desktop-file-utils libgdk-pixbuf-2.0-dev fakeroot strace binutils coreutils
           
       - name: Download appimagetool
         run: |
@@ -267,10 +268,15 @@ jobs:
           sudo chmod +x /usr/local/bin/appimagetool
           
       - name: Install appimage-builder
-        run: sudo pip3 install appimage-builder==1.1.0
+        run: |
+          python3 -m venv "${{ runner.temp }}/appimage-builder-venv"
+          # appimage-builder 1.1.0 relies on LegacyVersion when comparing
+          # Debian-style versions such as 1.22.6ubuntu6.
+          "${{ runner.temp }}/appimage-builder-venv/bin/pip" install appimage-builder==1.1.0 "packaging<22"
 
       - name: Build AppImage
-        run: appimage-builder --recipe ${{ matrix.recipe }} --skip-test
+        run: |
+          "${{ runner.temp }}/appimage-builder-venv/bin/appimage-builder" --recipe "${{ matrix.recipe }}" --skip-test
 
       - run: mv "Mixin Messenger-latest-${{ matrix.appimage_arch }}.AppImage" mixin_desktop_linux_${{ matrix.arch }}.AppImage
       - name: Upload AppImage Artifact

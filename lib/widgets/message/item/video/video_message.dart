@@ -112,14 +112,14 @@ class MessageVideo extends HookConsumerWidget {
             message,
             isTranscriptPage,
           );
-          if (kPlatformIsDarwin) {
+          if (kPlatformIsDarwin || Platform.isLinux || Platform.isWindows) {
             showVideoPreviewPage(
               context,
               path,
               message: message,
               isTranscriptPage: isTranscriptPage,
             );
-          } else if (Platform.isIOS || Platform.isAndroid) {
+          } else if (Platform.isAndroid) {
             OpenFile.open(path);
           } else {
             openUri(context, Uri.file(path).toString());
