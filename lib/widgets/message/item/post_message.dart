@@ -176,7 +176,7 @@ class PostPreview extends StatelessWidget {
               namespace: 'post-preview',
               id: message.messageId,
             ),
-            maxContentWidth: double.infinity,
+            maxContentWidth: 1200,
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
           ),
         ),

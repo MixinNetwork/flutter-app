@@ -21,12 +21,12 @@ void main() {
     expect(find.text('Post title'), findsOneWidget);
   });
 
-  testWidgets('allows unrestricted Markdown preview width', (tester) async {
+  testWidgets('allows a 1200px Markdown preview width', (tester) async {
     await tester.pumpWidget(
       _app(
         const Markdown(
           data: '# Post title',
-          maxContentWidth: double.infinity,
+          maxContentWidth: 1200,
         ),
       ),
     );
@@ -35,7 +35,7 @@ void main() {
       find.byType(mixin_markdown.MarkdownWidget),
     );
 
-    expect(markdown.theme!.maxContentWidth, double.infinity);
+    expect(markdown.theme!.maxContentWidth, 1200);
   });
 
   testWidgets('scales PostMessage H1 once with the chat font setting', (
