@@ -170,14 +170,23 @@ class PostPreview extends StatelessWidget {
           actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
         ),
         Expanded(
-          child: Markdown(
-            data: message.content ?? '',
-            cacheKey: buildMarkdownCacheKey(
-              namespace: 'post-preview',
-              id: message.messageId,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1264),
+              child: Markdown(
+                data: message.content ?? '',
+                cacheKey: buildMarkdownCacheKey(
+                  namespace: 'post-preview',
+                  id: message.messageId,
+                ),
+                maxContentWidth: 1200,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 32,
+                ),
+              ),
             ),
-            maxContentWidth: 1200,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
           ),
         ),
       ],
