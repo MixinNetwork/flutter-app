@@ -327,12 +327,13 @@ class _CenterPage extends HookConsumerWidget {
         majorNavigationProvider.notifier,
       );
 
-      if (majorNavigationNotifier.syncSettingCategory(
-        isSetting,
-        routeMode: routeMode,
-      )) {
+      if (isSetting && !routeMode) {
         ref.read(conversationProvider.notifier).unselected();
       }
+      majorNavigationNotifier.syncSettingCategory(
+        isSetting,
+        routeMode: routeMode,
+      );
     });
 
     return RepaintBoundary(

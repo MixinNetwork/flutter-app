@@ -39,7 +39,7 @@ class SettingPage extends HookConsumerWidget {
     );
 
     return ColoredBox(
-      color: context.theme.background,
+      color: context.theme.primary,
       child: Column(
         children: [
           const SizedBox(height: 64),
