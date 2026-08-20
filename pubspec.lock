@@ -619,14 +619,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  flutter_highlight:
-    dependency: transitive
-    description:
-      name: flutter_highlight
-      sha256: "7b96333867aa07e122e245c033b8ad622e4e3a42a1a2372cbb098a2541d8782c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.0"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -688,6 +680,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_math_fork:
+    dependency: transitive
+    description:
+      name: flutter_math_fork
+      sha256: "6d5f2f1aa57ae539ffb0a04bb39d2da67af74601d685a161aff7ce5bda5fa407"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.4"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -795,14 +795,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
-  highlight:
-    dependency: transitive
-    description:
-      name: highlight
-      sha256: "5353a83ffe3e3eca7df0abfb72dcf3fa66cc56b953728e7113ad4ad88497cf21"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.0"
   hive:
     dependency: "direct main"
     description:
@@ -1171,14 +1163,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.3.1"
-  markdown_widget:
-    dependency: "direct main"
-    description:
-      name: markdown_widget
-      sha256: b52c13d3ee4d0e60c812e15b0593f142a3b8a2003cde1babb271d001a1dbdc1c
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.2+8"
   matcher:
     dependency: transitive
     description:
@@ -1227,6 +1211,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  mixin_markdown_widget:
+    dependency: "direct main"
+    description:
+      name: mixin_markdown_widget
+      sha256: "4b4f6430c3be9be5766ae06b0d6c78ab6bd3059c1f2df076ef325028b6f030d5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   msix:
     dependency: "direct dev"
     description:
@@ -1524,6 +1516,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.2"
+  pretext:
+    dependency: transitive
+    description:
+      name: pretext
+      sha256: "414ef08acce07d877ec62348a56c998d8d45eab4cc6bfab35a7287520c6e4c7c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   pretty_qr_code:
     dependency: "direct main"
     description:
@@ -1628,6 +1628,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.3"
+  re_highlight:
+    dependency: transitive
+    description:
+      name: re_highlight
+      sha256: "6c4ac3f76f939fb7ca9df013df98526634e17d8f7460e028bd23a035870024f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   recase:
     dependency: "direct main"
     description:
@@ -1708,14 +1716,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
-  scroll_to_index:
-    dependency: transitive
-    description:
-      name: scroll_to_index
-      sha256: b707546e7500d9f070d63e5acf74fd437ec7eeeb68d3412ef7b0afada0b4f176
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   scrollable_positioned_list:
     dependency: "direct main"
     description:
@@ -1945,6 +1945,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:

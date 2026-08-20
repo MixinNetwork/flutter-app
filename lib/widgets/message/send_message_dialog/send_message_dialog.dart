@@ -508,7 +508,11 @@ class _Post extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsets.all(36),
       child: _MessageBubble(
-        child: MessagePost(showStatus: false, content: content),
+        child: MessagePost(
+          showStatus: false,
+          content: content,
+          clickable: false,
+        ),
       ),
     ),
   );

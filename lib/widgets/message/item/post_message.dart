@@ -34,7 +34,14 @@ class PostMessage extends HookConsumerWidget {
         constraints: const BoxConstraints(maxWidth: 400),
         child: DefaultTextStyle.merge(
           style: TextStyle(fontSize: context.messageStyle.primaryFontSize),
-          child: MessagePost(showStatus: true, content: content),
+          child: MessagePost(
+            showStatus: true,
+            content: content,
+            cacheKey: buildMarkdownCacheKey(
+              namespace: 'post',
+              id: context.message.messageId,
+            ),
+          ),
         ),
       ),
     );
@@ -49,6 +56,7 @@ class MessagePost extends StatelessWidget {
     this.padding,
     this.decoration,
     this.clickable = true,
+    this.cacheKey,
   });
 
   final EdgeInsetsGeometry? padding;
@@ -56,6 +64,7 @@ class MessagePost extends StatelessWidget {
   final bool showStatus;
   final String content;
   final bool clickable;
+  final String? cacheKey;
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
@@ -84,7 +93,10 @@ class MessagePost extends StatelessWidget {
                   ).copyWith(scrollbars: false),
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
-                    child: MarkdownColumn(data: postContent),
+                    child: MarkdownColumn(
+                      data: postContent,
+                      cacheKey: cacheKey,
+                    ),
                   ),
                 ),
               );
@@ -158,12 +170,14 @@ class PostPreview extends StatelessWidget {
           actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
         ),
         Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Markdown(
-              data: message.content ?? '',
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+          child: Markdown(
+            data: message.content ?? '',
+            cacheKey: buildMarkdownCacheKey(
+              namespace: 'post-preview',
+              id: message.messageId,
             ),
+            maxContentWidth: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
           ),
         ),
       ],
