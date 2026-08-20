@@ -47,6 +47,9 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: 8),
         ],
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         centerTitle: true,
         backgroundColor: backgroundColor ?? context.theme.primary,
         leading: MoveWindowBarrier(
