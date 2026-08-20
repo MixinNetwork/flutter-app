@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/markdown.dart';
@@ -8,7 +7,6 @@ import 'package:flutter_app/widgets/message/item/post_message.dart';
 import 'package:flutter_app/widgets/message/message_style.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_markdown_widget/mixin_markdown_widget.dart'
     as mixin_markdown;
 
@@ -23,12 +21,12 @@ void main() {
     expect(find.text('Post title'), findsOneWidget);
   });
 
-  testWidgets('allows a 1200px Markdown preview width', (tester) async {
+  testWidgets('allows unrestricted Markdown preview width', (tester) async {
     await tester.pumpWidget(
       _app(
         const Markdown(
           data: '# Post title',
-          maxContentWidth: 1200,
+          maxContentWidth: double.infinity,
         ),
       ),
     );
@@ -37,28 +35,7 @@ void main() {
       find.byType(mixin_markdown.MarkdownWidget),
     );
 
-    expect(markdown.theme!.maxContentWidth, 1200);
-  });
-
-  testWidgets('centers the 1200px PostPreview content', (tester) async {
-    await tester.pumpWidget(_app(PostPreview(message: _postMessage())));
-
-    final content = find.byWidgetPredicate(
-      (widget) =>
-          widget is ConstrainedBox && widget.constraints.maxWidth == 1264,
-    );
-
-    expect(content, findsOneWidget);
-    expect(
-      find.ancestor(
-        of: content,
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is Align && widget.alignment == Alignment.topCenter,
-        ),
-      ),
-      findsOneWidget,
-    );
+    expect(markdown.theme!.maxContentWidth, double.infinity);
   });
 
   testWidgets('scales PostMessage H1 once with the chat font setting', (
@@ -145,21 +122,6 @@ void main() {
     markdownControllerCache.release(key, replacement);
   });
 }
-
-MessageItem _postMessage() => MessageItem(
-  messageId: 'post-message',
-  conversationId: 'conversation',
-  content: '# Post title',
-  type: 'POST',
-  createdAt: DateTime(2026),
-  status: MessageStatus.delivered,
-  userId: 'user',
-  userFullName: 'User',
-  userIdentityNumber: '0',
-  isVerified: false,
-  sharedUserIsVerified: false,
-  pinned: false,
-);
 
 Widget _app(
   Widget child, {
