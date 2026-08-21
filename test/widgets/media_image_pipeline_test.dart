@@ -1,69 +1,87 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/utils/proxy.dart';
+import 'package:flutter_app/widgets/global_image_cache.dart';
 import 'package:flutter_app/widgets/media_image_pipeline.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 
 void main() {
-  test('uses custom media pipeline only for proxy or likely gif urls', () {
-    expect(
-      shouldUseMediaImagePipeline('https://example.com/a.png', null),
-      false,
-    );
-    expect(
-      shouldUseMediaImagePipeline('https://example.com/a.gif?x=1', null),
-      true,
-    );
-    expect(
-      shouldUseMediaImagePipeline(
-        'https://example.com/no-extension',
-        null,
-        normalizeGif: true,
-      ),
-      true,
-    );
-    expect(
-      shouldUseMediaImagePipeline(
-        'https://example.com/a.png',
-        ProxyConfig(
-          type: ProxyType.http,
-          host: '127.0.0.1',
-          port: 8080,
-          id: 'test',
+  testWidgets('shows a resident remote image without its placeholder', (
+    tester,
+  ) async {
+    const url = 'https://example.com/avatar.png';
+    final image = img.Image(width: 1, height: 1)
+      ..setPixelRgba(0, 0, 0, 0, 0, 255);
+    final data = Uint8List.fromList(img.encodePng(image));
+    late Directory directory;
+    late GlobalImageCache cache;
+    late Uint8List bytes;
+    await tester.runAsync(() async {
+      directory = await Directory.systemTemp.createTemp('image-cache-test');
+      cache = GlobalImageCache.forTesting(
+        directory: directory,
+        fetcher: (_, _, _) async => http.StreamedResponse(
+          Stream.value(data),
+          HttpStatus.ok,
+          headers: {HttpHeaders.cacheControlHeader: 'max-age=3600'},
         ),
+        maxSizeBytes: 1024,
+      );
+      bytes = await cache.getBytes(url, limitBytes: true).single;
+    });
+    addTearDown(() => directory.deleteSync(recursive: true));
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(),
       ),
-      true,
     );
+    await tester.runAsync(
+      () => precacheImage(
+        MemoryImage(bytes),
+        tester.element(find.byType(SizedBox)),
+      ),
+    );
+    await tester.pump();
+
+    Widget imageFor(String imageUrl) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: CachedMediaImage(
+        url: imageUrl,
+        scale: 1,
+        proxyConfig: null,
+        placeholder: () => const SizedBox(key: Key('placeholder')),
+        errorBuilder: null,
+        width: null,
+        height: null,
+        fit: null,
+        isAntiAlias: false,
+        imageCache: cache,
+      ),
+    );
+
+    await tester.pumpWidget(imageFor(url));
+    expect(find.byKey(const Key('placeholder')), findsNothing);
+
+    await tester.pumpWidget(imageFor('https://example.com/other.png'));
+    expect(find.byKey(const Key('placeholder')), findsOneWidget);
   });
 
-  test('resolves network image provider only when pipeline is needed', () {
-    const png = NetworkImage('https://example.com/a.png');
-    expect(
-      resolveMediaImageProvider(image: png, proxyConfig: null),
-      same(png),
-    );
-
-    expect(
-      resolveMediaImageProvider(
-        image: const NetworkImage('https://example.com/a.gif'),
-        proxyConfig: null,
-      ),
-      isA<ProxyNetworkImage>(),
-    );
-
-    expect(
-      resolveMediaImageProvider(
-        image: const NetworkImage('https://example.com/a.png'),
-        proxyConfig: ProxyConfig(
-          type: ProxyType.http,
-          host: '127.0.0.1',
-          port: 8080,
-          id: 'test',
+  testWidgets('keeps file images out of the global cache', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaImagePipeline(
+          image: FileImage(File.fromUri(Uri())),
         ),
       ),
-      isA<ProxyNetworkImage>(),
     );
+
+    expect(find.byType(CachedMediaImage), findsNothing);
   });
 
   testWidgets('skips file images with empty paths', (tester) async {

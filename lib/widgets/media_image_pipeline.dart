@@ -1,48 +1,15 @@
-import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../utils/image.dart';
 import '../utils/proxy.dart';
+import 'global_image_cache.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
 
 final _checkedImageFiles = <String>{};
-
-bool shouldUseMediaImagePipeline(
-  String url,
-  ProxyConfig? proxyConfig, {
-  bool normalizeGif = false,
-}) => normalizeGif || proxyConfig != null || isLikelyGifUrl(url);
-
-@visibleForTesting
-bool isLikelyGifUrl(String url) {
-  final path = Uri.tryParse(url)?.path ?? url.split('?').first;
-  return path.toLowerCase().endsWith('.gif');
-}
-
-ImageProvider resolveMediaImageProvider({
-  required ImageProvider image,
-  required ProxyConfig? proxyConfig,
-  bool normalizeGif = false,
-}) {
-  if (image is NetworkImage &&
-      shouldUseMediaImagePipeline(
-        image.url,
-        proxyConfig,
-        normalizeGif: normalizeGif,
-      )) {
-    return ProxyNetworkImage(
-      image.url,
-      scale: image.scale,
-      proxyConfig: proxyConfig,
-    );
-  }
-  return image;
-}
 
 class MediaImagePipeline extends StatelessWidget {
   const MediaImagePipeline({
@@ -55,7 +22,6 @@ class MediaImagePipeline extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-    this.normalizeGif = false,
   });
 
   final ImageProvider image;
@@ -66,21 +32,29 @@ class MediaImagePipeline extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final bool isAntiAlias;
-  final bool normalizeGif;
 
   @override
   Widget build(BuildContext context) {
-    final resolvedImage = resolveMediaImageProvider(
-      image: image,
-      proxyConfig: proxyConfig,
-      normalizeGif: normalizeGif,
-    );
+    final image = this.image;
+    if (image is NetworkImage) {
+      return CachedMediaImage(
+        url: image.url,
+        scale: image.scale,
+        proxyConfig: proxyConfig,
+        placeholder: placeholder,
+        errorBuilder: errorBuilder,
+        width: width,
+        height: height,
+        fit: fit,
+        isAntiAlias: isAntiAlias,
+      );
+    }
 
     Widget fallback() =>
         placeholder?.call() ?? SizedBox(width: width, height: height);
 
     Widget imageView() => Image(
-      image: resolvedImage,
+      image: image,
       width: width,
       height: height,
       fit: fit,
@@ -94,70 +68,112 @@ class MediaImagePipeline extends StatelessWidget {
     );
 
     return NormalizedGifImageGate(
-      image: resolvedImage,
+      image: image,
       placeholder: fallback,
       childBuilder: imageView,
     );
   }
 }
 
-@immutable
-class ProxyNetworkImage extends ImageProvider<ProxyNetworkImage> {
-  const ProxyNetworkImage(this.url, {this.scale = 1.0, this.proxyConfig});
+class CachedMediaImage extends StatefulWidget {
+  const CachedMediaImage({
+    required this.url,
+    required this.scale,
+    required this.proxyConfig,
+    required this.placeholder,
+    required this.errorBuilder,
+    required this.width,
+    required this.height,
+    required this.fit,
+    required this.isAntiAlias,
+    @visibleForTesting this.imageCache,
+    super.key,
+  });
 
   final String url;
   final double scale;
   final ProxyConfig? proxyConfig;
+  final PlaceholderWidgetBuilder? placeholder;
+  final ImageErrorWidgetBuilder? errorBuilder;
+  final double? width;
+  final double? height;
+  final BoxFit? fit;
+  final bool isAntiAlias;
+
+  @visibleForTesting
+  final GlobalImageCache? imageCache;
 
   @override
-  Future<ProxyNetworkImage> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<ProxyNetworkImage>(this);
+  State<CachedMediaImage> createState() => _CachedMediaImageState();
+}
+
+class _CachedMediaImageState extends State<CachedMediaImage> {
+  late Stream<Uint8List> _images;
 
   @override
-  ImageStreamCompleter loadImage(
-    ProxyNetworkImage key,
-    ImageDecoderCallback decode,
-  ) => _load(key, (buffer) => decode(buffer));
-
-  ImageStreamCompleter _load(
-    ProxyNetworkImage key,
-    Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
-  ) => MultiFrameImageStreamCompleter(
-    codec: _loadAsync(key, decode),
-    scale: key.scale,
-    debugLabel: key.url,
-    informationCollector: () => <DiagnosticsNode>[
-      DiagnosticsProperty<ImageProvider>('Image provider', this),
-      DiagnosticsProperty<ProxyNetworkImage>('Image key', key),
-    ],
-  );
-
-  Future<ui.Codec> _loadAsync(
-    ProxyNetworkImage key,
-    Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
-  ) async {
-    try {
-      final bytes = normalizeGifBytesIfNeeded(
-        await downloadImageBytes(key.url, proxyConfig: key.proxyConfig),
-      );
-      return await decode(await ui.ImmutableBuffer.fromUint8List(bytes));
-    } catch (_) {
-      scheduleMicrotask(() {
-        PaintingBinding.instance.imageCache.evict(key);
-      });
-      rethrow;
-    }
+  void initState() {
+    super.initState();
+    _images = _imageStream();
   }
 
   @override
-  bool operator ==(Object other) =>
-      other is ProxyNetworkImage &&
-      other.url == url &&
-      other.scale == scale &&
-      other.proxyConfig == proxyConfig;
+  void didUpdateWidget(covariant CachedMediaImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url ||
+        oldWidget.proxyConfig != widget.proxyConfig ||
+        oldWidget.imageCache != widget.imageCache) {
+      _images = _imageStream();
+    }
+  }
+
+  GlobalImageCache get _cache => widget.imageCache ?? GlobalImageCache.instance;
+
+  Stream<Uint8List> _imageStream() => _cache.getBytes(
+    widget.url,
+    proxyConfig: widget.proxyConfig,
+    limitBytes: true,
+  );
 
   @override
-  int get hashCode => Object.hash(url, scale, proxyConfig);
+  Widget build(BuildContext context) {
+    Widget fallback() =>
+        widget.placeholder?.call() ??
+        SizedBox(width: widget.width, height: widget.height);
+
+    return StreamBuilder<Uint8List>(
+      key: ValueKey((widget.url, widget.proxyConfig, widget.imageCache)),
+      initialData: _cache.peekMemoryBytes(
+        widget.url,
+        proxyConfig: widget.proxyConfig,
+      ),
+      stream: _images,
+      builder: (context, snapshot) {
+        final error = snapshot.error;
+        if (error != null) {
+          return widget.errorBuilder?.call(context, error, StackTrace.empty) ??
+              fallback();
+        }
+        final bytes = snapshot.data;
+        if (bytes == null) return fallback();
+
+        return Image.memory(
+          bytes,
+          scale: widget.scale,
+          width: widget.width,
+          height: widget.height,
+          fit: widget.fit,
+          isAntiAlias: widget.isAntiAlias,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded || frame != null) return child;
+            return fallback();
+          },
+          errorBuilder: (context, error, stackTrace) =>
+              widget.errorBuilder?.call(context, error, stackTrace) ??
+              fallback(),
+        );
+      },
+    );
+  }
 }
 
 class NormalizedGifImageGate extends StatefulWidget {
