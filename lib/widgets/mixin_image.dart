@@ -16,7 +16,6 @@ class MixinImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-    this.normalizeGif = false,
   });
 
   MixinImage.network(
@@ -28,7 +27,6 @@ class MixinImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-    this.normalizeGif = false,
   }) : image = NetworkImage(url);
 
   MixinImage.file(
@@ -40,8 +38,7 @@ class MixinImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-  }) : image = FileImage(file),
-       normalizeGif = false;
+  }) : image = FileImage(file);
 
   MixinImage.asset(
     String assetName, {
@@ -52,8 +49,7 @@ class MixinImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-  }) : image = AssetImage(assetName),
-       normalizeGif = false;
+  }) : image = AssetImage(assetName);
 
   MixinImage.memory(
     Uint8List bytes, {
@@ -64,8 +60,7 @@ class MixinImage extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-  }) : image = MemoryImage(bytes),
-       normalizeGif = false;
+  }) : image = MemoryImage(bytes);
 
   final ImageProvider image;
   final PlaceholderWidgetBuilder? placeholder;
@@ -74,7 +69,6 @@ class MixinImage extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final bool isAntiAlias;
-  final bool normalizeGif;
 
   @override
   Widget build(BuildContext context) => MediaImagePipeline(
@@ -86,6 +80,5 @@ class MixinImage extends StatelessWidget {
     height: height,
     fit: fit,
     isAntiAlias: isAntiAlias,
-    normalizeGif: normalizeGif,
   );
 }
