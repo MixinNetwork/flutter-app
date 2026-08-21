@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../utils/image.dart';
 import '../utils/proxy.dart';
 
-const _kGlobalImageCacheKey = 'mixin_global_image_cache';
+const _kGlobalImageCacheKey = 'cacheimage';
 const _kGlobalImageCacheMaxSizeBytes = 1024 * 1024 * 1024;
 const _kDefaultImageCacheMaxAge = Duration(days: 7);
 const _kCacheEntryFileExtension = '.image';
@@ -455,7 +455,7 @@ class _ImageCacheEntry {
 }
 
 Future<Directory> _defaultDirectory() async => Directory(
-  p.join((await getApplicationCacheDirectory()).path, _kGlobalImageCacheKey),
+  p.join((await getTemporaryDirectory()).path, _kGlobalImageCacheKey),
 );
 
 Future<http.StreamedResponse> _fetchRemoteImage(
