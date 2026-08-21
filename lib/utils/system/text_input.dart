@@ -17,15 +17,13 @@ class TextInputActionHandler extends StatefulWidget {
 
 class _TextInputActionHandlerState extends State<TextInputActionHandler> {
   late final _actions = <Type, Action<Intent>>{
-    DeleteCharacterIntent: makeAction<DeleteCharacterIntent>(context),
-    ExtendSelectionByCharacterIntent:
-        makeAction<ExtendSelectionByCharacterIntent>(context),
-    ExtendSelectionVerticallyToAdjacentLineIntent:
-        makeAction<ExtendSelectionVerticallyToAdjacentLineIntent>(context),
-    SelectAllTextIntent: makeAction<SelectAllTextIntent>(context),
-    PasteTextIntent: makeAction<PasteTextIntent>(context),
-    RedoTextIntent: makeAction<RedoTextIntent>(context),
-    UndoTextIntent: makeAction<UndoTextIntent>(context),
+    DeleteCharacterIntent: makeAction(context),
+    ExtendSelectionByCharacterIntent: makeAction(context),
+    ExtendSelectionVerticallyToAdjacentLineIntent: makeAction(context),
+    SelectAllTextIntent: makeAction(context),
+    PasteTextIntent: makeAction(context),
+    RedoTextIntent: makeAction(context),
+    UndoTextIntent: makeAction(context),
   };
 
   @override
@@ -37,19 +35,18 @@ class _TextInputActionHandlerState extends State<TextInputActionHandler> {
   }
 }
 
-Action<T> makeAction<T extends Intent>(BuildContext context) =>
-    Action<T>.overridable(
-      defaultAction: _CallbackContextAction(),
-      context: context,
-    );
+Action<Intent> makeAction(BuildContext context) => Action<Intent>.overridable(
+  defaultAction: _CallbackContextAction(),
+  context: context,
+);
 
-class _CallbackContextAction<T extends Intent> extends ContextAction<T> {
+class _CallbackContextAction extends ContextAction<Intent> {
   _CallbackContextAction();
 
   bool? _consumeKey;
 
   @override
-  bool consumesKey(T intent) {
+  bool consumesKey(Intent intent) {
     final consumeKey = _consumeKey;
     _consumeKey = null;
     if (consumeKey != null) {
@@ -59,7 +56,7 @@ class _CallbackContextAction<T extends Intent> extends ContextAction<T> {
   }
 
   @override
-  Object? invoke(T intent, [BuildContext? context]) {
+  Object? invoke(Intent intent, [BuildContext? context]) {
     if (context == null) {
       e('No context provided to _CallbackContextAction');
       return callingAction?.invoke(intent);

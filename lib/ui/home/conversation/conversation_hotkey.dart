@@ -16,29 +16,42 @@ class ConversationHotKey extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => FocusableActionDetector(
-    shortcuts: {
-      SingleActivator(
-        LogicalKeyboardKey.arrowDown,
-        meta: kPlatformIsDarwin,
-        control: !kPlatformIsDarwin,
-      ): const NextConversationIntent(),
-      SingleActivator(
-        LogicalKeyboardKey.arrowUp,
-        meta: kPlatformIsDarwin,
-        control: !kPlatformIsDarwin,
-      ): const PreviousConversationIntent(),
-    },
-    actions: {
-      NextConversationIntent: CallbackAction<NextConversationIntent>(
-        onInvoke: (_) => _navigationConversation(context, forward: true),
-      ),
-      PreviousConversationIntent: CallbackAction<PreviousConversationIntent>(
-        onInvoke: (_) => _navigationConversation(context, forward: false),
-      ),
-    },
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: FocusManager.instance,
+    builder: (context, child) => FocusableActionDetector(
+      shortcuts: _isMultilineEditableTextFocused()
+          ? const {}
+          : {
+              SingleActivator(
+                LogicalKeyboardKey.arrowDown,
+                meta: kPlatformIsDarwin,
+                control: !kPlatformIsDarwin,
+              ): const NextConversationIntent(),
+              SingleActivator(
+                LogicalKeyboardKey.arrowUp,
+                meta: kPlatformIsDarwin,
+                control: !kPlatformIsDarwin,
+              ): const PreviousConversationIntent(),
+            },
+      actions: {
+        NextConversationIntent: CallbackAction<NextConversationIntent>(
+          onInvoke: (_) => _navigationConversation(context, forward: true),
+        ),
+        PreviousConversationIntent: CallbackAction<PreviousConversationIntent>(
+          onInvoke: (_) => _navigationConversation(context, forward: false),
+        ),
+      },
+      child: child!,
+    ),
     child: child,
   );
+}
+
+bool _isMultilineEditableTextFocused() {
+  final context = FocusManager.instance.primaryFocus?.context;
+  final editableText = context?.findAncestorWidgetOfExactType<EditableText>();
+  final maxLines = editableText?.maxLines;
+  return editableText != null && (maxLines == null || maxLines > 1);
 }
 
 class NextConversationIntent extends Intent {
