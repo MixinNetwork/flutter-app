@@ -89,7 +89,7 @@ class _AddStickerDialog extends StatelessWidget {
 
                   final response = await accountServer.client.accountApi
                       .addSticker(
-                        StickerRequest(dataBase64: bytes.base64Encode()),
+                        StickerRequest(dataBase64: bytes.base64RawUrlEncode()),
                       );
                   final sticker = response.data;
 
