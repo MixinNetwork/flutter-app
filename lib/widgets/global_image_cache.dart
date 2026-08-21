@@ -90,9 +90,6 @@ class GlobalImageCache {
     }
   }
 
-  Uint8List? peekMemoryBytes(String url, {ProxyConfig? proxyConfig}) =>
-      _entries[_cacheKey(url, proxyConfig)]?.bytes?.target;
-
   Future<_CachedImage?> _read(String key) async {
     await _ensureReady();
     return _synchronized(() async {

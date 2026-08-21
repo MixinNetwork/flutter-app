@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -8,6 +10,17 @@ import '../utils/proxy.dart';
 import 'global_image_cache.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
+
+ImageProvider resolveMediaImageProvider(
+  ImageProvider image,
+  ProxyConfig? proxyConfig,
+) => image is NetworkImage
+    ? CachedNetworkImage(
+        image.url,
+        scale: image.scale,
+        proxyConfig: proxyConfig,
+      )
+    : image;
 
 final _checkedImageFiles = <String>{};
 
@@ -35,26 +48,12 @@ class MediaImagePipeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = this.image;
-    if (image is NetworkImage) {
-      return CachedMediaImage(
-        url: image.url,
-        scale: image.scale,
-        proxyConfig: proxyConfig,
-        placeholder: placeholder,
-        errorBuilder: errorBuilder,
-        width: width,
-        height: height,
-        fit: fit,
-        isAntiAlias: isAntiAlias,
-      );
-    }
-
+    final resolvedImage = resolveMediaImageProvider(image, proxyConfig);
     Widget fallback() =>
         placeholder?.call() ?? SizedBox(width: width, height: height);
 
     Widget imageView() => Image(
-      image: image,
+      image: resolvedImage,
       width: width,
       height: height,
       fit: fit,
@@ -68,112 +67,82 @@ class MediaImagePipeline extends StatelessWidget {
     );
 
     return NormalizedGifImageGate(
-      image: image,
+      image: resolvedImage,
       placeholder: fallback,
       childBuilder: imageView,
     );
   }
 }
 
-class CachedMediaImage extends StatefulWidget {
-  const CachedMediaImage({
-    required this.url,
-    required this.scale,
-    required this.proxyConfig,
-    required this.placeholder,
-    required this.errorBuilder,
-    required this.width,
-    required this.height,
-    required this.fit,
-    required this.isAntiAlias,
+@immutable
+class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
+  const CachedNetworkImage(
+    this.url, {
+    this.scale = 1.0,
+    this.proxyConfig,
     @visibleForTesting this.imageCache,
-    super.key,
   });
 
   final String url;
   final double scale;
   final ProxyConfig? proxyConfig;
-  final PlaceholderWidgetBuilder? placeholder;
-  final ImageErrorWidgetBuilder? errorBuilder;
-  final double? width;
-  final double? height;
-  final BoxFit? fit;
-  final bool isAntiAlias;
 
   @visibleForTesting
   final GlobalImageCache? imageCache;
 
-  @override
-  State<CachedMediaImage> createState() => _CachedMediaImageState();
-}
-
-class _CachedMediaImageState extends State<CachedMediaImage> {
-  late Stream<Uint8List> _images;
+  GlobalImageCache get _cache => imageCache ?? GlobalImageCache.instance;
 
   @override
-  void initState() {
-    super.initState();
-    _images = _imageStream();
-  }
+  Future<CachedNetworkImage> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture<CachedNetworkImage>(this);
 
   @override
-  void didUpdateWidget(covariant CachedMediaImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.url != widget.url ||
-        oldWidget.proxyConfig != widget.proxyConfig ||
-        oldWidget.imageCache != widget.imageCache) {
-      _images = _imageStream();
+  ImageStreamCompleter loadImage(
+    CachedNetworkImage key,
+    ImageDecoderCallback decode,
+  ) => MultiFrameImageStreamCompleter(
+    codec: _loadAsync(key, decode),
+    scale: key.scale,
+    debugLabel: key.url,
+    informationCollector: () => <DiagnosticsNode>[
+      DiagnosticsProperty<ImageProvider>('Image provider', this),
+      DiagnosticsProperty<CachedNetworkImage>('Image key', key),
+    ],
+  );
+
+  Future<ui.Codec> _loadAsync(
+    CachedNetworkImage key,
+    Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
+  ) async {
+    try {
+      // ponytail: expired entries revalidate before decode; add a streaming
+      // completer only if live stale-while-revalidate updates are required.
+      final bytes = await _cache
+          .getBytes(
+            key.url,
+            proxyConfig: key.proxyConfig,
+            limitBytes: true,
+          )
+          .last;
+      return await decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+    } catch (_) {
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
+      rethrow;
     }
   }
 
-  GlobalImageCache get _cache => widget.imageCache ?? GlobalImageCache.instance;
-
-  Stream<Uint8List> _imageStream() => _cache.getBytes(
-    widget.url,
-    proxyConfig: widget.proxyConfig,
-    limitBytes: true,
-  );
+  @override
+  bool operator ==(Object other) =>
+      other is CachedNetworkImage &&
+      other.url == url &&
+      other.scale == scale &&
+      other.proxyConfig == proxyConfig &&
+      other.imageCache == imageCache;
 
   @override
-  Widget build(BuildContext context) {
-    Widget fallback() =>
-        widget.placeholder?.call() ??
-        SizedBox(width: widget.width, height: widget.height);
-
-    return StreamBuilder<Uint8List>(
-      key: ValueKey((widget.url, widget.proxyConfig, widget.imageCache)),
-      initialData: _cache.peekMemoryBytes(
-        widget.url,
-        proxyConfig: widget.proxyConfig,
-      ),
-      stream: _images,
-      builder: (context, snapshot) {
-        final error = snapshot.error;
-        if (error != null) {
-          return widget.errorBuilder?.call(context, error, StackTrace.empty) ??
-              fallback();
-        }
-        final bytes = snapshot.data;
-        if (bytes == null) return fallback();
-
-        return Image.memory(
-          bytes,
-          scale: widget.scale,
-          width: widget.width,
-          height: widget.height,
-          fit: widget.fit,
-          isAntiAlias: widget.isAntiAlias,
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            if (wasSynchronouslyLoaded || frame != null) return child;
-            return fallback();
-          },
-          errorBuilder: (context, error, stackTrace) =>
-              widget.errorBuilder?.call(context, error, stackTrace) ??
-              fallback(),
-        );
-      },
-    );
-  }
+  int get hashCode => Object.hash(url, scale, proxyConfig, imageCache);
 }
 
 class NormalizedGifImageGate extends StatefulWidget {
