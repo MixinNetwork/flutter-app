@@ -7,42 +7,22 @@ import 'package:flutter/widgets.dart';
 
 import '../utils/image.dart';
 import '../utils/proxy.dart';
+import 'global_image_cache.dart';
 
 typedef PlaceholderWidgetBuilder = Widget Function();
 
-final _checkedImageFiles = <String>{};
-
-bool shouldUseMediaImagePipeline(
-  String url,
-  ProxyConfig? proxyConfig, {
-  bool normalizeGif = false,
-}) => normalizeGif || proxyConfig != null || isLikelyGifUrl(url);
-
-@visibleForTesting
-bool isLikelyGifUrl(String url) {
-  final path = Uri.tryParse(url)?.path ?? url.split('?').first;
-  return path.toLowerCase().endsWith('.gif');
-}
-
-ImageProvider resolveMediaImageProvider({
-  required ImageProvider image,
-  required ProxyConfig? proxyConfig,
-  bool normalizeGif = false,
-}) {
-  if (image is NetworkImage &&
-      shouldUseMediaImagePipeline(
+ImageProvider resolveMediaImageProvider(
+  ImageProvider image,
+  ProxyConfig? proxyConfig,
+) => image is NetworkImage
+    ? CachedNetworkImage(
         image.url,
-        proxyConfig,
-        normalizeGif: normalizeGif,
-      )) {
-    return ProxyNetworkImage(
-      image.url,
-      scale: image.scale,
-      proxyConfig: proxyConfig,
-    );
-  }
-  return image;
-}
+        scale: image.scale,
+        proxyConfig: proxyConfig,
+      )
+    : image;
+
+final _checkedImageFiles = <String>{};
 
 class MediaImagePipeline extends StatelessWidget {
   const MediaImagePipeline({
@@ -55,7 +35,6 @@ class MediaImagePipeline extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
-    this.normalizeGif = false,
   });
 
   final ImageProvider image;
@@ -66,16 +45,10 @@ class MediaImagePipeline extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final bool isAntiAlias;
-  final bool normalizeGif;
 
   @override
   Widget build(BuildContext context) {
-    final resolvedImage = resolveMediaImageProvider(
-      image: image,
-      proxyConfig: proxyConfig,
-      normalizeGif: normalizeGif,
-    );
-
+    final resolvedImage = resolveMediaImageProvider(image, proxyConfig);
     Widget fallback() =>
         placeholder?.call() ?? SizedBox(width: width, height: height);
 
@@ -102,44 +75,55 @@ class MediaImagePipeline extends StatelessWidget {
 }
 
 @immutable
-class ProxyNetworkImage extends ImageProvider<ProxyNetworkImage> {
-  const ProxyNetworkImage(this.url, {this.scale = 1.0, this.proxyConfig});
+class CachedNetworkImage extends ImageProvider<CachedNetworkImage> {
+  const CachedNetworkImage(
+    this.url, {
+    this.scale = 1.0,
+    this.proxyConfig,
+    @visibleForTesting this.imageCache,
+  });
 
   final String url;
   final double scale;
   final ProxyConfig? proxyConfig;
 
+  @visibleForTesting
+  final GlobalImageCache? imageCache;
+
+  GlobalImageCache get _cache => imageCache ?? GlobalImageCache.instance;
+
   @override
-  Future<ProxyNetworkImage> obtainKey(ImageConfiguration configuration) =>
-      SynchronousFuture<ProxyNetworkImage>(this);
+  Future<CachedNetworkImage> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture<CachedNetworkImage>(this);
 
   @override
   ImageStreamCompleter loadImage(
-    ProxyNetworkImage key,
+    CachedNetworkImage key,
     ImageDecoderCallback decode,
-  ) => _load(key, (buffer) => decode(buffer));
-
-  ImageStreamCompleter _load(
-    ProxyNetworkImage key,
-    Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
   ) => MultiFrameImageStreamCompleter(
     codec: _loadAsync(key, decode),
     scale: key.scale,
     debugLabel: key.url,
     informationCollector: () => <DiagnosticsNode>[
       DiagnosticsProperty<ImageProvider>('Image provider', this),
-      DiagnosticsProperty<ProxyNetworkImage>('Image key', key),
+      DiagnosticsProperty<CachedNetworkImage>('Image key', key),
     ],
   );
 
   Future<ui.Codec> _loadAsync(
-    ProxyNetworkImage key,
+    CachedNetworkImage key,
     Future<ui.Codec> Function(ui.ImmutableBuffer buffer) decode,
   ) async {
     try {
-      final bytes = normalizeGifBytesIfNeeded(
-        await downloadImageBytes(key.url, proxyConfig: key.proxyConfig),
-      );
+      // ponytail: expired entries revalidate before decode; add a streaming
+      // completer only if live stale-while-revalidate updates are required.
+      final bytes = await _cache
+          .getBytes(
+            key.url,
+            proxyConfig: key.proxyConfig,
+            limitBytes: true,
+          )
+          .last;
       return await decode(await ui.ImmutableBuffer.fromUint8List(bytes));
     } catch (_) {
       scheduleMicrotask(() {
@@ -151,13 +135,14 @@ class ProxyNetworkImage extends ImageProvider<ProxyNetworkImage> {
 
   @override
   bool operator ==(Object other) =>
-      other is ProxyNetworkImage &&
+      other is CachedNetworkImage &&
       other.url == url &&
       other.scale == scale &&
-      other.proxyConfig == proxyConfig;
+      other.proxyConfig == proxyConfig &&
+      other.imageCache == imageCache;
 
   @override
-  int get hashCode => Object.hash(url, scale, proxyConfig);
+  int get hashCode => Object.hash(url, scale, proxyConfig, imageCache);
 }
 
 class NormalizedGifImageGate extends StatefulWidget {
