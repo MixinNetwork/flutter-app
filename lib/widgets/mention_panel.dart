@@ -13,7 +13,6 @@ import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/mention_provider.dart';
 import '../utils/extension/extension.dart';
-import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
 import 'high_light_text.dart';
@@ -57,22 +56,18 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
 
     return FocusableActionDetector(
       enabled: selectable,
-      shortcuts: {
-        const SingleActivator(LogicalKeyboardKey.arrowDown):
-            const ListSelectionNextIntent(),
-        const SingleActivator(LogicalKeyboardKey.arrowUp):
-            const ListSelectionPrevIntent(),
-        const SingleActivator(LogicalKeyboardKey.tab):
-            const ListSelectionNextIntent(),
-        const SingleActivator(LogicalKeyboardKey.enter):
-            const ListSelectionSelectedIntent(),
-        if (kPlatformIsDarwin) ...{
-          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
-              const ListSelectionNextIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyP, control: true):
-              const ListSelectionPrevIntent(),
-        },
-      },
+      shortcuts: selectable
+          ? {
+              const SingleActivator(LogicalKeyboardKey.arrowDown):
+                  const ListSelectionNextIntent(),
+              const SingleActivator(LogicalKeyboardKey.arrowUp):
+                  const ListSelectionPrevIntent(),
+              const SingleActivator(LogicalKeyboardKey.tab):
+                  const ListSelectionSelectedIntent(),
+              const SingleActivator(LogicalKeyboardKey.enter):
+                  const ListSelectionSelectedIntent(),
+            }
+          : const {},
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
           onInvoke: (intent) =>
@@ -82,11 +77,9 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
           onInvoke: (intent) =>
               ref.read(mentionProviderInstance.notifier).prev(),
         ),
-        ListSelectionSelectedIntent: CallbackAction<Intent>(
-          onInvoke: (intent) {
-            final state = ref.read(mentionProviderInstance);
-            _select(state.users[state.index], ref.read(mentionCacheProvider));
-          },
+        ListSelectionSelectedIntent: _MentionSelectionAction(
+          selectedUser: () => ref.read(mentionProviderInstance).selectedUser,
+          onSelect: (user) => _select(user, ref.read(mentionCacheProvider)),
         ),
       },
       child: PortalTarget(
@@ -143,6 +136,26 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ..selection = TextSelection.fromPosition(
         TextPosition(offset: beforeSelectionOffset.length),
       );
+  }
+}
+
+class _MentionSelectionAction extends Action<ListSelectionSelectedIntent> {
+  _MentionSelectionAction({
+    required this.selectedUser,
+    required this.onSelect,
+  });
+
+  final User? Function() selectedUser;
+  final void Function(User user) onSelect;
+
+  @override
+  bool isEnabled(ListSelectionSelectedIntent intent) => selectedUser() != null;
+
+  @override
+  Object? invoke(ListSelectionSelectedIntent intent) {
+    final user = selectedUser();
+    if (user != null) onSelect(user);
+    return null;
   }
 }
 

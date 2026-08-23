@@ -30,7 +30,6 @@ import 'utils/extension/extension.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
-import 'utils/system/text_input.dart';
 import 'utils/system/tray.dart';
 import 'widgets/actions/actions.dart';
 import 'widgets/auth.dart';
@@ -191,10 +190,8 @@ class _App extends HookConsumerWidget {
                         : mediaQueryData.textScaler,
                   ),
                   child: SystemTrayWidget(
-                    child: TextInputActionHandler(
-                      child: _WindowsTitleBarDivider(
-                        child: AuthGuard(child: child!),
-                      ),
+                    child: _WindowsTitleBarDivider(
+                      child: AuthGuard(child: child!),
                     ),
                   ),
                 ),
