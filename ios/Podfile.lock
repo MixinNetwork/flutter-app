@@ -7,8 +7,6 @@ PODS:
     - FlutterMacOS
   - irondash_engine_context (0.0.1):
     - Flutter
-  - mixin_logger (0.0.1):
-    - Flutter
   - objective_c (0.0.1):
     - Flutter
   - ogg_opus_player (0.0.1):
@@ -28,7 +26,6 @@ DEPENDENCIES:
   - flutter_app_icon_badge (from `.symlinks/plugins/flutter_app_icon_badge/ios`)
   - gal (from `.symlinks/plugins/gal/darwin`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
-  - mixin_logger (from `.symlinks/plugins/mixin_logger/ios`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/darwin`)
   - protocol_handler_ios (from `.symlinks/plugins/protocol_handler_ios/ios`)
@@ -45,8 +42,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/gal/darwin"
   irondash_engine_context:
     :path: ".symlinks/plugins/irondash_engine_context/ios"
-  mixin_logger:
-    :path: ".symlinks/plugins/mixin_logger/ios"
   objective_c:
     :path: ".symlinks/plugins/objective_c/ios"
   ogg_opus_player:
@@ -65,7 +60,6 @@ SPEC CHECKSUMS:
   flutter_app_icon_badge: 44f31cf93bad265c20fe8f13f6e0a1d4e4707fe8
   gal: 44e5b10dbd347c8247a2851acee6c1fbe282c1d3
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
-  mixin_logger: c613ba9ee39d409e9de69216b6bee00340bf077c
   objective_c: a86b8b4cc01f607d2f65f73fcba1f7b1ac593745
   ogg_opus_player: 954784304f4e2722780018c4abf284e4f93cddf5
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5

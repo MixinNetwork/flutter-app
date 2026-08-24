@@ -8,8 +8,6 @@ PODS:
   - FlutterMacOS (1.0.0)
   - irondash_engine_context (0.0.1):
     - FlutterMacOS
-  - mixin_logger (0.0.1):
-    - FlutterMacOS
   - objective_c (0.0.1):
     - FlutterMacOS
   - ogg_opus_player (0.0.1):
@@ -33,7 +31,6 @@ DEPENDENCIES:
   - flutter_app_icon_badge (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
-  - mixin_logger (from `Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos`)
   - objective_c (from `Flutter/ephemeral/.symlinks/plugins/objective_c/macos`)
   - ogg_opus_player (from `Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/darwin`)
   - PLCrashReporter
@@ -58,8 +55,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   irondash_engine_context:
     :path: Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos
-  mixin_logger:
-    :path: Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos
   objective_c:
     :path: Flutter/ephemeral/.symlinks/plugins/objective_c/macos
   ogg_opus_player:
@@ -81,7 +76,6 @@ SPEC CHECKSUMS:
   flutter_app_icon_badge: e05568a57ac0d98a0e7bc35c5b9ae9b118109b1e
   FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
-  mixin_logger: 6b31328b08f546a8defd32cd910370562fc48405
   objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7
   ogg_opus_player: 954784304f4e2722780018c4abf284e4f93cddf5
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
