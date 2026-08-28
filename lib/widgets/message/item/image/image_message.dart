@@ -75,6 +75,7 @@ class MessageImage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
+    final isPinnedPage = useIsPinnedPage();
     final type = useMessageConverter(converter: (state) => state.type);
     final conversationId = useMessageConverter(
       converter: (state) => state.conversationId,
@@ -141,6 +142,7 @@ class MessageImage extends HookConsumerWidget {
               conversationId: message.conversationId,
               messageId: message.messageId,
               isTranscriptPage: isTranscriptPage,
+              isPinnedPage: isPinnedPage,
             );
           case MediaStatus.canceled:
             if (message.mediaUrl?.isNotEmpty == true && isMessageSentOut) {

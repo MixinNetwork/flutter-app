@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -147,6 +148,7 @@ class PostPreview extends StatelessWidget {
     barrierColor: Colors.transparent,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    requestFocus: true,
     pageBuilder:
         (
           buildContext,
@@ -161,26 +163,41 @@ class PostPreview extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: context.theme.background,
-    child: Column(
-      children: [
-        MixinAppBar(
-          leading: const SizedBox(),
-          actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
-        ),
-        Expanded(
-          child: Markdown(
-            data: message.content ?? '',
-            cacheKey: buildMarkdownCacheKey(
-              namespace: 'post-preview',
-              id: message.messageId,
-            ),
-            maxContentWidth: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+  Widget build(BuildContext context) => FocusableActionDetector(
+    shortcuts: const {
+      SingleActivator(LogicalKeyboardKey.escape): _PostPreviewEscapeIntent(),
+    },
+    actions: {
+      _PostPreviewEscapeIntent: CallbackAction<Intent>(
+        onInvoke: (intent) => Navigator.maybePop(context),
+      ),
+    },
+    autofocus: true,
+    child: Material(
+      color: context.theme.background,
+      child: Column(
+        children: [
+          MixinAppBar(
+            leading: const SizedBox(),
+            actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
           ),
-        ),
-      ],
+          Expanded(
+            child: Markdown(
+              data: message.content ?? '',
+              cacheKey: buildMarkdownCacheKey(
+                namespace: 'post-preview',
+                id: message.messageId,
+              ),
+              maxContentWidth: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+            ),
+          ),
+        ],
+      ),
     ),
   );
+}
+
+class _PostPreviewEscapeIntent extends Intent {
+  const _PostPreviewEscapeIntent();
 }
