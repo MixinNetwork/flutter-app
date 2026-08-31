@@ -68,7 +68,7 @@ class GroupParticipantsPage extends HookConsumerWidget {
       appBar: MixinAppBar(
         title: Text(context.l10n.groupParticipants),
         actions: [
-          if (currentUser?.role != null)
+          if (hasParticipant && currentUser?.role != null)
             _ActionAddParticipants(participants: participants),
         ],
       ),

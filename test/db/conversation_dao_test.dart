@@ -8,7 +8,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     show ConversationCategory, ConversationStatus, UserRelationship;
 
 void main() {
-  test('conversation searches exclude quit groups but keep contacts', () async {
+  test('conversation searches include quit groups', () async {
     final database = MixinDatabase(NativeDatabase.memory());
     addTearDown(database.close);
 
@@ -67,7 +67,7 @@ void main() {
         .get();
     expect(
       typedPaletteResults.map((item) => item.id).toSet(),
-      {'active-group', 'quit-contact'},
+      {'active-group', 'quit-group', 'quit-contact'},
     );
 
     final recentPaletteResults = await database.conversationDao
@@ -79,7 +79,7 @@ void main() {
         .get();
     expect(
       recentPaletteResults.map((item) => item.id).toSet(),
-      {'active-group', 'quit-contact'},
+      {'active-group', 'quit-group', 'quit-contact'},
     );
 
     final quitContactResults = await database.conversationDao
@@ -87,15 +87,15 @@ void main() {
         .get();
     expect(
       quitContactResults.map((item) => item.id).toSet(),
-      {'active-group', 'quit-contact'},
+      {'active-group', 'quit-group', 'quit-contact'},
     );
 
     final regularSearchResults = await database.conversationDao
         .fuzzySearchConversation('Group', 32)
         .get();
     expect(
-      regularSearchResults.map((item) => item.conversationId),
-      ['active-group'],
+      regularSearchResults.map((item) => item.conversationId).toSet(),
+      {'active-group', 'quit-group'},
     );
 
     final regularQuitContactResults = await database.conversationDao
@@ -103,7 +103,7 @@ void main() {
         .get();
     expect(
       regularQuitContactResults.map((item) => item.conversationId).toSet(),
-      {'active-group', 'quit-contact'},
+      {'quit-contact'},
     );
   });
 }

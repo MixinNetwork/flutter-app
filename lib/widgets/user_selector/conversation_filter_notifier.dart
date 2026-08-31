@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
+    show ConversationStatus;
 
 import '../../account/account_server.dart';
 import '../../db/dao/conversation_dao.dart';
@@ -14,8 +16,9 @@ class ConversationFilterNotifier
     this.accountServer,
     this.onlyContact,
     this.filteredIds,
-    this.afterInit,
-  ) : super(const ConversationFilterState()) {
+    this.afterInit, {
+    this.selectedConversationIds = const [],
+  }) : super(const ConversationFilterState()) {
     unawaited(_init());
   }
 
@@ -23,6 +26,7 @@ class ConversationFilterNotifier
   final bool onlyContact;
   final Function(ConversationFilterState) afterInit;
   final Iterable<String> filteredIds;
+  final Iterable<String> selectedConversationIds;
 
   var _conversations = <ConversationItem>[];
   var _friends = <User>[];
@@ -35,9 +39,26 @@ class ConversationFilterNotifier
     if (onlyContact) {
       _conversations = [];
     } else {
-      _conversations = await accountServer.database.conversationDao
-          .conversationItems()
-          .get();
+      _conversations =
+          (await accountServer.database.conversationDao
+                  .conversationItems()
+                  .get())
+              .where(
+                (conversation) =>
+                    !conversation.isGroupConversation ||
+                    conversation.status != ConversationStatus.quit,
+              )
+              .toList();
+      final conversationIds = _conversations
+          .map((conversation) => conversation.conversationId)
+          .toSet();
+      _conversations.addAll(
+        (await accountServer.database.conversationDao.conversationItemsByIds(
+          selectedConversationIds,
+        )).where(
+          (conversation) => conversationIds.add(conversation.conversationId),
+        ),
+      );
       contactConversationIds = _conversations
           .where(
             (element) =>
@@ -55,7 +76,6 @@ class ConversationFilterNotifier
 
     _friends = <User>[];
     _bots = <User>[];
-
     final Iterable<User> users = await accountServer.database.userDao
         .notInFriends([
           ...contactConversationIds,
