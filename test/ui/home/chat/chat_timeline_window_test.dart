@@ -15,6 +15,9 @@ void main() {
         center: center,
         bottom: [testMessage(11)],
         lastReadMessageId: center.messageId,
+        anchor: UnreadMessageWindowAnchor(
+          lastReadMessageId: center.messageId,
+        ),
       ),
     );
 
@@ -39,6 +42,27 @@ void main() {
 
     expect(window.anchorUnreadSeparator, false);
     expect(window.scrollAnchor, ChatScrollCoordinator.messageFocusAnchor);
+    expect(window.restoreCenterMessageId, center.messageId);
+    expect(window.rows.center?.message.messageId, center.messageId);
+  });
+
+  test('around anchor keeps a last-read target as the center message', () {
+    final center = testMessage(10);
+    final window = ChatTimelineWindow(
+      MessageState(
+        conversationId: 'conversation',
+        top: [testMessage(1)],
+        center: center,
+        bottom: [testMessage(11)],
+        lastReadMessageId: center.messageId,
+        anchor: AroundMessageWindowAnchor(
+          messageId: center.messageId,
+          source: MessageWindowJumpSource.message,
+        ),
+      ),
+    );
+
+    expect(window.anchorUnreadSeparator, false);
     expect(window.restoreCenterMessageId, center.messageId);
     expect(window.rows.center?.message.messageId, center.messageId);
   });
