@@ -207,8 +207,9 @@ class _ConversationSelector extends HookConsumerWidget {
             selectItem(element);
           });
         },
+        selectedConversationIds: initSelected.map((e) => e.conversationId),
       ),
-      [accountServer, onlyContact, filteredIds],
+      [accountServer, onlyContact, filteredIds, initSelected],
     );
     useEffect(
       () => conversationFilterNotifier.dispose,
