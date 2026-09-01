@@ -8,7 +8,9 @@ import '../utils/hook.dart';
 import 'message/message.dart';
 
 class StatusPending extends HookConsumerWidget {
-  const StatusPending({super.key});
+  const StatusPending({super.key, this.transcriptId});
+
+  final String? transcriptId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,9 +20,11 @@ class StatusPending extends HookConsumerWidget {
 
     final value = useListenableConverter(
       context.accountServer.attachmentUtil,
-      converter: (attachmentUtil) =>
-          attachmentUtil.getAttachmentProgress(messageId),
-      keys: [messageId],
+      converter: (attachmentUtil) => attachmentUtil.getAttachmentProgress(
+        messageId,
+        transcriptId: transcriptId,
+      ),
+      keys: [messageId, transcriptId],
     ).requireData;
 
     return _StatusPending(value: value);

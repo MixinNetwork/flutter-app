@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:uuid/uuid.dart';
@@ -29,6 +30,17 @@ import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../../widgets/message/send_message_dialog/attachment_extra.dart';
 import '../job_queue.dart';
 import '../sender.dart';
+
+@visibleForTesting
+Map<String, dynamic> transcriptMessageToSendingJson(
+  TranscriptMessage message,
+) {
+  final map = message.toJson(serializer: const UtcValueSerializer())
+    ..['media_duration'] = int.tryParse(message.mediaDuration ?? '')
+    ..remove('media_status')
+    ..remove('media_url');
+  return map;
+}
 
 class SendingJob extends JobQueue<Job, List<Job>> {
   SendingJob({
@@ -199,11 +211,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
           }
         }
 
-        final map = e.toJson(serializer: const UtcValueSerializer());
-        map['media_duration'] = int.tryParse(
-          map['media_duration'] as String? ?? '',
-        );
-        map.remove('media_status');
+        final map = transcriptMessageToSendingJson(e);
         return map;
       }).toList();
       message = message.copyWith(content: await jsonEncodeWithIsolate(json));

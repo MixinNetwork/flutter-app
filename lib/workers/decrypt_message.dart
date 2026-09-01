@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -50,6 +52,16 @@ import 'job/update_sticker_job.dart';
 import 'job/update_token_job.dart';
 import 'message_worker_isolate.dart';
 import 'sender.dart';
+
+@visibleForTesting
+TranscriptMessage normalizeIncomingTranscriptMessage(
+  TranscriptMessage transcript,
+) => transcript.category.isAttachment
+    ? transcript.copyWith(
+        mediaUrl: const Value(null),
+        mediaStatus: const Value(MediaStatus.canceled),
+      )
+    : transcript;
 
 class DecryptMessage extends Injector {
   DecryptMessage(
@@ -1577,14 +1589,7 @@ class DecryptMessage extends Injector {
 
     final insertAllTranscriptMessageFuture = database.transcriptMessageDao
         .insertAll(
-          transcripts.map((transcript) {
-            if (transcript.category.isAttachment) {
-              return transcript.copyWith(
-                mediaStatus: const Value(MediaStatus.canceled),
-              );
-            }
-            return transcript;
-          }).toList(),
+          transcripts.map(normalizeIncomingTranscriptMessage).toList(),
         );
 
     await Future.wait([

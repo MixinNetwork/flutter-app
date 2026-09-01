@@ -75,6 +75,7 @@ class MessageImage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
+    final transcriptId = TranscriptPage.of(context)?.messageId;
     final isPinnedPage = useIsPinnedPage();
     final type = useMessageConverter(converter: (state) => state.type);
     final conversationId = useMessageConverter(
@@ -165,11 +166,15 @@ class MessageImage extends HookConsumerWidget {
                 context.accountServer.reUploadAttachment(message);
               }
             } else {
-              context.accountServer.downloadAttachment(message.messageId);
+              context.accountServer.downloadAttachment(
+                message.messageId,
+                transcriptId: transcriptId,
+              );
             }
           case MediaStatus.pending:
             context.accountServer.cancelProgressAttachmentJob(
               message.messageId,
+              transcriptId: transcriptId,
             );
           case null:
           case MediaStatus.expired:
@@ -207,7 +212,9 @@ class MessageImage extends HookConsumerWidget {
                           ? const StatusUpload()
                           : const StatusDownload();
                     case MediaStatus.pending:
-                      return const StatusPending();
+                      return StatusPending(
+                        transcriptId: transcriptId,
+                      );
                     case MediaStatus.expired:
                       return const StatusWarning();
                     case MediaStatus.done:
