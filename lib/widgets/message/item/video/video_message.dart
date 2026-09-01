@@ -75,9 +75,7 @@ class MessageVideo extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isCurrentUser = useIsCurrentUser();
     final isTranscriptPage = useIsTranscriptPage();
-    final transcriptId = isTranscriptPage
-        ? TranscriptPage.of(context)?.messageId
-        : null;
+    final transcriptId = TranscriptPage.of(context)?.messageId;
 
     final thumbImage = useMessageConverter(
       converter: (state) => state.thumbImage,
@@ -171,9 +169,7 @@ class VideoMessageMediaStatusWidget extends HookConsumerWidget {
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
     final isTranscriptPage = useIsTranscriptPage();
-    final transcriptId = isTranscriptPage
-        ? TranscriptPage.of(context)?.messageId
-        : null;
+    final transcriptId = TranscriptPage.of(context)?.messageId;
     final isMessageSentOut =
         (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||

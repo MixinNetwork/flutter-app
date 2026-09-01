@@ -25,9 +25,7 @@ class AudioMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
-    final transcriptId = isTranscriptPage
-        ? TranscriptPage.of(context)?.messageId
-        : null;
+    final transcriptId = TranscriptPage.of(context)?.messageId;
     final messageId = useMessageConverter(
       converter: (state) => state.messageId,
     );

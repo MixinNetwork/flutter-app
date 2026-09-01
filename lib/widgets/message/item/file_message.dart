@@ -36,9 +36,7 @@ class MessageFile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
-    final transcriptId = isTranscriptPage
-        ? TranscriptPage.of(context)?.messageId
-        : null;
+    final transcriptId = TranscriptPage.of(context)?.messageId;
     final mediaStatus = useMessageConverter(
       converter: (state) => state.mediaStatus,
     );

@@ -75,9 +75,7 @@ class MessageImage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
-    final transcriptId = isTranscriptPage
-        ? TranscriptPage.of(context)?.messageId
-        : null;
+    final transcriptId = TranscriptPage.of(context)?.messageId;
     final isPinnedPage = useIsPinnedPage();
     final type = useMessageConverter(converter: (state) => state.type);
     final conversationId = useMessageConverter(

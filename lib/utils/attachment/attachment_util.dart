@@ -196,14 +196,12 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       return transcriptMessage?.mediaStatus == MediaStatus.done;
     }
 
-    Future<bool> checkDownloaded() async =>
-        await _messageDao.messageHasMediaStatus(messageId, MediaStatus.done) ||
-        await _messageDao.transcriptMessageHasMediaStatus(
-          messageId,
-          MediaStatus.done,
-        );
-
-    if (!_hasAttachmentJob(messageId) && await checkDownloaded()) {
+    if (!_hasAttachmentJob(messageId) &&
+        (await _messageDao.messageHasMediaStatus(messageId, MediaStatus.done) ||
+            await _messageDao.transcriptMessageHasMediaStatus(
+              messageId,
+              MediaStatus.done,
+            ))) {
       await syncMessageMedia(messageId);
       await _updateTranscriptMessageStatus(messageId);
       return true;
