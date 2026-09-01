@@ -50,16 +50,39 @@ class _DeletingTranscriptAttachmentUtil extends AttachmentUtil {
     );
     final parentId = transcriptId!;
     await removeAttachmentJobsByParentId(parentId);
-    await (_database.delete(_database.transcriptMessages)
-          ..where(
-            (row) =>
-                row.transcriptId.equals(parentId) &
-                row.messageId.equals(messageId),
-          ))
+    await (_database.delete(_database.transcriptMessages)..where(
+          (row) =>
+              row.transcriptId.equals(parentId) &
+              row.messageId.equals(messageId),
+        ))
         .go();
     isNotPendingReturned.complete();
     return result;
   }
+}
+
+class _AttachmentTestContext {
+  _AttachmentTestContext(this.database, this.mediaDirectory);
+
+  static Future<_AttachmentTestContext> create(String key) async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final documentsDirectory = await Directory.systemTemp.createTemp(
+      'attachment-util-documents',
+    );
+    mixinDocumentsDirectory = documentsDirectory;
+    addTearDown(() => documentsDirectory.delete(recursive: true));
+    await DownloadKeyValue.instance.init(key);
+    addTearDown(DownloadKeyValue.instance.delete);
+    final mediaDirectory = await Directory.systemTemp.createTemp(
+      'attachment-util-test',
+    );
+    addTearDown(() => mediaDirectory.delete(recursive: true));
+    return _AttachmentTestContext(database, mediaDirectory);
+  }
+
+  final MixinDatabase database;
+  final Directory mediaDirectory;
 }
 
 void main() {
@@ -101,20 +124,11 @@ void main() {
   });
 
   test('downloads the requested transcript child once by both IDs', () async {
-    final database = MixinDatabase(NativeDatabase.memory());
-    addTearDown(database.close);
-    final documentsDirectory = await Directory.systemTemp.createTemp(
-      'attachment-util-documents',
+    final context = await _AttachmentTestContext.create(
+      'attachment-util-exact',
     );
-    mixinDocumentsDirectory = documentsDirectory;
-    addTearDown(() => documentsDirectory.delete(recursive: true));
-    await DownloadKeyValue.instance.init('attachment-util-exact');
-    addTearDown(DownloadKeyValue.instance.delete);
-
-    final mediaDirectory = await Directory.systemTemp.createTemp(
-      'attachment-util-test',
-    );
-    addTearDown(() => mediaDirectory.delete(recursive: true));
+    final database = context.database;
+    final mediaDirectory = context.mediaDirectory;
 
     await database.transcriptMessageDao.insertAll([
       TranscriptMessage(
@@ -204,20 +218,11 @@ void main() {
   test(
     'aborts an in-flight transcript download when its row is deleted',
     () async {
-      final database = MixinDatabase(NativeDatabase.memory());
-      addTearDown(database.close);
-      final documentsDirectory = await Directory.systemTemp.createTemp(
-        'attachment-util-documents',
+      final context = await _AttachmentTestContext.create(
+        'attachment-util-deleted-row',
       );
-      mixinDocumentsDirectory = documentsDirectory;
-      addTearDown(() => documentsDirectory.delete(recursive: true));
-      await DownloadKeyValue.instance.init('attachment-util-deleted-row');
-      addTearDown(DownloadKeyValue.instance.delete);
-
-      final mediaDirectory = await Directory.systemTemp.createTemp(
-        'attachment-util-test',
-      );
-      addTearDown(() => mediaDirectory.delete(recursive: true));
+      final database = context.database;
+      final mediaDirectory = context.mediaDirectory;
 
       const transcriptId = 'deleted-parent';
       const messageId = 'deleted-child';
@@ -279,12 +284,11 @@ void main() {
         transcriptId: transcriptId,
       );
       await requestReceived.future;
-      await (database.delete(database.transcriptMessages)
-            ..where(
-              (row) =>
-                  row.transcriptId.equals(transcriptId) &
-                  row.messageId.equals(messageId),
-            ))
+      await (database.delete(database.transcriptMessages)..where(
+            (row) =>
+                row.transcriptId.equals(transcriptId) &
+                row.messageId.equals(messageId),
+          ))
           .go();
 
       try {
@@ -304,22 +308,11 @@ void main() {
   test(
     'does not recreate a deleted transcript attachment job after pending check',
     () async {
-      final database = MixinDatabase(NativeDatabase.memory());
-      addTearDown(database.close);
-      final documentsDirectory = await Directory.systemTemp.createTemp(
-        'attachment-util-documents',
-      );
-      mixinDocumentsDirectory = documentsDirectory;
-      addTearDown(() => documentsDirectory.delete(recursive: true));
-      await DownloadKeyValue.instance.init(
+      final context = await _AttachmentTestContext.create(
         'attachment-util-deleted-after-pending',
       );
-      addTearDown(DownloadKeyValue.instance.delete);
-
-      final mediaDirectory = await Directory.systemTemp.createTemp(
-        'attachment-util-test',
-      );
-      addTearDown(() => mediaDirectory.delete(recursive: true));
+      final database = context.database;
+      final mediaDirectory = context.mediaDirectory;
 
       const transcriptId = 'deleted-after-pending-parent';
       const messageId = 'deleted-after-pending-child';
@@ -401,20 +394,11 @@ void main() {
   test(
     'removes persisted attachment jobs by parent without sibling leakage',
     () async {
-      final database = MixinDatabase(NativeDatabase.memory());
-      addTearDown(database.close);
-      final documentsDirectory = await Directory.systemTemp.createTemp(
-        'attachment-util-documents',
+      final context = await _AttachmentTestContext.create(
+        'attachment-util-parent-cleanup',
       );
-      mixinDocumentsDirectory = documentsDirectory;
-      addTearDown(() => documentsDirectory.delete(recursive: true));
-      await DownloadKeyValue.instance.init('attachment-util-parent-cleanup');
-      addTearDown(DownloadKeyValue.instance.delete);
-
-      final mediaDirectory = await Directory.systemTemp.createTemp(
-        'attachment-util-test',
-      );
-      addTearDown(() => mediaDirectory.delete(recursive: true));
+      final database = context.database;
+      final mediaDirectory = context.mediaDirectory;
 
       final util = AttachmentUtil(
         Client(

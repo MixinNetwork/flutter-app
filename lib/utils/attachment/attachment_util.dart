@@ -670,8 +670,8 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       transcriptId: transcriptId,
     );
     final hasJob = _hasAttachmentJob(messageId, transcriptId: transcriptId);
-    _attachmentDownloadKeys[_attachmentJobKey(messageId, transcriptId)]
-        ?.invalidated = true;
+    final key = _attachmentJobKey(messageId, transcriptId);
+    _attachmentDownloadKeys[key]?.invalidated = true;
     await removeAttachmentJob(messageId, transcriptId: transcriptId);
     if (!hasJob) {
       w('cancelProgressAttachmentJob: no job for $messageId');
