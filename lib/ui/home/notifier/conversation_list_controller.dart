@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    show ConversationCategory, ConversationStatus;
+    show ConversationCategory;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../core/conversation/conversation_list_store.dart';
@@ -88,9 +88,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
     final matches =
         state.items.where((item) {
           final name = item.isGroupConversation ? item.groupName : item.name;
-          return (item.isGroupConversation &&
-                      item.status != ConversationStatus.quit ||
-                  item.isStrangerConversation) &&
+          return (item.isGroupConversation || item.isStrangerConversation) &&
               name?.toLowerCase().contains(normalizedQuery) == true &&
               (!filterUnseen || (item.unseenMessageCount ?? 0) > 0);
         }).toList()..sort((a, b) {

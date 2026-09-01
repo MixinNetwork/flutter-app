@@ -72,6 +72,11 @@ void main() {
             identityNumber: '3',
             fullName: 'Group owner',
           ),
+          const User(
+            userId: 'quit-group-owner',
+            identityNumber: '4',
+            fullName: 'Quit group owner',
+          ),
         ])
         ..insertAll(mixinDatabase.conversations, [
           Conversation(
@@ -96,6 +101,14 @@ void main() {
             createdAt: now,
             status: ConversationStatus.success,
           ),
+          Conversation(
+            conversationId: 'quit-group-chat',
+            ownerId: 'quit-group-owner',
+            category: ConversationCategory.group,
+            name: '主退出群',
+            createdAt: now.subtract(const Duration(minutes: 1)),
+            status: ConversationStatus.quit,
+          ),
         ])
         ..insert(
           mixinDatabase.circleConversations,
@@ -113,14 +126,13 @@ void main() {
     final initialized = controller.addListenerCompleter();
     await store.start();
     await initialized.future;
-    expect(controller.state.count, 3);
+    expect(controller.state.count, 4);
     expect(
       controller
           .search('主', filterUnseen: false)!
-          .map(
-            (item) => item.conversationId,
-          ),
-      ['group-chat', 'stranger-chat'],
+          .map((item) => item.conversationId)
+          .toSet(),
+      {'group-chat', 'quit-group-chat', 'stranger-chat'},
     );
 
     final contactsChanged = controller.addListenerCompleter();
@@ -162,7 +174,7 @@ void main() {
     await changed.future;
     expect(
       controller.state.items.map((item) => item.conversationId),
-      ['group-chat', 'friend-chat', 'stranger-chat'],
+      ['group-chat', 'friend-chat', 'stranger-chat', 'quit-group-chat'],
     );
   });
 }
