@@ -75,6 +75,10 @@ abstract class _AttachmentJobBase {
   }
 }
 
+class _AttachmentDownloadReservation {
+  bool invalidated = false;
+}
+
 class AttachmentUtilBase {
   AttachmentUtilBase(this.mediaPath)
     : transcriptPath = p.join(mediaPath, 'Transcripts') {
@@ -171,7 +175,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   final SettingPropertyStorage _settingProperties;
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
-  final _attachmentDownloadKeys = <String>{};
+  final _attachmentDownloadKeys = <String, _AttachmentDownloadReservation>{};
   String _attachmentJobKey(String messageId, String? transcriptId) =>
       transcriptId == null ? messageId : '$transcriptId|$messageId';
 
@@ -215,19 +219,25 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     String? transcriptId,
   }) async {
     final key = _attachmentJobKey(messageId, transcriptId);
-    if (!_attachmentDownloadKeys.add(key)) return;
+    if (_attachmentDownloadKeys.containsKey(key)) return;
+    final token = _AttachmentDownloadReservation();
+    _attachmentDownloadKeys[key] = token;
     try {
       await _downloadAttachment(
         messageId: messageId,
         transcriptId: transcriptId,
+        reservation: token,
       );
     } finally {
-      _attachmentDownloadKeys.remove(key);
+      if (identical(_attachmentDownloadKeys[key], token)) {
+        _attachmentDownloadKeys.remove(key);
+      }
     }
   }
 
   Future<void> _downloadAttachment({
     required String messageId,
+    required _AttachmentDownloadReservation reservation,
     String? transcriptId,
   }) async {
     if (_hasAttachmentJob(messageId, transcriptId: transcriptId)) return;
@@ -382,6 +392,12 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
               : null,
         );
 
+        final currentReservation =
+            _attachmentDownloadKeys[_attachmentJobKey(messageId, transcriptId)];
+        if (!identical(currentReservation, reservation) ||
+            reservation.invalidated) {
+          return;
+        }
 
         _setAttachmentJob(
           messageId,
@@ -601,18 +617,19 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   Iterable<String> get downloadingParentIds => {
     ..._attachmentJob.keys,
     ...DownloadKeyValue.instance.messageIds,
-    ..._attachmentDownloadKeys,
+    ..._attachmentDownloadKeys.keys,
   }.map(_parentIdFromAttachmentJobKey).toSet();
 
   Future<void> removeAttachmentJobsByParentId(String parentId) async {
     final keys = {
       ..._attachmentJob.keys,
       ...DownloadKeyValue.instance.messageIds,
-      ..._attachmentDownloadKeys,
+      ..._attachmentDownloadKeys.keys,
     };
     final prefix = '$parentId|';
     for (final key in keys) {
       if (key != parentId && !key.startsWith(prefix)) continue;
+      _attachmentDownloadKeys[key]?.invalidated = true;
       final separator = key.indexOf('|');
       await removeAttachmentJob(
         separator == -1 ? key : key.substring(separator + 1),
@@ -653,6 +670,8 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       transcriptId: transcriptId,
     );
     final hasJob = _hasAttachmentJob(messageId, transcriptId: transcriptId);
+    _attachmentDownloadKeys[_attachmentJobKey(messageId, transcriptId)]
+        ?.invalidated = true;
     await removeAttachmentJob(messageId, transcriptId: transcriptId);
     if (!hasJob) {
       w('cancelProgressAttachmentJob: no job for $messageId');
