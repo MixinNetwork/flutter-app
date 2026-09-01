@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
@@ -59,6 +59,52 @@ class _DeletingTranscriptAttachmentUtil extends AttachmentUtil {
     isNotPendingReturned.complete();
     return result;
   }
+}
+
+class _RecordingTranscriptAttachmentUtil extends AttachmentUtil {
+  _RecordingTranscriptAttachmentUtil(
+    Client client,
+    MixinDatabase database,
+    SettingPropertyStorage settingProperties,
+    String mediaPath,
+  ) : super(
+        client,
+        database.messageDao,
+        database.transcriptMessageDao,
+        settingProperties,
+        mediaPath,
+      );
+
+  final paths = <String>[];
+
+  @override
+  File getAttachmentFile(
+    String category,
+    String? conversationId,
+    String messageId,
+    String? mediaName, {
+    String? mimeType,
+    bool isTranscript = false,
+    String? transcriptId,
+  }) {
+    final file = super.getAttachmentFile(
+      category,
+      conversationId,
+      messageId,
+      mediaName,
+      mimeType: mimeType,
+      isTranscript: isTranscript,
+      transcriptId: transcriptId,
+    );
+    paths.add(file.path);
+    return file;
+  }
+
+  @override
+  Future<bool> isNotPending(
+    String messageId, {
+    String? transcriptId,
+  }) async => true;
 }
 
 class _AttachmentTestContext {
@@ -214,6 +260,119 @@ void main() {
     expect(other.mediaStatus, MediaStatus.canceled);
     expect(requestedPaths, ['/attachments/target-attachment']);
   });
+  test(
+    'isolates concurrent transcript downloads with the same child ID',
+    () async {
+      final context = await _AttachmentTestContext.create(
+        'attachment-util-transcript-isolation',
+      );
+      final database = context.database;
+      final mediaDirectory = context.mediaDirectory;
+
+      const firstTranscriptId = 'first-transcript';
+      const secondTranscriptId = 'second-transcript';
+      const childMessageId = 'shared-child-id';
+      const firstAttachmentId = 'first-attachment';
+      const secondAttachmentId = 'second-attachment';
+
+      await database.transcriptMessageDao.insertAll([
+        TranscriptMessage(
+          transcriptId: firstTranscriptId,
+          messageId: childMessageId,
+          category: MessageCategory.plainImage,
+          createdAt: DateTime(2026),
+          content: firstAttachmentId,
+          mediaMimeType: 'image/png',
+          mediaWidth: 1,
+          mediaHeight: 1,
+          mediaStatus: MediaStatus.canceled,
+        ),
+        TranscriptMessage(
+          transcriptId: secondTranscriptId,
+          messageId: childMessageId,
+          category: MessageCategory.plainImage,
+          createdAt: DateTime(2026),
+          content: secondAttachmentId,
+          mediaMimeType: 'image/png',
+          mediaWidth: 1,
+          mediaHeight: 1,
+          mediaStatus: MediaStatus.canceled,
+        ),
+      ]);
+
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final requestedAttachmentIds = <String>[];
+      final metadataRequestsReceived = Completer<void>();
+      final baseUrl = 'http://${server.address.host}:${server.port}';
+      final subscription = server.listen((request) async {
+        final attachmentId = request.uri.path.substring(
+          '/attachments/'.length,
+        );
+        requestedAttachmentIds.add(attachmentId);
+        if (requestedAttachmentIds.length == 2) {
+          metadataRequestsReceived.complete();
+        }
+        request.response.headers.contentType = ContentType.json;
+        request.response.write(
+          jsonEncode({
+            'data': {
+              'attachment_id': attachmentId,
+              'created_at': '2026-01-01T00:00:00Z',
+              'view_url': null,
+            },
+          }),
+        );
+        await request.response.close();
+      });
+      addTearDown(() async {
+        await subscription.cancel();
+        await server.close(force: true);
+      });
+
+      final util = _RecordingTranscriptAttachmentUtil(
+        Client(baseUrl: baseUrl, accessToken: 'test', httpLogLevel: null),
+        database,
+        SettingPropertyStorage(database.propertyDao),
+        mediaDirectory.path,
+      );
+
+      final downloads = Future.wait([
+        util.downloadAttachment(
+          messageId: childMessageId,
+          transcriptId: firstTranscriptId,
+        ),
+        util.downloadAttachment(
+          messageId: childMessageId,
+          transcriptId: secondTranscriptId,
+        ),
+      ]);
+      await metadataRequestsReceived.future;
+      await downloads;
+
+      expect(
+        requestedAttachmentIds.toSet(),
+        {firstAttachmentId, secondAttachmentId},
+      );
+      expect(util.paths.toSet(), hasLength(2));
+      expect(
+        util.paths.singleWhere((path) => path.contains(firstTranscriptId)),
+        contains(childMessageId),
+      );
+      expect(
+        util.paths.singleWhere((path) => path.contains(secondTranscriptId)),
+        contains(childMessageId),
+      );
+      expect(
+        util.convertAbsolutePath(
+          category: MessageCategory.plainImage,
+          fileName: null,
+          messageId: childMessageId,
+          isTranscript: true,
+        ),
+        '',
+      );
+    },
+  );
 
   test(
     'aborts an in-flight transcript download when its row is deleted',

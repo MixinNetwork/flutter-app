@@ -106,11 +106,8 @@ class AttachmentUtilBase {
   }) {
     if (fileName?.trim().isEmpty ?? true) return '';
     if (isTranscript) {
-      var name = '$messageId${fileName!.fileExtension}';
-      if (messageId == null) {
-        name = fileName;
-      }
-      return p.join(transcriptPath, name);
+      if (p.isAbsolute(fileName!)) return fileName;
+      return p.join(transcriptPath, fileName);
     }
     if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
       return fileName!;
@@ -343,6 +340,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       message?.name ?? transcriptMessage?.mediaName,
       mimeType: mediaMimeType,
       isTranscript: transcriptId != null || message == null,
+      transcriptId: transcriptId,
     );
     final path = file.absolute.path;
     if (file.existsSync()) await file.delete();
@@ -563,6 +561,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     String? mediaName, {
     String? mimeType,
     bool isTranscript = false,
+    String? transcriptId,
   }) {
     final path = isTranscript
         ? transcriptPath
@@ -585,7 +584,10 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     } else {
       suffix = mediaName?.fileExtension ?? '';
     }
-    return File(p.join(path, '$messageId$suffix'));
+    final name = isTranscript && transcriptId != null
+        ? '$transcriptId-$messageId$suffix'
+        : '$messageId$suffix';
+    return File(p.join(path, name));
   }
 
   bool _equalsIgnoreCase(String? string1, String? string2) =>
