@@ -75,6 +75,9 @@ class MessageVideo extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isCurrentUser = useIsCurrentUser();
     final isTranscriptPage = useIsTranscriptPage();
+    final transcriptId = isTranscriptPage
+        ? TranscriptPage.of(context)?.messageId
+        : null;
 
     final thumbImage = useMessageConverter(
       converter: (state) => state.thumbImage,
@@ -104,7 +107,10 @@ class MessageVideo extends HookConsumerWidget {
               context.accountServer.reUploadAttachment(message);
             }
           } else {
-            context.accountServer.downloadAttachment(message.messageId);
+            context.accountServer.downloadAttachment(
+              message.messageId,
+              transcriptId: transcriptId,
+            );
           }
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
@@ -125,7 +131,10 @@ class MessageVideo extends HookConsumerWidget {
             openUri(context, Uri.file(path).toString());
           }
         } else if (message.mediaStatus == MediaStatus.pending) {
-          context.accountServer.cancelProgressAttachmentJob(message.messageId);
+          context.accountServer.cancelProgressAttachmentJob(
+            message.messageId,
+            transcriptId: transcriptId,
+          );
         } else if (message.type.isLive && message.mediaUrl != null) {
           launchUrlString(message.mediaUrl!);
         }
@@ -162,6 +171,9 @@ class VideoMessageMediaStatusWidget extends HookConsumerWidget {
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
     final isTranscriptPage = useIsTranscriptPage();
+    final transcriptId = isTranscriptPage
+        ? TranscriptPage.of(context)?.messageId
+        : null;
     final isMessageSentOut =
         (isTranscriptPage &&
             TranscriptPage.of(context)?.relationship == UserRelationship.me) ||
@@ -173,7 +185,9 @@ class VideoMessageMediaStatusWidget extends HookConsumerWidget {
             ? const StatusUpload()
             : const StatusDownload();
       case MediaStatus.pending:
-        return const StatusPending();
+        return StatusPending(
+          transcriptId: transcriptId,
+        );
       case MediaStatus.expired:
         return const StatusWarning();
       case MediaStatus.done:

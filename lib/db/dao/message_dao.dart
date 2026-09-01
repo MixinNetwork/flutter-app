@@ -431,30 +431,43 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required int mediaSize,
     required MediaStatus mediaStatus,
     String? content,
+    String? transcriptId,
   }) async {
-    final [messageResult, transcriptMessageResult] = await db.transaction(
-      () => Future.wait([
-        (db.update(
-          db.messages,
-        )..where((tbl) => tbl.messageId.equals(messageId))).write(
-          MessagesCompanion(
-            mediaUrl: Value(path.pathBasename),
-            mediaSize: Value(mediaSize),
-            mediaStatus: Value(mediaStatus),
-          ),
+    var messageResult = 0;
+    var transcriptMessageResult = 0;
+    await db.transaction(() async {
+      if (transcriptId == null) {
+        messageResult =
+            await (db.update(
+              db.messages,
+            )..where((tbl) => tbl.messageId.equals(messageId))).write(
+              MessagesCompanion(
+                mediaUrl: Value(path.pathBasename),
+                mediaSize: Value(mediaSize),
+                mediaStatus: Value(mediaStatus),
+              ),
+            );
+      }
+
+      final update = db.update(db.transcriptMessages);
+      if (transcriptId == null) {
+        update.where((tbl) => tbl.messageId.equals(messageId));
+      } else {
+        update.where(
+          (tbl) =>
+              tbl.transcriptId.equals(transcriptId) &
+              tbl.messageId.equals(messageId),
+        );
+      }
+      transcriptMessageResult = await update.write(
+        TranscriptMessagesCompanion(
+          mediaUrl: Value(path.pathBasename),
+          mediaSize: Value(mediaSize),
+          mediaStatus: Value(mediaStatus),
+          content: content != null ? Value(content) : const Value.absent(),
         ),
-        (db.update(
-          db.transcriptMessages,
-        )..where((tbl) => tbl.messageId.equals(messageId))).write(
-          TranscriptMessagesCompanion(
-            mediaUrl: Value(path.pathBasename),
-            mediaSize: Value(mediaSize),
-            mediaStatus: Value(mediaStatus),
-            content: content != null ? Value(content) : const Value.absent(),
-          ),
-        ),
-      ]),
-    );
+      );
+    });
 
     await _notifyEventByMessageId(
       messageId,
@@ -463,21 +476,46 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     );
   }
 
-  Future<void> updateMediaStatus(String messageId, MediaStatus status) async {
-    if (!await hasMediaStatus(messageId, status, true)) return;
+  Future<void> updateMediaStatus(
+    String messageId,
+    MediaStatus status, {
+    String? transcriptId,
+  }) async {
+    final hasStatus = transcriptId == null
+        ? await hasMediaStatus(messageId, status, true)
+        : await transcriptMessageHasMediaStatusById(
+            transcriptId,
+            messageId,
+            status,
+            true,
+          );
+    if (!hasStatus) return;
 
-    final [messageResult, transcriptMessageResult] = await db.transaction(
-      () => Future.wait([
-        (db.update(db.messages)..where(
-              (tbl) => tbl.messageId.equals(messageId),
-            ))
-            .write(MessagesCompanion(mediaStatus: Value(status))),
-        (db.update(db.transcriptMessages)..where(
-              (tbl) => tbl.messageId.equals(messageId),
-            ))
-            .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
-      ]),
-    );
+    var messageResult = 0;
+    var transcriptMessageResult = 0;
+    await db.transaction(() async {
+      if (transcriptId == null) {
+        messageResult =
+            await (db.update(db.messages)..where(
+                  (tbl) => tbl.messageId.equals(messageId),
+                ))
+                .write(MessagesCompanion(mediaStatus: Value(status)));
+      }
+
+      final update = db.update(db.transcriptMessages);
+      if (transcriptId == null) {
+        update.where((tbl) => tbl.messageId.equals(messageId));
+      } else {
+        update.where(
+          (tbl) =>
+              tbl.transcriptId.equals(transcriptId) &
+              tbl.messageId.equals(messageId),
+        );
+      }
+      transcriptMessageResult = await update.write(
+        TranscriptMessagesCompanion(mediaStatus: Value(status)),
+      );
+    });
 
     await _notifyEventByMessageId(
       messageId,
@@ -557,6 +595,25 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final predicate = not
         ? equalsId & equalsStatus.not()
         : equalsId & equalsStatus;
+    return db.hasData(db.transcriptMessages, [], predicate);
+  }
+
+  Future<bool> transcriptMessageHasMediaStatusById(
+    String transcriptId,
+    String messageId,
+    MediaStatus mediaStatus, [
+    bool not = false,
+  ]) async {
+    final equalsTranscript = db.transcriptMessages.transcriptId.equals(
+      transcriptId,
+    );
+    final equalsId = db.transcriptMessages.messageId.equals(messageId);
+    final equalsStatus = db.transcriptMessages.mediaStatus.equalsValue(
+      mediaStatus,
+    );
+    final predicate =
+        equalsTranscript &
+        (not ? equalsId & equalsStatus.not() : equalsId & equalsStatus);
     return db.hasData(db.transcriptMessages, [], predicate);
   }
 

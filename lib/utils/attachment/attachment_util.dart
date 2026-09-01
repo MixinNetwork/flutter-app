@@ -171,9 +171,30 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
   final SettingPropertyStorage _settingProperties;
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
+  final _attachmentDownloadKeys = <String>{};
+  String _attachmentJobKey(String messageId, String? transcriptId) =>
+      transcriptId == null ? messageId : '$transcriptId|$messageId';
+
+  String _parentIdFromAttachmentJobKey(String key) {
+    final separator = key.indexOf('|');
+    return separator == -1 ? key : key.substring(0, separator);
+  }
 
   /// check if the attachment is downloaded, if not, return false, otherwise sync it and  return true
-  Future<bool> checkSyncMessageMedia(String messageId) async {
+  Future<bool> checkSyncMessageMedia(
+    String messageId, {
+    String? transcriptId,
+  }) async {
+    if (transcriptId != null) {
+      if (_hasAttachmentJob(messageId, transcriptId: transcriptId)) {
+        return false;
+      }
+      final transcriptMessage = await _transcriptMessageDao
+          .transcriptMessageByIds(transcriptId, messageId)
+          .getSingleOrNull();
+      return transcriptMessage?.mediaStatus == MediaStatus.done;
+    }
+
     Future<bool> checkDownloaded() async =>
         await _messageDao.messageHasMediaStatus(messageId, MediaStatus.done) ||
         await _messageDao.transcriptMessageHasMediaStatus(
@@ -189,29 +210,63 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     return false;
   }
 
-  Future<void> downloadAttachment({required String messageId}) async {
-    if (await checkSyncMessageMedia(messageId)) return;
+  Future<void> downloadAttachment({
+    required String messageId,
+    String? transcriptId,
+  }) async {
+    final key = _attachmentJobKey(messageId, transcriptId);
+    if (!_attachmentDownloadKeys.add(key)) return;
+    try {
+      await _downloadAttachment(
+        messageId: messageId,
+        transcriptId: transcriptId,
+      );
+    } finally {
+      _attachmentDownloadKeys.remove(key);
+    }
+  }
 
-    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
+  Future<void> _downloadAttachment({
+    required String messageId,
+    String? transcriptId,
+  }) async {
+    if (_hasAttachmentJob(messageId, transcriptId: transcriptId)) return;
+
+    if (await checkSyncMessageMedia(messageId, transcriptId: transcriptId)) {
+      return;
+    }
+
+    await _messageDao.updateMediaStatus(
+      messageId,
+      MediaStatus.pending,
+      transcriptId: transcriptId,
+    );
 
     AttachmentMessage? attachmentMessage;
-
-    final list = await Future.wait([
-      _messageDao.findMessageByMessageId(messageId),
-      _transcriptMessageDao
-          .transcriptMessageByMessageId(messageId)
-          .getSingleOrNull(),
-    ]);
-    final message = list.first as Message?;
-    final transcriptMessage = list[1] as TranscriptMessage?;
+    Message? message;
+    TranscriptMessage? transcriptMessage;
+    if (transcriptId == null) {
+      final list = await Future.wait([
+        _messageDao.findMessageByMessageId(messageId),
+        _transcriptMessageDao
+            .transcriptMessageByMessageId(messageId)
+            .getSingleOrNull(),
+      ]);
+      message = list.first as Message?;
+      transcriptMessage = list[1] as TranscriptMessage?;
+    } else {
+      transcriptMessage = await _transcriptMessageDao
+          .transcriptMessageByIds(transcriptId, messageId)
+          .getSingleOrNull();
+    }
 
     if (message != null) {
       attachmentMessage = AttachmentMessage(
         message.mediaKey,
         message.mediaDigest,
-        message.content!,
-        message.mediaMimeType!,
-        message.mediaSize!,
+        message.content ?? '',
+        message.mediaMimeType ?? '',
+        message.mediaSize ?? 0,
         message.name,
         message.mediaWidth,
         message.mediaHeight,
@@ -227,9 +282,9 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       attachmentMessage = AttachmentMessage(
         transcriptMessage.mediaKey,
         transcriptMessage.mediaDigest,
-        transcriptMessage.content!,
-        transcriptMessage.mediaMimeType!,
-        transcriptMessage.mediaSize!,
+        transcriptMessage.content ?? '',
+        transcriptMessage.mediaMimeType ?? '',
+        transcriptMessage.mediaSize ?? 0,
         transcriptMessage.userFullName,
         transcriptMessage.mediaWidth,
         transcriptMessage.mediaHeight,
@@ -246,7 +301,10 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     final conversationId = message?.conversationId;
 
     if (category == null || content == null) {
-      await cancelProgressAttachmentJob(messageId);
+      await cancelProgressAttachmentJob(
+        messageId,
+        transcriptId: transcriptId,
+      );
       return;
     }
 
@@ -260,7 +318,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       );
       attachmentId = attachmentExtra.attachmentId;
       shareable = attachmentExtra.shareable;
-    } catch (e) {
+    } catch (_) {
       attachmentId = content;
     }
 
@@ -274,7 +332,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       messageId,
       message?.name ?? transcriptMessage?.mediaName,
       mimeType: mediaMimeType,
-      isTranscript: message == null,
+      isTranscript: transcriptId != null || message == null,
     );
     final path = file.absolute.path;
     if (file.existsSync()) await file.delete();
@@ -283,7 +341,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
       final response = await _client.attachmentApi.getAttachment(attachmentId);
       d('download ${response.data.viewUrl}');
 
-      if (await isNotPending(messageId)) return;
+      if (await isNotPending(messageId, transcriptId: transcriptId)) return;
 
       if (response.data.viewUrl != null) {
         String? mediaKey;
@@ -324,7 +382,12 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
               : null,
         );
 
-        _setAttachmentJob(messageId, attachmentDownloadJob);
+
+        _setAttachmentJob(
+          messageId,
+          attachmentDownloadJob,
+          transcriptId: transcriptId,
+        );
 
         await attachmentDownloadJob.download(
           _settingProperties.activatedProxy,
@@ -334,7 +397,7 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         await normalizeGifFileIfNeeded(file, mediaMimeType);
         final fileSize = await file.length();
 
-        if (attachmentMessage != null) {
+        if (attachmentMessage != null && transcriptId == null) {
           final content = await jsonEncodeWithIsolate(
             AttachmentExtra(
               attachmentId: response.data.attachmentId,
@@ -363,17 +426,25 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
           path: file.path,
           mediaSize: fileSize,
           mediaStatus: MediaStatus.done,
+          transcriptId: transcriptId,
         );
 
         await _updateMessageQuotedContent(messageId, conversationId);
-        await _updateTranscriptMessageStatus(messageId);
+        await _updateTranscriptMessageStatus(
+          messageId,
+          transcriptId: transcriptId,
+        );
       }
     } catch (er) {
       e(er.toString());
       if (file.existsSync()) await file.delete();
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
+      await _messageDao.updateMediaStatus(
+        messageId,
+        MediaStatus.canceled,
+        transcriptId: transcriptId,
+      );
     } finally {
-      await removeAttachmentJob(messageId);
+      await removeAttachmentJob(messageId, transcriptId: transcriptId);
     }
   }
 
@@ -383,8 +454,14 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     String category, {
     String? transcriptId,
   }) async {
-    assert(!_hasAttachmentJob(messageId));
-    await _messageDao.updateMediaStatus(messageId, MediaStatus.pending);
+    assert(
+      !_hasAttachmentJob(messageId, transcriptId: transcriptId),
+    );
+    await _messageDao.updateMediaStatus(
+      messageId,
+      MediaStatus.pending,
+      transcriptId: transcriptId,
+    );
 
     try {
       final response = await _client.attachmentApi.postAttachment();
@@ -406,13 +483,21 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
         iv: iv,
       );
 
-      _setAttachmentJob(messageId, attachmentUploadJob);
+      _setAttachmentJob(
+        messageId,
+        attachmentUploadJob,
+        transcriptId: transcriptId,
+      );
 
       final digest = await attachmentUploadJob.upload(
         _settingProperties.activatedProxy,
         (count, total) => notifyListeners(),
       );
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.done);
+      await _messageDao.updateMediaStatus(
+        messageId,
+        MediaStatus.done,
+        transcriptId: transcriptId,
+      );
       return AttachmentResult(
         response.data.attachmentId,
         category.isSignal || category.isEncrypted
@@ -430,15 +515,30 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
           (context) => context.l10n.errorUploadAttachmentFailed,
         ),
       );
-      await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
+      await _messageDao.updateMediaStatus(
+        messageId,
+        MediaStatus.canceled,
+        transcriptId: transcriptId,
+      );
       return null;
     } finally {
-      await removeAttachmentJob(messageId);
+      await removeAttachmentJob(messageId, transcriptId: transcriptId);
     }
   }
 
-  Future<bool> isNotPending(String messageId) =>
-      _messageDao.hasMediaStatus(messageId, MediaStatus.pending, true);
+  Future<bool> isNotPending(
+    String messageId, {
+    String? transcriptId,
+  }) async {
+    if (transcriptId != null) {
+      return !(await _messageDao.transcriptMessageHasMediaStatusById(
+        transcriptId,
+        messageId,
+        MediaStatus.pending,
+      ));
+    }
+    return _messageDao.hasMediaStatus(messageId, MediaStatus.pending, true);
+  }
 
   File getAttachmentFile(
     String category,
@@ -493,39 +593,79 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     );
   }
 
-  bool _hasAttachmentJob(String messageId) =>
-      _attachmentJob.containsKey(messageId);
+  bool _hasAttachmentJob(
+    String messageId, {
+    String? transcriptId,
+  }) => _attachmentJob.containsKey(_attachmentJobKey(messageId, transcriptId));
 
-  Iterable<String> get downloadingIds =>
-      _attachmentJob.entries.map((e) => e.key);
+  Iterable<String> get downloadingParentIds => {
+    ..._attachmentJob.keys,
+    ...DownloadKeyValue.instance.messageIds,
+    ..._attachmentDownloadKeys,
+  }.map(_parentIdFromAttachmentJobKey).toSet();
 
-  void _setAttachmentJob(String messageId, _AttachmentJobBase job) {
-    _attachmentJob[messageId] = job;
-    if (job is _AttachmentDownloadJob) {
-      DownloadKeyValue.instance.addMessageId(messageId);
+  Future<void> removeAttachmentJobsByParentId(String parentId) async {
+    final keys = {
+      ..._attachmentJob.keys,
+      ...DownloadKeyValue.instance.messageIds,
+      ..._attachmentDownloadKeys,
+    };
+    final prefix = '$parentId|';
+    for (final key in keys) {
+      if (key != parentId && !key.startsWith(prefix)) continue;
+      final separator = key.indexOf('|');
+      await removeAttachmentJob(
+        separator == -1 ? key : key.substring(separator + 1),
+        transcriptId: separator == -1 ? null : key.substring(0, separator),
+      );
     }
   }
 
-  Future<void> removeAttachmentJob(String messageId) async {
-    await DownloadKeyValue.instance.removeMessageId(messageId);
-    _attachmentJob[messageId]?.cancel();
-    _attachmentJob.remove(messageId);
+  void _setAttachmentJob(
+    String messageId,
+    _AttachmentJobBase job, {
+    String? transcriptId,
+  }) {
+    final key = _attachmentJobKey(messageId, transcriptId);
+    _attachmentJob[key] = job;
+    if (job is _AttachmentDownloadJob) {
+      DownloadKeyValue.instance.addMessageId(key);
+    }
   }
 
-  Future<bool> cancelProgressAttachmentJob(String messageId) async {
-    await _messageDao.updateMediaStatus(messageId, MediaStatus.canceled);
-    if (!_hasAttachmentJob(messageId)) {
+  Future<void> removeAttachmentJob(
+    String messageId, {
+    String? transcriptId,
+  }) async {
+    final key = _attachmentJobKey(messageId, transcriptId);
+    await DownloadKeyValue.instance.removeMessageId(key);
+    _attachmentJob[key]?.cancel();
+    _attachmentJob.remove(key);
+  }
+
+  Future<bool> cancelProgressAttachmentJob(
+    String messageId, {
+    String? transcriptId,
+  }) async {
+    await _messageDao.updateMediaStatus(
+      messageId,
+      MediaStatus.canceled,
+      transcriptId: transcriptId,
+    );
+    final hasJob = _hasAttachmentJob(messageId, transcriptId: transcriptId);
+    await removeAttachmentJob(messageId, transcriptId: transcriptId);
+    if (!hasJob) {
       w('cancelProgressAttachmentJob: no job for $messageId');
       return false;
     }
-    await DownloadKeyValue.instance.removeMessageId(messageId);
-    _attachmentJob[messageId]?.cancel();
-    _attachmentJob.remove(messageId);
     return true;
   }
 
-  double getAttachmentProgress(String messageId) =>
-      _attachmentJob[messageId]?.progress ?? 0;
+  double getAttachmentProgress(
+    String messageId, {
+    String? transcriptId,
+  }) =>
+      _attachmentJob[_attachmentJobKey(messageId, transcriptId)]?.progress ?? 0;
 
   Future<bool> syncMessageMedia(String messageId) async {
     Future<bool> fromMessage() async {
@@ -578,12 +718,16 @@ class AttachmentUtil extends AttachmentUtilBase with ChangeNotifier {
     return result.any((result) => result);
   }
 
-  Future _updateTranscriptMessageStatus(String messageId) async {
-    final transcriptIds =
-        (await _transcriptMessageDao
-                .transcriptMessageByMessageId(messageId, maxLimit)
-                .get())
-            .map((e) => e.transcriptId);
+  Future _updateTranscriptMessageStatus(
+    String messageId, {
+    String? transcriptId,
+  }) async {
+    final transcriptIds = transcriptId != null
+        ? [transcriptId]
+        : (await _transcriptMessageDao
+                  .transcriptMessageByMessageId(messageId, maxLimit)
+                  .get())
+              .map((e) => e.transcriptId);
     await Future.forEach<String>(transcriptIds, (transcriptId) async {
       final list = await _transcriptMessageDao
           .transcriptMessageByTranscriptId(transcriptId)

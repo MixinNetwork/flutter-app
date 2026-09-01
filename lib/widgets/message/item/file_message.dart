@@ -36,6 +36,9 @@ class MessageFile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
+    final transcriptId = isTranscriptPage
+        ? TranscriptPage.of(context)?.messageId
+        : null;
     final mediaStatus = useMessageConverter(
       converter: (state) => state.mediaStatus,
     );
@@ -85,7 +88,10 @@ class MessageFile extends HookConsumerWidget {
               await context.accountServer.reUploadAttachment(message);
             }
           } else {
-            await context.accountServer.downloadAttachment(message.messageId);
+            await context.accountServer.downloadAttachment(
+              message.messageId,
+              transcriptId: transcriptId,
+            );
           }
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
@@ -115,6 +121,7 @@ class MessageFile extends HookConsumerWidget {
         } else if (message.mediaStatus == MediaStatus.pending) {
           await context.accountServer.cancelProgressAttachmentJob(
             message.messageId,
+            transcriptId: transcriptId,
           );
         }
       },
@@ -129,7 +136,9 @@ class MessageFile extends HookConsumerWidget {
                       ? const StatusUpload()
                       : const StatusDownload();
                 case MediaStatus.pending:
-                  return const StatusPending();
+                  return StatusPending(
+                    transcriptId: transcriptId,
+                  );
                 case MediaStatus.expired:
                   return const StatusWarning();
                 case null:

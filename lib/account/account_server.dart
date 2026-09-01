@@ -127,9 +127,66 @@ class AccountServer {
     unawaited(conversationListStore.start());
     unawaited(_start());
 
-    DownloadKeyValue.instance.messageIds.forEach((messageId) {
-      attachmentUtil.downloadAttachment(messageId: messageId);
-    });
+    for (final jobKey in DownloadKeyValue.instance.messageIds.toList()) {
+      final separator = jobKey.indexOf('|');
+      if (separator == -1) {
+        final message = await database.messageDao.findMessageByMessageId(
+          jobKey,
+        );
+        final transcripts = await database.transcriptMessageDao
+            .transcriptMessageByMessageId(jobKey)
+            .get();
+        if (message != null) {
+          unawaited(attachmentUtil.downloadAttachment(messageId: jobKey));
+        } else if (transcripts.length == 1) {
+          unawaited(
+            attachmentUtil.downloadAttachment(
+              messageId: jobKey,
+              transcriptId: transcripts.single.transcriptId,
+            ),
+          );
+        } else {
+          unawaited(DownloadKeyValue.instance.removeMessageId(jobKey));
+        }
+        continue;
+      }
+      final transcriptId = jobKey.substring(0, separator);
+      final messageId = jobKey.substring(separator + 1);
+      final transcriptMessage = await database.transcriptMessageDao
+          .transcriptMessageByIds(transcriptId, messageId)
+          .getSingleOrNull();
+      if (transcriptMessage == null) {
+        await DownloadKeyValue.instance.removeMessageId(jobKey);
+        continue;
+      }
+      unawaited(
+        attachmentUtil.downloadAttachment(
+          messageId: messageId,
+          transcriptId: transcriptId,
+        ),
+      );
+    }
+    final pendingTranscriptMessages = await database.transcriptMessageDao
+        .pendingTranscriptMessages()
+        .get();
+    for (final message in pendingTranscriptMessages) {
+      if (!message.category.isAttachment) continue;
+      final parent = await database.messageDao.findMessageByMessageId(
+        message.transcriptId,
+      );
+      if (parent == null ||
+          parent.userId == userId ||
+          parent.status == MessageStatus.sending) {
+        continue;
+      }
+      unawaited(
+        attachmentUtil.downloadAttachment(
+          messageId: message.messageId,
+          transcriptId: message.transcriptId,
+        ),
+      );
+    }
+
     appActiveListener.addListener(onActive);
   }
 
@@ -342,16 +399,23 @@ class AccountServer {
         'request download transcript: ${request.message.messageId} ${request.message.category}',
       );
       final messageId = request.message.messageId;
+      final transcriptId = request.message.transcriptId;
       if (needDownload(request.message.category)) {
         await attachmentUtil.downloadAttachment(
-          messageId: request.message.messageId,
+          messageId: messageId,
+          transcriptId: transcriptId,
         );
       } else {
-        await attachmentUtil.checkSyncMessageMedia(messageId);
+        await attachmentUtil.checkSyncMessageMedia(
+          messageId,
+          transcriptId: transcriptId,
+        );
       }
     } else if (request is AttachmentDeleteRequest) {
       try {
-        await attachmentUtil.removeAttachmentJob(request.message.messageId);
+        await attachmentUtil.removeAttachmentJobsByParentId(
+          request.message.messageId,
+        );
         await _deleteMessageAttachment(request.message);
         request.resultPort?.send(null);
       } catch (error) {
@@ -997,8 +1061,13 @@ class AccountServer {
     }
   }
 
-  Future<void> downloadAttachment(String messageId) async =>
-      attachmentUtil.downloadAttachment(messageId: messageId);
+  Future<void> downloadAttachment(
+    String messageId, {
+    String? transcriptId,
+  }) async => attachmentUtil.downloadAttachment(
+    messageId: messageId,
+    transcriptId: transcriptId,
+  );
 
   Future<void> reUploadGiphyGif(db.MessageItem message) {
     assert(
@@ -1430,8 +1499,13 @@ class AccountServer {
     multiAuthNotifier.updateAccount(user.data);
   }
 
-  Future<bool> cancelProgressAttachmentJob(String messageId) =>
-      attachmentUtil.cancelProgressAttachmentJob(messageId);
+  Future<bool> cancelProgressAttachmentJob(
+    String messageId, {
+    String? transcriptId,
+  }) => attachmentUtil.cancelProgressAttachmentJob(
+    messageId,
+    transcriptId: transcriptId,
+  );
 
   Future<void> _deleteMessageAttachment(db.Message message) async {
     if (message.category.isAttachment) {
@@ -1487,7 +1561,7 @@ class AccountServer {
   Future<void> deleteMessage(String messageId) async {
     final message = await database.messageDao.findMessageByMessageId(messageId);
     if (message == null) return;
-    await attachmentUtil.cancelProgressAttachmentJob(messageId);
+    await attachmentUtil.removeAttachmentJobsByParentId(messageId);
     await database.messageDao.deleteMessage(message.conversationId, messageId);
     unawaited(database.ftsDatabase.deleteByMessageId(messageId));
     unawaited(_deleteMessageAttachment(message));
@@ -1495,14 +1569,14 @@ class AccountServer {
 
   Future<void> deleteMessagesByConversationId(String conversationId) async {
     final miniMessageIds = await database.messageDao
-        .miniMessageByIds(attachmentUtil.downloadingIds.toList())
+        .miniMessageByIds(attachmentUtil.downloadingParentIds.toList())
         .get();
     await Future.forEach(
       miniMessageIds.where(
         (message) => message.conversationId == conversationId,
       ),
       (message) =>
-          attachmentUtil.cancelProgressAttachmentJob(message.messageId),
+          attachmentUtil.removeAttachmentJobsByParentId(message.messageId),
     );
 
     await database.messageDao.deleteMessagesByConversationId(conversationId);

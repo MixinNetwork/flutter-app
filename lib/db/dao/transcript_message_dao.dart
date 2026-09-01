@@ -47,6 +47,19 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
         ..where((tbl) => tbl.messageId.equals(messageId))
         // ignore: invalid_use_of_protected_member
         ..limitExpr = limit ?? Limit(1, 0));
+  Selectable<TranscriptMessage> transcriptMessageByIds(
+    String transcriptId,
+    String messageId,
+  ) => (db.select(db.transcriptMessages)
+    ..where(
+      (tbl) =>
+          tbl.transcriptId.equals(transcriptId) &
+          tbl.messageId.equals(messageId),
+    ));
+  SimpleSelectStatement<TranscriptMessages, TranscriptMessage>
+  pendingTranscriptMessages() =>
+      db.select(db.transcriptMessages)
+        ..where((tbl) => tbl.mediaStatus.equalsValue(MediaStatus.pending));
 
   SimpleSelectStatement<TranscriptMessages, TranscriptMessage>
   transcriptMessageByTranscriptId(String transcriptId) =>

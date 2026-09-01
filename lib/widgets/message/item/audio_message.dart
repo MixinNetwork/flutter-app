@@ -25,6 +25,9 @@ class AudioMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
+    final transcriptId = isTranscriptPage
+        ? TranscriptPage.of(context)?.messageId
+        : null;
     final messageId = useMessageConverter(
       converter: (state) => state.messageId,
     );
@@ -89,11 +92,15 @@ class AudioMessage extends HookConsumerWidget {
                   context.accountServer.reUploadAttachment(message);
                 }
               } else {
-                context.accountServer.downloadAttachment(message.messageId);
+                context.accountServer.downloadAttachment(
+                  message.messageId,
+                  transcriptId: transcriptId,
+                );
               }
             case MediaStatus.pending:
               context.accountServer.cancelProgressAttachmentJob(
                 message.messageId,
+                transcriptId: transcriptId,
               );
             case MediaStatus.expired:
             case null:
@@ -111,7 +118,9 @@ class AudioMessage extends HookConsumerWidget {
                         ? const StatusUpload()
                         : const StatusDownload();
                   case MediaStatus.pending:
-                    return const StatusPending();
+                    return StatusPending(
+                      transcriptId: transcriptId,
+                    );
                   case MediaStatus.expired:
                     return const StatusWarning();
                   case MediaStatus.done:
