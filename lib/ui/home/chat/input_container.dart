@@ -221,9 +221,11 @@ class _InputContainer extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    _AnimatedSendOrVoiceButton(
-                      textEditingController: textEditingController,
-                      textEditingValueStream: textEditingValueStream,
+                    AppActiveTickerMode(
+                      child: _AnimatedSendOrVoiceButton(
+                        textEditingController: textEditingController,
+                        textEditingValueStream: textEditingValueStream,
+                      ),
                     ),
                   ],
                 ),
