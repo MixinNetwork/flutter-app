@@ -12,6 +12,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
+import '../../../../utils/app_lifecycle.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../../utils/system/clipboard.dart';
@@ -604,25 +605,27 @@ class _Item extends HookConsumerWidget {
       child: DecoratedBox(
         decoration: const BoxDecoration(color: Color.fromRGBO(62, 65, 72, 0.9)),
         child: ClipRect(
-          child: ImagPreviewWidget(
-            scale: initialScale,
-            minScale: math.min(initialScale / 2, 0.5),
-            maxScale: math.max(initialScale * 2, 2),
-            controller: controller,
-            onEmptyAreaTapped: () {
-              Navigator.maybePop(context);
-            },
-            image: Image.file(
-              File(
-                context.accountServer.convertMessageAbsolutePath(
-                  message,
-                  isTranscriptPage,
+          child: AppActiveTickerMode(
+            child: ImagPreviewWidget(
+              scale: initialScale,
+              minScale: math.min(initialScale / 2, 0.5),
+              maxScale: math.max(initialScale * 2, 2),
+              controller: controller,
+              onEmptyAreaTapped: () {
+                Navigator.maybePop(context);
+              },
+              image: Image.file(
+                File(
+                  context.accountServer.convertMessageAbsolutePath(
+                    message,
+                    isTranscriptPage,
+                  ),
                 ),
-              ),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
-                imageData: message.thumbImage ?? '',
                 fit: BoxFit.contain,
+                errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
+                  imageData: message.thumbImage ?? '',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),

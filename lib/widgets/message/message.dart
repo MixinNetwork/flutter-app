@@ -17,6 +17,7 @@ import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../ui/provider/user_cache_provider.dart';
+import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
@@ -277,23 +278,25 @@ class MessageItemWidget extends HookConsumerWidget {
       child: child,
     );
 
-    return FocusScope(
-      node: focusNode,
-      child: MessageContext(
-        isTranscriptPage: isTranscriptPage,
-        isPinnedPage: isPinnedPage,
-        showNip: presentation.showNip,
-        isCurrentUser: presentation.isCurrentUser,
-        message: message,
-        highlightEnabled: blink,
-        menuHighlighted: showedMenu.value,
-        child: Builder(
-          builder: (context) => MessageQuickReplyDetector(
-            child: Padding(
-              padding: row.sameUserPrev
-                  ? EdgeInsets.zero
-                  : const EdgeInsets.only(top: 8),
-              child: child,
+    return AppActiveTickerMode(
+      child: FocusScope(
+        node: focusNode,
+        child: MessageContext(
+          isTranscriptPage: isTranscriptPage,
+          isPinnedPage: isPinnedPage,
+          showNip: presentation.showNip,
+          isCurrentUser: presentation.isCurrentUser,
+          message: message,
+          highlightEnabled: blink,
+          menuHighlighted: showedMenu.value,
+          child: Builder(
+            builder: (context) => MessageQuickReplyDetector(
+              child: Padding(
+                padding: row.sameUserPrev
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.only(top: 8),
+                child: child,
+              ),
             ),
           ),
         ),

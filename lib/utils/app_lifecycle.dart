@@ -12,6 +12,20 @@ bool get isAppActive => _appObserver._isActive.value;
 
 ValueNotifier<bool> get appActiveListener => _appObserver._isActive;
 
+class AppActiveTickerMode extends StatelessWidget {
+  const AppActiveTickerMode({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: appActiveListener,
+    builder: (context, enabled, child) =>
+        TickerMode(enabled: enabled, child: child!),
+    child: child,
+  );
+}
+
 class _AppLifecycleObserver extends WidgetsBindingObserver {
   final _isActive = ValueNotifier<bool>(true);
 

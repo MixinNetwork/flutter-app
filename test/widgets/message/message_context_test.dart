@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
 import 'package:flutter_app/ui/provider/message_selection_provider.dart';
 import 'package:flutter_app/ui/provider/quote_message_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
+import 'package:flutter_app/utils/app_lifecycle.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
@@ -22,10 +24,12 @@ import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_app/widgets/message/message_action_policy.dart';
 import 'package:flutter_app/widgets/message/message_bubble.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart' as provider;
+import 'package:visibility_detector/visibility_detector.dart';
 
 void main() {
   test('MessageRows links top tail to first bottom row without center', () {
@@ -292,6 +296,106 @@ void main() {
     expect(quoteWidth, greaterThanOrEqualTo(bodyWidth));
   });
 
+  testWidgets(
+    'inactive mutes message ticker while sibling scroll still animates',
+    (tester) async {
+      final previousAppActive = appActiveListener.value;
+      final visibilityController = VisibilityDetectorController.instance;
+      final previousUpdateInterval = visibilityController.updateInterval;
+      addTearDown(
+        () => visibilityController.updateInterval = previousUpdateInterval,
+      );
+      visibilityController.updateInterval = Duration.zero;
+      addTearDown(() => appActiveListener.value = previousAppActive);
+      initAppLifecycleObserver();
+      appActiveListener.value = true;
+      final message = testMessage('ticker', type: MessageCategory.secret);
+
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        _MessageTestScope(
+          child: Localizations(
+            locale: const Locale('en'),
+            delegates: const [
+              Localization.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            child: SizedBox(
+              width: 600,
+              height: 600,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 100,
+                    child: MessageItemWidget(
+                      message: message,
+                      row: MessageRowModel(message: message, prev: message),
+                      isGroupOrBotGroupConversation: false,
+                      enableShowAvatar: false,
+                      blink: false,
+                      showUnreadBar: false,
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      children: List<Widget>.generate(
+                        40,
+                        (index) => SizedBox(
+                          height: 40,
+                          child: Text(index.toString()),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(MessageContext), findsOneWidget);
+      expect(scrollController.position.maxScrollExtent, greaterThan(0));
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump();
+      expect(
+        TickerMode.valuesOf(
+          tester.element(find.byType(MessageContext)),
+        ).enabled,
+        isFalse,
+      );
+      expect(
+        TickerMode.valuesOf(tester.element(find.byType(Scrollable))).enabled,
+        isTrue,
+      );
+
+      final scrollAnimation = scrollController.animateTo(
+        400,
+        duration: const Duration(seconds: 1),
+        curve: Curves.linear,
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
+      expect(scrollController.offset, greaterThan(0));
+      await scrollAnimation;
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(
+        TickerMode.valuesOf(
+          tester.element(find.byType(MessageContext)),
+        ).enabled,
+        isTrue,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
   testWidgets('current user blink is visible enough', (tester) async {
     final notifier = BlinkNotifier(tester)..blinkByMessageId('1');
 

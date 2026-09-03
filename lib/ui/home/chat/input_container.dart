@@ -84,7 +84,9 @@ class InputContainer extends HookConsumerWidget {
       child: LayoutBuilder(
         builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
           layoutWidth: constraints.maxWidth,
-          child: const _InputContainer(),
+          child: const AppActiveTickerMode(
+            child: _InputContainer(),
+          ),
         ),
       ),
     );
