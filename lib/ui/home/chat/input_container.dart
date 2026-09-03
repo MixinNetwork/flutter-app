@@ -84,7 +84,9 @@ class InputContainer extends HookConsumerWidget {
       child: LayoutBuilder(
         builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
           layoutWidth: constraints.maxWidth,
-          child: const _InputContainer(),
+          child: const AppActiveTickerMode(
+            child: _InputContainer(),
+          ),
         ),
       ),
     );
@@ -221,11 +223,9 @@ class _InputContainer extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    AppActiveTickerMode(
-                      child: _AnimatedSendOrVoiceButton(
-                        textEditingController: textEditingController,
-                        textEditingValueStream: textEditingValueStream,
-                      ),
+                    _AnimatedSendOrVoiceButton(
+                      textEditingController: textEditingController,
+                      textEditingValueStream: textEditingValueStream,
                     ),
                   ],
                 ),
