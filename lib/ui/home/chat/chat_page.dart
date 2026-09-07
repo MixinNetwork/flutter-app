@@ -66,11 +66,6 @@ class ChatPage extends HookConsumerWidget {
 
     useValueListenable(chatSideNotifier);
 
-    ref.listen(hasSelectedMessageProvider, (previous, hasSelectedMessage) {
-      if (!hasSelectedMessage) return;
-      chatSideNotifier.clear();
-    });
-
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
       name: 'chatContainer',
