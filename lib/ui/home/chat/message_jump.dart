@@ -34,7 +34,8 @@ class ChatTimelineLocation {
     );
     final handled = await _scrollCoordinator.scrollToMessageIfInLoadedWindow(
       messageId,
-      animated: true,
+      // A covering side route mutes the chat's scroll animation ticker.
+      animated: !(closeSideAfterJump && chatSideRouteMode),
     );
     traceChatJump(
       'loaded-window result target=${shortMessageId(messageId)} '
