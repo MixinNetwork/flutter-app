@@ -19,6 +19,7 @@ import '../../app_bar.dart';
 import '../../auth.dart';
 import '../../buttons.dart';
 import '../../dialog.dart';
+import '../../mixin_image.dart';
 import '../../sticker_page/sticker_item.dart';
 import '../../toast.dart';
 import '../../user_selector/conversation_selector.dart';
@@ -443,11 +444,9 @@ class _Image extends HookConsumerWidget {
   final SendImageData image;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => SingleChildScrollView(
-    child: SelectableText(
-      image.url,
-      style: TextStyle(color: context.theme.text),
-    ),
+  Widget build(BuildContext context, WidgetRef ref) => MixinImage.network(
+    image.url,
+    placeholder: () => ColoredBox(color: context.theme.secondaryText),
   );
 }
 

@@ -237,15 +237,16 @@ void main() {
     expect(server.sent.single.namedArguments[#recipientId], _user);
   });
 
-  testWidgets('image confirmation shows URL without loading a preview', (
+  testWidgets('image preview is shown but sending requires confirmation', (
     tester,
   ) async {
     await mount(tester);
     const url = 'http://127.0.0.1:12345/private.jpg';
     await open(tester, link('image', jsonEncode({'url': url})));
     expect(server.sent, isEmpty);
-    expect(find.text(url), findsOneWidget);
-    expect(find.byType(MixinImage), findsNothing);
+    expect(find.byType(MixinImage), findsOneWidget);
+    final preview = tester.widget<MixinImage>(find.byType(MixinImage));
+    expect((preview.image as NetworkImage).url, url);
     await tester.tap(find.byType(MixinCloseButton));
     await tester.pumpAndSettle();
     expect(server.sent, isEmpty);
