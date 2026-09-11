@@ -279,7 +279,7 @@ class _MessageProcessRunner {
       _deviceTransfer = await startTransferIsolate(
         userId: userId,
         messageDeliver: (message) async {
-          d('device_transfer: send message: $message');
+          d('device_transfer: send message');
           final result = await _sender.deliver(message);
           if (!result.success) {
             w('device_transfer: send message failed: $result');

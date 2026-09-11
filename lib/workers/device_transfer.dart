@@ -470,7 +470,7 @@ class DeviceTransfer {
     int code,
     String secretKey,
   ) async {
-    d('_handleRemotePushCommand: $ip:$port ($code)');
+    d('_handleRemotePushCommand');
     final keyBytes = base64Decode(secretKey);
     if (keyBytes.length != 64) {
       e('handleRemotePushCommand: invalid secret key length.');

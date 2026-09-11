@@ -131,6 +131,10 @@ class TransferDataCommand with Equatable {
   bool get isPull => action == kTransferCommandActionPull;
 
   @override
+  String toString() =>
+      'TransferDataCommand(action: $action, version: $version)';
+
+  @override
   List<Object?> get props => [
     deviceId,
     action,

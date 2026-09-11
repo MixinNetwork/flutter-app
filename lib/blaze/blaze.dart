@@ -252,7 +252,7 @@ class Blaze {
               }
 
               _connectedState = ConnectedState.connected;
-              d('blazeMessage receive: ${blazeMessage.toJson()}');
+              d('blazeMessage receive: ${blazeMessage.action}');
 
               if (blazeMessage.action == kErrorAction &&
                   blazeMessage.error?.code == authentication) {
@@ -424,7 +424,7 @@ class Blaze {
         .getLastBlazeMessageCreatedAt();
     final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
-    d('blaze send: ${m.toJson()}');
+    d('blaze send: ${m.action}');
     await _sendGZip(m);
   }
 
@@ -492,7 +492,7 @@ class Blaze {
       return null;
     }
 
-    d('blaze send: ${blazeMessage.toJson()}');
+    d('blaze send: ${blazeMessage.action}');
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
     d('sendMessage transactions size: ${transactions.length}');
@@ -566,7 +566,7 @@ class Blaze {
     if (url == proxyConfig) {
       return;
     }
-    i('Proxy settings changed to: $url');
+    i('Proxy settings changed');
     proxyConfig = url;
 
     i('Triggering DISCONNECT event: Proxy settings changed');
