@@ -120,6 +120,37 @@ class AttachmentUtilBase {
     );
   }
 
+  // Migration metadata is remote input; normal local attachment reads also
+  // support legacy absolute paths and must not define this write boundary.
+  String convertTransferAttachmentPath({
+    required String? fileName,
+    required String category,
+    String? conversationId,
+    bool isTranscript = false,
+  }) {
+    final path = convertAbsolutePath(
+      fileName: fileName,
+      category: category,
+      conversationId: conversationId,
+      isTranscript: isTranscript,
+    );
+    if (path.isEmpty) return '';
+    final root = p.normalize(p.absolute(mediaPath));
+    final target = p.normalize(p.absolute(path));
+    if (!p.isWithin(root, target)) return '';
+    // Existing links must not redirect a contained path outside Media.
+    var current = target;
+    while (true) {
+      if (FileSystemEntity.typeSync(current, followLinks: false) ==
+          FileSystemEntityType.link) {
+        return '';
+      }
+      if (current == root) break;
+      current = p.dirname(current);
+    }
+    return target;
+  }
+
   String getAttachmentDirectoryPath(String category, String conversationId) {
     assert(category.isAttachment);
     String path;
