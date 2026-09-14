@@ -260,9 +260,15 @@ class _TransferJsonPacketBuilder extends _TransferPacketBuilder {
       return creator(jsonData);
     } catch (error, stacktrace) {
       e(
-        '_TransferJsonPacketBuilder#build: $error, $stacktrace \ncontent: ${utf8.decode(jsonData, allowMalformed: true)}',
+        '_TransferJsonPacketBuilder#build: ${error.runtimeType}',
+        null,
+        stacktrace,
       );
-      rethrow;
+      // Parser errors can include plaintext; callers also log propagated errors.
+      Error.throwWithStackTrace(
+        const FormatException('Invalid transfer packet'),
+        stacktrace,
+      );
     }
   }
 }

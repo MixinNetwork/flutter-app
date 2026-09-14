@@ -47,12 +47,15 @@ class ProxyConfig with Equatable {
   Map<String, dynamic> toJson() => _$ProxyConfigToJson(this);
 
   @override
+  String toString() => 'ProxyConfig(type: $type)';
+
+  @override
   List<Object?> get props => [id, type, host, port, username, password];
 }
 
 extension DioProxyExt on Dio {
   void applyProxy(ProxyConfig? config) {
-    i('apply client proxy ${config?.toUri()}');
+    i('apply client proxy: ${config != null}');
     httpClientAdapter = _CustomHttpClientAdapterWrapper(config);
   }
 }

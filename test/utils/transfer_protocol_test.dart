@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_app/utils/crypto/aes.dart';
 import 'package:flutter_app/utils/device_transfer/cipher.dart';
 import 'package:flutter_app/utils/device_transfer/json_transfer_data.dart';
 import 'package:flutter_app/utils/device_transfer/socket_wrapper.dart';
@@ -41,6 +42,62 @@ Future<String> _createTempFile(int fileSize) async {
 }
 
 void main() {
+  test(
+    'invalid transfer packets do not expose decrypted content in logs',
+    () async {
+      const secret = 'transfer-key-must-not-appear';
+      final logs = <String>[];
+      final previousCallback = onWriteToFile;
+      onWriteToFile = logs.add;
+      try {
+        for (final payload in [
+          jsonEncode({'secret_key': secret, 'version': 'invalid'}),
+          '{"secret_key":"$secret",',
+        ]) {
+          final key = generateTransferKey();
+          final iv = generateTransferIv();
+          final encrypted = AesCipher.encrypt(
+            key: key.aesKey,
+            iv: iv,
+            data: Uint8List.fromList(utf8.encode(payload)),
+          );
+          final body = [...iv, ...encrypted];
+          final header = ByteData(5)
+            ..setInt8(0, kTypeCommand)
+            ..setInt32(1, body.length);
+          final packet = Uint8List.fromList([
+            ...header.buffer.asUint8List(),
+            ...body,
+            ...Hmac(sha256, key.hMacKey).convert(body).bytes,
+          ]);
+          final output = StreamController<TransferPacket>();
+          final subscription = output.stream.listen(
+            (_) => fail('Invalid packet accepted'),
+          );
+          final parser = TransferProtocolSink(output.sink, '', key);
+          Object? failure;
+          try {
+            parser.add(packet);
+          } catch (error, stackTrace) {
+            failure = error;
+            // The receiver logs propagated errors too.
+            e('receiver: socket process error', error, stackTrace);
+          } finally {
+            await output.close();
+            await subscription.cancel();
+          }
+          expect(failure, isNotNull);
+          expect(logs, isNotEmpty);
+          expect(logs.join('\n'), isNot(contains(secret)));
+          expect(failure.toString(), isNot(contains(secret)));
+          logs.clear();
+        }
+      } finally {
+        onWriteToFile = previousCallback;
+      }
+    },
+  );
+
   test('transfer writer', () async {
     final secretKey = generateTransferKey();
     final socket = MockTransferSocket(secretKey);

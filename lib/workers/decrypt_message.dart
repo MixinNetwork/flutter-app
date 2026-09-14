@@ -144,7 +144,7 @@ class DecryptMessage extends Injector {
     final data = BlazeMessageData.fromJson(
       jsonDecode(floodMessage.data) as Map<String, dynamic>,
     );
-    d('DecryptMessage process data: ${data.toJson()}');
+    d('DecryptMessage process: ${data.messageId} ${data.category}');
     if (await isExistMessage(data.messageId)) {
       await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
       await database.floodMessageDao.deleteFloodMessage(floodMessage);

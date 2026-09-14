@@ -214,7 +214,6 @@ class DeviceTransferReceiver {
       switch (data.type) {
         case JsonTransferDataType.conversation:
           final conversation = TransferDataConversation.fromJson(data.data);
-          d('client: conversation: $conversation');
           final local = await database.conversationDao
               .conversationById(conversation.conversationId)
               .getSingleOrNull();
@@ -233,7 +232,6 @@ class DeviceTransferReceiver {
             return;
           }
 
-          d('client: message: $message');
           final local = await database.messageDao.findMessageByMessageId(
             message.messageId,
           );
@@ -248,40 +246,33 @@ class DeviceTransferReceiver {
           await database.ftsDatabase.insertFts(dbMessage);
         case JsonTransferDataType.asset:
           final asset = TransferDataAsset.fromJson(data.data);
-          d('client: asset: $asset');
           await database.assetDao.insertAsset(asset.toDbAsset());
         case JsonTransferDataType.token:
           final token = TransferDataToken.fromJson(data.data);
-          d('client: token: $token');
           await database.tokenDao.insertToken(token.toDbToken());
         case JsonTransferDataType.user:
           final user = TransferDataUser.fromJson(data.data);
-          d('client: user: $user');
           await database.userDao.insert(
             user.toDbUser(),
             updateIfConflict: false,
           );
         case JsonTransferDataType.sticker:
           final sticker = TransferDataSticker.fromJson(data.data);
-          d('client: sticker: $sticker');
           await database.stickerDao.insertSticker(sticker.toDbSticker());
         case JsonTransferDataType.snapshot:
           final snapshot = TransferDataSnapshot.fromJson(data.data);
-          d('client: snapshot: $snapshot');
           await database.snapshotDao.insert(
             snapshot.toDbSnapshot(),
             updateIfConflict: false,
           );
         case JsonTransferDataType.safeSnapshot:
           final safeSnapshot = TransferDataSafeSnapshot.fromJson(data.data);
-          d('client: safeSnapshot: $safeSnapshot');
           await database.safeSnapshotDao.insert(
             safeSnapshot.toDbSafeSnapshot(),
             updateIfConflict: false,
           );
         case JsonTransferDataType.expiredMessage:
           final expiredMessage = TransferDataExpiredMessage.fromJson(data.data);
-          d('client: expiredMessage: $expiredMessage');
           await database.expiredMessageDao.insert(
             messageId: expiredMessage.messageId,
             expireIn: expiredMessage.expireIn,
@@ -292,45 +283,38 @@ class DeviceTransferReceiver {
           final transcriptMessage = TransferDataTranscriptMessage.fromJson(
             data.data,
           );
-          d('client: transcriptMessage: $transcriptMessage');
           await database.transcriptMessageDao.insertAll([
             transcriptMessage.toDbTranscriptMessage(),
           ], mode: InsertMode.insertOrIgnore);
         case JsonTransferDataType.participant:
           final participant = TransferDataParticipant.fromJson(data.data);
-          d('client: participant: $participant');
           await database.participantDao.insert(
             participant.toDbParticipant(),
             updateIfConflict: false,
           );
         case JsonTransferDataType.pinMessage:
           final pinMessage = TransferDataPinMessage.fromJson(data.data);
-          d('client: pinMessage: $pinMessage');
           await database.pinMessageDao.insert(
             pinMessage.toDbPinMessage(),
             updateIfConflict: false,
           );
         case JsonTransferDataType.messageMention:
           final messageMention = db.MessageMention.fromJson(data.data);
-          d('client: messageMention: $messageMention');
           await database.messageMentionDao.insert(
             messageMention,
             updateIfConflict: false,
           );
         case JsonTransferDataType.app:
           final app = TransferDataApp.fromJson(data.data);
-          d('client: app: $app');
           await database.appDao.insert(app.toDbApp(), updateIfConflict: false);
         case JsonTransferDataType.inscriptionItem:
           final inscription = db.InscriptionItem.fromJson(data.data);
-          d('client: inscription: $inscription');
           await database.inscriptionItemDao.insert(
             inscription,
             updateIfConflict: false,
           );
         case JsonTransferDataType.inscriptionCollection:
           final collection = db.InscriptionCollection.fromJson(data.data);
-          d('client: InscriptionCollection: $collection');
           await database.inscriptionCollectionDao.insert(
             collection,
             updateIfConflict: false,
@@ -339,8 +323,11 @@ class DeviceTransferReceiver {
           i('unknown type: ${data.type}');
       }
     } catch (error, stacktrace) {
-      e('_processReceivedJsonPacket: ${data.data}');
-      e('_processReceivedJsonPacket', error, stacktrace);
+      e(
+        '_processReceivedJsonPacket: ${data.type} ${error.runtimeType}',
+        null,
+        stacktrace,
+      );
     }
   }
 
