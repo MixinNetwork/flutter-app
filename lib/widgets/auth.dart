@@ -23,6 +23,10 @@ const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
 
+final appLockedProvider = StateProvider.autoDispose<bool>(
+  (ref) => SecurityKeyValue.instance.hasPasscode,
+);
+
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({required this.child, super.key});
 
@@ -59,13 +63,14 @@ class _AuthGuard extends HookConsumerWidget {
         SecurityKeyValue.instance.biometric;
 
     final hasError = useState(false);
-    final lock = useState(SecurityKeyValue.instance.hasPasscode);
+    final lock = ref.watch(appLockedProvider.notifier);
+    ref.watch(appLockedProvider);
 
     useEffect(() {
       final listen = EventBus.instance.on.whereType<LockEvent>().listen((
         event,
       ) {
-        lock.value = event == LockEvent.lock;
+        lock.state = event == LockEvent.lock;
       });
 
       return listen.cancel;
@@ -79,7 +84,7 @@ class _AuthGuard extends HookConsumerWidget {
       }
 
       void listener() {
-        if (lock.value) return;
+        if (lock.state) return;
 
         final needLock = !isAppActive;
 
@@ -89,16 +94,16 @@ class _AuthGuard extends HookConsumerWidget {
           if (lockDuration.inMinutes > 0) {
             timer = Timer(lockDuration, () {
               if (!hasPasscode) {
-                lock.value = false;
+                lock.state = false;
                 return;
               }
 
-              lock.value = !isAppActive;
+              lock.state = !isAppActive;
             });
           }
         } else {
           dispose();
-          lock.value = needLock;
+          lock.state = needLock;
         }
       }
 
@@ -130,12 +135,12 @@ class _AuthGuard extends HookConsumerWidget {
         FocusManager.instance.removeListener(listener);
         ServicesBinding.instance.keyboard.removeHandler(handler);
       };
-    }, [lock.value]);
+    }, [lock.state]);
 
     return Stack(
       children: [
         child,
-        if (lock.value)
+        if (lock.state)
           GestureDetector(
             onTap: focusNode.requestFocus,
             behavior: HitTestBehavior.translucent,
@@ -201,7 +206,7 @@ class _AuthGuard extends HookConsumerWidget {
                             onCompleted: (value) {
                               textEditingController.text = '';
                               if (SecurityKeyValue.instance.passcode == value) {
-                                lock.value = false;
+                                lock.state = false;
                               } else {
                                 hasError.value = true;
                               }
@@ -235,7 +240,7 @@ class _AuthGuard extends HookConsumerWidget {
                               padding: const EdgeInsets.all(24),
                               onTap: () async {
                                 if (await authenticate()) {
-                                  lock.value = false;
+                                  lock.state = false;
                                   return;
                                 }
                               },
