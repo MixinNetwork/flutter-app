@@ -138,12 +138,11 @@ class PostDetailIcon extends StatelessWidget {
 }
 
 class PostPreview extends StatelessWidget {
-  const PostPreview({required this.content, this.cacheKey, super.key});
+  const PostPreview({required this.message, super.key});
 
   static Future<void> push(
     BuildContext context, {
     required MessageItem message,
-    String? content,
   }) => showGeneralDialog(
     context: context,
     barrierColor: Colors.transparent,
@@ -155,23 +154,13 @@ class PostPreview extends StatelessWidget {
           buildContext,
           animation,
           secondaryAnimation,
-        ) =>
-            InheritedTheme.capture(
-              from: context,
-              to: Navigator.of(context, rootNavigator: true).context,
-            ).wrap(
-              PostPreview(
-                content: content ?? message.content ?? '',
-                cacheKey: buildMarkdownCacheKey(
-                  namespace: content == null ? 'post-preview' : 'file-preview',
-                  id: message.messageId,
-                ),
-              ),
-            ),
+        ) => InheritedTheme.capture(
+          from: context,
+          to: Navigator.of(context, rootNavigator: true).context,
+        ).wrap(PostPreview(message: message)),
   );
 
-  final String content;
-  final String? cacheKey;
+  final MessageItem message;
 
   @override
   Widget build(BuildContext context) => FocusableActionDetector(
@@ -194,8 +183,11 @@ class PostPreview extends StatelessWidget {
           ),
           Expanded(
             child: Markdown(
-              data: content,
-              cacheKey: cacheKey,
+              data: message.content ?? '',
+              cacheKey: buildMarkdownCacheKey(
+                namespace: 'post-preview',
+                id: message.messageId,
+              ),
               maxContentWidth: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
             ),

@@ -3,6 +3,7 @@ import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/markdown.dart';
+import 'package:flutter_app/widgets/markdown_file_preview.dart';
 import 'package:flutter_app/widgets/message/item/post_message.dart';
 import 'package:flutter_app/widgets/message/message_style.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +17,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _app(
-        const PostPreview(
+        const MarkdownFilePreview(
           content: '# 文件预览\n\n```dart\nprint(42);\n```',
         ),
       ),

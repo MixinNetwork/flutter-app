@@ -14,13 +14,13 @@ import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../interactive_decorated_box.dart';
+import '../../markdown_file_preview.dart';
 import '../../status.dart';
 import '../../toast.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_style.dart';
-import 'post_message.dart';
 import 'transcript_message.dart';
 
 class FileMessage extends HookConsumerWidget {
@@ -113,7 +113,7 @@ class MessageFile extends HookConsumerWidget {
               return;
             }
             if (!context.mounted) return;
-            await PostPreview.push(context, message: message, content: content);
+            await MarkdownFilePreview.push(context, content: content);
           } else if (_shouldOpenDirectly(mediaName)) {
             final path = context.accountServer.convertMessageAbsolutePath(
               message,
