@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -18,6 +20,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_style.dart';
+import 'post_message.dart';
 import 'transcript_message.dart';
 
 class FileMessage extends HookConsumerWidget {
@@ -94,7 +97,24 @@ class MessageFile extends HookConsumerWidget {
         } else if (message.mediaStatus == MediaStatus.done &&
             message.mediaUrl != null) {
           if (message.mediaUrl?.isEmpty ?? true) return;
-          if (_shouldOpenDirectly(mediaName)) {
+          if (p.extension(mediaName).toLowerCase() == '.md') {
+            final path = context.accountServer.convertMessageAbsolutePath(
+              message,
+              isTranscriptPage,
+            );
+            final String content;
+            try {
+              content = await File(path).readAsString();
+            } catch (_) {
+              if (!context.mounted) return;
+              showToastFailed(
+                ToastError(context.l10n.unableToOpenFile(mediaName)),
+              );
+              return;
+            }
+            if (!context.mounted) return;
+            await PostPreview.push(context, message: message, content: content);
+          } else if (_shouldOpenDirectly(mediaName)) {
             final path = context.accountServer.convertMessageAbsolutePath(
               message,
               isTranscriptPage,
