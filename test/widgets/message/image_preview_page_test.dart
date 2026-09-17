@@ -115,7 +115,8 @@ void main() {
                       barrierLabel: MaterialLocalizations.of(
                         context,
                       ).modalBarrierDismissLabel,
-                      pageBuilder: (_, _, _) => PostPreview(message: message),
+                      pageBuilder: (_, _, _) =>
+                          PostPreview(content: message.content ?? ''),
                     );
                   },
                   child: const Text('open post'),
