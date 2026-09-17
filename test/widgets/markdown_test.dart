@@ -11,6 +11,24 @@ import 'package:mixin_markdown_widget/mixin_markdown_widget.dart'
     as mixin_markdown;
 
 void main() {
+  testWidgets('previews Markdown file contents with headings and code', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        const PostPreview(
+          content: '# 文件预览\n\n```dart\nprint(42);\n```',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('文件预览'), findsOneWidget);
+    final markdown = tester.widget<Markdown>(find.byType(Markdown));
+    expect(markdown.data, contains('print(42);'));
+  });
+
   testWidgets('renders PostMessage Markdown with mixin_markdown_widget', (
     tester,
   ) async {
