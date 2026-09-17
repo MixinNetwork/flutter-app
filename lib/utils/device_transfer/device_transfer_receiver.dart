@@ -348,7 +348,7 @@ class DeviceTransferReceiver {
         .transcriptMessageByMessageId(packet.messageId)
         .getSingleOrNull();
     if (tm != null) {
-      final path = attachmentUtil.convertAbsolutePath(
+      final path = attachmentUtil.convertTransferAttachmentPath(
         category: tm.category,
         fileName: tm.mediaUrl,
         isTranscript: true,
@@ -387,7 +387,7 @@ class DeviceTransferReceiver {
       return;
     }
 
-    final path = attachmentUtil.convertAbsolutePath(
+    final path = attachmentUtil.convertTransferAttachmentPath(
       category: message.category,
       conversationId: message.conversationId,
       fileName: message.mediaUrl,
