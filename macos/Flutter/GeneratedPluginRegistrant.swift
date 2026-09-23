@@ -45,7 +45,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   IrondashEngineContextPlugin.register(with: registry.registrar(forPlugin: "IrondashEngineContextPlugin"))
   LocalAuthPlugin.register(with: registry.registrar(forPlugin: "LocalAuthPlugin"))
   NetworkInfoPlusPlugin.register(with: registry.registrar(forPlugin: "NetworkInfoPlusPlugin"))
-  OggOpusPlayerPlugin.register(with: registry.registrar(forPlugin: "OggOpusPlayerPlugin"))
+  SwiftOggOpusPlayerPlugin.register(with: registry.registrar(forPlugin: "SwiftOggOpusPlayerPlugin"))
   OpenFilePlugin.register(with: registry.registrar(forPlugin: "OpenFilePlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))

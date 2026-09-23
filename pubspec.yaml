@@ -94,7 +94,7 @@ dependencies:
   mixin_bot_sdk_dart: ^1.5.0
   mixin_logger: ^0.2.0
   network_info_plus: ^7.0.0
-  ogg_opus_player: ^0.8.0
+  ogg_opus_player: ^0.8.1
   open_file: ^4.0.0
   overlay_support: ^2.1.0
   package_info_plus: ^9.0.1

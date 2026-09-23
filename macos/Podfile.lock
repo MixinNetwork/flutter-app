@@ -77,7 +77,7 @@ SPEC CHECKSUMS:
   FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
   objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7
-  ogg_opus_player: 954784304f4e2722780018c4abf284e4f93cddf5
+  ogg_opus_player: 6ef20440251756613be639749b71dc7215b9def5
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
   protocol_handler_macos: f9cd7b13bcaf6b0425f7410cbe52376cb843a936
   rhttp: 08d791d6373089de796318f4cfb172cbcf34e78b
