@@ -267,7 +267,8 @@ jobs:
           sudo chmod +x /usr/local/bin/appimagetool
           
       - name: Install appimage-builder
-        run: sudo pip3 install appimage-builder==1.1.0
+        # appimage-builder parses Ubuntu package versions with packaging; 22+ rejects versions like 1.21.1ubuntu2.
+        run: sudo pip3 install appimage-builder==1.1.0 packaging==21.3
 
       - name: Build AppImage
         run: appimage-builder --recipe ${{ matrix.recipe }} --skip-test
