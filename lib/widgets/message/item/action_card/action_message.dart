@@ -51,6 +51,7 @@ class ActionCardMessage extends HookConsumerWidget {
             context,
             appCardData.action,
             title: appCardData.title,
+            isExplicitSendAction: true,
             appCardData: appCardData,
             conversationId: ref.read(currentConversationIdProvider),
           );
