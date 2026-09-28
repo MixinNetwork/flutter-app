@@ -78,7 +78,22 @@ class DeviceTransferIsolateController {
   DeviceTransferIsolateController({
     required this.dispose,
     required this.handleRemoteCommand,
+    required this.userId,
+    required this.primarySessionId,
   });
+
+  final String userId;
+  final String primarySessionId;
+
+  bool acceptsRemoteSource({
+    required String sourceUserId,
+    required String senderId,
+    required String sessionId,
+  }) =>
+      sourceUserId == userId &&
+      senderId == userId &&
+      primarySessionId.isNotEmpty &&
+      sessionId == primarySessionId;
 
   final void Function() dispose;
 
@@ -132,6 +147,8 @@ Future<DeviceTransferIsolateController> startTransferIsolate({
     );
 
   return DeviceTransferIsolateController(
+    userId: userId,
+    primarySessionId: primarySessionId,
     dispose: () {
       isolateChannel.sink.add(DeviceTransferIsolateDestroy());
       jobSubscribers.forEach((element) => element.cancel());
