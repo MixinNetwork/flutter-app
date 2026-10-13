@@ -186,7 +186,6 @@ extension _AttachmentDownloadExtension on Dio {
 
     //Create a Completer to notify the success/error state.
     final completer = Completer<Response>();
-    var future = completer.future;
 
     var compressed = false;
     var total = 0;
@@ -269,28 +268,12 @@ extension _AttachmentDownloadExtension on Dio {
       await _closeAndDelete();
     });
 
-    final receiveTimeout =
-        response.requestOptions.receiveTimeout?.inMilliseconds;
-    if (receiveTimeout != null && receiveTimeout > 0) {
-      future = future
-          .timeout(Duration(milliseconds: receiveTimeout))
-          .catchError((err, s) async {
-            await subscription.cancel();
-            await _closeAndDelete();
-            if (err is TimeoutException) {
-              throw DioException(
-                requestOptions: response.requestOptions,
-                error: 'Receiving data timeout[${receiveTimeout}ms]',
-                type: DioExceptionType.receiveTimeout,
-              );
-            } else {
-              w('download error: $err, stack: $s');
-              // ignore: throw_of_invalid_type
-              throw err;
-            }
-          });
-    }
+    // Dio already times out when no chunk arrives within receiveTimeout.
     // ignore: invalid_use_of_internal_member
-    return DioMixin.listenCancelForAsyncTask(cancelToken, future);
+    return DioMixin.listenCancelForAsyncTask(cancelToken, completer.future);
   }
 }
+
+@visibleForTesting
+Future<Response> downloadAttachmentStream(Dio dio, String url, String path) =>
+    dio._download(url, path, transformStream: (stream, _) => stream);
