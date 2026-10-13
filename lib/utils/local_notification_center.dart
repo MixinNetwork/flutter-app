@@ -44,6 +44,8 @@ abstract class _NotificationManager {
 
   Future<void> dismissByMessageId(String messageId, String conversationId);
 
+  Future<void> dismissAll();
+
   Future<bool?> requestPermission();
 
   @protected
@@ -175,6 +177,12 @@ class _LocalNotificationManager extends _NotificationManager {
     await flutterLocalNotificationsPlugin.cancel(id: id);
     notifications.remove(notification);
   }
+
+  @override
+  Future<void> dismissAll() async {
+    notifications.clear();
+    await flutterLocalNotificationsPlugin.cancelAll();
+  }
 }
 
 class _WindowsNotificationManager extends _NotificationManager {
@@ -243,6 +251,9 @@ class _WindowsNotificationManager extends _NotificationManager {
   }
 
   @override
+  Future<void> dismissAll() => WinToast.instance().clear();
+
+  @override
   Future<bool?> requestPermission() async => null;
 }
 
@@ -307,6 +318,9 @@ Future<void> dismissByMessageId(
   String conversationId,
 ) async =>
     await _notificationManager?.dismissByMessageId(messageId, conversationId);
+
+Future<void> dismissAllNotifications() async =>
+    await _notificationManager?.dismissAll();
 
 Future<bool?> requestNotificationPermission() async =>
     _notificationManager?.requestPermission();
