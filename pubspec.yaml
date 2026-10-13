@@ -166,6 +166,10 @@ dev_dependencies:
   drift_dev: ^2.34.5
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
   intl_utils: ^2.8.16
   json_serializable: ^6.14.1
   msix:
