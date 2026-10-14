@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/provider/conversation_provider.dart';
+import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../message_status_icon.dart';
 import 'message.dart';
@@ -134,9 +135,13 @@ class _MessageDatetime extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = useMemoized(() => DateFormat.Hm().format(dateTime.toLocal()), [
-      dateTime,
-    ]);
+    final text = useMemoized(
+      () =>
+          cachedDateFormat(DateFormat.HOUR24_MINUTE).format(dateTime.toLocal()),
+      [
+        dateTime,
+      ],
+    );
 
     return Text(
       text,
