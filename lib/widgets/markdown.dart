@@ -7,6 +7,7 @@ import 'package:mixin_markdown_widget/mixin_markdown_widget.dart';
 
 import '../ui/provider/setting_provider.dart';
 import '../utils/extension/extension.dart';
+import '../utils/system/system_fonts.dart';
 import '../utils/uri_utils.dart';
 import 'message/message_style.dart';
 import 'mixin_image.dart';
@@ -404,6 +405,17 @@ MarkdownThemeData _createMarkdownTheme(
   TextStyle applyTextStyle(TextStyle style) =>
       applyTextColor(scaleFontSize(style));
 
+  // Linux has none of the default code fonts, and the first layout of each
+  // missing family costs a fontconfig search of about 30 ms.
+  TextStyle applyCodeStyle(TextStyle style) => applyTextStyle(
+    Platform.isLinux && linuxMonospaceFamily != null
+        ? style.copyWith(
+            fontFamily: linuxMonospaceFamily,
+            fontFamilyFallback: base.bodyStyle.fontFamilyFallback,
+          )
+        : style,
+  );
+
   return base.copyWith(
     bodyStyle: applyTextStyle(base.bodyStyle),
     quoteStyle: scaleFontSize(
@@ -421,8 +433,8 @@ MarkdownThemeData _createMarkdownTheme(
           fontSizeScale,
       decoration: .none,
     ),
-    inlineCodeStyle: applyTextStyle(base.inlineCodeStyle),
-    codeBlockStyle: applyTextStyle(base.codeBlockStyle),
+    inlineCodeStyle: applyCodeStyle(base.inlineCodeStyle),
+    codeBlockStyle: applyCodeStyle(base.codeBlockStyle),
     tableHeaderStyle: applyTextStyle(base.tableHeaderStyle),
     heading1Style: applyTextStyle(
       base.heading1Style.copyWith(

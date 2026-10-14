@@ -13,8 +13,32 @@ String? loadedFallbackFonts;
 
 /// The system CJK font family on Linux. Text whose fonts lack a character
 /// falls back through fontconfig for every paragraph, which costs about 3 ms
-/// per paragraph, so the theme lists a CJK family and the emoji family.
+/// per paragraph, so the theme uses a CJK family and lists the emoji family.
+///
+/// The theme also uses it as the main family: the default 'Roboto' is not
+/// installed on most Linux systems, and the first layout of a missing family
+/// costs about 30 ms for each font weight.
 String? _linuxCjkFamily;
+
+/// The system monospace font family on Linux, for code text. The usual code
+/// font names are not installed on Linux, and each missing name costs a
+/// fontconfig search on first use.
+String? linuxMonospaceFamily;
+
+Future<String?> _matchLinuxFamily(String pattern) async {
+  try {
+    final result = await Process.run('fc-match', [
+      '-f',
+      '%{family[0]}',
+      pattern,
+    ]);
+    final family = (result.stdout as String).trim();
+    if (result.exitCode == 0 && family.isNotEmpty) return family;
+  } catch (error) {
+    w('failed to match a font family for $pattern: $error');
+  }
+  return null;
+}
 
 // TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
 Future<void> loadFallbackFonts() async {
@@ -24,20 +48,13 @@ Future<void> loadFallbackFonts() async {
 
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
+  final monospace = _matchLinuxFamily('monospace');
   if (PlatformDispatcher.instance.locale.languageCode == 'en') {
-    try {
-      final result = await Process.run('fc-match', [
-        '-f',
-        '%{family[0]}',
-        ':lang=zh-cn',
-      ]);
-      final family = (result.stdout as String).trim();
-      if (result.exitCode == 0 && family.isNotEmpty) _linuxCjkFamily = family;
-    } catch (error) {
-      w('failed to match a CJK font family: $error');
-    }
+    _linuxCjkFamily = await _matchLinuxFamily(':lang=zh-cn');
+    linuxMonospaceFamily = await monospace;
     return;
   }
+  linuxMonospaceFamily = await monospace;
   if (_fallbackFontsLoaded) {
     return;
   }
@@ -110,12 +127,10 @@ extension ApplyFontsExtension on ThemeData {
     } else {
       return this;
     }
+    final family = loadedFallbackFonts ?? _linuxCjkFamily;
     return copyWith(
-      textTheme: textTheme.applyFonts(loadedFallbackFonts, fallback),
-      primaryTextTheme: primaryTextTheme.applyFonts(
-        loadedFallbackFonts,
-        fallback,
-      ),
+      textTheme: textTheme.applyFonts(family, fallback),
+      primaryTextTheme: primaryTextTheme.applyFonts(family, fallback),
     );
   }
 }
