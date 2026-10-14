@@ -2178,7 +2178,7 @@ packages:
     source: hosted
     version: "0.4.0+2"
   vm_service:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: vm_service
       sha256: "0016aef94fc66495ac78af5859181e3f3bf2026bd8eecc72b9565601e19ab360"
