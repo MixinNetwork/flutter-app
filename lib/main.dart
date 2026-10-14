@@ -22,6 +22,7 @@ import 'ui/setting/log_page.dart';
 import 'utils/app_lifecycle.dart';
 import 'utils/event_bus.dart';
 import 'utils/file.dart';
+import 'utils/frame_log.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/local_state_storage.dart';
@@ -45,6 +46,7 @@ Future<void> _runApp(List<String> args) async {
 
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isLinux) unawaited(watchLinuxAccessibility());
+  startFrameLog();
 
   await loadFallbackFonts();
 
