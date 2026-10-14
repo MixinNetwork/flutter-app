@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -250,8 +251,10 @@ class _TextMatch {
 }
 
 class _TextCache {
+  // Spans are keyed by identity: TextSpan.hashCode hashes the whole subtree
+  // and its styles, and equal spans in one tree are still different spans.
   factory _TextCache({required InlineSpan span}) {
-    final lengths = <InlineSpan, int>{span: 0};
+    final lengths = HashMap<InlineSpan, int>.identity()..[span] = 0;
     final text = StringBuffer();
 
     int visitSpan(InlineSpan span) {
@@ -286,7 +289,7 @@ class _TextCache {
     return textCache;
   }
 
-  _TextCache._empty() : text = '', _lengths = <InlineSpan, int>{};
+  _TextCache._empty() : text = '', _lengths = HashMap.identity();
 
   const _TextCache._({
     required this.text,
@@ -299,7 +302,9 @@ class _TextCache {
 
   _TextCache _merge(_TextCache other) => _TextCache._(
     text: text + other.text,
-    lengths: Map<InlineSpan, int>.from(_lengths)..addAll(other._lengths),
+    lengths: HashMap<InlineSpan, int>.identity()
+      ..addAll(_lengths)
+      ..addAll(other._lengths),
   );
 
   int? getLength(InlineSpan span) => _lengths[span];
