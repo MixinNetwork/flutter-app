@@ -85,4 +85,23 @@ void main() {
     );
     expect(_matchCount, 5);
   });
+
+  test('EmojiTextMatcher sets the emoji font only on text-style emoji', () {
+    final spans = TextMatcher.applyTextMatchers(
+      [
+        const TextSpan(text: 'a😀b❤️‍🔥c'),
+      ],
+      [EmojiTextMatcher()],
+    ).toList();
+    final styled = <String>[];
+    for (final span in spans) {
+      span.visitChildren((child) {
+        if (child is TextSpan && child.style?.fontFamily != null) {
+          styled.add(child.text!);
+        }
+        return true;
+      });
+    }
+    expect(styled, ['❤️‍🔥']);
+  });
 }

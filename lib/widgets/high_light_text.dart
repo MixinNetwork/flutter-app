@@ -577,8 +577,14 @@ class MailTextMatcher extends TextMatcher with Equatable {
 
 class EmojiTextMatcher extends TextMatcher with Equatable {
   EmojiTextMatcher()
-    : super.regExp(
-        regExp: emojiRegex,
+    : super.textRangesFromText(
+        textRangesFromText: (text) {
+          if (!mayContainTextStyleEmoji(text)) return const [];
+          return emojiRegex
+              .allMatches(text)
+              .where((match) => isTextStyleEmoji(match[0]!))
+              .map((match) => TextRange(start: match.start, end: match.end));
+        },
         matchBuilder: (span, displayString, linkString) => TextSpan(
           text: displayString,
           style: TextStyle(fontFamily: kEmojiFontFamily),

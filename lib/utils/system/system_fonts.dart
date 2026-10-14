@@ -4,11 +4,17 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../emoji.dart';
 import '../logger.dart';
 
 bool _fallbackFontsLoaded = false;
 
 String? loadedFallbackFonts;
+
+/// The system CJK font family on Linux. Text whose fonts lack a character
+/// falls back through fontconfig for every paragraph, which costs about 3 ms
+/// per paragraph, so the theme lists a CJK family and the emoji family.
+String? _linuxCjkFamily;
 
 // TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
 Future<void> loadFallbackFonts() async {
@@ -19,6 +25,17 @@ Future<void> loadFallbackFonts() async {
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
   if (PlatformDispatcher.instance.locale.languageCode == 'en') {
+    try {
+      final result = await Process.run('fc-match', [
+        '-f',
+        '%{family[0]}',
+        ':lang=zh-cn',
+      ]);
+      final family = (result.stdout as String).trim();
+      if (result.exitCode == 0 && family.isNotEmpty) _linuxCjkFamily = family;
+    } catch (error) {
+      w('failed to match a CJK font family: $error');
+    }
     return;
   }
   if (_fallbackFontsLoaded) {
@@ -85,20 +102,20 @@ Future<void> loadFallbackFonts() async {
 
 extension ApplyFontsExtension on ThemeData {
   ThemeData withFallbackFonts() {
-    if (loadedFallbackFonts == null) {
-      if (Platform.isWindows) {
-        return copyWith(
-          textTheme: textTheme.applyFonts(null, ['Microsoft Yahei']),
-          primaryTextTheme: primaryTextTheme.applyFonts(null, [
-            'Microsoft Yahei',
-          ]),
-        );
-      }
+    final List<String> fallback;
+    if (Platform.isWindows) {
+      fallback = ['Microsoft Yahei', kEmojiFontFamily];
+    } else if (Platform.isLinux) {
+      fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+    } else {
       return this;
     }
     return copyWith(
-      textTheme: textTheme.applyFonts(loadedFallbackFonts, null),
-      primaryTextTheme: primaryTextTheme.applyFonts(loadedFallbackFonts, null),
+      textTheme: textTheme.applyFonts(loadedFallbackFonts, fallback),
+      primaryTextTheme: primaryTextTheme.applyFonts(
+        loadedFallbackFonts,
+        fallback,
+      ),
     );
   }
 }
