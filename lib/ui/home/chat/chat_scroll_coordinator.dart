@@ -543,6 +543,8 @@ class ChatScrollCoordinator {
     final render = _messageRender(messageId, keysByMessageId);
     final viewport = _viewportRender;
     if (render == null || viewport == null) return null;
+    // A row that left the cache extent can keep its key but is detached.
+    if (!render.attached || !viewport.attached) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
     final viewportOrigin = _globalOrigin(viewport);
@@ -571,6 +573,8 @@ class ChatScrollCoordinator {
     final render = _messageRender(messageId, keysByMessageId);
     final viewport = _viewportRender;
     if (render == null || viewport == null) return null;
+    // A row that left the cache extent can keep its key but is detached.
+    if (!render.attached || !viewport.attached) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
     final viewportOrigin = _globalOrigin(viewport);
