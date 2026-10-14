@@ -311,36 +311,6 @@ void main() {
     },
   );
 
-  testWidgets('viewport date only inspects rendered message keys', (
-    tester,
-  ) async {
-    final coordinator = ChatScrollCoordinator();
-    final messages = List.generate(1000, testMessage);
-    final keysByMessageId = CountingKeyMap({
-      for (final message in messages)
-        message.messageId: MessageGlobalKey(message.messageId),
-    });
-
-    addTearDown(coordinator.dispose);
-    await pumpScrollableMessages(
-      tester,
-      coordinator,
-      messages,
-      keysByMessageId,
-      cacheExtent: 0,
-    );
-
-    coordinator.scrollController.jumpTo(80.0 * 500);
-    await tester.pump();
-
-    keysByMessageId.lookupCount = 0;
-    coordinator.updateMessages(messages, keysByMessageId);
-    await tester.pump();
-
-    expect(coordinator.visibleDateTime.value, testMessage(500).createdAt);
-    expect(keysByMessageId.lookupCount, lessThan(50));
-  });
-
   testWidgets('scroll updates do not resolve visible date geometry', (
     tester,
   ) async {

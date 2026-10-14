@@ -78,7 +78,6 @@ class ChatScrollCoordinator {
   static const loadedJumpViewportCount = 2.0;
 
   final scrollController = ScrollController();
-  final visibleDateTime = ValueNotifier<DateTime?>(null);
   final showJumpToLatest = ValueNotifier<bool>(false);
 
   _ChatRestoreRequest? _restoreRequest;
@@ -97,7 +96,6 @@ class ChatScrollCoordinator {
   ChatScrollRestoreDirection? _animatedRestoreDirection;
   bool _restoreScheduled = false;
   bool _viewportStateUpdateScheduled = false;
-  bool _viewportStateUpdateIncludesVisibleDate = false;
   bool _blockPreloadUntilUserScroll = false;
   bool _disposed = false;
   int _programmaticScrollDepth = 0;
@@ -271,9 +269,7 @@ class ChatScrollCoordinator {
     required VoidCallback loadAfter,
   }) {
     _setMessages(messages, keysByMessageId);
-    _scheduleViewportStateUpdate(
-      updateVisibleDate: notification is ScrollEndNotification,
-    );
+    _scheduleViewportStateUpdate();
     if (notification is ScrollStartNotification ||
         notification is ScrollEndNotification ||
         notification is UserScrollNotification) {
@@ -436,7 +432,6 @@ class ChatScrollCoordinator {
     scrollController
       ..removeListener(_scheduleScrollPositionUpdate)
       ..dispose();
-    visibleDateTime.dispose();
     showJumpToLatest.dispose();
   }
 
@@ -806,22 +801,6 @@ class ChatScrollCoordinator {
     return math.max(0, position.maxScrollExtent - position.pixels);
   }
 
-  String? _firstVisibleMessageId() {
-    String? firstVisibleMessageId;
-    double? firstVisibleTop;
-
-    for (final messageId in _currentRenderedMessageIds()) {
-      final geometry = _messageTargetGeometry(messageId, _keysByMessageId);
-      if (geometry == null || geometry.bottom <= 0) continue;
-      if (firstVisibleTop == null || geometry.top < firstVisibleTop) {
-        firstVisibleMessageId = messageId;
-        firstVisibleTop = geometry.top;
-      }
-    }
-
-    return firstVisibleMessageId;
-  }
-
   _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshotFromViewport() {
     _TailFollowAnchorSnapshot? snapshot;
     final viewportHeight = scrollController.position.viewportDimension;
@@ -896,25 +875,21 @@ class ChatScrollCoordinator {
 
   void _scheduleScrollPositionUpdate() {
     _traceScrollPosition();
-    _scheduleViewportStateUpdate(updateVisibleDate: false);
+    _scheduleViewportStateUpdate();
   }
 
-  void _scheduleViewportStateUpdate({bool updateVisibleDate = true}) {
+  void _scheduleViewportStateUpdate() {
     if (_disposed) return;
-    _viewportStateUpdateIncludesVisibleDate =
-        _viewportStateUpdateIncludesVisibleDate || updateVisibleDate;
     if (_viewportStateUpdateScheduled) return;
     _viewportStateUpdateScheduled = true;
     scheduleMicrotask(() {
-      final updateVisibleDate = _viewportStateUpdateIncludesVisibleDate;
       _viewportStateUpdateScheduled = false;
-      _viewportStateUpdateIncludesVisibleDate = false;
       if (_disposed) return;
-      _updateViewportState(updateVisibleDate: updateVisibleDate);
+      _updateViewportState();
     });
   }
 
-  void _updateViewportState({bool updateVisibleDate = true}) {
+  void _updateViewportState() {
     if (!scrollController.hasClients) return;
     if (_jumpButtonFrozenUpdates <= 0) {
       final nextShowJumpToLatest = _shouldShowJumpToLatest();
@@ -923,15 +898,6 @@ class ChatScrollCoordinator {
       }
     } else {
       _jumpButtonFrozenUpdates--;
-    }
-
-    if (!updateVisibleDate) return;
-    final firstVisibleMessageId = _firstVisibleMessageId();
-    final nextDateTime = firstVisibleMessageId == null
-        ? null
-        : _messagesById[firstVisibleMessageId]?.createdAt;
-    if (visibleDateTime.value != nextDateTime) {
-      visibleDateTime.value = nextDateTime;
     }
   }
 
