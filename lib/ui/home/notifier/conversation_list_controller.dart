@@ -56,6 +56,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
 
   int? _limit;
   int? _badgeCount;
+  var _snapshotGeneration = 0;
   SlideCategoryState? _activeState;
   var _disposed = false;
 
@@ -130,17 +131,31 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
     final activeState = _activeState;
     if (activeState == null) return;
     final items = _itemsFor(activeState);
-    value = ConversationListState(
-      items: items,
-      initialized: true,
-    );
-    final warmItems = switch (event) {
-      ConversationListDelta(:final changedIds) => items.where(
-        (item) => changedIds.contains(item.conversationId),
-      ),
-      ConversationListSnapshot() => items.take(limit),
-    };
-    unawaited(_warm(warmItems));
+    switch (event) {
+      case ConversationListDelta(:final changedIds):
+        _snapshotGeneration++;
+        value = ConversationListState(items: items, initialized: true);
+        unawaited(
+          _warm(
+            items.where((item) => changedIds.contains(item.conversationId)),
+          ),
+        );
+      case ConversationListSnapshot():
+        // Rows draw their preview and group avatars from these caches without
+        // waiting, so publish a new list only after they are filled. A
+        // snapshot covers every row with one query per cache.
+        final generation = ++_snapshotGeneration;
+        if (items.isEmpty) {
+          value = ConversationListState(items: items, initialized: true);
+          break;
+        }
+        unawaited(
+          _warm(items).whenComplete(() {
+            if (_disposed || generation != _snapshotGeneration) return;
+            value = ConversationListState(items: items, initialized: true);
+          }),
+        );
+    }
     final badgeCount = store.unseenCountIgnoringMuted;
     if (_badgeCount != badgeCount) {
       _badgeCount = badgeCount;

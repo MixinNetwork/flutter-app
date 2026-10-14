@@ -8,11 +8,13 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
+import '../../../db/dao/user_dao.dart' show MentionUser;
 import '../../../db/mixin_database.dart' show User;
 import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
+import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/badges_widget.dart';
 import '../../../widgets/high_light_text.dart';
@@ -28,6 +30,7 @@ import '../../provider/slide_category_provider.dart';
 import '../desktop_shell_layout.dart';
 import '../notifier/conversation_list_controller.dart';
 import 'audio_player_bar.dart';
+import 'conversation_avatar_cache.dart';
 import 'conversation_focus.dart';
 import 'conversation_page.dart';
 import 'menu_wrapper.dart';
@@ -44,8 +47,13 @@ class ConversationList extends HookConsumerWidget {
     final conversationListController = context
         .read<ConversationListController>();
     final listState = useValueListenable(conversationListController);
-    useListenable(conversationListController.avatarCache);
-    final conversationId = ref.watch(currentConversationIdProvider);
+    // Rows are cached by conversation: a list update returns the same widget
+    // for rows whose conversation did not change, so Flutter skips them.
+    final rowCache = useRef<Map<String, _ConversationListItem>>({});
+    useMemoized(() {
+      final ids = {for (final item in listState.items) item.conversationId};
+      rowCache.value.removeWhere((id, _) => !ids.contains(id));
+    }, [listState.items]);
 
     final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
       context,
@@ -82,25 +90,19 @@ class ConversationList extends HookConsumerWidget {
             itemScrollController: itemScrollController,
             itemBuilder: (context, index) {
               final conversation = listState.items[index];
-              final current = conversation.conversationId == conversationId;
-              final selected = current && showsConversationSelection;
-              return ConversationMenuWrapper(
-                conversation: conversation,
-                removeChatFromCircle: true,
-                child: ConversationItemWidget(
-                  selected: selected,
-                  conversation: conversation,
-                  groupAvatarUsers: conversationListController.avatarCache
-                      .usersFor(conversation.conversationId),
-                  onTap: () {
-                    ConversationFocus.selectConversation(
-                      context,
-                      conversation.conversationId,
-                      conversation: conversation,
-                    );
-                  },
-                ),
-              );
+              final cached = rowCache.value[conversation.conversationId];
+              if (cached != null &&
+                  cached.conversation == conversation &&
+                  cached.showsSelection == showsConversationSelection) {
+                return cached;
+              }
+              return rowCache.value[conversation.conversationId] =
+                  _ConversationListItem(
+                    key: ValueKey(conversation.conversationId),
+                    conversation: conversation,
+                    avatarCache: conversationListController.avatarCache,
+                    showsSelection: showsConversationSelection,
+                  );
             },
           );
 
@@ -113,6 +115,50 @@ class ConversationList extends HookConsumerWidget {
           child: AudioPlayerBar(),
         ),
       ],
+    );
+  }
+}
+
+/// One row of the conversation list. It watches only its own avatar users and
+/// whether it is the current conversation, so loading avatars while scrolling
+/// or switching conversations rebuilds the affected rows, not the whole list.
+class _ConversationListItem extends HookConsumerWidget {
+  const _ConversationListItem({
+    required this.conversation,
+    required this.avatarCache,
+    required this.showsSelection,
+    super.key,
+  });
+
+  final ConversationItem conversation;
+  final ConversationAvatarCache avatarCache;
+  final bool showsSelection;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conversationId = conversation.conversationId;
+    final groupAvatarUsers = useListenableSelector(
+      avatarCache,
+      () => avatarCache.usersFor(conversationId),
+    );
+    final current = ref.watch(
+      currentConversationIdProvider.select((id) => id == conversationId),
+    );
+    return ConversationMenuWrapper(
+      conversation: conversation,
+      removeChatFromCircle: true,
+      child: ConversationItemWidget(
+        selected: current && showsSelection,
+        conversation: conversation,
+        groupAvatarUsers: groupAvatarUsers,
+        onTap: () {
+          ConversationFocus.selectConversation(
+            context,
+            conversationId,
+            conversation: conversation,
+          );
+        },
+      ),
     );
   }
 }
@@ -341,73 +387,69 @@ class _MessageContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final text = useMemoizedFuture(
-      () async {
-        if (hasDraft) return conversation.draft;
-        final isGroup =
-            conversation.category == ConversationCategory.group ||
-            conversation.senderId != conversation.ownerId;
-
-        final mentionCache = ref.read(mentionCacheProvider);
-
-        if (conversation.contentType == MessageCategory.systemConversation) {
-          return generateSystemText(
-            actionName: conversation.actionName,
-            participantUserId: conversation.participantUserId,
-            senderId: conversation.senderId,
-            currentUserId: context.accountServer.userId,
-            participantFullName: conversation.participantFullName,
-            senderFullName: conversation.senderFullName,
-            expireIn: int.tryParse(conversation.content ?? '0'),
-          );
-        } else if (conversation.contentType.isPin) {
-          final pinMessageMinimal = PinMessageMinimal.fromJsonString(
-            conversation.content ?? '',
-          );
-          if (pinMessageMinimal == null) {
-            return context.l10n.chatPinMessage(
-              conversation.senderFullName ?? '',
-              context.l10n.aMessage,
-            );
-          }
-          final preview = await generatePinPreviewText(
-            pinMessageMinimal: pinMessageMinimal,
-            mentionCache: mentionCache,
-          );
-          return context.l10n.chatPinMessage(
-            conversation.senderFullName ?? '',
-            preview,
-          );
-        }
-
-        return messagePreviewOptimize(
-          conversation.messageStatus,
-          conversation.contentType,
-          mentionCache.replaceMention(
-            conversation.content,
-            await mentionCache.checkMentionCache({conversation.content}),
-          ),
-          conversation.senderId == context.accountServer.userId,
-          isGroup,
-          conversation.senderFullName,
+    final mentionCache = ref.read(mentionCacheProvider);
+    final keys = [
+      conversation.actionName,
+      conversation.messageStatus,
+      conversation.contentType,
+      conversation.content,
+      conversation.senderId,
+      conversation.ownerId,
+      conversation.relationship,
+      conversation.participantFullName,
+      conversation.senderFullName,
+      conversation.groupName,
+      conversation.draft,
+      hasDraft,
+    ];
+    String? preview(Map<String, MentionUser> mentions) {
+      if (hasDraft) return conversation.draft;
+      final isGroup =
+          conversation.category == ConversationCategory.group ||
+          conversation.senderId != conversation.ownerId;
+      if (conversation.contentType == MessageCategory.systemConversation) {
+        return generateSystemText(
+          actionName: conversation.actionName,
+          participantUserId: conversation.participantUserId,
+          senderId: conversation.senderId,
+          currentUserId: context.accountServer.userId,
+          participantFullName: conversation.participantFullName,
+          senderFullName: conversation.senderFullName,
+          expireIn: int.tryParse(conversation.content ?? '0'),
         );
-      },
-      null,
-      keys: [
-        conversation.actionName,
+      } else if (conversation.contentType.isPin) {
+        final pinMessageMinimal = PinMessageMinimal.fromJsonString(
+          conversation.content ?? '',
+        );
+        return context.l10n.chatPinMessage(
+          conversation.senderFullName ?? '',
+          pinMessageMinimal == null
+              ? context.l10n.aMessage
+              : cachePinPreviewText(
+                  pinMessageMinimal: pinMessageMinimal,
+                  mentionCache: mentionCache,
+                ),
+        );
+      }
+      return messagePreviewOptimize(
         conversation.messageStatus,
         conversation.contentType,
-        conversation.content,
-        conversation.senderId,
-        conversation.ownerId,
-        conversation.relationship,
-        conversation.participantFullName,
+        mentionCache.replaceMention(conversation.content, mentions),
+        conversation.senderId == context.accountServer.userId,
+        isGroup,
         conversation.senderFullName,
-        conversation.groupName,
-        conversation.draft,
-        hasDraft,
-      ],
-    ).data;
+      );
+    }
+
+    // The list controller fills the mention cache before it shows a list, so
+    // the preview is final in the first frame. Only content that mentions
+    // users looks them up again, for users not cached yet.
+    final cachedText = useMemoized(
+      () => preview(mentionCache.mentionCache(conversation.content)),
+      keys,
+    );
+    final mayMention =
+        !hasDraft && mentionNumberRegExp.hasMatch(conversation.content ?? '');
 
     final icon = useMemoized(
       () => messagePreviewIcon(
@@ -420,6 +462,14 @@ class _MessageContent extends HookConsumerWidget {
     if (conversation.contentType == null && !hasDraft) return const SizedBox();
 
     final dynamicColor = context.theme.secondaryText;
+    Widget previewText(String text) => Expanded(
+      child: CustomText(
+        text.overflow,
+        style: TextStyle(color: dynamicColor, fontSize: 14),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+    );
 
     return Row(
       children: [
@@ -433,17 +483,41 @@ class _MessageContent extends HookConsumerWidget {
             '${context.l10n.draft}:',
             style: TextStyle(color: context.theme.red, fontSize: 14),
           ),
-        if (text != null)
-          Expanded(
-            child: CustomText(
-              text.overflow,
-              style: TextStyle(color: dynamicColor, fontSize: 14),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+        if (mayMention)
+          _MentionedPreview(
+            keys: keys,
+            initialText: cachedText,
+            load: () async => preview(
+              await mentionCache.checkMentionCache({conversation.content}),
             ),
-          ),
+            builder: previewText,
+          )
+        else if (cachedText != null)
+          previewText(cachedText),
       ].joinList(const SizedBox(width: 4)),
     );
+  }
+}
+
+/// A preview that mentions users: shows the cached names first, then the names
+/// of users that were not cached yet.
+class _MentionedPreview extends HookWidget {
+  const _MentionedPreview({
+    required this.keys,
+    required this.initialText,
+    required this.load,
+    required this.builder,
+  });
+
+  final List<Object?> keys;
+  final String? initialText;
+  final Future<String?> Function() load;
+  final Widget Function(String text) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = useMemoizedFuture(load, initialText, keys: keys).data;
+    return text == null ? const SizedBox() : builder(text);
   }
 }
 
