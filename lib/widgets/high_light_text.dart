@@ -58,7 +58,8 @@ class CustomText extends HookConsumerWidget {
       () => TextMatcher.applyTextMatchers([
         textSpan ?? TextSpan(text: text, style: style),
       ], textMatchers ?? [EmojiTextMatcher()]).toList(),
-      [text, style, textMatchers],
+      // Matchers read theme colors when they build spans.
+      [text, textSpan, style, context.theme, ...?textMatchers],
     );
 
     final defaultTextStyle = DefaultTextStyle.of(context);
@@ -141,7 +142,8 @@ class CustomSelectableText extends HookWidget {
       () => TextMatcher.applyTextMatchers([
         textSpan ?? TextSpan(text: text, style: style),
       ], textMatchers ?? [EmojiTextMatcher()]).toList(),
-      [text, style, textMatchers],
+      // Matchers read theme colors when they build spans.
+      [text, textSpan, style, context.theme, ...?textMatchers],
     );
     return SelectableText.rich(
       TextSpan(children: spans, style: style),
@@ -513,15 +515,15 @@ class _MatchedSpans {
   }
 }
 
-class UrlTextMatcher extends TextMatcher implements Equatable {
+// Creating an NSDataDetector costs about 1 ms, so share one.
+final _linkDetector = DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
+
+class UrlTextMatcher extends TextMatcher with Equatable {
   UrlTextMatcher(BuildContext context)
     : super.textRangesFromText(
         textRangesFromText: (text) {
           if (kPlatformIsDarwin) {
-            final dataDetector = DataDetector(
-              NSTextCheckingType.NSTextCheckingTypeLink,
-            );
-            return dataDetector.matchesInString(text).map((e) => e.range);
+            return _linkDetector.matchesInString(text).map((e) => e.range);
           } else {
             return TextMatcher._textRangesFromText(text, uriRegExp);
           }
@@ -548,7 +550,7 @@ class UrlTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class MailTextMatcher extends TextMatcher implements Equatable {
+class MailTextMatcher extends TextMatcher with Equatable {
   MailTextMatcher(BuildContext context)
     : super.regExp(
         regExp: mailRegExp,
@@ -568,7 +570,7 @@ class MailTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class EmojiTextMatcher extends TextMatcher implements Equatable {
+class EmojiTextMatcher extends TextMatcher with Equatable {
   EmojiTextMatcher()
     : super.regExp(
         regExp: emojiRegex,
@@ -592,7 +594,7 @@ class EmojiTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class KeyWordTextMatcher extends TextMatcher implements Equatable {
+class KeyWordTextMatcher extends TextMatcher with Equatable {
   KeyWordTextMatcher(this.keyword, {this.style, this.caseSensitive = true})
     : super.regExp(
         regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
@@ -620,7 +622,7 @@ class KeyWordTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class MultiKeyWordTextMatcher extends TextMatcher implements Equatable {
+class MultiKeyWordTextMatcher extends TextMatcher with Equatable {
   MultiKeyWordTextMatcher(
     this.keywords, {
     this.style,
@@ -699,7 +701,7 @@ class MultiKeyWordTextMatcher extends TextMatcher implements Equatable {
   }
 }
 
-class BotNumberTextMatcher extends TextMatcher implements Equatable {
+class BotNumberTextMatcher extends TextMatcher with Equatable {
   BotNumberTextMatcher(BuildContext context)
     : super.regExp(
         regExp: botNumberRegExp,
@@ -719,7 +721,7 @@ class BotNumberTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class MentionTextMatcher extends TextMatcher implements Equatable {
+class MentionTextMatcher extends TextMatcher with Equatable {
   MentionTextMatcher(BuildContext context, this.map)
     : super.regExp(
         regExp: mentionNumberRegExp,
