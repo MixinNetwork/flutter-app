@@ -59,6 +59,9 @@ class ChatHistoryViewport extends HookConsumerWidget {
     );
     final messageKeysRef = useRef<Map<String, GlobalKey>>({});
     final dayTimeKeysRef = useRef<Map<String, GlobalKey>>({});
+    // The widget built for each row and the inputs it was built from. Returning
+    // the same widget instance lets Flutter skip rebuilding unchanged rows.
+    final rowWidgetsRef = useRef<Map<String, (Object, Widget)>>({});
     final previousConversationIdRef = useRef<String?>(null);
     final previousRefreshKeyRef = useRef<Object?>(null);
     final viewportKey = useMemoized(
@@ -89,6 +92,9 @@ class ChatHistoryViewport extends HookConsumerWidget {
         messageIds,
         createKey: _messageDayTimeKey,
       );
+      rowWidgetsRef.value.removeWhere(
+        (messageId, _) => !messageIds.contains(messageId),
+      );
     }, [messageIdsKey]);
 
     final dayTimeEntries = useMemoized(
@@ -101,7 +107,23 @@ class ChatHistoryViewport extends HookConsumerWidget {
       final showUnreadBar =
           !timelineWindow.anchorUnreadSeparator ||
           message.messageId != state.lastReadMessageId;
-      return ChatRenderedMessage(
+      final isGroupOrBotGroup = _isGroupOrBotGroupMessage(
+        message,
+        isBotGroupConversation,
+      );
+      final inputs = (
+        row,
+        state.lastReadMessageId,
+        showUnreadBar,
+        isGroupOrBotGroup,
+        enableShowAvatar,
+        scrollCoordinator,
+        messageKeysRef.value[message.messageId],
+        dayTimeKeysRef.value[message.messageId],
+      );
+      final cached = rowWidgetsRef.value[message.messageId];
+      if (cached != null && cached.$1 == inputs) return cached.$2;
+      final widget = ChatRenderedMessage(
         coordinator: scrollCoordinator,
         messageId: message.messageId,
         child: MessageItemWidget(
@@ -113,13 +135,12 @@ class ChatHistoryViewport extends HookConsumerWidget {
           dateTimeKey: row.dateTime == null
               ? null
               : dayTimeKeysRef.value[message.messageId],
-          isGroupOrBotGroupConversation: _isGroupOrBotGroupMessage(
-            message,
-            isBotGroupConversation,
-          ),
+          isGroupOrBotGroupConversation: isGroupOrBotGroup,
           enableShowAvatar: enableShowAvatar,
         ),
       );
+      rowWidgetsRef.value[message.messageId] = (inputs, widget);
+      return widget;
     }
 
     useEffect(
