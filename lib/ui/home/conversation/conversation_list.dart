@@ -141,8 +141,12 @@ class _ConversationListItem extends HookConsumerWidget {
       avatarCache,
       () => avatarCache.usersFor(conversationId),
     );
+    // Select on conversationProvider itself: chaining select on
+    // currentConversationIdProvider notified every row on any change.
     final current = ref.watch(
-      currentConversationIdProvider.select((id) => id == conversationId),
+      conversationProvider.select(
+        (state) => state?.conversationId == conversationId,
+      ),
     );
     return ConversationMenuWrapper(
       conversation: conversation,
