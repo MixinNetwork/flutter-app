@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/utils/event_bus.dart';
+import 'package:flutter_app/utils/system/linux_accessibility.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -46,6 +47,7 @@ void main() {
 
   setUpAll(() async {
     EventBus.initialize();
+    if (Platform.isLinux) await watchLinuxAccessibility();
     // The macOS runner starts with a hidden window, and a hidden window gets
     // no frames. The app's main() shows it; this test does not run main().
     await windowManager.ensureInitialized();
@@ -96,84 +98,90 @@ void main() {
     step('$key traced');
   }
 
-  testWidgets('chat timeline frame timings', (tester) async {
-    step('start');
-    final directory = Directory.systemTemp.createTempSync('chat-bench');
-    final imagePath = await createLargeImage(directory);
-    final messages = buildMessages(
-      1200,
-      imagePath: imagePath,
-      withImages: const bool.fromEnvironment('BENCH_IMAGES'),
-    );
-    // Mount the app shell once with a warm-up chat, then measure switching to
-    // another chat, like the real chat page: fonts and the shell are already
-    // built when a chat opens.
-    final controller = FakeMessageController(messages.sublist(0, 200));
-    final width = ValueNotifier<double>(900);
-    final blinkNotifier = BlinkNotifier(tester);
-    final database = createFixtureDatabase();
-    await tester.pumpWidget(
-      ValueListenableBuilder<double>(
-        valueListenable: width,
-        builder: (context, value, _) => ChatTimelineFixture(
-          controller: controller,
-          blinkNotifier: blinkNotifier,
-          database: database,
-          width: value,
+  testWidgets(
+    'chat timeline frame timings',
+    (tester) async {
+      step('start');
+      final directory = Directory.systemTemp.createTempSync('chat-bench');
+      final imagePath = await createLargeImage(directory);
+      final messages = buildMessages(
+        1200,
+        imagePath: imagePath,
+        withImages: const bool.fromEnvironment('BENCH_IMAGES'),
+      );
+      // Mount the app shell once with a warm-up chat, then measure switching to
+      // another chat, like the real chat page: fonts and the shell are already
+      // built when a chat opens.
+      final controller = FakeMessageController(messages.sublist(0, 200));
+      final width = ValueNotifier<double>(900);
+      final blinkNotifier = BlinkNotifier(tester);
+      final database = createFixtureDatabase();
+      await tester.pumpWidget(
+        ValueListenableBuilder<double>(
+          valueListenable: width,
+          builder: (context, value, _) => ChatTimelineFixture(
+            controller: controller,
+            blinkNotifier: blinkNotifier,
+            database: database,
+            width: value,
+          ),
         ),
-      ),
-    );
-    await frames(tester);
-    step(
-      'warmed up; semantics enabled: '
-      '${SemanticsBinding.instance.semanticsEnabled}',
-    );
-
-    await measure('open', () async {
-      controller.open(messages.sublist(0, 1150), refreshKey: 'measured');
+      );
       await frames(tester);
-    });
-    expect(find.byType(MessageItemWidget), findsWidgets);
-    step('opened');
-    await reportIdle(tester, 'open');
+      step(
+        'warmed up; semantics enabled: '
+        '${SemanticsBinding.instance.semanticsEnabled}',
+      );
 
-    final viewport = find.byType(Scrollable).first;
-    final wheel = TestPointer(1, PointerDeviceKind.mouse)
-      ..hover(tester.getCenter(viewport));
-    await measure('wheel_scroll_back', () async {
-      // Desktop users scroll with a wheel or trackpad: one event per 120 Hz
-      // frame, 150 px each (18000 px/s), loading pages on the way.
-      for (var i = 0; i < (trace ? 240 : 800); i++) {
-        await tester.sendEventToBinding(wheel.scroll(const Offset(0, -150)));
-        await tester.pump(const Duration(milliseconds: 8));
-      }
-    });
-    step('wheel scrolled');
-    await reportIdle(tester, 'wheel_scroll_back');
+      await measure('open', () async {
+        controller.open(messages.sublist(0, 1150), refreshKey: 'measured');
+        await frames(tester);
+      });
+      expect(find.byType(MessageItemWidget), findsWidgets);
+      step('opened');
+      await reportIdle(tester, 'open');
 
-    await measure('fling_chain', () async {
-      // Fling again before the previous fling settles.
-      for (var i = 0; i < 20; i++) {
-        await tester.fling(viewport, const Offset(0, -800), 12000);
-        await frames(tester, 8);
-      }
-    });
-    step('flung');
+      final viewport = find.byType(Scrollable).first;
+      final wheel = TestPointer(1, PointerDeviceKind.mouse)
+        ..hover(tester.getCenter(viewport));
+      await measure('wheel_scroll_back', () async {
+        // Desktop users scroll with a wheel or trackpad: one event per 120 Hz
+        // frame, 150 px each (18000 px/s), loading pages on the way.
+        for (var i = 0; i < (trace ? 240 : 800); i++) {
+          await tester.sendEventToBinding(wheel.scroll(const Offset(0, -150)));
+          await tester.pump(const Duration(milliseconds: 8));
+        }
+      });
+      step('wheel scrolled');
+      await reportIdle(tester, 'wheel_scroll_back');
 
-    await measure('incoming', () async {
-      for (final message in messages.sublist(1150)) {
-        controller.append(message);
-        await frames(tester, 6);
-      }
-    });
-    step('incoming done');
+      await measure('fling_chain', () async {
+        // Fling again before the previous fling settles.
+        for (var i = 0; i < 20; i++) {
+          await tester.fling(viewport, const Offset(0, -800), 12000);
+          await frames(tester, 8);
+        }
+      });
+      step('flung');
 
-    await measure('resize', () async {
-      for (var i = 0; i < 60; i++) {
-        width.value = 600 + (i % 30) * 20;
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-    });
-    step('resize done');
-  });
+      await measure('incoming', () async {
+        for (final message in messages.sublist(1150)) {
+          controller.append(message);
+          await frames(tester, 6);
+        }
+      });
+      step('incoming done');
+
+      await measure('resize', () async {
+        for (var i = 0; i < 60; i++) {
+          width.value = 600 + (i % 30) * 20;
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+      });
+      step('resize done');
+    },
+    // testWidgets enables semantics by default; the app only builds them when
+    // assistive technology asks.
+    semanticsEnabled: false,
+  );
 }

@@ -20,6 +20,7 @@ import 'package:flutter_app/ui/provider/account_server_provider.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
+import 'package:flutter_app/utils/system/linux_accessibility.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -237,6 +238,8 @@ class ChatTimelineFixture extends StatelessWidget {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
+      // The app root gates semantics on Linux; mirror it.
+      builder: (context, child) => LinuxSemanticsGate(child: child!),
       home: BrightnessData(
         value: 0,
         brightnessThemeData: lightBrightnessThemeData,

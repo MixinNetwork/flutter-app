@@ -27,6 +27,7 @@ import 'utils/local_notification_center.dart';
 import 'utils/local_state_storage.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
+import 'utils/system/linux_accessibility.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/web_view/web_view_desktop.dart';
 import 'widgets/protocol_handler.dart';
@@ -43,6 +44,7 @@ Future<void> _runApp(List<String> args) async {
   await Rhttp.init();
 
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isLinux) unawaited(watchLinuxAccessibility());
 
   await loadFallbackFonts();
 
