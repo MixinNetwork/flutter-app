@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/utils/event_bus.dart';
@@ -57,9 +58,25 @@ void main() {
     );
   });
 
+  // TRACE=true records a timeline with one event per widget build instead of
+  // frame timings, to find which widgets cost the most.
+  const trace = bool.fromEnvironment('TRACE');
+
   Future<void> measure(String key, Future<void> Function() action) async {
-    await binding.watchPerformance(action, reportKey: key);
-    step('$key ${jsonEncode(binding.reportData?[key])}');
+    if (!trace) {
+      await binding.watchPerformance(action, reportKey: key);
+      step('$key ${jsonEncode(binding.reportData?[key])}');
+      return;
+    }
+    debugProfileBuildsEnabledUserWidgets = true;
+    debugProfileLayoutsEnabled = true;
+    try {
+      await binding.traceAction(action, reportKey: '${key}_timeline');
+    } finally {
+      debugProfileBuildsEnabledUserWidgets = false;
+      debugProfileLayoutsEnabled = false;
+    }
+    step('$key traced');
   }
 
   testWidgets('chat timeline frame timings', (tester) async {
@@ -71,6 +88,24 @@ void main() {
       imagePath: imagePath,
       withImages: const bool.fromEnvironment('BENCH_IMAGES'),
     );
+    // The real app has already rendered text (conversation list, fonts) before
+    // a chat opens, so open a warm-up chat first to keep one-time process
+    // costs out of the measured open.
+    await tester.pumpWidget(
+      ChatTimelineFixture(
+        controller: FakeMessageController(messages.sublist(0, 200)),
+        blinkNotifier: BlinkNotifier(tester),
+        database: createFixtureDatabase(),
+      ),
+    );
+    await frames(tester);
+    await tester.pumpWidget(const SizedBox());
+    await frames(tester, 10);
+    step(
+      'warmed up; semantics enabled: '
+      '${SemanticsBinding.instance.semanticsEnabled}',
+    );
+
     final controller = FakeMessageController(messages.sublist(0, 1150));
     final width = ValueNotifier<double>(900);
     final database = createFixtureDatabase();
@@ -100,7 +135,7 @@ void main() {
     await measure('wheel_scroll_back', () async {
       // Desktop users scroll with a wheel or trackpad: one event per frame,
       // 300 px each (about 18000 px/s at 60 Hz), loading pages on the way.
-      for (var i = 0; i < 400; i++) {
+      for (var i = 0; i < (trace ? 120 : 400); i++) {
         await tester.sendEventToBinding(wheel.scroll(const Offset(0, -300)));
         await tester.pump(const Duration(milliseconds: 16));
       }
