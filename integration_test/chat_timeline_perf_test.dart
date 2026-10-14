@@ -64,8 +64,25 @@ void main() {
 
   Future<void> measure(String key, Future<void> Function() action) async {
     if (!trace) {
+      // watchPerformance counts misses against 16 ms; the target is 120 Hz.
+      final timings = <FrameTiming>[];
+      void collect(List<FrameTiming> batch) => timings.addAll(batch);
+      SchedulerBinding.instance.addTimingsCallback(collect);
       await binding.watchPerformance(action, reportKey: key);
-      step('$key ${jsonEncode(binding.reportData?[key])}');
+      SchedulerBinding.instance.removeTimingsCallback(collect);
+      const budget = Duration(microseconds: 8333);
+      final summary = {
+        ...?binding.reportData?[key] as Map<String, dynamic>?,
+        'frames_120hz': timings.length,
+        'build_over_120hz': timings
+            .where((t) => t.buildDuration > budget)
+            .length,
+        'raster_over_120hz': timings
+            .where((t) => t.rasterDuration > budget)
+            .length,
+      };
+      binding.reportData![key] = summary;
+      step('$key ${jsonEncode(summary)}');
       return;
     }
     debugProfileBuildsEnabledUserWidgets = true;
@@ -88,41 +105,32 @@ void main() {
       imagePath: imagePath,
       withImages: const bool.fromEnvironment('BENCH_IMAGES'),
     );
-    // The real app has already rendered text (conversation list, fonts) before
-    // a chat opens, so open a warm-up chat first to keep one-time process
-    // costs out of the measured open.
+    // Mount the app shell once with a warm-up chat, then measure switching to
+    // another chat, like the real chat page: fonts and the shell are already
+    // built when a chat opens.
+    final controller = FakeMessageController(messages.sublist(0, 200));
+    final width = ValueNotifier<double>(900);
+    final blinkNotifier = BlinkNotifier(tester);
+    final database = createFixtureDatabase();
     await tester.pumpWidget(
-      ChatTimelineFixture(
-        controller: FakeMessageController(messages.sublist(0, 200)),
-        blinkNotifier: BlinkNotifier(tester),
-        database: createFixtureDatabase(),
+      ValueListenableBuilder<double>(
+        valueListenable: width,
+        builder: (context, value, _) => ChatTimelineFixture(
+          controller: controller,
+          blinkNotifier: blinkNotifier,
+          database: database,
+          width: value,
+        ),
       ),
     );
     await frames(tester);
-    await tester.pumpWidget(const SizedBox());
-    await frames(tester, 10);
     step(
       'warmed up; semantics enabled: '
       '${SemanticsBinding.instance.semanticsEnabled}',
     );
 
-    final controller = FakeMessageController(messages.sublist(0, 1150));
-    final width = ValueNotifier<double>(900);
-    final database = createFixtureDatabase();
-    step('fixture ready');
-
     await measure('open', () async {
-      await tester.pumpWidget(
-        ValueListenableBuilder<double>(
-          valueListenable: width,
-          builder: (context, value, _) => ChatTimelineFixture(
-            controller: controller,
-            blinkNotifier: BlinkNotifier(tester),
-            database: database,
-            width: value,
-          ),
-        ),
-      );
+      controller.open(messages.sublist(0, 1150), refreshKey: 'measured');
       await frames(tester);
     });
     expect(find.byType(MessageItemWidget), findsWidgets);
@@ -133,11 +141,11 @@ void main() {
     final wheel = TestPointer(1, PointerDeviceKind.mouse)
       ..hover(tester.getCenter(viewport));
     await measure('wheel_scroll_back', () async {
-      // Desktop users scroll with a wheel or trackpad: one event per frame,
-      // 300 px each (about 18000 px/s at 60 Hz), loading pages on the way.
-      for (var i = 0; i < (trace ? 120 : 400); i++) {
-        await tester.sendEventToBinding(wheel.scroll(const Offset(0, -300)));
-        await tester.pump(const Duration(milliseconds: 16));
+      // Desktop users scroll with a wheel or trackpad: one event per 120 Hz
+      // frame, 150 px each (18000 px/s), loading pages on the way.
+      for (var i = 0; i < (trace ? 240 : 800); i++) {
+        await tester.sendEventToBinding(wheel.scroll(const Offset(0, -150)));
+        await tester.pump(const Duration(milliseconds: 8));
       }
     });
     step('wheel scrolled');

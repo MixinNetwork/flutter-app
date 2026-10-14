@@ -108,9 +108,28 @@ class FakeMessageController extends ValueNotifier<MessageState>
         ),
       );
 
-  final List<MessageItem> pool;
+  List<MessageItem> pool;
   final int pageSize;
+  Object? refreshKey;
   int _start;
+
+  /// Switches to another conversation, like the real controller does when the
+  /// selected conversation changes.
+  void open(
+    List<MessageItem> messages, {
+    required Object refreshKey,
+    int initial = 60,
+  }) {
+    pool = messages;
+    this.refreshKey = refreshKey;
+    _start = messages.length - initial;
+    value = MessageState(
+      conversationId: conversationId,
+      bottom: messages.sublist(_start),
+      isLatest: true,
+      refreshKey: refreshKey,
+    );
+  }
 
   @override
   void before() {
@@ -125,6 +144,7 @@ class FakeMessageController extends ValueNotifier<MessageState>
       bottom: value.bottom,
       isLatest: true,
       isOldest: _start == 0,
+      refreshKey: refreshKey,
     );
   }
 
@@ -140,6 +160,7 @@ class FakeMessageController extends ValueNotifier<MessageState>
       bottom: [...value.bottom, message],
       isLatest: true,
       isOldest: value.isOldest,
+      refreshKey: refreshKey,
     );
   }
 
@@ -224,9 +245,7 @@ class ChatTimelineFixture extends StatelessWidget {
             provider.ChangeNotifierProvider<BlinkNotifier>.value(
               value: blinkNotifier,
             ),
-            provider.ChangeNotifierProvider<MessageController>.value(
-              value: controller,
-            ),
+
             provider.ChangeNotifierProvider(create: (_) => ChatSideNotifier()),
             provider.ChangeNotifierProvider(
               create: (context) => SearchConversationKeywordNotifier(
@@ -243,7 +262,10 @@ class ChatTimelineFixture extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: SizedBox(
                 width: width,
-                child: const ChatHistoryViewport(),
+                child: provider.ChangeNotifierProvider<MessageController>.value(
+                  value: controller,
+                  child: const ChatHistoryViewport(),
+                ),
               ),
             ),
           ),
