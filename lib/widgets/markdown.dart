@@ -27,6 +27,10 @@ final markdownControllerCache = MarkdownControllerCache();
 /// build. A post's first build parsed its markdown on the UI thread, about
 /// 1 ms for a short post on a slow Linux desktop. The rows of a loaded window
 /// build within a few viewports, so nearly every parse is used.
+///
+/// The code blocks are highlighted there too. A code block otherwise showed
+/// plain text, and a frame later its whole post built and laid out again with
+/// the colors, which took several posts over the frame budget at once.
 Future<void> preparePosts(Iterable<MessageItem> messages) async {
   final pending = <String, String>{};
   for (final message in messages) {
@@ -37,23 +41,21 @@ Future<void> preparePosts(Iterable<MessageItem> messages) async {
     pending[key] = content.postOptimize();
   }
   if (pending.isEmpty) return;
-  final documents = await runLoadBalancer(
-    _parsePosts,
-    pending.values.toList(),
-  );
+  final parsed = await runLoadBalancer(_parsePosts, pending.values.toList());
   var index = 0;
   for (final entry in pending.entries) {
-    markdownControllerCache.putParsed(
-      entry.key,
-      entry.value,
-      documents[index++],
-    );
+    final (document, highlights) = parsed[index++];
+    MarkdownController.cacheCodeHighlights(highlights);
+    markdownControllerCache.putParsed(entry.key, entry.value, document);
   }
 }
 
-List<MarkdownDocument> _parsePosts(List<String> data) => [
-  for (final item in data) MarkdownController.parseDocument(item),
-];
+List<(MarkdownDocument, List<Map<String, Object?>>)> _parsePosts(
+  List<String> data,
+) => data.map((item) {
+  final document = MarkdownController.parseDocument(item);
+  return (document, MarkdownController.highlightCodeBlocks(document));
+}).toList();
 
 class MarkdownControllerCache {
   final _entries = <String, _MarkdownCacheEntry>{};
