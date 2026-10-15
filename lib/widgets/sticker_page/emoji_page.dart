@@ -622,10 +622,18 @@ class _EmojiRowPainter extends CustomPainter {
         image.width / pixelRatio,
         image.height / pixelRatio,
       );
+      final cell = _cell(size, i);
+      // A sequence the emoji font lacks draws as several glyphs; keep it in
+      // its cell.
+      final fitted = applyBoxFit(
+        BoxFit.scaleDown,
+        imageSize,
+        cell.size,
+      ).destination;
       canvas.drawImageRect(
         image,
         Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
-        Alignment.center.inscribe(imageSize, _cell(size, i)),
+        Alignment.center.inscribe(fitted, cell),
         paint,
       );
     }
