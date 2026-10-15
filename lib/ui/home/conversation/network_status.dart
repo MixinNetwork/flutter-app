@@ -57,10 +57,14 @@ class NetworkStatus extends HookConsumerWidget {
           child:
               connectedState == ConnectedState.connecting ||
                   connectedState == ConnectedState.reconnecting
-              ? LinearProgressIndicator(
-                  backgroundColor: Colors.transparent,
-                  color: context.theme.accent,
-                  minHeight: 2,
+              // The indicator repaints every frame; keep the conversation
+              // page out of its repaints.
+              ? RepaintBoundary(
+                  child: LinearProgressIndicator(
+                    backgroundColor: Colors.transparent,
+                    color: context.theme.accent,
+                    minHeight: 2,
+                  ),
                 )
               : const SizedBox(),
         ),

@@ -68,9 +68,13 @@ class HomePage extends HookConsumerWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              LayoutBuilder(
-                builder: (context, constraints) =>
-                    _HomePage(constraints: constraints),
+              // An animation below a LayoutBuilder makes it lay out again, and
+              // each layout repaints up to the nearest repaint boundary.
+              RepaintBoundary(
+                child: LayoutBuilder(
+                  builder: (context, constraints) =>
+                      _HomePage(constraints: constraints),
+                ),
               ),
               if (isEmptyUserName) const _SetupNameWidget(),
               if (localTimeError) const _LocalTimeError(),
@@ -257,6 +261,11 @@ class _HomePage extends HookConsumerWidget {
         body: SafeArea(
           child: AppProtocolHandler(
             child: Row(
+              // Tight constraints make the navigator's LayoutBuilder a relayout
+              // boundary, so an animation in a page does not lay out the
+              // whole scaffold, and the repaint boundary keeps the rail and
+              // the scaffold out of its repaints.
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TweenAnimationBuilder(
                   tween: Tween<double>(end: shellLayout.slideWidth),
@@ -276,25 +285,27 @@ class _HomePage extends HookConsumerWidget {
                   ),
                 ),
                 Expanded(
-                  child: MajorNavigator(
-                    switchWidth: DesktopShellLayout.mainRouteSwitchWidth,
-                    leftPage: MaterialPage(
-                      key: const ValueKey('center'),
-                      name: 'center',
-                      child: SizedBox(
-                        key: _conversationPageKey,
-                        width: kConversationListWidth,
-                        child: const _CenterPage(),
-                      ),
-                    ),
-                    rightEmptyPage: MaterialPage(
-                      key: const ValueKey('empty'),
-                      name: 'empty',
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: context.theme.chatBackground,
+                  child: RepaintBoundary(
+                    child: MajorNavigator(
+                      switchWidth: DesktopShellLayout.mainRouteSwitchWidth,
+                      leftPage: MaterialPage(
+                        key: const ValueKey('center'),
+                        name: 'center',
+                        child: SizedBox(
+                          key: _conversationPageKey,
+                          width: kConversationListWidth,
+                          child: const _CenterPage(),
                         ),
-                        child: Empty(text: context.l10n.pickAConversation),
+                      ),
+                      rightEmptyPage: MaterialPage(
+                        key: const ValueKey('empty'),
+                        name: 'empty',
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: context.theme.chatBackground,
+                          ),
+                          child: Empty(text: context.l10n.pickAConversation),
+                        ),
                       ),
                     ),
                   ),
