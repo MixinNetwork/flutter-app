@@ -72,12 +72,13 @@ DateTime startOfWeek(DateTime a) => a.subtract(Duration(days: a.weekday));
 // cached instances, until the messages load again.
 final _localDays = Expando<int>();
 
-int _localDay(DateTime time) => _localDays[time] ??= () {
+/// The local day of [time] as yyyymmdd, cached by instance.
+int localDay(DateTime time) => _localDays[time] ??= () {
   final local = time.toLocal();
   return local.year * 10000 + local.month * 100 + local.day;
 }();
 
 bool isSameDay(DateTime? a, DateTime? b) {
   if (a == null || b == null) return false;
-  return _localDay(a) == _localDay(b);
+  return localDay(a) == localDay(b);
 }

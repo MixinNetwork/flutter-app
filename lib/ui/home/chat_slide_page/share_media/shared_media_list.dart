@@ -11,6 +11,7 @@ import 'package:vector_graphics/vector_graphics_compat.dart'
 
 import '../../../../db/dao/message_dao.dart';
 import '../../../../db/mixin_database.dart';
+import '../../../../utils/datetime_format_utils.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/deferred_mount.dart';
 import '../../../../widgets/near_edge_scroll_listener.dart';
@@ -80,10 +81,12 @@ class SharedMediaList extends HookConsumerWidget {
     );
 
     final grouped = useMemoized(
-      () => groupBy<MessageItem, DateTime>(messages.value, (messageItem) {
-        final local = messageItem.createdAt.toLocal();
-        return DateTime(local.year, local.month, local.day);
-      }),
+      // Each load groups every message again; a local date reads the time
+      // zone, so the day of each message comes from a cache.
+      () => groupBy<MessageItem, int>(
+        messages.value,
+        (messageItem) => localDay(messageItem.createdAt),
+      ),
       [messages.value],
     );
     final scrollController = useScrollController();
@@ -150,7 +153,9 @@ class SharedMediaList extends HookConsumerWidget {
                       color: context.theme.primary,
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        DateFormat.yMMMd().format(entry.key.toLocal()),
+                        cachedDateFormat(
+                          DateFormat.YEAR_ABBR_MONTH_DAY,
+                        ).format(entry.value.first.createdAt.toLocal()),
                         style: TextStyle(
                           fontSize: 14,
                           color: context.theme.secondaryText,
