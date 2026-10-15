@@ -10,6 +10,41 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
 void main() {
+  group('coverDecodeImage', () {
+    final file = FileImage(File('photo.jpg'));
+    ImageProvider decode(Size box, int? width, int? height) => coverDecodeImage(
+      file,
+      box: box,
+      mediaWidth: width,
+      mediaHeight: height,
+      devicePixelRatio: 2,
+    );
+
+    test('the short side of a photo covers the long side of the box', () {
+      final image = decode(const Size(100, 100), 884, 1920) as ResizeImage;
+      // 100 px at 2x rounds up to 256; 256 * 1920 / 884 rounds up to 557.
+      expect(image.width, 557);
+      expect(image.height, 557);
+      expect(image.policy, ResizeImagePolicy.fit);
+    });
+
+    test('a rotated size decodes the same', () {
+      final tall = decode(const Size(100, 300), 3000, 4000) as ResizeImage;
+      final wide = decode(const Size(100, 300), 4000, 3000) as ResizeImage;
+      expect(tall.width, 854);
+      expect(wide.width, tall.width);
+    });
+
+    test('a photo smaller than the box or with no size stays as it is', () {
+      expect(identical(decode(const Size(300, 300), 200, 200), file), isTrue);
+      expect(identical(decode(const Size(100, 100), null, 200), file), isTrue);
+      expect(
+        identical(decode(const Size(double.infinity, 100), 900, 900), file),
+        isTrue,
+      );
+    });
+  });
+
   test('uses a cached provider for NetworkImage', () {
     const url = 'https://example.com/avatar.png';
     final resolved = resolveMediaImageProvider(
@@ -143,6 +178,26 @@ void main() {
       tester.widget<Image>(find.byType(Image)).image,
       isNot(isA<CachedNetworkImage>()),
     );
+  });
+
+  testWidgets('checks a resized gif file before it shows', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NormalizedGifImageGate(
+          image: ResizeImage(
+            FileImage(
+              File('resized_gate_test_${identityHashCode(tester)}.gif'),
+            ),
+            width: 10,
+          ),
+          placeholder: () => const SizedBox(key: Key('placeholder')),
+          childBuilder: () => const SizedBox(key: Key('child')),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('placeholder')), findsOneWidget);
   });
 
   testWidgets('skips file images with empty paths', (tester) async {

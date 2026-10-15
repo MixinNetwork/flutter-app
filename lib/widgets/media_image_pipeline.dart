@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -22,6 +23,43 @@ ImageProvider resolveMediaImageProvider(
       )
     : image;
 
+/// [image] decoded at a size that covers [box], for an image of
+/// [mediaWidth] x [mediaHeight].
+///
+/// A photo decodes to tens of megabytes at full size, and the raster thread
+/// uploads all of it, which stalls a frame that shows a few of them. The short
+/// side of the decoded image covers the long side of the box, so the result
+/// does not depend on whether the stored size is before or after the EXIF
+/// rotation. The size goes up in steps of 64 pixels, so a window resize
+/// decodes again only now and then.
+ImageProvider coverDecodeImage(
+  ImageProvider image, {
+  required Size box,
+  required int? mediaWidth,
+  required int? mediaHeight,
+  required double devicePixelRatio,
+}) {
+  if (mediaWidth == null ||
+      mediaHeight == null ||
+      mediaWidth <= 0 ||
+      mediaHeight <= 0 ||
+      !box.isFinite ||
+      box.isEmpty) {
+    return image;
+  }
+  final short = math.min(mediaWidth, mediaHeight);
+  final long = math.max(mediaWidth, mediaHeight);
+  final side = (box.longestSide * devicePixelRatio / 64).ceil() * 64;
+  if (side >= short) return image;
+  final bound = (side * long / short).ceil();
+  return ResizeImage(
+    image,
+    width: bound,
+    height: bound,
+    policy: ResizeImagePolicy.fit,
+  );
+}
+
 final _checkedImageFiles = <String>{};
 
 class MediaImagePipeline extends StatelessWidget {
@@ -35,6 +73,7 @@ class MediaImagePipeline extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
+    this.gaplessPlayback = false,
   });
 
   final ImageProvider image;
@@ -45,6 +84,9 @@ class MediaImagePipeline extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final bool isAntiAlias;
+
+  /// Whether a new [image] keeps showing the old one until it loads.
+  final bool gaplessPlayback;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +100,7 @@ class MediaImagePipeline extends StatelessWidget {
       height: height,
       fit: fit,
       isAntiAlias: isAntiAlias,
+      gaplessPlayback: gaplessPlayback,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) return child;
         return fallback();
@@ -179,7 +222,11 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
   }
 
   void _start() {
-    final image = widget.image;
+    // A message image decodes at its display size through a ResizeImage.
+    final image = switch (widget.image) {
+      ResizeImage(:final imageProvider) => imageProvider,
+      final image => image,
+    };
     if (image is! FileImage) {
       _future = null;
       return;
@@ -203,13 +250,14 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
       return;
     }
 
-    _future = _normalize(image.file);
+    _future = _normalize(image.file, widget.image);
   }
 
-  Future<void> _normalize(File file) async {
+  Future<void> _normalize(File file, ImageProvider shown) async {
     try {
       await normalizeGifFileIfNeeded(file, null);
       await FileImage(file).evict();
+      await shown.evict();
     } finally {
       _checkedImageFiles.add(file.absolute.path);
     }
