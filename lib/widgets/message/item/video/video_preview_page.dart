@@ -131,6 +131,14 @@ class _VideoPreviewPage extends HookConsumerWidget {
 
     useEffect(() => controller.dispose, [controller]);
 
+    // Pause on hidden too: minimizing on macOS reports hidden, not paused.
+    useOnAppLifecycleStateChange((previous, current) {
+      if (current == AppLifecycleState.hidden ||
+          current == AppLifecycleState.paused) {
+        controller.pause();
+      }
+    });
+
     return ProviderScope(
       overrides: [videoPlayerProvider.overrideWith((ref) => controller)],
       child: _CupertinoVideoPlayerStyle(
