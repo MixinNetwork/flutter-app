@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -12,6 +13,7 @@ import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/emoji.dart';
 import '../../utils/extension/extension.dart';
+import '../deferred_mount.dart';
 import '../interactive_decorated_box.dart';
 
 final _emojiScrollOffsetProvider = StateProvider<double>((ref) => 0);
@@ -26,6 +28,48 @@ const emojiGroups = [
   [EmojiGroup.symbols],
   [EmojiGroup.flags],
 ];
+
+final _emojiStyle = TextStyle(
+  fontSize: 26,
+  height: 1,
+  fontFamily: kEmojiFontFamily,
+  inherit: false,
+);
+const _emojiStrutStyle = StrutStyle(height: 1);
+
+List<String> _groupEmojis(List<EmojiGroup> group) => group
+    .expand(Emoji.byGroup)
+    .where((e) => !e.modifiable)
+    .map((emoji) => emoji.char)
+    .toList();
+
+var _emojiPageWarmed = false;
+
+/// Lays out the emojis that the panel shows first, a few at a time while no
+/// animation runs. A color emoji costs about 0.1 ms on its first layout, and
+/// the first open of the panel laid out about 80 of them in its first frames.
+void warmEmojiPage() {
+  if (_emojiPageWarmed) return;
+  _emojiPageWarmed = true;
+  final emojis = [
+    ...AccountKeyValue.instance.recentUsedEmoji,
+    ..._groupEmojis(emojiGroups.first),
+  ].take(100).toList();
+  for (var start = 0; start < emojis.length; start += 8) {
+    final batch = emojis.skip(start).take(8);
+    SchedulerBinding.instance.scheduleTask(() {
+      for (final emoji in batch) {
+        TextPainter(
+            text: TextSpan(text: emoji, style: _emojiStyle),
+            strutStyle: _emojiStrutStyle,
+            textDirection: TextDirection.ltr,
+          )
+          ..layout()
+          ..dispose();
+      }
+    }, Priority.idle);
+  }
+}
 
 class EmojiPage extends StatelessWidget {
   const EmojiPage({super.key});
@@ -75,16 +119,7 @@ class _EmojiPageBody extends HookConsumerWidget {
     );
 
     final groupedEmojis = useMemoized(
-      () => [
-        recentUsedEmoji,
-        ...emojiGroups.map(
-          (group) => group
-              .expand(Emoji.byGroup)
-              .where((e) => !e.modifiable)
-              .map((emoji) => emoji.char)
-              .toList(),
-        ),
-      ],
+      () => [recentUsedEmoji, ...emojiGroups.map(_groupEmojis)],
       [recentUsedEmoji],
     );
 
@@ -281,8 +316,10 @@ class _AllEmojisPage extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) =>
-                      _EmojiItem(emoji: groupedEmojis[i][index]),
+                  // The first open mounts every visible emoji at once.
+                  (context, index) => DeferredMount(
+                    child: _EmojiItem(emoji: groupedEmojis[i][index]),
+                  ),
                   childCount: groupedEmojis[i].length,
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -354,13 +391,8 @@ class _EmojiItem extends StatelessWidget {
       child: Center(
         child: Text(
           emoji,
-          style: TextStyle(
-            fontSize: 26,
-            height: 1,
-            fontFamily: kEmojiFontFamily,
-            inherit: false,
-          ),
-          strutStyle: const StrutStyle(height: 1),
+          style: _emojiStyle,
+          strutStyle: _emojiStrutStyle,
           textAlign: TextAlign.center,
         ),
       ),

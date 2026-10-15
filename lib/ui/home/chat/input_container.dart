@@ -39,6 +39,7 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
+import '../../../widgets/sticker_page/emoji_page.dart' show warmEmojiPage;
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
@@ -784,6 +785,10 @@ class _StickerButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
+    useEffect(() {
+      warmEmojiPage();
+      return null;
+    }, const []);
     final stickerReadModel = useMemoized(
       () => StickerReadModel(
         stickerDao: context.database.stickerDao,
