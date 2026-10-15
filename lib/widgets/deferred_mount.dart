@@ -53,7 +53,9 @@ const _budget = Duration(milliseconds: 3);
 // Runs from the first layout in a frame to the end of that frame.
 final _frame = Stopwatch();
 var _endScheduled = false;
+var _shownThisFrame = 0;
 
+// Children wait in the order they first missed the budget, until they show.
 final _waiting = <_DeferredMountState>{};
 
 bool _take(_DeferredMountState state) {
@@ -66,7 +68,11 @@ bool _take(_DeferredMountState state) {
     _endScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((_) => _endFrame());
   }
-  if (_frame.elapsed < _budget) return true;
+  if (_frame.elapsed < _budget) {
+    _waiting.remove(state);
+    _shownThisFrame++;
+    return true;
+  }
   _waiting.add(state);
   return false;
 }
@@ -74,9 +80,12 @@ bool _take(_DeferredMountState state) {
 void _endFrame() {
   _endScheduled = false;
   _frame.stop();
-  final waiting = _waiting.toList();
-  _waiting.clear();
-  for (final state in waiting) {
+  // Retry only the head of the queue: a fast scroll can leave hundreds of
+  // children waiting, and building each placeholder again costs time. The
+  // layout still checks the time, so the count only needs to be enough.
+  final retries = 2 * _shownThisFrame + 1;
+  _shownThisFrame = 0;
+  for (final state in _waiting.take(retries).toList()) {
     state._retry();
   }
 }

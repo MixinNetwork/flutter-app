@@ -77,4 +77,36 @@ void main() {
       expect(costly() - before, lessThanOrEqualTo(2));
     }
   });
+
+  testWidgets('a long queue rebuilds only its head in a frame', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              for (var i = 0; i < 200; i++)
+                DeferredMount(
+                  placeholder: const SizedBox(height: 10),
+                  child: _Slow(i),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(shown().length, lessThan(20));
+
+    var retried = 0;
+    debugOnRebuildDirtyWidget = (element, builtOnce) {
+      if (element.widget is DeferredMount) retried++;
+    };
+    addTearDown(() => debugOnRebuildDirtyWidget = null);
+    await tester.pump();
+    debugOnRebuildDirtyWidget = null;
+
+    expect(retried, lessThan(50));
+  });
 }
