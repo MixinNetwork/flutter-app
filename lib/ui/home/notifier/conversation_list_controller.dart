@@ -257,9 +257,18 @@ class _ConversationListView {
       ItemPositionsListener.create();
   final ItemScrollController itemScrollController = ItemScrollController();
 
-  void _onPositionsChanged() => onVisible(
-    itemPositionsListener.itemPositions.value.map((item) => item.index).toSet(),
-  );
+  Set<int> _visible = const {};
+
+  // Positions change on every scrolled frame; warm rows only when a row
+  // enters or leaves the viewport.
+  void _onPositionsChanged() {
+    final visible = itemPositionsListener.itemPositions.value
+        .map((item) => item.index)
+        .toSet();
+    if (setEquals(visible, _visible)) return;
+    _visible = visible;
+    onVisible(visible);
+  }
 
   void dispose() =>
       itemPositionsListener.itemPositions.removeListener(_onPositionsChanged);
