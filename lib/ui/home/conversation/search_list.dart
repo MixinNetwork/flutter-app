@@ -648,8 +648,11 @@ class SearchItemWidget extends StatelessWidget {
                               ),
                             ),
                           Expanded(
+                            // One line shows at most a few dozen characters,
+                            // and matching and shaping a whole long message
+                            // took about 2.5ms.
                             child: CustomText(
-                              description!,
+                              Characters(description!).take(200).toString(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -707,7 +710,7 @@ class _SearchMessageList extends HookConsumerWidget {
         database: context.database,
         category: categoryState,
         keyword: keyword,
-        limit: context.read<ConversationListController>().limit,
+        limit: kSearchMessagePageSize,
       ),
       [keyword, categoryState],
     );

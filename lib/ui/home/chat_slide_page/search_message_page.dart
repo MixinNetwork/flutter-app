@@ -25,7 +25,6 @@ import '../../provider/conversation_provider.dart';
 import '../chat/message_jump.dart';
 import '../conversation/search_list.dart';
 import '../notifier/chat_side_notifier.dart';
-import '../notifier/conversation_list_controller.dart';
 import '../notifier/search_message_controller.dart';
 
 class SearchMessagePage extends HookConsumerWidget {
@@ -286,7 +285,7 @@ class _SearchMessageList extends HookConsumerWidget {
       () => SearchMessageController.conversation(
         database: context.database,
         keyword: keyword,
-        limit: context.read<ConversationListController>().limit,
+        limit: kSearchMessagePageSize,
         categories: categories,
         userId: selectedUserId,
         conversationId: conversationId,
