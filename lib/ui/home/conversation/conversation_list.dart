@@ -53,9 +53,13 @@ class ConversationList extends HookConsumerWidget {
     // Rows are cached by conversation: a list update returns the same widget
     // for rows whose conversation did not change, so Flutter skips them.
     final rowCache = useRef<Map<String, DeferredMount>>({});
-    useMemoized(() {
-      final ids = {for (final item in listState.items) item.conversationId};
-      rowCache.value.removeWhere((id, _) => !ids.contains(id));
+    final indexes = useMemoized(() {
+      final indexes = {
+        for (final (index, item) in listState.items.indexed)
+          item.conversationId: index,
+      };
+      rowCache.value.removeWhere((id, _) => !indexes.containsKey(id));
+      return indexes;
     }, [listState.items]);
 
     final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
@@ -91,6 +95,11 @@ class ConversationList extends HookConsumerWidget {
             itemPositionsListener: itemPositionsListener,
             itemCount: listState.count,
             itemScrollController: itemScrollController,
+            // A conversation with a new message moves to the top, and the
+            // rows above its old index move down; the callback lets them keep
+            // their elements instead of being built again.
+            findChildIndexCallback: (key) =>
+                key is ValueKey<String> ? indexes[key.value] : null,
             itemBuilder: (context, index) => conversationRow(
               rowCache.value,
               listState.items[index],

@@ -48,7 +48,7 @@ class UnseenConversationList extends HookConsumerWidget {
     };
     return ListView.builder(
       findChildIndexCallback: (key) =>
-          indexes[(key as ValueKey<String>).value],
+          key is ValueKey<String> ? indexes[key.value] : null,
       itemBuilder: (context, index) => conversationRow(
         rowCache.value,
         unseenConversations[index],
