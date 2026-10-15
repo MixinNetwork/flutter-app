@@ -1229,11 +1229,10 @@ packages:
   mixin_markdown_widget:
     dependency: "direct main"
     description:
-      name: mixin_markdown_widget
-      sha256: "4b4f6430c3be9be5766ae06b0d6c78ab6bd3059c1f2df076ef325028b6f030d5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1"
+      path: "../flutter-plugins/packages/mixin_markdown_widget"
+      relative: true
+    source: path
+    version: "0.3.2"
   msix:
     dependency: "direct dev"
     description:
