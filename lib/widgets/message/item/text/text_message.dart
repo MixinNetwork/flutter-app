@@ -105,13 +105,30 @@ class MessageTextWidget extends HookConsumerWidget {
     );
     final keyword = globalKeyword ?? rowKeyword;
 
+    // A long message finds its links in the background, and shows them once
+    // they are ready.
+    final linksReady =
+        useMemoizedFuture(
+          () async {
+            if (content.length >= darwinBackgroundLinkLength) {
+              await prepareDarwinLinkRanges(content);
+            }
+            return true;
+          },
+          !kPlatformIsDarwin ||
+              content.length < darwinBackgroundLinkLength ||
+              darwinLinkRangesReady(content),
+          keys: [content],
+        ).data ??
+        true;
+
     Widget child = MessageLayout(
       spacing: 6,
       content: CustomText(
         content,
         style: TextStyle(fontSize: fontSize, color: color),
         textMatchers: [
-          UrlTextMatcher(context),
+          if (linksReady) UrlTextMatcher(context),
           MailTextMatcher(context),
           MentionTextMatcher(context, mentionMap),
           BotNumberTextMatcher(context),

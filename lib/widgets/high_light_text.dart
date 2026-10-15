@@ -17,6 +17,7 @@ import '../db/dao/user_dao.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
@@ -520,15 +521,62 @@ class _MatchedSpans {
   }
 }
 
-// Creating an NSDataDetector costs about 1 ms, so share one.
+// Creating an NSDataDetector costs about 1 ms, so share one per isolate.
 final _linkDetector = DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
+
+// NSDataDetector identifies the language and tokenizes CJK text before it
+// scans: about 1 ms per 1000 characters of mixed text, and about 20 ms for
+// 700 characters of Chinese. Rows build again often,
+// so keep the ranges of recent texts.
+final _linkRanges = <String, List<TextRange>>{};
+const _linkRangesLimit = 1000;
+
+/// Text at least this long finds its links in the background; see
+/// [prepareDarwinLinkRanges].
+const darwinBackgroundLinkLength = 64;
+
+// Every link NSDataDetector finds has a scheme or a domain.
+bool _mayHaveLink(String text) => text.contains('.') || text.contains(':');
+
+List<TextRange> _detectLinkRanges(String text) => _linkDetector
+    .matchesInString(text)
+    .map((e) => e.range)
+    .toList(growable: false);
+
+List<TextRange> _storeLinkRanges(String text, List<TextRange> ranges) {
+  if (_linkRanges.length >= _linkRangesLimit) {
+    _linkRanges.remove(_linkRanges.keys.first);
+  }
+  return _linkRanges[text] = ranges;
+}
+
+/// The link ranges that NSDataDetector finds in [text].
+@visibleForTesting
+List<TextRange> darwinLinkRanges(String text) {
+  if (!_mayHaveLink(text)) return const [];
+  final cached = _linkRanges.remove(text);
+  if (cached != null) return _linkRanges[text] = cached;
+  return _storeLinkRanges(text, _detectLinkRanges(text));
+}
+
+/// Whether [darwinLinkRanges] returns [text]'s links without detecting them.
+bool darwinLinkRangesReady(String text) =>
+    !_mayHaveLink(text) || _linkRanges.containsKey(text);
+
+/// Finds the links of [text] in a background isolate, so that a long message
+/// does not stall a frame.
+Future<void> prepareDarwinLinkRanges(String text) async {
+  if (!kPlatformIsDarwin || darwinLinkRangesReady(text)) return;
+  final ranges = await runLoadBalancer(_detectLinkRanges, text);
+  _storeLinkRanges(text, ranges);
+}
 
 class UrlTextMatcher extends TextMatcher with Equatable {
   UrlTextMatcher(BuildContext context)
     : super.textRangesFromText(
         textRangesFromText: (text) {
           if (kPlatformIsDarwin) {
-            return _linkDetector.matchesInString(text).map((e) => e.range);
+            return darwinLinkRanges(text);
           } else {
             return TextMatcher._textRangesFromText(text, uriRegExp);
           }
