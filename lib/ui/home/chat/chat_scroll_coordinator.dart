@@ -206,8 +206,10 @@ class ChatScrollCoordinator {
       _animateNextRestore = false;
       _blockPreloadUntilUserScroll = true;
       // A latest window starts at the center too: an offset left from the
-      // previous window makes the lists build every row up to it first.
-      if (!animated &&
+      // previous window makes the lists build every row up to it first. An
+      // animation with a direction moves to its own start offset, so it does
+      // not need the old offset either.
+      if ((!animated || animatedRestoreDirection != null) &&
           (hasCenteredAnchor || centerMessageId != null || isLatest)) {
         _resetCenteredOffsetBeforePaint();
       }
