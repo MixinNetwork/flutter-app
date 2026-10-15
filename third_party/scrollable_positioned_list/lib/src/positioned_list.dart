@@ -44,6 +44,7 @@ class PositionedList extends StatefulWidget {
     this.addSemanticIndexes = true,
     this.addRepaintBoundaries = true,
     this.addAutomaticKeepAlives = true,
+    this.findChildIndexCallback,
   })  : assert(itemCount != null),
         assert(itemBuilder != null),
         assert((positionedIndex == 0) || (positionedIndex < itemCount)),
@@ -51,6 +52,9 @@ class PositionedList extends StatefulWidget {
 
   /// Number of items the [itemBuilder] can produce.
   final int itemCount;
+
+  /// See [ScrollablePositionedList.findChildIndexCallback].
+  final ChildIndexGetter? findChildIndexCallback;
 
   /// Called to build children for the list with
   /// 0 <= index < itemCount.
@@ -190,6 +194,10 @@ class _PositionedListState extends State<PositionedList> {
                     childCount: widget.separatorBuilder == null
                         ? widget.positionedIndex
                         : 2 * widget.positionedIndex,
+                    findChildIndexCallback: _childIndexGetter((index) =>
+                        index < widget.positionedIndex
+                            ? widget.positionedIndex - index - 1
+                            : null),
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
@@ -206,6 +214,8 @@ class _PositionedListState extends State<PositionedList> {
                       : _buildSeparatedListElement(
                           index + 2 * widget.positionedIndex),
                   childCount: widget.itemCount != 0 ? 1 : 0,
+                  findChildIndexCallback: _childIndexGetter(
+                      (index) => index == widget.positionedIndex ? 0 : null),
                   addSemanticIndexes: false,
                   addRepaintBoundaries: widget.addRepaintBoundaries,
                   addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
@@ -225,6 +235,10 @@ class _PositionedListState extends State<PositionedList> {
                     childCount: widget.separatorBuilder == null
                         ? widget.itemCount - widget.positionedIndex - 1
                         : 2 * (widget.itemCount - widget.positionedIndex - 1),
+                    findChildIndexCallback: _childIndexGetter((index) =>
+                        index > widget.positionedIndex
+                            ? index - widget.positionedIndex - 1
+                            : null),
                     addSemanticIndexes: false,
                     addRepaintBoundaries: widget.addRepaintBoundaries,
                     addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
@@ -243,13 +257,30 @@ class _PositionedListState extends State<PositionedList> {
     }
   }
 
+  // Maps an item index from [PositionedList.findChildIndexCallback] to the
+  // child index in one of the slivers, or null for an item in another sliver.
+  ChildIndexGetter? _childIndexGetter(int? Function(int index) toSliverIndex) {
+    final find = widget.findChildIndexCallback;
+    if (find == null || widget.separatorBuilder != null) return null;
+    return (key) {
+      final index = find(key);
+      return index == null ? null : toSliverIndex(index);
+    };
+  }
+
   Widget _buildItem(int index) {
-    return RegisteredElementWidget(
-      key: ValueKey(index),
+    final child = widget.itemBuilder(context, index);
+    // A keyed item keeps its key on the wrapper, so the sliver can find it
+    // after it moves.
+    final key = widget.findChildIndexCallback != null && child.key != null
+        ? child.key
+        : ValueKey(index);
+    return _Item(
+      key: key,
+      index: index,
       child: widget.addSemanticIndexes
-          ? IndexedSemantics(
-              index: index, child: widget.itemBuilder(context, index))
-          : widget.itemBuilder(context, index),
+          ? IndexedSemantics(index: index, child: child)
+          : child,
     );
   }
 
@@ -328,7 +359,7 @@ class _PositionedListState extends State<PositionedList> {
             anchor = viewport.anchor;
           }
 
-          final ValueKey<int> key = element.widget.key as ValueKey<int>;
+          final ValueKey<int> key = ValueKey((element.widget as _Item).index);
           // Skip this element if `box` has never been laid out.
           if (!box.hasSize) continue;
           if (widget.scrollDirection == Axis.vertical) {
@@ -367,4 +398,11 @@ class _PositionedListState extends State<PositionedList> {
       });
     }
   }
+}
+
+class _Item extends RegisteredElementWidget {
+  const _Item({required Key? key, required this.index, required Widget child})
+      : super(key: key, child: child);
+
+  final int index;
 }

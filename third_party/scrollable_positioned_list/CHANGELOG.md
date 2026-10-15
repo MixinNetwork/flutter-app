@@ -1,3 +1,8 @@
+# Mixin changes
+
+* Add `findChildIndexCallback` to `ScrollablePositionedList.builder`, so a keyed
+  item that moves keeps its element and state.
+
 # 0.3.8
 * Add ScrollOffsetController to allow pixel-based changes in offset.
 * Bump min sdk version to 2.15.0
