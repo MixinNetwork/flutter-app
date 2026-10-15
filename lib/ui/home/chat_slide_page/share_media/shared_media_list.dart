@@ -111,6 +111,29 @@ class SharedMediaList extends HookConsumerWidget {
       return wrapped;
     }
 
+    // The date header of each day. A page load builds the slivers of every
+    // day again, and new headers laid out their text again.
+    final headers = useMemoized(() => <int, Widget>{}, [
+      context.theme,
+      Localizations.maybeLocaleOf(context),
+    ]);
+    Widget header(int day, MessageItem first) =>
+        headers[day] ??= SliverPinnedHeader(
+          child: Container(
+            color: context.theme.primary,
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              cachedDateFormat(
+                DateFormat.YEAR_ABBR_MONTH_DAY,
+              ).format(first.createdAt.toLocal()),
+              style: TextStyle(
+                fontSize: 14,
+                color: context.theme.secondaryText,
+              ),
+            ),
+          ),
+        );
+
     if (grouped.isEmpty) {
       return Center(
         child: Column(
@@ -161,21 +184,7 @@ class SharedMediaList extends HookConsumerWidget {
               (entry) => MultiSliver(
                 pushPinnedChildren: true,
                 children: [
-                  SliverPinnedHeader(
-                    child: Container(
-                      color: context.theme.primary,
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        cachedDateFormat(
-                          DateFormat.YEAR_ABBR_MONTH_DAY,
-                        ).format(entry.value.first.createdAt.toLocal()),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: context.theme.secondaryText,
-                        ),
-                      ),
-                    ),
-                  ),
+                  header(entry.key, entry.value.first),
                   if (gridDelegate == null)
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
