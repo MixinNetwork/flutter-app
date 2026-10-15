@@ -20,6 +20,7 @@ import 'package:flutter_app/ui/provider/account_server_provider.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
+import 'package:flutter_app/utils/system/system_fonts.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -95,7 +96,8 @@ List<MessageItem> buildMessages(
 }
 
 /// Serves a window of [pool] like the real controller: starts at the latest
-/// messages and prepends a page on every [before] call.
+/// messages above the center, oldest first, and prepends a page on every
+/// [before] call.
 class FakeMessageController extends ValueNotifier<MessageState>
     implements MessageController {
   FakeMessageController(this.pool, {this.pageSize = 30, int initial = 60})
@@ -103,7 +105,7 @@ class FakeMessageController extends ValueNotifier<MessageState>
       super(
         MessageState(
           conversationId: conversationId,
-          bottom: pool.sublist(pool.length - initial),
+          top: pool.sublist(pool.length - initial),
           isLatest: true,
         ),
       );
@@ -125,7 +127,7 @@ class FakeMessageController extends ValueNotifier<MessageState>
     _start = messages.length - initial;
     value = MessageState(
       conversationId: conversationId,
-      bottom: messages.sublist(_start),
+      top: messages.sublist(_start),
       isLatest: true,
       refreshKey: refreshKey,
     );
@@ -139,7 +141,7 @@ class FakeMessageController extends ValueNotifier<MessageState>
     _start = next;
     value = MessageState(
       conversationId: conversationId,
-      top: [...page.reversed, ...value.top],
+      top: [...page, ...value.top],
       center: value.center,
       bottom: value.bottom,
       isLatest: true,
@@ -232,6 +234,8 @@ class ChatTimelineFixture extends StatelessWidget {
       accountServerProvider.overrideWith((ref) => _ReadyAccountServerOpener()),
     ],
     child: MaterialApp(
+      // The app fonts: text with a missing family lays out much slower.
+      theme: ThemeData(useMaterial3: true).withFallbackFonts(),
       localizationsDelegates: const [
         Localization.delegate,
         GlobalMaterialLocalizations.delegate,

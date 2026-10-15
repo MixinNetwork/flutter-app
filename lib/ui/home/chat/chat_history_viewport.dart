@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -46,7 +49,11 @@ class ChatHistoryViewport extends HookConsumerWidget {
     final messageController = context.read<MessageController>();
     final scrollCoordinator = context.read<ChatScrollCoordinator>();
     final state = useValueListenable(messageController);
-    final timelineWindow = ChatTimelineWindow(state);
+    // Rows compare neighbour days in local time, which costs a time zone
+    // lookup per message, so build them once per state, not on every rebuild.
+    final timelineWindow = useMemoized(() => ChatTimelineWindow(state), [
+      state,
+    ]);
 
     final key = ValueKey((state.conversationId, state.refreshKey));
     final messages = timelineWindow.messages;
@@ -181,8 +188,10 @@ class ChatHistoryViewport extends HookConsumerWidget {
       ],
     );
 
+    // The viewport keeps its place across windows: a new parent would move
+    // its keyed scroll view and rebuild all of it. The day chip catches up
+    // with the new entries on the next frame.
     return MessageDayTimeViewportWidget.chatPage(
-      key: key,
       entries: dayTimeEntries,
       scrollController: scrollCoordinator.scrollController,
       child: NotificationListener<ScrollNotification>(
@@ -201,14 +210,17 @@ class ChatHistoryViewport extends HookConsumerWidget {
           anchor: timelineWindow.scrollAnchor,
           physics: const ClampingScrollPhysics(),
           scrollCacheExtent: const ScrollCacheExtent.viewport(
-            ChatScrollCoordinator.loadedJumpViewportCount,
+            _cacheViewportCount,
           ),
           scrollOffsetCorrection:
               scrollCoordinator.takeViewportAnchorCorrection,
           suppressAutoBottomTracking:
               scrollCoordinator.shouldSuppressAutoBottomTracking,
           slivers: [
-            SliverList(
+            // A new window gets new lists, so its rows are not matched to the
+            // old rows by index, and the build budget starts again.
+            _ChatSliverList(
+              key: ValueKey((key, 'top')),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final actualIndex = rows.top.length - index - 1;
                 final row = rows.top[actualIndex];
@@ -228,7 +240,8 @@ class ChatHistoryViewport extends HookConsumerWidget {
                 },
               ),
             ),
-            SliverList(
+            _ChatSliverList(
+              key: ValueKey((key, 'bottom')),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final row = rows.bottom[index];
                 return buildMessage(row);
@@ -239,6 +252,134 @@ class ChatHistoryViewport extends HookConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+// Rows stay built this far beyond the viewport, so scrolling back does not
+// build them again. The lists fill it within the frame budget, and it covers
+// the near-jump range of the scroll coordinator.
+const _cacheViewportCount = 2 * ChatScrollCoordinator.loadedJumpViewportCount;
+
+/// A [SliverList] that lays out new rows within a per-frame time budget.
+///
+/// A chat row costs about 2 ms to build and lay out on a slow Linux desktop,
+/// and opening a chat or loading a page adds tens of rows at once. The list
+/// extends its laid-out region only as far as the budget allows and continues
+/// on the next frame. Rows nearest the center sliver come first, so the
+/// visible rows appear within a few frames, and the estimated extent of the
+/// rows not built yet keeps the scroll position stable meanwhile.
+class _ChatSliverList extends SliverList {
+  const _ChatSliverList({required super.delegate, super.key});
+
+  @override
+  RenderSliverList createRenderObject(BuildContext context) =>
+      _RenderChatSliverList(
+        childManager: context as SliverMultiBoxAdaptorElement,
+      );
+}
+
+class _RenderChatSliverList extends RenderSliverList {
+  _RenderChatSliverList({required super.childManager});
+
+  // Paint, the other slivers, and the rest of the frame need the remainder of
+  // an 8.3 ms frame at 120 Hz.
+  static const _frameBudgetMicros = 3000;
+
+  // The layout cost of one pixel of new rows, measured on earlier layouts.
+  // Every chat window gets new lists, so the measurement is shared.
+  static double _microsPerPixel = 40;
+
+  // A chat row costs at least this much, whatever one layout measured.
+  static const _minMicrosPerPixel = 10.0;
+
+  // The constraints this layout uses, when the budget cuts the region short.
+  SliverConstraints? _budgeted;
+
+  // The scroll offset where the laid-out children ended after the last layout.
+  double _laidOutEnd = 0;
+
+  // Where the children ended when this frame began. The viewport can lay out
+  // a sliver several times in one frame, and the budget is for the frame.
+  double? _frameStartEnd;
+
+  // The tallest visible region a layout has covered. Up to that height, only
+  // the cache region beyond the visible region waits for the budget, so
+  // scrolling never shows empty space. The viewport can lay out a sliver with
+  // a short visible region first and correct its scroll offset in the same
+  // frame, so a filled short region does not lift the budget for a taller one.
+  double _filledPaintExtent = 0;
+
+  @override
+  SliverConstraints get constraints => _budgeted ?? super.constraints;
+
+  @override
+  void performLayout() {
+    final requested = super.constraints;
+    final start = requested.scrollOffset + requested.cacheOrigin;
+    final visibleEnd = requested.scrollOffset + requested.remainingPaintExtent;
+    final frameStartEnd = _frameStartEnd ??= _laidOutEnd;
+    var allowedEnd =
+        math.max(frameStartEnd, start) + _frameBudgetMicros / _microsPerPixel;
+    if (requested.remainingPaintExtent <= _filledPaintExtent) {
+      allowedEnd = math.max(allowedEnd, visibleEnd);
+    }
+    final limited = allowedEnd < start + requested.remainingCacheExtent;
+    if (limited) {
+      _budgeted = requested.copyWith(
+        remainingCacheExtent: allowedEnd - start,
+        remainingPaintExtent: (allowedEnd - requested.scrollOffset).clamp(
+          0.0,
+          requested.remainingPaintExtent,
+        ),
+      );
+    }
+
+    final firstBefore = firstChild == null ? null : indexOf(firstChild!);
+    final lastBefore = lastChild == null ? null : indexOf(lastChild!);
+    final watch = Stopwatch()..start();
+    try {
+      super.performLayout();
+    } finally {
+      _budgeted = null;
+    }
+    final last = lastChild;
+    _laidOutEnd = last == null
+        ? 0
+        : childScrollOffset(last)! + paintExtentOf(last);
+
+    // Measure only the rows this layout created: laying out rows that already
+    // exist is cheap and would make the budget allow far too much.
+    var added = 0.0;
+    for (var child = firstChild; child != null; child = childAfter(child)) {
+      final index = indexOf(child);
+      if (firstBefore == null || index < firstBefore || index > lastBefore!) {
+        added += paintExtentOf(child);
+      }
+    }
+    if (added > 50) {
+      final cost = watch.elapsedMicroseconds / added;
+      _microsPerPixel = math.max(
+        _minMicrosPerPixel,
+        (_microsPerPixel + cost) / 2,
+      );
+    }
+    final reachedEnd = last == null
+        ? childManager.childCount == 0
+        : indexOf(last) == childManager.childCount - 1;
+    if (!limited || reachedEnd || allowedEnd >= visibleEnd) {
+      _filledPaintExtent = math.max(
+        _filledPaintExtent,
+        requested.remainingPaintExtent,
+      );
+    }
+    if (limited && !reachedEnd) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _frameStartEnd = null;
+        if (attached) markNeedsLayout();
+      });
+    } else {
+      _frameStartEnd = null;
+    }
   }
 }
 

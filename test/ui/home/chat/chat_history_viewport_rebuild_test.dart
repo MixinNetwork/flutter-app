@@ -28,9 +28,8 @@ void main() {
         database: createFixtureDatabase(),
       ),
     );
-    for (var i = 0; i < 10; i++) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
+    // The list fills its cache region over several frames.
+    await tester.pumpAndSettle();
 
     final rebuilt = <String>[];
     debugOnRebuildDirtyWidget = (element, builtOnce) {
@@ -47,6 +46,37 @@ void main() {
     debugOnRebuildDirtyWidget = null;
     await tester.pumpWidget(const SizedBox());
     // isBotGroupProvider closes its keep-alive 10 minutes after dispose.
+    await tester.pump(const Duration(minutes: 11));
+  });
+
+  testWidgets('a new window builds its rows over several frames', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1000, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final messages = buildMessages(120, imagePath: '', withImages: false);
+    final controller = FakeMessageController(messages.sublist(0, 60));
+    await tester.pumpWidget(
+      ChatTimelineFixture(
+        controller: controller,
+        blinkNotifier: BlinkNotifier(tester),
+        database: createFixtureDatabase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    controller.open(messages.sublist(60), refreshKey: Object());
+    await tester.pump();
+    final firstFrame = find.byType(MessageItemWidget).evaluate().length;
+    await tester.pumpAndSettle();
+    final settled = find.byType(MessageItemWidget).evaluate().length;
+
+    expect(firstFrame, greaterThan(0));
+    expect(firstFrame, lessThan(settled));
+
+    await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(minutes: 11));
   });
 }

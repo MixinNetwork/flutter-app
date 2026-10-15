@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/utils/system/linux_accessibility.dart';
+import 'package:flutter_app/utils/system/system_fonts.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -102,6 +103,7 @@ void main() {
     'chat timeline frame timings',
     (tester) async {
       step('start');
+      await tester.runAsync(loadFallbackFonts);
       final directory = Directory.systemTemp.createTempSync('chat-bench');
       final imagePath = await createLargeImage(directory);
       final messages = buildMessages(
