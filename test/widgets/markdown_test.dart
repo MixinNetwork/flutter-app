@@ -82,6 +82,28 @@ void main() {
     );
   });
 
+  testWidgets('posts share one Markdown theme', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        const Column(
+          children: [
+            MarkdownColumn(data: '# First'),
+            MarkdownColumn(data: '# Second'),
+          ],
+        ),
+      ),
+    );
+
+    final themes = tester
+        .widgetList<mixin_markdown.MarkdownWidget>(
+          find.byType(mixin_markdown.MarkdownWidget),
+        )
+        .map((widget) => widget.theme)
+        .toList();
+    expect(themes, hasLength(2));
+    expect(identical(themes.first, themes.last), isTrue);
+  });
+
   testWidgets('renders a post draft without MessageContext', (tester) async {
     await tester.pumpWidget(
       _app(

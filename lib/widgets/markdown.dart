@@ -374,7 +374,41 @@ Widget _buildMixinImageForUrl(
   );
 }
 
+// Every post builds this theme, and building it costs about 1 ms, so reuse it
+// while its inputs are the same objects.
+(List<Object?>, MarkdownThemeData)? _lastMarkdownTheme;
+
 MarkdownThemeData _createMarkdownTheme(
+  BuildContext context,
+  double chatFontSizeDelta, {
+  double? maxContentWidth,
+}) {
+  final inputs = [
+    Theme.of(context),
+    context.theme,
+    context.brightness,
+    chatFontSizeDelta,
+    maxContentWidth,
+  ];
+  final last = _lastMarkdownTheme;
+  if (last != null && _sameInputs(inputs, last.$1)) return last.$2;
+  final theme = _buildMarkdownTheme(
+    context,
+    chatFontSizeDelta,
+    maxContentWidth: maxContentWidth,
+  );
+  _lastMarkdownTheme = (inputs, theme);
+  return theme;
+}
+
+bool _sameInputs(List<Object?> a, List<Object?> b) {
+  for (var i = 0; i < a.length; i++) {
+    if (!identical(a[i], b[i]) && a[i] != b[i]) return false;
+  }
+  return true;
+}
+
+MarkdownThemeData _buildMarkdownTheme(
   BuildContext context,
   double chatFontSizeDelta, {
   double? maxContentWidth,
