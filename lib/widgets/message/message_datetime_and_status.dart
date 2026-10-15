@@ -4,6 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
@@ -114,6 +116,7 @@ class _ChatIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
     assetName,
+    renderingStrategy: RenderingStrategy.raster,
     width: 8,
     height: 8,
     colorFilter: ColorFilter.mode(

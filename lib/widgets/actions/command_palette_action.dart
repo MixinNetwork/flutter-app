@@ -6,6 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../db/database_event_bus.dart';
@@ -311,6 +313,7 @@ class CommandPalettePage extends HookConsumerWidget {
                       children: [
                         SvgPicture.asset(
                           Resources.assetsImagesEmptyFileSvg,
+                          renderingStrategy: RenderingStrategy.raster,
                           height: 80,
                           width: 80,
                           colorFilter: ColorFilter.mode(

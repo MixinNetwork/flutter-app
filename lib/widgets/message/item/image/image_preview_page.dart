@@ -8,6 +8,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
@@ -309,6 +311,8 @@ class ImagePreviewPage extends HookConsumerWidget {
                                         prev.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesNextSvg,
+                                      renderingStrategy:
+                                          RenderingStrategy.raster,
                                     ),
                                   ),
                                 const Spacer(),
@@ -318,6 +322,8 @@ class ImagePreviewPage extends HookConsumerWidget {
                                         next.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesPrevSvg,
+                                      renderingStrategy:
+                                          RenderingStrategy.raster,
                                     ),
                                   ),
                               ],

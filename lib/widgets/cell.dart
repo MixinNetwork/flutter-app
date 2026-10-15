@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../constants/resources.dart';
 import '../ui/home/desktop_shell_layout.dart';
@@ -132,6 +134,7 @@ class Arrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
     Resources.assetsImagesIcArrowRightSvg,
+    renderingStrategy: RenderingStrategy.raster,
     colorFilter: ColorFilter.mode(context.theme.secondaryText, BlendMode.srcIn),
     width: 30,
     height: 30,

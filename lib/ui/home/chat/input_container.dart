@@ -16,6 +16,8 @@ import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
@@ -589,6 +591,7 @@ class _QuoteMessage extends HookConsumerWidget {
                     padding: const EdgeInsets.all(14),
                     child: SvgPicture.asset(
                       Resources.assetsImagesCloseOvalSvg,
+                      renderingStrategy: RenderingStrategy.raster,
                       height: 22,
                       width: 22,
                     ),

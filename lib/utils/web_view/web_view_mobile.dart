@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../constants/resources.dart';
@@ -199,6 +201,7 @@ class _WebViewActionDialog extends StatelessWidget {
                 title: Text(context.l10n.refresh),
                 leading: SvgPicture.asset(
                   Resources.assetsImagesInviteRefreshSvg,
+                  renderingStrategy: RenderingStrategy.raster,
                   width: 24,
                   height: 24,
                   colorFilter: ColorFilter.mode(
@@ -237,6 +240,7 @@ class _ShareMenuItem extends StatelessWidget {
     title: Text(context.l10n.share),
     leading: SvgPicture.asset(
       Resources.assetsImagesShareSvg,
+      renderingStrategy: RenderingStrategy.raster,
       width: 24,
       height: 24,
       colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),

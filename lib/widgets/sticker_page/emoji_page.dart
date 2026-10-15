@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
@@ -207,6 +209,7 @@ class _EmojiGroupIcon extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: SvgPicture.asset(
         icon,
+        renderingStrategy: RenderingStrategy.raster,
         width: 24,
         height: 24,
         colorFilter: ColorFilter.mode(

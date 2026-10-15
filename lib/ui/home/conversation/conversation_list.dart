@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key, User;
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../constants/resources.dart';
@@ -181,6 +183,7 @@ class _Empty extends StatelessWidget {
         children: [
           SvgPicture.asset(
             Resources.assetsImagesEmptyFileSvg,
+            renderingStrategy: RenderingStrategy.raster,
             height: 78,
             width: 58,
             colorFilter: ColorFilter.mode(dynamicColor, BlendMode.srcIn),
@@ -364,6 +367,7 @@ class _MessagePreview extends StatelessWidget {
         if ((conversation.expireIn ?? 0) > 0)
           SvgPicture.asset(
             Resources.assetsImagesDisappearingMessageIndicatorSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(
               context.theme.secondaryText,
               BlendMode.srcIn,
@@ -480,6 +484,7 @@ class _MessageContent extends HookConsumerWidget {
         if (!hasDraft && icon != null)
           SvgPicture.asset(
             icon,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(dynamicColor, BlendMode.srcIn),
           ),
         if (hasDraft)
@@ -557,6 +562,7 @@ class _StatusRow extends StatelessWidget {
       if (conversation.isMute)
         SvgPicture.asset(
           Resources.assetsImagesMuteSvg,
+          renderingStrategy: RenderingStrategy.raster,
           colorFilter: ColorFilter.mode(
             context.theme.secondaryText,
             BlendMode.srcIn,
@@ -565,6 +571,7 @@ class _StatusRow extends StatelessWidget {
       if (conversation.pinTime != null)
         SvgPicture.asset(
           Resources.assetsImagesPinSvg,
+          renderingStrategy: RenderingStrategy.raster,
           colorFilter: ColorFilter.mode(
             context.theme.secondaryText,
             BlendMode.srcIn,

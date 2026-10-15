@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
@@ -92,6 +94,7 @@ class _NetworkNotConnect extends StatelessWidget {
                       height: 10,
                       child: SvgPicture.asset(
                         Resources.assetsImagesExclamationMarkSvg,
+                        renderingStrategy: RenderingStrategy.raster,
                         colorFilter: const ColorFilter.mode(
                           Colors.white,
                           BlendMode.srcIn,

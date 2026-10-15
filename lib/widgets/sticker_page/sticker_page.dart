@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../account/account_key_value.dart';
 import '../../constants/icon_fonts.dart';
@@ -219,6 +221,7 @@ class _AddStickerWidget extends StatelessWidget {
     child: Center(
       child: SvgPicture.asset(
         Resources.assetsImagesAddStickerSvg,
+        renderingStrategy: RenderingStrategy.raster,
         width: 78,
         height: 78,
         colorFilter: ColorFilter.mode(
@@ -441,6 +444,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
                 if (index < presetStickerGroups.length) {
                   return SvgPicture.asset(
                     presetStickerAlbum[presetStickerGroups[index]]!,
+                    renderingStrategy: RenderingStrategy.raster,
                     colorFilter: index != 0
                         ? ColorFilter.mode(
                             context.theme.secondaryText,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../db/dao/asset_dao.dart';
@@ -158,6 +160,7 @@ class _UsersLayout extends StatelessWidget {
         dimension: 24,
         child: SvgPicture.asset(
           Resources.assetsImagesIcArrowRightSvg,
+          renderingStrategy: RenderingStrategy.raster,
           colorFilter: ColorFilter.mode(context.theme.green, BlendMode.srcIn),
         ),
       ),
@@ -301,6 +304,7 @@ class _DoneLayout extends StatelessWidget {
             dimension: 60,
             child: SvgPicture.asset(
               Resources.assetsImagesCheckedSvg,
+              renderingStrategy: RenderingStrategy.raster,
               colorFilter: ColorFilter.mode(
                 context.theme.green,
                 BlendMode.srcIn,

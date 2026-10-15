@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../widgets/app_bar.dart';
@@ -176,7 +178,10 @@ class _RestorePage extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 32),
-      SvgPicture.asset(Resources.assetsImagesDeviceTransferSvg),
+      SvgPicture.asset(
+        Resources.assetsImagesDeviceTransferSvg,
+        renderingStrategy: RenderingStrategy.raster,
+      ),
       const SizedBox(height: 20),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 36),
@@ -237,7 +242,10 @@ class _RestoreWaitingConnectPage extends HookConsumerWidget {
           ],
         ),
         const SizedBox(height: 32),
-        SvgPicture.asset(Resources.assetsImagesTransferFromPhoneSvg),
+        SvgPicture.asset(
+          Resources.assetsImagesTransferFromPhoneSvg,
+          renderingStrategy: RenderingStrategy.raster,
+        ),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
@@ -281,6 +289,7 @@ class _BackupPage extends StatelessWidget {
       const SizedBox(height: 32),
       SvgPicture.asset(
         Resources.assetsImagesDeviceTransferSvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(
           context.theme.secondaryText,
           BlendMode.srcIn,
@@ -346,7 +355,10 @@ class _BackupWaitingConnectPage extends HookConsumerWidget {
           ],
         ),
         const SizedBox(height: 32),
-        SvgPicture.asset(Resources.assetsImagesTransferToPhoneSvg),
+        SvgPicture.asset(
+          Resources.assetsImagesTransferToPhoneSvg,
+          renderingStrategy: RenderingStrategy.raster,
+        ),
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),

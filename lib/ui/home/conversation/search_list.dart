@@ -8,6 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../constants/resources.dart';
@@ -438,6 +440,7 @@ class _SearchMaoUserWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaultInscriptionImage = SvgPicture.asset(
       Resources.assetsImagesInscriptionPlaceholderSvg,
+      renderingStrategy: RenderingStrategy.raster,
       width: 14,
       height: 14,
     );
@@ -637,6 +640,7 @@ class SearchItemWidget extends StatelessWidget {
                               padding: const EdgeInsets.only(right: 2),
                               child: SvgPicture.asset(
                                 descriptionIcon!,
+                                renderingStrategy: RenderingStrategy.raster,
                                 colorFilter: ColorFilter.mode(
                                   context.theme.secondaryText,
                                   BlendMode.srcIn,

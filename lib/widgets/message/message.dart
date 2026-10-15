@@ -6,6 +6,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../constants/resources.dart';
@@ -522,6 +524,7 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
             alignment: const Alignment(0, -0.2),
             child: SvgPicture.asset(
               Resources.assetsImagesSelectedSvg,
+              renderingStrategy: RenderingStrategy.raster,
               height: 10,
               width: 10,
             ),

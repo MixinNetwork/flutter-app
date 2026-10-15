@@ -6,6 +6,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../db/dao/message_dao.dart';
 import '../../../../db/mixin_database.dart';
@@ -92,6 +94,7 @@ class SharedMediaList extends HookConsumerWidget {
           children: [
             SvgPicture.asset(
               emptyAsset,
+              renderingStrategy: RenderingStrategy.raster,
               colorFilter: ColorFilter.mode(
                 context.theme.secondaryText.withValues(alpha: 0.4),
                 BlendMode.srcIn,
