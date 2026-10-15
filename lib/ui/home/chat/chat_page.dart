@@ -201,18 +201,12 @@ class ChatContainer extends HookConsumerWidget {
     return RepaintBoundary(
       child: FocusableActionDetector(
         autofocus: true,
-        shortcuts: {
-          if (inMultiSelectMode)
-            const SingleActivator(LogicalKeyboardKey.escape):
-                const EscapeIntent(),
+        // The shortcut stays when selection mode changes: an empty map drops
+        // the Shortcuts widget, and that structure change rebuilt every row.
+        shortcuts: const {
+          SingleActivator(LogicalKeyboardKey.escape): EscapeIntent(),
         },
-        actions: {
-          EscapeIntent: CallbackAction<EscapeIntent>(
-            onInvoke: (intent) {
-              ref.read(messageSelectionProvider).clearSelection();
-            },
-          ),
-        },
+        actions: {EscapeIntent: _ClearSelectionAction(ref)},
         child: Column(
           children: [
             Container(
@@ -302,4 +296,18 @@ class ChatBottomBarSwitcher extends StatelessWidget {
         : CrossFadeState.showFirst,
     duration: const Duration(milliseconds: 300),
   );
+}
+
+// A disabled action leaves Escape to the handlers above it.
+class _ClearSelectionAction extends Action<EscapeIntent> {
+  _ClearSelectionAction(this.ref);
+
+  final WidgetRef ref;
+
+  @override
+  bool isEnabled(EscapeIntent intent) => ref.read(hasSelectedMessageProvider);
+
+  @override
+  void invoke(EscapeIntent intent) =>
+      ref.read(messageSelectionProvider).clearSelection();
 }
