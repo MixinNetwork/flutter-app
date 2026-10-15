@@ -93,16 +93,22 @@ class SharedMediaList extends HookConsumerWidget {
     // The item built for each message. A page load rebuilds the list, and the
     // same widget lets an unchanged item skip its rebuild; a post item laid
     // out its markdown again otherwise.
-    final items = useRef(<String, (MessageItem, Widget)>{});
+    final items = useRef(<String, (MessageItem, DeferredMount)>{});
     // A page fills the panel and more, and a post lays out up to 400px of
-    // markdown, so new items show over a few frames from the top.
+    // markdown, so new items show over a few frames from the top. An item
+    // shown before does not wait again when it comes back into view, and the
+    // same wrapper keeps its LayoutBuilder from building again on each load.
     Widget item(BuildContext context, MessageItem message) {
       final cached = items.value[message.messageId];
+      if (cached != null && identical(cached.$1, message) && !cached.$2.defer) {
+        return cached.$2;
+      }
       final child = cached != null && identical(cached.$1, message)
-          ? cached.$2
+          ? cached.$2.child
           : itemBuilder(context, message);
-      items.value[message.messageId] = (message, child);
-      return DeferredMount(defer: cached == null, child: child);
+      final wrapped = DeferredMount(defer: cached == null, child: child);
+      items.value[message.messageId] = (message, wrapped);
+      return wrapped;
     }
 
     if (grouped.isEmpty) {
