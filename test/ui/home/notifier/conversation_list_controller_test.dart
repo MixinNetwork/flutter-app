@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
@@ -19,14 +20,76 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final badgeCalls = <MethodCall>[];
   setUpAll(() {
     EventBus.initialize();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           const MethodChannel('flutter_app_icon_badge'),
-          (_) async => null,
+          (call) async {
+            badgeCalls.add(call);
+            return null;
+          },
         );
   });
+
+  test(
+    'disposing the controller removes the unread badge',
+    () async {
+      final mixinDatabase = MixinDatabase(NativeDatabase.memory());
+      final database = Database(
+        mixinDatabase,
+        FtsDatabase(NativeDatabase.memory()),
+      );
+      final store = ConversationListStore(mixinDatabase);
+      final categories = SlideCategoryStateNotifier();
+      final mentionCache = MentionCache(mixinDatabase.userDao);
+      final controller = ConversationListController(
+        categories,
+        database,
+        mentionCache,
+        store,
+      );
+      addTearDown(() async {
+        mentionCache.dispose();
+        categories.dispose();
+        await store.close();
+        await database.dispose();
+      });
+      await mixinDatabase.batch(
+        (batch) => batch
+          ..insert(
+            mixinDatabase.users,
+            const User(userId: 'friend', identityNumber: '1', fullName: 'F'),
+          )
+          ..insert(
+            mixinDatabase.conversations,
+            Conversation(
+              conversationId: 'friend-chat',
+              ownerId: 'friend',
+              category: ConversationCategory.contact,
+              createdAt: DateTime(2026),
+              status: ConversationStatus.success,
+              unseenMessageCount: 3,
+            ),
+          ),
+      );
+
+      controller.init();
+      final initialized = controller.addListenerCompleter();
+      await store.start();
+      await initialized.future;
+      await pumpEventQueue();
+      expect(badgeCalls.last.method, 'updateBadge');
+      expect(badgeCalls.last.arguments, {'count': 3});
+
+      controller.dispose();
+      await pumpEventQueue();
+
+      expect(badgeCalls.last.method, 'removeBadge');
+    },
+    skip: Platform.isMacOS ? false : 'the unread badge is macOS only',
+  );
 
   test('adapts store snapshots and deltas to the active category', () async {
     final mixinDatabase = MixinDatabase(NativeDatabase.memory());

@@ -220,6 +220,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
   @override
   void dispose() {
     _disposed = true;
+    if ((_badgeCount ?? 0) != 0) unawaited(_updateBadge(0));
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
