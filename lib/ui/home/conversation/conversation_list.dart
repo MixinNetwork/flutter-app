@@ -19,6 +19,7 @@ import '../../../utils/message_optimize.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/conversation/badges_widget.dart';
+import '../../../widgets/deferred_mount.dart';
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/pin_message.dart';
@@ -51,7 +52,7 @@ class ConversationList extends HookConsumerWidget {
     final listState = useValueListenable(conversationListController);
     // Rows are cached by conversation: a list update returns the same widget
     // for rows whose conversation did not change, so Flutter skips them.
-    final rowCache = useRef<Map<String, _ConversationListItem>>({});
+    final rowCache = useRef<Map<String, DeferredMount>>({});
     useMemoized(() {
       final ids = {for (final item in listState.items) item.conversationId};
       rowCache.value.removeWhere((id, _) => !ids.contains(id));
@@ -93,17 +94,24 @@ class ConversationList extends HookConsumerWidget {
             itemBuilder: (context, index) {
               final conversation = listState.items[index];
               final cached = rowCache.value[conversation.conversationId];
+              final cachedItem = cached?.child as _ConversationListItem?;
               if (cached != null &&
-                  cached.conversation == conversation &&
-                  cached.showsSelection == showsConversationSelection) {
+                  cachedItem!.conversation == conversation &&
+                  cachedItem.showsSelection == showsConversationSelection) {
                 return cached;
               }
+              // A category switch mounts every row of a new list at once.
               return rowCache.value[conversation.conversationId] =
-                  _ConversationListItem(
+                  DeferredMount(
                     key: ValueKey(conversation.conversationId),
-                    conversation: conversation,
-                    avatarCache: conversationListController.avatarCache,
-                    showsSelection: showsConversationSelection,
+                    placeholder: const SizedBox(
+                      height: ConversationPage.conversationItemHeight,
+                    ),
+                    child: _ConversationListItem(
+                      conversation: conversation,
+                      avatarCache: conversationListController.avatarCache,
+                      showsSelection: showsConversationSelection,
+                    ),
                   );
             },
           );
@@ -129,7 +137,6 @@ class _ConversationListItem extends HookConsumerWidget {
     required this.conversation,
     required this.avatarCache,
     required this.showsSelection,
-    super.key,
   });
 
   final ConversationItem conversation;
