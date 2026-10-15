@@ -785,8 +785,9 @@ class _StickerButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
     useEffect(() {
-      warmEmojiPage();
+      warmEmojiPage(pixelRatio);
       return null;
     }, const []);
     final stickerReadModel = useMemoized(

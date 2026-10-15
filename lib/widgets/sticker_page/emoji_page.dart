@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,7 +16,6 @@ import '../../account/account_key_value.dart';
 import '../../constants/resources.dart';
 import '../../utils/emoji.dart';
 import '../../utils/extension/extension.dart';
-import '../deferred_mount.dart';
 import '../interactive_decorated_box.dart';
 
 final _emojiScrollOffsetProvider = StateProvider<double>((ref) => 0);
@@ -43,32 +45,122 @@ List<String> _groupEmojis(List<EmojiGroup> group) => group
     .map((emoji) => emoji.char)
     .toList();
 
+/// Emoji drawn into images once, as the Telegram apps draw their emoji panels.
+///
+/// Laying out a color emoji costs about 0.1 ms, and the first time each one
+/// is drawn its glyph goes into the raster thread's glyph atlas. A panel that
+/// scrolls through hundreds of new emoji did both every frame. An image costs
+/// that once, and the panel then only draws images.
+class _EmojiImages extends ChangeNotifier {
+  _EmojiImages._();
+
+  static final instance = _EmojiImages._();
+
+  // A batch leaves the rest of a 8.3 ms frame at 120 Hz to the frame.
+  static const _batchBudget = Duration(milliseconds: 2);
+
+  final _images = <String, ui.Image>{};
+  final _pending = <String>{};
+  final _rendering = <String>{};
+  double _pixelRatio = 0;
+  var _scheduled = false;
+
+  ui.Image? operator [](String emoji) => _images[emoji];
+
+  /// Renders the images of [emojis] that are missing.
+  void request(Iterable<String> emojis, double pixelRatio) {
+    if (pixelRatio != _pixelRatio) {
+      for (final image in _images.values) {
+        image.dispose();
+      }
+      _images.clear();
+      _pixelRatio = pixelRatio;
+    }
+    for (final emoji in emojis) {
+      if (!_images.containsKey(emoji) && !_rendering.contains(emoji)) {
+        _pending.add(emoji);
+      }
+    }
+    _schedule();
+  }
+
+  // Animation priority: an idle task waits as long as any animation runs, and
+  // the scheduler polls it on every event loop turn meanwhile. A batch is
+  // short enough to run between frames.
+  void _schedule() {
+    if (_scheduled || _pending.isEmpty) return;
+    _scheduled = true;
+    SchedulerBinding.instance.scheduleTask(() {
+      _scheduled = false;
+      _renderBatch();
+    }, Priority.animation);
+  }
+
+  void _renderBatch() {
+    final pixelRatio = _pixelRatio;
+    final watch = Stopwatch()..start();
+    final renders = <Future<void>>[];
+    while (_pending.isNotEmpty && watch.elapsed < _batchBudget) {
+      final emoji = _pending.first;
+      _pending.remove(emoji);
+      _rendering.add(emoji);
+      renders.add(_render(emoji, pixelRatio));
+    }
+    unawaited(Future.wait(renders).then((_) => notifyListeners()));
+    _schedule();
+  }
+
+  Future<void> _render(String emoji, double pixelRatio) async {
+    final painter = TextPainter(
+      text: TextSpan(text: emoji, style: _emojiStyle),
+      strutStyle: _emojiStrutStyle,
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final size = painter.size;
+    final recorder = ui.PictureRecorder();
+    painter
+      ..paint(Canvas(recorder)..scale(pixelRatio), Offset.zero)
+      ..dispose();
+    final picture = recorder.endRecording();
+    try {
+      final image = await picture.toImage(
+        math.max(1, (size.width * pixelRatio).ceil()),
+        math.max(1, (size.height * pixelRatio).ceil()),
+      );
+      if (pixelRatio == _pixelRatio) {
+        _images[emoji] = image;
+      } else {
+        image.dispose();
+      }
+    } finally {
+      picture.dispose();
+      _rendering.remove(emoji);
+    }
+  }
+}
+
+@visibleForTesting
+bool emojiImageReady(String emoji) => _EmojiImages.instance[emoji] != null;
+
 var _emojiPageWarmed = false;
 
-/// Lays out the emojis that the panel shows first, a few at a time while no
-/// animation runs. A color emoji costs about 0.1 ms on its first layout, and
-/// the first open of the panel laid out about 80 of them in its first frames.
-void warmEmojiPage() {
+/// Renders the images of the emoji that the panel shows first, so the first
+/// open of the panel finds them ready. It starts a little later, after the
+/// chat that mounted the composer has built its rows.
+void warmEmojiPage(double pixelRatio) {
   if (_emojiPageWarmed) return;
   _emojiPageWarmed = true;
-  final emojis = [
-    ...AccountKeyValue.instance.recentUsedEmoji,
-    ..._groupEmojis(emojiGroups.first),
-  ].take(100).toList();
-  for (var start = 0; start < emojis.length; start += 8) {
-    final batch = emojis.skip(start).take(8);
-    SchedulerBinding.instance.scheduleTask(() {
-      for (final emoji in batch) {
-        TextPainter(
-            text: TextSpan(text: emoji, style: _emojiStyle),
-            strutStyle: _emojiStrutStyle,
-            textDirection: TextDirection.ltr,
-          )
-          ..layout()
-          ..dispose();
-      }
-    }, Priority.idle);
-  }
+  Timer(
+    const Duration(seconds: 2),
+    () => _EmojiImages.instance.request(
+      [
+        ...AccountKeyValue.instance.recentUsedEmoji,
+        ..._groupEmojis(emojiGroups.first),
+      ].take(100),
+      pixelRatio,
+    ),
+  );
 }
 
 class EmojiPage extends StatelessWidget {
@@ -314,16 +406,20 @@ class _AllEmojisPage extends HookConsumerWidget {
           if (groupedEmojis[i].isNotEmpty)
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  // The first open mounts every visible emoji at once.
-                  (context, index) => DeferredMount(
-                    child: _EmojiItem(emoji: groupedEmojis[i][index]),
+              sliver: SliverLayoutBuilder(
+                builder: (context, constraints) => SliverFixedExtentList(
+                  itemExtent: constraints.crossAxisExtent / emojiLineStride,
+                  delegate: SliverChildBuilderDelegate(
+                    (context, row) => _EmojiRow(
+                      emojis: groupedEmojis[i]
+                          .skip(row * emojiLineStride)
+                          .take(emojiLineStride)
+                          .toList(),
+                      columns: emojiLineStride,
+                    ),
+                    childCount: (groupedEmojis[i].length / emojiLineStride)
+                        .ceil(),
                   ),
-                  childCount: groupedEmojis[i].length,
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: emojiLineStride,
                 ),
               ),
             ),
@@ -351,51 +447,215 @@ class _EmojiGroupTitle extends StatelessWidget {
   );
 }
 
-class _EmojiItem extends StatelessWidget {
-  const _EmojiItem({required this.emoji});
+void _insertEmoji(BuildContext context, String emoji) {
+  final textController = context.read<TextEditingController>();
+  final textEditingValue = textController.value;
+  final selection = textEditingValue.selection;
+  if (!selection.isValid) {
+    textController.text = '${textEditingValue.text}$emoji';
+  } else {
+    final int lastSelectionIndex = math.max(
+      selection.baseOffset,
+      selection.extentOffset,
+    );
+    final collapsedTextEditingValue = textEditingValue.copyWith(
+      selection: TextSelection.collapsed(offset: lastSelectionIndex),
+    );
+    textController.value = collapsedTextEditingValue.replaced(
+      selection,
+      emoji,
+    );
+  }
+  AccountKeyValue.instance.onEmojiUsed(emoji);
+}
 
-  final String emoji;
+/// One line of the emoji grid, painted as one surface from emoji images.
+class _EmojiRow extends StatefulWidget {
+  const _EmojiRow({required this.emojis, required this.columns});
+
+  final List<String> emojis;
+  final int columns;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(2),
-    child: InteractiveDecoratedBox(
-      onTap: () {
-        final textController = context.read<TextEditingController>();
-        final textEditingValue = textController.value;
-        final selection = textEditingValue.selection;
-        if (!selection.isValid) {
-          textController.text = '${textEditingValue.text}$emoji';
-        } else {
-          final int lastSelectionIndex = math.max(
-            selection.baseOffset,
-            selection.extentOffset,
-          );
-          final collapsedTextEditingValue = textEditingValue.copyWith(
-            selection: TextSelection.collapsed(offset: lastSelectionIndex),
-          );
-          textController.value = collapsedTextEditingValue.replaced(
-            selection,
-            emoji,
-          );
-        }
-        AccountKeyValue.instance.onEmojiUsed(emoji);
+  State<_EmojiRow> createState() => _EmojiRowState();
+}
+
+class _EmojiRowState extends State<_EmojiRow> with TickerProviderStateMixin {
+  // The hover fades of InteractiveDecoratedBox, which each cell used.
+  AnimationController? _fadeIn;
+  AnimationController? _fadeOut;
+  int? _hovered;
+  int? _leaving;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _requestImages();
+  }
+
+  @override
+  void didUpdateWidget(covariant _EmojiRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.emojis != widget.emojis) _requestImages();
+  }
+
+  void _requestImages() => _EmojiImages.instance.request(
+    widget.emojis,
+    MediaQuery.devicePixelRatioOf(context),
+  );
+
+  @override
+  void dispose() {
+    _fadeIn?.dispose();
+    _fadeOut?.dispose();
+    super.dispose();
+  }
+
+  int? _cellAt(Offset position) {
+    final index = position.dx * widget.columns ~/ context.size!.width;
+    return index >= 0 && index < widget.emojis.length ? index : null;
+  }
+
+  void _hover(int? index) {
+    if (index == _hovered) return;
+    final fadeIn = _fadeIn ??= AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+    );
+    final fadeOut = _fadeOut ??= AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 60),
+    );
+    setState(() {
+      if (_hovered != null) {
+        _leaving = _hovered;
+        fadeOut
+          ..value = fadeIn.value
+          ..reverse(from: fadeIn.value);
+      }
+      _hovered = index;
+      if (index != null) fadeIn.forward(from: 0);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    onHover: (event) => _hover(_cellAt(event.localPosition)),
+    onExit: (_) => _hover(null),
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: (details) {
+        final index = _cellAt(details.localPosition);
+        if (index != null) _insertEmoji(context, widget.emojis[index]);
       },
-      hoveringDecoration: BoxDecoration(
-        color: context.dynamicColor(
-          const Color.fromRGBO(229, 231, 235, 1),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-        ),
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-      ),
-      child: Center(
-        child: Text(
-          emoji,
-          style: _emojiStyle,
-          strutStyle: _emojiStrutStyle,
-          textAlign: TextAlign.center,
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: _EmojiRowPainter(
+          emojis: widget.emojis,
+          columns: widget.columns,
+          pixelRatio: MediaQuery.devicePixelRatioOf(context),
+          hoverColor: context.dynamicColor(
+            const Color.fromRGBO(229, 231, 235, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+          ),
+          hovered: _hovered,
+          leaving: _leaving,
+          fadeIn: _fadeIn,
+          fadeOut: _fadeOut,
+          onTap: (emoji) => _insertEmoji(context, emoji),
         ),
       ),
     ),
   );
+}
+
+class _EmojiRowPainter extends CustomPainter {
+  _EmojiRowPainter({
+    required this.emojis,
+    required this.columns,
+    required this.pixelRatio,
+    required this.hoverColor,
+    required this.hovered,
+    required this.leaving,
+    required this.fadeIn,
+    required this.fadeOut,
+    required this.onTap,
+  }) : super(
+         repaint: Listenable.merge([_EmojiImages.instance, fadeIn, fadeOut]),
+       );
+
+  final List<String> emojis;
+  final int columns;
+  final double pixelRatio;
+  final Color hoverColor;
+  final int? hovered;
+  final int? leaving;
+  final Animation<double>? fadeIn;
+  final Animation<double>? fadeOut;
+  final void Function(String emoji) onTap;
+
+  Rect _cell(Size size, int index) {
+    final width = size.width / columns;
+    return Rect.fromLTWH(width * index, 0, width, size.height);
+  }
+
+  void _paintHover(Canvas canvas, Size size, int? index, double? opacity) {
+    if (index == null || opacity == null || opacity <= 0) return;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        _cell(size, index).deflate(2),
+        const Radius.circular(8),
+      ),
+      Paint()..color = hoverColor.withValues(alpha: hoverColor.a * opacity),
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _paintHover(canvas, size, leaving, fadeOut?.value);
+    _paintHover(canvas, size, hovered, fadeIn?.value);
+    final paint = Paint()..filterQuality = FilterQuality.medium;
+    for (var i = 0; i < emojis.length; i++) {
+      final image = _EmojiImages.instance[emojis[i]];
+      if (image == null) continue;
+      final imageSize = Size(
+        image.width / pixelRatio,
+        image.height / pixelRatio,
+      );
+      canvas.drawImageRect(
+        image,
+        Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
+        Alignment.center.inscribe(imageSize, _cell(size, i)),
+        paint,
+      );
+    }
+  }
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder =>
+      (size) => [
+        for (var i = 0; i < emojis.length; i++)
+          CustomPainterSemantics(
+            rect: _cell(size, i),
+            properties: SemanticsProperties(
+              label: emojis[i],
+              button: true,
+              textDirection: TextDirection.ltr,
+              onTap: () => onTap(emojis[i]),
+            ),
+          ),
+      ];
+
+  @override
+  bool shouldRepaint(_EmojiRowPainter oldDelegate) =>
+      oldDelegate.emojis != emojis ||
+      oldDelegate.columns != columns ||
+      oldDelegate.pixelRatio != pixelRatio ||
+      oldDelegate.hoverColor != hoverColor ||
+      oldDelegate.hovered != hovered ||
+      oldDelegate.leaving != leaving;
+
+  @override
+  bool shouldRebuildSemantics(_EmojiRowPainter oldDelegate) =>
+      oldDelegate.emojis != emojis || oldDelegate.columns != columns;
 }
