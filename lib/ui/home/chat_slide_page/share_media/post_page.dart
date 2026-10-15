@@ -6,6 +6,7 @@ import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../widgets/markdown.dart';
 import '../../../../widgets/message/item/post_message.dart';
 import '../../../../widgets/message/message.dart';
 import '../shared_media_page.dart';
@@ -35,10 +36,21 @@ class PostPage extends HookConsumerWidget {
       },
       emptyAsset: Resources.assetsImagesEmptyFileSvg,
       emptyText: context.l10n.noPosts,
-      reloadData: (pageSize) =>
-          messageDao.postMessages(conversationId, pageSize, 0).get(),
-      loadBefore: (info, pageSize) =>
-          messageDao.postMessagesBefore(info, conversationId, pageSize).get(),
+      // The posts parse in the load balancer before their items build.
+      reloadData: (pageSize) async {
+        final posts = await messageDao
+            .postMessages(conversationId, pageSize, 0)
+            .get();
+        await preparePosts(posts);
+        return posts;
+      },
+      loadBefore: (info, pageSize) async {
+        final posts = await messageDao
+            .postMessagesBefore(info, conversationId, pageSize)
+            .get();
+        await preparePosts(posts);
+        return posts;
+      },
       itemBuilder: (context, message) => _Item(message: message),
     );
   }
@@ -58,6 +70,11 @@ class _Item extends StatelessWidget {
         message: message,
         child: MessagePost(
           content: message.content ?? '',
+          // The chat's key, so a post shown in both parses once.
+          cacheKey: buildMarkdownCacheKey(
+            namespace: 'post',
+            id: message.messageId,
+          ),
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: context.theme.sidebarSelected,
