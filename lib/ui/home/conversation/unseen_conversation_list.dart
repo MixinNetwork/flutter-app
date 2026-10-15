@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../../db/dao/conversation_dao.dart';
 import '../../../widgets/deferred_mount.dart';
@@ -40,7 +39,16 @@ class UnseenConversationList extends HookConsumerWidget {
     if (unseenConversations.isEmpty) {
       return const SearchEmptyWidget();
     }
-    return ScrollablePositionedList.builder(
+    // Opening a conversation removes the one opened before from the list.
+    // The rows after it move up, and the callback lets them keep their
+    // elements instead of being built again at their new indexes.
+    final indexes = {
+      for (final (index, item) in unseenConversations.indexed)
+        item.conversationId: index,
+    };
+    return ListView.builder(
+      findChildIndexCallback: (key) =>
+          indexes[(key as ValueKey<String>).value],
       itemBuilder: (context, index) => conversationRow(
         rowCache.value,
         unseenConversations[index],
