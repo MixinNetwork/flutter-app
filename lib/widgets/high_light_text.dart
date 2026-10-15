@@ -60,7 +60,7 @@ class CustomText extends HookConsumerWidget {
     final spans = useMemoized(
       () => TextMatcher.applyTextMatchers([
         textSpan ?? TextSpan(text: text, style: style),
-      ], textMatchers ?? [EmojiTextMatcher()]).toList(),
+      ], textMatchers ?? [EmojiTextMatcher()]).map(withoutCrLf).toList(),
       // Matchers read theme colors when they build spans.
       [text, textSpan, style, context.theme, ...?textMatchers],
     );
@@ -105,6 +105,44 @@ class CustomText extends HookConsumerWidget {
     }
     return result;
   }
+}
+
+/// [span] with each "\r\n" as "\n".
+///
+/// On Linux the text engine asks fontconfig for a font for both characters of
+/// each "\r\n", about 0.4 ms each, while "\n" alone breaks the line the same
+/// way with no lookup. Messages from Windows keep "\r\n" in their text.
+@visibleForTesting
+InlineSpan withoutCrLf(InlineSpan span) {
+  if (span is! TextSpan) return span;
+  final text = span.text;
+  final newText = text != null && text.contains('\r\n')
+      ? text.replaceAll('\r\n', '\n')
+      : text;
+  final children = span.children;
+  List<InlineSpan>? newChildren;
+  if (children != null) {
+    for (var i = 0; i < children.length; i++) {
+      final child = withoutCrLf(children[i]);
+      if (!identical(child, children[i])) {
+        (newChildren ??= [...children])[i] = child;
+      }
+    }
+  }
+  if (identical(newText, text) && newChildren == null) return span;
+  return TextSpan(
+    text: newText,
+    children: newChildren ?? children,
+    style: span.style,
+    recognizer: span.recognizer,
+    mouseCursor: span.mouseCursor,
+    onEnter: span.onEnter,
+    onExit: span.onExit,
+    semanticsLabel: span.semanticsLabel,
+    semanticsIdentifier: span.semanticsIdentifier,
+    locale: span.locale,
+    spellOut: span.spellOut,
+  );
 }
 
 class CustomSelectableText extends HookWidget {
