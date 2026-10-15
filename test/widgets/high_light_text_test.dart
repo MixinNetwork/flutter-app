@@ -108,8 +108,27 @@ void main() {
     expect(styled, ['❤️‍🔥']);
   });
 
+  test('mayContainUrl follows the iOS app check', () {
+    for (final (text, expected) in [
+      ('', false),
+      ('收到', false),
+      ('10:30 开会', false),
+      ('tel:123 skype:foo', false),
+      ('a.b', false),
+      ('a.bc', true),
+      ('mixin.one', true),
+      ('see https://x', true),
+      ('end. Next', false),
+      ('a..b', false),
+      ('今天。明天', false),
+      ('见 mixin.one/blog', true),
+    ]) {
+      expect(mayContainUrl(text), expected, reason: text);
+    }
+  });
+
   test(
-    'darwin link ranges match NSDataDetector',
+    'darwin link ranges match NSDataDetector where a link can be',
     () {
       final detector = DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
       for (final text in [
@@ -122,8 +141,10 @@ void main() {
         'localhost www wwwexample a@b',
       ]) {
         expect(
-          darwinLinkRanges(text).toList(),
-          detector.matchesInString(text).map((e) => e.range).toList(),
+          darwinLinkRanges(text),
+          mayContainUrl(text)
+              ? detector.matchesInString(text).map((e) => e.range).toList()
+              : isEmpty,
           reason: text,
         );
       }
@@ -132,22 +153,25 @@ void main() {
   );
 
   test(
-    'a long text finds its links in the background',
+    'prepareLinkRanges finds links in the background',
     () async {
-      final text =
-          '${List.filled(50, '今天下午三点讨论发布计划，大家记得带上电脑。').join()} '
-          'see https://mixin.one/blog/release for details.';
-      expect(text.length, greaterThan(darwinBackgroundLinkLength));
-      expect(darwinLinkRangesReady(text), isFalse);
+      final body = List.filled(30, '今天下午三点讨论发布计划，').join();
+      final texts = [
+        for (var i = 0; i < 20; i++)
+          '$body see https://mixin.one/blog/$i for details.',
+      ];
+      expect(texts.any(linkRangesReady), isFalse);
 
-      await prepareDarwinLinkRanges(text);
+      await prepareLinkRanges(texts);
 
-      expect(darwinLinkRangesReady(text), isTrue);
+      expect(texts.every(linkRangesReady), isTrue);
       final detector = DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
-      expect(
-        darwinLinkRanges(text),
-        detector.matchesInString(text).map((e) => e.range).toList(),
-      );
+      for (final text in texts) {
+        expect(
+          darwinLinkRanges(text),
+          detector.matchesInString(text).map((e) => e.range).toList(),
+        );
+      }
     },
     skip: !Platform.isMacOS,
   );

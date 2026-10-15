@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/ui/home/chat/chat_history_viewport.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/home/notifier/chat_side_notifier.dart';
@@ -187,71 +184,4 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(minutes: 11));
   });
-
-  testWidgets(
-    'a long message shows its links once the background detection ends',
-    (tester) async {
-      tester.view
-        ..physicalSize = const Size(1000, 800)
-        ..devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      String content(String path) =>
-          '${List.filled(50, '今天下午三点讨论发布计划，大家记得带上电脑。').join()} '
-          'see https://mixin.one/blog/$path for details.';
-      final base = buildMessages(1, imagePath: '', withImages: false).single;
-      MessageItem message(String text) => MessageItem(
-        messageId: base.messageId,
-        conversationId: base.conversationId,
-        type: base.type,
-        content: text,
-        createdAt: base.createdAt,
-        status: base.status,
-        userId: base.userId,
-        userFullName: base.userFullName,
-        userIdentityNumber: base.userIdentityNumber,
-        isVerified: false,
-        sharedUserIsVerified: false,
-        pinned: false,
-        conversionCategory: base.conversionCategory,
-      );
-
-      Future<(bool, Size)> show(String text) async {
-        await tester.pumpWidget(
-          ChatTimelineFixture(
-            key: UniqueKey(),
-            controller: FakeMessageController([message(text)], initial: 1),
-            blinkNotifier: BlinkNotifier(tester),
-            database: createFixtureDatabase(),
-          ),
-        );
-        await tester.pump();
-        var hasLink = false;
-        for (final rich in tester.widgetList<RichText>(
-          find.byWidgetPredicate(
-            (w) => w is RichText && w.text.toPlainText().contains('blog'),
-          ),
-        )) {
-          rich.text.visitChildren((span) {
-            if (span is TextSpan && span.recognizer != null) hasLink = true;
-            return !hasLink;
-          });
-        }
-        return (hasLink, tester.getSize(find.byType(MessageItemWidget)));
-      }
-
-      // Before any widget mounts: plugins start async work once they do.
-      await tester.runAsync(() => prepareDarwinLinkRanges(content('bbb')));
-
-      final (pendingLink, pendingSize) = await show(content('aaa'));
-      expect(pendingLink, isFalse);
-
-      final (readyLink, readySize) = await show(content('bbb'));
-      expect(readyLink, isTrue);
-      expect(readySize, pendingSize);
-
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(minutes: 11));
-    },
-    skip: !Platform.isMacOS,
-  );
 }

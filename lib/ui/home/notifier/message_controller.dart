@@ -14,6 +14,7 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../widgets/high_light_text.dart' show prepareLinkRanges;
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../chat/chat_jump_trace.dart';
@@ -314,6 +315,20 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
+  // Text rows otherwise find their links on the UI thread, which costs
+  // milliseconds for a long Chinese message.
+  Future<void> _prepareLinksSafely(MessageState state) async {
+    try {
+      await prepareLinkRanges([
+        for (final message in {...state.top, state.center, ...state.bottom})
+          if (message != null && message.type.isText && message.content != null)
+            message.content!,
+      ]);
+    } catch (error) {
+      e('prepareLinkRanges failed: $error');
+    }
+  }
+
   Future<void> _preCacheMentionSafely(MessageState state) async {
     try {
       await _preCacheMention(state);
@@ -419,7 +434,10 @@ class MessageController extends ValueNotifier<MessageState> {
       'lastRead=${shortMessageId(nextState.lastReadMessageId)} '
       '${_formatWindow(nextState)}',
     );
-    await _preCacheMentionSafely(nextState);
+    await Future.wait([
+      _preCacheMentionSafely(nextState),
+      _prepareLinksSafely(nextState),
+    ]);
     if (!_isCurrent(generation, conversationId)) return;
     _emit(nextState, warmMentionCache: false);
   }
@@ -483,11 +501,15 @@ class MessageController extends ValueNotifier<MessageState> {
   Future<void> _loadAfter(int generation, String conversationId) async {
     final messageState = await _after(conversationId);
     if (!_isCurrent(generation, conversationId)) return;
+    await _prepareLinksSafely(messageState);
+    if (!_isCurrent(generation, conversationId)) return;
     _emit(_pretreatment(messageState));
   }
 
   Future<void> _loadBefore(int generation, String conversationId) async {
     final messageState = await _before(conversationId);
+    if (!_isCurrent(generation, conversationId)) return;
+    await _prepareLinksSafely(messageState);
     if (!_isCurrent(generation, conversationId)) return;
     _emit(_pretreatment(messageState));
   }

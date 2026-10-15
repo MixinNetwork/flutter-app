@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:ffi';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -526,49 +527,105 @@ final _linkDetector = DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
 
 // NSDataDetector identifies the language and tokenizes CJK text before it
 // scans: about 1 ms per 1000 characters of mixed text, and about 20 ms for
-// 700 characters of Chinese. Rows build again often,
-// so keep the ranges of recent texts.
+// 700 characters of Chinese. The message list finds the links of loaded
+// messages in the background (see [prepareLinkRanges]), and rows read them
+// here.
 final _linkRanges = <String, List<TextRange>>{};
 const _linkRangesLimit = 1000;
 
-/// Text at least this long finds its links in the background; see
-/// [prepareDarwinLinkRanges].
-const darwinBackgroundLinkLength = 64;
-
-// Every link NSDataDetector finds has a scheme or a domain.
-bool _mayHaveLink(String text) => text.contains('.') || text.contains(':');
+/// Whether [text] can contain a link: a "." between two characters that are
+/// not spaces, or "://". It is the check of the iOS app's
+/// MXMFastURLDetector, so both apps find the same links.
+@visibleForTesting
+bool mayContainUrl(String text) {
+  if (text.length < 3) return false;
+  const dot = 0x2E;
+  const space = 0x20;
+  const colon = 0x3A;
+  const slash = 0x2F;
+  var dotSequence = 0;
+  var last = 0;
+  for (var i = 0; i < text.length - 1; i++) {
+    final c = text.codeUnitAt(i);
+    if (c == dot) {
+      dotSequence = dotSequence == 0 && last != space ? 1 : 0;
+    } else if (c != space && last == dot && dotSequence == 1) {
+      return true;
+    } else if (c == colon &&
+        i + 2 < text.length - 1 &&
+        text.codeUnitAt(i + 1) == slash &&
+        text.codeUnitAt(i + 2) == slash) {
+      return true;
+    } else {
+      dotSequence = 0;
+    }
+    last = c;
+  }
+  return false;
+}
 
 List<TextRange> _detectLinkRanges(String text) => _linkDetector
     .matchesInString(text)
     .map((e) => e.range)
     .toList(growable: false);
 
-List<TextRange> _storeLinkRanges(String text, List<TextRange> ranges) {
+// The Objective-C runtime functions behind @autoreleasepool.
+final _autoreleasePoolPush = DynamicLibrary.process()
+    .lookupFunction<Pointer<Void> Function(), Pointer<Void> Function()>(
+      'objc_autoreleasePoolPush',
+    );
+final _autoreleasePoolPop = DynamicLibrary.process()
+    .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
+      'objc_autoreleasePoolPop',
+    );
+
+// A background isolate has no run loop to drain the autoreleased results, so
+// drain them here. The ranges are copied out before the pool drains.
+List<List<TextRange>> _detectLinkRangesInBackground(List<String> texts) {
+  final pool = _autoreleasePoolPush();
+  try {
+    return texts.map(_detectLinkRanges).toList();
+  } finally {
+    _autoreleasePoolPop(pool);
+  }
+}
+
+void _storeLinkRanges(String text, List<TextRange> ranges) {
   if (_linkRanges.length >= _linkRangesLimit) {
     _linkRanges.remove(_linkRanges.keys.first);
   }
-  return _linkRanges[text] = ranges;
+  _linkRanges[text] = ranges;
 }
 
-/// The link ranges that NSDataDetector finds in [text].
+/// The link ranges of [text], from [prepareLinkRanges] when it found them.
 @visibleForTesting
 List<TextRange> darwinLinkRanges(String text) {
-  if (!_mayHaveLink(text)) return const [];
+  if (!mayContainUrl(text)) return const [];
   final cached = _linkRanges.remove(text);
   if (cached != null) return _linkRanges[text] = cached;
-  return _storeLinkRanges(text, _detectLinkRanges(text));
+  final ranges = _detectLinkRanges(text);
+  _storeLinkRanges(text, ranges);
+  return ranges;
 }
 
-/// Whether [darwinLinkRanges] returns [text]'s links without detecting them.
-bool darwinLinkRangesReady(String text) =>
-    !_mayHaveLink(text) || _linkRanges.containsKey(text);
+/// Whether the link ranges of [text] are ready without detecting them.
+@visibleForTesting
+bool linkRangesReady(String text) =>
+    !mayContainUrl(text) || _linkRanges.containsKey(text);
 
-/// Finds the links of [text] in a background isolate, so that a long message
-/// does not stall a frame.
-Future<void> prepareDarwinLinkRanges(String text) async {
-  if (!kPlatformIsDarwin || darwinLinkRangesReady(text)) return;
-  final ranges = await runLoadBalancer(_detectLinkRanges, text);
-  _storeLinkRanges(text, ranges);
+/// Finds the links of [texts] in a background isolate, so that rows that
+/// show them do not stall a frame.
+Future<void> prepareLinkRanges(Iterable<String> texts) async {
+  if (!kPlatformIsDarwin) return;
+  final pending = {
+    for (final text in texts)
+      if (!linkRangesReady(text)) text,
+  }.toList();
+  if (pending.isEmpty) return;
+  final ranges = await runLoadBalancer(_detectLinkRangesInBackground, pending);
+  for (var i = 0; i < pending.length; i++) {
+    _storeLinkRanges(pending[i], ranges[i]);
+  }
 }
 
 class UrlTextMatcher extends TextMatcher with Equatable {
