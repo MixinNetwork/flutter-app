@@ -173,6 +173,7 @@ dev_dependencies:
       url: https://github.com/riccardo-lomazzi/msix.git
       ref: 75190427070d1a57873cfd895fb9251d0713ebd8
   flutter_lints: ^6.0.0
+  plugin_platform_interface: ^2.1.8
   very_good_analysis: ^10.2.0
 flutter:
   # The following line ensures that the Material Icons font is
