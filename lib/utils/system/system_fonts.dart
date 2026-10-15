@@ -40,12 +40,50 @@ Future<String?> _matchLinuxFamily(String pattern) async {
   return null;
 }
 
-// TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
 Future<void> loadFallbackFonts() async {
-  if (!Platform.isLinux) {
-    return;
-  }
+  if (!Platform.isLinux) return;
+  await _loadLinuxFonts();
+  _warmLinuxFonts();
+}
 
+/// Lays out text once in each font weight the app uses, before the first
+/// frame. The first layout of a family and weight searches fontconfig for
+/// about 10 ms, which would otherwise stall the first chat or post that uses
+/// it.
+void _warmLinuxFonts() {
+  final watch = Stopwatch()..start();
+  final fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+  final families = [
+    loadedFallbackFonts ?? _linuxCjkFamily,
+    ?linuxMonospaceFamily,
+  ];
+  for (final family in families) {
+    for (final weight in const [
+      FontWeight.w400,
+      FontWeight.w500,
+      FontWeight.w600,
+      FontWeight.w700,
+    ]) {
+      TextPainter(
+          text: TextSpan(
+            text: 'a',
+            style: TextStyle(
+              fontFamily: family,
+              fontFamilyFallback: fallback,
+              fontWeight: weight,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )
+        ..layout()
+        ..dispose();
+    }
+  }
+  i('warmed linux fonts in ${watch.elapsedMilliseconds} ms');
+}
+
+// TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
+Future<void> _loadLinuxFonts() async {
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
   final monospace = _matchLinuxFamily('monospace');
