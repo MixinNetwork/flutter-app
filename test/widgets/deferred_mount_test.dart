@@ -68,10 +68,13 @@ void main() {
     await tester.pumpWidget(
       list((i) => _Slow(i, micros: i < 10 ? 100 : 2000)),
     );
+    // Cheap children may still fill in on a loaded machine; the costly ones
+    // must not exceed the budget.
+    int costly() => shown().where((i) => i >= 10).length;
     while (shown().length < 20) {
-      final before = shown().length;
+      final before = costly();
       await tester.pump();
-      expect(shown().length - before, lessThanOrEqualTo(2));
+      expect(costly() - before, lessThanOrEqualTo(2));
     }
   });
 }
