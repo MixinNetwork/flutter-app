@@ -94,7 +94,10 @@ dependencies:
   mixin_markdown_widget:
     path: ../flutter-plugins/packages/mixin_markdown_widget
   mime: ^2.0.0
-  mixin_bot_sdk_dart: ^1.5.0
+  # shortcut: local package until the enum conversion cache is published;
+  # go back to the pub version after the release.
+  mixin_bot_sdk_dart:
+    path: ../mixin_bot_sdk_dart-perf
   mixin_logger: ^0.2.0
   network_info_plus: ^7.0.0
   ogg_opus_player: ^0.8.1
