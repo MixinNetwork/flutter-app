@@ -112,7 +112,9 @@ dependencies:
   provider: ^6.1.5
   recase: ^4.1.0
   rxdart: ^0.28.0
-  scrollable_positioned_list: ^0.3.5
+  # The upstream repository (google/flutter.widgets) is archived.
+  scrollable_positioned_list:
+    path: third_party/scrollable_positioned_list
   simple_animations: ^5.3.0
   sliver_tools: ^0.2.12
   stream_transform: ^2.1.2
