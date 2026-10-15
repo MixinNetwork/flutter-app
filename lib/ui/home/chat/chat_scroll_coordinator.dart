@@ -547,12 +547,10 @@ class ChatScrollCoordinator {
     if (!render.attached || !viewport.attached) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportOrigin = _globalOrigin(viewport);
-    final renderOrigin = _globalOrigin(render);
-    if (viewportOrigin == null || renderOrigin == null) return null;
+    final origin = _originInViewport(render, viewport);
+    if (origin == null) return null;
 
-    final viewportTop = viewportOrigin.dy;
-    final top = renderOrigin.dy - viewportTop;
+    final top = origin.dy;
     final height = render.size.height;
     final target =
         scrollController.offset +
@@ -577,16 +575,15 @@ class ChatScrollCoordinator {
     if (!render.attached || !viewport.attached) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportOrigin = _globalOrigin(viewport);
-    final renderOrigin = _globalOrigin(render);
-    if (viewportOrigin == null || renderOrigin == null) return null;
-
-    return renderOrigin.dy - viewportOrigin.dy;
+    return _originInViewport(render, viewport)?.dy;
   }
 
-  Offset? _globalOrigin(RenderBox render) {
+  // The viewport is an ancestor of every row. The transform to it is short,
+  // while the transforms of both to the screen walk the whole app tree, and a
+  // snapshot of the viewport anchor measures every built row.
+  Offset? _originInViewport(RenderBox render, RenderBox viewport) {
     try {
-      return render.localToGlobal(Offset.zero);
+      return render.localToGlobal(Offset.zero, ancestor: viewport);
     } catch (error) {
       if (error is StateError &&
           error.message.contains('RenderBox was not laid out')) {
