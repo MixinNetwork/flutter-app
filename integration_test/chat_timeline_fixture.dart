@@ -64,6 +64,7 @@ List<MessageItem> buildMessages(
   int count, {
   required String imagePath,
   bool withImages = true,
+  Set<int> postIndexes = const {},
 }) {
   final thumb = img.Image(width: 40, height: 30);
   img.fill(thumb, color: img.ColorRgb8(90, 140, 200));
@@ -72,11 +73,20 @@ List<MessageItem> buildMessages(
     final (userId, name) = _users[index % _users.length];
     final createdAt = DateTime(2026, 10).add(Duration(minutes: index * 7));
     final isImage = withImages && index % 9 == 4;
+    final isPost = postIndexes.contains(index);
     return MessageItem(
       messageId: 'message-${index.toString().padLeft(6, '0')}',
       conversationId: conversationId,
-      type: isImage ? MessageCategory.plainImage : MessageCategory.plainText,
-      content: isImage ? null : _texts[index % _texts.length],
+      type: isImage
+          ? MessageCategory.plainImage
+          : isPost
+          ? MessageCategory.plainPost
+          : MessageCategory.plainText,
+      content: isImage
+          ? null
+          : isPost
+          ? '# Post\n\nA paragraph with `code` in it.'
+          : _texts[index % _texts.length],
       createdAt: createdAt,
       status: MessageStatus.read,
       userId: userId,

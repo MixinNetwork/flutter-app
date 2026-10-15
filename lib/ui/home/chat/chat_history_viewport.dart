@@ -221,6 +221,8 @@ class ChatHistoryViewport extends HookConsumerWidget {
             // old rows by index, and the build budget starts again.
             _ChatSliverList(
               key: ValueKey((key, 'top')),
+              isCostly: (index) =>
+                  rows.top[rows.top.length - index - 1].message.type.isPost,
               delegate: SliverChildBuilderDelegate((context, index) {
                 final actualIndex = rows.top.length - index - 1;
                 final row = rows.top[actualIndex];
@@ -268,18 +270,72 @@ const _cacheViewportCount = 2 * ChatScrollCoordinator.loadedJumpViewportCount;
 /// on the next frame. Rows nearest the center sliver come first, so the
 /// visible rows appear within a few frames, and the estimated extent of the
 /// rows not built yet keeps the scroll position stable meanwhile.
+/// How long a frame of a new chat window builds other rows before a post
+/// waits for the next frame.
+@visibleForTesting
+int chatCostlyRowWaitMicros = 1000;
+
 class _ChatSliverList extends SliverList {
-  const _ChatSliverList({required super.delegate, super.key});
+  const _ChatSliverList({required super.delegate, super.key, this.isCostly});
+
+  /// Whether the row at an index costs a frame of its own to build, such as a
+  /// post. Only the list above the center, which grows away from the latest
+  /// messages, sets it.
+  final bool Function(int index)? isCostly;
 
   @override
   RenderSliverList createRenderObject(BuildContext context) =>
       _RenderChatSliverList(
         childManager: context as SliverMultiBoxAdaptorElement,
-      );
+      )..isCostly = isCostly;
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderChatSliverList renderObject,
+  ) {
+    super.updateRenderObject(context, renderObject);
+    renderObject.isCostly = isCostly;
+  }
 }
 
 class _RenderChatSliverList extends RenderSliverList {
   _RenderChatSliverList({required super.childManager});
+
+  // A post lays out its markdown, about 5 ms on a slow Linux desktop the first
+  // time, and a new window builds its visible rows in one frame. In the first
+  // frames of a window, a post that would follow other rows waits for the next
+  // frame: the list ends before it, and it then grows away from the rows that
+  // show. Later layouts, such as a scroll, never stop early.
+  static const _openingFrames = 3;
+  bool Function(int index)? isCostly;
+  var _openingFramesLeft = _openingFrames;
+  final _frameWatch = Stopwatch();
+  var _deferredCostly = false;
+
+  @override
+  RenderBox? insertAndLayoutChild(
+    BoxConstraints childConstraints, {
+    required RenderBox? after,
+    bool parentUsesSize = false,
+  }) {
+    final isCostly = this.isCostly;
+    if (isCostly != null &&
+        after != null &&
+        _openingFramesLeft > 0 &&
+        _frameWatch.elapsedMicroseconds > chatCostlyRowWaitMicros) {
+      final index = indexOf(after) + 1;
+      if (index < childManager.childCount && isCostly(index)) {
+        _deferredCostly = true;
+        return null;
+      }
+    }
+    return super.insertAndLayoutChild(
+      childConstraints,
+      after: after,
+      parentUsesSize: parentUsesSize,
+    );
+  }
 
   // Paint, the other slivers, and the rest of the frame need the remainder of
   // an 8.3 ms frame at 120 Hz.
@@ -314,6 +370,19 @@ class _RenderChatSliverList extends RenderSliverList {
 
   @override
   void performLayout() {
+    if (!_frameWatch.isRunning) {
+      _frameWatch
+        ..reset()
+        ..start();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _frameWatch.stop();
+        if (_openingFramesLeft > 0) _openingFramesLeft -= 1;
+        if (_deferredCostly) {
+          _deferredCostly = false;
+          if (attached) markNeedsLayout();
+        }
+      });
+    }
     final requested = super.constraints;
     final start = requested.scrollOffset + requested.cacheOrigin;
     final visibleEnd = requested.scrollOffset + requested.remainingPaintExtent;

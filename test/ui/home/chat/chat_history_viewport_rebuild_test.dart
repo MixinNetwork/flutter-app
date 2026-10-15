@@ -56,6 +56,56 @@ void main() {
     await tester.pump(const Duration(minutes: 11));
   });
 
+  testWidgets('a post of a new window waits for the frame after its rows', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1000, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const postIndex = 118;
+    final messages = buildMessages(
+      120,
+      imagePath: '',
+      withImages: false,
+      postIndexes: {postIndex},
+    );
+    final controller = FakeMessageController(messages.sublist(0, 60));
+    await tester.pumpWidget(
+      ChatTimelineFixture(
+        controller: controller,
+        blinkNotifier: BlinkNotifier(tester),
+        database: createFixtureDatabase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    bool built(int index) => find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is MessageItemWidget &&
+              widget.message.messageId == messages[index].messageId,
+        )
+        .evaluate()
+        .isNotEmpty;
+
+    // Rows cost more in tests, and the frame budget builds one a frame, so
+    // any time spent on other rows defers the post.
+    chatCostlyRowWaitMicros = 0;
+    addTearDown(() => chatCostlyRowWaitMicros = 1000);
+    controller.open(messages.sublist(60), refreshKey: Object());
+    await tester.pump();
+    await tester.pump();
+    expect(built(messages.length - 1), isTrue);
+    expect(built(postIndex), isFalse);
+
+    await tester.pumpAndSettle();
+    expect(built(postIndex), isTrue);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(minutes: 11));
+  });
+
   testWidgets('a new window builds its rows over several frames', (
     tester,
   ) async {
