@@ -91,29 +91,12 @@ class ConversationList extends HookConsumerWidget {
             itemPositionsListener: itemPositionsListener,
             itemCount: listState.count,
             itemScrollController: itemScrollController,
-            itemBuilder: (context, index) {
-              final conversation = listState.items[index];
-              final cached = rowCache.value[conversation.conversationId];
-              final cachedItem = cached?.child as _ConversationListItem?;
-              if (cached != null &&
-                  cachedItem!.conversation == conversation &&
-                  cachedItem.showsSelection == showsConversationSelection) {
-                return cached;
-              }
-              // A category switch mounts every row of a new list at once.
-              return rowCache.value[conversation.conversationId] =
-                  DeferredMount(
-                    key: ValueKey(conversation.conversationId),
-                    placeholder: const SizedBox(
-                      height: ConversationPage.conversationItemHeight,
-                    ),
-                    child: _ConversationListItem(
-                      conversation: conversation,
-                      avatarCache: conversationListController.avatarCache,
-                      showsSelection: showsConversationSelection,
-                    ),
-                  );
-            },
+            itemBuilder: (context, index) => conversationRow(
+              rowCache.value,
+              listState.items[index],
+              avatarCache: conversationListController.avatarCache,
+              showsSelection: showsConversationSelection,
+            ),
           );
 
     return Column(
@@ -127,6 +110,35 @@ class ConversationList extends HookConsumerWidget {
       ],
     );
   }
+}
+
+/// The row of [conversation] from [cache], or a new one. A list update returns
+/// the same widget for rows whose conversation did not change, so Flutter
+/// skips them, and a new list mounts its rows over a few frames.
+DeferredMount conversationRow(
+  Map<String, DeferredMount> cache,
+  ConversationItem conversation, {
+  required ConversationAvatarCache avatarCache,
+  required bool showsSelection,
+}) {
+  final cached = cache[conversation.conversationId];
+  final cachedItem = cached?.child as _ConversationListItem?;
+  if (cached != null &&
+      cachedItem!.conversation == conversation &&
+      cachedItem.showsSelection == showsSelection) {
+    return cached;
+  }
+  return cache[conversation.conversationId] = DeferredMount(
+    key: ValueKey(conversation.conversationId),
+    placeholder: const SizedBox(
+      height: ConversationPage.conversationItemHeight,
+    ),
+    child: _ConversationListItem(
+      conversation: conversation,
+      avatarCache: avatarCache,
+      showsSelection: showsSelection,
+    ),
+  );
 }
 
 /// One row of the conversation list. It watches only its own avatar users and

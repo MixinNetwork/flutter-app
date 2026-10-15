@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../provider/conversation_provider.dart';
+import '../../../db/dao/conversation_dao.dart';
+import '../../../widgets/deferred_mount.dart';
 import '../../provider/unseen_conversations_provider.dart';
 import '../desktop_shell_layout.dart';
-import 'conversation_focus.dart';
+import '../notifier/conversation_list_controller.dart';
 import 'conversation_list.dart';
-import 'menu_wrapper.dart';
 import 'search_list.dart';
 
 class UnseenConversationList extends HookConsumerWidget {
@@ -16,8 +18,17 @@ class UnseenConversationList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unseenConversations = ref.watch(unseenConversationsProvider);
-
-    final currentConversationId = ref.watch(currentConversationIdProvider);
+    // Each row watches whether it is the current conversation, so opening one
+    // does not rebuild the list, and unchanged rows keep their widgets.
+    final rowCache = useRef<Map<String, DeferredMount>>({});
+    useMemoized(() {
+      final ids = {
+        for (final item in unseenConversations ?? const <ConversationItem>[])
+          item.conversationId,
+      };
+      rowCache.value.removeWhere((id, _) => !ids.contains(id));
+    }, [unseenConversations]);
+    final avatarCache = context.read<ConversationListController>().avatarCache;
 
     final showsConversationSelection = !DesktopShellLayout.mainRouteModeOf(
       context,
@@ -30,26 +41,12 @@ class UnseenConversationList extends HookConsumerWidget {
       return const SearchEmptyWidget();
     }
     return ScrollablePositionedList.builder(
-      itemBuilder: (context, index) {
-        final conversation = unseenConversations[index];
-        final current = conversation.conversationId == currentConversationId;
-        final selected = current && showsConversationSelection;
-        return ConversationMenuWrapper(
-          conversation: conversation,
-          removeChatFromCircle: true,
-          child: ConversationItemWidget(
-            conversation: conversation,
-            selected: selected,
-            onTap: () {
-              ConversationFocus.selectConversation(
-                context,
-                conversation.conversationId,
-                conversation: conversation,
-              );
-            },
-          ),
-        );
-      },
+      itemBuilder: (context, index) => conversationRow(
+        rowCache.value,
+        unseenConversations[index],
+        avatarCache: avatarCache,
+        showsSelection: showsConversationSelection,
+      ),
       itemCount: unseenConversations.length,
     );
   }
