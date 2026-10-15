@@ -348,6 +348,13 @@ class _RenderChatSliverList extends RenderSliverList {
   // A chat row costs at least this much, whatever one layout measured.
   static const _minMicrosPerPixel = 10.0;
 
+  // The layout time all lists spent in this frame, and this list's part. The
+  // lists above and below the center fill their cache regions in the same
+  // frames, so beyond the visible region they share one budget.
+  static var _frameSpentMicros = 0;
+  static var _frameSpentReset = false;
+  var _ownSpentMicros = 0;
+
   // The constraints this layout uses, when the budget cuts the region short.
   SliverConstraints? _budgeted;
 
@@ -386,9 +393,21 @@ class _RenderChatSliverList extends RenderSliverList {
     final requested = super.constraints;
     final start = requested.scrollOffset + requested.cacheOrigin;
     final visibleEnd = requested.scrollOffset + requested.remainingPaintExtent;
+    if (_frameStartEnd == null) _ownSpentMicros = 0;
+    if (!_frameSpentReset) {
+      _frameSpentReset = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _frameSpentReset = false;
+        _frameSpentMicros = 0;
+      });
+    }
     final frameStartEnd = _frameStartEnd ??= _laidOutEnd;
-    var allowedEnd =
-        math.max(frameStartEnd, start) + _frameBudgetMicros / _microsPerPixel;
+    final from = math.max(frameStartEnd, start);
+    final othersSpent = _frameSpentMicros - _ownSpentMicros;
+    var allowedEnd = math.max(
+      from + math.max(0, _frameBudgetMicros - othersSpent) / _microsPerPixel,
+      math.min(from + _frameBudgetMicros / _microsPerPixel, visibleEnd),
+    );
     if (requested.remainingPaintExtent <= _filledPaintExtent) {
       allowedEnd = math.max(allowedEnd, visibleEnd);
     }
@@ -410,6 +429,8 @@ class _RenderChatSliverList extends RenderSliverList {
       super.performLayout();
     } finally {
       _budgeted = null;
+      _ownSpentMicros += watch.elapsedMicroseconds;
+      _frameSpentMicros += watch.elapsedMicroseconds;
     }
     final last = lastChild;
     _laidOutEnd = last == null
