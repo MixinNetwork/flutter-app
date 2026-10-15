@@ -167,27 +167,31 @@ class _AnimatedChatSlide extends HookWidget {
       return null;
     }, [pages, controller]);
 
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) => SizedBox(
-        width:
-            kChatSidePageWidth * Curves.easeInOut.transform(controller.value),
-        height: constraints.maxHeight,
-        child: controller.value != 0 ? child : null,
-      ),
-      child: ClipRect(
-        child: OverflowBox(
-          alignment: AlignmentDirectional.centerStart,
-          maxHeight: constraints.maxHeight,
-          minHeight: constraints.maxHeight,
-          maxWidth: kChatSidePageWidth,
-          minWidth: kChatSidePageWidth,
-          child: Navigator(
-            pages: displayedPages.value,
-            onDidRemovePage: onDidRemovePage,
-          ),
-        ),
-      ),
+    // The side page takes its full width for the whole animation and slides
+    // in it, so the chat lays out at its new width once. A width that grew
+    // with the animation laid out every built chat row again in each frame.
+    final shown = displayedPages.value.isNotEmpty;
+    return SizedBox(
+      width: shown ? kChatSidePageWidth : 0,
+      height: constraints.maxHeight,
+      child: shown
+          ? ClipRect(
+              child: AnimatedBuilder(
+                animation: controller,
+                builder: (context, child) => FractionalTranslation(
+                  translation: Offset(
+                    1 - Curves.easeInOut.transform(controller.value),
+                    0,
+                  ),
+                  child: child,
+                ),
+                child: Navigator(
+                  pages: displayedPages.value,
+                  onDidRemovePage: onDidRemovePage,
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
