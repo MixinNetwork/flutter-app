@@ -15,6 +15,7 @@ import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/high_light_text.dart' show prepareLinkRanges;
+import '../../../widgets/markdown.dart' show preparePosts;
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../chat/chat_jump_trace.dart';
@@ -319,13 +320,18 @@ class MessageController extends ValueNotifier<MessageState> {
   // milliseconds for a long Chinese message.
   Future<void> _prepareLinksSafely(MessageState state) async {
     try {
-      await prepareLinkRanges([
-        for (final message in {...state.top, state.center, ...state.bottom})
-          if (message != null && message.type.isText && message.content != null)
-            message.content!,
+      await Future.wait([
+        preparePosts({...state.top, ?state.center, ...state.bottom}),
+        prepareLinkRanges([
+          for (final message in {...state.top, state.center, ...state.bottom})
+            if (message != null &&
+                message.type.isText &&
+                message.content != null)
+              message.content!,
+        ]),
       ]);
     } catch (error) {
-      e('prepareLinkRanges failed: $error');
+      e('prepare message content failed: $error');
     }
   }
 

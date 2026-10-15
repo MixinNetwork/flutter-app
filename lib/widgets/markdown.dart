@@ -5,8 +5,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_markdown_widget/mixin_markdown_widget.dart';
 
+import '../db/mixin_database.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/extension/extension.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/system/system_fonts.dart';
 import '../utils/uri_utils.dart';
 import 'message/message_style.dart';
@@ -20,6 +22,38 @@ String buildMarkdownCacheKey({
 }) => '$namespace:$id';
 
 final markdownControllerCache = MarkdownControllerCache();
+
+/// Parses the posts among [messages] in the load balancer before their rows
+/// build. A post's first build parsed its markdown on the UI thread, about
+/// 1 ms for a short post on a slow Linux desktop. The rows of a loaded window
+/// build within a few viewports, so nearly every parse is used.
+Future<void> preparePosts(Iterable<MessageItem> messages) async {
+  final pending = <String, String>{};
+  for (final message in messages) {
+    final content = message.content;
+    if (!message.type.isPost || content == null) continue;
+    final key = buildMarkdownCacheKey(namespace: 'post', id: message.messageId);
+    if (markdownControllerCache.contains(key)) continue;
+    pending[key] = content.postOptimize();
+  }
+  if (pending.isEmpty) return;
+  final documents = await runLoadBalancer(
+    _parsePosts,
+    pending.values.toList(),
+  );
+  var index = 0;
+  for (final entry in pending.entries) {
+    markdownControllerCache.putParsed(
+      entry.key,
+      entry.value,
+      documents[index++],
+    );
+  }
+}
+
+List<MarkdownDocument> _parsePosts(List<String> data) => [
+  for (final item in data) MarkdownController.parseDocument(item),
+];
 
 class MarkdownControllerCache {
   final _entries = <String, _MarkdownCacheEntry>{};
@@ -46,6 +80,19 @@ class MarkdownControllerCache {
     entry.retainCount += 1;
     _evictIfNeeded();
     return entry.controller;
+  }
+
+  bool contains(String key) => _entries.containsKey(key);
+
+  /// Adds a controller for [document], parsed from [data] in an isolate, so
+  /// the first build of its key does not parse.
+  void putParsed(String key, String data, MarkdownDocument document) {
+    if (_entries.containsKey(key)) return;
+    _entries[key] = _MarkdownCacheEntry(
+      data: data,
+      controller: MarkdownController(data: data, document: document),
+    );
+    _evictIfNeeded();
   }
 
   void release(String key, MarkdownController controller) {
