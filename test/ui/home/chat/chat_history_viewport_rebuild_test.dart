@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/ui/home/chat/chat_history_viewport.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
+import 'package:flutter_app/ui/home/notifier/chat_side_notifier.dart';
+import 'package:flutter_app/ui/provider/keyword_provider.dart';
 import 'package:flutter_app/utils/event_bus.dart';
+import 'package:flutter_app/widgets/high_light_text.dart';
+import 'package:flutter_app/widgets/message/item/text/text_message.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../../../../integration_test/chat_timeline_fixture.dart';
 
@@ -75,6 +82,104 @@ void main() {
 
     expect(firstFrame, greaterThan(0));
     expect(firstFrame, lessThan(settled));
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(minutes: 11));
+  });
+
+  testWidgets('a search keyword rebuilds only the rows that show it', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1000, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final messages = buildMessages(30, imagePath: '', withImages: false);
+    final controller = FakeMessageController(messages, initial: 30);
+    await tester.pumpWidget(
+      ChatTimelineFixture(
+        controller: controller,
+        blinkNotifier: BlinkNotifier(tester),
+        database: createFixtureDatabase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(ChatHistoryViewport)),
+    );
+    final rebuilt = <String>[];
+    debugOnRebuildDirtyWidget = (element, builtOnce) {
+      if (element.widget is MessageTextWidget) {
+        rebuilt.add((element.widget as MessageTextWidget).content);
+      }
+    };
+    addTearDown(() => debugOnRebuildDirtyWidget = null);
+
+    container.read(keywordProvider.notifier).state = 'no match';
+    await tester.pump();
+    expect(rebuilt, isEmpty);
+
+    container.read(keywordProvider.notifier).state = '会议室';
+    await tester.pump();
+
+    expect(rebuilt, isNotEmpty);
+    expect(rebuilt.every((content) => content.contains('会议室')), isTrue);
+
+    debugOnRebuildDirtyWidget = null;
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(minutes: 11));
+  });
+
+  testWidgets('a global keyword hides the chat search keyword', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1000, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final messages = buildMessages(30, imagePath: '', withImages: false);
+    final controller = FakeMessageController(messages, initial: 30);
+    await tester.pumpWidget(
+      ChatTimelineFixture(
+        controller: controller,
+        blinkNotifier: BlinkNotifier(tester),
+        database: createFixtureDatabase(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final element = tester.element(find.byType(ChatHistoryViewport));
+    final container = ProviderScope.containerOf(element);
+
+    // Whether the rows that say 收到 highlight it.
+    Set<bool> highlighted() => {
+      for (final text in tester.widgetList<CustomText>(
+        find.byWidgetPredicate((w) => w is CustomText && w.text == '收到'),
+      ))
+        text.textMatchers!
+            .whereType<KeyWordTextMatcher>()
+            .single
+            .regExp!
+            .allMatches('收到')
+            .any((match) => match.end > match.start),
+    };
+
+    provider.Provider.of<SearchConversationKeywordNotifier>(
+      element,
+      listen: false,
+    ).value = (
+      null,
+      '收到',
+    );
+    await tester.pump();
+    expect(highlighted(), {true});
+
+    container.read(keywordProvider.notifier).state = 'no match';
+    await tester.pump();
+    expect(highlighted(), {false});
+
+    container.read(keywordProvider.notifier).state = '';
+    await tester.pump();
+    expect(highlighted(), {true});
 
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(minutes: 11));

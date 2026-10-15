@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide SelectableRegion;
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/home/notifier/chat_side_notifier.dart';
@@ -8,6 +9,7 @@ import '../../../../ui/provider/mention_cache_provider.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/platform.dart';
+import '../../../../utils/reg_exp_utils.dart';
 import '../../../high_light_text.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -52,30 +54,6 @@ class MessageTextWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userId = useMessageConverter(converter: (state) => state.userId);
 
-    final keywordNotifier = context.read<SearchConversationKeywordNotifier>();
-    var keyword =
-        useListenableConverter<ValueNotifier<(String?, String)>, String>(
-          keywordNotifier,
-          converter: (notifier) {
-            final state = notifier.value;
-            if (state.$1 == null || state.$1 == userId) return state.$2;
-            return '';
-          },
-          keys: [userId],
-        ).data ??
-        '';
-
-    final globalKeyword = ref.watch(trimmedKeywordProvider);
-    final conversationKeyword = ref.watch(
-      conversationProvider.select((value) => value?.keyword),
-    );
-
-    if (globalKeyword.isNotEmpty) {
-      keyword = globalKeyword;
-    } else if (conversationKeyword?.isNotEmpty ?? false) {
-      keyword = conversationKeyword!;
-    }
-
     final mentionCache = ref.read(mentionCacheProvider);
 
     final mentionMap = useMemoizedFuture(
@@ -83,6 +61,49 @@ class MessageTextWidget extends HookConsumerWidget {
       mentionCache.mentionCache(content),
       keys: [content],
     ).requireData;
+
+    // A search keyword changes on every key press, and only the rows whose
+    // shown text contains it need to build again.
+    final mentionText = useMemoized(
+      () => content.replaceAllMapped(mentionNumberRegExp, (match) {
+        final user = mentionMap[match[1]];
+        if (user == null) return match[0]!;
+        return '@${user.fullName ?? user.identityNumber}';
+      }),
+      [content, mentionMap],
+    );
+    bool shows(String keyword) =>
+        keyword.isNotEmpty &&
+        (content.contains(keyword) || mentionText.contains(keyword));
+
+    final keywordNotifier = context.read<SearchConversationKeywordNotifier>();
+    final localKeyword =
+        useListenableConverter<ValueNotifier<(String?, String)>, String>(
+          keywordNotifier,
+          converter: (notifier) {
+            final state = notifier.value;
+            if (state.$1 != null && state.$1 != userId) return '';
+            return shows(state.$2) ? state.$2 : '';
+          },
+          keys: [userId, mentionText],
+        ).data ??
+        '';
+    final conversationKeyword =
+        ref.watch(conversationProvider.select((value) => value?.keyword)) ?? '';
+    // The keyword this row shows when there is no global keyword.
+    final rowKeyword = conversationKeyword.isNotEmpty
+        ? (shows(conversationKeyword) ? conversationKeyword : '')
+        : localKeyword;
+    // A global keyword hides the other keywords even where it does not match,
+    // so it changes a row only where it shows or hides a match.
+    final globalKeyword = ref.watch(
+      trimmedKeywordProvider.select((keyword) {
+        if (shows(keyword)) return keyword;
+        if (keyword.isNotEmpty && rowKeyword.isNotEmpty) return '';
+        return null;
+      }),
+    );
+    final keyword = globalKeyword ?? rowKeyword;
 
     Widget child = MessageLayout(
       spacing: 6,
