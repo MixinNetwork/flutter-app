@@ -61,6 +61,20 @@ void main() {
     }
   });
 
+  testWidgets('children that must not wait appear in the first frame', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Column(
+        children: [
+          for (var i = 0; i < 20; i++)
+            DeferredMount(defer: false, child: _Slow(i)),
+        ],
+      ),
+    );
+    expect(shown().length, 20);
+  });
+
   testWidgets('later frames keep the budget when children cost more', (
     tester,
   ) async {

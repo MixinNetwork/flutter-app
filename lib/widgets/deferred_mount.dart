@@ -13,11 +13,17 @@ class DeferredMount extends StatefulWidget {
   const DeferredMount({
     required this.child,
     this.placeholder = const SizedBox.shrink(),
+    this.defer = true,
     super.key,
   });
 
   final Widget child;
   final Widget placeholder;
+
+  /// Whether [child] can wait for a later frame. A list without fixed item
+  /// extents sets it to false for an item it showed before: a placeholder that
+  /// grows above the viewport moves the content below it.
+  final bool defer;
 
   @override
   State<DeferredMount> createState() => _DeferredMountState();
@@ -39,7 +45,7 @@ class _DeferredMountState extends State<DeferredMount> {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      _shown = _shown || _take(this);
+      _shown = _shown || !widget.defer || _take(this);
       return _shown ? widget.child : widget.placeholder;
     },
   );

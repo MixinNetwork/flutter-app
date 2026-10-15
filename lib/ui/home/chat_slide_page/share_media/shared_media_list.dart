@@ -12,6 +12,7 @@ import 'package:vector_graphics/vector_graphics_compat.dart'
 import '../../../../db/dao/message_dao.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../widgets/deferred_mount.dart';
 import '../../../../widgets/near_edge_scroll_listener.dart';
 
 typedef SharedMediaInitialLoader =
@@ -86,6 +87,13 @@ class SharedMediaList extends HookConsumerWidget {
       [messages.value],
     );
     final scrollController = useScrollController();
+    final seen = useRef(<String>{});
+    // A page fills the panel and more, and a post lays out up to 400px of
+    // markdown, so new items show over a few frames from the top.
+    Widget item(BuildContext context, MessageItem message) => DeferredMount(
+      defer: seen.value.add(message.messageId),
+      child: itemBuilder(context, message),
+    );
 
     if (grouped.isEmpty) {
       return Center(
@@ -153,8 +161,7 @@ class SharedMediaList extends HookConsumerWidget {
                   if (gridDelegate == null)
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) =>
-                            itemBuilder(context, entry.value[index]),
+                        (context, index) => item(context, entry.value[index]),
                         childCount: entry.value.length,
                       ),
                     )
@@ -163,8 +170,7 @@ class SharedMediaList extends HookConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
-                          (context, index) =>
-                              itemBuilder(context, entry.value[index]),
+                          (context, index) => item(context, entry.value[index]),
                           childCount: entry.value.length,
                         ),
                         gridDelegate: gridDelegate!,
