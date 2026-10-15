@@ -28,7 +28,6 @@ import 'ui/provider/slide_category_provider.dart';
 import 'utils/extension/extension.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
-import 'utils/system/linux_accessibility.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/tray.dart';
 import 'widgets/actions/actions.dart';
@@ -184,11 +183,9 @@ class _App extends HookConsumerWidget {
                     ? TextScaler.noScaling
                     : mediaQueryData.textScaler,
               ),
-              child: LinuxSemanticsGate(
-                child: SystemTrayWidget(
-                  child: _WindowsTitleBarDivider(
-                    child: AuthGuard(child: child!),
-                  ),
+              child: SystemTrayWidget(
+                child: _WindowsTitleBarDivider(
+                  child: AuthGuard(child: child!),
                 ),
               ),
             ),

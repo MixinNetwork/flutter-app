@@ -38,6 +38,8 @@ Future<void> main(List<String> args) async {
 }
 
 Future<void> _runApp(List<String> args) async {
+  // The first binding wins, so create it before anything else needs one.
+  if (Platform.isLinux) LinuxSemanticsBinding();
   EquatableConfig.stringify = true;
 
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;

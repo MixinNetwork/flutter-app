@@ -1,16 +1,11 @@
 import 'dart:async';
 
 import 'package:dbus/dbus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../logger.dart';
 
 /// Whether an assistive technology talks to apps through AT-SPI.
-///
-/// The Linux embedder always enables Flutter semantics, and a scrolled list
-/// rebuilds its semantics on every frame. Other platforms build semantics only
-/// while assistive technology is on, so Linux follows the AT-SPI status.
 final linuxAccessibilityEnabled = ValueNotifier<bool>(false);
 
 Future<void> watchLinuxAccessibility() async {
@@ -38,21 +33,28 @@ Future<void> watchLinuxAccessibility() async {
   i('linux accessibility enabled: ${linuxAccessibilityEnabled.value}');
 }
 
-/// Builds [child] without semantics on Linux while no assistive technology is
-/// on.
-class LinuxSemanticsGate extends StatelessWidget {
-  const LinuxSemanticsGate({required this.child, super.key});
-
-  final Widget child;
+/// The Linux binding, which builds semantics only while an assistive
+/// technology is on.
+///
+/// The Linux embedder always enables semantics. Every render object that is
+/// added then marks semantics dirty, and opening a chat or scrolling a list
+/// flushed semantics for several milliseconds in a frame. Other platforms
+/// build semantics only while assistive technology is on, so Linux follows the
+/// AT-SPI status.
+class LinuxSemanticsBinding extends WidgetsFlutterBinding {
+  @override
+  bool get semanticsEnabled =>
+      super.semanticsEnabled && linuxAccessibilityEnabled.value;
 
   @override
-  Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.linux) return child;
-    return ValueListenableBuilder<bool>(
-      valueListenable: linuxAccessibilityEnabled,
-      builder: (context, enabled, child) =>
-          ExcludeSemantics(excluding: !enabled, child: child),
-      child: child,
-    );
+  void addSemanticsEnabledListener(VoidCallback listener) {
+    super.addSemanticsEnabledListener(listener);
+    linuxAccessibilityEnabled.addListener(listener);
+  }
+
+  @override
+  void removeSemanticsEnabledListener(VoidCallback listener) {
+    super.removeSemanticsEnabledListener(listener);
+    linuxAccessibilityEnabled.removeListener(listener);
   }
 }
