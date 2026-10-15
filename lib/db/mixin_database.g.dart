@@ -19033,20 +19033,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        messages,
-        users,
-        participants,
-        conversations,
-        stickers,
-        snapshots,
-        safeSnapshots,
-        assets,
-        tokens,
-        chains,
-        hyperlinks,
-        messageMentions,
-        expiredMessages,
-        pinMessages,
+        this.messages,
+        this.users,
+        this.participants,
+        this.conversations,
+        this.stickers,
+        this.snapshots,
+        this.safeSnapshots,
+        this.assets,
+        this.tokens,
+        this.chains,
+        this.hyperlinks,
+        this.messageMentions,
+        this.expiredMessages,
+        this.pinMessages,
         ...generatedwhere.watchedTables,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
@@ -19198,20 +19198,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        messages,
-        users,
-        participants,
-        conversations,
-        stickers,
-        snapshots,
-        safeSnapshots,
-        assets,
-        tokens,
-        chains,
-        hyperlinks,
-        messageMentions,
-        expiredMessages,
-        pinMessages,
+        this.messages,
+        this.users,
+        this.participants,
+        this.conversations,
+        this.stickers,
+        this.snapshots,
+        this.safeSnapshots,
+        this.assets,
+        this.tokens,
+        this.chains,
+        this.hyperlinks,
+        this.messageMentions,
+        this.expiredMessages,
+        this.pinMessages,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -19325,7 +19325,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        users,
+        this.users,
         ...generatedwhere.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -19377,8 +19377,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        conversations,
-        users,
+        this.conversations,
+        this.users,
         ...generatedwhere.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -19919,7 +19919,16 @@ class $ConversationsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Conversations, Conversation>(table),
+                  BaseReferences<_$MixinDatabase, Conversations, Conversation>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -20639,7 +20648,16 @@ class $MessagesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Messages, Message>(table),
+                  BaseReferences<_$MixinDatabase, Messages, Message>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21074,7 +21092,12 @@ class $UsersTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Users, User>(table),
+                  BaseReferences<_$MixinDatabase, Users, User>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21256,7 +21279,16 @@ class $ParticipantsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Participants, Participant>(table),
+                  BaseReferences<_$MixinDatabase, Participants, Participant>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -21653,7 +21685,16 @@ class $SnapshotsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Snapshots, Snapshot>(table),
+                  BaseReferences<_$MixinDatabase, Snapshots, Snapshot>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22078,7 +22119,16 @@ class $SafeSnapshotsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<SafeSnapshots, SafeSnapshot>(table),
+                  BaseReferences<_$MixinDatabase, SafeSnapshots, SafeSnapshot>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22466,7 +22516,12 @@ class $AssetsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Assets, Asset>(table),
+                  BaseReferences<_$MixinDatabase, Assets, Asset>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -22853,7 +22908,12 @@ class $TokensTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Tokens, Token>(table),
+                  BaseReferences<_$MixinDatabase, Tokens, Token>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23044,7 +23104,12 @@ class $ChainsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Chains, Chain>(table),
+                  BaseReferences<_$MixinDatabase, Chains, Chain>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23317,7 +23382,16 @@ class $StickersTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Stickers, Sticker>(table),
+                  BaseReferences<_$MixinDatabase, Stickers, Sticker>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23512,7 +23586,16 @@ class $HyperlinksTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Hyperlinks, Hyperlink>(table),
+                  BaseReferences<_$MixinDatabase, Hyperlinks, Hyperlink>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23673,7 +23756,16 @@ class $MessageMentionsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<MessageMentions, MessageMention>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    MessageMentions,
+                    MessageMention
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23838,7 +23930,16 @@ class $PinMessagesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<PinMessages, PinMessage>(table),
+                  BaseReferences<_$MixinDatabase, PinMessages, PinMessage>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -23997,7 +24098,16 @@ class $ExpiredMessagesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<ExpiredMessages, ExpiredMessage>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    ExpiredMessages,
+                    ExpiredMessage
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24290,7 +24400,16 @@ class $AddressesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Addresses, Address>(table),
+                  BaseReferences<_$MixinDatabase, Addresses, Address>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24642,7 +24761,12 @@ class $AppsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Apps, App>(table),
+                  BaseReferences<_$MixinDatabase, Apps, App>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -24849,7 +24973,16 @@ class $CircleConversationsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<CircleConversations, CircleConversation>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    CircleConversations,
+                    CircleConversation
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25030,7 +25163,16 @@ class $CirclesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Circles, Circle>(table),
+                  BaseReferences<_$MixinDatabase, Circles, Circle>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25190,7 +25332,16 @@ class $FloodMessagesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<FloodMessages, FloodMessage>(table),
+                  BaseReferences<_$MixinDatabase, FloodMessages, FloodMessage>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25486,7 +25637,12 @@ class $JobsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Jobs, Job>(table),
+                  BaseReferences<_$MixinDatabase, Jobs, Job>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25609,7 +25765,16 @@ class $MessagesHistoryTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<MessagesHistory, MessagesHistoryData>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    MessagesHistory,
+                    MessagesHistoryData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25746,7 +25911,16 @@ class $OffsetsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Offsets, Offset>(table),
+                  BaseReferences<_$MixinDatabase, Offsets, Offset>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -25971,7 +26145,18 @@ class $ParticipantSessionTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<ParticipantSession, ParticipantSessionData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    ParticipantSession,
+                    ParticipantSessionData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26182,7 +26367,18 @@ class $ResendSessionMessagesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<ResendSessionMessages, ResendSessionMessage>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    ResendSessionMessages,
+                    ResendSessionMessage
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26418,7 +26614,18 @@ class $SentSessionSenderKeysTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<SentSessionSenderKeys, SentSessionSenderKey>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    SentSessionSenderKeys,
+                    SentSessionSenderKey
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26761,7 +26968,16 @@ class $StickerAlbumsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<StickerAlbums, StickerAlbum>(table),
+                  BaseReferences<_$MixinDatabase, StickerAlbums, StickerAlbum>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -26910,7 +27126,16 @@ class $StickerRelationshipsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<StickerRelationships, StickerRelationship>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    StickerRelationships,
+                    StickerRelationship
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27567,7 +27792,16 @@ class $TranscriptMessagesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<TranscriptMessages, TranscriptMessage>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    TranscriptMessages,
+                    TranscriptMessage
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27696,7 +27930,12 @@ class $FiatsTableManager
                 Value<int> rowid = const Value.absent(),
               }) => FiatsCompanion.insert(code: code, rate: rate, rowid: rowid),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Fiats, Fiat>(table),
+                  BaseReferences<_$MixinDatabase, Fiats, Fiat>(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -27856,7 +28095,16 @@ class $FavoriteAppsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<FavoriteApps, FavoriteApp>(table),
+                  BaseReferences<_$MixinDatabase, FavoriteApps, FavoriteApp>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -28012,7 +28260,16 @@ class $PropertiesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Properties, Property>(table),
+                  BaseReferences<_$MixinDatabase, Properties, Property>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -28276,7 +28533,18 @@ class $InscriptionCollectionsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<InscriptionCollections, InscriptionCollection>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    InscriptionCollections,
+                    InscriptionCollection
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -28570,7 +28838,16 @@ class $InscriptionItemsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<InscriptionItems, InscriptionItem>(table),
+                  BaseReferences<
+                    _$MixinDatabase,
+                    InscriptionItems,
+                    InscriptionItem
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

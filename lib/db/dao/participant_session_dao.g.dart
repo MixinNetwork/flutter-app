@@ -51,7 +51,7 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id != ?2 LIMIT 1',
       variables: [Variable<String>(conversationId), Variable<String>(userId)],
-      readsFrom: {participantSession},
+      readsFrom: {this.participantSession},
     ).map(
       (QueryRow row) => ParticipantSessionKey(
         conversationId: row.read<String>('conversation_id'),
@@ -74,7 +74,7 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(userId),
         Variable<String>(sessionId),
       ],
-      readsFrom: {participantSession},
+      readsFrom: {this.participantSession},
     ).map(
       (QueryRow row) => ParticipantSessionKey(
         conversationId: row.read<String>('conversation_id'),
@@ -95,8 +95,8 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(conversationId),
         Variable<String>(sessionId),
       ],
-      readsFrom: {participantSession, users},
-    ).asyncMap(participantSession.mapFromRow);
+      readsFrom: {this.participantSession, this.users},
+    ).asyncMap(this.participantSession.mapFromRow);
   }
 
   ParticipantSessionDaoManager get managers =>

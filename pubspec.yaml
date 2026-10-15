@@ -19,7 +19,7 @@ environment:
   flutter: ^3.38.0
 
 dependencies:
-  android_id: ^0.5.1
+  android_id: ^0.6.0
   ansicolor: ^2.0.3
   archive: ^4.3.0
   async: ^2.13.1
@@ -121,7 +121,7 @@ dependencies:
   super_clipboard: ^0.9.1
   super_context_menu: ^0.9.1
   super_native_extensions: ^0.9.1
-  synchronized: 3.4.0+1
+  synchronized: ^3.5.0
   system_tray:
     path: third_party/system_tray
   ui_device:
@@ -147,7 +147,7 @@ dependencies:
       ref: 12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1
   html: ^0.15.6
   video_player: ^2.14.0
-  cupertino_icons: ^1.0.9
+  cupertino_icons: ^2.0.0
   video_compress: ^3.1.4
   webcrypto:
     git:

@@ -80,10 +80,10 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        transcriptMessages,
-        messages,
-        users,
-        stickers,
+        this.transcriptMessages,
+        this.messages,
+        this.users,
+        this.stickers,
         ...generatedwhere.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -144,7 +144,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM transcript_messages',
       variables: [],
-      readsFrom: {transcriptMessages},
+      readsFrom: {this.transcriptMessages},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
