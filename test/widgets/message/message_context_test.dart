@@ -622,19 +622,16 @@ void main() {
   ) async {
     const outsideTextKey = ValueKey('outside-selectable-text');
     final blinkNotifier = BlinkNotifier(tester);
-    final focusNode = FocusNode(debugLabel: 'test_selection_focus');
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       _MessageTestScope(
         blinkNotifier: blinkNotifier,
         child: MessageContext.fromMessageItem(
           message: testMessage('1'),
-          child: MessageQuickReplyDetector(
+          child: const MessageQuickReplyDetector(
             child: MessageBubble(
               child: MessageSelectionArea(
-                focusNode: focusNode,
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CustomText('hello world'),
@@ -722,6 +719,34 @@ void main() {
     blinkNotifier.dispose();
   });
 
+  testWidgets('a message builds its selection region when the mouse enters', (
+    tester,
+  ) async {
+    final blinkNotifier = BlinkNotifier(tester);
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: const Center(
+            child: MessageSelectionArea(child: CustomText('hello world')),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(message_selectable.SelectableRegion), findsNothing);
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(tester.getCenter(find.byType(CustomText)));
+    await tester.pump();
+    expect(find.byType(message_selectable.SelectableRegion), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
   testWidgets('blink keeps bubble content mounted', (tester) async {
     final notifier = BlinkNotifier(tester);
     final mountCount = ValueNotifier(0);
@@ -748,6 +773,93 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
     notifier.dispose();
+  });
+
+  testWidgets('only an unread mention watches its visibility', (tester) async {
+    Future<bool> watches(bool? mentionRead) async {
+      final message = testMessage(
+        'mention',
+        type: MessageCategory.secret,
+        mentionRead: mentionRead,
+      );
+      await tester.pumpWidget(
+        _MessageTestScope(
+          child: Localizations(
+            locale: const Locale('en'),
+            delegates: const [
+              Localization.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            child: MessageItemWidget(
+              message: message,
+              row: MessageRowModel(message: message, prev: message),
+              isGroupOrBotGroupConversation: false,
+              enableShowAvatar: false,
+              blink: false,
+              showUnreadBar: false,
+            ),
+          ),
+        ),
+      );
+      return find.byType(VisibilityDetector).evaluate().isNotEmpty;
+    }
+
+    expect(await watches(false), isTrue);
+    expect(await watches(true), isFalse);
+    expect(await watches(null), isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('selection mode slides the selection icon in and out', (
+    tester,
+  ) async {
+    final message = testMessage('1', type: MessageCategory.messageRecall);
+    await tester.pumpWidget(
+      _MessageTestScope(
+        child: Localizations(
+          locale: const Locale('en'),
+          delegates: const [
+            Localization.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          child: MessageItemWidget(
+            message: message,
+            row: MessageRowModel(message: message, prev: message),
+            isGroupOrBotGroupConversation: false,
+            enableShowAvatar: false,
+            blink: false,
+            showUnreadBar: false,
+          ),
+        ),
+      ),
+    );
+    double iconWidth() => tester
+        .getSize(
+          find
+              .descendant(
+                of: find.byType(MessageItemWidget),
+                matching: find.byType(SizedBox),
+              )
+              .first,
+        )
+        .width;
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MessageItemWidget)),
+    );
+    final selection = container.read(messageSelectionProvider);
+    expect(iconWidth(), 0);
+
+    selection.toggleSelection(message);
+    await tester.pumpAndSettle();
+    expect(iconWidth(), 48);
+
+    selection.clearSelection();
+    await tester.pumpAndSettle();
+    expect(iconWidth(), 0);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
   });
 
   test('mention read marker only fires for fully visible unread mentions', () {
@@ -918,6 +1030,9 @@ class _MessageTestScope extends StatelessWidget {
         databaseProvider.overrideWith((ref) => DatabaseOpener()),
         mentionCacheProvider.overrideWithValue(MentionCache(null)),
         settingProvider.overrideWith((ref) => SettingChangeNotifier()),
+        messageSelectionProvider.overrideWith(
+          (ref) => MessageSelectionNotifier(),
+        ),
       ],
       child: MaterialApp(
         home: BrightnessData(

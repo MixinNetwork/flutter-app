@@ -266,19 +266,26 @@ class MessageItemWidget extends HookConsumerWidget {
       ],
     );
 
-    child = VisibilityDetector(
-      onVisibilityChanged: (info) {
-        if (!shouldMarkMentionRead(message.mentionRead, info.visibleFraction)) {
-          return;
-        }
-        context.accountServer.markMentionRead(
-          message.messageId,
-          message.conversationId,
-        );
-      },
-      key: ValueKey('message_visibility_${message.messageId}'),
-      child: child,
-    );
+    // Only an unread mention needs its visibility. A detector adds a layer and
+    // a visibility check to every paint, which costs every row on a scroll.
+    if (message.mentionRead == false) {
+      child = VisibilityDetector(
+        onVisibilityChanged: (info) {
+          if (!shouldMarkMentionRead(
+            message.mentionRead,
+            info.visibleFraction,
+          )) {
+            return;
+          }
+          context.accountServer.markMentionRead(
+            message.messageId,
+            message.conversationId,
+          );
+        },
+        key: ValueKey('message_visibility_${message.messageId}'),
+        child: child,
+      );
+    }
 
     return AppActiveTickerMode(
       child: FocusScope(
@@ -366,7 +373,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
           hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          child: MessageQuickReplyDetector(child: Builder(builder: builder)),
+          child: Builder(builder: builder),
         ),
       ],
     );
@@ -471,7 +478,7 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
   }
 }
 
-class _AnimatedSelectionIcon extends HookConsumerWidget {
+class _AnimatedSelectionIcon extends StatefulWidget {
   const _AnimatedSelectionIcon({
     required this.selected,
     required this.inSelectedMode,
@@ -482,36 +489,58 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
   final bool inSelectedMode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final animationController = useAnimationController(
-      duration: const Duration(milliseconds: 300),
-    );
+  State<_AnimatedSelectionIcon> createState() => _AnimatedSelectionIconState();
+}
 
-    final animation = useMemoized(
-      () => animationController.drive(
-        Tween<double>(
-          begin: 0,
-          end: 48,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-      ),
-      [animationController],
-    );
+class _AnimatedSelectionIconState extends State<_AnimatedSelectionIcon>
+    with SingleTickerProviderStateMixin {
+  static final _width = Tween<double>(
+    begin: 0,
+    end: 48,
+  ).chain(CurveTween(curve: Curves.easeInOut));
 
-    useEffect(() {
-      if (inSelectedMode) {
-        animationController.forward();
-      } else {
-        animationController.reverse();
-      }
-    }, [inSelectedMode]);
+  // Created on the first selection mode: every row has this icon, and most
+  // rows never animate it.
+  AnimationController? _controller;
 
-    useListenable(animation);
+  AnimationController get _ensureController =>
+      _controller ??= AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 300),
+      )..addListener(() => setState(() {}));
 
-    if (animation.isDismissed) {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.inSelectedMode) _ensureController.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedSelectionIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.inSelectedMode == oldWidget.inSelectedMode) return;
+    if (widget.inSelectedMode) {
+      _ensureController.forward();
+    } else {
+      _controller?.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller == null || controller.isDismissed) {
       return const SizedBox();
     }
+    final selected = widget.selected;
     return SizedBox(
-      width: animation.value,
+      width: _width.evaluate(controller),
       height: 20,
       child: Center(
         child: ClipOval(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart' hide SelectableRegion;
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../ui/home/notifier/chat_side_notifier.dart';
@@ -85,8 +84,6 @@ class MessageTextWidget extends HookConsumerWidget {
       keys: [content],
     ).requireData;
 
-    final focusNode = useFocusNode(debugLabel: 'text selection focus');
-
     Widget child = MessageLayout(
       spacing: 6,
       content: CustomText(
@@ -111,32 +108,64 @@ class MessageTextWidget extends HookConsumerWidget {
     );
 
     if (enableSelection) {
-      child = MessageSelectionArea(focusNode: focusNode, child: child);
+      child = MessageSelectionArea(child: child);
     }
     return child;
   }
 }
 
-class MessageSelectionArea extends HookWidget {
-  const MessageSelectionArea({required this.child, this.focusNode, super.key});
+/// Text selection for a message on desktop.
+///
+/// A selection region costs every chat row a focus node, gesture recognizers,
+/// and actions, so a row builds it only when the mouse first enters the row's
+/// content.
+// shortcut: a touch on a row that the mouse has not entered only turns
+// selection on, so the first long press does not select; add a touch path if
+// desktop touch screens need it.
+class MessageSelectionArea extends StatefulWidget {
+  const MessageSelectionArea({required this.child, super.key});
 
   final Widget child;
-  final FocusNode? focusNode;
+
+  @override
+  State<MessageSelectionArea> createState() => _MessageSelectionAreaState();
+}
+
+class _MessageSelectionAreaState extends State<MessageSelectionArea> {
+  FocusNode? _focusNode;
+
+  void _activate() {
+    if (_focusNode != null) return;
+    setState(
+      () => _focusNode = FocusNode(debugLabel: 'message_selection_focus'),
+    );
+  }
+
+  @override
+  void dispose() {
+    _focusNode?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final node = useMemoized(
-      () => focusNode ?? FocusNode(debugLabel: 'message_selection_focus'),
-      [focusNode],
-    );
-    if (kPlatformIsDesktop) {
-      return SelectableRegion(
-        focusNode: node,
-        contextMenuBuilder: (context, state) => const SizedBox(),
-        selectionControls: desktopTextSelectionHandleControls,
-        child: child,
+    if (!kPlatformIsDesktop) return widget.child;
+    final focusNode = _focusNode;
+    if (focusNode == null) {
+      return MouseRegion(
+        opaque: false,
+        onEnter: (_) => _activate(),
+        child: Listener(
+          onPointerDown: (_) => _activate(),
+          child: widget.child,
+        ),
       );
     }
-    return child;
+    return SelectableRegion(
+      focusNode: focusNode,
+      contextMenuBuilder: (context, state) => const SizedBox(),
+      selectionControls: desktopTextSelectionHandleControls,
+      child: widget.child,
+    );
   }
 }

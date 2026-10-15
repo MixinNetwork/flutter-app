@@ -70,9 +70,12 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
       },
       cursor: widget.cursor,
       onHover: (event) {
-        setState(() {
-          hovering = true;
-        });
+        // Hover events arrive on every pointer move; rebuild only on a change.
+        if (!hovering) {
+          setState(() {
+            hovering = true;
+          });
+        }
         widget.onHover?.call(event);
       },
       onExit: (event) {
@@ -190,30 +193,40 @@ class InteractiveDecoratedBox extends StatelessWidget {
           status,
           lastStatus,
           child,
-        ) => TweenAnimationBuilder<Decoration>(
-          tween: DecorationTween(
-            end:
-                {
-                  InteractiveStatus.interactive:
-                      _decoration ?? const BoxDecoration(),
-                  InteractiveStatus.hovering:
-                      hoveringDecoration ?? tapDowningDecoration ?? _decoration,
-                  InteractiveStatus.tapDowning:
-                      tapDowningDecoration ?? hoveringDecoration ?? _decoration,
-                }[status] ??
-                const BoxDecoration(),
+        ) => hoveringDecoration == null && tapDowningDecoration == null
+        // Without a state decoration nothing animates, so skip the
+        // animation controller that each TweenAnimationBuilder creates.
+        ? _decoration == null
+              ? child!
+              : DecoratedBox(decoration: _decoration, child: child)
+        : TweenAnimationBuilder<Decoration>(
+            tween: DecorationTween(
+              end:
+                  {
+                    InteractiveStatus.interactive:
+                        _decoration ?? const BoxDecoration(),
+                    InteractiveStatus.hovering:
+                        hoveringDecoration ??
+                        tapDowningDecoration ??
+                        _decoration,
+                    InteractiveStatus.tapDowning:
+                        tapDowningDecoration ??
+                        hoveringDecoration ??
+                        _decoration,
+                  }[status] ??
+                  const BoxDecoration(),
+            ),
+            duration:
+                (lastStatus == InteractiveStatus.interactive &&
+                        status != InteractiveStatus.interactive
+                    ? inDuration
+                    : outDuration) ??
+                Duration.zero,
+            curve: Curves.decelerate,
+            builder: (context, value, child) =>
+                DecoratedBox(decoration: value, child: child),
+            child: child,
           ),
-          duration:
-              (lastStatus == InteractiveStatus.interactive &&
-                      status != InteractiveStatus.interactive
-                  ? inDuration
-                  : outDuration) ??
-              Duration.zero,
-          curve: Curves.decelerate,
-          builder: (context, value, child) =>
-              DecoratedBox(decoration: value, child: child),
-          child: child,
-        ),
     child: child,
   );
 }
