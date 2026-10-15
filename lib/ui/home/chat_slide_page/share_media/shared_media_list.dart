@@ -90,13 +90,20 @@ class SharedMediaList extends HookConsumerWidget {
       [messages.value],
     );
     final scrollController = useScrollController();
-    final seen = useRef(<String>{});
+    // The item built for each message. A page load rebuilds the list, and the
+    // same widget lets an unchanged item skip its rebuild; a post item laid
+    // out its markdown again otherwise.
+    final items = useRef(<String, (MessageItem, Widget)>{});
     // A page fills the panel and more, and a post lays out up to 400px of
     // markdown, so new items show over a few frames from the top.
-    Widget item(BuildContext context, MessageItem message) => DeferredMount(
-      defer: seen.value.add(message.messageId),
-      child: itemBuilder(context, message),
-    );
+    Widget item(BuildContext context, MessageItem message) {
+      final cached = items.value[message.messageId];
+      final child = cached != null && identical(cached.$1, message)
+          ? cached.$2
+          : itemBuilder(context, message);
+      items.value[message.messageId] = (message, child);
+      return DeferredMount(defer: cached == null, child: child);
+    }
 
     if (grouped.isEmpty) {
       return Center(
