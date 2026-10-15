@@ -65,9 +65,19 @@ bool isSameWeek(DateTime a, DateTime b) =>
 
 DateTime startOfWeek(DateTime a) => a.subtract(Duration(days: a.weekday));
 
+// The local day of a time, by instance. Each local date field reads the time
+// zone, and chat rows compare the day of every message with its neighbours
+// whenever the message window changes.
+// shortcut: a time zone change while the app runs keeps the old local days of
+// cached instances, until the messages load again.
+final _localDays = Expando<int>();
+
+int _localDay(DateTime time) => _localDays[time] ??= () {
+  final local = time.toLocal();
+  return local.year * 10000 + local.month * 100 + local.day;
+}();
+
 bool isSameDay(DateTime? a, DateTime? b) {
   if (a == null || b == null) return false;
-  final _a = a.toLocal();
-  final _b = b.toLocal();
-  return _a.year == _b.year && _a.month == _b.month && _a.day == _b.day;
+  return _localDay(a) == _localDay(b);
 }

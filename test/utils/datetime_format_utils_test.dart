@@ -18,4 +18,13 @@ void main() {
     expect(chinese.locale, 'zh');
     expect(chinese.format(DateTime(2026, 10, 12)), '周一');
   });
+
+  test('compares local days of UTC and local times', () {
+    final morning = DateTime(2026, 10, 15, 0, 30);
+    final night = DateTime(2026, 10, 15, 23, 30);
+    expect(isSameDay(morning.toUtc(), night), isTrue);
+    expect(isSameDay(morning.toUtc(), morning.toUtc()), isTrue);
+    expect(isSameDay(night, DateTime(2026, 10, 16, 0, 10).toUtc()), isFalse);
+    expect(isSameDay(null, night), isFalse);
+  });
 }
