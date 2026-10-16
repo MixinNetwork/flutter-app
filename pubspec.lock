@@ -1221,10 +1221,11 @@ packages:
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
-      path: "../mixin_bot_sdk_dart-perf"
-      relative: true
-    source: path
-    version: "1.5.0"
+      name: mixin_bot_sdk_dart
+      sha256: "12c471644ceb17c856d64feb1d03caf908898572aa55a33139c2439ce3e5f5b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
   mixin_logger:
     dependency: "direct main"
     description:
@@ -1236,10 +1237,11 @@ packages:
   mixin_markdown_widget:
     dependency: "direct main"
     description:
-      path: "../flutter-plugins/packages/mixin_markdown_widget"
-      relative: true
-    source: path
-    version: "0.3.2"
+      name: mixin_markdown_widget
+      sha256: d211333d11bdce6532eb86bdc1be6f0c4826c979cb326fd12b279bba9460d37b
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
   msix:
     dependency: "direct dev"
     description:
