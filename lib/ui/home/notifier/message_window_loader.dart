@@ -23,23 +23,6 @@ typedef MessagesByIdsQuery =
 
 enum MessageWindowDirection { older, newer }
 
-/// Publishes the page that [load] builds from [window]. A live insert or
-/// delete that replaces the window while [load] runs is not in that page, so
-/// the page is loaded again from the new window. [load] returns null to stop.
-@visibleForTesting
-Future<void> loadOnCurrentWindow<T extends Object>({
-  required T Function() window,
-  required Future<T?> Function() load,
-  required void Function(T page) publish,
-}) async {
-  while (true) {
-    final base = window();
-    final page = await load();
-    if (page == null) return;
-    if (identical(window(), base)) return publish(page);
-  }
-}
-
 class MessageWindowLoader {
   const MessageWindowLoader({
     required this.recentMessages,
@@ -97,40 +80,37 @@ class MessageWindowLoader {
   final AroundMessageIdsQuery afterMessageIds;
   final MessagesByIdsQuery messagesByIds;
 
-  Future<MessageState> loadBefore(
+  /// The page before the top of [state], oldest first. Add it with
+  /// [MessageState.addOlder].
+  Future<List<MessageItem>> loadBefore(
     MessageState state,
     String conversationId,
     int limit,
   ) async {
     final topMessageId = state.topMessage?.messageId;
-    if (topMessageId == null) return state.copyWith(isOldest: true);
+    if (topMessageId == null) return const [];
 
     final info = await messageOrderInfo(topMessageId);
-    if (info == null) return state.copyWith(isOldest: true);
+    if (info == null) return const [];
 
     final messages = await beforeMessages(info, conversationId, limit);
-    return state.copyWith(
-      top: [...messages.reversed, ...state.top],
-      isOldest: messages.length < limit,
-    );
+    return messages.reversed.toList();
   }
 
-  Future<MessageState> loadAfter(
+  /// The page after the bottom of [state], oldest first. Add it with
+  /// [MessageState.addNewer].
+  Future<List<MessageItem>> loadAfter(
     MessageState state,
     String conversationId,
     int limit,
   ) async {
     final bottomMessageId = state.bottomMessage?.messageId;
-    if (bottomMessageId == null) return state.copyWith(isLatest: true);
+    if (bottomMessageId == null) return const [];
 
     final info = await messageOrderInfo(bottomMessageId);
-    if (info == null) return state.copyWith(isLatest: true);
+    if (info == null) return const [];
 
-    final messages = await afterMessages(info, conversationId, limit);
-    return state.copyWith(
-      bottom: [...state.bottom, ...messages],
-      isLatest: messages.length < limit ? true : null,
-    );
+    return afterMessages(info, conversationId, limit);
   }
 
   Future<MessageWindowDirection?> directionFromSource({

@@ -197,6 +197,16 @@ class MessageState extends Equatable {
     anchor: anchor ?? this.anchor,
   );
 
+  // A page load does not see live inserts and deletes while it runs, so the
+  // page goes into the window as it is when the load ends.
+  MessageState addOlder(List<MessageItem> page, int limit) =>
+      copyWith(top: [...page, ...top], isOldest: page.length < limit);
+
+  MessageState addNewer(List<MessageItem> page, int limit) => copyWith(
+    bottom: [...bottom, ...page],
+    isLatest: page.length < limit ? true : null,
+  );
+
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
       return MessageState(
@@ -233,7 +243,11 @@ class MessageController extends ValueNotifier<MessageState> {
     required this.database,
     required this.mentionCache,
     required this.accountServer,
-  }) : super(MessageState()) {
+    @visibleForTesting MessageWindowLoader? messageWindowLoader,
+  }) : _messageWindowLoader =
+           messageWindowLoader ??
+           MessageWindowLoader.fromDao(database.messageDao),
+       super(MessageState()) {
     _init(
       centerMessageId: conversationNotifier.state?.initIndexMessageId,
       lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
@@ -291,8 +305,7 @@ class MessageController extends ValueNotifier<MessageState> {
   var _loadAfterInFlight = false;
   var _loadBeforeInFlight = false;
   var _disposed = false;
-  late final MessageWindowLoader _messageWindowLoader =
-      MessageWindowLoader.fromDao(messageDao);
+  final MessageWindowLoader _messageWindowLoader;
 
   MessageState get state => value;
 
@@ -318,15 +331,13 @@ class MessageController extends ValueNotifier<MessageState> {
 
   // Text rows otherwise find their links on the UI thread, which costs
   // milliseconds for a long Chinese message.
-  Future<void> _prepareLinksSafely(MessageState state) async {
+  Future<void> _prepareLinksSafely(List<MessageItem> messages) async {
     try {
       await Future.wait([
-        preparePosts({...state.top, ?state.center, ...state.bottom}),
+        preparePosts(messages),
         prepareLinkRanges([
-          for (final message in {...state.top, state.center, ...state.bottom})
-            if (message != null &&
-                message.type.isText &&
-                message.content != null)
+          for (final message in messages)
+            if (message.type.isText && message.content != null)
               message.content!,
         ]),
       ]);
@@ -442,7 +453,7 @@ class MessageController extends ValueNotifier<MessageState> {
     );
     await Future.wait([
       _preCacheMentionSafely(nextState),
-      _prepareLinksSafely(nextState),
+      _prepareLinksSafely(nextState.list),
     ]);
     if (!_isCurrent(generation, conversationId)) return;
     _emit(nextState, warmMentionCache: false);
@@ -504,33 +515,29 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
-  Future<void> _loadAfter(int generation, String conversationId) =>
-      _loadPage(generation, conversationId, _after);
+  Future<void> _loadAfter(int generation, String conversationId) async {
+    final page = await _messageWindowLoader.loadAfter(
+      state,
+      conversationId,
+      limit,
+    );
+    if (!_isCurrent(generation, conversationId)) return;
+    await _prepareLinksSafely(page);
+    if (!_isCurrent(generation, conversationId)) return;
+    _emit(_pretreatment(state.addNewer(page, limit)));
+  }
 
-  Future<void> _loadBefore(int generation, String conversationId) =>
-      _loadPage(generation, conversationId, _before);
-
-  Future<void> _loadPage(
-    int generation,
-    String conversationId,
-    Future<MessageState> Function(String conversationId) load,
-  ) => loadOnCurrentWindow(
-    window: () => state,
-    load: () async {
-      final messageState = await load(conversationId);
-      if (!_isCurrent(generation, conversationId)) return null;
-      await _prepareLinksSafely(messageState);
-      if (!_isCurrent(generation, conversationId)) return null;
-      return messageState;
-    },
-    publish: (messageState) => _emit(_pretreatment(messageState)),
-  );
-
-  Future<MessageState> _before(String conversationId) =>
-      _messageWindowLoader.loadBefore(state, conversationId, limit);
-
-  Future<MessageState> _after(String conversationId) =>
-      _messageWindowLoader.loadAfter(state, conversationId, limit);
+  Future<void> _loadBefore(int generation, String conversationId) async {
+    final page = await _messageWindowLoader.loadBefore(
+      state,
+      conversationId,
+      limit,
+    );
+    if (!_isCurrent(generation, conversationId)) return;
+    await _prepareLinksSafely(page);
+    if (!_isCurrent(generation, conversationId)) return;
+    _emit(_pretreatment(state.addOlder(page, limit)));
+  }
 
   Future<MessageState> _resetMessageList(
     String conversationId,
