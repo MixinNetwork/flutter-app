@@ -154,4 +154,42 @@ void main() {
     }
     expect(shown().length, 20, reason: 'the rest of the queue shows');
   });
+
+  testWidgets('waiting children that unmount free the queue', (tester) async {
+    // The same widgets in each build, so the children that stay do not build
+    // again, as rows that a list keeps.
+    final children = [
+      for (var i = 0; i < 20; i++)
+        DeferredMount(
+          key: ValueKey(i),
+          placeholder: const SizedBox(height: 10),
+          child: _Slow(i),
+        ),
+    ];
+    Widget rows(Set<int> removed) => Column(
+      children: [
+        for (var i = 0; i < 20; i++)
+          if (!removed.contains(i)) children[i],
+      ],
+    );
+
+    await tester.pumpWidget(rows({}));
+    final first = shown();
+    expect(first.length, lessThan(20));
+
+    // The head of the queue unmounts before its retry builds, as rows that a
+    // fast scroll moves out of the list do.
+    final head = {for (var i = first.length; i < first.length + 8; i++) i};
+    await tester.pumpWidget(rows(head));
+
+    for (var frame = 0; frame < 40; frame++) {
+      if (shown().length == 20 - head.length) break;
+      await tester.pump();
+    }
+    expect(
+      shown().length,
+      20 - head.length,
+      reason: 'the rest of the queue shows',
+    );
+  });
 }

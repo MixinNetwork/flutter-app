@@ -38,7 +38,7 @@ class _DeferredMountState extends State<DeferredMount> {
 
   @override
   void dispose() {
-    _waiting.remove(this);
+    _leave(this);
     super.dispose();
   }
 
@@ -82,8 +82,8 @@ bool _take(_DeferredMountState state) {
   return false;
 }
 
-// A waiting child that stops waiting leaves the queue, and the queue still
-// retries the children after it at the end of this frame.
+// A waiting child that stops waiting or unmounts leaves the queue, and the
+// queue still retries the children after it at the end of this frame.
 bool _leave(_DeferredMountState state) {
   if (_waiting.remove(state)) _scheduleEnd();
   return true;
