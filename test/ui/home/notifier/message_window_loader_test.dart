@@ -98,6 +98,51 @@ void main() {
     expect(after.isLatest, isTrue);
   });
 
+  test('a live update during a page load survives the page', () async {
+    final loader = MessageWindowLoader(
+      recentMessages: (_, _) => throw StateError('unexpected recent query'),
+      messageOrderInfo: (messageId) async => MessageOrderInfo(
+        rowId: int.parse(messageId),
+        createdAt: int.parse(messageId),
+      ),
+      beforeMessages: (_, _, _) => throw StateError('unexpected before'),
+      afterMessages: (_, _, _) async => [testMessage(4, messageId: '4')],
+      beforeMessageIds: (_, _, _) => throw StateError('unexpected before ids'),
+      afterMessageIds: (_, _, _) => throw StateError('unexpected after ids'),
+      messagesByIds: (_) => throw StateError('unexpected hydrate'),
+    );
+    var window = MessageState(
+      center: testMessage(2, messageId: '2'),
+      bottom: [testMessage(3, messageId: '3')],
+    );
+    final prepared = <Completer<void>>[];
+
+    final future = loadOnCurrentWindow(
+      window: () => window,
+      load: () async {
+        final page = await loader.loadAfter(window, 'conversation', 3);
+        // Content preparation runs off the UI thread.
+        final completer = Completer<void>();
+        prepared.add(completer);
+        await completer.future;
+        return page;
+      },
+      publish: (page) => window = page,
+    );
+    await pumpEventQueue();
+
+    // A delete arrives while the first page is in preparation.
+    window = window.removeMessage('3');
+    prepared.single.complete();
+    await pumpEventQueue();
+    expect(prepared, hasLength(2), reason: 'the page loads again');
+
+    prepared.last.complete();
+    await future;
+    expect(window.center?.messageId, '2');
+    expect(window.bottom.map((e) => e.messageId), ['4']);
+  });
+
   test('directionFromSource compares message order', () async {
     final loader = MessageWindowLoader(
       recentMessages: (_, _) => throw StateError('unexpected recent query'),

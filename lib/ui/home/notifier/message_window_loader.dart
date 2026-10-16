@@ -23,6 +23,23 @@ typedef MessagesByIdsQuery =
 
 enum MessageWindowDirection { older, newer }
 
+/// Publishes the page that [load] builds from [window]. A live insert or
+/// delete that replaces the window while [load] runs is not in that page, so
+/// the page is loaded again from the new window. [load] returns null to stop.
+@visibleForTesting
+Future<void> loadOnCurrentWindow<T extends Object>({
+  required T Function() window,
+  required Future<T?> Function() load,
+  required void Function(T page) publish,
+}) async {
+  while (true) {
+    final base = window();
+    final page = await load();
+    if (page == null) return;
+    if (identical(window(), base)) return publish(page);
+  }
+}
+
 class MessageWindowLoader {
   const MessageWindowLoader({
     required this.recentMessages,

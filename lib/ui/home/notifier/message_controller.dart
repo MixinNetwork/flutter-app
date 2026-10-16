@@ -504,21 +504,27 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
-  Future<void> _loadAfter(int generation, String conversationId) async {
-    final messageState = await _after(conversationId);
-    if (!_isCurrent(generation, conversationId)) return;
-    await _prepareLinksSafely(messageState);
-    if (!_isCurrent(generation, conversationId)) return;
-    _emit(_pretreatment(messageState));
-  }
+  Future<void> _loadAfter(int generation, String conversationId) =>
+      _loadPage(generation, conversationId, _after);
 
-  Future<void> _loadBefore(int generation, String conversationId) async {
-    final messageState = await _before(conversationId);
-    if (!_isCurrent(generation, conversationId)) return;
-    await _prepareLinksSafely(messageState);
-    if (!_isCurrent(generation, conversationId)) return;
-    _emit(_pretreatment(messageState));
-  }
+  Future<void> _loadBefore(int generation, String conversationId) =>
+      _loadPage(generation, conversationId, _before);
+
+  Future<void> _loadPage(
+    int generation,
+    String conversationId,
+    Future<MessageState> Function(String conversationId) load,
+  ) => loadOnCurrentWindow(
+    window: () => state,
+    load: () async {
+      final messageState = await load(conversationId);
+      if (!_isCurrent(generation, conversationId)) return null;
+      await _prepareLinksSafely(messageState);
+      if (!_isCurrent(generation, conversationId)) return null;
+      return messageState;
+    },
+    publish: (messageState) => _emit(_pretreatment(messageState)),
+  );
 
   Future<MessageState> _before(String conversationId) =>
       _messageWindowLoader.loadBefore(state, conversationId, limit);
