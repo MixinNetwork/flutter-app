@@ -398,8 +398,10 @@ class Blaze {
         .messageStatusById(messageId)
         .getSingleOrNull();
 
-    if (currentStatus != null && status.index > currentStatus.index) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
+    if (currentStatus != null) {
+      if (canUpdateMessageStatus(currentStatus, status)) {
+        await database.messageDao.updateMessageStatusById(messageId, status);
+      }
       return;
     }
 
@@ -654,3 +656,15 @@ class WebSocketTransaction<T> {
     }
   }
 }
+
+/// Whether a delivery receipt moves a stored message from [current] to [next].
+///
+/// A message that failed to decrypt or is unknown keeps its status, as
+/// `MessageDao.markMessageRead` does. Its content is still the encrypted
+/// data, which a read message would show as text, and only a failed message
+/// is requested again from its sender.
+@visibleForTesting
+bool canUpdateMessageStatus(MessageStatus current, MessageStatus next) =>
+    current != MessageStatus.failed &&
+    current != MessageStatus.unknown &&
+    next.index > current.index;
