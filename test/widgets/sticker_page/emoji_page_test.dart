@@ -69,6 +69,8 @@ void main() {
     await renderImages();
 
     expect(emojiImageReady('😀'), isTrue);
+    // Images render a few at a time, so the raster thread is not held.
+    expect(largestEmojiImageBatch, inInclusiveRange(1, 3));
     expect(find.semantics.byLabel('😀'), findsOne);
 
     tester.semantics.tap(find.semantics.byLabel('😀'));

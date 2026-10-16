@@ -59,11 +59,17 @@ class _EmojiImages extends ChangeNotifier {
   // A batch leaves the rest of a 8.3 ms frame at 120 Hz to the frame.
   static const _batchBudget = Duration(milliseconds: 2);
 
+  // The raster thread decodes the color glyph of each image, about 1 ms per
+  // emoji on macOS, so a batch stays small and the next one waits for it.
+  // Twenty images at once held the raster thread for 30 ms.
+  static const _batchSize = 3;
+
   final _images = <String, ui.Image>{};
   final _pending = <String>{};
   final _rendering = <String>{};
   double _pixelRatio = 0;
   var _scheduled = false;
+  var _largestBatch = 0;
 
   ui.Image? operator [](String emoji) => _images[emoji];
 
@@ -88,7 +94,7 @@ class _EmojiImages extends ChangeNotifier {
   // the scheduler polls it on every event loop turn meanwhile. A batch is
   // short enough to run between frames.
   void _schedule() {
-    if (_scheduled || _pending.isEmpty) return;
+    if (_scheduled || _rendering.isNotEmpty || _pending.isEmpty) return;
     _scheduled = true;
     SchedulerBinding.instance.scheduleTask(() {
       _scheduled = false;
@@ -100,14 +106,21 @@ class _EmojiImages extends ChangeNotifier {
     final pixelRatio = _pixelRatio;
     final watch = Stopwatch()..start();
     final renders = <Future<void>>[];
-    while (_pending.isNotEmpty && watch.elapsed < _batchBudget) {
+    while (_pending.isNotEmpty &&
+        renders.length < _batchSize &&
+        watch.elapsed < _batchBudget) {
       final emoji = _pending.first;
       _pending.remove(emoji);
       _rendering.add(emoji);
       renders.add(_render(emoji, pixelRatio));
     }
-    unawaited(Future.wait(renders).then((_) => notifyListeners()));
-    _schedule();
+    _largestBatch = math.max(_largestBatch, renders.length);
+    unawaited(
+      Future.wait(renders).then((_) {
+        notifyListeners();
+        _schedule();
+      }),
+    );
   }
 
   Future<void> _render(String emoji, double pixelRatio) async {
@@ -142,6 +155,9 @@ class _EmojiImages extends ChangeNotifier {
 
 @visibleForTesting
 bool emojiImageReady(String emoji) => _EmojiImages.instance[emoji] != null;
+
+@visibleForTesting
+int get largestEmojiImageBatch => _EmojiImages.instance._largestBatch;
 
 var _emojiPageWarmed = false;
 
