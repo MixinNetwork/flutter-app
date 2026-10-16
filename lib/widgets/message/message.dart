@@ -257,7 +257,7 @@ class MessageItemWidget extends HookConsumerWidget {
                   showedMenu: showedMenu,
                   focusNode: focusNode,
                 ),
-                builder: (_) => MessageContent(message: message),
+                child: MessageContent(message: message),
               ),
             );
           },
@@ -298,14 +298,12 @@ class MessageItemWidget extends HookConsumerWidget {
           message: message,
           highlightEnabled: blink,
           menuHighlighted: showedMenu.value,
-          child: Builder(
-            builder: (context) => MessageQuickReplyDetector(
-              child: Padding(
-                padding: row.sameUserPrev
-                    ? EdgeInsets.zero
-                    : const EdgeInsets.only(top: 8),
-                child: child,
-              ),
+          child: MessageQuickReplyDetector(
+            child: Padding(
+              padding: row.sameUserPrev
+                  ? EdgeInsets.zero
+                  : const EdgeInsets.only(top: 8),
+              child: child,
             ),
           ),
         ),
@@ -319,7 +317,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
     required this.isCurrentUser,
     required this.userName,
     required this.userId,
-    required this.builder,
+    required this.child,
     required this.buildMenus,
     required this.pinArrowWidth,
     required this.userAvatarUrl,
@@ -331,7 +329,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   final bool isCurrentUser;
   final String? userName;
   final String? userId;
-  final WidgetBuilder builder;
+  final Widget child;
   final MenuProvider buildMenus;
   final double pinArrowWidth;
   final String? userAvatarUrl;
@@ -354,26 +352,19 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (displayName != null && userId != null)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: MessageName(
-                  userName: displayName,
-                  userId: userId!,
-                  userIdentityNumber: userIdentityNumber,
-                  membership: membership,
-                  isBot: isBot,
-                  verified: isVerified,
-                ),
-              ),
-            ],
+          MessageName(
+            userName: displayName,
+            userId: userId!,
+            userIdentityNumber: userIdentityNumber,
+            membership: membership,
+            isBot: isBot,
+            verified: isVerified,
           ),
         CustomContextMenuWidget(
           hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          child: Builder(builder: builder),
+          child: child,
         ),
       ],
     );
