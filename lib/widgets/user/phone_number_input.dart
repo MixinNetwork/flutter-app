@@ -13,6 +13,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/providers/country_provider.dart';
 import 'package:intl_phone_number_input/src/utils/phone_number/phone_number_util.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/constants.dart';
 import '../../constants/resources.dart';
@@ -226,6 +228,7 @@ class _MobileInput extends HookConsumerWidget {
               duration: const Duration(milliseconds: 200),
               child: SvgPicture.asset(
                 Resources.assetsImagesIcArrowRightSvg,
+                renderingStrategy: RenderingStrategy.raster,
                 width: 30,
                 height: 30,
                 colorFilter: ColorFilter.mode(

@@ -80,7 +80,10 @@ extension NullableStringExtension on String? {
       return 1;
     }
     // this must be a valid uuid
-    return Ulid.parse(this!).hashCode;
+    // The Signal store keys sessions and sender keys by this number, so it
+    // must stay the same across versions and runs: the hash of the id's bytes
+    // joined as decimals, which `Ulid.hashCode` returned before ulid 2.2.0.
+    return Ulid.parse(this!).toBytes().join().hashCode;
   }
 
   bool isNullOrBlank() => this == null || this?.trim().isEmpty == true;

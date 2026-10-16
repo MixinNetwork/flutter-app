@@ -48,8 +48,8 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT user.* FROM participants AS participant INNER JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
       variables: [Variable<String>(conversationId)],
-      readsFrom: {participants, users},
-    ).asyncMap(users.mapFromRow);
+      readsFrom: {this.participants, this.users},
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<ParticipantUser> groupParticipantsByConversationId(
@@ -58,7 +58,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, COALESCE(u.is_verified, FALSE) AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam, u.membership AS membership FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
       variables: [Variable<String>(conversationId)],
-      readsFrom: {participants, users},
+      readsFrom: {this.participants, this.users},
     ).map(
       (QueryRow row) => ParticipantUser(
         conversationId: row.read<String>('conversationId'),
@@ -106,7 +106,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(conversationId),
         Variable<String>(identityNumber),
       ],
-      readsFrom: {users, participants},
+      readsFrom: {this.users, this.participants},
     ).map((QueryRow row) => row.read<String>('user_id'));
   }
 
@@ -114,7 +114,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM participants',
       variables: [],
-      readsFrom: {participants},
+      readsFrom: {this.participants},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -122,7 +122,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM participants WHERE conversation_id = ?1',
       variables: [Variable<String>(conversationId)],
-      readsFrom: {participants},
+      readsFrom: {this.participants},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -130,7 +130,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT p.conversation_id FROM participants AS p,conversations AS c WHERE p.user_id = ?1 AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
       variables: [Variable<String>(userId)],
-      readsFrom: {participants, conversations},
+      readsFrom: {this.participants, this.conversations},
     ).map((QueryRow row) => row.read<String>('conversation_id'));
   }
 

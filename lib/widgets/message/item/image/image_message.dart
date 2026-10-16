@@ -10,6 +10,7 @@ import '../../../../enum/media_status.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../media_image_pipeline.dart';
 import '../../../mixin_image.dart';
 import '../../../status.dart';
 import '../../message.dart';
@@ -187,17 +188,32 @@ class MessageImage extends HookConsumerWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            MixinImage.file(
-              File(
-                context.accountServer.convertAbsolutePath(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final path = context.accountServer.convertAbsolutePath(
                   type,
                   conversationId,
                   mediaUrl,
                   isTranscriptPage,
-                ),
-              ),
-              placeholder: () => thumbWidget,
-              errorBuilder: (_, _, _) => thumbWidget,
+                );
+                return MixinImage(
+                  // A cell that a list reuses for another photo starts again,
+                  // so only a new decode size of this photo keeps the old frame.
+                  key: ValueKey(path),
+                  image: coverDecodeImage(
+                    FileImage(File(path)),
+                    box: constraints.biggest,
+                    mediaWidth: mediaSize.$1,
+                    mediaHeight: mediaSize.$2,
+                    devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                  ),
+                  // A resize can change the decode size; the old image stays
+                  // until the new one is ready.
+                  gaplessPlayback: true,
+                  placeholder: () => thumbWidget,
+                  errorBuilder: (_, _, _) => thumbWidget,
+                );
+              },
             ),
             Center(
               child: HookBuilder(

@@ -48,7 +48,7 @@ mixin _$FloodMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
       variables: [],
-      readsFrom: {floodMessages},
+      readsFrom: {this.floodMessages},
     ).map(
       (QueryRow row) => FloodMessages.$convertercreatedAt.fromSql(
         row.read<int>('created_at'),

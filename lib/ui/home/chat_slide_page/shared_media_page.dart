@@ -24,6 +24,10 @@ class SharedMediaPage extends HookConsumerWidget {
     final conversationId = conversationState.conversationId;
 
     final selectedIndex = useState(0);
+    // A tab builds when it first shows: the post tab lays out every post of
+    // its first page, which took tens of milliseconds behind the media tab.
+    final shownTabs = useRef(<int>{});
+    shownTabs.value.add(selectedIndex.value);
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(title: Text(context.l10n.sharedMedia)),
@@ -34,18 +38,24 @@ class SharedMediaPage extends HookConsumerWidget {
               builder: (context, constraints) => IndexedStack(
                 index: selectedIndex.value,
                 children: [
-                  MediaPage(
-                    conversationId: conversationId,
-                    maxHeight: constraints.maxHeight,
-                  ),
-                  PostPage(
-                    conversationId: conversationId,
-                    maxHeight: constraints.maxHeight,
-                  ),
-                  FilePage(
-                    conversationId: conversationId,
-                    maxHeight: constraints.maxHeight,
-                  ),
+                  for (final (index, page) in [
+                    MediaPage(
+                      conversationId: conversationId,
+                      maxHeight: constraints.maxHeight,
+                    ),
+                    PostPage(
+                      conversationId: conversationId,
+                      maxHeight: constraints.maxHeight,
+                    ),
+                    FilePage(
+                      conversationId: conversationId,
+                      maxHeight: constraints.maxHeight,
+                    ),
+                  ].indexed)
+                    if (shownTabs.value.contains(index))
+                      page
+                    else
+                      const SizedBox.shrink(),
                 ],
               ),
             ),

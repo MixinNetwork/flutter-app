@@ -48,7 +48,7 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT asset.*, chain.symbol AS chainSymbol, chain.icon_url AS chainIconUrl, chain.name AS chainName, chain.threshold AS chainThreshold FROM assets AS asset LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id WHERE asset.asset_id = ?1 LIMIT 1',
       variables: [Variable<String>(assetId)],
-      readsFrom: {chains, assets},
+      readsFrom: {this.chains, this.assets},
     ).map(
       (QueryRow row) => AssetItem(
         assetId: row.read<String>('asset_id'),
@@ -78,7 +78,7 @@ mixin _$AssetDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM assets',
       variables: [],
-      readsFrom: {assets},
+      readsFrom: {this.assets},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 

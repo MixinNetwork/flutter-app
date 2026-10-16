@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
@@ -36,6 +38,7 @@ class RadioItem<T> extends StatelessWidget {
               alignment: const Alignment(0, -0.2),
               child: SvgPicture.asset(
                 Resources.assetsImagesSelectedSvg,
+                renderingStrategy: RenderingStrategy.raster,
                 height: 10,
                 width: 10,
               ),

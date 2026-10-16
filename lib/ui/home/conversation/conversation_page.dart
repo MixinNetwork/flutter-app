@@ -27,6 +27,7 @@ class ConversationPage extends HookConsumerWidget {
     final slideCategoryState = ref.watch(slideCategoryStateProvider);
 
     final filterUnseen = ref.watch(conversationUnseenFilterEnabledProvider);
+    final searching = filterUnseen || hasKeyword;
 
     return MultiProvider(
       providers: [
@@ -38,12 +39,28 @@ class ConversationPage extends HookConsumerWidget {
       child: Column(
         children: [
           const SearchBar(),
-          if (!filterUnseen && !hasKeyword)
-            Expanded(
-              child: ConversationList(key: PageStorageKey(slideCategoryState)),
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // The list stays mounted under the search results, so leaving
+                // a search shows it again without building every row.
+                Offstage(
+                  offstage: searching,
+                  child: ExcludeFocus(
+                    excluding: searching,
+                    child: TickerMode(
+                      enabled: !searching,
+                      child: ConversationList(
+                        key: PageStorageKey(slideCategoryState),
+                      ),
+                    ),
+                  ),
+                ),
+                if (searching) SearchList(filterUnseen: filterUnseen),
+              ],
             ),
-          if (filterUnseen || hasKeyword)
-            Expanded(child: SearchList(filterUnseen: filterUnseen)),
+          ),
         ],
       ),
     );

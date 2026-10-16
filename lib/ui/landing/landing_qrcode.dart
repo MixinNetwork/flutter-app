@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
@@ -211,6 +213,7 @@ class _Retry extends StatelessWidget {
             children: [
               SvgPicture.asset(
                 Resources.assetsImagesIcRetrySvg,
+                renderingStrategy: RenderingStrategy.raster,
                 width: 40,
                 height: 40,
               ),

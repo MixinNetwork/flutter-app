@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../mixin_image.dart';
@@ -35,12 +37,14 @@ class BadgesWidget extends StatelessWidget {
       case (true, _, _, _):
         child = SvgPicture.asset(
           Resources.assetsImagesVerifiedSvg,
+          renderingStrategy: RenderingStrategy.raster,
           width: 12,
           height: 12,
         );
       case (_, true, _, _):
         child = SvgPicture.asset(
           Resources.assetsImagesBotFillSvg,
+          renderingStrategy: RenderingStrategy.raster,
           width: 12,
           height: 12,
         );

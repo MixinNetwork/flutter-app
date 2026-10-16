@@ -6,6 +6,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide Key;
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/icon_fonts.dart';
 import '../../constants/resources.dart';
@@ -107,6 +109,7 @@ class SlidePage extends StatelessWidget {
                           collapse
                               ? Resources.assetsImagesExpandedSvg
                               : Resources.assetsImagesCollapseSvg,
+                          renderingStrategy: RenderingStrategy.raster,
                           width: 24,
                           height: 24,
                           colorFilter: ColorFilter.mode(
@@ -397,6 +400,7 @@ class _CircleList extends HookConsumerWidget {
                             child: SelectItem(
                               icon: SvgPicture.asset(
                                 Resources.assetsImagesCircleSvg,
+                                renderingStrategy: RenderingStrategy.raster,
                                 width: 24,
                                 height: 24,
                                 colorFilter: ColorFilter.mode(
@@ -494,6 +498,7 @@ class _Item extends HookConsumerWidget {
       child: SelectItem(
         icon: SvgPicture.asset(
           asset,
+          renderingStrategy: RenderingStrategy.raster,
           width: 24,
           height: 24,
           colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),

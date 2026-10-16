@@ -60,8 +60,8 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(username),
         Variable<String>(identityNumber),
       ],
-      readsFrom: {users, messages},
-    ).asyncMap(users.mapFromRow);
+      readsFrom: {this.users, this.messages},
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<User> fuzzySearchGroupUser(
@@ -76,16 +76,16 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(conversationId),
         Variable<String>(keyword),
       ],
-      readsFrom: {participants, users},
-    ).asyncMap(users.mapFromRow);
+      readsFrom: {this.participants, this.users},
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<User> groupParticipants(String conversationId) {
     return customSelect(
       'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id',
       variables: [Variable<String>(conversationId)],
-      readsFrom: {participants, users},
-    ).asyncMap(users.mapFromRow);
+      readsFrom: {this.participants, this.users},
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<User> notInFriends(List<String> filterIds) {
@@ -95,8 +95,8 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT * FROM users WHERE relationship = \'FRIEND\' AND user_id NOT IN ($expandedfilterIds) ORDER BY full_name, user_id ASC',
       variables: [for (var $ in filterIds) Variable<String>($)],
-      readsFrom: {users},
-    ).asyncMap(users.mapFromRow);
+      readsFrom: {this.users},
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<User> usersByIn(List<String> userIds) {
@@ -106,8 +106,8 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT * FROM users WHERE user_id IN ($expandeduserIds)',
       variables: [for (var $ in userIds) Variable<String>($)],
-      readsFrom: {users},
-    ).asyncMap(users.mapFromRow);
+      readsFrom: {this.users},
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<String> userIdsByIn(List<String> userIds) {
@@ -117,7 +117,7 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT user_id FROM users WHERE user_id IN ($expandeduserIds)',
       variables: [for (var $ in userIds) Variable<String>($)],
-      readsFrom: {users},
+      readsFrom: {this.users},
     ).map((QueryRow row) => row.read<String>('user_id'));
   }
 
@@ -151,12 +151,12 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlastFilter.introducedVariables,
       ],
       readsFrom: {
-        users,
-        conversations,
+        this.users,
+        this.conversations,
         ...generatedfirstFilter.watchedTables,
         ...generatedlastFilter.watchedTables,
       },
-    ).asyncMap(users.mapFromRow);
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<User> _fuzzySearchUserInCircle(
@@ -187,19 +187,19 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedfilter.introducedVariables,
       ],
       readsFrom: {
-        users,
-        conversations,
-        circleConversations,
+        this.users,
+        this.conversations,
+        this.circleConversations,
         ...generatedfilter.watchedTables,
       },
-    ).asyncMap(users.mapFromRow);
+    ).asyncMap(this.users.mapFromRow);
   }
 
   Selectable<String?> biographyByIdentityNumber(String userId) {
     return customSelect(
       'SELECT biography FROM users WHERE user_id = ?1',
       variables: [Variable<String>(userId)],
-      readsFrom: {users},
+      readsFrom: {this.users},
     ).map((QueryRow row) => row.readNullable<String>('biography'));
   }
 
@@ -210,7 +210,7 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT user_id, identity_number, full_name FROM users WHERE identity_number IN ($expandednumbers)',
       variables: [for (var $ in numbers) Variable<String>($)],
-      readsFrom: {users},
+      readsFrom: {this.users},
     ).map(
       (QueryRow row) => MentionUser(
         userId: row.read<String>('user_id'),
@@ -224,7 +224,7 @@ mixin _$UserDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(*) AS _c0 FROM users',
       variables: [],
-      readsFrom: {users},
+      readsFrom: {this.users},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 

@@ -6,6 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hexagon/hexagon.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../../constants/resources.dart';
 import '../../../../../db/vo/inscription.dart';
@@ -77,6 +79,7 @@ class _InscriptionLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaultCollectionImage = SvgPicture.asset(
       Resources.assetsImagesCollectionPlaceholderSvg,
+      renderingStrategy: RenderingStrategy.raster,
     );
     return SizedBox(
       width: 260,

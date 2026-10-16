@@ -48,7 +48,7 @@ mixin _$StickerRelationshipDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT sa.album_id FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
       variables: [Variable<String>(stickerId)],
-      readsFrom: {stickerAlbums, stickerRelationships},
+      readsFrom: {this.stickerAlbums, this.stickerRelationships},
     ).map((QueryRow row) => row.read<String>('album_id'));
   }
 
@@ -56,8 +56,8 @@ mixin _$StickerRelationshipDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT sa.* FROM sticker_relationships AS sr INNER JOIN sticker_albums AS sa ON sr.album_id = sa.album_id WHERE sr.sticker_id = ?1 AND sa.category = \'SYSTEM\' LIMIT 1',
       variables: [Variable<String>(stickerId)],
-      readsFrom: {stickerRelationships, stickerAlbums},
-    ).asyncMap(stickerAlbums.mapFromRow);
+      readsFrom: {this.stickerRelationships, this.stickerAlbums},
+    ).asyncMap(this.stickerAlbums.mapFromRow);
   }
 
   StickerRelationshipDaoManager get managers =>

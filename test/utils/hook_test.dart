@@ -41,6 +41,23 @@ class _FutureProbe extends HookWidget {
   }
 }
 
+class _Converted extends HookWidget {
+  const _Converted({required this.notifier, required this.suffix});
+
+  final ValueNotifier<String> notifier;
+  final String suffix;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = useListenableConverter<ValueNotifier<String>, String>(
+      notifier,
+      converter: (notifier) => '${notifier.value}$suffix',
+      keys: [suffix],
+    ).data;
+    return Text('$value', textDirection: TextDirection.ltr);
+  }
+}
+
 void main() {
   testWidgets('clears a stale stream result when its key changes', (
     tester,
@@ -102,5 +119,27 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('current result'), findsOneWidget);
+  });
+
+  testWidgets('a new key converts again without a notification', (
+    tester,
+  ) async {
+    final notifier = ValueNotifier('a');
+    addTearDown(notifier.dispose);
+
+    await tester.pumpWidget(_Converted(notifier: notifier, suffix: '1'));
+    expect(find.text('a1'), findsOneWidget);
+
+    // An input of the converter changes, such as a mention that resolves to
+    // a name, while the notifier stays the same.
+    await tester.pumpWidget(_Converted(notifier: notifier, suffix: '2'));
+    await tester.pump();
+    expect(find.text('a2'), findsOneWidget);
+
+    // The stream delivers the notification after this frame.
+    notifier.value = 'b';
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('b2'), findsOneWidget);
   });
 }

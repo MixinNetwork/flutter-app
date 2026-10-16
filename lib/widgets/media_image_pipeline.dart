@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -22,6 +23,43 @@ ImageProvider resolveMediaImageProvider(
       )
     : image;
 
+/// [image] decoded at a size that covers [box], for an image of
+/// [mediaWidth] x [mediaHeight].
+///
+/// A photo decodes to tens of megabytes at full size, and the raster thread
+/// uploads all of it, which stalls a frame that shows a few of them. The short
+/// side of the decoded image covers the long side of the box, so the result
+/// does not depend on whether the stored size is before or after the EXIF
+/// rotation. The size goes up in steps of 64 pixels, so a window resize
+/// decodes again only now and then.
+ImageProvider coverDecodeImage(
+  ImageProvider image, {
+  required Size box,
+  required int? mediaWidth,
+  required int? mediaHeight,
+  required double devicePixelRatio,
+}) {
+  if (mediaWidth == null ||
+      mediaHeight == null ||
+      mediaWidth <= 0 ||
+      mediaHeight <= 0 ||
+      !box.isFinite ||
+      box.isEmpty) {
+    return image;
+  }
+  final short = math.min(mediaWidth, mediaHeight);
+  final long = math.max(mediaWidth, mediaHeight);
+  final side = (box.longestSide * devicePixelRatio / 64).ceil() * 64;
+  if (side >= short) return image;
+  final bound = (side * long / short).ceil();
+  return ResizeImage(
+    image,
+    width: bound,
+    height: bound,
+    policy: ResizeImagePolicy.fit,
+  );
+}
+
 final _checkedImageFiles = <String>{};
 
 class MediaImagePipeline extends StatelessWidget {
@@ -35,6 +73,7 @@ class MediaImagePipeline extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
+    this.gaplessPlayback = false,
   });
 
   final ImageProvider image;
@@ -45,6 +84,9 @@ class MediaImagePipeline extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final bool isAntiAlias;
+
+  /// Whether a new [image] keeps showing the old one until it loads.
+  final bool gaplessPlayback;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +100,13 @@ class MediaImagePipeline extends StatelessWidget {
       height: height,
       fit: fit,
       isAntiAlias: isAntiAlias,
+      gaplessPlayback: gaplessPlayback,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded || frame != null) return child;
+        // A new image resets the frame, while gapless playback still paints
+        // the old one until the new one loads.
+        final image = child is Semantics ? child.child : child;
+        final painting = image is RawImage && image.image != null;
+        if (wasSynchronouslyLoaded || frame != null || painting) return child;
         return fallback();
       },
       errorBuilder: (context, error, stackTrace) =>
@@ -162,7 +209,10 @@ class NormalizedGifImageGate extends StatefulWidget {
 }
 
 class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
-  Future<void>? _future;
+  // The child stays at the same place in the tree after the check, so a new
+  // decode size of a checked file keeps the image state and its last frame.
+  var _ready = true;
+  Future<void>? _pending;
 
   @override
   void initState() {
@@ -179,55 +229,45 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
   }
 
   void _start() {
-    final image = widget.image;
-    if (image is! FileImage) {
-      _future = null;
-      return;
-    }
+    _pending = null;
+    _ready = true;
+    // A message image decodes at its display size through a ResizeImage.
+    final image = switch (widget.image) {
+      ResizeImage(:final imageProvider) => imageProvider,
+      final image => image,
+    };
+    if (image is! FileImage) return;
     final filePathSegments = image.file.uri.pathSegments;
     final fileName = filePathSegments.isEmpty
         ? ''
         : filePathSegments.last.toLowerCase();
-    if (fileName.isEmpty) {
-      _future = null;
-      return;
-    }
-    if (!fileName.endsWith('.gif') && fileName.contains('.')) {
-      _future = null;
-      return;
-    }
+    if (fileName.isEmpty) return;
+    if (!fileName.endsWith('.gif') && fileName.contains('.')) return;
 
     final path = image.file.absolute.path;
-    if (_checkedImageFiles.contains(path)) {
-      _future = null;
-      return;
-    }
+    if (_checkedImageFiles.contains(path)) return;
 
-    _future = _normalize(image.file);
+    _ready = false;
+    final pending = _pending = _normalize(image.file, widget.image);
+    unawaited(
+      pending.catchError((Object _) {}).whenComplete(() {
+        if (!mounted || !identical(_pending, pending)) return;
+        setState(() => _ready = true);
+      }),
+    );
   }
 
-  Future<void> _normalize(File file) async {
+  Future<void> _normalize(File file, ImageProvider shown) async {
     try {
       await normalizeGifFileIfNeeded(file, null);
       await FileImage(file).evict();
+      await shown.evict();
     } finally {
       _checkedImageFiles.add(file.absolute.path);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final future = _future;
-    if (future == null) return widget.childBuilder();
-
-    return FutureBuilder<void>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return widget.childBuilder();
-        }
-        return widget.placeholder();
-      },
-    );
-  }
+  Widget build(BuildContext context) =>
+      _ready ? widget.childBuilder() : widget.placeholder();
 }

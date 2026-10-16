@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../blaze/blaze.dart';
 import '../../../constants/resources.dart';
@@ -55,10 +57,14 @@ class NetworkStatus extends HookConsumerWidget {
           child:
               connectedState == ConnectedState.connecting ||
                   connectedState == ConnectedState.reconnecting
-              ? LinearProgressIndicator(
-                  backgroundColor: Colors.transparent,
-                  color: context.theme.accent,
-                  minHeight: 2,
+              // The indicator repaints every frame; keep the conversation
+              // page out of its repaints.
+              ? RepaintBoundary(
+                  child: LinearProgressIndicator(
+                    backgroundColor: Colors.transparent,
+                    color: context.theme.accent,
+                    minHeight: 2,
+                  ),
                 )
               : const SizedBox(),
         ),
@@ -92,6 +98,7 @@ class _NetworkNotConnect extends StatelessWidget {
                       height: 10,
                       child: SvgPicture.asset(
                         Resources.assetsImagesExclamationMarkSvg,
+                        renderingStrategy: RenderingStrategy.raster,
                         colorFilter: const ColorFilter.mode(
                           Colors.white,
                           BlendMode.srcIn,

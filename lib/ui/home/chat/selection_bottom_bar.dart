@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
@@ -194,6 +196,7 @@ class _Button extends StatelessWidget {
           children: [
             SvgPicture.asset(
               iconAssetName,
+              renderingStrategy: RenderingStrategy.raster,
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(

@@ -7,6 +7,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart' as map;
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../utils/uri_utils.dart';
@@ -71,6 +73,7 @@ class LocationMessageWidget extends HookConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 16.5),
                   child: SvgPicture.asset(
                     Resources.assetsImagesLocationMarkSvg,
+                    renderingStrategy: RenderingStrategy.raster,
                   ),
                 ),
               ),

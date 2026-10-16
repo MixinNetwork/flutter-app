@@ -8,6 +8,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../account/security_key_value.dart';
 import '../constants/resources.dart';
@@ -151,6 +153,7 @@ class _AuthGuard extends HookConsumerWidget {
                       children: [
                         SvgPicture.asset(
                           Resources.assetsImagesLockSvg,
+                          renderingStrategy: RenderingStrategy.raster,
                           width: 68,
                           height: 68,
                           colorFilter: ColorFilter.mode(

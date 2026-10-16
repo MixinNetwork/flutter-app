@@ -296,11 +296,12 @@ class MessageDayTimeViewportWidget extends HookConsumerWidget {
       dateTime.value = items.getOrNull(firstInScreenIndex)?.createdAt;
     }
 
+    // The listener outlives this build, so it runs the latest traversal.
+    final traversal = useRef(doTraversal)..value = doTraversal;
     useEffect(() {
-      scrollController.addListener(doTraversal);
-      return () {
-        scrollController.removeListener(doTraversal);
-      };
+      void listener() => traversal.value();
+      scrollController.addListener(listener);
+      return () => scrollController.removeListener(listener);
     }, [scrollController]);
 
     useEffect(() {

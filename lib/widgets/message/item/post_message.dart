@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Message, Offset;
@@ -131,6 +133,7 @@ class PostDetailIcon extends StatelessWidget {
     alignment: Alignment.center,
     child: SvgPicture.asset(
       Resources.assetsImagesPostDetailSvg,
+      renderingStrategy: RenderingStrategy.raster,
       width: 20,
       height: 20,
     ),

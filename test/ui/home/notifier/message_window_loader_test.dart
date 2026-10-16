@@ -88,14 +88,48 @@ void main() {
       center: testMessage(3, messageId: '3'),
     );
 
-    final before = await loader.loadBefore(state, 'conversation', 3);
+    final before = state.addOlder(
+      await loader.loadBefore(state, 'conversation', 3),
+      isOldest: true,
+    );
     expect(before.top.map((e) => e.messageId), ['1', '2']);
     expect(before.center?.messageId, '3');
     expect(before.isOldest, isTrue);
 
-    final after = await loader.loadAfter(before, 'conversation', 3);
+    final after = before.addNewer(
+      await loader.loadAfter(before, 'conversation', 3),
+      isLatest: true,
+    );
     expect(after.bottom.map((e) => e.messageId), ['4', '5']);
     expect(after.isLatest, isTrue);
+  });
+
+  test('a page goes into the window as it is when the load ends', () async {
+    final page = Completer<List<MessageItem>>();
+    final loader = MessageWindowLoader(
+      recentMessages: (_, _) => throw StateError('unexpected recent query'),
+      messageOrderInfo: (messageId) async => MessageOrderInfo(
+        rowId: int.parse(messageId),
+        createdAt: int.parse(messageId),
+      ),
+      beforeMessages: (_, _, _) => throw StateError('unexpected before'),
+      afterMessages: (_, _, _) => page.future,
+      beforeMessageIds: (_, _, _) => throw StateError('unexpected before ids'),
+      afterMessageIds: (_, _, _) => throw StateError('unexpected after ids'),
+      messagesByIds: (_) => throw StateError('unexpected hydrate'),
+    );
+    var window = MessageState(
+      center: testMessage(2, messageId: '2'),
+      bottom: [testMessage(3, messageId: '3')],
+    );
+
+    final load = loader.loadAfter(window, 'conversation', 3);
+    // A delete arrives while the page loads.
+    window = window.removeMessage('2');
+    page.complete([testMessage(4, messageId: '4')]);
+    window = window.addNewer(await load, isLatest: true);
+
+    expect(window.list.map((e) => e.messageId), ['3', '4']);
   });
 
   test('directionFromSource compares message order', () async {

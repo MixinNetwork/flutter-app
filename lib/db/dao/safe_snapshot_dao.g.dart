@@ -89,9 +89,9 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        safeSnapshots,
-        users,
-        tokens,
+        this.safeSnapshots,
+        this.users,
+        this.tokens,
         ...generatedwhere.watchedTables,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
@@ -122,7 +122,7 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customUpdate(
       'DELETE FROM safe_snapshots WHERE type = \'pending\' AND deposit LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'',
       variables: [Variable<String>(transactionHash)],
-      updates: {safeSnapshots},
+      updates: {this.safeSnapshots},
       updateKind: UpdateKind.delete,
     );
   }
@@ -131,7 +131,7 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM safe_snapshots',
       variables: [],
-      readsFrom: {safeSnapshots},
+      readsFrom: {this.safeSnapshots},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
