@@ -89,6 +89,9 @@ class ChatScrollCoordinator {
   GlobalKey? _viewportKey;
   final _renderedMessageIds = <String>{};
   bool _tailFollowEligible = true;
+  // Whether the shown window ends at the latest message. Only then do rows
+  // added at the bottom come from new messages that the view follows.
+  bool _windowIsLatest = true;
   _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshot;
   bool _tailFollowMessageWindowChanged = false;
   _ViewportAnchorSnapshot? _viewportAnchorSnapshot;
@@ -113,7 +116,9 @@ class ChatScrollCoordinator {
     if (!scrollController.hasClients) return;
     final messageWindowChanged = !_hasSameMessageIds(messages);
     _setMessages(messages, keysByMessageId);
-    _tailFollowEligible = _isTailFollowEligible();
+    // A page added below an older window keeps the view where it is, so the
+    // next scroll can load the page after it.
+    _tailFollowEligible = _windowIsLatest && _isTailFollowEligible();
     _tailFollowAnchorSnapshot = _tailFollowEligible
         ? _tailFollowAnchorSnapshotFromViewport()
         : null;
@@ -215,6 +220,7 @@ class ChatScrollCoordinator {
       }
     }
     _setMessages(messages, keysByMessageId);
+    _windowIsLatest = isLatest;
     _restoreRequest = _ChatRestoreRequest(
       messages: messages,
       keysByMessageId: keysByMessageId,
