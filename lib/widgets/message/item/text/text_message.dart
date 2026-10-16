@@ -137,9 +137,9 @@ class MessageTextWidget extends HookConsumerWidget {
 
 /// Text selection for a message on desktop.
 ///
-/// A selection region costs every chat row a focus node, gesture recognizers,
-/// and actions, so a row builds it only when the mouse first enters the row's
-/// content.
+/// A selection region costs every chat row gesture recognizers, a selection
+/// registrar, and actions, so a row builds it only when the mouse first enters
+/// the row's content or the keyboard moves focus to the row.
 // shortcut: a touch on a row that the mouse has not entered only turns
 // selection on, so the first long press does not select; add a touch path if
 // desktop touch screens need it.
@@ -153,37 +153,43 @@ class MessageSelectionArea extends StatefulWidget {
 }
 
 class _MessageSelectionAreaState extends State<MessageSelectionArea> {
-  FocusNode? _focusNode;
+  final _focusNode = FocusNode(debugLabel: 'message_selection_focus');
+  var _active = false;
 
   void _activate() {
-    if (_focusNode != null) return;
-    setState(
-      () => _focusNode = FocusNode(debugLabel: 'message_selection_focus'),
-    );
+    if (_active) return;
+    setState(() => _active = true);
   }
 
   @override
   void dispose() {
-    _focusNode?.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (!kPlatformIsDesktop) return widget.child;
-    final focusNode = _focusNode;
-    if (focusNode == null) {
-      return MouseRegion(
-        opaque: false,
-        onEnter: (_) => _activate(),
-        child: Listener(
-          onPointerDown: (_) => _activate(),
-          child: widget.child,
+    if (!_active) {
+      return Focus(
+        focusNode: _focusNode,
+        includeSemantics: false,
+        // The selection region takes this node and keeps its focus.
+        onFocusChange: (focused) {
+          if (focused) _activate();
+        },
+        child: MouseRegion(
+          opaque: false,
+          onEnter: (_) => _activate(),
+          child: Listener(
+            onPointerDown: (_) => _activate(),
+            child: widget.child,
+          ),
         ),
       );
     }
     return SelectableRegion(
-      focusNode: focusNode,
+      focusNode: _focusNode,
       contextMenuBuilder: (context, state) => const SizedBox(),
       selectionControls: desktopTextSelectionHandleControls,
       child: widget.child,

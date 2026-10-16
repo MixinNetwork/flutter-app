@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/enum/message_category.dart';
@@ -752,6 +754,70 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     blinkNotifier.dispose();
   });
+
+  testWidgets('the keyboard can select and copy an untouched message', (
+    tester,
+  ) async {
+    final blinkNotifier = BlinkNotifier(tester);
+    final before = FocusNode(debugLabel: 'before');
+    addTearDown(before.dispose);
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Focus(focusNode: before, child: const SizedBox(height: 10)),
+              const MessageSelectionArea(child: CustomText('hello world')),
+            ],
+          ),
+        ),
+      ),
+    );
+    before.requestFocus();
+    await tester.pump();
+    expect(find.byType(message_selectable.SelectableRegion), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(find.byType(message_selectable.SelectableRegion), findsOneWidget);
+    final region = tester.widget<message_selectable.SelectableRegion>(
+      find.byType(message_selectable.SelectableRegion),
+    );
+    expect(region.focusNode.hasPrimaryFocus, isTrue);
+
+    final modifier = defaultTargetPlatform == TargetPlatform.macOS
+        ? LogicalKeyboardKey.metaLeft
+        : LogicalKeyboardKey.controlLeft;
+    await tester.sendKeyDownEvent(modifier);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(modifier);
+    await tester.pump();
+    expect(copied, 'hello world');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('blink keeps bubble content mounted', (tester) async {
     final notifier = BlinkNotifier(tester);
