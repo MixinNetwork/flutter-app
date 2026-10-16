@@ -9,9 +9,6 @@ PODS:
     - Flutter
   - objective_c (0.0.1):
     - Flutter
-  - ogg_opus_player (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - protocol_handler_ios (0.0.1):
     - Flutter
   - rhttp (0.0.1):
@@ -27,7 +24,6 @@ DEPENDENCIES:
   - gal (from `.symlinks/plugins/gal/darwin`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
-  - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/darwin`)
   - protocol_handler_ios (from `.symlinks/plugins/protocol_handler_ios/ios`)
   - rhttp (from `.symlinks/plugins/rhttp/ios`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
@@ -44,8 +40,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/irondash_engine_context/ios"
   objective_c:
     :path: ".symlinks/plugins/objective_c/ios"
-  ogg_opus_player:
-    :path: ".symlinks/plugins/ogg_opus_player/darwin"
   protocol_handler_ios:
     :path: ".symlinks/plugins/protocol_handler_ios/ios"
   rhttp:
@@ -61,7 +55,6 @@ SPEC CHECKSUMS:
   gal: 44e5b10dbd347c8247a2851acee6c1fbe282c1d3
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
   objective_c: a86b8b4cc01f607d2f65f73fcba1f7b1ac593745
-  ogg_opus_player: 954784304f4e2722780018c4abf284e4f93cddf5
   protocol_handler_ios: 59f23ee71f3ec602d67902ca7f669a80957888d5
   rhttp: 359daed992674fc912552df3106bfbc746bcc929
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
@@ -69,4 +62,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 1221e4e2b01ff9316e45a16b384d493851eb95c9
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0
