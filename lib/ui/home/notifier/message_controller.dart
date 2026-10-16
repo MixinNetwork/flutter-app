@@ -199,13 +199,11 @@ class MessageState extends Equatable {
 
   // A page load does not see live inserts and deletes while it runs, so the
   // page goes into the window as it is when the load ends.
-  MessageState addOlder(List<MessageItem> page, int limit) =>
-      copyWith(top: [...page, ...top], isOldest: page.length < limit);
+  MessageState addOlder(List<MessageItem> page, {required bool isOldest}) =>
+      copyWith(top: [...page, ...top], isOldest: isOldest);
 
-  MessageState addNewer(List<MessageItem> page, int limit) => copyWith(
-    bottom: [...bottom, ...page],
-    isLatest: page.length < limit ? true : null,
-  );
+  MessageState addNewer(List<MessageItem> page, {required bool isLatest}) =>
+      copyWith(bottom: [...bottom, ...page], isLatest: isLatest ? true : null);
 
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
@@ -304,6 +302,9 @@ class MessageController extends ValueNotifier<MessageState> {
   var _generation = 0;
   var _loadAfterInFlight = false;
   var _loadBeforeInFlight = false;
+  // Live changes by message ID for each page load in flight. Null is a
+  // delete.
+  final _pageChanges = <Map<String, MessageItem?>>[];
   var _disposed = false;
   final MessageWindowLoader _messageWindowLoader;
 
@@ -515,28 +516,53 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
-  Future<void> _loadAfter(int generation, String conversationId) async {
-    final page = await _messageWindowLoader.loadAfter(
-      state,
-      conversationId,
-      limit,
-    );
-    if (!_isCurrent(generation, conversationId)) return;
-    await _prepareLinksSafely(page);
-    if (!_isCurrent(generation, conversationId)) return;
-    _emit(_pretreatment(state.addNewer(page, limit)));
-  }
+  Future<void> _loadAfter(int generation, String conversationId) => _loadPage(
+    generation,
+    conversationId,
+    _messageWindowLoader.loadAfter,
+    (window, page, end) => window.addNewer(page, isLatest: end),
+  );
 
-  Future<void> _loadBefore(int generation, String conversationId) async {
-    final page = await _messageWindowLoader.loadBefore(
-      state,
-      conversationId,
-      limit,
-    );
-    if (!_isCurrent(generation, conversationId)) return;
-    await _prepareLinksSafely(page);
-    if (!_isCurrent(generation, conversationId)) return;
-    _emit(_pretreatment(state.addOlder(page, limit)));
+  Future<void> _loadBefore(int generation, String conversationId) => _loadPage(
+    generation,
+    conversationId,
+    _messageWindowLoader.loadBefore,
+    (window, page, end) => window.addOlder(page, isOldest: end),
+  );
+
+  Future<void> _loadPage(
+    int generation,
+    String conversationId,
+    Future<List<MessageItem>> Function(
+      MessageState state,
+      String conversationId,
+      int limit,
+    )
+    load,
+    MessageState Function(MessageState window, List<MessageItem> page, bool end)
+    add,
+  ) async {
+    final changes = <String, MessageItem?>{};
+    _pageChanges.add(changes);
+    try {
+      final page = await load(state, conversationId, limit);
+      if (!_isCurrent(generation, conversationId)) return;
+      await _prepareLinksSafely(page);
+      if (!_isCurrent(generation, conversationId)) return;
+      // The page and the window were read before the live changes that
+      // arrived during the load, so apply those changes to the page and add
+      // it to the window as it is now.
+      final current = [
+        for (final message in page)
+          if (changes.containsKey(message.messageId))
+            ?changes[message.messageId]
+          else
+            message,
+      ];
+      _emit(_pretreatment(add(state, current, page.length < limit)));
+    } finally {
+      _pageChanges.remove(changes);
+    }
   }
 
   Future<MessageState> _resetMessageList(
@@ -655,6 +681,13 @@ class MessageController extends ValueNotifier<MessageState> {
     if (conversationId == null || state.conversationId != conversationId) {
       return;
     }
+    for (final changes in _pageChanges) {
+      for (final item in list) {
+        if (item.conversationId == conversationId) {
+          changes[item.messageId] = item;
+        }
+      }
+    }
 
     traceChatScroll(
       'insert current conv=${shortMessageId(conversationId)} '
@@ -676,6 +709,9 @@ class MessageController extends ValueNotifier<MessageState> {
     final conversationId = conversationNotifier.state?.conversationId;
     if (conversationId == null || state.conversationId != conversationId) {
       return;
+    }
+    for (final changes in _pageChanges) {
+      changes[messageId] = null;
     }
 
     _emit(_pretreatment(state.removeMessage(messageId)));

@@ -90,7 +90,7 @@ void main() {
 
     final before = state.addOlder(
       await loader.loadBefore(state, 'conversation', 3),
-      3,
+      isOldest: true,
     );
     expect(before.top.map((e) => e.messageId), ['1', '2']);
     expect(before.center?.messageId, '3');
@@ -98,7 +98,7 @@ void main() {
 
     final after = before.addNewer(
       await loader.loadAfter(before, 'conversation', 3),
-      3,
+      isLatest: true,
     );
     expect(after.bottom.map((e) => e.messageId), ['4', '5']);
     expect(after.isLatest, isTrue);
@@ -127,7 +127,7 @@ void main() {
     // A delete arrives while the page loads.
     window = window.removeMessage('2');
     page.complete([testMessage(4, messageId: '4')]);
-    window = window.addNewer(await load, 3);
+    window = window.addNewer(await load, isLatest: true);
 
     expect(window.list.map((e) => e.messageId), ['3', '4']);
   });

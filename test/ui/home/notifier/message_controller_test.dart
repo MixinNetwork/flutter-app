@@ -220,6 +220,42 @@ void main() {
       );
     });
 
+    test('drops an incoming message deleted while its page loads', () async {
+      gate = Completer();
+      controller.before();
+      await pumpEventQueue();
+
+      await mixinDatabase.messageDao.deleteMessage(_conversationId, _id(5));
+      await pumpEventQueue();
+
+      gate!.complete();
+      await until(() => ids().contains(_id(4)));
+      expect(ids(), [
+        for (var i = 4; i <= 12; i++)
+          if (i != 5) _id(i),
+      ]);
+      expect(controller.value.isOldest, isFalse);
+    });
+
+    test('shows an incoming message edited while its page loads', () async {
+      gate = Completer();
+      controller.after();
+      await pumpEventQueue();
+
+      await mixinDatabase.messageDao.updateMessageContent(_id(14), 'edited');
+      await pumpEventQueue();
+
+      gate!.complete();
+      await until(() => ids().contains(_id(16)));
+      expect(ids(), [for (var i = 8; i <= 16; i++) _id(i)]);
+      expect(
+        controller.value.list
+            .singleWhere((m) => m.messageId == _id(14))
+            .content,
+        'edited',
+      );
+    });
+
     test(
       'adds the older page when its anchor is deleted during the load',
       () async {
