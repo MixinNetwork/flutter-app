@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/actions/actions.dart';
+import '../../../widgets/slack_width_box.dart';
 import '../../provider/chat_navigation_intent_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
@@ -35,6 +36,8 @@ class ChatPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatContainerPageKey = useMemoized(GlobalKey.new);
+    // The width of the side page while it animates, and zero otherwise.
+    final sidePageSlack = useValueNotifier<double>(0);
     final (conversationId, initialSidePage) = ref.watch(
       conversationProvider.select(
         (value) => (value?.conversationId, value?.initialSidePage),
@@ -125,7 +128,18 @@ class ChatPage extends HookConsumerWidget {
               child: ChatMenuHandler(
                 child: Row(
                   children: [
-                    if (!routeMode) Expanded(child: chatContainerPage.child),
+                    if (!routeMode)
+                      Expanded(
+                        // The chat keeps its full width while the side page
+                        // opens over it or closes from it, and lays out at
+                        // its new width once, not in every frame.
+                        child: ValueListenableBuilder<double>(
+                          valueListenable: sidePageSlack,
+                          builder: (context, slack, child) =>
+                              SlackWidthBox(slack: slack, child: child),
+                          child: chatContainerPage.child,
+                        ),
+                      ),
                     if (!routeMode)
                       Container(width: 1, color: context.theme.divider),
                     FocusableActionDetector(
@@ -140,6 +154,7 @@ class ChatPage extends HookConsumerWidget {
                       },
                       child: ChatSideRouter(
                         constraints: boxConstraints,
+                        slack: sidePageSlack,
                         routeMode: routeMode,
                         onDidRemovePage: (page) {
                           chatSideNotifier.onPopPage();

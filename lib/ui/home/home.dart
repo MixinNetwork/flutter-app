@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
@@ -18,6 +20,7 @@ import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../../widgets/protocol_handler.dart';
+import '../../widgets/slack_width_box.dart';
 import '../../widgets/toast.dart';
 import '../landing/landing.dart';
 import '../provider/conversation_provider.dart';
@@ -238,6 +241,15 @@ class _HomePage extends HookConsumerWidget {
 
     final hasDrawer = useListenable(leftRailController);
 
+    // The rail widths the current animation moves between.
+    final railFrom = useRef(shellLayout.slideWidth);
+    final railTo = useRef(shellLayout.slideWidth);
+    if (railTo.value != shellLayout.slideWidth) {
+      railFrom.value = railTo.value;
+      railTo.value = shellLayout.slideWidth;
+    }
+    final slidePage = SlidePage(showCollapse: shellLayout.showCollapseControl);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: leftRailController),
@@ -260,57 +272,76 @@ class _HomePage extends HookConsumerWidget {
             : null,
         body: SafeArea(
           child: AppProtocolHandler(
-            child: Row(
-              // Tight constraints make the navigator's LayoutBuilder a relayout
-              // boundary, so an animation in a page does not lay out the
-              // whole scaffold, and the repaint boundary keeps the rail and
-              // the scaffold out of its repaints.
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TweenAnimationBuilder(
-                  tween: Tween<double>(end: shellLayout.slideWidth),
-                  duration: const Duration(milliseconds: 200),
-                  onEnd: () => leftRailController.sync(shellLayout),
-                  builder: (context, value, child) => SizedBox(
-                    width: value,
-                    child: value == 0 ? null : child,
+            child: TweenAnimationBuilder(
+              tween: Tween<double>(end: shellLayout.slideWidth),
+              duration: const Duration(milliseconds: 200),
+              onEnd: () => leftRailController.sync(shellLayout),
+              // Built once, so the frames of the animation only lay them out.
+              child: RepaintBoundary(
+                child: MajorNavigator(
+                  switchWidth: DesktopShellLayout.mainRouteSwitchWidth,
+                  leftPage: MaterialPage(
+                    key: const ValueKey('center'),
+                    name: 'center',
+                    child: SizedBox(
+                      key: _conversationPageKey,
+                      width: kConversationListWidth,
+                      child: const _CenterPage(),
+                    ),
                   ),
-                  child: OverflowBox(
-                    alignment: Alignment.centerLeft,
-                    minWidth: kSlidePageMinWidth,
-                    maxWidth: shellLayout.slideMaxWidth,
-                    child: SlidePage(
-                      showCollapse: shellLayout.showCollapseControl,
+                  rightEmptyPage: MaterialPage(
+                    key: const ValueKey('empty'),
+                    name: 'empty',
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: context.theme.chatBackground,
+                      ),
+                      child: Empty(text: context.l10n.pickAConversation),
                     ),
                   ),
                 ),
-                Expanded(
-                  child: RepaintBoundary(
-                    child: MajorNavigator(
-                      switchWidth: DesktopShellLayout.mainRouteSwitchWidth,
-                      leftPage: MaterialPage(
-                        key: const ValueKey('center'),
-                        name: 'center',
-                        child: SizedBox(
-                          key: _conversationPageKey,
-                          width: kConversationListWidth,
-                          child: const _CenterPage(),
-                        ),
-                      ),
-                      rightEmptyPage: MaterialPage(
-                        key: const ValueKey('empty'),
-                        name: 'empty',
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: context.theme.chatBackground,
-                          ),
-                          child: Empty(text: context.l10n.pickAConversation),
-                        ),
+              ),
+              builder: (context, value, navigator) {
+                final animating = value != shellLayout.slideWidth;
+                // The widest the rail gets in this animation, and the
+                // narrowest, so neither side lays out again in each frame.
+                final widest = math.max(railFrom.value, railTo.value);
+                final narrowest = math.min(railFrom.value, railTo.value);
+                return Row(
+                  // Tight constraints make the navigator's LayoutBuilder a
+                  // relayout boundary, and the repaint boundary keeps the rail
+                  // and the scaffold out of its repaints.
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      width: value,
+                      child: value == 0
+                          ? null
+                          // The rail keeps its expanded layout while it
+                          // collapses or expands, and the clip shows the
+                          // part that fits; it changes layout at the end.
+                          : ClipRect(
+                              child: OverflowBox(
+                                alignment: Alignment.centerLeft,
+                                minWidth: kSlidePageMinWidth,
+                                maxWidth: animating
+                                    ? math.max(widest, kSlidePageMinWidth)
+                                    : shellLayout.slideMaxWidth,
+                                child: slidePage,
+                              ),
+                            ),
+                    ),
+                    Expanded(
+                      // The pages keep the width they have when the rail is
+                      // narrowest, and the rail covers or reveals their edge.
+                      child: SlackWidthBox(
+                        slack: animating ? math.max(0, value - narrowest) : 0,
+                        child: navigator,
                       ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
         ),

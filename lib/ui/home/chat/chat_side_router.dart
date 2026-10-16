@@ -20,6 +20,7 @@ class ChatSideRouter extends StatelessWidget {
     required this.destinations,
     required this.constraints,
     required this.routeMode,
+    required this.slack,
     super.key,
     this.leadingPages = const [],
     this.onDidRemovePage,
@@ -30,6 +31,9 @@ class ChatSideRouter extends StatelessWidget {
   final DidRemovePageCallback? onDidRemovePage;
   final BoxConstraints constraints;
   final bool routeMode;
+
+  /// Gets the width of the side page while it animates, and zero otherwise.
+  final ValueNotifier<double> slack;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +48,7 @@ class ChatSideRouter extends StatelessWidget {
           )
         : _AnimatedChatSlide(
             constraints: constraints,
+            slack: slack,
             pages: pages,
             onDidRemovePage: onDidRemovePage,
           );
@@ -140,12 +145,14 @@ class _AnimatedChatSlide extends HookWidget {
   const _AnimatedChatSlide({
     required this.pages,
     required this.constraints,
+    required this.slack,
     required this.onDidRemovePage,
   });
 
   final List<Page<dynamic>> pages;
   final DidRemovePageCallback? onDidRemovePage;
   final BoxConstraints constraints;
+  final ValueNotifier<double> slack;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +161,21 @@ class _AnimatedChatSlide extends HookWidget {
     );
 
     final displayedPages = useState(<Page<dynamic>>[]);
+
+    useEffect(() {
+      void update() => slack.value = controller.isAnimating
+          ? kChatSidePageWidth * Curves.easeInOut.transform(controller.value)
+          : 0;
+      void updateStatus(AnimationStatus _) => update();
+      controller
+        ..addListener(update)
+        ..addStatusListener(updateStatus);
+      return () {
+        controller
+          ..removeListener(update)
+          ..removeStatusListener(updateStatus);
+      };
+    }, [controller, slack]);
 
     useEffect(() {
       if (pages.isNotEmpty) {
