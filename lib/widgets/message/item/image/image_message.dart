@@ -189,29 +189,31 @@ class MessageImage extends HookConsumerWidget {
           fit: StackFit.expand,
           children: [
             LayoutBuilder(
-              builder: (context, constraints) => MixinImage(
-                image: coverDecodeImage(
-                  FileImage(
-                    File(
-                      context.accountServer.convertAbsolutePath(
-                        type,
-                        conversationId,
-                        mediaUrl,
-                        isTranscriptPage,
-                      ),
-                    ),
+              builder: (context, constraints) {
+                final path = context.accountServer.convertAbsolutePath(
+                  type,
+                  conversationId,
+                  mediaUrl,
+                  isTranscriptPage,
+                );
+                return MixinImage(
+                  // A cell that a list reuses for another photo starts again,
+                  // so only a new decode size of this photo keeps the old frame.
+                  key: ValueKey(path),
+                  image: coverDecodeImage(
+                    FileImage(File(path)),
+                    box: constraints.biggest,
+                    mediaWidth: mediaSize.$1,
+                    mediaHeight: mediaSize.$2,
+                    devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                   ),
-                  box: constraints.biggest,
-                  mediaWidth: mediaSize.$1,
-                  mediaHeight: mediaSize.$2,
-                  devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-                ),
-                // A resize can change the decode size; the old image stays
-                // until the new one is ready.
-                gaplessPlayback: true,
-                placeholder: () => thumbWidget,
-                errorBuilder: (_, _, _) => thumbWidget,
-              ),
+                  // A resize can change the decode size; the old image stays
+                  // until the new one is ready.
+                  gaplessPlayback: true,
+                  placeholder: () => thumbWidget,
+                  errorBuilder: (_, _, _) => thumbWidget,
+                );
+              },
             ),
             Center(
               child: HookBuilder(
