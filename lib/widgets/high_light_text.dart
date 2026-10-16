@@ -205,6 +205,23 @@ typedef InlineMatchBuilder =
       String linkString,
     );
 
+// A row runs every matcher again each time it is built, as when it scrolls
+// back into view. Regular expressions run in an interpreter in AOT builds, so
+// a long message costs milliseconds per build; keep the ranges of recent
+// texts.
+const _cachedTextRangesLimit = 1000;
+
+List<TextRange> _cachedTextRanges<K>(
+  Map<K, List<TextRange>> cache,
+  K key,
+  List<TextRange> Function() find,
+) {
+  final cached = cache.remove(key);
+  if (cached != null) return cache[key] = cached;
+  if (cache.length >= _cachedTextRangesLimit) cache.remove(cache.keys.first);
+  return cache[key] = find();
+}
+
 class TextMatcher {
   TextMatcher.regExp({required this.regExp, required this.matchBuilder})
     : textRangesFromText = null;
@@ -235,10 +252,21 @@ class TextMatcher {
     (previousValue, element) => matchSpans(previousValue, [element]),
   );
 
+  static final _rangesByMatch = <(String, int, String), List<TextRange>>{};
+
   static Iterable<TextRange> _textRangesFromText(String text, RegExp regExp) {
-    final matches = regExp.allMatches(text);
-    return matches.map(
-      (match) => TextRange(start: match.start, end: match.end),
+    final flags =
+        (regExp.isCaseSensitive ? 1 : 0) |
+        (regExp.isMultiLine ? 2 : 0) |
+        (regExp.isUnicode ? 4 : 0) |
+        (regExp.isDotAll ? 8 : 0);
+    return _cachedTextRanges(
+      _rangesByMatch,
+      (regExp.pattern, flags, text),
+      () => [
+        for (final match in regExp.allMatches(text))
+          TextRange(start: match.start, end: match.end),
+      ],
     );
   }
 
@@ -718,15 +746,22 @@ class MailTextMatcher extends TextMatcher with Equatable {
   bool? get stringify => true;
 }
 
+final _emojiRanges = <String, List<TextRange>>{};
+
 class EmojiTextMatcher extends TextMatcher with Equatable {
   EmojiTextMatcher()
     : super.textRangesFromText(
         textRangesFromText: (text) {
           if (!mayContainTextStyleEmoji(text)) return const [];
-          return emojiRegex
-              .allMatches(text)
-              .where((match) => isTextStyleEmoji(match[0]!))
-              .map((match) => TextRange(start: match.start, end: match.end));
+          return _cachedTextRanges(
+            _emojiRanges,
+            text,
+            () => [
+              for (final match in emojiRegex.allMatches(text))
+                if (isTextStyleEmoji(match[0]!))
+                  TextRange(start: match.start, end: match.end),
+            ],
+          );
         },
         matchBuilder: (span, displayString, linkString) => TextSpan(
           text: displayString,

@@ -89,6 +89,29 @@ void main() {
     expect(_matchCount, 5);
   });
 
+  test('cached regular expression matches keep the flags apart', () {
+    List<String> matches(RegExp regExp) {
+      final found = <String>[];
+      TextMatcher.applyTextMatchers(
+        [const TextSpan(text: 'a A a')],
+        [
+          TextMatcher.regExp(
+            regExp: regExp,
+            matchBuilder: (span, displayString, linkString) {
+              found.add(linkString);
+              return TextSpan(text: displayString);
+            },
+          ),
+        ],
+      ).toList();
+      return found;
+    }
+
+    expect(matches(RegExp('a')), ['a', 'a']);
+    expect(matches(RegExp('a', caseSensitive: false)), ['a', 'A', 'a']);
+    expect(matches(RegExp('a')), ['a', 'a']);
+  });
+
   test('EmojiTextMatcher sets the emoji font only on text-style emoji', () {
     final spans = TextMatcher.applyTextMatchers(
       [
