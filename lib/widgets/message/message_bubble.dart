@@ -358,7 +358,15 @@ class MessageBubbleNipPadding extends StatelessWidget {
   );
 }
 
-class BubbleClipper extends CustomClipper<Path> with Equatable {
+/// A bubble shape: a rounded rectangle and a nip.
+abstract class BubbleShapeClipper extends CustomClipper<Path> {
+  const BubbleShapeClipper();
+
+  /// The rounded rectangle of the bubble without its nip.
+  RRect bodyRRect(Size size);
+}
+
+class BubbleClipper extends BubbleShapeClipper with Equatable {
   BubbleClipper({
     required this.currentUser,
     required this.showNip,
@@ -371,22 +379,21 @@ class BubbleClipper extends CustomClipper<Path> with Equatable {
 
   @override
   Path getClip(Size size) {
-    final nipWidth = nipPadding ? _nipWidth : 0.0;
-
-    final bubblePath = _bubblePath(
-      Size(size.width - nipWidth, size.height),
-    ).shift(Offset(currentUser ? 0 : nipWidth, 0));
-
+    final bubblePath = Path()..addRRect(bodyRRect(size));
     if (!showNip) return bubblePath;
 
     final nipPath = currentUser ? _rightNipPath(size) : _leftNipPath(size);
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) => Path()
-    ..addRRect(
-      const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
+  @override
+  RRect bodyRRect(Size size) {
+    final nipWidth = nipPadding ? _nipWidth : 0.0;
+    return const BorderRadius.all(Radius.circular(8)).toRRect(
+      Offset(currentUser ? 0 : nipWidth, 0) &
+          Size(size.width - nipWidth, size.height),
     );
+  }
 
   Path _leftNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 12);
@@ -548,7 +555,14 @@ class BubblePainter extends CustomPainter with Equatable {
     final clip = clipper.getClip(size);
 
     if (elevation != 0.0) {
-      canvas.drawShadow(clip, shadowColor, elevation, false);
+      // Impeller blurs the shadow of any other path offscreen in every frame,
+      // but draws the shadow of a rounded rectangle directly. The nip is too
+      // small for its own shadow to show.
+      final clipper = this.clipper;
+      final shadow = clipper is BubbleShapeClipper
+          ? (Path()..addRRect(clipper.bodyRRect(size)))
+          : clip;
+      canvas.drawShadow(shadow, shadowColor, elevation, false);
     }
 
     canvas.drawPath(clip, _fillPaint);
