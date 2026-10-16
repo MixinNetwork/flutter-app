@@ -220,6 +220,70 @@ void main() {
       );
     });
 
+    Future<void> insertMessage(String id, DateTime createdAt) =>
+        mixinDatabase.messageDao.insert(
+          Message(
+            messageId: id,
+            conversationId: _conversationId,
+            userId: 'user',
+            category: MessageCategory.plainText,
+            content: id,
+            status: MessageStatus.read,
+            createdAt: createdAt,
+          ),
+          'user',
+        );
+
+    test('shows a message received while the last page loads', () async {
+      controller.limit = 9;
+      gate = Completer();
+      controller.after();
+      await pumpEventQueue();
+
+      await insertMessage(_id(21), DateTime(2026, 1, 1, 12, 21));
+      await pumpEventQueue();
+
+      gate!.complete();
+      await until(() => ids().contains(_id(20)));
+      expect(ids(), [for (var i = 8; i <= 21; i++) _id(i)]);
+      expect(controller.value.isLatest, isTrue);
+    });
+
+    test(
+      'adds a message inserted inside an older page while it loads',
+      () async {
+        gate = Completer();
+        controller.before();
+        await pumpEventQueue();
+
+        await insertMessage('m05b', DateTime(2026, 1, 1, 12, 5, 30));
+        await pumpEventQueue();
+
+        gate!.complete();
+        await until(() => ids().contains(_id(4)));
+        expect(ids(), [
+          _id(4),
+          _id(5),
+          'm05b',
+          for (var i = 6; i <= 12; i++) _id(i),
+        ]);
+      },
+    );
+
+    test(
+      'a larger limit during a page load does not end the history',
+      () async {
+        gate = Completer();
+        controller.after();
+        await pumpEventQueue();
+        controller.limit = 6;
+
+        gate!.complete();
+        await until(() => ids().contains(_id(16)));
+        expect(controller.value.isLatest, isFalse);
+      },
+    );
+
     test('drops an incoming message deleted while its page loads', () async {
       gate = Completer();
       controller.before();

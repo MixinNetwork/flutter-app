@@ -516,39 +516,30 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
-  Future<void> _loadAfter(int generation, String conversationId) => _loadPage(
-    generation,
-    conversationId,
-    _messageWindowLoader.loadAfter,
-    (window, page, end) => window.addNewer(page, isLatest: end),
-  );
+  Future<void> _loadAfter(int generation, String conversationId) =>
+      _loadPage(generation, conversationId, newer: true);
 
-  Future<void> _loadBefore(int generation, String conversationId) => _loadPage(
-    generation,
-    conversationId,
-    _messageWindowLoader.loadBefore,
-    (window, page, end) => window.addOlder(page, isOldest: end),
-  );
+  Future<void> _loadBefore(int generation, String conversationId) =>
+      _loadPage(generation, conversationId, newer: false);
 
   Future<void> _loadPage(
     int generation,
-    String conversationId,
-    Future<List<MessageItem>> Function(
-      MessageState state,
-      String conversationId,
-      int limit,
-    )
-    load,
-    MessageState Function(MessageState window, List<MessageItem> page, bool end)
-    add,
-  ) async {
+    String conversationId, {
+    required bool newer,
+  }) async {
+    // The window size can change the limit during the load.
+    final limit = this.limit;
     final changes = <String, MessageItem?>{};
     _pageChanges.add(changes);
     try {
-      final page = await load(state, conversationId, limit);
+      final page = await (newer
+          ? _messageWindowLoader.loadAfter
+          : _messageWindowLoader.loadBefore)(state, conversationId, limit);
       if (!_isCurrent(generation, conversationId)) return;
       await _prepareLinksSafely(page);
       if (!_isCurrent(generation, conversationId)) return;
+      final end = page.length < limit;
+      final window = state;
       // The page and the window were read before the live changes that
       // arrived during the load, so apply those changes to the page and add
       // it to the window as it is now.
@@ -559,7 +550,38 @@ class MessageController extends ValueNotifier<MessageState> {
           else
             message,
       ];
-      _emit(_pretreatment(add(state, current, page.length < limit)));
+      // A message inserted during the load is in neither the page nor the
+      // window when it falls in the range of the page, or past the end of the
+      // history.
+      final known = {
+        for (final message in page) message.messageId,
+        for (final message in window.list) message.messageId,
+      };
+      final edge = newer ? window.bottomMessage : window.topMessage;
+      final far = end ? null : (newer ? page.lastOrNull : page.firstOrNull);
+      bool inPageRange(DateTime time) => newer
+          ? (edge == null || time.isAfter(edge.createdAt)) &&
+                (far == null || !time.isAfter(far.createdAt))
+          : (edge == null || time.isBefore(edge.createdAt)) &&
+                (far == null || !time.isBefore(far.createdAt));
+      for (final message in changes.values) {
+        if (message == null ||
+            known.contains(message.messageId) ||
+            !inPageRange(message.createdAt)) {
+          continue;
+        }
+        final index = current.indexWhere(
+          (other) => other.createdAt.isAfter(message.createdAt),
+        );
+        current.insert(index < 0 ? current.length : index, message);
+      }
+      _emit(
+        _pretreatment(
+          newer
+              ? window.addNewer(current, isLatest: end)
+              : window.addOlder(current, isOldest: end),
+        ),
+      );
     } finally {
       _pageChanges.remove(changes);
     }
