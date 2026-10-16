@@ -70,4 +70,58 @@ void main() {
       );
     },
   );
+
+  Future<void> pumpSwitcher(
+    WidgetTester tester, {
+    required bool inMultiSelectMode,
+    required double inputHeight,
+  }) => tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ChatBottomBarSwitcher(
+          inMultiSelectMode: inMultiSelectMode,
+          inputContainer: SizedBox(width: 320, height: inputHeight),
+          selectionBottomBar: const SizedBox(width: 320, height: 80),
+        ),
+      ),
+    ),
+  );
+
+  double barHeight(WidgetTester tester) =>
+      tester.getSize(find.byType(ChatBottomBarSwitcher)).height;
+
+  testWidgets('ChatBottomBarSwitcher grows with the input at once', (
+    tester,
+  ) async {
+    await pumpSwitcher(tester, inMultiSelectMode: false, inputHeight: 56);
+    await tester.pumpAndSettle();
+
+    // A new line in the input: the bar takes the new height in the same
+    // frame, so its clip does not cover the input's padding.
+    await pumpSwitcher(tester, inMultiSelectMode: false, inputHeight: 76);
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(barHeight(tester), 76);
+  });
+
+  testWidgets('ChatBottomBarSwitcher animates its height between bars', (
+    tester,
+  ) async {
+    await pumpSwitcher(tester, inMultiSelectMode: false, inputHeight: 56);
+    await tester.pumpAndSettle();
+
+    await pumpSwitcher(tester, inMultiSelectMode: true, inputHeight: 56);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(barHeight(tester), inExclusiveRange(56, 80));
+    await tester.pumpAndSettle();
+    expect(barHeight(tester), 80);
+
+    // After the switch, the input's lines change the height at once again.
+    await pumpSwitcher(tester, inMultiSelectMode: false, inputHeight: 56);
+    await tester.pumpAndSettle();
+    await pumpSwitcher(tester, inMultiSelectMode: false, inputHeight: 96);
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(barHeight(tester), 96);
+  });
 }

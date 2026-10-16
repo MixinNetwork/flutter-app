@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/actions/actions.dart';
-import '../../../widgets/slack_width_box.dart';
 import '../../provider/chat_navigation_intent_provider.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
@@ -36,8 +35,6 @@ class ChatPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatContainerPageKey = useMemoized(GlobalKey.new);
-    // The width of the side page while it animates, and zero otherwise.
-    final sidePageSlack = useValueNotifier<double>(0);
     final (conversationId, initialSidePage) = ref.watch(
       conversationProvider.select(
         (value) => (value?.conversationId, value?.initialSidePage),
@@ -128,18 +125,7 @@ class ChatPage extends HookConsumerWidget {
               child: ChatMenuHandler(
                 child: Row(
                   children: [
-                    if (!routeMode)
-                      Expanded(
-                        // The chat keeps its full width while the side page
-                        // opens over it or closes from it, and lays out at
-                        // its new width once, not in every frame.
-                        child: ValueListenableBuilder<double>(
-                          valueListenable: sidePageSlack,
-                          builder: (context, slack, child) =>
-                              SlackWidthBox(slack: slack, child: child),
-                          child: chatContainerPage.child,
-                        ),
-                      ),
+                    if (!routeMode) Expanded(child: chatContainerPage.child),
                     if (!routeMode)
                       Container(width: 1, color: context.theme.divider),
                     FocusableActionDetector(
@@ -154,7 +140,6 @@ class ChatPage extends HookConsumerWidget {
                       },
                       child: ChatSideRouter(
                         constraints: boxConstraints,
-                        slack: sidePageSlack,
                         routeMode: routeMode,
                         onDidRemovePage: (page) {
                           chatSideNotifier.onPopPage();
@@ -289,7 +274,7 @@ class ChatContainer extends HookConsumerWidget {
 }
 
 @visibleForTesting
-class ChatBottomBarSwitcher extends StatelessWidget {
+class ChatBottomBarSwitcher extends HookWidget {
   const ChatBottomBarSwitcher({
     required this.inMultiSelectMode,
     this.inputContainer = const InputContainer(),
@@ -301,16 +286,40 @@ class ChatBottomBarSwitcher extends StatelessWidget {
   final Widget inputContainer;
   final Widget selectionBottomBar;
 
+  static const _duration = Duration(milliseconds: 300);
+
   @override
-  Widget build(BuildContext context) => AnimatedCrossFade(
-    alignment: Alignment.bottomCenter,
-    firstChild: inputContainer,
-    secondChild: selectionBottomBar,
-    crossFadeState: inMultiSelectMode
-        ? CrossFadeState.showSecond
-        : CrossFadeState.showFirst,
-    duration: const Duration(milliseconds: 300),
-  );
+  Widget build(BuildContext context) {
+    // The bar animates its height only while it switches between the input and
+    // the selection bar. A line that the input adds or removes changes the
+    // height at once, so the clip does not cover the input's padding while
+    // the height catches up.
+    final switching = useRef(false);
+    final previous = usePrevious(inMultiSelectMode);
+    if (previous != null && previous != inMultiSelectMode) {
+      switching.value = true;
+    }
+    final rebuild = useState(0);
+    useEffect(() {
+      if (!switching.value) return null;
+      final timer = Timer(_duration, () {
+        switching.value = false;
+        rebuild.value++;
+      });
+      return timer.cancel;
+    }, [inMultiSelectMode]);
+
+    return AnimatedCrossFade(
+      alignment: Alignment.bottomCenter,
+      firstChild: inputContainer,
+      secondChild: selectionBottomBar,
+      crossFadeState: inMultiSelectMode
+          ? CrossFadeState.showSecond
+          : CrossFadeState.showFirst,
+      sizeCurve: switching.value ? Curves.linear : const Threshold(0),
+      duration: _duration,
+    );
+  }
 }
 
 // A disabled action leaves Escape to the handlers above it.
