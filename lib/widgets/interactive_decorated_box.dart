@@ -195,10 +195,13 @@ class InteractiveDecoratedBox extends StatelessWidget {
           child,
         ) => hoveringDecoration == null && tapDowningDecoration == null
         // Without a state decoration nothing animates, so skip the
-        // animation controller that each TweenAnimationBuilder creates.
-        ? _decoration == null
-              ? child!
-              : DecoratedBox(decoration: _decoration, child: child)
+        // animation controller that each TweenAnimationBuilder creates. An
+        // empty decoration still takes hits, for a child under IgnorePointer
+        // with HitTestBehavior.deferToChild.
+        ? DecoratedBox(
+            decoration: _decoration ?? const BoxDecoration(),
+            child: child,
+          )
         : TweenAnimationBuilder<Decoration>(
             tween: DecorationTween(
               end:

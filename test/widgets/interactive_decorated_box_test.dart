@@ -53,4 +53,25 @@ void main() {
     );
     expect(find.byType(TweenAnimationBuilder<Decoration>), findsOneWidget);
   });
+
+  testWidgets('a child under IgnorePointer still takes taps', (tester) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: InteractiveDecoratedBox(
+            onTap: () => taps++,
+            behavior: HitTestBehavior.deferToChild,
+            child: const IgnorePointer(
+              child: SizedBox(width: 100, height: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IgnorePointer), warnIfMissed: false);
+    expect(taps, 1);
+  });
 }
