@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_key_value.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/sticker_page/emoji_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -81,5 +83,18 @@ void main() {
     // The warm-up starts after 2 s.
     await tester.pump(const Duration(seconds: 3));
     await renderImages();
+    // The warm-up also reads the icons of the sticker album bar, which this
+    // page does not show.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    expect(
+      svg.cache.evict(
+        const SvgAssetLoader(
+          Resources.assetsImagesGifStickerSvg,
+        ).cacheKey(null),
+      ),
+      isTrue,
+    );
   });
 }

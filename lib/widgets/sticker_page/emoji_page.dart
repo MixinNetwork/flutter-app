@@ -45,6 +45,34 @@ List<String> _groupEmojis(List<EmojiGroup> group) => group
     .map((emoji) => emoji.char)
     .toList();
 
+// Each group filters thousands of emoji, so the panel computes them once.
+final _groupedEmojis = [for (final group in emojiGroups) _groupEmojis(group)];
+
+const _emojiGroupIcons = [
+  Resources.assetsImagesEmojiRecentSvg,
+  Resources.assetsImagesEmojiFaceSvg,
+  Resources.assetsImagesEmojiAnimalSvg,
+  Resources.assetsImagesEmojiFoodSvg,
+  Resources.assetsImagesEmojiTravelSvg,
+  Resources.assetsImagesEmojiSportsSvg,
+  Resources.assetsImagesEmojiObjectsSvg,
+  Resources.assetsImagesEmojiSymbolSvg,
+  Resources.assetsImagesEmojiFlagsSvg,
+];
+
+// The icons of the emoji groups and of the sticker album bar. The engine
+// reads an asset on the UI thread, so the first open of the panel opened a
+// file for each icon.
+const _panelIcons = [
+  ..._emojiGroupIcons,
+  Resources.assetsImagesStickerStoreSvg,
+  Resources.assetsImagesStickerStoreRedDotSvg,
+  Resources.assetsImagesEmojiStickerSvg,
+  Resources.assetsImagesRecentStickerSvg,
+  Resources.assetsImagesPersonalStickerSvg,
+  Resources.assetsImagesGifStickerSvg,
+];
+
 /// Emoji drawn into images once, as the Telegram apps draw their emoji panels.
 ///
 /// Laying out a color emoji costs about 0.1 ms, and the first time each one
@@ -167,16 +195,18 @@ var _emojiPageWarmed = false;
 void warmEmojiPage(double pixelRatio) {
   if (_emojiPageWarmed) return;
   _emojiPageWarmed = true;
-  Timer(
-    const Duration(seconds: 2),
-    () => _EmojiImages.instance.request(
+  Timer(const Duration(seconds: 2), () {
+    for (final icon in _panelIcons) {
+      unawaited(SvgAssetLoader(icon).loadBytes(null));
+    }
+    _EmojiImages.instance.request(
       [
         ...AccountKeyValue.instance.recentUsedEmoji,
-        ..._groupEmojis(emojiGroups.first),
+        ..._groupedEmojis.first,
       ].take(100),
       pixelRatio,
-    ),
-  );
+    );
+  });
 }
 
 class EmojiPage extends StatelessWidget {
@@ -196,18 +226,6 @@ class _EmojiPageBody extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const emojiGroupIcon = [
-      Resources.assetsImagesEmojiRecentSvg,
-      Resources.assetsImagesEmojiFaceSvg,
-      Resources.assetsImagesEmojiAnimalSvg,
-      Resources.assetsImagesEmojiFoodSvg,
-      Resources.assetsImagesEmojiTravelSvg,
-      Resources.assetsImagesEmojiSportsSvg,
-      Resources.assetsImagesEmojiObjectsSvg,
-      Resources.assetsImagesEmojiSymbolSvg,
-      Resources.assetsImagesEmojiFlagsSvg,
-    ];
-
     final offset = ref.watch(_emojiScrollOffsetProvider);
 
     final emojiLineStride = useRef(8);
@@ -227,7 +245,7 @@ class _EmojiPageBody extends HookConsumerWidget {
     );
 
     final groupedEmojis = useMemoized(
-      () => [recentUsedEmoji, ...emojiGroups.map(_groupEmojis)],
+      () => [recentUsedEmoji, ..._groupedEmojis],
       [recentUsedEmoji],
     );
 
@@ -259,7 +277,7 @@ class _EmojiPageBody extends HookConsumerWidget {
       children: [
         _EmojiGroupHeader(
           selectedIndex: selectedIndex,
-          icons: emojiGroupIcon,
+          icons: _emojiGroupIcons,
           onTap: (index) {
             ref.read(_emojiScrollOffsetProvider.notifier).state =
                 groupOffset[index];
