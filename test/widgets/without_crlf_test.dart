@@ -29,7 +29,10 @@ void main() {
   });
 
   test('withoutCrLf returns a span without CRLF unchanged', () {
-    const span = TextSpan(text: 'a\nb', children: [TextSpan(text: 'c')]);
+    const span = TextSpan(
+      text: 'a\nb',
+      children: [TextSpan(text: 'c')],
+    );
     expect(identical(withoutCrLf(span), span), isTrue);
   });
 }
