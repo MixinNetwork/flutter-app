@@ -102,7 +102,11 @@ class MediaImagePipeline extends StatelessWidget {
       isAntiAlias: isAntiAlias,
       gaplessPlayback: gaplessPlayback,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded || frame != null) return child;
+        // A new image resets the frame, while gapless playback still paints
+        // the old one until the new one loads.
+        final image = child is Semantics ? child.child : child;
+        final painting = image is RawImage && image.image != null;
+        if (wasSynchronouslyLoaded || frame != null || painting) return child;
         return fallback();
       },
       errorBuilder: (context, error, stackTrace) =>

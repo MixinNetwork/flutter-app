@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/widgets/global_image_cache.dart';
 import 'package:flutter_app/widgets/media_image_pipeline.dart';
@@ -215,6 +215,39 @@ void main() {
     expect(find.byKey(const Key('child')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('a replacement load keeps showing the image it replaces', (
+    tester,
+  ) async {
+    final png = Uint8List.fromList(
+      img.encodePng(img.Image(width: 4, height: 4)),
+    );
+    const placeholderKey = Key('placeholder');
+    Widget pipeline(ImageProvider image) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaImagePipeline(
+        image: image,
+        gaplessPlayback: true,
+        placeholder: () => const SizedBox(key: placeholderKey),
+      ),
+    );
+
+    await tester.pumpWidget(pipeline(MemoryImage(png)));
+    expect(find.byKey(placeholderKey), findsOneWidget);
+    await tester.runAsync(() async {
+      for (var i = 0; i < 100; i++) {
+        if (find.byKey(placeholderKey).evaluate().isEmpty) break;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await tester.pump();
+      }
+    });
+    expect(find.byKey(placeholderKey), findsNothing);
+
+    // A new decode size starts a load that has not finished.
+    await tester.pumpWidget(pipeline(_PendingImage()));
+    expect(find.byKey(placeholderKey), findsNothing);
+    expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
+  });
 }
 
 Future<_ResolvedImage> _resolveImage(ImageProvider image) {
@@ -250,4 +283,16 @@ class _ResolvedImage {
 
   final int width;
   final bool synchronouslyLoaded;
+}
+
+class _PendingImage extends ImageProvider<_PendingImage> {
+  @override
+  Future<_PendingImage> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture(this);
+
+  @override
+  ImageStreamCompleter loadImage(
+    _PendingImage key,
+    ImageDecoderCallback decode,
+  ) => OneFrameImageStreamCompleter(Completer<ImageInfo>().future);
 }
