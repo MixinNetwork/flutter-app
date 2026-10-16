@@ -1,4 +1,9 @@
-import 'package:flutter/material.dart' hide SelectableRegion;
+import 'dart:async';
+
+import 'package:flutter/gestures.dart'
+    show PointerDeviceKind, kLongPressTimeout, kTouchSlop;
+import 'package:flutter/material.dart'
+    hide SelectableRegion, SelectableRegionState;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -139,10 +144,9 @@ class MessageTextWidget extends HookConsumerWidget {
 ///
 /// A selection region costs every chat row gesture recognizers, a selection
 /// registrar, and actions, so a row builds it only when the mouse first enters
-/// the row's content or the keyboard moves focus to the row.
-// shortcut: a touch on a row that the mouse has not entered only turns
-// selection on, so the first long press does not select; add a touch path if
-// desktop touch screens need it.
+/// the row's content, a pointer goes down on it, or the keyboard moves focus
+/// to the row. A touch long press on a row without the region selects the
+/// word when the press is long enough, as the region would.
 class MessageSelectionArea extends StatefulWidget {
   const MessageSelectionArea({required this.child, super.key});
 
@@ -154,15 +158,54 @@ class MessageSelectionArea extends StatefulWidget {
 
 class _MessageSelectionAreaState extends State<MessageSelectionArea> {
   final _focusNode = FocusNode(debugLabel: 'message_selection_focus');
+  final _regionKey = GlobalKey<SelectableRegionState>();
   var _active = false;
+  Timer? _longPress;
+  int? _pressPointer;
+  Offset? _pressPosition;
 
   void _activate() {
     if (_active) return;
     setState(() => _active = true);
   }
 
+  void _handlePointerDown(PointerDownEvent event) {
+    final startsLongPress = !_active && event.kind != PointerDeviceKind.mouse;
+    _activate();
+    if (!startsLongPress) return;
+    // The region is built after this pointer went down, so its long press
+    // recognizer does not see this press.
+    _cancelLongPress();
+    _pressPointer = event.pointer;
+    _pressPosition = event.position;
+    _longPress = Timer(kLongPressTimeout, () {
+      final position = _pressPosition;
+      _cancelLongPress();
+      if (!mounted || position == null) return;
+      _regionKey.currentState?.selectWordAtLongPress(position);
+    });
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    final start = _pressPosition;
+    if (event.pointer != _pressPointer || start == null) return;
+    if ((event.position - start).distance > kTouchSlop) _cancelLongPress();
+  }
+
+  void _handlePointerEnd(PointerEvent event) {
+    if (event.pointer == _pressPointer) _cancelLongPress();
+  }
+
+  void _cancelLongPress() {
+    _longPress?.cancel();
+    _longPress = null;
+    _pressPointer = null;
+    _pressPosition = null;
+  }
+
   @override
   void dispose() {
+    _cancelLongPress();
     _focusNode.dispose();
     super.dispose();
   }
@@ -170,8 +213,9 @@ class _MessageSelectionAreaState extends State<MessageSelectionArea> {
   @override
   Widget build(BuildContext context) {
     if (!kPlatformIsDesktop) return widget.child;
+    final Widget region;
     if (!_active) {
-      return Focus(
+      region = Focus(
         focusNode: _focusNode,
         includeSemantics: false,
         // The selection region takes this node and keeps its focus.
@@ -181,18 +225,27 @@ class _MessageSelectionAreaState extends State<MessageSelectionArea> {
         child: MouseRegion(
           opaque: false,
           onEnter: (_) => _activate(),
-          child: Listener(
-            onPointerDown: (_) => _activate(),
-            child: widget.child,
-          ),
+          child: widget.child,
         ),
       );
+    } else {
+      region = SelectableRegion(
+        key: _regionKey,
+        focusNode: _focusNode,
+        contextMenuBuilder: (context, state) => const SizedBox(),
+        selectionControls: desktopTextSelectionHandleControls,
+        child: widget.child,
+      );
     }
-    return SelectableRegion(
-      focusNode: _focusNode,
-      contextMenuBuilder: (context, state) => const SizedBox(),
-      selectionControls: desktopTextSelectionHandleControls,
-      child: widget.child,
+    return Listener(
+      // A MouseRegion that is not opaque reports no hit, so this listener
+      // takes the pointers in its bounds itself.
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _handlePointerDown,
+      onPointerMove: _handlePointerMove,
+      onPointerUp: _handlePointerEnd,
+      onPointerCancel: _handlePointerEnd,
+      child: region,
     );
   }
 }

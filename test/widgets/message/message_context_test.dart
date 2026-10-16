@@ -819,6 +819,87 @@ void main() {
     blinkNotifier.dispose();
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('the first touch long press selects a word of a fresh row', (
+    tester,
+  ) async {
+    final blinkNotifier = BlinkNotifier(tester);
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String?;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: const MessageSelectionArea(child: CustomText('hello world')),
+        ),
+      ),
+    );
+    expect(find.byType(message_selectable.SelectableRegion), findsNothing);
+
+    final text = find.byWidgetPredicate(
+      (widget) =>
+          widget is RichText && widget.text.toPlainText() == 'hello world',
+    );
+    final hello = tester.getRect(text).centerLeft + const Offset(12, 0);
+    final touch = await tester.startGesture(hello);
+    // The press builds the selection region in the next frame.
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await touch.up();
+    await tester.pump();
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(copied, 'hello');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
+  testWidgets('a short touch on a fresh row does not select', (tester) async {
+    final blinkNotifier = BlinkNotifier(tester);
+    await tester.pumpWidget(
+      _MessageTestScope(
+        blinkNotifier: blinkNotifier,
+        child: MessageContext.fromMessageItem(
+          message: testMessage('1'),
+          child: const MessageSelectionArea(child: CustomText('hello world')),
+        ),
+      ),
+    );
+    final touch = await tester.startGesture(
+      tester.getCenter(find.byType(CustomText)),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await touch.up();
+    await tester.pump(kLongPressTimeout);
+
+    final region = tester.state<message_selectable.SelectableRegionState>(
+      find.byType(message_selectable.SelectableRegion),
+    );
+    expect(region.textEditingValue.selection.isCollapsed, isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    blinkNotifier.dispose();
+  });
+
   testWidgets('blink keeps bubble content mounted', (tester) async {
     final notifier = BlinkNotifier(tester);
     final mountCount = ValueNotifier(0);
