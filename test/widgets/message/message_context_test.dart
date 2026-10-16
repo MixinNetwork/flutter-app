@@ -894,6 +894,8 @@ void main() {
     final region = tester.state<message_selectable.SelectableRegionState>(
       find.byType(message_selectable.SelectableRegion),
     );
+    // The region has no other public view of its selection.
+    // ignore: deprecated_member_use_from_same_package
     expect(region.textEditingValue.selection.isCollapsed, isTrue);
 
     await tester.pumpWidget(const SizedBox.shrink());
