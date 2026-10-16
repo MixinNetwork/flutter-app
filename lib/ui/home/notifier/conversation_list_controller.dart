@@ -142,17 +142,19 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
         );
       case ConversationListSnapshot():
         // Rows draw their preview and group avatars from these caches without
-        // waiting, so publish a new list only after they are filled. A
-        // snapshot covers every row with one query per cache.
+        // waiting, so publish a new list only after the first rows are
+        // filled. The other rows are filled with one more query per cache
+        // before they scroll into view, and are not built until then.
         final generation = ++_snapshotGeneration;
         if (items.isEmpty) {
           value = ConversationListState(items: items, initialized: true);
           break;
         }
         unawaited(
-          _warm(items).whenComplete(() {
+          _warm(items.take(limit)).whenComplete(() {
             if (_disposed || generation != _snapshotGeneration) return;
             value = ConversationListState(items: items, initialized: true);
+            unawaited(_warm(items.skip(limit)));
           }),
         );
     }
