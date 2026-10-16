@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -362,8 +363,9 @@ class MessageBubbleNipPadding extends StatelessWidget {
 abstract class BubbleShapeClipper extends CustomClipper<Path> {
   const BubbleShapeClipper();
 
-  /// The rounded rectangle of the bubble without its nip.
-  RRect bodyRRect(Size size);
+  /// The edges of a bubble of [size] that keep their shape when the bubble
+  /// grows: the corners and the nip. The rest is straight.
+  EdgeInsets fixedInsets(Size size);
 }
 
 class BubbleClipper extends BubbleShapeClipper with Equatable {
@@ -387,6 +389,18 @@ class BubbleClipper extends BubbleShapeClipper with Equatable {
   }
 
   @override
+  EdgeInsets fixedInsets(Size size) {
+    final nipWidth = nipPadding ? _nipWidth : 0.0;
+    // The nip spans the 21 points above the bottom at its side.
+    return EdgeInsets.fromLTRB(
+      currentUser ? 8 : nipWidth + 8,
+      8,
+      currentUser ? nipWidth + 8 : 8,
+      21,
+    );
+  }
+
+  /// The rounded rectangle of the bubble without its nip.
   RRect bodyRRect(Size size) {
     final nipWidth = nipPadding ? _nipWidth : 0.0;
     return const BorderRadius.all(Radius.circular(8)).toRRect(
@@ -531,7 +545,64 @@ class BubbleClipper extends BubbleShapeClipper with Equatable {
   bool shouldReclip(covariant BubbleClipper oldClipper) => this != oldClipper;
 
   @override
-  List<Object?> get props => [currentUser, showNip];
+  List<Object?> get props => [currentUser, showNip, nipPadding];
+}
+
+// Impeller draws the shadow of a path that is not a rounded rectangle
+// through an offscreen blur, in every frame for every bubble. So the shadow of
+// each bubble shape is drawn once, and stretched along the straight edges
+// between the corners and the nip, as the iOS and Android apps stretch their
+// bubble images.
+final _shadowImages = <Object, ui.Image>{};
+const _shadowMargin = 4.0;
+
+void _paintShadow(
+  Canvas canvas,
+  Size size,
+  BubbleShapeClipper clipper,
+  Color color,
+  double elevation,
+) {
+  final dpr = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+  final fixed = clipper.fixedInsets(size);
+  final template = Size(fixed.horizontal + 1, fixed.vertical + 1);
+  final image = _shadowImages[(clipper, template, color, elevation, dpr)] ??=
+      () {
+        final recorder = ui.PictureRecorder();
+        Canvas(recorder)
+          ..scale(dpr)
+          ..translate(_shadowMargin, _shadowMargin)
+          ..drawShadow(clipper.getClip(template), color, elevation, false);
+        final picture = recorder.endRecording();
+        final image = picture.toImageSync(
+          ((template.width + _shadowMargin * 2) * dpr).ceil(),
+          ((template.height + _shadowMargin * 2) * dpr).ceil(),
+        );
+        picture.dispose();
+        return image;
+      }();
+  final destination = (Offset.zero & size).inflate(_shadowMargin);
+  canvas
+    ..save()
+    // The image has device pixels; draw its corners one to one.
+    ..scale(1 / dpr)
+    ..drawImageNine(
+      image,
+      Rect.fromLTWH(
+        (fixed.left + _shadowMargin) * dpr,
+        (fixed.top + _shadowMargin) * dpr,
+        dpr,
+        dpr,
+      ),
+      Rect.fromLTRB(
+        destination.left * dpr,
+        destination.top * dpr,
+        destination.right * dpr,
+        destination.bottom * dpr,
+      ),
+      Paint(),
+    )
+    ..restore();
 }
 
 class BubblePainter extends CustomPainter with Equatable {
@@ -555,14 +626,12 @@ class BubblePainter extends CustomPainter with Equatable {
     final clip = clipper.getClip(size);
 
     if (elevation != 0.0) {
-      // Impeller blurs the shadow of any other path offscreen in every frame,
-      // but draws the shadow of a rounded rectangle directly. The nip is too
-      // small for its own shadow to show.
       final clipper = this.clipper;
-      final shadow = clipper is BubbleShapeClipper
-          ? (Path()..addRRect(clipper.bodyRRect(size)))
-          : clip;
-      canvas.drawShadow(shadow, shadowColor, elevation, false);
+      if (clipper is BubbleShapeClipper) {
+        _paintShadow(canvas, size, clipper, shadowColor, elevation);
+      } else {
+        canvas.drawShadow(clip, shadowColor, elevation, false);
+      }
     }
 
     canvas.drawPath(clip, _fillPaint);

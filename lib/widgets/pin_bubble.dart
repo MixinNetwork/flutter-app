@@ -41,15 +41,22 @@ class _PinBubbleClipper extends BubbleShapeClipper {
 
   @override
   Path getClip(Size size) {
-    final bubblePath = Path()..addRRect(bodyRRect(size));
+    final bubblePath = Path()
+      ..addRRect(
+        const BorderRadius.all(
+          Radius.circular(8),
+        ).toRRect(Offset.zero & Size(size.width - _nipWidth, size.height)),
+      );
     final nipPath = _rightNipPath(size);
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
+  // The nip is at the middle of the right edge, so the height stays fixed.
   @override
-  RRect bodyRRect(Size size) => const BorderRadius.all(
-    Radius.circular(8),
-  ).toRRect(Offset.zero & Size(size.width - _nipWidth, size.height));
+  EdgeInsets fixedInsets(Size size) {
+    final top = (size.height / 2).floorToDouble();
+    return EdgeInsets.fromLTRB(8, top, _nipWidth + 8, size.height - top - 1);
+  }
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 10);
