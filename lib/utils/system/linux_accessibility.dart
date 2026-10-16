@@ -9,22 +9,30 @@ import '../logger.dart';
 final linuxAccessibilityEnabled = ValueNotifier<bool>(false);
 
 Future<void> watchLinuxAccessibility() async {
-  final bus = DBusRemoteObject(
-    DBusClient.session(),
-    name: 'org.a11y.Bus',
-    path: DBusObjectPath('/org/a11y/bus'),
-  );
-  Future<void> refresh() async {
-    final status = await bus.getAllProperties('org.a11y.Status');
-    linuxAccessibilityEnabled.value =
-        (status['IsEnabled']?.asBoolean() ?? false) ||
-        (status['ScreenReaderEnabled']?.asBoolean() ?? false);
-  }
-
   try {
+    final bus = DBusRemoteObject(
+      DBusClient.session(),
+      name: 'org.a11y.Bus',
+      path: DBusObjectPath('/org/a11y/bus'),
+    );
+    Future<void> refresh() async {
+      final status = await bus.getAllProperties('org.a11y.Status');
+      linuxAccessibilityEnabled.value =
+          (status['IsEnabled']?.asBoolean() ?? false) ||
+          (status['ScreenReaderEnabled']?.asBoolean() ?? false);
+    }
+
+    // A failed connection throws here. A signal subscription would report it
+    // as an unhandled error inside the dbus package instead.
+    await refresh();
     bus.propertiesChanged
         .where((signal) => signal.propertiesInterface == 'org.a11y.Status')
-        .listen((_) => unawaited(refresh().catchError((_) {})));
+        .listen(
+          (_) => unawaited(refresh().catchError((_) {})),
+          onError: (Object error) =>
+              i('linux accessibility status signal failed: $error'),
+        );
+    // The status can change before the subscription starts.
     await refresh();
   } catch (error) {
     // Without the AT-SPI bus no assistive technology can reach the app.
