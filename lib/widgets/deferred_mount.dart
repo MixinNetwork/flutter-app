@@ -45,7 +45,9 @@ class _DeferredMountState extends State<DeferredMount> {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      _shown = _shown || !widget.defer || _take(this);
+      if (!_shown) {
+        _shown = widget.defer ? _take(this) : _leave(this);
+      }
       return _shown ? widget.child : widget.placeholder;
     },
   );
@@ -70,10 +72,7 @@ bool _take(_DeferredMountState state) {
       ..reset()
       ..start();
   }
-  if (!_endScheduled) {
-    _endScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) => _endFrame());
-  }
+  _scheduleEnd();
   if (_frame.elapsed < _budget) {
     _waiting.remove(state);
     _shownThisFrame++;
@@ -81,6 +80,19 @@ bool _take(_DeferredMountState state) {
   }
   _waiting.add(state);
   return false;
+}
+
+// A waiting child that stops waiting leaves the queue, and the queue still
+// retries the children after it at the end of this frame.
+bool _leave(_DeferredMountState state) {
+  if (_waiting.remove(state)) _scheduleEnd();
+  return true;
+}
+
+void _scheduleEnd() {
+  if (_endScheduled) return;
+  _endScheduled = true;
+  SchedulerBinding.instance.addPostFrameCallback((_) => _endFrame());
 }
 
 void _endFrame() {

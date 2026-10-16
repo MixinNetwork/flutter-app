@@ -123,4 +123,35 @@ void main() {
 
     expect(retried, lessThan(50));
   });
+
+  testWidgets('a waiting child that must not wait any more frees its place', (
+    tester,
+  ) async {
+    Widget rows(Set<int> shownBefore) => Column(
+      children: [
+        for (var i = 0; i < 20; i++)
+          DeferredMount(
+            key: ValueKey(i),
+            // A list shows a child it showed before without waiting.
+            defer: !shownBefore.contains(i),
+            placeholder: const SizedBox(height: 10),
+            child: _Slow(i),
+          ),
+      ],
+    );
+
+    await tester.pumpWidget(rows({}));
+    final first = shown();
+    expect(first.length, lessThan(20));
+
+    // The head of the queue stops waiting before its retry, as the shared
+    // media list does when it rebuilds its cached items.
+    final head = {for (var i = first.length; i < first.length + 8; i++) i};
+    await tester.pumpWidget(rows(head));
+
+    for (var frame = 0; frame < 40 && shown().length < 20; frame++) {
+      await tester.pump();
+    }
+    expect(shown().length, 20, reason: 'the rest of the queue shows');
+  });
 }
