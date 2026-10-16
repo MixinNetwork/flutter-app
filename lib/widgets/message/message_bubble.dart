@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
@@ -553,7 +554,7 @@ class BubbleClipper extends BubbleShapeClipper with Equatable {
 // each bubble shape is drawn once, and stretched along the straight edges
 // between the corners and the nip, as the iOS and Android apps stretch their
 // bubble images.
-final _shadowImages = <Object, ui.Image>{};
+final _shadowImages = <Object, (ui.Image, Paint)>{};
 const _shadowMargin = 4.0;
 
 void _paintShadow(
@@ -566,41 +567,89 @@ void _paintShadow(
   final dpr = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
   final fixed = clipper.fixedInsets(size);
   final template = Size(fixed.horizontal + 1, fixed.vertical + 1);
-  final image = _shadowImages[(clipper, template, color, elevation, dpr)] ??=
-      () {
-        final recorder = ui.PictureRecorder();
-        Canvas(recorder)
-          ..scale(dpr)
-          ..translate(_shadowMargin, _shadowMargin)
-          ..drawShadow(clipper.getClip(template), color, elevation, false);
-        final picture = recorder.endRecording();
-        final image = picture.toImageSync(
-          ((template.width + _shadowMargin * 2) * dpr).ceil(),
-          ((template.height + _shadowMargin * 2) * dpr).ceil(),
-        );
-        picture.dispose();
-        return image;
-      }();
+  final (
+    image,
+    paint,
+  ) = _shadowImages[(clipper, template, color, elevation, dpr)] ??= () {
+    final recorder = ui.PictureRecorder();
+    Canvas(recorder)
+      ..scale(dpr)
+      ..translate(_shadowMargin, _shadowMargin)
+      ..drawShadow(clipper.getClip(template), color, elevation, false);
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(
+      ((template.width + _shadowMargin * 2) * dpr).ceil(),
+      ((template.height + _shadowMargin * 2) * dpr).ceil(),
+    );
+    picture.dispose();
+    return (
+      image,
+      Paint()
+        ..shader = ImageShader(
+          image,
+          TileMode.clamp,
+          TileMode.clamp,
+          Matrix4.identity().storage,
+        ),
+    );
+  }();
   final destination = (Offset.zero & size).inflate(_shadowMargin);
+  // One mesh of nine quads, in device pixels so that the corners draw one
+  // to one. Impeller draws a nine patch image as nine separate images.
+  List<double> stops(double start, double end, double first, double last) {
+    final scale = math.min(1, (end - start) / (first + last));
+    return [start, start + first * scale, end - last * scale, end];
+  }
+
+  final left = (fixed.left + _shadowMargin) * dpr;
+  final top = (fixed.top + _shadowMargin) * dpr;
+  final right = image.width - left - dpr;
+  final bottom = image.height - top - dpr;
+  final xs = stops(
+    destination.left * dpr,
+    destination.right * dpr,
+    left,
+    right,
+  );
+  final ys = stops(
+    destination.top * dpr,
+    destination.bottom * dpr,
+    top,
+    bottom,
+  );
+  final us = [0.0, left, image.width - right, image.width.toDouble()];
+  final vs = [0.0, top, image.height - bottom, image.height.toDouble()];
+  final positions = <Offset>[
+    for (final y in ys)
+      for (final x in xs) Offset(x, y),
+  ];
+  final textures = <Offset>[
+    for (final v in vs)
+      for (final u in us) Offset(u, v),
+  ];
+  final indices = <int>[
+    for (var row = 0; row < 3; row++)
+      for (var column = 0; column < 3; column++) ...[
+        row * 4 + column,
+        row * 4 + column + 1,
+        row * 4 + column + 4,
+        row * 4 + column + 1,
+        row * 4 + column + 5,
+        row * 4 + column + 4,
+      ],
+  ];
   canvas
     ..save()
-    // The image has device pixels; draw its corners one to one.
     ..scale(1 / dpr)
-    ..drawImageNine(
-      image,
-      Rect.fromLTWH(
-        (fixed.left + _shadowMargin) * dpr,
-        (fixed.top + _shadowMargin) * dpr,
-        dpr,
-        dpr,
+    ..drawVertices(
+      ui.Vertices(
+        ui.VertexMode.triangles,
+        positions,
+        textureCoordinates: textures,
+        indices: indices,
       ),
-      Rect.fromLTRB(
-        destination.left * dpr,
-        destination.top * dpr,
-        destination.right * dpr,
-        destination.bottom * dpr,
-      ),
-      Paint(),
+      BlendMode.srcOver,
+      paint,
     )
     ..restore();
 }

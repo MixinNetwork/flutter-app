@@ -25,7 +25,7 @@ void main() {
       expect(
         find.byType(CustomPaint),
         paints
-          ..something((method, arguments) => method == #drawImageNine)
+          ..something((method, arguments) => method == #drawVertices)
           ..path(),
       );
       expect(
