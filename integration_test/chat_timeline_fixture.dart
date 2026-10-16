@@ -227,6 +227,7 @@ class ChatTimelineFixture extends StatelessWidget {
     required this.blinkNotifier,
     required this.database,
     this.width,
+    this.header,
     super.key,
   });
 
@@ -234,6 +235,9 @@ class ChatTimelineFixture extends StatelessWidget {
   final BlinkNotifier blinkNotifier;
   final Database database;
   final double? width;
+
+  /// Shown above the timeline, such as an input that takes the focus.
+  final Widget? header;
 
   @override
   Widget build(BuildContext context) => ProviderScope(
@@ -280,7 +284,14 @@ class ChatTimelineFixture extends StatelessWidget {
                 width: width,
                 child: provider.ChangeNotifierProvider<MessageController>.value(
                   value: controller,
-                  child: const ChatHistoryViewport(),
+                  child: header == null
+                      ? const ChatHistoryViewport()
+                      : Column(
+                          children: [
+                            header!,
+                            const Expanded(child: ChatHistoryViewport()),
+                          ],
+                        ),
                 ),
               ),
             ),

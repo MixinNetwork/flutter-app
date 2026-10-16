@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/enum/message_category.dart';
@@ -11,9 +12,11 @@ import 'package:flutter_app/ui/provider/message_selection_provider.dart';
 import 'package:flutter_app/ui/provider/quote_message_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/utils/app_lifecycle.dart';
+import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
+import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/message/item/action/action_data.dart';
 import 'package:flutter_app/widgets/message/item/action/action_message.dart';
 import 'package:flutter_app/widgets/message/item/quote_message.dart';
@@ -29,7 +32,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart' as provider;
+import 'package:super_context_menu/super_context_menu.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+import '../../../integration_test/chat_timeline_fixture.dart';
 
 void main() {
   test('MessageRows links top tail to first bottom row without center', () {
@@ -904,6 +910,125 @@ void main() {
       expect(_richTextPlainText(tester), contains('@Alice'));
     },
   );
+  group('the message menu', () {
+    setUpAll(EventBus.initialize);
+
+    // Text rows under an input. A row's menu takes the focus from the input
+    // and from other rows, and keeps the selection of its own row, which its
+    // copy action reads.
+    Future<(FocusNode, Finder, Finder)> pumpRows(WidgetTester tester) async {
+      tester.view
+        ..physicalSize = const Size(1000, 800)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final input = FocusNode();
+      addTearDown(input.dispose);
+      final messages = buildMessages(20, imagePath: '', withImages: false);
+      await tester.pumpWidget(
+        ChatTimelineFixture(
+          controller: FakeMessageController(messages, initial: 20),
+          blinkNotifier: BlinkNotifier(tester),
+          database: createFixtureDatabase(),
+          header: TextField(focusNode: input),
+        ),
+      );
+      await tester.pumpAndSettle();
+      Finder row(int index) => find.byWidgetPredicate(
+        (w) =>
+            w is MessageItemWidget &&
+            w.message.messageId == messages[index].messageId,
+      );
+      return (input, row(18), row(19));
+    }
+
+    Future<void> select(WidgetTester tester, Finder row) async {
+      final text = find.descendant(
+        of: find.descendant(of: row, matching: find.byType(MessageTextWidget)),
+        matching: find.byType(CustomText),
+      );
+      final rect = tester.getRect(text);
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: rect.centerLeft + const Offset(1, 0));
+      await tester.pump();
+      await mouse.down(rect.centerLeft + const Offset(1, 0));
+      await tester.pump();
+      await mouse.moveTo(rect.centerRight - const Offset(1, 0));
+      await tester.pump();
+      await mouse.up();
+      await tester.pump();
+      await mouse.removePointer();
+    }
+
+    SelectionStatus? status(WidgetTester tester, Finder row) {
+      final region = find.descendant(
+        of: row,
+        matching: find.byType(message_selectable.SelectableRegion),
+      );
+      if (region.evaluate().isEmpty) return null;
+      return tester
+          .state<message_selectable.SelectableRegionState>(region)
+          .selectable
+          ?.value
+          .status;
+    }
+
+    Future<void> showMenu(WidgetTester tester, Finder row) async {
+      final menu = tester.widget<CustomContextMenuWidget>(
+        find.descendant(
+          of: row,
+          matching: find.byType(CustomContextMenuWidget),
+        ),
+      );
+      final shown = ValueNotifier(0);
+      addTearDown(shown.dispose);
+      try {
+        await menu.menuProvider(
+          MenuRequest(
+            onShowMenu: shown,
+            onHideMenu: ValueNotifier<MenuResult?>(null),
+            onPreviewAction: ChangeNotifier(),
+            location: Offset.zero,
+          ),
+        );
+      } on Object catch (_) {
+        // The menu items need services this test does not provide; the show
+        // listener is added before them.
+      }
+      shown.value++;
+      await tester.pump();
+    }
+
+    testWidgets('keeps the selection of its own row', (tester) async {
+      final (_, a, _) = await pumpRows(tester);
+      await select(tester, a);
+      expect(status(tester, a), SelectionStatus.uncollapsed);
+
+      await showMenu(tester, a);
+      expect(status(tester, a), SelectionStatus.uncollapsed);
+      await _disposeFixture(tester);
+    });
+
+    testWidgets('clears the selection of another row', (tester) async {
+      final (_, a, b) = await pumpRows(tester);
+      await select(tester, a);
+      expect(status(tester, a), SelectionStatus.uncollapsed);
+
+      await showMenu(tester, b);
+      expect(status(tester, a), isNot(SelectionStatus.uncollapsed));
+      await _disposeFixture(tester);
+    });
+
+    testWidgets('takes the focus from the input', (tester) async {
+      final (input, a, _) = await pumpRows(tester);
+      input.requestFocus();
+      await tester.pump();
+      expect(input.hasFocus, isTrue);
+
+      await showMenu(tester, a);
+      expect(input.hasFocus, isFalse);
+      await _disposeFixture(tester);
+    });
+  });
 }
 
 class _MessageIdText extends HookWidget {
@@ -1051,4 +1176,10 @@ class _MessageTestScope extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _disposeFixture(WidgetTester tester) async {
+  await tester.pumpWidget(const SizedBox());
+  // isBotGroupProvider closes its keep-alive 10 minutes after dispose.
+  await tester.pump(const Duration(minutes: 11));
 }
