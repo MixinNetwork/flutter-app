@@ -45,6 +45,9 @@ Uint8List _blurHashPixels(String hash) =>
 final _blurHashImages = <String, ui.Image>{};
 final _blurHashLoads = <String, Future<ui.Image>>{};
 
+@visibleForTesting
+void debugEvictBlurHashImages() => _blurHashImages.clear();
+
 ui.Image? _cachedBlurHashImage(String hash) {
   final image = _blurHashImages.remove(hash);
   if (image != null) _blurHashImages[hash] = image;
@@ -82,7 +85,9 @@ class _ImageByBlurHash extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cached = _cachedBlurHashImage(hash);
+    // The image this widget found in the cache when it mounted. It keeps
+    // showing after a later placeholder evicts it from the cache.
+    final cached = useMemoized(() => _cachedBlurHashImage(hash), [hash]);
     final loaded = useFuture(
       useMemoized(() => cached == null ? _loadBlurHashImage(hash) : null, [
         hash,

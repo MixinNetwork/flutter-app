@@ -24,5 +24,14 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(const ImageByBlurHashOrBase64(imageData: hash));
     expect(raw().image?.width, 20);
+
+    // Later placeholders evict it from the cache. The widget that showed it
+    // from the cache keeps it when it builds again.
+    debugEvictBlurHashImages();
+    tester
+        .element(find.byWidgetPredicate((w) => w is ImageByBlurHashOrBase64))
+        .visitChildren((element) => element.markNeedsBuild());
+    await tester.pump();
+    expect(raw().image?.width, 20);
   });
 }
