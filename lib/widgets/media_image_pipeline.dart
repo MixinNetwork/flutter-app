@@ -209,7 +209,10 @@ class NormalizedGifImageGate extends StatefulWidget {
 }
 
 class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
-  Future<void>? _future;
+  // The child stays at the same place in the tree after the check, so a new
+  // decode size of a checked file keeps the image state and its last frame.
+  var _ready = true;
+  Future<void>? _pending;
 
   @override
   void initState() {
@@ -226,35 +229,32 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
   }
 
   void _start() {
+    _pending = null;
+    _ready = true;
     // A message image decodes at its display size through a ResizeImage.
     final image = switch (widget.image) {
       ResizeImage(:final imageProvider) => imageProvider,
       final image => image,
     };
-    if (image is! FileImage) {
-      _future = null;
-      return;
-    }
+    if (image is! FileImage) return;
     final filePathSegments = image.file.uri.pathSegments;
     final fileName = filePathSegments.isEmpty
         ? ''
         : filePathSegments.last.toLowerCase();
-    if (fileName.isEmpty) {
-      _future = null;
-      return;
-    }
-    if (!fileName.endsWith('.gif') && fileName.contains('.')) {
-      _future = null;
-      return;
-    }
+    if (fileName.isEmpty) return;
+    if (!fileName.endsWith('.gif') && fileName.contains('.')) return;
 
     final path = image.file.absolute.path;
-    if (_checkedImageFiles.contains(path)) {
-      _future = null;
-      return;
-    }
+    if (_checkedImageFiles.contains(path)) return;
 
-    _future = _normalize(image.file, widget.image);
+    _ready = false;
+    final pending = _pending = _normalize(image.file, widget.image);
+    unawaited(
+      pending.catchError((Object _) {}).whenComplete(() {
+        if (!mounted || !identical(_pending, pending)) return;
+        setState(() => _ready = true);
+      }),
+    );
   }
 
   Future<void> _normalize(File file, ImageProvider shown) async {
@@ -268,18 +268,6 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final future = _future;
-    if (future == null) return widget.childBuilder();
-
-    return FutureBuilder<void>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return widget.childBuilder();
-        }
-        return widget.placeholder();
-      },
-    );
-  }
+  Widget build(BuildContext context) =>
+      _ready ? widget.childBuilder() : widget.placeholder();
 }

@@ -200,6 +200,36 @@ void main() {
     expect(find.byKey(const Key('placeholder')), findsOneWidget);
   });
 
+  testWidgets('a new decode size of a checked file keeps the child state', (
+    tester,
+  ) async {
+    final file = File('resized_keep_test_${identityHashCode(tester)}.gif');
+    var mounts = 0;
+    Widget gate(int width) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: NormalizedGifImageGate(
+        image: ResizeImage(FileImage(file), width: width),
+        placeholder: () => const SizedBox(key: Key('placeholder')),
+        childBuilder: () => _MountCounter(onMount: () => mounts++),
+      ),
+    );
+
+    await tester.pumpWidget(gate(10));
+    await tester.runAsync(() async {
+      for (var i = 0; i < 100; i++) {
+        if (find.byType(_MountCounter).evaluate().isNotEmpty) break;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await tester.pump();
+      }
+    });
+    expect(find.byType(_MountCounter), findsOneWidget);
+    expect(mounts, 1);
+
+    await tester.pumpWidget(gate(20));
+    expect(find.byType(_MountCounter), findsOneWidget);
+    expect(mounts, 1);
+  });
+
   testWidgets('skips file images with empty paths', (tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -295,4 +325,24 @@ class _PendingImage extends ImageProvider<_PendingImage> {
     _PendingImage key,
     ImageDecoderCallback decode,
   ) => OneFrameImageStreamCompleter(Completer<ImageInfo>().future);
+}
+
+class _MountCounter extends StatefulWidget {
+  const _MountCounter({required this.onMount});
+
+  final VoidCallback onMount;
+
+  @override
+  State<_MountCounter> createState() => _MountCounterState();
+}
+
+class _MountCounterState extends State<_MountCounter> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMount();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
