@@ -163,7 +163,10 @@ class _AnimatedChatSlide extends HookWidget {
     final displayedPages = useState(<Page<dynamic>>[]);
 
     useEffect(() {
-      void update() => slack.value = controller.isAnimating
+      // The chat narrows with the side page as it opens. As the page closes,
+      // the chat lays out at its full width once and the page reveals it.
+      void update() =>
+          slack.value = controller.status == AnimationStatus.reverse
           ? kChatSidePageWidth * Curves.easeInOut.transform(controller.value)
           : 0;
       void updateStatus(AnimationStatus _) => update();
@@ -180,7 +183,11 @@ class _AnimatedChatSlide extends HookWidget {
     useEffect(() {
       if (pages.isNotEmpty) {
         displayedPages.value = pages;
-        controller.forward();
+        // The page builds in a frame of its own at zero width, so the first
+        // frame of the animation does not also lay out the narrower chat.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) controller.forward();
+        });
       } else {
         controller.reverse().whenComplete(() {
           displayedPages.value = pages;
@@ -195,7 +202,9 @@ class _AnimatedChatSlide extends HookWidget {
         width:
             kChatSidePageWidth * Curves.easeInOut.transform(controller.value),
         height: constraints.maxHeight,
-        child: controller.value != 0 ? child : null,
+        child: controller.value != 0 || displayedPages.value.isNotEmpty
+            ? child
+            : null,
       ),
       child: ClipRect(
         child: OverflowBox(
