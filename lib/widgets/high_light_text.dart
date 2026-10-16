@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:data_detector/data_detector.dart';
-import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -756,11 +755,7 @@ class EmojiTextMatcher extends TextMatcher with Equatable {
           return _cachedTextRanges(
             _emojiRanges,
             text,
-            () => [
-              for (final match in emojiRegex.allMatches(text))
-                if (isTextStyleEmoji(match[0]!))
-                  TextRange(start: match.start, end: match.end),
-            ],
+            () => textStyleEmojiRanges(text),
           );
         },
         matchBuilder: (span, displayString, linkString) => TextSpan(

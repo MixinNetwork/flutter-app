@@ -49,6 +49,24 @@ bool mayContainTextStyleEmoji(String text) {
 bool isTextStyleEmoji(String emoji) =>
     emoji.isNotEmpty && emoji.codeUnitAt(0) < 0xD800;
 
+/// The ranges of the emoji in [text] that text fonts may draw as text.
+///
+/// It looks up each grapheme cluster, as [EmojiExtension.splitEmoji] does.
+/// The emoji regular expression of the emojis package is about 165 KB, and it
+/// runs in an interpreter in AOT builds, which costs milliseconds per message.
+List<TextRange> textStyleEmojiRanges(String text) {
+  final ranges = <TextRange>[];
+  var start = 0;
+  for (final char in Characters(text)) {
+    final end = start + char.length;
+    if (isTextStyleEmoji(char) && _emojis.containsKey(char)) {
+      ranges.add(TextRange(start: start, end: end));
+    }
+    start = end;
+  }
+  return ranges;
+}
+
 List<String> extractEmoji(String text) {
   final characters = Characters(text);
   final emojis = <String>[];
