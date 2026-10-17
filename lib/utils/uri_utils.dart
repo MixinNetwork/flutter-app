@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
-import '../enum/encrypt_category.dart';
 import '../ui/home/conversation/conversation_focus.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -27,9 +28,11 @@ Future<bool> openUriWithWebView(
   String? title,
   String? conversationId,
   AppCardData? appCardData,
+  bool isExplicitSendAction = false,
 }) async => openUri(
   context,
   text,
+  isExplicitSendAction: isExplicitSendAction,
   fallbackHandler: (uri) async {
     if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
       await MixinWebView.instance.openWebViewWindowWithUrl(
@@ -50,6 +53,8 @@ Future<bool> openUri(
   String text, {
   Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
   App? app,
+  // Set only by an action-button tap, never from URI parameters.
+  bool isExplicitSendAction = false,
 }) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
@@ -75,33 +80,15 @@ Future<bool> openUri(
     final startText = uri.startTextOfConversation;
     if (conversationId != null && conversationId.trim().isNotEmpty) {
       if (startText?.trim().isNotEmpty == true) {
-        try {
-          final conversation = await context.database.conversationDao
-              .conversationItem(conversationId)
-              .getSingleOrNull();
-
-          if (conversation == null) {
-            showToastFailed(null);
-            return false;
-          }
-
-          await ConversationFocus.selectConversation(
-            context,
-            conversation.conversationId,
-            conversation: conversation,
-          );
-
-          await context.accountServer.sendTextMessage(
-            startText ?? '',
-            EncryptCategory.plain,
-            conversationId: conversationId,
-          );
-
-          return true;
-        } catch (error) {
-          showToastFailed(error);
-          return false;
-        }
+        return showSendDialog(
+          context,
+          'text',
+          conversationId,
+          base64Encode(utf8.encode(startText!)),
+          app,
+          null,
+          isExplicitSendAction: isExplicitSendAction,
+        );
       }
 
       return _selectConversation(uri, context, conversationId);
@@ -115,6 +102,7 @@ Future<bool> openUri(
         uri.dataOfSend,
         app,
         uri.userOfSend,
+        isExplicitSendAction: isExplicitSendAction,
       );
     }
 

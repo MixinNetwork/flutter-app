@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -10,12 +9,14 @@ import '../../../db/dao/sticker_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
 import '../../../ui/home/conversation/conversation_focus.dart';
+import '../../../ui/provider/account_server_provider.dart';
 import '../../../ui/provider/conversation_provider.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/logger.dart';
 import '../../app_bar.dart';
+import '../../auth.dart';
 import '../../buttons.dart';
 import '../../dialog.dart';
 import '../../mixin_image.dart';
@@ -43,7 +44,9 @@ enum _Category {
 }
 
 extension _CategoriesExtension on String {
-  _Category? get category => _Category.values.byName(toLowerCase());
+  _Category? get category => _Category.values
+      .where((value) => value.name == toLowerCase())
+      .firstOrNull;
 }
 
 Future<bool> showSendDialog(
@@ -52,8 +55,13 @@ Future<bool> showSendDialog(
   String? conversationId,
   String? data,
   App? app,
-  String? user,
-) async {
+  String? user, {
+  bool isExplicitSendAction = false,
+}) async {
+  final container = context.providerContainer;
+  if (container.read(appLockedProvider)) return false;
+  final sendingAccount = context.accountServer;
+  final currentConversation = container.read(conversationProvider);
   final _category = category?.category;
   if (_category == null || data == null || data.isEmpty) return false;
 
@@ -67,6 +75,13 @@ Future<bool> showSendDialog(
           final json =
               await jsonDecodeWithIsolate(_data) as Map<String, dynamic>;
           result = SendImageData.fromJson(json);
+          final url = Uri.tryParse((result as SendImageData).url);
+          if (url == null ||
+              !url.hasAuthority ||
+              url.host.isEmpty ||
+              (url.scheme != 'http' && url.scheme != 'https')) {
+            return false;
+          }
         }
       case _Category.contact:
         {
@@ -96,82 +111,116 @@ Future<bool> showSendDialog(
         result = _data;
     }
   } catch (e, s) {
-    w('showSendDialog error: $e, $s');
+    w('showSendDialog error: ${e.runtimeType}, $s');
     return false;
   }
 
-  if (user != null) {
-    return _sendMessageToUserId(context, user, _category, result);
+  var targetId = conversationId;
+  var recipientId = user;
+  String? targetName;
+  EncryptCategory? encryptCategory;
+  final directAction =
+      isExplicitSendAction &&
+      (user != null ||
+          (conversationId == null &&
+              _category == _Category.text &&
+              currentConversation != null));
+  if (recipientId == null && targetId == null && _category == _Category.text) {
+    targetId = currentConversation?.conversationId;
+    recipientId = currentConversation?.userId;
   }
-  if (conversationId == null && _category == _Category.text) {
-    final currentConversation = context.providerContainer.read(
-      conversationProvider,
+  if (recipientId == null && targetId == null) {
+    final selected = (await showConversationSelector(
+      context: context,
+      singleSelect: true,
+      title: context.l10n.forward,
+      onlyContact: false,
+    ))?.firstOrNull;
+    if (selected == null) return false;
+    targetId = selected.conversationId;
+    recipientId = selected.userId;
+  }
+  if (recipientId != null) {
+    if (!Uuid.isValidUUID(fromString: recipientId)) return false;
+    final users = await context.accountServer.refreshUsers([recipientId]);
+    if (users == null || users.isEmpty) return false;
+    final targetUser = users.first;
+    targetName =
+        '${targetUser.fullName ?? recipientId} (${targetUser.identityNumber})';
+    targetId = generateConversationId(
+      context.accountServer.userId,
+      recipientId,
     );
-    if (currentConversation != null) {
-      await _sendMessage(
-        context,
-        currentConversation.conversationId,
-        currentConversation.encryptCategory,
-        _category,
-        result,
-      );
-      return true;
-    }
+    encryptCategory = await context.database.conversationDao.getEncryptCategory(
+      recipientId,
+      targetUser.isBot,
+    );
+  } else if (targetId != null) {
+    final conversation = await context.database.conversationDao
+        .conversationItem(targetId)
+        .getSingleOrNull();
+    if (conversation == null || conversation.ownerId == null) return false;
+    targetName = conversation.validName;
+    encryptCategory = conversation.isGroupConversation
+        ? EncryptCategory.signal
+        : await context.database.conversationDao.getEncryptCategory(
+            conversation.ownerId!,
+            conversation.isBotConversation,
+          );
   }
-
-  await showMixinDialog(
-    context: context,
-    child: _SendPage(_category, conversationId, result, app),
-  );
-
-  return true;
-}
-
-Future<bool> _sendMessageToUserId(
-  BuildContext context,
-  String userId,
-  _Category category,
-  dynamic data,
-) async {
-  if (!Uuid.isValidUUID(fromString: userId)) {
+  if (targetId == null ||
+      targetName == null ||
+      encryptCategory == null ||
+      !context.mounted ||
+      container.read(appLockedProvider)) {
     return false;
   }
 
-  showToastLoading();
-  try {
-    final users = await context.accountServer.refreshUsers([userId]);
-    if (users == null || users.isEmpty) {
-      return false;
+  final destination = targetId;
+  final encryption = encryptCategory;
+  Future<void> send() async {
+    if (!context.mounted ||
+        container.read(appLockedProvider) ||
+        !identical(
+          container.read(accountServerProvider).valueOrNull,
+          sendingAccount,
+        )) {
+      return;
     }
-  } finally {
-    Toast.dismiss();
+    await _sendMessage(
+      context,
+      destination,
+      encryption,
+      _category,
+      result,
+      recipientId: recipientId,
+    );
   }
 
-  final conversationId = generateConversationId(
-    context.accountServer.userId,
-    userId,
-  );
-  await ConversationFocus.selectUser(context, userId);
-  final conversation = context.providerContainer.read(conversationProvider);
-  if (conversation == null) {
-    return false;
+  if (directAction) {
+    if (user != null) await ConversationFocus.selectUser(context, user);
+    await send();
+  } else {
+    await showMixinDialog<void>(
+      context: context,
+      child: _SendPage(_category, result, app, targetName, send),
+    );
   }
-  await _sendMessage(
-    context,
-    conversationId,
-    conversation.encryptCategory,
-    category,
-    data,
-    recipientId: userId,
-  );
   return true;
 }
 
 class _SendPage extends HookConsumerWidget {
-  const _SendPage(this.category, this.conversationId, this.data, this.app);
+  const _SendPage(
+    this.category,
+    this.data,
+    this.app,
+    this.targetName,
+    this.onSend,
+  );
 
   final _Category category;
-  final String? conversationId;
+  final String targetName;
+  final Future<void> Function() onSend;
   final dynamic data;
   final App? app;
 
@@ -213,40 +262,16 @@ class _SendPage extends HookConsumerWidget {
       return _Text(data as String);
     }, [category, data]);
 
+    final sending = useState(false);
     Future<void> sendMessage() async {
-      EncryptCategory? encryptCategory;
-      var _conversationId = conversationId;
-      if (_conversationId == null) {
-        final result = await showConversationSelector(
-          context: context,
-          singleSelect: true,
-          title: context.l10n.forward,
-          onlyContact: false,
-        );
-        _conversationId = result?.firstOrNull?.conversationId;
-        encryptCategory = result?.firstOrNull?.encryptCategory;
+      if (sending.value || ref.read(appLockedProvider)) return;
+      sending.value = true;
+      try {
+        await onSend();
+        if (context.mounted) Navigator.pop(context);
+      } finally {
+        if (context.mounted) sending.value = false;
       }
-      if (encryptCategory == null && _conversationId != null) {
-        final conversation = await context.database.conversationDao
-            .conversationItem(_conversationId)
-            .getSingleOrNull();
-        final ownerId = conversation?.ownerId;
-        final isBotConversation = conversation?.isBotConversation;
-        if (ownerId == null || isBotConversation == null) return;
-        encryptCategory = await context.database.conversationDao
-            .getEncryptCategory(ownerId, isBotConversation);
-      }
-
-      if (_conversationId == null || encryptCategory == null) return;
-
-      await _sendMessage(
-        context,
-        _conversationId,
-        encryptCategory,
-        category,
-        data,
-      );
-      Navigator.pop(context);
     }
 
     return SizedBox(
@@ -260,6 +285,8 @@ class _SendPage extends HookConsumerWidget {
             leading: const SizedBox(),
             backgroundColor: context.theme.popUp,
           ),
+          const SizedBox(height: 12),
+          Text(targetName, textAlign: TextAlign.center),
           const SizedBox(height: 12),
           Container(
             width: 340,
@@ -279,12 +306,8 @@ class _SendPage extends HookConsumerWidget {
           ),
           const SizedBox(height: 54),
           MixinButton(
-            onTap: sendMessage,
-            child: Text(
-              (conversationId != null)
-                  ? context.l10n.send
-                  : context.l10n.forward,
-            ),
+            onTap: sending.value ? null : sendMessage,
+            child: Text(context.l10n.send),
           ),
           const SizedBox(height: 56),
         ],
@@ -402,12 +425,14 @@ class _Text extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => _MessageBubble(
-    child: Text(
-      text,
-      style: TextStyle(
-        fontSize: MessageItemWidget.primaryFontSize,
-        color: context.theme.text,
+  Widget build(BuildContext context) => SingleChildScrollView(
+    child: _MessageBubble(
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: MessageItemWidget.primaryFontSize,
+          color: context.theme.text,
+        ),
       ),
     ),
   );

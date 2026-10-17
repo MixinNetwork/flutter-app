@@ -137,6 +137,7 @@ class ActionMessageButton extends HookConsumerWidget {
           context,
           action.action,
           title: action.label,
+          isExplicitSendAction: true,
           conversationId: ref.read(currentConversationIdProvider),
         );
       },
