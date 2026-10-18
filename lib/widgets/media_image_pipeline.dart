@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -23,41 +22,113 @@ ImageProvider resolveMediaImageProvider(
       )
     : image;
 
-/// [image] decoded at a size that covers [box], for an image of
-/// [mediaWidth] x [mediaHeight].
+/// [image] decoded at the smallest size that covers [box].
 ///
 /// A photo decodes to tens of megabytes at full size, and the raster thread
-/// uploads all of it, which stalls a frame that shows a few of them. The short
-/// side of the decoded image covers the long side of the box, so the result
-/// does not depend on whether the stored size is before or after the EXIF
-/// rotation. The size goes up in steps of 64 pixels, so a window resize
-/// decodes again only now and then.
+/// uploads all of it, which stalls a frame that shows a few of them. Each side
+/// of the box goes up in steps of 64 pixels, so a window resize decodes again
+/// only now and then.
 ImageProvider coverDecodeImage(
   ImageProvider image, {
   required Size box,
-  required int? mediaWidth,
-  required int? mediaHeight,
   required double devicePixelRatio,
 }) {
-  if (mediaWidth == null ||
-      mediaHeight == null ||
-      mediaWidth <= 0 ||
-      mediaHeight <= 0 ||
-      !box.isFinite ||
-      box.isEmpty) {
-    return image;
-  }
-  final short = math.min(mediaWidth, mediaHeight);
-  final long = math.max(mediaWidth, mediaHeight);
-  final side = (box.longestSide * devicePixelRatio / 64).ceil() * 64;
-  if (side >= short) return image;
-  final bound = (side * long / short).ceil();
-  return ResizeImage(
+  if (!box.isFinite || box.isEmpty) return image;
+  int step(double side) => (side * devicePixelRatio / 64).ceil() * 64;
+  return CoverResizeImage(
     image,
-    width: bound,
-    height: bound,
-    policy: ResizeImagePolicy.fit,
+    width: step(box.width),
+    height: step(box.height),
   );
+}
+
+/// [imageProvider] decoded at the smallest size, with its aspect ratio, that
+/// covers [width] x [height], and never above its own size.
+///
+/// The decoder gives the size after the EXIF rotation, so a rotated photo
+/// covers the box too. [ResizeImagePolicy.fit] with [BoxFit.cover] decodes
+/// too small, and a bound of the long side decodes too large.
+// shortcut: ResizeImage has no cover policy yet, use ResizeImagePolicy.cover
+// when flutter/flutter#61987 lands.
+@immutable
+class CoverResizeImage extends ImageProvider<CoverResizeImageKey> {
+  const CoverResizeImage(
+    this.imageProvider, {
+    required this.width,
+    required this.height,
+  });
+
+  final ImageProvider imageProvider;
+  final int width;
+  final int height;
+
+  @override
+  Future<CoverResizeImageKey> obtainKey(ImageConfiguration configuration) =>
+      imageProvider
+          .obtainKey(configuration)
+          .then((key) => CoverResizeImageKey(key, width, height));
+
+  @override
+  ImageStreamCompleter loadImage(
+    CoverResizeImageKey key,
+    ImageDecoderCallback decode,
+  ) {
+    Future<ui.Codec> decodeCover(
+      ui.ImmutableBuffer buffer, {
+      ui.TargetImageSizeCallback? getTargetSize,
+    }) {
+      assert(getTargetSize == null);
+      return decode(
+        buffer,
+        getTargetSize: (intrinsicWidth, intrinsicHeight) {
+          // The side that needs the larger scale sets it; the other side
+          // rounds up so that it still covers the box.
+          final widthCovers =
+              width * intrinsicHeight >= height * intrinsicWidth;
+          final targetWidth = widthCovers
+              ? width
+              : (height * intrinsicWidth + intrinsicHeight - 1) ~/
+                    intrinsicHeight;
+          final targetHeight = widthCovers
+              ? (width * intrinsicHeight + intrinsicWidth - 1) ~/ intrinsicWidth
+              : height;
+          if (targetWidth >= intrinsicWidth) return const ui.TargetImageSize();
+          return ui.TargetImageSize(width: targetWidth, height: targetHeight);
+        },
+      );
+    }
+
+    return imageProvider.loadImage(key.providerCacheKey, decodeCover);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is CoverResizeImage &&
+      other.imageProvider == imageProvider &&
+      other.width == width &&
+      other.height == height;
+
+  @override
+  int get hashCode => Object.hash(imageProvider, width, height);
+}
+
+@immutable
+class CoverResizeImageKey {
+  const CoverResizeImageKey(this.providerCacheKey, this.width, this.height);
+
+  final Object providerCacheKey;
+  final int width;
+  final int height;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CoverResizeImageKey &&
+      other.providerCacheKey == providerCacheKey &&
+      other.width == width &&
+      other.height == height;
+
+  @override
+  int get hashCode => Object.hash(providerCacheKey, width, height);
 }
 
 final _checkedImageFiles = <String>{};
@@ -231,9 +302,9 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
   void _start() {
     _pending = null;
     _ready = true;
-    // A message image decodes at its display size through a ResizeImage.
+    // A message image decodes at its display size through CoverResizeImage.
     final image = switch (widget.image) {
-      ResizeImage(:final imageProvider) => imageProvider,
+      CoverResizeImage(:final imageProvider) => imageProvider,
       final image => image,
     };
     if (image is! FileImage) return;

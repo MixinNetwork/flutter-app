@@ -203,8 +203,6 @@ class MessageImage extends HookConsumerWidget {
                   image: coverDecodeImage(
                     FileImage(File(path)),
                     box: constraints.biggest,
-                    mediaWidth: mediaSize.$1,
-                    mediaHeight: mediaSize.$2,
                     devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                   ),
                   // A resize can change the decode size; the old image stays
