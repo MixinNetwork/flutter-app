@@ -100,6 +100,11 @@ enum BotWindowComposer {
     channel?.invokeMethod("onMoreTapped", arguments: ["browserId": browser])
   }
 
+  /// Dart hides the menu, then the popup through hidePopup.
+  fileprivate static func dismissPopup(_ browser: Int64) {
+    channel?.invokeMethod("onDismissPopup", arguments: ["browserId": browser])
+  }
+
   /// FlutterMacOS adds views only to engines in multi-view mode, and its
   /// enableMultiView requires no view yet. Turning the same flag on after the
   /// main view keeps it the implicit view, which runApp and plugins using
@@ -130,9 +135,11 @@ enum BotWindowComposer {
     private let titleLabel = NSTextField(labelWithString: "")
     private let leading: LeadingView
     private var popup: PopupHostView?
+    private var popupConstraints: [NSLayoutConstraint] = []
     private var canGoBack = false
     private var canGoForward = false
     private var eventMonitor: Any?
+    private var resizeObserver: NSObjectProtocol?
 
     init(browser: Int64, window: NSWindow, webView: NSView, arguments: [String: Any]) {
       self.browser = browser
@@ -149,7 +156,7 @@ enum BotWindowComposer {
 
       // The requested size includes the header.
       let size = window.contentView?.frame.size ?? window.frame.size
-      window.styleMask = [.titled, .closable, .miniaturizable, .fullSizeContentView]
+      window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
       window.titlebarAppearsTransparent = true
       window.titleVisibility = .hidden
       window.acceptsMouseMovedEvents = true
@@ -158,6 +165,8 @@ enum BotWindowComposer {
         window.standardWindowButton(button)?.isHidden = true
       }
       window.setContentSize(size)
+      // The size the window opens with is also the smallest it gets.
+      window.contentMinSize = size
 
       let root = window.contentView!
       for view in [header, webView, capsule] {
@@ -234,6 +243,14 @@ enum BotWindowComposer {
         return nil
       }
 
+      // The menu hangs from where the capsule was when it opened.
+      resizeObserver = NotificationCenter.default.addObserver(
+        forName: NSWindow.didResizeNotification, object: window, queue: nil
+      ) { [weak self] _ in
+        guard let self = self, !(self.popup?.isHidden ?? true) else { return }
+        BotWindowComposer.dismissPopup(self.browser)
+      }
+
       setTitle(arguments["title"] as? String ?? "")
       setChrome(arguments)
     }
@@ -275,21 +292,23 @@ enum BotWindowComposer {
         let controller = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
         controller.backgroundColor = .clear
         let host = PopupHostView(controller: controller)
-        host.translatesAutoresizingMaskIntoConstraints = false
         // Covers the whole window, above the header, page and capsule, so
         // the menu's barrier blocks all of them.
         if let root = window?.contentView {
           root.addSubview(host)
-          NSLayoutConstraint.activate([
+          popupConstraints = [
             host.topAnchor.constraint(equalTo: root.topAnchor),
             host.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             host.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             host.bottomAnchor.constraint(equalTo: root.bottomAnchor),
-          ])
+          ]
         }
         popup = host
         return host
       }()
+      host.translatesAutoresizingMaskIntoConstraints = false
+      NSLayoutConstraint.activate(popupConstraints)
+      window?.contentView?.layoutSubtreeIfNeeded()
       host.isHidden = false
       window?.makeFirstResponder(host.controller.view)
       let anchor = capsule.frame
@@ -303,6 +322,11 @@ enum BotWindowComposer {
     func hidePopup() {
       guard let popup = popup, !popup.isHidden else { return }
       popup.isHidden = true
+      // A Flutter view waits for a frame at each new size, which would stall
+      // every step of a resize or zoom; the hidden view keeps its size.
+      NSLayoutConstraint.deactivate(popupConstraints)
+      popup.autoresizingMask = []
+      popup.translatesAutoresizingMaskIntoConstraints = true
       window?.makeFirstResponder(webView)
     }
 
@@ -384,6 +408,8 @@ enum BotWindowComposer {
     func tearDown() {
       if let monitor = eventMonitor { NSEvent.removeMonitor(monitor) }
       eventMonitor = nil
+      if let observer = resizeObserver { NotificationCenter.default.removeObserver(observer) }
+      resizeObserver = nil
       // Releasing the controller removes its view from the engine.
       popup?.removeFromSuperview()
       popup = nil
@@ -436,7 +462,7 @@ enum BotWindowComposer {
     override func rotate(with event: NSEvent) { controller.rotate(with: event) }
   }
 
-  /// The drag strip and title row. Double-clicks do nothing.
+  /// The drag strip and title row. Double-clicks act like the title bar's.
   private final class HeaderView: NSView {
     var color: NSColor = .windowBackgroundColor {
       didSet { needsDisplay = true }
@@ -456,7 +482,16 @@ enum BotWindowComposer {
     }
 
     override func mouseDown(with event: NSEvent) {
-      if event.clickCount == 1 { window?.performDrag(with: event) }
+      if event.clickCount == 1 {
+        window?.performDrag(with: event)
+      } else if event.clickCount == 2 {
+        // System Settings > Desktop & Dock > Double-click a window's title bar.
+        switch UserDefaults.standard.string(forKey: "AppleActionOnDoubleClick") {
+        case "Minimize": window?.miniaturize(nil)
+        case "None": break
+        default: window?.zoom(nil)
+        }
+      }
     }
   }
 

@@ -64,6 +64,7 @@ struct BotWindow {
   int capsule_pressed = -1;  // 0: •••, 1: ✕
   bool popup_shown = false;
   bool dismiss_requested = false;
+  GtkAllocation popup_allocation{};  // The overlay's when the popup showed.
 
   ~BotWindow() {
     g_clear_object(&icon);
@@ -401,8 +402,16 @@ gboolean WindowPress(GtkWidget*, GdkEventButton* event, BotWindow* bot) {
     return TRUE;
   }
   if (IsNavigationButton(event)) return Navigate(bot, event->button == 9);
-  // Double-clicks on the header do nothing.
-  return event->type == GDK_2BUTTON_PRESS;
+  return FALSE;
+}
+
+// The menu hangs from where the capsule was when it opened. Showing the
+// popup allocates the overlay again at the same size.
+void OverlayAllocated(GtkWidget*, GtkAllocation* allocation, BotWindow* bot) {
+  if (allocation->width != bot->popup_allocation.width ||
+      allocation->height != bot->popup_allocation.height) {
+    RequestDismiss(bot);
+  }
 }
 
 void WindowActiveChanged(GObject*, GParamSpec*, BotWindow* bot) {
@@ -468,8 +477,12 @@ DWWComposeResult Compose(void*, const DWWComposeRequest* request) {
   }
   const std::string title = GetString(arguments, "title");
   gtk_window_set_title(bot->window, title.c_str());
-  // The page is laid out for a phone.
-  gtk_window_set_resizable(bot->window, FALSE);
+  // The size the window opens with is also the smallest it gets.
+  GdkGeometry geometry{};
+  gtk_window_get_default_size(bot->window, &geometry.min_width,
+                              &geometry.min_height);
+  gtk_window_set_geometry_hints(bot->window, nullptr, &geometry,
+                                GDK_HINT_MIN_SIZE);
 
   bot->css = gtk_css_provider_new();
   bot->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -508,8 +521,8 @@ DWWComposeResult Compose(void*, const DWWComposeRequest* request) {
                                    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
     // A long title truncates; the window keeps its width.
     gtk_label_set_ellipsize(GTK_LABEL(bot->title), PANGO_ELLIPSIZE_END);
-    // A window that cannot be resized takes its natural width, which would
-    // otherwise be the whole title's; hexpand gives the label the rest.
+    // The window's natural width would otherwise be the whole title's;
+    // hexpand gives the label the rest.
     gtk_label_set_max_width_chars(GTK_LABEL(bot->title), 1);
     gtk_label_set_xalign(GTK_LABEL(bot->title), 0);
     gtk_widget_set_hexpand(bot->title, TRUE);
@@ -526,6 +539,7 @@ DWWComposeResult Compose(void*, const DWWComposeRequest* request) {
   gtk_widget_show_all(bot->overlay);
 
   g_signal_connect(bot->window, "button-press-event", G_CALLBACK(WindowPress), bot);
+  g_signal_connect(bot->overlay, "size-allocate", G_CALLBACK(OverlayAllocated), bot);
   // The plugin's container holds WebKitWebView as its main child.
   bot->page = gtk_bin_get_child(GTK_BIN(bot->webview));
   if (bot->page) {
@@ -583,6 +597,7 @@ FlValue* ShowPopup(BotWindow* bot) {
   }
   bot->popup_shown = true;
   bot->dismiss_requested = false;
+  gtk_widget_get_allocation(bot->overlay, &bot->popup_allocation);
   gtk_widget_show(bot->popup);
   gtk_widget_grab_focus(bot->popup);
   // The capsule may be in the title bar, above the view.

@@ -98,6 +98,7 @@ struct BotWindow {
   int capsule_pressed = -1;  // 0: ..., 1: x
   bool popup_shown = false;
   bool dismiss_requested = false;
+  SIZE min_size{};  // At 96 DPI: the size the window opened with.
 };
 
 std::map<int64_t, std::unique_ptr<BotWindow>>& Windows() {
@@ -176,6 +177,12 @@ int Scaled(HWND window, int logical) {
 
 float ScaleOf(HWND window) {
   return static_cast<float>(GetDpiForWindow(window)) / 96.0f;
+}
+
+int FrameHeight(HWND window) {
+  const UINT dpi = GetDpiForWindow(window);
+  return GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi) +
+         GetSystemMetricsForDpi(SM_CXPADDEDBORDER, dpi);
 }
 
 int HeaderHeight(const BotWindow& bot) {
@@ -517,21 +524,50 @@ LRESULT CALLBACK BotWindowProc(HWND hwnd, UINT message, WPARAM wparam,
   BotWindow* bot = Find(static_cast<int64_t>(data));
   if (!bot) return DefSubclassProc(hwnd, message, wparam, lparam);
   switch (message) {
-    case WM_NCCALCSIZE:
-      // The whole window is client area; DWM keeps the shadow and corners.
-      if (wparam) return 0;
-      break;
+    case WM_NCCALCSIZE: {
+      if (!wparam) break;
+      // Keep the default side and bottom borders; the client area takes the
+      // caption and the top border.
+      auto* params = reinterpret_cast<NCCALCSIZE_PARAMS*>(lparam);
+      const LONG top = params->rgrc[0].top;
+      const LRESULT result = DefSubclassProc(hwnd, message, wparam, lparam);
+      params->rgrc[0].top = top;
+      // A maximized window extends past the monitor by its frame.
+      if (IsZoomed(hwnd)) params->rgrc[0].top += FrameHeight(hwnd);
+      return result;
+    }
     case WM_NCHITTEST: {
+      // Side and bottom borders keep their default handling.
+      const LRESULT hit = DefSubclassProc(hwnd, message, wparam, lparam);
+      if (hit != HTCLIENT) return hit;
       POINT point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
       ScreenToClient(hwnd, &point);
-      // No resize borders: the page is laid out for a phone.
+      // The top resize border of a restored window lies inside the header.
+      if (!IsZoomed(hwnd) &&
+          point.y < GetSystemMetricsForDpi(SM_CYSIZEFRAME, GetDpiForWindow(hwnd))) {
+        const int corner = Scaled(hwnd, 16);
+        RECT client;
+        GetClientRect(hwnd, &client);
+        if (point.x < corner) return HTTOPLEFT;
+        if (point.x >= client.right - corner) return HTTOPRIGHT;
+        return HTTOP;
+      }
       if (point.y >= HeaderHeight(*bot) || InBack(*bot, point)) return HTCLIENT;
       return HTCAPTION;
     }
-    case WM_NCLBUTTONDBLCLK:
-      // Double-clicks on the header do nothing.
-      if (wparam == HTCAPTION) return 0;
+    case WM_SIZE:
+      // The menu hangs from where the capsule was when it opened.
+      RequestDismiss(*bot);
       break;
+    case WM_GETMINMAXINFO: {
+      const LRESULT result = DefSubclassProc(hwnd, message, wparam, lparam);
+      auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      if (bot->min_size.cx > 0) {
+        info->ptMinTrackSize = {Scaled(hwnd, bot->min_size.cx),
+                                Scaled(hwnd, bot->min_size.cy)};
+      }
+      return result;
+    }
     case WM_XBUTTONUP:
     case WM_NCXBUTTONUP:
       Navigate(*bot, GET_XBUTTON_WPARAM(wparam) == XBUTTON2);
@@ -641,15 +677,9 @@ DWWComposeResult Compose(void*, const DWWComposeRequest* request) {
   SetChrome(bot, *arguments);
   SetWindowTextW(bot.window, bot.title.c_str());
 
-  // Fixed size, no maximize.
-  auto style = GetWindowLongPtrW(bot.window, GWL_STYLE);
-  SetWindowLongPtrW(bot.window, GWL_STYLE, style & ~(WS_THICKFRAME | WS_MAXIMIZEBOX));
   const DWORD round = 2;  // DWMWCP_ROUND
   DwmSetWindowAttribute(bot.window, static_cast<DWMWINDOWATTRIBUTE>(33), &round,
                         sizeof(round));
-  // Keeps DWM's shadow without a frame.
-  const MARGINS margins{0, 0, 1, 0};
-  DwmExtendFrameIntoClientArea(bot.window, &margins);
 
   bot.capsule = CreateChild(kCapsuleClass, WS_VISIBLE, bot.window, bot.browser);
   // New children go below their siblings; immersive pages put it over the
@@ -663,6 +693,22 @@ DWWComposeResult Compose(void*, const DWWComposeRequest* request) {
   SetWindowPos(bot.window, nullptr, 0, 0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE |
                    SWP_FRAMECHANGED);
+  // The requested size is the client area's: grow by the side and bottom
+  // borders, which are invisible on Windows 10 and later. It is also the
+  // smallest the window gets.
+  RECT frame;
+  RECT client;
+  GetWindowRect(bot.window, &frame);
+  GetClientRect(bot.window, &client);
+  const int extra_x = (frame.right - frame.left) - client.right;
+  const int extra_y = (frame.bottom - frame.top) - client.bottom;
+  const int width = (frame.right - frame.left) + extra_x;
+  const int height = (frame.bottom - frame.top) + extra_y;
+  const UINT dpi = GetDpiForWindow(bot.window);
+  bot.min_size = {MulDiv(width, 96, static_cast<int>(dpi)),
+                  MulDiv(height, 96, static_cast<int>(dpi))};
+  SetWindowPos(bot.window, nullptr, frame.left - extra_x / 2, frame.top, width,
+               height, SWP_NOZORDER | SWP_NOACTIVATE);
   return DWW_COMPOSE_HANDLED;
 }
 
