@@ -361,7 +361,7 @@ SelectedContent? _findSelectedContent(BuildContext context) {
   final selectableRegion = findSelectableRegionState(context);
   final status = selectableRegion?.selectable?.value.status;
   final content = selectableRegion?.selectable?.getSelectedContent();
-  d('status: $status, content: $content');
+  d('status: $status, content length: ${content?.plainText.length}');
   if (status == SelectionStatus.uncollapsed && content != null) {
     return content;
   }

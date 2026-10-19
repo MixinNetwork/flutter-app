@@ -143,7 +143,13 @@ class DatabaseProfiler extends Database {
     try {
       result = run();
     } catch (error, s) {
-      e('queryExecutor Error: $error\n$s\nsql: $sql, parameters: $parameters');
+      // SqliteException.toString() includes the bound parameters.
+      final message = error is SqliteException
+          ? 'SqliteException(${error.extendedResultCode}): ${error.message}'
+          : error;
+      e(
+        'queryExecutor Error: $message\n$s\nsql: $sql, parameters: ${parameters?.length}',
+      );
       rethrow;
     }
     stopwatch?.stop();
@@ -172,7 +178,7 @@ class DatabaseProfiler extends Database {
       w('''
 sql execution time: ${stopwatch.elapsed.inMilliseconds} MS, Isolate_${Isolate.current.hashCode}(${Isolate.current.debugName})
 sql: $sql
-parameter: $parameters
+parameter count: ${parameters?.length}
 ''');
       if (needPrint && details != null) {
         w('EXPLAIN QUERY PLAN: \n${details.join('\n')}');

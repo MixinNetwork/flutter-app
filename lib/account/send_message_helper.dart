@@ -1186,7 +1186,9 @@ class SendMessageHelper {
             as Map<String, dynamic>,
       );
     } catch (e) {
-      w('check attachment extra error: $e, content: ${message.content}');
+      w(
+        'check attachment extra error: ${e.runtimeType}, messageId: ${message.messageId}',
+      );
       attachmentExtra = null;
     }
     if (attachmentExtra == null) {

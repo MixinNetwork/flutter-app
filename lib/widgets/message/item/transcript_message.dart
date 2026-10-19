@@ -56,8 +56,8 @@ class TranscriptMessageWidget extends HookConsumerWidget {
             )
             .toList();
       } catch (error) {
-        e('TranscriptMessageWidget.build $error');
-        e('parse json failed: $content');
+        e('TranscriptMessageWidget.build ${error.runtimeType}');
+        e('parse json failed, content length: ${content.length}');
         return null;
       }
     }, [content]);
