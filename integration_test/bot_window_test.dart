@@ -103,7 +103,8 @@ void main() {
 
   tearDownAll(() => server.close(force: true));
 
-  testWidgets('browser window chrome and popup', (tester) async {
+  // Pumps the app with a main navigator; each test opens its own window.
+  Future<BuildContext> pumpApp(WidgetTester tester) async {
     late BuildContext context;
     await tester.pumpWidget(
       ProviderScope(
@@ -132,6 +133,107 @@ void main() {
         ),
       ),
     );
+    return context;
+  }
+
+  Future<_Window> openWindow(
+    WidgetTester tester,
+    BuildContext context, {
+    String key = 'test',
+    String title = 'Test',
+    App? app,
+  }) async {
+    final window = _Window(
+      tester,
+      await BotWindow.open(
+        context,
+        key: key,
+        url: url,
+        title: title,
+        app: app,
+        appCardData: null,
+        conversationId: null,
+        version: 'test',
+        windows: const WindowsWebviewOptions(),
+      ),
+    );
+    addTearDown(() async {
+      if (!window.closed) await window.window.webview.close();
+    });
+    return window;
+  }
+
+  testWidgets('header follows the page theme-color', (tester) async {
+    final context = await pumpApp(tester);
+    final window = await openWindow(tester, context);
+    final webview = window.window.webview;
+
+    // The page's theme-color reaches the whole header before load completes.
+    await window.expectChrome(0xFFFF8800);
+    expect(webview.navigationState.value.isLoading, true);
+    await window.waitFor(
+      'page loaded',
+      () => !webview.navigationState.value.isLoading,
+    );
+    await webview.evaluateJavaScript('''
+document.querySelector('meta[name="theme-color"]').content = '#101010';
+''');
+    await window.expectChrome(0xFF101010);
+
+    // getContext follows the window's appearance.
+    expect(
+      await webview.evaluateJavaScript(
+        'JSON.parse(MixinContext.getContext()).appearance',
+      ),
+      context.brightness == Brightness.dark ? 'dark' : 'light',
+    );
+  });
+
+  testWidgets('‹ goes back', (tester) async {
+    final context = await pumpApp(tester);
+    final window = await openWindow(tester, context);
+    final webview = window.window.webview;
+
+    // `‹` shows once the page can go back, and goes back. Without it the
+    // title row drags the window.
+    expect(await window.hitAt(_back), 'header');
+    // A launch while the first page loads would replace it.
+    await window.waitFor(
+      'page loaded',
+      () => !webview.navigationState.value.isLoading,
+    );
+    await webview.launch('${url}next');
+    await window.waitFor(
+      'can go back',
+      () => webview.navigationState.value.canGoBack,
+    );
+    expect(await window.hitAt(_back), 'leading');
+    // The page's long title truncates; the window keeps its width.
+    await window.waitFor(
+      'long title',
+      () => webview.navigationState.value.title!.startsWith('Long'),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect((await window.probe(const []))['width'], 380);
+    await window.click(_back);
+    await window.waitFor(
+      'went back',
+      () =>
+          !webview.navigationState.value.canGoBack &&
+          !webview.navigationState.value.isLoading,
+    );
+    expect(webview.navigationState.value.url, url);
+    expect(await window.hitAt(_back), 'header');
+  });
+
+  testWidgets('••• popup covers the window and hands off to the main one', (
+    tester,
+  ) async {
+    final context = await pumpApp(tester);
+    final window = await openWindow(tester, context);
+    // X11 has no popup view: ••• shows a native menu instead, not driven
+    // here.
+    if ((await window.probe(const []))['nativeMenu'] == true) return;
 
     // A test desktop may keep the foreground elsewhere, as Windows does for
     // apps started by a scheduled task; focus is then checked nowhere.
@@ -141,254 +243,135 @@ void main() {
       debugPrint('The app cannot take focus here; skipping focus checks.');
     }
 
-    var window = await BotWindow.open(
-      context,
-      key: 'test',
-      url: url,
-      title: 'Test',
-      app: null,
-      appCardData: null,
-      conversationId: null,
-      version: 'test',
-      windows: const WindowsWebviewOptions(),
+    // ••• opens the menu, hanging from the capsule.
+    await window.window.focus();
+    await window.click(_capsuleMore);
+    await window.waitFor(
+      'popup shown',
+      () => window.window.popupVisible.value,
     );
-    var closed = false;
-    unawaited(window.webview.onClose.then((_) => closed = true));
-    addTearDown(() async {
-      if (!closed) await window.webview.close();
-    });
-
-    Future<Map<Object?, Object?>> probe(List<Offset> points) async =>
-        (await _channel.invokeMapMethod<Object?, Object?>('debugProbe', {
-          'browserId': window.webview.id,
-          'points': [
-            for (final point in points) [point.dx, point.dy],
-          ],
-        }))!;
-
-    Future<void> mouse(String type, Offset point) =>
-        _channel.invokeMethod<void>('debugMouse', {
-          'browserId': window.webview.id,
-          'type': type,
-          'x': point.dx,
-          'y': point.dy,
-        });
-
-    Future<void> click(Offset point) async {
-      await mouse('down', point);
-      await mouse('up', point);
-      await tester.pump(const Duration(milliseconds: 50));
-    }
-
-    Future<void> waitFor(String reason, FutureOr<bool> Function() done) async {
-      final deadline = DateTime.now().add(const Duration(seconds: 10));
-      while (!await done()) {
-        if (DateTime.now().isAfter(deadline)) fail('Timed out: $reason');
-        await tester.pump(const Duration(milliseconds: 50));
-      }
-    }
-
-    Future<void> expectChrome(int color) async {
-      await waitFor(
-        'header color ${color.toRadixString(16)}',
-        () async => (await probe(const []))['headerColor'] == color,
-      );
-      final probes = (await probe([_headerTop, _titleRow]))['probes']! as List;
-      for (final p in probes) {
-        // The capture is display-managed, so allow some drift per channel.
-        final drawn = Color((p as Map)['color']! as int);
-        final expected = Color(color);
-        expect(
-          [drawn.r, drawn.g, drawn.b],
-          [
-            closeTo(expected.r, 0.1),
-            closeTo(expected.g, 0.1),
-            closeTo(expected.b, 0.1),
-          ],
-          reason:
-              'pixel drawn in the header: ${drawn.toARGB32().toRadixString(16)}',
-        );
-      }
-    }
-
-    // The page's theme-color reaches the whole header before load completes.
-    await expectChrome(0xFFFF8800);
-    expect(window.webview.navigationState.value.isLoading, true);
-    await waitFor(
-      'page loaded',
-      () => !window.webview.navigationState.value.isLoading,
-    );
-    await window.webview.evaluateJavaScript('''
-document.querySelector('meta[name="theme-color"]').content = '#101010';
-''');
-    await expectChrome(0xFF101010);
-
-    // getContext follows the window's appearance.
+    await tester.pump(const Duration(milliseconds: 400));
+    final viewId = BotWindow.popups.value.keys.single;
+    final state = await window.probe([_headerTop, _capsuleClose, _page]);
+    expect(state['popupHidden'], false);
     expect(
-      await window.webview.evaluateJavaScript(
-        'JSON.parse(MixinContext.getContext()).appearance',
-      ),
-      context.brightness == Brightness.dark ? 'dark' : 'light',
+      [for (final p in state['probes']! as List) (p as Map)['hit']],
+      _popupCoversHeader
+          ? ['popup', 'popup', 'popup']
+          : ['header', 'capsule', 'popup'],
+      reason: 'the popup view covers the window',
+    );
+    // Window content coordinates of the popup view's origin.
+    final origin = state['popupOrigin']! as List;
+    final popupOrigin = Offset(
+      (origin[0]! as num).toDouble(),
+      (origin[1]! as num).toDouble(),
+    );
+    final menu = tester.getRect(
+      find
+          .ancestor(of: find.text(_pageTitle), matching: find.byType(Material))
+          .first,
+    );
+    final anchor = window.window.popupAnchor;
+    expect(anchor, _capsule.shift(-popupOrigin));
+    expect(
+      menu.top,
+      moreOrLessEquals(math.max(anchor.bottom + 4, 0).toDouble(), epsilon: 1),
+    );
+    expect(menu.right, moreOrLessEquals(anchor.right, epsilon: 1));
+
+    // Account dialogs move to the main navigator only after the popup closes.
+    BuildContext? main;
+    Object? hiddenAtHandoff;
+    var handedOff = false;
+    unawaited(
+      window.window.showMainWindow().then((value) async {
+        main = value;
+        hiddenAtHandoff = (await window.probe(const []))['popupHidden'];
+        handedOff = true;
+      }),
+    );
+    await window.waitFor('main window handoff', () => handedOff);
+    expect(main, isNotNull);
+    expect(hiddenAtHandoff, true);
+    if (canFocus) expect(await windowManager.isFocused(), true);
+    final mainViewId = View.of(context).viewId;
+    final dialog = showMixinDialog<void>(
+      context: main!,
+      child: const Text('Main window dialog'),
+    );
+    await tester.pumpAndSettle(
+      const Duration(milliseconds: 50),
+      EnginePhase.sendSemanticsUpdate,
+      const Duration(seconds: 5),
+    );
+    expect(
+      View.of(tester.element(find.text('Main window dialog'))).viewId,
+      mainViewId,
+    );
+    Navigator.of(main!).pop();
+    await tester.pumpAndSettle(
+      const Duration(milliseconds: 50),
+      EnginePhase.sendSemanticsUpdate,
+      const Duration(seconds: 5),
+    );
+    await dialog;
+
+    await window.window.focus();
+    await window.click(_capsuleMore);
+    await window.waitFor(
+      'popup shown again',
+      () => window.window.popupVisible.value,
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Hover reaches the popup view.
+    events.clear();
+    await window.mouse('moved', _page);
+    await window.waitFor(
+      'hover in view $viewId',
+      () => events.any((e) => e is PointerHoverEvent && e.viewId == viewId),
     );
 
-    // `‹` shows once the page can go back, and goes back. Without it the
-    // title row drags the window.
-    Future<Object?> hitAtBack() async =>
-        (((await probe([_back]))['probes']! as List).single as Map)['hit'];
-    expect(await hitAtBack(), 'header');
-    await window.webview.launch('${url}next');
-    await waitFor(
-      'can go back',
-      () => window.webview.navigationState.value.canGoBack,
+    // A click on the menu stays in the popup.
+    final header = tester.getCenter(find.text(_pageTitle));
+    events.clear();
+    await window.click(header + popupOrigin);
+    await window.waitFor(
+      'pointer down in view $viewId',
+      () => events.any((e) => e is PointerDownEvent && e.viewId == viewId),
     );
-    expect(await hitAtBack(), 'leading');
-    // The page's long title truncates; the window keeps its width.
-    await waitFor(
-      'long title',
-      () => window.webview.navigationState.value.title!.startsWith('Long'),
+    expect(
+      events.whereType<PointerDownEvent>().single.position,
+      within(distance: 1, from: header),
     );
-    await tester.pump(const Duration(milliseconds: 100));
-    expect((await probe(const []))['width'], 380);
-    await click(_back);
-    await waitFor(
-      'went back',
-      () =>
-          !window.webview.navigationState.value.canGoBack &&
-          !window.webview.navigationState.value.isLoading,
+    expect(window.window.popupVisible.value, true);
+
+    // A click on the capsule's ✕ hits the barrier: the popup closes, the
+    // window does not.
+    await window.click(_capsuleClose);
+    await window.waitFor(
+      'popup hidden',
+      () async => (await window.probe(const []))['popupHidden'] == true,
     );
-    expect(window.webview.navigationState.value.url, url);
-    expect(await hitAtBack(), 'header');
+    expect(window.closed, false);
+  });
 
-    // X11 has no popup view: ••• shows a native menu instead, not driven
-    // here.
-    final nativeMenu = (await probe(const []))['nativeMenu'] == true;
-    if (!nativeMenu) {
-      // ••• opens the menu, hanging from the capsule.
-      await window.focus();
-      await click(_capsuleMore);
-      await waitFor('popup shown', () => window.popupVisible.value);
-      await tester.pump(const Duration(milliseconds: 400));
-      final viewId = BotWindow.popups.value.keys.single;
-      final state = await probe([_headerTop, _capsuleClose, _page]);
-      expect(state['popupHidden'], false);
-      expect(
-        [for (final p in state['probes']! as List) (p as Map)['hit']],
-        _popupCoversHeader
-            ? ['popup', 'popup', 'popup']
-            : ['header', 'capsule', 'popup'],
-        reason: 'the popup view covers the window',
-      );
-      // Window content coordinates of the popup view's origin.
-      final origin = state['popupOrigin']! as List;
-      final popupOrigin = Offset(
-        (origin[0]! as num).toDouble(),
-        (origin[1]! as num).toDouble(),
-      );
-      final menu = tester.getRect(
-        find
-            .ancestor(
-              of: find.text(_pageTitle),
-              matching: find.byType(Material),
-            )
-            .first,
-      );
-      expect(window.popupAnchor, _capsule.shift(-popupOrigin));
-      expect(
-        menu.top,
-        moreOrLessEquals(
-          math.max(window.popupAnchor.bottom + 4, 0).toDouble(),
-          epsilon: 1,
-        ),
-      );
-      expect(
-        menu.right,
-        moreOrLessEquals(window.popupAnchor.right, epsilon: 1),
-      );
+  testWidgets('✕ closes the window', (tester) async {
+    final context = await pumpApp(tester);
+    final window = await openWindow(tester, context);
+    await window.click(_capsuleClose);
+    await window.waitFor('window closed', () => window.closed);
+  });
 
-      // Account dialogs move to the main navigator only after the popup closes.
-      BuildContext? main;
-      Object? hiddenAtHandoff;
-      var handedOff = false;
-      unawaited(
-        window.showMainWindow().then((value) async {
-          main = value;
-          hiddenAtHandoff = (await probe(const []))['popupHidden'];
-          handedOff = true;
-        }),
-      );
-      await waitFor('main window handoff', () => handedOff);
-      expect(main, isNotNull);
-      expect(hiddenAtHandoff, true);
-      if (canFocus) expect(await windowManager.isFocused(), true);
-      final mainViewId = View.of(context).viewId;
-      final dialog = showMixinDialog<void>(
-        context: main!,
-        child: const Text('Main window dialog'),
-      );
-      await tester.pumpAndSettle(
-        const Duration(milliseconds: 50),
-        EnginePhase.sendSemanticsUpdate,
-        const Duration(seconds: 5),
-      );
-      expect(
-        View.of(tester.element(find.text('Main window dialog'))).viewId,
-        mainViewId,
-      );
-      Navigator.of(main!).pop();
-      await tester.pumpAndSettle(
-        const Duration(milliseconds: 50),
-        EnginePhase.sendSemanticsUpdate,
-        const Duration(seconds: 5),
-      );
-      await dialog;
-
-      await window.focus();
-      await click(_capsuleMore);
-      await waitFor('popup shown again', () => window.popupVisible.value);
-      await tester.pump(const Duration(milliseconds: 400));
-
-      // Hover reaches the popup view.
-      events.clear();
-      await mouse('moved', _page);
-      await waitFor(
-        'hover in view $viewId',
-        () => events.any((e) => e is PointerHoverEvent && e.viewId == viewId),
-      );
-
-      // A click on the menu stays in the popup.
-      final header = tester.getCenter(find.text(_pageTitle));
-      events.clear();
-      await click(header + popupOrigin);
-      await waitFor(
-        'pointer down in view $viewId',
-        () => events.any((e) => e is PointerDownEvent && e.viewId == viewId),
-      );
-      expect(
-        events.whereType<PointerDownEvent>().single.position,
-        within(distance: 1, from: header),
-      );
-      expect(window.popupVisible.value, true);
-
-      // A click on the capsule's ✕ hits the barrier: the popup closes, the
-      // window does not.
-      await click(_capsuleClose);
-      await waitFor(
-        'popup hidden',
-        () async => (await probe(const []))['popupHidden'] == true,
-      );
-      expect(closed, false);
-    }
-
-    // With the popup gone, ✕ closes the window.
-    await click(_capsuleClose);
-    await waitFor('window closed', () => closed);
-
+  testWidgets("a bot's icon turns into ‹", (tester) async {
+    final context = await pumpApp(tester);
     // A bot's title row: its icon fills the 24pt slot before the name, and
     // turns into `‹` once the page can go back.
-    window = await BotWindow.open(
+    final window = await openWindow(
+      tester,
       context,
       key: 'bot',
-      url: url,
       title: 'Bot',
       app: const App(
         appId: '00000000-0000-0000-0000-000000000001',
@@ -401,28 +384,27 @@ document.querySelector('meta[name="theme-color"]').content = '#101010';
         appSecret: '',
         creatorId: '',
       ),
-      appCardData: null,
-      conversationId: null,
-      version: 'test',
-      windows: const WindowsWebviewOptions(),
     );
-    closed = false;
-    unawaited(window.webview.onClose.then((_) => closed = true));
+    final webview = window.window.webview;
     Future<Map<Object?, Object?>> leading() async =>
-        (await probe(const []))['leading']! as Map<Object?, Object?>;
+        (await window.probe(const []))['leading']! as Map<Object?, Object?>;
     expect(await leading(), containsPair('shown', true));
     // The icon drags the window like the rest of the title row.
-    expect(await hitAtBack(), 'header');
+    expect(await window.hitAt(_back), 'header');
 
     final recorder = ui.PictureRecorder();
     ui.Canvas(recorder).drawColor(const Color(0xFFFF0000), BlendMode.src);
     final source = await recorder.endRecording().toImage(128, 128);
     final png = (await source.toByteData(format: ui.ImageByteFormat.png))!;
-    await window.showIcon(png.buffer.asUint8List());
-    await waitFor('icon set', () async => (await leading())['hasIcon'] == true);
+    await window.window.showIcon(png.buffer.asUint8List());
+    await window.waitFor(
+      'icon set',
+      () async => (await leading())['hasIcon'] == true,
+    );
     await tester.pump(const Duration(milliseconds: 100));
     final iconPixel = Color(
-      (((await probe([_back]))['probes']! as List).single as Map)['color']!
+      (((await window.probe([_back]))['probes']! as List).single
+              as Map)['color']!
           as int,
     );
     expect(
@@ -431,14 +413,82 @@ document.querySelector('meta[name="theme-color"]').content = '#101010';
       reason: 'icon pixel: ${iconPixel.toARGB32().toRadixString(16)}',
     );
 
-    await window.webview.launch('${url}next');
-    await waitFor(
+    await webview.launch('${url}next');
+    await window.waitFor(
       'bot can go back',
-      () => window.webview.navigationState.value.canGoBack,
+      () => webview.navigationState.value.canGoBack,
     );
-    await waitFor('‹ shown', () async => (await leading())['back'] == true);
-    expect(await hitAtBack(), 'leading');
-    await click(_capsuleClose);
-    await waitFor('bot window closed', () => closed);
+    await window.waitFor(
+      '‹ shown',
+      () async => (await leading())['back'] == true,
+    );
+    expect(await window.hitAt(_back), 'leading');
   });
+}
+
+/// An open bot window driven through the runner's debug methods.
+class _Window {
+  _Window(this.tester, this.window) {
+    unawaited(window.webview.onClose.then((_) => closed = true));
+  }
+
+  final WidgetTester tester;
+  final BotWindow window;
+  bool closed = false;
+
+  Future<Map<Object?, Object?>> probe(List<Offset> points) async =>
+      (await _channel.invokeMapMethod<Object?, Object?>('debugProbe', {
+        'browserId': window.webview.id,
+        'points': [
+          for (final point in points) [point.dx, point.dy],
+        ],
+      }))!;
+
+  Future<Object?> hitAt(Offset point) async =>
+      (((await probe([point]))['probes']! as List).single as Map)['hit'];
+
+  Future<void> mouse(String type, Offset point) =>
+      _channel.invokeMethod<void>('debugMouse', {
+        'browserId': window.webview.id,
+        'type': type,
+        'x': point.dx,
+        'y': point.dy,
+      });
+
+  Future<void> click(Offset point) async {
+    await mouse('down', point);
+    await mouse('up', point);
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+
+  Future<void> waitFor(String reason, FutureOr<bool> Function() done) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while (!await done()) {
+      if (DateTime.now().isAfter(deadline)) fail('Timed out: $reason');
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+  }
+
+  Future<void> expectChrome(int color) async {
+    await waitFor(
+      'header color ${color.toRadixString(16)}',
+      () async => (await probe(const []))['headerColor'] == color,
+    );
+    final probes = (await probe([_headerTop, _titleRow]))['probes']! as List;
+    for (final p in probes) {
+      // The capture is display-managed, so allow some drift per channel.
+      final drawn = Color((p as Map)['color']! as int);
+      final expected = Color(color);
+      expect(
+        [drawn.r, drawn.g, drawn.b],
+        [
+          closeTo(expected.r, 0.1),
+          closeTo(expected.g, 0.1),
+          closeTo(expected.b, 0.1),
+        ],
+        reason:
+            'pixel drawn in the header: ${drawn.toARGB32().toRadixString(16)}',
+      );
+    }
+  }
 }

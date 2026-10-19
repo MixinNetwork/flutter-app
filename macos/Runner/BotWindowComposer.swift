@@ -381,7 +381,7 @@ enum BotWindowComposer {
 
     /// Delivers a synthetic mouse event through NSWindow.sendEvent, so it
     /// takes the same route as a real one without needing the window in
-    /// front.
+    /// front, or the app active.
     func debugMouse(type: String, x: Double, y: Double) {
       guard let window = window, let root = window.contentView else { return }
       let point = root.convert(NSPoint(x: x, y: root.bounds.height - y), to: nil)
@@ -396,6 +396,14 @@ enum BotWindowComposer {
         timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: window.windowNumber,
         context: nil, eventNumber: 0, clickCount: eventType == .mouseMoved ? 0 : 1,
         pressure: eventType == .leftMouseDown ? 1 : 0) else { return }
+      // In an inactive app, NSWindow takes a click to activate the app,
+      // which a synthetic one cannot do, and drops it. Hand it to the view
+      // under the point, as AppKit does once the app is active.
+      if eventType != .mouseMoved, !NSApp.isActive, let frameView = root.superview {
+        let view = frameView.hitTest(frameView.convert(point, from: nil))
+        eventType == .leftMouseDown ? view?.mouseDown(with: event) : view?.mouseUp(with: event)
+        return
+      }
       window.sendEvent(event)
     }
     #endif
