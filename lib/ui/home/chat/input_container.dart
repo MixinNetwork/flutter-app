@@ -48,6 +48,7 @@ import '../../provider/mention_cache_provider.dart';
 import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
+import '../../provider/setting_provider.dart';
 import '../notifier/chat_side_notifier.dart';
 import 'chat_send_outcome.dart';
 import 'files_preview.dart';
@@ -451,6 +452,9 @@ class _SendTextField extends HookConsumerWidget {
         (value) => value?.encryptCategory.isEncrypt == true,
       ),
     );
+    final fontSize =
+        14.0 +
+        ref.watch(settingProvider.select((value) => value.chatFontSizeDelta));
 
     final hasInputText =
         useMemoizedStream(
@@ -507,7 +511,7 @@ class _SendTextField extends HookConsumerWidget {
               minLines: 1,
               focusNode: focusNode,
               controller: textEditingController,
-              style: TextStyle(color: context.theme.text, fontSize: 14),
+              style: TextStyle(color: context.theme.text, fontSize: fontSize),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(kMaxTextLength),
               ],
@@ -534,7 +538,7 @@ class _SendTextField extends HookConsumerWidget {
                           : context.l10n.typeMessage,
                       style: TextStyle(
                         color: context.theme.secondaryText,
-                        fontSize: 14,
+                        fontSize: fontSize,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
