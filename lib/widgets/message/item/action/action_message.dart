@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../ui/provider/conversation_provider.dart';
@@ -97,6 +99,7 @@ class ActionMessageButton extends HookConsumerWidget {
                   padding: const EdgeInsets.all(6),
                   child: SvgPicture.asset(
                     Resources.assetsImagesLinkSendSvg,
+                    renderingStrategy: RenderingStrategy.raster,
                     width: 8,
                     height: 8,
                   ),
@@ -109,6 +112,7 @@ class ActionMessageButton extends HookConsumerWidget {
                   padding: const EdgeInsets.all(6),
                   child: SvgPicture.asset(
                     Resources.assetsImagesExternalLinkSvg,
+                    renderingStrategy: RenderingStrategy.raster,
                     width: 6,
                     height: 6,
                   ),

@@ -201,18 +201,12 @@ class ChatContainer extends HookConsumerWidget {
     return RepaintBoundary(
       child: FocusableActionDetector(
         autofocus: true,
-        shortcuts: {
-          if (inMultiSelectMode)
-            const SingleActivator(LogicalKeyboardKey.escape):
-                const EscapeIntent(),
+        // The shortcut stays when selection mode changes: an empty map drops
+        // the Shortcuts widget, and that structure change rebuilt every row.
+        shortcuts: const {
+          SingleActivator(LogicalKeyboardKey.escape): EscapeIntent(),
         },
-        actions: {
-          EscapeIntent: CallbackAction<EscapeIntent>(
-            onInvoke: (intent) {
-              ref.read(messageSelectionProvider).clearSelection();
-            },
-          ),
-        },
+        actions: {EscapeIntent: _ClearSelectionAction(ref)},
         child: Column(
           children: [
             Container(
@@ -280,7 +274,7 @@ class ChatContainer extends HookConsumerWidget {
 }
 
 @visibleForTesting
-class ChatBottomBarSwitcher extends StatelessWidget {
+class ChatBottomBarSwitcher extends HookWidget {
   const ChatBottomBarSwitcher({
     required this.inMultiSelectMode,
     this.inputContainer = const InputContainer(),
@@ -292,14 +286,52 @@ class ChatBottomBarSwitcher extends StatelessWidget {
   final Widget inputContainer;
   final Widget selectionBottomBar;
 
+  static const _duration = Duration(milliseconds: 300);
+
   @override
-  Widget build(BuildContext context) => AnimatedCrossFade(
-    alignment: Alignment.bottomCenter,
-    firstChild: inputContainer,
-    secondChild: selectionBottomBar,
-    crossFadeState: inMultiSelectMode
-        ? CrossFadeState.showSecond
-        : CrossFadeState.showFirst,
-    duration: const Duration(milliseconds: 300),
-  );
+  Widget build(BuildContext context) {
+    // The bar animates its height only while it switches between the input and
+    // the selection bar. A line that the input adds or removes changes the
+    // height at once, so the clip does not cover the input's padding while
+    // the height catches up.
+    final switching = useRef(false);
+    final previous = usePrevious(inMultiSelectMode);
+    if (previous != null && previous != inMultiSelectMode) {
+      switching.value = true;
+    }
+    final rebuild = useState(0);
+    useEffect(() {
+      if (!switching.value) return null;
+      final timer = Timer(_duration, () {
+        switching.value = false;
+        rebuild.value++;
+      });
+      return timer.cancel;
+    }, [inMultiSelectMode]);
+
+    return AnimatedCrossFade(
+      alignment: Alignment.bottomCenter,
+      firstChild: inputContainer,
+      secondChild: selectionBottomBar,
+      crossFadeState: inMultiSelectMode
+          ? CrossFadeState.showSecond
+          : CrossFadeState.showFirst,
+      sizeCurve: switching.value ? Curves.linear : const Threshold(0),
+      duration: _duration,
+    );
+  }
+}
+
+// A disabled action leaves Escape to the handlers above it.
+class _ClearSelectionAction extends Action<EscapeIntent> {
+  _ClearSelectionAction(this.ref);
+
+  final WidgetRef ref;
+
+  @override
+  bool isEnabled(EscapeIntent intent) => ref.read(hasSelectedMessageProvider);
+
+  @override
+  void invoke(EscapeIntent intent) =>
+      ref.read(messageSelectionProvider).clearSelection();
 }

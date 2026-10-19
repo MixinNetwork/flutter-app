@@ -311,36 +311,6 @@ void main() {
     },
   );
 
-  testWidgets('viewport date only inspects rendered message keys', (
-    tester,
-  ) async {
-    final coordinator = ChatScrollCoordinator();
-    final messages = List.generate(1000, testMessage);
-    final keysByMessageId = CountingKeyMap({
-      for (final message in messages)
-        message.messageId: MessageGlobalKey(message.messageId),
-    });
-
-    addTearDown(coordinator.dispose);
-    await pumpScrollableMessages(
-      tester,
-      coordinator,
-      messages,
-      keysByMessageId,
-      cacheExtent: 0,
-    );
-
-    coordinator.scrollController.jumpTo(80.0 * 500);
-    await tester.pump();
-
-    keysByMessageId.lookupCount = 0;
-    coordinator.updateMessages(messages, keysByMessageId);
-    await tester.pump();
-
-    expect(coordinator.visibleDateTime.value, testMessage(500).createdAt);
-    expect(keysByMessageId.lookupCount, lessThan(50));
-  });
-
   testWidgets('scroll updates do not resolve visible date geometry', (
     tester,
   ) async {
@@ -610,6 +580,63 @@ void main() {
 
     expect(coordinator.trackingScrollController.animateCount, 1);
     expect(coordinator.trackingScrollController.jumpCount, 0);
+  });
+
+  testWidgets('a page added below an older window does not move the view', (
+    tester,
+  ) async {
+    final coordinator = TrackingChatScrollCoordinator();
+    final messages = List.generate(20, testMessage);
+    final nextMessages = [
+      ...messages,
+      for (var i = 20; i < 30; i++) testMessage(i),
+    ];
+    final keysByMessageId = {
+      for (final message in nextMessages) message.messageId: GlobalKey(),
+    };
+
+    addTearDown(coordinator.dispose);
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      messages,
+      keysByMessageId,
+    );
+    coordinator.scheduleRestore(
+      messages: messages,
+      keysByMessageId: keysByMessageId,
+      reset: false,
+      isLatest: false,
+    );
+    await tester.pump();
+    final bottom = coordinator.scrollController.position.maxScrollExtent;
+    coordinator.scrollController.jumpTo(bottom);
+    await tester.pump();
+    coordinator.captureViewportState(messages, keysByMessageId);
+
+    await pumpFullyBuiltScrollableMessages(
+      tester,
+      coordinator,
+      nextMessages,
+      keysByMessageId,
+    );
+    coordinator.trackingScrollController
+      ..animateCount = 0
+      ..jumpCount = 0;
+    coordinator.scheduleRestore(
+      messages: nextMessages,
+      keysByMessageId: keysByMessageId,
+      reset: false,
+      isLatest: false,
+    );
+    await tester.pump();
+
+    expect(coordinator.trackingScrollController.animateCount, 0);
+    expect(coordinator.scrollController.offset, bottom);
+    expect(
+      coordinator.scrollController.position.maxScrollExtent,
+      greaterThan(bottom),
+    );
   });
 
   testWidgets('latest request follows new bottom during animation', (

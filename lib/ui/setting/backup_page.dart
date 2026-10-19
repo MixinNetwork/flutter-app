@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
@@ -22,6 +24,7 @@ class BackupPage extends HookConsumerWidget {
         children: [
           SvgPicture.asset(
             Resources.assetsImagesChatBackupSvg,
+            renderingStrategy: RenderingStrategy.raster,
             width: 88,
             height: 58,
             colorFilter: ColorFilter.mode(

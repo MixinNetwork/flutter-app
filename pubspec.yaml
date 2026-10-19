@@ -19,7 +19,7 @@ environment:
   flutter: ^3.38.0
 
 dependencies:
-  android_id: ^0.5.1
+  android_id: ^0.6.0
   ansicolor: ^2.0.3
   archive: ^4.3.0
   async: ^2.13.1
@@ -89,9 +89,9 @@ dependencies:
   local_auth: ^3.0.1
   lottie: ^3.3.3
   map: ^2.0.2
-  mixin_markdown_widget: ^0.3.1
+  mixin_markdown_widget: ^0.3.3
   mime: ^2.0.0
-  mixin_bot_sdk_dart: ^1.5.0
+  mixin_bot_sdk_dart: ^1.5.1
   mixin_logger: ^0.2.0
   network_info_plus: ^7.0.0
   ogg_opus_player: ^0.8.1
@@ -106,7 +106,9 @@ dependencies:
   provider: ^6.1.5
   recase: ^4.1.0
   rxdart: ^0.28.0
-  scrollable_positioned_list: ^0.3.5
+  # The upstream repository (google/flutter.widgets) is archived.
+  scrollable_positioned_list:
+    path: third_party/scrollable_positioned_list
   simple_animations: ^5.3.0
   sliver_tools: ^0.2.12
   stream_transform: ^2.1.2
@@ -118,7 +120,7 @@ dependencies:
   super_clipboard: ^0.9.1
   super_context_menu: ^0.9.1
   super_native_extensions: ^0.9.1
-  synchronized: 3.4.0+1
+  synchronized: ^3.5.0
   system_tray:
     path: third_party/system_tray
   ui_device:
@@ -129,6 +131,7 @@ dependencies:
   ulid: ^2.0.0
   url_launcher: ^6.3.2
   uuid: ^4.6.0
+  vector_graphics: ^1.2.2
   visibility_detector: ^0.4.0+2
   watcher: ^1.2.1
   web_socket_channel: ^3.0.3
@@ -143,7 +146,7 @@ dependencies:
       ref: 12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1
   html: ^0.15.6
   video_player: ^2.14.0
-  cupertino_icons: ^1.0.9
+  cupertino_icons: ^2.0.0
   video_compress: ^3.1.4
   webcrypto:
     git:
@@ -166,6 +169,10 @@ dev_dependencies:
   drift_dev: ^2.34.5
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
   intl_utils: ^2.8.16
   json_serializable: ^6.14.1
   msix:
@@ -176,6 +183,7 @@ dev_dependencies:
   plugin_platform_interface: ^2.1.8
   very_good_analysis: ^10.2.0
   video_player_platform_interface: ^6.9.0
+  vm_service: ^15.2.0
 flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

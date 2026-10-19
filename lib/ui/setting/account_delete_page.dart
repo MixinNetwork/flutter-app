@@ -4,6 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide encryptPin;
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../account/session_key_value.dart';
 import '../../constants/resources.dart';
@@ -139,6 +141,7 @@ class _DeleteWarningWidget extends StatelessWidget {
     children: [
       SvgPicture.asset(
         Resources.assetsImagesDeleteAccountSvg,
+        renderingStrategy: RenderingStrategy.raster,
         width: 70,
         height: 72,
       ),

@@ -240,6 +240,72 @@ void main() {
       ['group-chat', 'friend-chat', 'stranger-chat', 'quit-group-chat'],
     );
   });
+
+  test('a snapshot waits only for the first rows to warm', () async {
+    final mixinDatabase = MixinDatabase(NativeDatabase.memory());
+    final database = Database(
+      mixinDatabase,
+      FtsDatabase(NativeDatabase.memory()),
+    );
+    final store = ConversationListStore(mixinDatabase);
+    final categories = SlideCategoryStateNotifier();
+    final mentionCache = MentionCache(mixinDatabase.userDao);
+    final controller = ConversationListController(
+      categories,
+      database,
+      mentionCache,
+      store,
+    )..limit = 1;
+    addTearDown(() async {
+      controller.dispose();
+      mentionCache.dispose();
+      categories.dispose();
+      await store.close();
+      await database.dispose();
+    });
+
+    final now = DateTime(2026);
+    await mixinDatabase.batch((batch) {
+      batch
+        ..insert(
+          mixinDatabase.users,
+          const User(userId: 'member', identityNumber: '1', fullName: 'M'),
+        )
+        ..insertAll(mixinDatabase.conversations, [
+          for (final (index, id) in ['first', 'second'].indexed)
+            Conversation(
+              conversationId: id,
+              ownerId: 'member',
+              category: ConversationCategory.group,
+              createdAt: now.subtract(Duration(minutes: index)),
+              status: ConversationStatus.success,
+            ),
+        ])
+        ..insertAll(mixinDatabase.participants, [
+          for (final id in ['first', 'second'])
+            Participant(conversationId: id, userId: 'member', createdAt: now),
+        ]);
+    });
+
+    controller.init();
+    final cached = <String, bool>{};
+    final initialized = Completer<void>();
+    void listener() {
+      controller.removeListener(listener);
+      for (final id in ['first', 'second']) {
+        cached[id] = controller.avatarCache.usersFor(id) != null;
+      }
+      initialized.complete();
+    }
+
+    controller.addListener(listener);
+    await store.start();
+    await initialized.future;
+    expect(cached, {'first': true, 'second': false});
+
+    await pumpEventQueue();
+    expect(controller.avatarCache.usersFor('second'), isNotNull);
+  });
 }
 
 extension on ConversationListController {

@@ -22,6 +22,15 @@ class DatabaseProfiler extends Database {
   int get userVersion => database.userVersion;
 
   @override
+  ({int current, int highwater}) status(
+    StatusParameter option, {
+    bool reset = false,
+  }) => database.status(option, reset: reset);
+
+  @override
+  void releaseMemory() => database.releaseMemory();
+
+  @override
   Stream<double> backup(Database toDatabase, {int nPage = 5}) =>
       database.backup(toDatabase, nPage: nPage);
 

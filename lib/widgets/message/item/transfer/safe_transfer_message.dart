@@ -8,6 +8,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_logger/mixin_logger.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../db/extension/job.dart';
@@ -158,7 +160,10 @@ class _SnapshotLayout extends StatelessWidget {
     children: [
       Align(
         alignment: Alignment.topRight,
-        child: SvgPicture.asset(Resources.assetsImagesBgSnapshotSvg),
+        child: SvgPicture.asset(
+          Resources.assetsImagesBgSnapshotSvg,
+          renderingStrategy: RenderingStrategy.raster,
+        ),
       ),
       Padding(
         padding: const EdgeInsets.all(4),

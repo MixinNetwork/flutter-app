@@ -78,7 +78,6 @@ class ChatScrollCoordinator {
   static const loadedJumpViewportCount = 2.0;
 
   final scrollController = ScrollController();
-  final visibleDateTime = ValueNotifier<DateTime?>(null);
   final showJumpToLatest = ValueNotifier<bool>(false);
 
   _ChatRestoreRequest? _restoreRequest;
@@ -90,6 +89,9 @@ class ChatScrollCoordinator {
   GlobalKey? _viewportKey;
   final _renderedMessageIds = <String>{};
   bool _tailFollowEligible = true;
+  // Whether the shown window ends at the latest message. Only then do rows
+  // added at the bottom come from new messages that the view follows.
+  bool _windowIsLatest = true;
   _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshot;
   bool _tailFollowMessageWindowChanged = false;
   _ViewportAnchorSnapshot? _viewportAnchorSnapshot;
@@ -97,7 +99,6 @@ class ChatScrollCoordinator {
   ChatScrollRestoreDirection? _animatedRestoreDirection;
   bool _restoreScheduled = false;
   bool _viewportStateUpdateScheduled = false;
-  bool _viewportStateUpdateIncludesVisibleDate = false;
   bool _blockPreloadUntilUserScroll = false;
   bool _disposed = false;
   int _programmaticScrollDepth = 0;
@@ -115,7 +116,9 @@ class ChatScrollCoordinator {
     if (!scrollController.hasClients) return;
     final messageWindowChanged = !_hasSameMessageIds(messages);
     _setMessages(messages, keysByMessageId);
-    _tailFollowEligible = _isTailFollowEligible();
+    // A page added below an older window keeps the view where it is, so the
+    // next scroll can load the page after it.
+    _tailFollowEligible = _windowIsLatest && _isTailFollowEligible();
     _tailFollowAnchorSnapshot = _tailFollowEligible
         ? _tailFollowAnchorSnapshotFromViewport()
         : null;
@@ -207,11 +210,17 @@ class ChatScrollCoordinator {
       _animatedRestoreComplete = null;
       _animateNextRestore = false;
       _blockPreloadUntilUserScroll = true;
-      if (!animated && (hasCenteredAnchor || centerMessageId != null)) {
+      // A latest window starts at the center too: an offset left from the
+      // previous window makes the lists build every row up to it first. An
+      // animation with a direction moves to its own start offset, so it does
+      // not need the old offset either.
+      if ((!animated || animatedRestoreDirection != null) &&
+          (hasCenteredAnchor || centerMessageId != null || isLatest)) {
         _resetCenteredOffsetBeforePaint();
       }
     }
     _setMessages(messages, keysByMessageId);
+    _windowIsLatest = isLatest;
     _restoreRequest = _ChatRestoreRequest(
       messages: messages,
       keysByMessageId: keysByMessageId,
@@ -271,9 +280,7 @@ class ChatScrollCoordinator {
     required VoidCallback loadAfter,
   }) {
     _setMessages(messages, keysByMessageId);
-    _scheduleViewportStateUpdate(
-      updateVisibleDate: notification is ScrollEndNotification,
-    );
+    _scheduleViewportStateUpdate();
     if (notification is ScrollStartNotification ||
         notification is ScrollEndNotification ||
         notification is UserScrollNotification) {
@@ -436,7 +443,6 @@ class ChatScrollCoordinator {
     scrollController
       ..removeListener(_scheduleScrollPositionUpdate)
       ..dispose();
-    visibleDateTime.dispose();
     showJumpToLatest.dispose();
   }
 
@@ -543,14 +549,14 @@ class ChatScrollCoordinator {
     final render = _messageRender(messageId, keysByMessageId);
     final viewport = _viewportRender;
     if (render == null || viewport == null) return null;
+    // A row that left the cache extent can keep its key but is detached.
+    if (!render.attached || !viewport.attached) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportOrigin = _globalOrigin(viewport);
-    final renderOrigin = _globalOrigin(render);
-    if (viewportOrigin == null || renderOrigin == null) return null;
+    final origin = _originInViewport(render, viewport);
+    if (origin == null) return null;
 
-    final viewportTop = viewportOrigin.dy;
-    final top = renderOrigin.dy - viewportTop;
+    final top = origin.dy;
     final height = render.size.height;
     final target =
         scrollController.offset +
@@ -571,18 +577,19 @@ class ChatScrollCoordinator {
     final render = _messageRender(messageId, keysByMessageId);
     final viewport = _viewportRender;
     if (render == null || viewport == null) return null;
+    // A row that left the cache extent can keep its key but is detached.
+    if (!render.attached || !viewport.attached) return null;
     if (!render.hasSize || !viewport.hasSize) return null;
 
-    final viewportOrigin = _globalOrigin(viewport);
-    final renderOrigin = _globalOrigin(render);
-    if (viewportOrigin == null || renderOrigin == null) return null;
-
-    return renderOrigin.dy - viewportOrigin.dy;
+    return _originInViewport(render, viewport)?.dy;
   }
 
-  Offset? _globalOrigin(RenderBox render) {
+  // The viewport is an ancestor of every row. The transform to it is short,
+  // while the transforms of both to the screen walk the whole app tree, and a
+  // snapshot of the viewport anchor measures every built row.
+  Offset? _originInViewport(RenderBox render, RenderBox viewport) {
     try {
-      return render.localToGlobal(Offset.zero);
+      return render.localToGlobal(Offset.zero, ancestor: viewport);
     } catch (error) {
       if (error is StateError &&
           error.message.contains('RenderBox was not laid out')) {
@@ -802,22 +809,6 @@ class ChatScrollCoordinator {
     return math.max(0, position.maxScrollExtent - position.pixels);
   }
 
-  String? _firstVisibleMessageId() {
-    String? firstVisibleMessageId;
-    double? firstVisibleTop;
-
-    for (final messageId in _currentRenderedMessageIds()) {
-      final geometry = _messageTargetGeometry(messageId, _keysByMessageId);
-      if (geometry == null || geometry.bottom <= 0) continue;
-      if (firstVisibleTop == null || geometry.top < firstVisibleTop) {
-        firstVisibleMessageId = messageId;
-        firstVisibleTop = geometry.top;
-      }
-    }
-
-    return firstVisibleMessageId;
-  }
-
   _TailFollowAnchorSnapshot? _tailFollowAnchorSnapshotFromViewport() {
     _TailFollowAnchorSnapshot? snapshot;
     final viewportHeight = scrollController.position.viewportDimension;
@@ -892,25 +883,21 @@ class ChatScrollCoordinator {
 
   void _scheduleScrollPositionUpdate() {
     _traceScrollPosition();
-    _scheduleViewportStateUpdate(updateVisibleDate: false);
+    _scheduleViewportStateUpdate();
   }
 
-  void _scheduleViewportStateUpdate({bool updateVisibleDate = true}) {
+  void _scheduleViewportStateUpdate() {
     if (_disposed) return;
-    _viewportStateUpdateIncludesVisibleDate =
-        _viewportStateUpdateIncludesVisibleDate || updateVisibleDate;
     if (_viewportStateUpdateScheduled) return;
     _viewportStateUpdateScheduled = true;
     scheduleMicrotask(() {
-      final updateVisibleDate = _viewportStateUpdateIncludesVisibleDate;
       _viewportStateUpdateScheduled = false;
-      _viewportStateUpdateIncludesVisibleDate = false;
       if (_disposed) return;
-      _updateViewportState(updateVisibleDate: updateVisibleDate);
+      _updateViewportState();
     });
   }
 
-  void _updateViewportState({bool updateVisibleDate = true}) {
+  void _updateViewportState() {
     if (!scrollController.hasClients) return;
     if (_jumpButtonFrozenUpdates <= 0) {
       final nextShowJumpToLatest = _shouldShowJumpToLatest();
@@ -919,15 +906,6 @@ class ChatScrollCoordinator {
       }
     } else {
       _jumpButtonFrozenUpdates--;
-    }
-
-    if (!updateVisibleDate) return;
-    final firstVisibleMessageId = _firstVisibleMessageId();
-    final nextDateTime = firstVisibleMessageId == null
-        ? null
-        : _messagesById[firstVisibleMessageId]?.createdAt;
-    if (visibleDateTime.value != nextDateTime) {
-      visibleDateTime.value = nextDateTime;
     }
   }
 

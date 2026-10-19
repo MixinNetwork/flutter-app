@@ -5,8 +5,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_markdown_widget/mixin_markdown_widget.dart';
 
+import '../db/mixin_database.dart';
 import '../ui/provider/setting_provider.dart';
 import '../utils/extension/extension.dart';
+import '../utils/load_balancer_utils.dart';
+import '../utils/system/system_fonts.dart';
 import '../utils/uri_utils.dart';
 import 'message/message_style.dart';
 import 'mixin_image.dart';
@@ -19,6 +22,40 @@ String buildMarkdownCacheKey({
 }) => '$namespace:$id';
 
 final markdownControllerCache = MarkdownControllerCache();
+
+/// Parses the posts among [messages] in the load balancer before their rows
+/// build. A post's first build parsed its markdown on the UI thread, about
+/// 1 ms for a short post on a slow Linux desktop. The rows of a loaded window
+/// build within a few viewports, so nearly every parse is used.
+///
+/// The code blocks are highlighted there too. A code block otherwise showed
+/// plain text, and a frame later its whole post built and laid out again with
+/// the colors, which took several posts over the frame budget at once.
+Future<void> preparePosts(Iterable<MessageItem> messages) async {
+  final pending = <String, String>{};
+  for (final message in messages) {
+    final content = message.content;
+    if (!message.type.isPost || content == null) continue;
+    final key = buildMarkdownCacheKey(namespace: 'post', id: message.messageId);
+    if (markdownControllerCache.contains(key)) continue;
+    pending[key] = content.postOptimize();
+  }
+  if (pending.isEmpty) return;
+  final parsed = await runLoadBalancer(_parsePosts, pending.values.toList());
+  var index = 0;
+  for (final entry in pending.entries) {
+    final (document, highlights) = parsed[index++];
+    MarkdownController.cacheCodeHighlights(highlights);
+    markdownControllerCache.putParsed(entry.key, entry.value, document);
+  }
+}
+
+List<(MarkdownDocument, List<Map<String, Object?>>)> _parsePosts(
+  List<String> data,
+) => data.map((item) {
+  final document = MarkdownController.parseDocument(item);
+  return (document, MarkdownController.highlightCodeBlocks(document));
+}).toList();
 
 class MarkdownControllerCache {
   final _entries = <String, _MarkdownCacheEntry>{};
@@ -45,6 +82,19 @@ class MarkdownControllerCache {
     entry.retainCount += 1;
     _evictIfNeeded();
     return entry.controller;
+  }
+
+  bool contains(String key) => _entries.containsKey(key);
+
+  /// Adds a controller for [document], parsed from [data] in an isolate, so
+  /// the first build of its key does not parse.
+  void putParsed(String key, String data, MarkdownDocument document) {
+    if (_entries.containsKey(key)) return;
+    _entries[key] = _MarkdownCacheEntry(
+      data: data,
+      controller: MarkdownController(data: data, document: document),
+    );
+    _evictIfNeeded();
   }
 
   void release(String key, MarkdownController controller) {
@@ -373,7 +423,41 @@ Widget _buildMixinImageForUrl(
   );
 }
 
+// Every post builds this theme, and building it costs about 1 ms, so reuse it
+// while its inputs are the same objects.
+(List<Object?>, MarkdownThemeData)? _lastMarkdownTheme;
+
 MarkdownThemeData _createMarkdownTheme(
+  BuildContext context,
+  double chatFontSizeDelta, {
+  double? maxContentWidth,
+}) {
+  final inputs = [
+    Theme.of(context),
+    context.theme,
+    context.brightness,
+    chatFontSizeDelta,
+    maxContentWidth,
+  ];
+  final last = _lastMarkdownTheme;
+  if (last != null && _sameInputs(inputs, last.$1)) return last.$2;
+  final theme = _buildMarkdownTheme(
+    context,
+    chatFontSizeDelta,
+    maxContentWidth: maxContentWidth,
+  );
+  _lastMarkdownTheme = (inputs, theme);
+  return theme;
+}
+
+bool _sameInputs(List<Object?> a, List<Object?> b) {
+  for (var i = 0; i < a.length; i++) {
+    if (!identical(a[i], b[i]) && a[i] != b[i]) return false;
+  }
+  return true;
+}
+
+MarkdownThemeData _buildMarkdownTheme(
   BuildContext context,
   double chatFontSizeDelta, {
   double? maxContentWidth,
@@ -404,6 +488,17 @@ MarkdownThemeData _createMarkdownTheme(
   TextStyle applyTextStyle(TextStyle style) =>
       applyTextColor(scaleFontSize(style));
 
+  // Linux has none of the default code fonts, and the first layout of each
+  // missing family costs a fontconfig search of about 30 ms.
+  TextStyle applyCodeStyle(TextStyle style) => applyTextStyle(
+    Platform.isLinux && linuxMonospaceFamily != null
+        ? style.copyWith(
+            fontFamily: linuxMonospaceFamily,
+            fontFamilyFallback: base.bodyStyle.fontFamilyFallback,
+          )
+        : style,
+  );
+
   return base.copyWith(
     bodyStyle: applyTextStyle(base.bodyStyle),
     quoteStyle: scaleFontSize(
@@ -421,8 +516,8 @@ MarkdownThemeData _createMarkdownTheme(
           fontSizeScale,
       decoration: .none,
     ),
-    inlineCodeStyle: applyTextStyle(base.inlineCodeStyle),
-    codeBlockStyle: applyTextStyle(base.codeBlockStyle),
+    inlineCodeStyle: applyCodeStyle(base.inlineCodeStyle),
+    codeBlockStyle: applyCodeStyle(base.codeBlockStyle),
     tableHeaderStyle: applyTextStyle(base.tableHeaderStyle),
     heading1Style: applyTextStyle(
       base.heading1Style.copyWith(

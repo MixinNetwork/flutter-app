@@ -54,7 +54,7 @@ mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<String>(messageId),
         Variable<String>(conversationId),
       ],
-      readsFrom: {messages, users, pinMessages},
+      readsFrom: {this.messages, this.users, this.pinMessages},
     ).map(
       (QueryRow row) => PinMessageItemResult(
         content: row.readNullable<String>('content'),
@@ -67,7 +67,7 @@ mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT pinMessage.message_id FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id WHERE pinMessage.conversation_id = ?1 ORDER BY message.created_at DESC',
       variables: [Variable<String>(conversationId)],
-      readsFrom: {pinMessages, messages},
+      readsFrom: {this.pinMessages, this.messages},
     ).map((QueryRow row) => row.read<String>('message_id'));
   }
 
@@ -75,7 +75,7 @@ mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM pin_messages',
       variables: [],
-      readsFrom: {pinMessages},
+      readsFrom: {this.pinMessages},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 

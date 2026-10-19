@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/widgets/global_image_cache.dart';
 import 'package:flutter_app/widgets/media_image_pipeline.dart';
@@ -10,6 +10,84 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
 void main() {
+  group('coverDecodeImage', () {
+    final images = <String, Uint8List>{};
+    Future<(int, int)> decode(
+      Size box,
+      int width,
+      int height, {
+      int orientation = 1,
+    }) async {
+      final bytes = images.putIfAbsent('$width $height $orientation', () {
+        final image = img.Image(width: width, height: height);
+        image.exif.imageIfd.orientation = orientation;
+        return Uint8List.fromList(img.encodeJpg(image));
+      });
+      final resolved = await _resolveImage(
+        coverDecodeImage(MemoryImage(bytes), box: box, devicePixelRatio: 2),
+      );
+      return (resolved.width, resolved.height);
+    }
+
+    test('a square box', () async {
+      // 100 at 2x rounds up to 256; 256 * 1920 / 884 rounds up to 557.
+      expect(await decode(const Size(100, 100), 884, 1920), (256, 557));
+    });
+
+    test('a tall box with a tall screenshot', () async {
+      // 300 x 600 at 2x rounds up to 640 x 1216, and the width covers it.
+      expect(await decode(const Size(300, 600), 884, 1920), (640, 1391));
+      expect(await decode(const Size(300, 600), 1179, 2556), (640, 1388));
+    });
+
+    test('a wide box with a wide photo', () async {
+      expect(await decode(const Size(600, 300), 1920, 884), (1391, 640));
+    });
+
+    test('a box larger than the image does not scale it up', () async {
+      expect(await decode(const Size(300, 300), 200, 200), (200, 200));
+    });
+
+    test('the size after the EXIF rotation covers the box', () async {
+      expect(
+        await decode(const Size(300, 600), 1920, 884, orientation: 6),
+        (640, 1391),
+      );
+    });
+
+    test('the same box size has the same cache key', () async {
+      final file = FileImage(File('photo.jpg'));
+      Future<Object> key(Size box) => coverDecodeImage(
+        file,
+        box: box,
+        devicePixelRatio: 2,
+      ).obtainKey(ImageConfiguration.empty);
+      expect(
+        await key(const Size(300, 600)),
+        await key(const Size(310, 605)),
+      );
+      expect(
+        await key(const Size(300, 600)),
+        isNot(await key(const Size(340, 600))),
+      );
+    });
+
+    test('a box with no finite size keeps the image', () {
+      final file = FileImage(File('photo.jpg'));
+      expect(
+        identical(
+          coverDecodeImage(
+            file,
+            box: const Size(double.infinity, 100),
+            devicePixelRatio: 2,
+          ),
+          file,
+        ),
+        isTrue,
+      );
+    });
+  });
+
   test('uses a cached provider for NetworkImage', () {
     const url = 'https://example.com/avatar.png';
     final resolved = resolveMediaImageProvider(
@@ -145,6 +223,57 @@ void main() {
     );
   });
 
+  testWidgets('checks a resized gif file before it shows', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NormalizedGifImageGate(
+          image: CoverResizeImage(
+            FileImage(
+              File('resized_gate_test_${identityHashCode(tester)}.gif'),
+            ),
+            width: 10,
+            height: 10,
+          ),
+          placeholder: () => const SizedBox(key: Key('placeholder')),
+          childBuilder: () => const SizedBox(key: Key('child')),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('placeholder')), findsOneWidget);
+  });
+
+  testWidgets('a new decode size of a checked file keeps the child state', (
+    tester,
+  ) async {
+    final file = File('resized_keep_test_${identityHashCode(tester)}.gif');
+    var mounts = 0;
+    Widget gate(int width) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: NormalizedGifImageGate(
+        image: CoverResizeImage(FileImage(file), width: width, height: width),
+        placeholder: () => const SizedBox(key: Key('placeholder')),
+        childBuilder: () => _MountCounter(onMount: () => mounts++),
+      ),
+    );
+
+    await tester.pumpWidget(gate(10));
+    await tester.runAsync(() async {
+      for (var i = 0; i < 100; i++) {
+        if (find.byType(_MountCounter).evaluate().isNotEmpty) break;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await tester.pump();
+      }
+    });
+    expect(find.byType(_MountCounter), findsOneWidget);
+    expect(mounts, 1);
+
+    await tester.pumpWidget(gate(20));
+    expect(find.byType(_MountCounter), findsOneWidget);
+    expect(mounts, 1);
+  });
+
   testWidgets('skips file images with empty paths', (tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -160,6 +289,39 @@ void main() {
     expect(find.byKey(const Key('child')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('a replacement load keeps showing the image it replaces', (
+    tester,
+  ) async {
+    final png = Uint8List.fromList(
+      img.encodePng(img.Image(width: 4, height: 4)),
+    );
+    const placeholderKey = Key('placeholder');
+    Widget pipeline(ImageProvider image) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaImagePipeline(
+        image: image,
+        gaplessPlayback: true,
+        placeholder: () => const SizedBox(key: placeholderKey),
+      ),
+    );
+
+    await tester.pumpWidget(pipeline(MemoryImage(png)));
+    expect(find.byKey(placeholderKey), findsOneWidget);
+    await tester.runAsync(() async {
+      for (var i = 0; i < 100; i++) {
+        if (find.byKey(placeholderKey).evaluate().isEmpty) break;
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await tester.pump();
+      }
+    });
+    expect(find.byKey(placeholderKey), findsNothing);
+
+    // A new decode size starts a load that has not finished.
+    await tester.pumpWidget(pipeline(_PendingImage()));
+    expect(find.byKey(placeholderKey), findsNothing);
+    expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
+  });
 }
 
 Future<_ResolvedImage> _resolveImage(ImageProvider image) {
@@ -169,11 +331,13 @@ Future<_ResolvedImage> _resolveImage(ImageProvider image) {
   listener = ImageStreamListener(
     (image, synchronouslyLoaded) {
       final width = image.image.width;
+      final height = image.image.height;
       image.dispose();
       stream.removeListener(listener);
       completer.complete(
         _ResolvedImage(
           width: width,
+          height: height,
           synchronouslyLoaded: synchronouslyLoaded,
         ),
       );
@@ -190,9 +354,43 @@ Future<_ResolvedImage> _resolveImage(ImageProvider image) {
 class _ResolvedImage {
   const _ResolvedImage({
     required this.width,
+    required this.height,
     required this.synchronouslyLoaded,
   });
 
   final int width;
+  final int height;
   final bool synchronouslyLoaded;
+}
+
+class _PendingImage extends ImageProvider<_PendingImage> {
+  @override
+  Future<_PendingImage> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture(this);
+
+  @override
+  ImageStreamCompleter loadImage(
+    _PendingImage key,
+    ImageDecoderCallback decode,
+  ) => OneFrameImageStreamCompleter(Completer<ImageInfo>().future);
+}
+
+class _MountCounter extends StatefulWidget {
+  const _MountCounter({required this.onMount});
+
+  final VoidCallback onMount;
+
+  @override
+  State<_MountCounter> createState() => _MountCounterState();
+}
+
+class _MountCounterState extends State<_MountCounter> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMount();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }

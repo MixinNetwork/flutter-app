@@ -5,7 +5,7 @@ import 'package:flutter_app/ui/home/conversation/conversation_hotkey.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('does not bind conversation arrows for a multiline editor', (
+  testWidgets('disables conversation arrows for a multiline editor', (
     tester,
   ) async {
     final focusNode = FocusNode();
@@ -23,7 +23,43 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
-    expect(_hasConversationShortcut(tester), isFalse);
+    expect(
+      _conversationArrowsEnabled(tester, find.byType(EditableText)),
+      isFalse,
+    );
+  });
+
+  testWidgets('keeps the home subtree when focus enters a multiline editor', (
+    tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    var builds = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ConversationHotKey(
+            child: Column(
+              children: [
+                Builder(
+                  builder: (context) {
+                    Theme.of(context);
+                    builds++;
+                    return const SizedBox();
+                  },
+                ),
+                TextField(focusNode: focusNode, maxLines: 2),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(builds, 1);
   });
 
   testWidgets('moves the caret between lines with bare arrows', (tester) async {
@@ -102,7 +138,10 @@ void main() {
       ),
     );
 
-    expect(_hasConversationShortcut(tester), isTrue);
+    expect(
+      _conversationArrowsEnabled(tester, find.byType(SizedBox).last),
+      isTrue,
+    );
   });
 }
 
@@ -110,17 +149,12 @@ class _TestIntent extends Intent {
   const _TestIntent();
 }
 
-bool _hasConversationShortcut(WidgetTester tester) => tester
-    .widgetList<Shortcuts>(
-      find.descendant(
-        of: find.byType(ConversationHotKey),
-        matching: find.byType(Shortcuts),
-      ),
-    )
-    .any(
-      (shortcuts) => shortcuts.shortcuts.values.any(
-        (intent) =>
-            intent is NextConversationIntent ||
-            intent is PreviousConversationIntent,
-      ),
-    );
+// Looks up the action the way the shortcut manager does, from [finder].
+bool _conversationArrowsEnabled(WidgetTester tester, Finder finder) {
+  const intent = NextConversationIntent();
+  final action = Actions.maybeFind<NextConversationIntent>(
+    tester.element(finder),
+    intent: intent,
+  );
+  return action?.isEnabled(intent) ?? false;
+}

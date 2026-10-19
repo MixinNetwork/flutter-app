@@ -6,6 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/resources.dart';
 import '../../widgets/dialog.dart';
@@ -383,6 +385,7 @@ class _TransferProcessDialog extends HookConsumerWidget {
               const SizedBox(height: 40),
               SvgPicture.asset(
                 iconAssetName,
+                renderingStrategy: RenderingStrategy.raster,
                 width: 72,
                 height: 72,
                 colorFilter: ColorFilter.mode(

@@ -415,6 +415,17 @@ class SelectableRegionState extends State<SelectableRegion>
     _updateSelectedContentIfNeeded();
   }
 
+  /// Selects the word at [globalPosition] as a touch long press does, for a
+  /// long press that started before this region was built.
+  void selectWordAtLongPress(Offset globalPosition) {
+    _handleTouchLongPressStart(
+      LongPressStartDetails(globalPosition: globalPosition),
+    );
+    _handleTouchLongPressEnd(
+      LongPressEndDetails(globalPosition: globalPosition),
+    );
+  }
+
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     _selectEndTo(
       offset: details.globalPosition,
