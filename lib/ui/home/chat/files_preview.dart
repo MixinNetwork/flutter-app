@@ -18,6 +18,8 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
 
@@ -561,6 +563,7 @@ class _Tab extends StatelessWidget {
                 textStyle: const TextStyle(color: Colors.white),
                 child: SvgPicture.asset(
                   assetName,
+                  renderingStrategy: RenderingStrategy.raster,
                   colorFilter: ColorFilter.mode(
                     selected ? context.theme.accent : context.theme.icon,
                     BlendMode.srcIn,
@@ -660,6 +663,7 @@ class _ZipPasswordInputEditText extends HookWidget {
             children: [
               SvgPicture.asset(
                 Resources.assetsImagesLockSvg,
+                renderingStrategy: RenderingStrategy.raster,
                 width: 18,
                 height: 18,
                 colorFilter: ColorFilter.mode(

@@ -8,6 +8,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../enum/media_status.dart';
@@ -192,6 +194,7 @@ class VideoMessageMediaStatusWidget extends HookConsumerWidget {
         return done ??
             SvgPicture.asset(
               Resources.assetsImagesPlaySvg,
+              renderingStrategy: RenderingStrategy.raster,
               width: 38,
               height: 38,
             );

@@ -4,6 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/constants.dart';
 import '../../../constants/resources.dart';
@@ -34,6 +36,7 @@ class DisappearMessagePage extends StatelessWidget {
           const SizedBox(height: 30),
           SvgPicture.asset(
             Resources.assetsImagesDisappearingMessageSvg,
+            renderingStrategy: RenderingStrategy.raster,
             width: 70,
             height: 70,
           ),
@@ -79,6 +82,7 @@ class _Options extends StatelessWidget {
           trailing: expireDuration < const Duration(seconds: 1)
               ? SvgPicture.asset(
                   Resources.assetsImagesCheckedSvg,
+                  renderingStrategy: RenderingStrategy.raster,
                   width: 24,
                   height: 24,
                 )
@@ -154,6 +158,7 @@ class _DurationOptionItem extends StatelessWidget {
     trailing: duration == current
         ? SvgPicture.asset(
             Resources.assetsImagesCheckedSvg,
+            renderingStrategy: RenderingStrategy.raster,
             width: 24,
             height: 24,
           )
@@ -406,6 +411,7 @@ class _CustomExpireUnitSelection extends StatelessWidget {
                   quarterTurns: 9,
                   child: SvgPicture.asset(
                     Resources.assetsImagesIcArrowRightSvg,
+                    renderingStrategy: RenderingStrategy.raster,
                     width: 30,
                     height: 30,
                     colorFilter: ColorFilter.mode(

@@ -16,35 +16,44 @@ class ConversationHotKey extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: FocusManager.instance,
-    builder: (context, child) => FocusableActionDetector(
-      shortcuts: _isMultilineEditableTextFocused()
-          ? const {}
-          : {
-              SingleActivator(
-                LogicalKeyboardKey.arrowDown,
-                meta: kPlatformIsDarwin,
-                control: !kPlatformIsDarwin,
-              ): const NextConversationIntent(),
-              SingleActivator(
-                LogicalKeyboardKey.arrowUp,
-                meta: kPlatformIsDarwin,
-                control: !kPlatformIsDarwin,
-              ): const PreviousConversationIntent(),
-            },
+  Widget build(BuildContext context) => Shortcuts(
+    shortcuts: {
+      SingleActivator(
+        LogicalKeyboardKey.arrowDown,
+        meta: kPlatformIsDarwin,
+        control: !kPlatformIsDarwin,
+      ): const NextConversationIntent(),
+      SingleActivator(
+        LogicalKeyboardKey.arrowUp,
+        meta: kPlatformIsDarwin,
+        control: !kPlatformIsDarwin,
+      ): const PreviousConversationIntent(),
+    },
+    child: Actions(
       actions: {
-        NextConversationIntent: CallbackAction<NextConversationIntent>(
-          onInvoke: (_) => _navigationConversation(context, forward: true),
-        ),
-        PreviousConversationIntent: CallbackAction<PreviousConversationIntent>(
-          onInvoke: (_) => _navigationConversation(context, forward: false),
-        ),
+        NextConversationIntent:
+            _ConversationNavigationAction<NextConversationIntent>(
+              onInvoke: (_) => _navigationConversation(context, forward: true),
+            ),
+        PreviousConversationIntent:
+            _ConversationNavigationAction<PreviousConversationIntent>(
+              onInvoke: (_) => _navigationConversation(context, forward: false),
+            ),
       },
-      child: child!,
+      child: child,
     ),
-    child: child,
   );
+}
+
+// The shortcut tree stays the same when focus moves: a structure change
+// re-parents the whole home page, and that rebuilds every widget in it.
+class _ConversationNavigationAction<T extends Intent>
+    extends CallbackAction<T> {
+  _ConversationNavigationAction({required super.onInvoke});
+
+  // A disabled action leaves the key to a focused multiline text field.
+  @override
+  bool isEnabled(T intent) => !_isMultilineEditableTextFocused();
 }
 
 bool _isMultilineEditableTextFocused() {

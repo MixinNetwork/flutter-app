@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../db/dao/conversation_dao.dart';
@@ -175,6 +177,7 @@ class _Icon extends StatelessWidget {
           alignment: Alignment.bottomRight,
           child: SvgPicture.asset(
             Resources.assetsImagesAudioSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(context.theme.icon, BlendMode.srcIn),
             width: 16,
             height: 16,

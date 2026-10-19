@@ -48,7 +48,7 @@ mixin _$CircleConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customUpdate(
       'DELETE FROM circle_conversations WHERE circle_id = ?1',
       variables: [Variable<String>(circleId)],
-      updates: {circleConversations},
+      updates: {this.circleConversations},
       updateKind: UpdateKind.delete,
     );
   }
@@ -57,7 +57,7 @@ mixin _$CircleConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customUpdate(
       'DELETE FROM circle_conversations WHERE conversation_id = ?1 AND circle_id = ?2',
       variables: [Variable<String>(conversationId), Variable<String>(circleId)],
-      updates: {circleConversations},
+      updates: {this.circleConversations},
       updateKind: UpdateKind.delete,
     );
   }

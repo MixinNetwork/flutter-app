@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
@@ -170,16 +172,20 @@ class _Failed extends StatelessWidget {
   const _Failed();
 
   @override
-  Widget build(BuildContext context) =>
-      SvgPicture.asset(Resources.assetsImagesFailedSvg);
+  Widget build(BuildContext context) => SvgPicture.asset(
+    Resources.assetsImagesFailedSvg,
+    renderingStrategy: RenderingStrategy.raster,
+  );
 }
 
 class _Successful extends StatelessWidget {
   const _Successful();
 
   @override
-  Widget build(BuildContext context) =>
-      SvgPicture.asset(Resources.assetsImagesSuccessfulSvg);
+  Widget build(BuildContext context) => SvgPicture.asset(
+    Resources.assetsImagesSuccessfulSvg,
+    renderingStrategy: RenderingStrategy.raster,
+  );
 }
 
 Future<bool> runFutureWithToast(Future<dynamic> future) async {

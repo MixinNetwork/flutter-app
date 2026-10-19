@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../ui/provider/recall_message_reedit_provider.dart';
@@ -28,6 +30,7 @@ class RecallMessage extends HookConsumerWidget {
       children: [
         SvgPicture.asset(
           Resources.assetsImagesRecallSvg,
+          renderingStrategy: RenderingStrategy.raster,
           colorFilter: ColorFilter.mode(
             context.theme.secondaryText,
             BlendMode.srcIn,

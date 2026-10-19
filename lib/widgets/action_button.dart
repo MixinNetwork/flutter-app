@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../utils/extension/extension.dart';
 import 'interactive_decorated_box.dart';
@@ -40,6 +42,7 @@ class ActionButton extends StatelessWidget {
     if (name?.isNotEmpty ?? false) {
       _child = SvgPicture.asset(
         name!,
+        renderingStrategy: RenderingStrategy.raster,
         width: size,
         height: size,
         colorFilter: color != null

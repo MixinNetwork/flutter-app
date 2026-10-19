@@ -20,6 +20,11 @@ class SearchMessageState with Equatable {
   List<Object?> get props => [items, loading];
 }
 
+/// The rows one search page loads. The list lays out two screens beyond the
+/// viewport, so a loaded page builds all its rows in one frame; a page sized
+/// to the window took 9-14ms on Linux.
+const kSearchMessagePageSize = 12;
+
 abstract class SearchMessageController
     extends ValueNotifier<SearchMessageState> {
   SearchMessageController({

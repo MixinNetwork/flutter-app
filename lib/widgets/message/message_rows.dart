@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
+
 import '../../db/mixin_database.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 
+@immutable
 class MessageRowModel {
   MessageRowModel({
     required this.message,
@@ -27,6 +30,31 @@ class MessageRowModel {
   late final bool sameUserPrev;
   final bool sameUserNext;
   late final DateTime? dateTime;
+
+  // Rows render from the message and these neighbour flags only, so two rows
+  // with equal values render the same and the timeline can skip the rebuild.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MessageRowModel &&
+          other.message == message &&
+          other.sameDayPrev == sameDayPrev &&
+          other.sameDayNext == sameDayNext &&
+          other.sameUserPrev == sameUserPrev &&
+          other.sameUserNext == sameUserNext &&
+          other.dateTime == dateTime &&
+          (other.next == null) == (next == null);
+
+  @override
+  int get hashCode => Object.hash(
+    message,
+    sameDayPrev,
+    sameDayNext,
+    sameUserPrev,
+    sameUserNext,
+    dateTime,
+    next == null,
+  );
 }
 
 class MessageRows {

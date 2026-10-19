@@ -62,9 +62,9 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
       'SELECT COUNT(DISTINCT conversation.conversation_id) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql}',
       variables: [...generatedwhere.introducedVariables],
       readsFrom: {
-        conversations,
-        users,
-        circleConversations,
+        this.conversations,
+        this.users,
+        this.circleConversations,
         ...generatedwhere.watchedTables,
       },
     ).map((QueryRow row) => row.read<int>('_c0'));
@@ -127,12 +127,12 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        conversations,
-        users,
-        messages,
-        snapshots,
-        expiredMessages,
-        messageMentions,
+        this.conversations,
+        this.users,
+        this.messages,
+        this.snapshots,
+        this.expiredMessages,
+        this.messageMentions,
         ...generatedwhere.watchedTables,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
@@ -260,13 +260,13 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        conversations,
-        users,
-        messages,
-        snapshots,
-        expiredMessages,
-        messageMentions,
-        circleConversations,
+        this.conversations,
+        this.users,
+        this.messages,
+        this.snapshots,
+        this.expiredMessages,
+        this.messageMentions,
+        this.circleConversations,
         ...generatedwhere.watchedTables,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
@@ -350,9 +350,9 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
       'SELECT IFNULL(SUM(unseen_message_count), 0) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql} LIMIT 1',
       variables: [...generatedwhere.introducedVariables],
       readsFrom: {
-        conversations,
-        users,
-        circleConversations,
+        this.conversations,
+        this.users,
+        this.circleConversations,
         ...generatedwhere.watchedTables,
       },
     ).map((QueryRow row) => row.read<int>('_c0'));
@@ -374,7 +374,11 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS unseen_conversation_count, IFNULL(SUM(CASE WHEN(CASE WHEN conversation.category = \'GROUP\' THEN conversation.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END), 0) AS unseen_muted_conversation_count FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} LIMIT 1',
       variables: [...generatedwhere.introducedVariables],
-      readsFrom: {conversations, users, ...generatedwhere.watchedTables},
+      readsFrom: {
+        this.conversations,
+        this.users,
+        ...generatedwhere.watchedTables,
+      },
     ).map(
       (QueryRow row) => BaseUnseenConversationCountResult(
         unseenConversationCount: row.read<int>('unseen_conversation_count'),
@@ -423,9 +427,9 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        conversations,
-        users,
-        messages,
+        this.conversations,
+        this.users,
+        this.messages,
         ...generatedwhere.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -500,9 +504,9 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedorder.introducedVariables,
       ],
       readsFrom: {
-        conversations,
-        users,
-        messages,
+        this.conversations,
+        this.users,
+        this.messages,
         ...generatedorder.watchedTables,
       },
     ).map(
@@ -591,10 +595,10 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        conversations,
-        users,
-        messages,
-        circleConversations,
+        this.conversations,
+        this.users,
+        this.messages,
+        this.circleConversations,
         ...generatedwhere.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -646,7 +650,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number, u.full_name, u.avatar_url, COALESCE(u.is_verified, FALSE) AS isVerified FROM conversations AS c INNER JOIN users AS u ON u.user_id = c.owner_id WHERE c.category IS NOT NULL',
       variables: [],
-      readsFrom: {conversations, users},
+      readsFrom: {this.conversations, this.users},
     ).map(
       (QueryRow row) => ConversationStorageUsage(
         conversationId: row.read<String>('conversation_id'),
@@ -668,7 +672,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.name AS groupName, (SELECT count(user_id) FROM participants WHERE conversation_id = c.conversation_id) AS memberCount FROM participants AS p INNER JOIN conversations AS c ON c.conversation_id = p.conversation_id WHERE p.user_id IN (?1, ?2) AND c.status = 2 AND c.category = \'GROUP\' GROUP BY c.conversation_id HAVING count(p.user_id) = 2 ORDER BY c.last_message_created_at DESC',
       variables: [Variable<String>(selfId), Variable<String>(userId)],
-      readsFrom: {conversations, participants},
+      readsFrom: {this.conversations, this.participants},
     ).map(
       (QueryRow row) => GroupMinimal(
         conversationId: row.read<String>('conversationId'),
@@ -683,7 +687,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM conversations',
       variables: [],
-      readsFrom: {conversations},
+      readsFrom: {this.conversations},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -705,7 +709,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
           ),
         ),
       ],
-      updates: {conversations},
+      updates: {this.conversations},
       updateKind: UpdateKind.update,
     );
   }
@@ -714,7 +718,7 @@ mixin _$ConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT (SELECT 1 FROM conversations INNER JOIN messages ON conversations.conversation_id = messages.conversation_id INNER JOIN users ON users.user_id = conversations.owner_id WHERE conversations.conversation_id = ?1 AND conversations.category = \'CONTACT\' AND users.app_id IS NOT NULL AND Length(users.app_id) > 0 AND messages.user_id != conversations.owner_id GROUP BY conversations.conversation_id HAVING Count(DISTINCT messages.user_id) >= 2) IS NOT NULL AS _c0',
       variables: [Variable<String>(conversationId)],
-      readsFrom: {conversations, messages, users},
+      readsFrom: {this.conversations, this.messages, this.users},
     ).map((QueryRow row) => row.read<bool>('_c0'));
   }
 

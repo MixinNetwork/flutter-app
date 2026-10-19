@@ -616,7 +616,7 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
     return customUpdate(
       'DELETE FROM messages_fts WHERE "rowid" = (SELECT doc_id FROM messages_metas WHERE message_id = ?1)',
       variables: [Variable<String>(messageId)],
-      updates: {messagesFts},
+      updates: {this.messagesFts},
       updateKind: UpdateKind.delete,
     );
   }
@@ -625,7 +625,7 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
     return customUpdate(
       'DELETE FROM messages_fts WHERE "rowid" = (SELECT doc_id FROM messages_metas WHERE conversation_id = ?1)',
       variables: [Variable<String>(conversationId)],
-      updates: {messagesFts},
+      updates: {this.messagesFts},
       updateKind: UpdateKind.delete,
     );
   }
@@ -634,7 +634,7 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
     return customSelect(
       'SELECT EXISTS (SELECT 1 AS _c1 FROM messages_metas WHERE message_id = ?1) AS _c0',
       variables: [Variable<String>(messageId)],
-      readsFrom: {messagesMetas},
+      readsFrom: {this.messagesMetas},
     ).map((QueryRow row) => row.read<bool>('_c0'));
   }
 
@@ -734,7 +734,16 @@ class $MessagesFtsTableManager
                 Value<int> rowid = const Value.absent(),
               }) => MessagesFtsCompanion.insert(content: content, rowid: rowid),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<MessagesFts, MessagesFt>(table),
+                  BaseReferences<_$FtsDatabase, MessagesFts, MessagesFt>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -953,7 +962,16 @@ class $MessagesMetasTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<MessagesMetas, MessagesMeta>(table),
+                  BaseReferences<_$FtsDatabase, MessagesMetas, MessagesMeta>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

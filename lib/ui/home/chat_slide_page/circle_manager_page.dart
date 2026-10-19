@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../db/dao/circle_dao.dart';
@@ -174,6 +176,7 @@ class _CircleManagerItem extends HookConsumerWidget {
               selected
                   ? Resources.assetsImagesCircleRemoveSvg
                   : Resources.assetsImagesCircleAddSvg,
+              renderingStrategy: RenderingStrategy.raster,
               height: 16,
               width: 16,
             ),
@@ -191,6 +194,7 @@ class _CircleManagerItem extends HookConsumerWidget {
             alignment: Alignment.center,
             child: SvgPicture.asset(
               Resources.assetsImagesCircleSvg,
+              renderingStrategy: RenderingStrategy.raster,
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(

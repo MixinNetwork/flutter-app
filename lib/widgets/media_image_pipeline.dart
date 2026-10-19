@@ -22,6 +22,115 @@ ImageProvider resolveMediaImageProvider(
       )
     : image;
 
+/// [image] decoded at the smallest size that covers [box].
+///
+/// A photo decodes to tens of megabytes at full size, and the raster thread
+/// uploads all of it, which stalls a frame that shows a few of them. Each side
+/// of the box goes up in steps of 64 pixels, so a window resize decodes again
+/// only now and then.
+ImageProvider coverDecodeImage(
+  ImageProvider image, {
+  required Size box,
+  required double devicePixelRatio,
+}) {
+  if (!box.isFinite || box.isEmpty) return image;
+  int step(double side) => (side * devicePixelRatio / 64).ceil() * 64;
+  return CoverResizeImage(
+    image,
+    width: step(box.width),
+    height: step(box.height),
+  );
+}
+
+/// [imageProvider] decoded at the smallest size, with its aspect ratio, that
+/// covers [width] x [height], and never above its own size.
+///
+/// The decoder gives the size after the EXIF rotation, so a rotated photo
+/// covers the box too. [ResizeImagePolicy.fit] with [BoxFit.cover] decodes
+/// too small, and a bound of the long side decodes too large.
+// shortcut: ResizeImage has no cover policy yet, use ResizeImagePolicy.cover
+// when flutter/flutter#61987 lands.
+@immutable
+class CoverResizeImage extends ImageProvider<CoverResizeImageKey> {
+  const CoverResizeImage(
+    this.imageProvider, {
+    required this.width,
+    required this.height,
+  });
+
+  final ImageProvider imageProvider;
+  final int width;
+  final int height;
+
+  @override
+  Future<CoverResizeImageKey> obtainKey(ImageConfiguration configuration) =>
+      imageProvider
+          .obtainKey(configuration)
+          .then((key) => CoverResizeImageKey(key, width, height));
+
+  @override
+  ImageStreamCompleter loadImage(
+    CoverResizeImageKey key,
+    ImageDecoderCallback decode,
+  ) {
+    Future<ui.Codec> decodeCover(
+      ui.ImmutableBuffer buffer, {
+      ui.TargetImageSizeCallback? getTargetSize,
+    }) {
+      assert(getTargetSize == null);
+      return decode(
+        buffer,
+        getTargetSize: (intrinsicWidth, intrinsicHeight) {
+          // The side that needs the larger scale sets it; the other side
+          // rounds up so that it still covers the box.
+          final widthCovers =
+              width * intrinsicHeight >= height * intrinsicWidth;
+          final targetWidth = widthCovers
+              ? width
+              : (height * intrinsicWidth + intrinsicHeight - 1) ~/
+                    intrinsicHeight;
+          final targetHeight = widthCovers
+              ? (width * intrinsicHeight + intrinsicWidth - 1) ~/ intrinsicWidth
+              : height;
+          if (targetWidth >= intrinsicWidth) return const ui.TargetImageSize();
+          return ui.TargetImageSize(width: targetWidth, height: targetHeight);
+        },
+      );
+    }
+
+    return imageProvider.loadImage(key.providerCacheKey, decodeCover);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is CoverResizeImage &&
+      other.imageProvider == imageProvider &&
+      other.width == width &&
+      other.height == height;
+
+  @override
+  int get hashCode => Object.hash(imageProvider, width, height);
+}
+
+@immutable
+class CoverResizeImageKey {
+  const CoverResizeImageKey(this.providerCacheKey, this.width, this.height);
+
+  final Object providerCacheKey;
+  final int width;
+  final int height;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CoverResizeImageKey &&
+      other.providerCacheKey == providerCacheKey &&
+      other.width == width &&
+      other.height == height;
+
+  @override
+  int get hashCode => Object.hash(providerCacheKey, width, height);
+}
+
 final _checkedImageFiles = <String>{};
 
 class MediaImagePipeline extends StatelessWidget {
@@ -35,6 +144,7 @@ class MediaImagePipeline extends StatelessWidget {
     this.height,
     this.fit = BoxFit.cover,
     this.isAntiAlias = false,
+    this.gaplessPlayback = false,
   });
 
   final ImageProvider image;
@@ -45,6 +155,9 @@ class MediaImagePipeline extends StatelessWidget {
   final double? height;
   final BoxFit? fit;
   final bool isAntiAlias;
+
+  /// Whether a new [image] keeps showing the old one until it loads.
+  final bool gaplessPlayback;
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +171,13 @@ class MediaImagePipeline extends StatelessWidget {
       height: height,
       fit: fit,
       isAntiAlias: isAntiAlias,
+      gaplessPlayback: gaplessPlayback,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded || frame != null) return child;
+        // A new image resets the frame, while gapless playback still paints
+        // the old one until the new one loads.
+        final image = child is Semantics ? child.child : child;
+        final painting = image is RawImage && image.image != null;
+        if (wasSynchronouslyLoaded || frame != null || painting) return child;
         return fallback();
       },
       errorBuilder: (context, error, stackTrace) =>
@@ -162,7 +280,10 @@ class NormalizedGifImageGate extends StatefulWidget {
 }
 
 class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
-  Future<void>? _future;
+  // The child stays at the same place in the tree after the check, so a new
+  // decode size of a checked file keeps the image state and its last frame.
+  var _ready = true;
+  Future<void>? _pending;
 
   @override
   void initState() {
@@ -179,55 +300,45 @@ class _NormalizedGifImageGateState extends State<NormalizedGifImageGate> {
   }
 
   void _start() {
-    final image = widget.image;
-    if (image is! FileImage) {
-      _future = null;
-      return;
-    }
+    _pending = null;
+    _ready = true;
+    // A message image decodes at its display size through CoverResizeImage.
+    final image = switch (widget.image) {
+      CoverResizeImage(:final imageProvider) => imageProvider,
+      final image => image,
+    };
+    if (image is! FileImage) return;
     final filePathSegments = image.file.uri.pathSegments;
     final fileName = filePathSegments.isEmpty
         ? ''
         : filePathSegments.last.toLowerCase();
-    if (fileName.isEmpty) {
-      _future = null;
-      return;
-    }
-    if (!fileName.endsWith('.gif') && fileName.contains('.')) {
-      _future = null;
-      return;
-    }
+    if (fileName.isEmpty) return;
+    if (!fileName.endsWith('.gif') && fileName.contains('.')) return;
 
     final path = image.file.absolute.path;
-    if (_checkedImageFiles.contains(path)) {
-      _future = null;
-      return;
-    }
+    if (_checkedImageFiles.contains(path)) return;
 
-    _future = _normalize(image.file);
+    _ready = false;
+    final pending = _pending = _normalize(image.file, widget.image);
+    unawaited(
+      pending.catchError((Object _) {}).whenComplete(() {
+        if (!mounted || !identical(_pending, pending)) return;
+        setState(() => _ready = true);
+      }),
+    );
   }
 
-  Future<void> _normalize(File file) async {
+  Future<void> _normalize(File file, ImageProvider shown) async {
     try {
       await normalizeGifFileIfNeeded(file, null);
       await FileImage(file).evict();
+      await shown.evict();
     } finally {
       _checkedImageFiles.add(file.absolute.path);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final future = _future;
-    if (future == null) return widget.childBuilder();
-
-    return FutureBuilder<void>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return widget.childBuilder();
-        }
-        return widget.placeholder();
-      },
-    );
-  }
+  Widget build(BuildContext context) =>
+      _ready ? widget.childBuilder() : widget.placeholder();
 }

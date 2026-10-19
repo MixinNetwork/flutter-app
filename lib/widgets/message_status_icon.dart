@@ -6,6 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../constants/resources.dart';
@@ -39,6 +41,7 @@ class MessageStatusIcon extends StatelessWidget {
     }
     return SvgPicture.asset(
       icon,
+      renderingStrategy: RenderingStrategy.raster,
       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
