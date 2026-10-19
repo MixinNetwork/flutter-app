@@ -56,6 +56,13 @@ void main() {
   setUpAll(() async {
     await windowManager.ensureInitialized();
     await windowManager.show();
+    // The main window sets GTK's dark theme preference, which WebKitGTK
+    // follows; without it bot windows here would follow the system theme.
+    if (Platform.isLinux) {
+      await windowManager.setBrightness(
+        ui.PlatformDispatcher.instance.platformBrightness,
+      );
+    }
     final directory = await Directory.systemTemp.createTemp('bot_window_test');
     await LocalStateStorage.init(directory.path);
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0)

@@ -198,8 +198,9 @@ class BotWindow {
     if (brightness == _brightness) return;
     _brightness = brightness;
     try {
-      // WebKitGTK follows GTK's dark theme preference, which the app sets
-      // for every window; the plugin throws there.
+      // WebKitGTK follows the process-wide GTK dark theme preference, which
+      // the main window sets with windowManager.setBrightness; the plugin
+      // throws there.
       if (defaultTargetPlatform != TargetPlatform.linux) {
         await webview.setBrightness(brightness);
       }
