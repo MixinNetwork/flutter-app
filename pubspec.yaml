@@ -44,7 +44,7 @@ dependencies:
       ref: ceca9081fbdccb2e3a71e32f9bfcc7b3e9c2b360
       path: packages/desktop_drop
   desktop_keep_screen_on: ^0.0.3
-  desktop_webview_window: ^0.3.2
+  desktop_webview_window: ^0.4.0
   device_info_plus: ^11.3.0
   dio: ^5.10.0
   dio_smart_retry: ^7.0.1
@@ -165,6 +165,8 @@ dev_dependencies:
       path: packages/debug_info_collector
   drift_dev: ^2.34.5
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   intl_utils: ^2.8.16
   json_serializable: ^6.14.1

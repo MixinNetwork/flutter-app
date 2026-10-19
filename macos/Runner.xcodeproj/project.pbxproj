@@ -30,6 +30,7 @@
 		6CEE09F3282D2516004C2854 /* PlatformMenuPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEE09F2282D2516004C2854 /* PlatformMenuPlugin.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		8AB39C65802F1AF208B36EEA /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B141C68416D6E935094F943 /* Pods_Runner.framework */; };
+		B0710E0A2EA3000000C0FFEE /* BotWindowComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0710E0B2EA3000000C0FFEE /* BotWindowComposer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		B0710E0B2EA3000000C0FFEE /* BotWindowComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotWindowComposer.swift; sourceTree = "<group>"; };
 		BAA0695525A6B07700218CFA /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/MainMenu.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -153,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				6CEE09F2282D2516004C2854 /* PlatformMenuPlugin.swift */,
+				B0710E0B2EA3000000C0FFEE /* BotWindowComposer.swift */,
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
@@ -247,7 +250,7 @@
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
 			);
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
 			projectDirPath = "";
@@ -363,7 +366,6 @@
 				"${BUILT_PRODUCTS_DIR}/flutter_app_icon_badge/flutter_app_icon_badge.framework",
 				"${BUILT_PRODUCTS_DIR}/irondash_engine_context/irondash_engine_context.framework",
 				"${BUILT_PRODUCTS_DIR}/objective_c/objective_c.framework",
-				"${BUILT_PRODUCTS_DIR}/ogg_opus_player/ogg_opus_player.framework",
 				"${BUILT_PRODUCTS_DIR}/protocol_handler_macos/protocol_handler_macos.framework",
 				"${BUILT_PRODUCTS_DIR}/rhttp/rhttp.framework",
 				"${BUILT_PRODUCTS_DIR}/super_native_extensions/super_native_extensions.framework",
@@ -377,7 +379,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_app_icon_badge.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/irondash_engine_context.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/objective_c.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ogg_opus_player.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/protocol_handler_macos.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/rhttp.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/super_native_extensions.framework",
@@ -400,6 +401,7 @@
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 				6CEE09F3282D2516004C2854 /* PlatformMenuPlugin.swift in Sources */,
+				B0710E0A2EA3000000C0FFEE /* BotWindowComposer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -639,6 +641,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = one.mixin.messenger.desktop.debug;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRIP_STYLE = "non-global";
 				SUPPORTED_PLATFORMS = macosx;
@@ -732,7 +735,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};

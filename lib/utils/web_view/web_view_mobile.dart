@@ -5,16 +5,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../constants/resources.dart';
-import '../../db/extension/app.dart';
 import '../../db/mixin_database.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
-import '../../widgets/toast.dart';
-import '../../widgets/user_selector/conversation_selector.dart';
 import '../extension/extension.dart';
-import '../logger.dart';
+import 'forward_web_page.dart';
 import 'web_view_interface.dart';
 
 class MobileMixinWebView extends MixinWebView {
@@ -243,88 +240,17 @@ class _ShareMenuItem extends StatelessWidget {
     ),
     trailing: null,
     onTap: () async {
-      // can not share app
-      if (appCardData?.shareable == false) {
-        showToastFailed(ToastError(context.l10n.appCardShareDisallow));
-      } else {
-        var title = await webViewController.getTitle();
-        final url = await webViewController.currentUrl();
-
-        final selectedConversation = await showConversationSelector(
-          context: context,
-          singleSelect: true,
-          title: context.l10n.forward,
-          onlyContact: false,
-        );
-        if (selectedConversation == null || selectedConversation.isEmpty) {
-          return;
-        }
-
-        var app = this.app;
-        if (appCardData?.appId != null) {
-          app = await context.accountServer.getAppAndCheckUser(
-            appCardData!.appId!,
-            DateTime.tryParse(appCardData!.updatedAt ?? ''),
-          );
-        }
-
-        if (app != null && url != null && _matchResourcePattern(url, app)) {
-          if (title?.trim().isNotEmpty != true) {
-            title = app.name;
-          }
-          final appCardData = AppCardData(
-            app.appId,
-            app.iconUrl,
-            app.name,
-            title ?? app.name,
-            url,
-            app.updatedAt?.toIso8601String() ?? '',
-            true,
-            [],
-            '',
-            null,
-          );
-
-          await context.accountServer.sendAppCardMessage(
-            conversationId: selectedConversation.first.conversationId,
-            recipientId: selectedConversation.first.userId,
-            data: appCardData,
-          );
-        } else {
-          final category = selectedConversation.first.encryptCategory;
-          assert(category != null, 'category must not be null');
-          if (category == null) {
-            e('selected conversation encrypt category is null');
-            return;
-          }
-          await context.accountServer.sendTextMessage(
-            url ?? '',
-            category,
-            conversationId: selectedConversation.first.conversationId,
-            recipientId: selectedConversation.first.userId,
-          );
-        }
-        Navigator.pop(context);
-      }
+      final title = await webViewController.getTitle();
+      final url = await webViewController.currentUrl();
+      if (url == null || !context.mounted) return;
+      final sent = await forwardWebPage(
+        context,
+        url: url,
+        title: title,
+        app: app,
+        appCardData: appCardData,
+      );
+      if (sent && context.mounted) Navigator.pop(context);
     },
   );
-}
-
-bool _matchResourcePattern(String url, App app) {
-  String? toSchemeHostOrNull(String url) {
-    final uri = Uri.tryParse(url);
-    if (uri == null) return null;
-    return '${uri.scheme.toLowerCase()}://${uri.host.toLowerCase()}';
-  }
-
-  final uri = toSchemeHostOrNull(url);
-
-  final patterns = app.resourcePatternsList;
-  if (patterns == null) return false;
-  try {
-    return patterns.any((element) => toSchemeHostOrNull(element.trim()) == uri);
-  } catch (error, stacktrace) {
-    e('decode resource patterns error: $error, $stacktrace');
-    return false;
-  }
 }

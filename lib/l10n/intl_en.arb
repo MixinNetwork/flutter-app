@@ -325,6 +325,7 @@
 "oneYear" : "1 Year",
 "open" : "Open",
 "openHomePage" : "Open Homepage",
+"openInBrowser" : "Open in Browser",
 "openLink" : "Open Link: {arg0}",
 "openLogDirectory" : "Open Log Directory",
 "openingBalance" : "Opening Balance",

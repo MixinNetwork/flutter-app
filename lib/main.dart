@@ -28,7 +28,6 @@ import 'utils/local_state_storage.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
-import 'utils/web_view/web_view_desktop.dart';
 import 'widgets/protocol_handler.dart';
 
 Future<void> main(List<String> args) async {
@@ -45,11 +44,6 @@ Future<void> _runApp(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await loadFallbackFonts();
-
-  // show custom web view navigation bar.
-  if (runWebViewNavigationBar(args)) {
-    return;
-  }
 
   EventBus.initialize();
   initAppLifecycleObserver();

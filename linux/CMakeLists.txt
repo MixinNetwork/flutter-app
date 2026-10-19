@@ -47,6 +47,7 @@ add_definitions(-DAPPLICATION_ID="${APPLICATION_ID}")
 
 # Application build
 add_executable(${BINARY_NAME}
+  "bot_window_composer.cc"
   "main.cc"
   "my_application.cc"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"

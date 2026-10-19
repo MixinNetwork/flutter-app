@@ -10,6 +10,8 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
     RegisterGeneratedPlugins(registry: flutterViewController)
     PlatformMenuPlugin.register(with: flutterViewController.registrar(forPlugin: "PlatformMenuPlugin"))
+    // Before the first browser window is created.
+    BotWindowComposer.install(controller: flutterViewController)
     self.titleVisibility = .hidden
     self.titlebarAppearsTransparent = true
     self.styleMask = [self.styleMask, NSWindow.StyleMask.fullSizeContentView]

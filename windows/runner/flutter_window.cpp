@@ -2,6 +2,7 @@
 
 #include <optional>
 
+#include "bot_window_composer.h"
 #include "flutter/generated_plugin_registrant.h"
 #include "raw_hwnd_plugin.h"
 
@@ -28,6 +29,7 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   RawHwndPluginRegisterWithRegistrar(
       flutter_controller_->engine()->GetRegistrarForPlugin("RawHwndPlugin"), GetHandle());
+  bot_window_composer::Install(flutter_controller_->engine()->messenger());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   return true;
 }

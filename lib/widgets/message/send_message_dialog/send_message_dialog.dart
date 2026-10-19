@@ -52,8 +52,9 @@ Future<bool> showSendDialog(
   String? conversationId,
   String? data,
   App? app,
-  String? user,
-) async {
+  String? user, {
+  bool confirm = false,
+}) async {
   final _category = category?.category;
   if (_category == null || data == null || data.isEmpty) return false;
 
@@ -100,7 +101,17 @@ Future<bool> showSendDialog(
     return false;
   }
 
+  // Shows what would be sent before the shortcuts below send it unasked.
+  Future<bool> confirmed() async =>
+      !confirm ||
+      await showMixinDialog<bool>(
+            context: context,
+            child: _SendPage(_category, null, result, app, confirmOnly: true),
+          ) ==
+          true;
+
   if (user != null) {
+    if (!await confirmed() || !context.mounted) return false;
     return _sendMessageToUserId(context, user, _category, result);
   }
   if (conversationId == null && _category == _Category.text) {
@@ -108,6 +119,7 @@ Future<bool> showSendDialog(
       conversationProvider,
     );
     if (currentConversation != null) {
+      if (!await confirmed() || !context.mounted) return false;
       await _sendMessage(
         context,
         currentConversation.conversationId,
@@ -168,12 +180,21 @@ Future<bool> _sendMessageToUserId(
 }
 
 class _SendPage extends HookConsumerWidget {
-  const _SendPage(this.category, this.conversationId, this.data, this.app);
+  const _SendPage(
+    this.category,
+    this.conversationId,
+    this.data,
+    this.app, {
+    this.confirmOnly = false,
+  });
 
   final _Category category;
   final String? conversationId;
   final dynamic data;
   final App? app;
+
+  /// Pops `true` on send and leaves the sending to the caller.
+  final bool confirmOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -214,6 +235,7 @@ class _SendPage extends HookConsumerWidget {
     }, [category, data]);
 
     Future<void> sendMessage() async {
+      if (confirmOnly) return Navigator.pop(context, true);
       EncryptCategory? encryptCategory;
       var _conversationId = conversationId;
       if (_conversationId == null) {
@@ -281,7 +303,7 @@ class _SendPage extends HookConsumerWidget {
           MixinButton(
             onTap: sendMessage,
             child: Text(
-              (conversationId != null)
+              (conversationId != null || confirmOnly)
                   ? context.l10n.send
                   : context.l10n.forward,
             ),

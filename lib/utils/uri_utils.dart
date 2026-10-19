@@ -8,6 +8,7 @@ import '../db/mixin_database.dart' hide User;
 import '../enum/encrypt_category.dart';
 import '../ui/home/conversation/conversation_focus.dart';
 import '../widgets/conversation/conversation_dialog.dart';
+import '../widgets/dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import '../widgets/message/item/transfer/transfer_page.dart';
 import '../widgets/message/send_message_dialog/send_message_dialog.dart';
@@ -27,16 +28,22 @@ Future<bool> openUriWithWebView(
   String? title,
   String? conversationId,
   AppCardData? appCardData,
+  String? appId,
 }) async => openUri(
   context,
   text,
   fallbackHandler: (uri) async {
     if (await MixinWebView.instance.isWebViewRuntimeAvailable()) {
+      final app = appId == null
+          ? null
+          : await context.database.appDao.findAppById(appId);
+      if (!context.mounted) return true;
       await MixinWebView.instance.openWebViewWindowWithUrl(
         context,
         uri.toString(),
         conversationId: conversationId,
         title: title,
+        app: app,
         appCardData: appCardData,
       );
       return true;
@@ -50,6 +57,9 @@ Future<bool> openUri(
   String text, {
   Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
   App? app,
+  // For links a page may open without a click: messages are sent only once
+  // confirmed.
+  bool confirmSend = false,
 }) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
@@ -91,6 +101,16 @@ Future<bool> openUri(
             conversation: conversation,
           );
 
+          if (confirmSend) {
+            if (!context.mounted) return false;
+            final event = await showConfirmMixinDialog(
+              context,
+              startText ?? '',
+              positiveText: context.l10n.send,
+            );
+            if (event != DialogEvent.positive) return false;
+          }
+
           await context.accountServer.sendTextMessage(
             startText ?? '',
             EncryptCategory.plain,
@@ -115,6 +135,7 @@ Future<bool> openUri(
         uri.dataOfSend,
         app,
         uri.userOfSend,
+        confirm: confirmSend,
       );
     }
 
@@ -156,6 +177,7 @@ Future<bool> openUri(
             context,
             homeUri.toString(),
             conversationId: conversationId,
+            app: app,
           );
           return true;
         }

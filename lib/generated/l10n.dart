@@ -1,7 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -2737,6 +2736,16 @@ class Localization {
     return Intl.message(
       'Open Homepage',
       name: 'openHomePage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open in Browser`
+  String get openInBrowser {
+    return Intl.message(
+      'Open in Browser',
+      name: 'openInBrowser',
       desc: '',
       args: [],
     );
