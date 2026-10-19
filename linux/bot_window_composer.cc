@@ -701,6 +701,7 @@ FlValue* DebugProbe(BotWindow* bot, FlValue* arguments) {
       result, "popupHidden",
       fl_value_new_bool(!bot->popup || !gtk_widget_get_visible(bot->popup)));
   fl_value_set_string_take(result, "popupOrigin", origin);
+  fl_value_set_string_take(result, "nativeMenu", fl_value_new_bool(IsX11()));
   fl_value_set_string_take(result, "leading", leading);
   fl_value_set_string_take(
       result, "width",

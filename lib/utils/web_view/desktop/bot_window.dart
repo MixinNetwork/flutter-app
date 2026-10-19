@@ -15,6 +15,7 @@ import '../../../constants/constants.dart';
 import '../../../db/extension/app.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/provider/setting_provider.dart';
+import '../../../widgets/auth.dart' show appLocked;
 import '../../../widgets/dialog.dart';
 import '../../../widgets/global_image_cache.dart';
 import '../../../widgets/message/item/action_card/action_card_data.dart';
@@ -114,7 +115,7 @@ class BotWindow {
       'showIcon': app != null,
       'icon': ?_icons[app?.appId],
       'backgroundColor': background.toARGB32(),
-      'dark': background.computeLuminance() < 0.5,
+      'dark': _isDark(background),
       // Native fallback menu where a Flutter view is unavailable (X11).
       'menu': {
         'refresh': l10n.refresh,
@@ -241,7 +242,7 @@ class BotWindow {
     final color = themeColor ?? _defaultChromeColor(_brightness);
     await _invoke('setChrome', {
       'backgroundColor': color.toARGB32(),
-      'dark': color.computeLuminance() < 0.5,
+      'dark': _isDark(color),
     });
   }
 
@@ -310,7 +311,13 @@ class BotWindow {
     final context = await showMainWindow();
     if (context == null || !context.mounted) return;
     if (uri.isScheme(mixinScheme) || uri.isMixinActionUrl) {
-      await openUri(context, uri.toString(), app: app, confirmSend: true);
+      await openUri(
+        context,
+        uri.toString(),
+        app: app,
+        conversationId: conversationId,
+        confirmSend: true,
+      );
       return;
     }
     // The page may navigate without a click, so another app is never
@@ -333,6 +340,8 @@ class BotWindow {
 
   /// Shows the menu for the `•••` button.
   Future<void> showPopup() async {
+    // The popup is outside the main window's lock screen.
+    if (appLocked.value) return;
     try {
       final result = await _invoke<Map<Object?, Object?>>('showPopup', {
         // Windows resolves the engine from it.
@@ -445,6 +454,10 @@ Color _defaultChromeColor(Brightness brightness) =>
     brightness == Brightness.dark
     ? darkBrightnessThemeData.primary
     : lightBrightnessThemeData.primary;
+
+/// Whether white text contrasts more than black with [color]: below the
+/// luminance where both contrast ratios meet.
+bool _isDark(Color color) => color.computeLuminance() < 0.179;
 
 bool _isWeb(Uri uri) => uri.isScheme('http') || uri.isScheme('https');
 

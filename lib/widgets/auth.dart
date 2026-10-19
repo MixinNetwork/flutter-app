@@ -25,6 +25,9 @@ const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
 
+/// Whether the main window shows the lock screen, for views outside it.
+final appLocked = ValueNotifier(false);
+
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({required this.child, super.key});
 
@@ -62,6 +65,11 @@ class _AuthGuard extends HookConsumerWidget {
 
     final hasError = useState(false);
     final lock = useState(SecurityKeyValue.instance.hasPasscode);
+
+    useEffect(() {
+      appLocked.value = lock.value;
+      return () => appLocked.value = false;
+    }, [lock.value]);
 
     useEffect(() {
       final listen = EventBus.instance.on.whereType<LockEvent>().listen((

@@ -12,6 +12,7 @@ import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../generated/l10n.dart';
 import '../../../ui/provider/setting_provider.dart';
+import '../../../widgets/auth.dart' show appLocked;
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/conversation/badges_widget.dart';
@@ -145,12 +146,14 @@ class _PopupLayerState extends State<_PopupLayer>
   void initState() {
     super.initState();
     _window.popupVisible.addListener(_onVisibleChanged);
+    appLocked.addListener(_onLocked);
     _onVisibleChanged();
   }
 
   @override
   void dispose() {
     _window.popupVisible.removeListener(_onVisibleChanged);
+    appLocked.removeListener(_onLocked);
     _controller.dispose();
     _window.popupDismissed();
     super.dispose();
@@ -165,6 +168,11 @@ class _PopupLayerState extends State<_PopupLayer>
     // The bot profile is a route of this view's navigator and would outlive
     // a popup dismissed from outside, then show over the next menu.
     Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  // The menu and the bot profile are outside the main window's lock screen.
+  void _onLocked() {
+    if (appLocked.value) unawaited(_window.hidePopup());
   }
 
   void _onStatusChanged(AnimationStatus status) {

@@ -57,6 +57,9 @@ Future<bool> openUri(
   String text, {
   Future<bool> Function(Uri uri) fallbackHandler = launchUrl,
   App? app,
+  // The conversation the link was opened from, where a text send link
+  // without a destination goes instead of the one the main window shows.
+  String? conversationId,
   // For links a page may open without a click: messages are sent only once
   // confirmed.
   bool confirmSend = false,
@@ -135,6 +138,7 @@ Future<bool> openUri(
         uri.dataOfSend,
         app,
         uri.userOfSend,
+        sourceConversationId: conversationId,
         confirm: confirmSend,
       );
     }

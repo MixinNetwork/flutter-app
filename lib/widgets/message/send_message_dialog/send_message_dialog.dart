@@ -53,6 +53,7 @@ Future<bool> showSendDialog(
   String? data,
   App? app,
   String? user, {
+  String? sourceConversationId,
   bool confirm = false,
 }) async {
   final _category = category?.category;
@@ -113,6 +114,15 @@ Future<bool> showSendDialog(
   if (user != null) {
     if (!await confirmed() || !context.mounted) return false;
     return _sendMessageToUserId(context, user, _category, result);
+  }
+  if (conversationId == null &&
+      _category == _Category.text &&
+      sourceConversationId != null) {
+    await showMixinDialog(
+      context: context,
+      child: _SendPage(_category, sourceConversationId, result, app),
+    );
+    return true;
   }
   if (conversationId == null && _category == _Category.text) {
     final currentConversation = context.providerContainer.read(

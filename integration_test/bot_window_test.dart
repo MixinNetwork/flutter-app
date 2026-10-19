@@ -252,114 +252,125 @@ document.querySelector('meta[name="theme-color"]').content = '#101010';
     expect(window.webview.navigationState.value.url, url);
     expect(await hitAtBack(), 'header');
 
-    // ••• opens the menu, hanging from the capsule.
-    await window.focus();
-    await click(_capsuleMore);
-    await waitFor('popup shown', () => window.popupVisible.value);
-    await tester.pump(const Duration(milliseconds: 400));
-    final viewId = BotWindow.popups.value.keys.single;
-    final state = await probe([_headerTop, _capsuleClose, _page]);
-    expect(state['popupHidden'], false);
-    expect(
-      [for (final p in state['probes']! as List) (p as Map)['hit']],
-      _popupCoversHeader
-          ? ['popup', 'popup', 'popup']
-          : ['header', 'capsule', 'popup'],
-      reason: 'the popup view covers the window',
-    );
-    // Window content coordinates of the popup view's origin.
-    final origin = state['popupOrigin']! as List;
-    final popupOrigin = Offset(
-      (origin[0]! as num).toDouble(),
-      (origin[1]! as num).toDouble(),
-    );
-    final menu = tester.getRect(
-      find
-          .ancestor(of: find.text(_pageTitle), matching: find.byType(Material))
-          .first,
-    );
-    expect(window.popupAnchor, _capsule.shift(-popupOrigin));
-    expect(
-      menu.top,
-      moreOrLessEquals(
-        math.max(window.popupAnchor.bottom + 4, 0).toDouble(),
-        epsilon: 1,
-      ),
-    );
-    expect(menu.right, moreOrLessEquals(window.popupAnchor.right, epsilon: 1));
+    // X11 has no popup view: ••• shows a native menu instead, not driven
+    // here.
+    final nativeMenu = (await probe(const []))['nativeMenu'] == true;
+    if (!nativeMenu) {
+      // ••• opens the menu, hanging from the capsule.
+      await window.focus();
+      await click(_capsuleMore);
+      await waitFor('popup shown', () => window.popupVisible.value);
+      await tester.pump(const Duration(milliseconds: 400));
+      final viewId = BotWindow.popups.value.keys.single;
+      final state = await probe([_headerTop, _capsuleClose, _page]);
+      expect(state['popupHidden'], false);
+      expect(
+        [for (final p in state['probes']! as List) (p as Map)['hit']],
+        _popupCoversHeader
+            ? ['popup', 'popup', 'popup']
+            : ['header', 'capsule', 'popup'],
+        reason: 'the popup view covers the window',
+      );
+      // Window content coordinates of the popup view's origin.
+      final origin = state['popupOrigin']! as List;
+      final popupOrigin = Offset(
+        (origin[0]! as num).toDouble(),
+        (origin[1]! as num).toDouble(),
+      );
+      final menu = tester.getRect(
+        find
+            .ancestor(
+              of: find.text(_pageTitle),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      expect(window.popupAnchor, _capsule.shift(-popupOrigin));
+      expect(
+        menu.top,
+        moreOrLessEquals(
+          math.max(window.popupAnchor.bottom + 4, 0).toDouble(),
+          epsilon: 1,
+        ),
+      );
+      expect(
+        menu.right,
+        moreOrLessEquals(window.popupAnchor.right, epsilon: 1),
+      );
 
-    // Account dialogs move to the main navigator only after the popup closes.
-    BuildContext? main;
-    Object? hiddenAtHandoff;
-    var handedOff = false;
-    unawaited(
-      window.showMainWindow().then((value) async {
-        main = value;
-        hiddenAtHandoff = (await probe(const []))['popupHidden'];
-        handedOff = true;
-      }),
-    );
-    await waitFor('main window handoff', () => handedOff);
-    expect(main, isNotNull);
-    expect(hiddenAtHandoff, true);
-    if (canFocus) expect(await windowManager.isFocused(), true);
-    final mainViewId = View.of(context).viewId;
-    final dialog = showMixinDialog<void>(
-      context: main!,
-      child: const Text('Main window dialog'),
-    );
-    await tester.pumpAndSettle(
-      const Duration(milliseconds: 50),
-      EnginePhase.sendSemanticsUpdate,
-      const Duration(seconds: 5),
-    );
-    expect(
-      View.of(tester.element(find.text('Main window dialog'))).viewId,
-      mainViewId,
-    );
-    Navigator.of(main!).pop();
-    await tester.pumpAndSettle(
-      const Duration(milliseconds: 50),
-      EnginePhase.sendSemanticsUpdate,
-      const Duration(seconds: 5),
-    );
-    await dialog;
+      // Account dialogs move to the main navigator only after the popup closes.
+      BuildContext? main;
+      Object? hiddenAtHandoff;
+      var handedOff = false;
+      unawaited(
+        window.showMainWindow().then((value) async {
+          main = value;
+          hiddenAtHandoff = (await probe(const []))['popupHidden'];
+          handedOff = true;
+        }),
+      );
+      await waitFor('main window handoff', () => handedOff);
+      expect(main, isNotNull);
+      expect(hiddenAtHandoff, true);
+      if (canFocus) expect(await windowManager.isFocused(), true);
+      final mainViewId = View.of(context).viewId;
+      final dialog = showMixinDialog<void>(
+        context: main!,
+        child: const Text('Main window dialog'),
+      );
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 50),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
+      expect(
+        View.of(tester.element(find.text('Main window dialog'))).viewId,
+        mainViewId,
+      );
+      Navigator.of(main!).pop();
+      await tester.pumpAndSettle(
+        const Duration(milliseconds: 50),
+        EnginePhase.sendSemanticsUpdate,
+        const Duration(seconds: 5),
+      );
+      await dialog;
 
-    await window.focus();
-    await click(_capsuleMore);
-    await waitFor('popup shown again', () => window.popupVisible.value);
-    await tester.pump(const Duration(milliseconds: 400));
+      await window.focus();
+      await click(_capsuleMore);
+      await waitFor('popup shown again', () => window.popupVisible.value);
+      await tester.pump(const Duration(milliseconds: 400));
 
-    // Hover reaches the popup view.
-    events.clear();
-    await mouse('moved', _page);
-    await waitFor(
-      'hover in view $viewId',
-      () => events.any((e) => e is PointerHoverEvent && e.viewId == viewId),
-    );
+      // Hover reaches the popup view.
+      events.clear();
+      await mouse('moved', _page);
+      await waitFor(
+        'hover in view $viewId',
+        () => events.any((e) => e is PointerHoverEvent && e.viewId == viewId),
+      );
 
-    // A click on the menu stays in the popup.
-    final header = tester.getCenter(find.text(_pageTitle));
-    events.clear();
-    await click(header + popupOrigin);
-    await waitFor(
-      'pointer down in view $viewId',
-      () => events.any((e) => e is PointerDownEvent && e.viewId == viewId),
-    );
-    expect(
-      events.whereType<PointerDownEvent>().single.position,
-      within(distance: 1, from: header),
-    );
-    expect(window.popupVisible.value, true);
+      // A click on the menu stays in the popup.
+      final header = tester.getCenter(find.text(_pageTitle));
+      events.clear();
+      await click(header + popupOrigin);
+      await waitFor(
+        'pointer down in view $viewId',
+        () => events.any((e) => e is PointerDownEvent && e.viewId == viewId),
+      );
+      expect(
+        events.whereType<PointerDownEvent>().single.position,
+        within(distance: 1, from: header),
+      );
+      expect(window.popupVisible.value, true);
 
-    // A click on the capsule's ✕ hits the barrier: the popup closes, the
-    // window does not.
-    await click(_capsuleClose);
-    await waitFor(
-      'popup hidden',
-      () async => (await probe(const []))['popupHidden'] == true,
-    );
-    expect(closed, false);
+      // A click on the capsule's ✕ hits the barrier: the popup closes, the
+      // window does not.
+      await click(_capsuleClose);
+      await waitFor(
+        'popup hidden',
+        () async => (await probe(const []))['popupHidden'] == true,
+      );
+      expect(closed, false);
+    }
 
     // With the popup gone, ✕ closes the window.
     await click(_capsuleClose);
