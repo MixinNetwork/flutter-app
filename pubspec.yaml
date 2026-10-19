@@ -183,7 +183,7 @@ dev_dependencies:
   plugin_platform_interface: ^2.1.8
   very_good_analysis: ^10.2.0
   video_player_platform_interface: ^6.9.0
-  vm_service: ^15.2.0
+  vm_service: ^15.4.0
 flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
