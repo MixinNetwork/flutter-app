@@ -18,6 +18,13 @@ analyzer:
     #    - 'editable/**'
     - "third_party/**"
     - "lib/constants/resources.preview.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:

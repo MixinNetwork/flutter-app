@@ -10,6 +10,7 @@
 #include "string"
 #include "dbus/dbus.h"
 
+#include "bot_window_composer.h"
 #include "flutter/generated_plugin_registrant.h"
 
 namespace {
@@ -114,6 +115,7 @@ static void my_application_activate(GApplication *application) {
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+  bot_window_composer_install(view);
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }

@@ -71,6 +71,8 @@ class ActionMessageButton extends HookConsumerWidget {
     );
     final highlightEnabled = useMessageHighlightEnabled();
     final menuHighlighted = useMessageMenuHighlighted();
+    // The page belongs to the bot that sent the message, as on Android.
+    final botId = useMessageConverter(converter: (m) => m.appId ?? m.userId);
     Widget button = CustomPaint(
       painter: BubblePainter(
         color: context.theme.primary,
@@ -142,6 +144,7 @@ class ActionMessageButton extends HookConsumerWidget {
           action.action,
           title: action.label,
           conversationId: ref.read(currentConversationIdProvider),
+          appId: botId,
         );
       },
       child: button,

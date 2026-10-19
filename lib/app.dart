@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/isolate.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Consumer, FutureProvider, Provider;
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
@@ -30,6 +32,7 @@ import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/system_fonts.dart';
 import 'utils/system/tray.dart';
+import 'utils/web_view/desktop/bot_window_popup.dart';
 import 'widgets/actions/actions.dart';
 import 'widgets/auth.dart';
 import 'widgets/brightness_observer.dart';
@@ -133,68 +136,89 @@ class _App extends HookConsumerWidget {
   final Widget home;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => WindowShortcuts(
-    child: GlobalMoveWindow(
-      child: MaterialApp(
-        title: 'Mixin',
-        navigatorObservers: [rootRouteObserver],
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          Localization.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [...Localization.delegate.supportedLocales],
-        theme: ThemeData(
-          colorScheme: ColorScheme.light(
-            primary: lightBrightnessThemeData.text,
-          ),
-          textSelectionTheme: TextSelectionThemeData(
-            cursorColor: lightBrightnessThemeData.accent,
-          ),
-          useMaterial3: true,
-        ).withFallbackFonts(),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.dark(
-            primary: darkBrightnessThemeData.text,
-          ),
-          textSelectionTheme: TextSelectionThemeData(
-            cursorColor: darkBrightnessThemeData.accent,
-          ),
-          useMaterial3: true,
-        ).withFallbackFonts(),
-        themeMode: ref.watch(settingProvider).themeMode,
-        builder: (context, child) {
-          try {
-            context.accountServer.language = Localizations.localeOf(
-              context,
-            ).languageCode;
-          } catch (_) {}
-          final mediaQueryData = MediaQuery.of(context);
-          return BrightnessObserver(
-            lightThemeData: lightBrightnessThemeData,
-            darkThemeData: darkBrightnessThemeData,
-            forceBrightness: ref.watch(settingProvider).brightness,
-            child: MediaQuery(
-              data: mediaQueryData.copyWith(
-                // Different linux distro change the value, e.g. 1.2
-                textScaler: Platform.isLinux
-                    ? TextScaler.noScaling
-                    : mediaQueryData.textScaler,
-              ),
-              child: SystemTrayWidget(
-                child: _WindowsTitleBarDivider(
-                  child: AuthGuard(child: child!),
+  Widget build(BuildContext context, WidgetRef ref) => BotWindowPopupHost(
+    child: _MainWindow(home: home),
+  );
+}
+
+class _MainWindow extends HookConsumerWidget {
+  const _MainWindow({required this.home});
+
+  final Widget home;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brightness =
+        ref.watch(settingProvider).brightness ??
+        MediaQuery.platformBrightnessOf(context);
+    useEffect(() {
+      // GTK applies it to every window: the title bars, and WebKitGTK's
+      // prefers-color-scheme in bot windows.
+      if (Platform.isLinux) unawaited(windowManager.setBrightness(brightness));
+    }, [brightness]);
+    return WindowShortcuts(
+      child: GlobalMoveWindow(
+        child: MaterialApp(
+          title: 'Mixin',
+          navigatorObservers: [rootRouteObserver],
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            Localization.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: [...Localization.delegate.supportedLocales],
+          theme: ThemeData(
+            colorScheme: ColorScheme.light(
+              primary: lightBrightnessThemeData.text,
+            ),
+            textSelectionTheme: TextSelectionThemeData(
+              cursorColor: lightBrightnessThemeData.accent,
+            ),
+            useMaterial3: true,
+          ).withFallbackFonts(),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.dark(
+              primary: darkBrightnessThemeData.text,
+            ),
+            textSelectionTheme: TextSelectionThemeData(
+              cursorColor: darkBrightnessThemeData.accent,
+            ),
+            useMaterial3: true,
+          ).withFallbackFonts(),
+          themeMode: ref.watch(settingProvider).themeMode,
+          builder: (context, child) {
+            try {
+              context.accountServer.language = Localizations.localeOf(
+                context,
+              ).languageCode;
+            } catch (_) {}
+            final mediaQueryData = MediaQuery.of(context);
+            return BrightnessObserver(
+              lightThemeData: lightBrightnessThemeData,
+              darkThemeData: darkBrightnessThemeData,
+              forceBrightness: ref.watch(settingProvider).brightness,
+              child: MediaQuery(
+                data: mediaQueryData.copyWith(
+                  // Different linux distro change the value, e.g. 1.2
+                  textScaler: Platform.isLinux
+                      ? TextScaler.noScaling
+                      : mediaQueryData.textScaler,
+                ),
+                child: SystemTrayWidget(
+                  child: _WindowsTitleBarDivider(
+                    child: AuthGuard(child: child!),
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-        home: MixinAppActions(child: MacosMenuBar(child: home)),
+            );
+          },
+          home: MixinAppActions(child: MacosMenuBar(child: home)),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _WindowsTitleBarDivider extends StatelessWidget {
