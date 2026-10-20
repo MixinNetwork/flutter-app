@@ -11,7 +11,10 @@ Future<R> runLoadBalancer<R, P>(
   P argument,
 ) => loadBalancer != null
     ? loadBalancer!.run(function, argument)
-    : compute(function, argument);
+    // Only the main isolate creates a load balancer. Other isolates, such as
+    // the message worker, run the function directly: spawning an isolate for
+    // each call costs more than the small conversions they do.
+    : Future.sync(() => function(argument));
 
 dynamic _jsonDecode(String json) => convert.jsonDecode(json);
 
