@@ -732,6 +732,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oneYear": MessageLookupByLibrary.simpleMessage("1 Year"),
     "open": MessageLookupByLibrary.simpleMessage("Open"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("Open Homepage"),
+    "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in Browser"),
     "openLink": m35,
     "openLogDirectory": MessageLookupByLibrary.simpleMessage(
       "Open Log Directory",

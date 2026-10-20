@@ -97,11 +97,11 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        users,
-        assets,
-        chains,
-        fiats,
-        snapshots,
+        this.users,
+        this.assets,
+        this.chains,
+        this.fiats,
+        this.snapshots,
         ...generatedwhere.watchedTables,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
@@ -144,7 +144,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM snapshots',
       variables: [],
-      readsFrom: {snapshots},
+      readsFrom: {this.snapshots},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 

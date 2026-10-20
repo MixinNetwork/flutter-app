@@ -3,6 +3,46 @@ import 'package:flutter_app/widgets/message/item/action_card/action_card_data.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('shared actions follow Android send-prefix exclusions', () {
+    final cases = {
+      'mixin://apps/example': true,
+      'MIXIN://users/example': true,
+      'https://example.com': true,
+      'http://example.com': true,
+      'custom://example': true,
+      'mixin://send?user=example': false,
+      'mixin://mixin.one/send?text=hello': false,
+      'https://mixin.one/send?user=example': false,
+      'MiXiN://SeNd': false,
+      'MIXIN://MIXIN.ONE/SEND': false,
+      'HTTPS://MIXIN.ONE/SEND': false,
+      'mixin://sender': false,
+    };
+    AppCardData card(List<String> actions) => AppCardData(
+      '',
+      '',
+      'title',
+      'description',
+      '',
+      '',
+      true,
+      actions.map((action) => ActionData('button', '', action)).toList(),
+      '',
+      null,
+    );
+    for (final entry in cases.entries) {
+      expect(card([entry.key]).canShareActions, entry.value, reason: entry.key);
+    }
+    expect(card([]).canShareActions, isTrue);
+    expect(
+      card([
+        'mixin://apps/example',
+        'mixin://send?user=example',
+      ]).canShareActions,
+      isFalse,
+    );
+  });
+
   test('test generate copy', () {
     final tests = [
       (

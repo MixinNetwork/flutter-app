@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bring_window_to_front/bring_window_to_front.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
@@ -43,6 +43,8 @@ abstract class _NotificationManager {
   Future<void> dismissByConversationId(String conversationId);
 
   Future<void> dismissByMessageId(String messageId, String conversationId);
+
+  Future<void> dismissAll();
 
   Future<bool?> requestPermission();
 
@@ -102,10 +104,26 @@ class _LocalNotificationManager extends _NotificationManager {
     const platformChannelSpecifics = NotificationDetails(
       macOS: notificationDetails,
       iOS: notificationDetails,
+      linux: LinuxNotificationDetails(
+        category: LinuxNotificationCategory.imReceived,
+      ),
     );
 
+    // Linux shows one popup per notification, so replace the conversation's
+    // previous one instead of stacking a popup for each message.
+    final previous = defaultTargetPlatform == TargetPlatform.linux
+        ? notifications.cast<Notification?>().firstWhere(
+            (element) => element?.conversationId == conversationId,
+            orElse: () => null,
+          )
+        : null;
+    if (previous != null) notifications.remove(previous);
+    final notificationId = previous == null
+        ? id
+        : (previous.notification as (Uri, int)).$2;
+
     await flutterLocalNotificationsPlugin.show(
-      id: id,
+      id: notificationId,
       title: title,
       body: body,
       notificationDetails: platformChannelSpecifics,
@@ -115,7 +133,7 @@ class _LocalNotificationManager extends _NotificationManager {
       Notification(
         conversationId: conversationId,
         messageId: messageId,
-        notification: (uri, id),
+        notification: (uri, notificationId),
       ),
     );
   }
@@ -174,6 +192,12 @@ class _LocalNotificationManager extends _NotificationManager {
     final (_, id) = notification.notification as (Uri, int);
     await flutterLocalNotificationsPlugin.cancel(id: id);
     notifications.remove(notification);
+  }
+
+  @override
+  Future<void> dismissAll() async {
+    notifications.clear();
+    await flutterLocalNotificationsPlugin.cancelAll();
   }
 }
 
@@ -243,6 +267,9 @@ class _WindowsNotificationManager extends _NotificationManager {
   }
 
   @override
+  Future<void> dismissAll() => WinToast.instance().clear();
+
+  @override
   Future<bool?> requestPermission() async => null;
 }
 
@@ -307,6 +334,9 @@ Future<void> dismissByMessageId(
   String conversationId,
 ) async =>
     await _notificationManager?.dismissByMessageId(messageId, conversationId);
+
+Future<void> dismissAllNotifications() async =>
+    await _notificationManager?.dismissAll();
 
 Future<bool?> requestNotificationPermission() async =>
     _notificationManager?.requestPermission();

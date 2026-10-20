@@ -48,7 +48,7 @@ mixin _$InscriptionItemDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT i.collection_hash, i.inscription_hash, ic.name, i.sequence, i.content_type, i.content_url, ic.icon_url FROM inscription_items AS i LEFT JOIN inscription_collections AS ic ON ic.collection_hash = i.collection_hash WHERE inscription_hash = ?1',
       variables: [Variable<String>(hash)],
-      readsFrom: {inscriptionItems, inscriptionCollections},
+      readsFrom: {this.inscriptionItems, this.inscriptionCollections},
     ).map(
       (QueryRow row) => Inscription(
         collectionHash: row.read<String>('collection_hash'),

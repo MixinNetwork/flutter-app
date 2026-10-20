@@ -48,7 +48,7 @@ mixin _$TokenDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM tokens',
       variables: [],
-      readsFrom: {tokens},
+      readsFrom: {this.tokens},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 

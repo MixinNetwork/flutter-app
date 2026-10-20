@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../../utils/extension/extension.dart';
+import '../../../utils/platform.dart';
 import '../../../widgets/dash_path_border.dart';
 import 'files_preview.dart';
 
@@ -27,6 +29,9 @@ class ChatDropOverlay extends HookWidget {
           return file.existsSync();
         }).toList();
         if (files.isEmpty) return;
+        if (kPlatformIsDesktop) {
+          await windowManager.show();
+        }
 
         dialogEnabled.value = false;
         await showFilesPreviewDialog(

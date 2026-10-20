@@ -16,6 +16,8 @@ import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_animations/simple_animations.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/constants.dart';
 import '../../../constants/icon_fonts.dart';
@@ -37,6 +39,7 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
+import '../../../widgets/sticker_page/emoji_page.dart' show warmEmojiPage;
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
@@ -45,6 +48,7 @@ import '../../provider/mention_cache_provider.dart';
 import '../../provider/mention_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import '../../provider/recall_message_reedit_provider.dart';
+import '../../provider/setting_provider.dart';
 import '../notifier/chat_side_notifier.dart';
 import 'chat_send_outcome.dart';
 import 'files_preview.dart';
@@ -84,7 +88,9 @@ class InputContainer extends HookConsumerWidget {
       child: LayoutBuilder(
         builder: (context, constraints) => VoiceRecorderBarOverlayComposition(
           layoutWidth: constraints.maxWidth,
-          child: const _InputContainer(),
+          child: const AppActiveTickerMode(
+            child: _InputContainer(),
+          ),
         ),
       ),
     );
@@ -446,6 +452,9 @@ class _SendTextField extends HookConsumerWidget {
         (value) => value?.encryptCategory.isEncrypt == true,
       ),
     );
+    final fontSize =
+        14.0 +
+        ref.watch(settingProvider.select((value) => value.chatFontSizeDelta));
 
     final hasInputText =
         useMemoizedStream(
@@ -502,7 +511,7 @@ class _SendTextField extends HookConsumerWidget {
               minLines: 1,
               focusNode: focusNode,
               controller: textEditingController,
-              style: TextStyle(color: context.theme.text, fontSize: 14),
+              style: TextStyle(color: context.theme.text, fontSize: fontSize),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(kMaxTextLength),
               ],
@@ -529,7 +538,7 @@ class _SendTextField extends HookConsumerWidget {
                           : context.l10n.typeMessage,
                       style: TextStyle(
                         color: context.theme.secondaryText,
-                        fontSize: 14,
+                        fontSize: fontSize,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -587,6 +596,7 @@ class _QuoteMessage extends HookConsumerWidget {
                     padding: const EdgeInsets.all(14),
                     child: SvgPicture.asset(
                       Resources.assetsImagesCloseOvalSvg,
+                      renderingStrategy: RenderingStrategy.raster,
                       height: 22,
                       width: 22,
                     ),
@@ -779,6 +789,11 @@ class _StickerButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = useMemoized(GlobalKey.new);
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    useEffect(() {
+      warmEmojiPage(pixelRatio);
+      return null;
+    }, const []);
     final stickerReadModel = useMemoized(
       () => StickerReadModel(
         stickerDao: context.database.stickerDao,

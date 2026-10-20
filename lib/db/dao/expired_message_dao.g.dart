@@ -46,25 +46,25 @@ mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
   Selectable<ExpiredMessage> getExpiredMessages(int? currentTime) {
     return customSelect(
-      'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC',
+      'SELECT * FROM expired_messages WHERE expire_at <= ?1 ORDER BY expire_at ASC LIMIT 100',
       variables: [Variable<int>(currentTime)],
-      readsFrom: {expiredMessages},
-    ).asyncMap(expiredMessages.mapFromRow);
+      readsFrom: {this.expiredMessages},
+    ).asyncMap(this.expiredMessages.mapFromRow);
   }
 
   Selectable<ExpiredMessage> getFirstExpiredMessage() {
     return customSelect(
       'SELECT * FROM expired_messages WHERE expire_at IS NOT NULL ORDER BY expire_at ASC LIMIT 1',
       variables: [],
-      readsFrom: {expiredMessages},
-    ).asyncMap(expiredMessages.mapFromRow);
+      readsFrom: {this.expiredMessages},
+    ).asyncMap(this.expiredMessages.mapFromRow);
   }
 
   Future<int> updateMessageExpireAt(int? expireAt, String messageId) {
     return customUpdate(
       'UPDATE expired_messages SET expire_at = ?1 WHERE message_id = ?2 AND(expire_at IS NULL || expire_at > ?1)',
       variables: [Variable<int>(expireAt), Variable<String>(messageId)],
-      updates: {expiredMessages},
+      updates: {this.expiredMessages},
       updateKind: UpdateKind.update,
     );
   }
@@ -85,7 +85,7 @@ mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         Variable<double>(currentTime),
         ...generatedwhere.introducedVariables,
       ],
-      updates: {expiredMessages},
+      updates: {this.expiredMessages},
       updateKind: UpdateKind.update,
     );
   }
@@ -94,23 +94,23 @@ mixin _$ExpiredMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT * FROM expired_messages WHERE message_id = ?1',
       variables: [Variable<String>(messageId)],
-      readsFrom: {expiredMessages},
-    ).asyncMap(expiredMessages.mapFromRow);
+      readsFrom: {this.expiredMessages},
+    ).asyncMap(this.expiredMessages.mapFromRow);
   }
 
   Selectable<ExpiredMessage> getAllExpiredMessages(int limit, int offset) {
     return customSelect(
       'SELECT * FROM expired_messages ORDER BY "rowid" ASC LIMIT ?1 OFFSET ?2',
       variables: [Variable<int>(limit), Variable<int>(offset)],
-      readsFrom: {expiredMessages},
-    ).asyncMap(expiredMessages.mapFromRow);
+      readsFrom: {this.expiredMessages},
+    ).asyncMap(this.expiredMessages.mapFromRow);
   }
 
   Selectable<int> countExpiredMessages() {
     return customSelect(
       'SELECT COUNT(1) AS _c0 FROM expired_messages',
       variables: [],
-      readsFrom: {expiredMessages},
+      readsFrom: {this.expiredMessages},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 

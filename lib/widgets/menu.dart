@@ -19,6 +19,8 @@ import 'package:super_context_menu/src/mobile.dart';
 import 'package:super_context_menu/src/scaffold/desktop/menu_widget_builder.dart';
 import 'package:super_context_menu/src/scaffold/mobile/menu_widget_builder.dart';
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
@@ -394,6 +396,7 @@ class ContextMenu extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 8),
                   child: SvgPicture.asset(
                     icon!,
+                    renderingStrategy: RenderingStrategy.raster,
                     colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
                     width: 20,
                     height: 20,
@@ -408,6 +411,7 @@ class ContextMenu extends StatelessWidget {
               if (_subMenuMode)
                 SvgPicture.asset(
                   Resources.assetsImagesIcArrowRightSvg,
+                  renderingStrategy: RenderingStrategy.raster,
                   width: 20,
                   height: 20,
                   colorFilter: ColorFilter.mode(
@@ -664,7 +668,8 @@ extension on SingleActivator {
   String stringRepresentation() => [
     if (control) 'Ctrl',
     if (alt) 'Alt',
-    if (meta) defaultTargetPlatform == TargetPlatform.macOS ? 'Cmd' : 'Meta',
+    if (meta)
+      if (defaultTargetPlatform == TargetPlatform.macOS) 'Cmd' else 'Meta',
     if (shift) 'Shift',
     trigger.keyLabel,
   ].join('+');

@@ -8,6 +8,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../account/security_key_value.dart';
 import '../constants/resources.dart';
@@ -22,6 +24,9 @@ import 'dialog.dart';
 const _lockDuration = Duration(minutes: 1);
 
 enum LockEvent { lock, unlock }
+
+/// Whether the main window shows the lock screen, for views outside it.
+final appLocked = ValueNotifier(false);
 
 class AuthGuard extends HookConsumerWidget {
   const AuthGuard({required this.child, super.key});
@@ -60,6 +65,11 @@ class _AuthGuard extends HookConsumerWidget {
 
     final hasError = useState(false);
     final lock = useState(SecurityKeyValue.instance.hasPasscode);
+
+    useEffect(() {
+      appLocked.value = lock.value;
+      return () => appLocked.value = false;
+    }, [lock.value]);
 
     useEffect(() {
       final listen = EventBus.instance.on.whereType<LockEvent>().listen((
@@ -151,6 +161,7 @@ class _AuthGuard extends HookConsumerWidget {
                       children: [
                         SvgPicture.asset(
                           Resources.assetsImagesLockSvg,
+                          renderingStrategy: RenderingStrategy.raster,
                           width: 68,
                           height: 68,
                           colorFilter: ColorFilter.mode(

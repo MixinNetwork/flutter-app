@@ -79,17 +79,19 @@ class ChatInfoPage extends HookConsumerWidget {
 
     final isGroupConversation = conversationState.isGroup ?? false;
     final muting = conversationState.conversation?.isMute == true;
+    final isExited =
+        userParticipant == null ||
+        conversationState.conversation?.status == ConversationStatus.quit;
     final isOwnerOrAdmin =
-        userParticipant?.role == ParticipantRole.owner ||
-        userParticipant?.role == ParticipantRole.admin;
+        !isExited &&
+        (userParticipant.role == ParticipantRole.owner ||
+            userParticipant.role == ParticipantRole.admin);
 
     final expireIn =
         conversationState.conversation?.expireDuration ?? Duration.zero;
 
     final canModifyExpireIn =
         !isGroupConversation || (isGroupConversation && isOwnerOrAdmin);
-
-    final isExited = userParticipant == null;
     return Scaffold(
       appBar: MixinAppBar(
         actions: [

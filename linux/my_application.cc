@@ -5,9 +5,12 @@
 #include <gdk/gdkx.h>
 #endif
 
+#include <unistd.h>
+
 #include "string"
 #include "dbus/dbus.h"
 
+#include "bot_window_composer.h"
 #include "flutter/generated_plugin_registrant.h"
 
 namespace {
@@ -68,6 +71,15 @@ int send_remote_args_to_primary_instance(char **arguments) {
   return 0;
 }
 
+// Tear down the process directly when the window is closed. A normal exit
+// destroys the FlView and runs library destructors while the raster thread
+// still holds the EGL context, which segfaults inside the NVIDIA driver
+// (libnvidia-eglcore). Logs are flushed per line and SQLite is safe
+// against abrupt termination.
+gboolean on_window_delete(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
+  _exit(0);
+}
+
 }
 
 struct _MyApplication {
@@ -92,6 +104,7 @@ static void my_application_activate(GApplication *application) {
   gtk_window_set_title(window, "Mixin Messenger");
   gtk_window_set_default_size(window, 1280, 720);
   gtk_window_set_position(window, GTK_WIN_POS_CENTER);
+  g_signal_connect(window, "delete-event", G_CALLBACK(on_window_delete), nullptr);
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
@@ -102,6 +115,7 @@ static void my_application_activate(GApplication *application) {
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+  bot_window_composer_install(view);
 
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }

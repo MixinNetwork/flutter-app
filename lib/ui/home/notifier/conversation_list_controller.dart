@@ -56,6 +56,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
 
   int? _limit;
   int? _badgeCount;
+  var _snapshotGeneration = 0;
   SlideCategoryState? _activeState;
   var _disposed = false;
 
@@ -81,6 +82,38 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
 
   void init() => _switchCategory(slideCategoryStateNotifier.state);
 
+  List<ConversationItem>? search(String query, {required bool filterUnseen}) {
+    if (!store.initialized) return null;
+
+    final normalizedQuery = query.toLowerCase();
+    final matches =
+        state.items.where((item) {
+          final name = item.isGroupConversation ? item.groupName : item.name;
+          return (item.isGroupConversation || item.isStrangerConversation) &&
+              name?.toLowerCase().contains(normalizedQuery) == true &&
+              (!filterUnseen || (item.unseenMessageCount ?? 0) > 0);
+        }).toList()..sort((a, b) {
+          final aName = a.isGroupConversation ? a.groupName : a.name;
+          final bName = b.isGroupConversation ? b.groupName : b.name;
+          final aExact = aName?.toLowerCase() == normalizedQuery;
+          final bExact = bName?.toLowerCase() == normalizedQuery;
+          if (aExact != bExact) return aExact ? -1 : 1;
+          final pin = _compareNullableDateDescending(a.pinTime, b.pinTime);
+          if (pin != 0) return pin;
+          return _compareNullableDateDescending(
+            a.lastMessageCreatedAt,
+            b.lastMessageCreatedAt,
+          );
+        });
+    return matches;
+  }
+
+  static int _compareNullableDateDescending(DateTime? a, DateTime? b) {
+    if (a == null) return b == null ? 0 : 1;
+    if (b == null) return -1;
+    return b.compareTo(a);
+  }
+
   void _switchCategory(SlideCategoryState state) {
     if (state.type == SlideCategoryType.setting) return;
     _views.putIfAbsent(
@@ -98,17 +131,33 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
     final activeState = _activeState;
     if (activeState == null) return;
     final items = _itemsFor(activeState);
-    value = ConversationListState(
-      items: items,
-      initialized: true,
-    );
-    final warmItems = switch (event) {
-      ConversationListDelta(:final changedIds) => items.where(
-        (item) => changedIds.contains(item.conversationId),
-      ),
-      ConversationListSnapshot() => items.take(limit),
-    };
-    unawaited(_warm(warmItems));
+    switch (event) {
+      case ConversationListDelta(:final changedIds):
+        _snapshotGeneration++;
+        value = ConversationListState(items: items, initialized: true);
+        unawaited(
+          _warm(
+            items.where((item) => changedIds.contains(item.conversationId)),
+          ),
+        );
+      case ConversationListSnapshot():
+        // Rows draw their preview and group avatars from these caches without
+        // waiting, so publish a new list only after the first rows are
+        // filled. The other rows are filled with one more query per cache
+        // before they scroll into view, and are not built until then.
+        final generation = ++_snapshotGeneration;
+        if (items.isEmpty) {
+          value = ConversationListState(items: items, initialized: true);
+          break;
+        }
+        unawaited(
+          _warm(items.take(limit)).whenComplete(() {
+            if (_disposed || generation != _snapshotGeneration) return;
+            value = ConversationListState(items: items, initialized: true);
+            unawaited(_warm(items.skip(limit)));
+          }),
+        );
+    }
     final badgeCount = store.unseenCountIgnoringMuted;
     if (_badgeCount != badgeCount) {
       _badgeCount = badgeCount;
@@ -188,6 +237,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
   @override
   void dispose() {
     _disposed = true;
+    if ((_badgeCount ?? 0) != 0) unawaited(_updateBadge(0));
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
@@ -209,9 +259,18 @@ class _ConversationListView {
       ItemPositionsListener.create();
   final ItemScrollController itemScrollController = ItemScrollController();
 
-  void _onPositionsChanged() => onVisible(
-    itemPositionsListener.itemPositions.value.map((item) => item.index).toSet(),
-  );
+  Set<int> _visible = const {};
+
+  // Positions change on every scrolled frame; warm rows only when a row
+  // enters or leaves the viewport.
+  void _onPositionsChanged() {
+    final visible = itemPositionsListener.itemPositions.value
+        .map((item) => item.index)
+        .toSet();
+    if (setEquals(visible, _visible)) return;
+    _visible = visible;
+    onVisible(visible);
+  }
 
   void dispose() =>
       itemPositionsListener.itemPositions.removeListener(_onPositionsChanged);

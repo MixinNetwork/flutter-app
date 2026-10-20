@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Message, Offset;
@@ -34,7 +37,14 @@ class PostMessage extends HookConsumerWidget {
         constraints: const BoxConstraints(maxWidth: 400),
         child: DefaultTextStyle.merge(
           style: TextStyle(fontSize: context.messageStyle.primaryFontSize),
-          child: MessagePost(showStatus: true, content: content),
+          child: MessagePost(
+            showStatus: true,
+            content: content,
+            cacheKey: buildMarkdownCacheKey(
+              namespace: 'post',
+              id: context.message.messageId,
+            ),
+          ),
         ),
       ),
     );
@@ -49,6 +59,7 @@ class MessagePost extends StatelessWidget {
     this.padding,
     this.decoration,
     this.clickable = true,
+    this.cacheKey,
   });
 
   final EdgeInsetsGeometry? padding;
@@ -56,6 +67,7 @@ class MessagePost extends StatelessWidget {
   final bool showStatus;
   final String content;
   final bool clickable;
+  final String? cacheKey;
 
   @override
   Widget build(BuildContext context) => InteractiveDecoratedBox(
@@ -84,7 +96,10 @@ class MessagePost extends StatelessWidget {
                   ).copyWith(scrollbars: false),
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
-                    child: MarkdownColumn(data: postContent),
+                    child: MarkdownColumn(
+                      data: postContent,
+                      cacheKey: cacheKey,
+                    ),
                   ),
                 ),
               );
@@ -118,6 +133,7 @@ class PostDetailIcon extends StatelessWidget {
     alignment: Alignment.center,
     child: SvgPicture.asset(
       Resources.assetsImagesPostDetailSvg,
+      renderingStrategy: RenderingStrategy.raster,
       width: 20,
       height: 20,
     ),
@@ -125,48 +141,74 @@ class PostDetailIcon extends StatelessWidget {
 }
 
 class PostPreview extends StatelessWidget {
-  const PostPreview({required this.message, super.key});
+  const PostPreview({required this.content, this.cacheKey, super.key});
 
   static Future<void> push(
     BuildContext context, {
     required MessageItem message,
+    String? content,
   }) => showGeneralDialog(
     context: context,
     barrierColor: Colors.transparent,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    requestFocus: true,
     pageBuilder:
         (
           buildContext,
           animation,
           secondaryAnimation,
-        ) => InheritedTheme.capture(
-          from: context,
-          to: Navigator.of(context, rootNavigator: true).context,
-        ).wrap(PostPreview(message: message)),
+        ) =>
+            InheritedTheme.capture(
+              from: context,
+              to: Navigator.of(context, rootNavigator: true).context,
+            ).wrap(
+              PostPreview(
+                content: content ?? message.content ?? '',
+                cacheKey: buildMarkdownCacheKey(
+                  namespace: content == null ? 'post-preview' : 'file-preview',
+                  id: message.messageId,
+                ),
+              ),
+            ),
   );
 
-  final MessageItem message;
+  final String content;
+  final String? cacheKey;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: context.theme.background,
-    child: Column(
-      children: [
-        MixinAppBar(
-          leading: const SizedBox(),
-          actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
-        ),
-        Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
+  Widget build(BuildContext context) => FocusableActionDetector(
+    shortcuts: const {
+      SingleActivator(LogicalKeyboardKey.escape): _PostPreviewEscapeIntent(),
+    },
+    actions: {
+      _PostPreviewEscapeIntent: CallbackAction<Intent>(
+        onInvoke: (intent) => Navigator.maybePop(context),
+      ),
+    },
+    autofocus: true,
+    child: Material(
+      color: context.theme.background,
+      child: Column(
+        children: [
+          MixinAppBar(
+            leading: const SizedBox(),
+            actions: [MixinCloseButton(onTap: () => Navigator.pop(context))],
+          ),
+          Expanded(
             child: Markdown(
-              data: message.content ?? '',
+              data: content,
+              cacheKey: cacheKey,
+              maxContentWidth: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
+}
+
+class _PostPreviewEscapeIntent extends Intent {
+  const _PostPreviewEscapeIntent();
 }

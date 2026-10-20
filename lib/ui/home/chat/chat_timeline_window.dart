@@ -6,6 +6,7 @@ import 'chat_scroll_coordinator.dart';
 class ChatTimelineWindow {
   ChatTimelineWindow(this.state)
     : anchorUnreadSeparator =
+          state.anchor is UnreadMessageWindowAnchor &&
           state.center != null &&
           state.center!.messageId == state.lastReadMessageId &&
           state.bottom.isNotEmpty {

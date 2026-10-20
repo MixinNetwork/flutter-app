@@ -8,12 +8,7 @@ PODS:
   - FlutterMacOS (1.0.0)
   - irondash_engine_context (0.0.1):
     - FlutterMacOS
-  - mixin_logger (0.0.1):
-    - FlutterMacOS
   - objective_c (0.0.1):
-    - FlutterMacOS
-  - ogg_opus_player (0.0.1):
-    - Flutter
     - FlutterMacOS
   - PLCrashReporter (1.11.2)
   - protocol_handler_macos (0.0.1):
@@ -33,9 +28,7 @@ DEPENDENCIES:
   - flutter_app_icon_badge (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
-  - mixin_logger (from `Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos`)
   - objective_c (from `Flutter/ephemeral/.symlinks/plugins/objective_c/macos`)
-  - ogg_opus_player (from `Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/darwin`)
   - PLCrashReporter
   - protocol_handler_macos (from `Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos`)
   - rhttp (from `Flutter/ephemeral/.symlinks/plugins/rhttp/macos`)
@@ -58,12 +51,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   irondash_engine_context:
     :path: Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos
-  mixin_logger:
-    :path: Flutter/ephemeral/.symlinks/plugins/mixin_logger/macos
   objective_c:
     :path: Flutter/ephemeral/.symlinks/plugins/objective_c/macos
-  ogg_opus_player:
-    :path: Flutter/ephemeral/.symlinks/plugins/ogg_opus_player/darwin
   protocol_handler_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/protocol_handler_macos/macos
   rhttp:
@@ -79,11 +68,9 @@ SPEC CHECKSUMS:
   desktop_drop: e0b672a7d84c0a6cbc378595e82cdb15f2970a43
   desktop_keep_screen_on: bfedcf75be8bd8b4a21db3dcf48667427087792c
   flutter_app_icon_badge: e05568a57ac0d98a0e7bc35c5b9ae9b118109b1e
-  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
-  mixin_logger: 6b31328b08f546a8defd32cd910370562fc48405
   objective_c: 2f927c775f7ad0d1ee8f78b4b0a5ddf03b2548d7
-  ogg_opus_player: 954784304f4e2722780018c4abf284e4f93cddf5
   PLCrashReporter: 499c53b0104f95c302d94fd723ebb03c56d9bac8
   protocol_handler_macos: f9cd7b13bcaf6b0425f7410cbe52376cb843a936
   rhttp: 08d791d6373089de796318f4cfb172cbcf34e78b
@@ -91,6 +78,6 @@ SPEC CHECKSUMS:
   video_compress: 752b161da855df2492dd1a8fa899743cc8fe9534
   window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9
 
-PODFILE CHECKSUM: 05d986538853d579a789a69095f4e3f0adfd7f8e
+PODFILE CHECKSUM: a2f4ae8684a4df051c9f929bdad149fd4db3a0bc
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.17.0

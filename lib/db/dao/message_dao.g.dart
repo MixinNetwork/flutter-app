@@ -95,10 +95,10 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        messages,
-        users,
-        stickers,
-        messageMentions,
+        this.messages,
+        this.users,
+        this.stickers,
+        this.messageMentions,
         ...generatedwhere.watchedTables,
         ...generatedorder.watchedTables,
         ...generatedlimit.watchedTables,
@@ -152,7 +152,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT status FROM messages WHERE message_id = ?1 LIMIT 1',
       variables: [Variable<String>(messageId)],
-      readsFrom: {messages},
+      readsFrom: {this.messages},
     ).map(
       (QueryRow row) =>
           Messages.$converterstatus.fromSql(row.read<String>('status')),
@@ -163,7 +163,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.caption, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
       variables: [Variable<String>(messageId)],
-      readsFrom: {messages, resendSessionMessages},
+      readsFrom: {this.messages, this.resendSessionMessages},
     ).map(
       (QueryRow row) => SendingMessage(
         messageId: row.read<String>('message_id'),
@@ -214,7 +214,12 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
       variables: [for (var $ in messageId) Variable<String>($)],
-      readsFrom: {messages, users, conversations, messageMentions},
+      readsFrom: {
+        this.messages,
+        this.users,
+        this.conversations,
+        this.messageMentions,
+      },
     ).map(
       (QueryRow row) => NotificationMessage(
         messageId: row.read<String>('messageId'),
@@ -261,7 +266,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT m.message_id AS messageId, u.user_id AS senderId, u.avatar_url AS senderAvatarUrl, u.full_name AS senderFullName, m.status AS status, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, COALESCE(u.is_verified, FALSE) AS verified, u.membership AS membership, c.owner_id AS ownerId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId, owner.full_name AS ownerFullName, owner.avatar_url AS ownerAvatarUrl FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id INNER JOIN users AS owner ON c.owner_id = owner.user_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC, m."rowid" DESC',
       variables: [for (var $ in messageIds) Variable<String>($)],
-      readsFrom: {messages, users, conversations},
+      readsFrom: {this.messages, this.users, this.conversations},
     ).map(
       (QueryRow row) => SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -300,7 +305,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT conversation_id AS conversationId, message_id AS messageId FROM messages WHERE message_id IN ($expandedmessageIds)',
       variables: [for (var $ in messageIds) Variable<String>($)],
-      readsFrom: {messages},
+      readsFrom: {this.messages},
     ).map(
       (QueryRow row) => MiniMessageItem(
         conversationId: row.read<String>('conversationId'),
@@ -343,9 +348,9 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         ...generatedlimit.introducedVariables,
       ],
       readsFrom: {
-        messages,
-        users,
-        conversations,
+        this.messages,
+        this.users,
+        this.conversations,
         ...generatedwhere.watchedTables,
         ...generatedlimit.watchedTables,
       },
@@ -384,7 +389,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT count(1) AS _c0 FROM messages',
       variables: [],
-      readsFrom: {messages},
+      readsFrom: {this.messages},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -392,7 +397,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT count(1) AS _c0 FROM messages WHERE category IN (\'SIGNAL_IMAGE\', \'SIGNAL_VIDEO\', \'SIGNAL_DATA\', \'SIGNAL_AUDIO\', \'PLAIN_IMAGE\', \'PLAIN_VIDEO\', \'PLAIN_DATA\', \'PLAIN_AUDIO\', \'ENCRYPTED_IMAGE\', \'ENCRYPTED_VIDEO\', \'ENCRYPTED_DATA\', \'ENCRYPTED_AUDIO\')',
       variables: [],
-      readsFrom: {messages},
+      readsFrom: {this.messages},
     ).map((QueryRow row) => row.read<int>('_c0'));
   }
 
@@ -400,7 +405,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     return customSelect(
       'SELECT "rowid", conversation_id, quote_message_id FROM messages WHERE "rowid" > ?1 AND quote_message_id IS NOT NULL AND quote_message_id != \'\' AND length(quote_content) > 10240 GROUP BY quote_message_id ORDER BY "rowid" ASC LIMIT ?2',
       variables: [Variable<int>(rowId), Variable<int>(limit)],
-      readsFrom: {messages},
+      readsFrom: {this.messages},
     ).map(
       (QueryRow row) => QuoteMinimal(
         rowid: row.read<int>('rowid'),

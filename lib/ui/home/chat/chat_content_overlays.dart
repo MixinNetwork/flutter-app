@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../account/scam_warning_key_value.dart';
 import '../../../account/show_pin_message_key_value.dart';
@@ -92,6 +94,7 @@ class _BottomBanner extends HookConsumerWidget {
               ),
               child: SvgPicture.asset(
                 Resources.assetsImagesTriangleWarningSvg,
+                renderingStrategy: RenderingStrategy.raster,
                 colorFilter: ColorFilter.mode(
                   context.theme.red,
                   BlendMode.srcIn,
@@ -208,6 +211,7 @@ class _PinMessagesBanner extends HookConsumerWidget {
                   alignment: Alignment.center,
                   child: SvgPicture.asset(
                     Resources.assetsImagesChatPinSvg,
+                    renderingStrategy: RenderingStrategy.raster,
                     width: 34,
                     height: 34,
                     colorFilter: ColorFilter.mode(

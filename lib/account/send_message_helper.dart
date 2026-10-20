@@ -92,7 +92,7 @@ class SendMessageHelper {
 
     if (content.startsWith('@7000')) {
       final botNumber = botNumberRegExp.firstMatch(content)?[0];
-      if (botNumber != null && content.startsWith('@$botNumber ')) {
+      if (botNumber != null && botNumber.isNotEmpty) {
         recipientId = await _participantDao
             .userIdByIdentityNumber(conversationId, botNumber)
             .getSingleOrNull();
@@ -1186,7 +1186,9 @@ class SendMessageHelper {
             as Map<String, dynamic>,
       );
     } catch (e) {
-      w('check attachment extra error: $e, content: ${message.content}');
+      w(
+        'check attachment extra error: ${e.runtimeType}, messageId: ${message.messageId}',
+      );
       attachmentExtra = null;
     }
     if (attachmentExtra == null) {

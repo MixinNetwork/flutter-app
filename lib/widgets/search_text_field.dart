@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../constants/constants.dart';
 import '../constants/resources.dart';
@@ -83,6 +85,7 @@ class SearchTextField extends HookConsumerWidget {
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: SvgPicture.asset(
                 Resources.assetsImagesIcSearchSmallSvg,
+                renderingStrategy: RenderingStrategy.raster,
                 colorFilter: ColorFilter.mode(hintColor, BlendMode.srcIn),
               ),
             ),

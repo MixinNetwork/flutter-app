@@ -112,7 +112,7 @@ Future<VerificationResponse> requestVerificationCode({
         assert(result.length == 2, 'Invalid result length');
         final type = result.first as CaptchaType;
         final token = result[1] as String;
-        d('Captcha type: $type, token: $token');
+        d('Captcha type: $type');
         return requestVerificationCode(
           phone: phone,
           context: context,

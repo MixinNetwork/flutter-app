@@ -6,6 +6,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
 import 'package:super_context_menu/super_context_menu.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../constants/resources.dart';
@@ -17,6 +19,7 @@ import '../../ui/provider/message_selection_provider.dart';
 import '../../ui/provider/quote_message_provider.dart';
 import '../../ui/provider/setting_provider.dart';
 import '../../ui/provider/user_cache_provider.dart';
+import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
 import '../avatar_view/avatar_view.dart';
 import '../interactive_decorated_box.dart';
@@ -254,7 +257,7 @@ class MessageItemWidget extends HookConsumerWidget {
                   showedMenu: showedMenu,
                   focusNode: focusNode,
                 ),
-                builder: (_) => MessageContent(message: message),
+                child: MessageContent(message: message),
               ),
             );
           },
@@ -263,32 +266,39 @@ class MessageItemWidget extends HookConsumerWidget {
       ],
     );
 
-    child = VisibilityDetector(
-      onVisibilityChanged: (info) {
-        if (!shouldMarkMentionRead(message.mentionRead, info.visibleFraction)) {
-          return;
-        }
-        context.accountServer.markMentionRead(
-          message.messageId,
-          message.conversationId,
-        );
-      },
-      key: ValueKey('message_visibility_${message.messageId}'),
-      child: child,
-    );
+    // Only an unread mention needs its visibility. A detector adds a layer and
+    // a visibility check to every paint, which costs every row on a scroll.
+    if (message.mentionRead == false) {
+      child = VisibilityDetector(
+        onVisibilityChanged: (info) {
+          if (!shouldMarkMentionRead(
+            message.mentionRead,
+            info.visibleFraction,
+          )) {
+            return;
+          }
+          context.accountServer.markMentionRead(
+            message.messageId,
+            message.conversationId,
+          );
+        },
+        key: ValueKey('message_visibility_${message.messageId}'),
+        child: child,
+      );
+    }
 
-    return FocusScope(
-      node: focusNode,
-      child: MessageContext(
-        isTranscriptPage: isTranscriptPage,
-        isPinnedPage: isPinnedPage,
-        showNip: presentation.showNip,
-        isCurrentUser: presentation.isCurrentUser,
-        message: message,
-        highlightEnabled: blink,
-        menuHighlighted: showedMenu.value,
-        child: Builder(
-          builder: (context) => MessageQuickReplyDetector(
+    return AppActiveTickerMode(
+      child: FocusScope(
+        node: focusNode,
+        child: MessageContext(
+          isTranscriptPage: isTranscriptPage,
+          isPinnedPage: isPinnedPage,
+          showNip: presentation.showNip,
+          isCurrentUser: presentation.isCurrentUser,
+          message: message,
+          highlightEnabled: blink,
+          menuHighlighted: showedMenu.value,
+          child: MessageQuickReplyDetector(
             child: Padding(
               padding: row.sameUserPrev
                   ? EdgeInsets.zero
@@ -307,7 +317,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
     required this.isCurrentUser,
     required this.userName,
     required this.userId,
-    required this.builder,
+    required this.child,
     required this.buildMenus,
     required this.pinArrowWidth,
     required this.userAvatarUrl,
@@ -319,7 +329,7 @@ class _MessageBubbleMargin extends HookConsumerWidget {
   final bool isCurrentUser;
   final String? userName;
   final String? userId;
-  final WidgetBuilder builder;
+  final Widget child;
   final MenuProvider buildMenus;
   final double pinArrowWidth;
   final String? userAvatarUrl;
@@ -342,26 +352,19 @@ class _MessageBubbleMargin extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (displayName != null && userId != null)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: MessageName(
-                  userName: displayName,
-                  userId: userId!,
-                  userIdentityNumber: userIdentityNumber,
-                  membership: membership,
-                  isBot: isBot,
-                  verified: isVerified,
-                ),
-              ),
-            ],
+          MessageName(
+            userName: displayName,
+            userId: userId!,
+            userIdentityNumber: userIdentityNumber,
+            membership: membership,
+            isBot: isBot,
+            verified: isVerified,
           ),
         CustomContextMenuWidget(
           hitTestBehavior: HitTestBehavior.translucent,
           menuProvider: buildMenus,
           desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
-          child: MessageQuickReplyDetector(child: Builder(builder: builder)),
+          child: child,
         ),
       ],
     );
@@ -466,7 +469,7 @@ class _MessageSelectionWrapper extends HookConsumerWidget {
   }
 }
 
-class _AnimatedSelectionIcon extends HookConsumerWidget {
+class _AnimatedSelectionIcon extends StatefulWidget {
   const _AnimatedSelectionIcon({
     required this.selected,
     required this.inSelectedMode,
@@ -477,36 +480,58 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
   final bool inSelectedMode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final animationController = useAnimationController(
-      duration: const Duration(milliseconds: 300),
-    );
+  State<_AnimatedSelectionIcon> createState() => _AnimatedSelectionIconState();
+}
 
-    final animation = useMemoized(
-      () => animationController.drive(
-        Tween<double>(
-          begin: 0,
-          end: 48,
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-      ),
-      [animationController],
-    );
+class _AnimatedSelectionIconState extends State<_AnimatedSelectionIcon>
+    with SingleTickerProviderStateMixin {
+  static final _width = Tween<double>(
+    begin: 0,
+    end: 48,
+  ).chain(CurveTween(curve: Curves.easeInOut));
 
-    useEffect(() {
-      if (inSelectedMode) {
-        animationController.forward();
-      } else {
-        animationController.reverse();
-      }
-    }, [inSelectedMode]);
+  // Created on the first selection mode: every row has this icon, and most
+  // rows never animate it.
+  AnimationController? _controller;
 
-    useListenable(animation);
+  AnimationController get _ensureController =>
+      _controller ??= AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 300),
+      )..addListener(() => setState(() {}));
 
-    if (animation.isDismissed) {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.inSelectedMode) _ensureController.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedSelectionIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.inSelectedMode == oldWidget.inSelectedMode) return;
+    if (widget.inSelectedMode) {
+      _ensureController.forward();
+    } else {
+      _controller?.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller == null || controller.isDismissed) {
       return const SizedBox();
     }
+    final selected = widget.selected;
     return SizedBox(
-      width: animation.value,
+      width: _width.evaluate(controller),
       height: 20,
       child: Center(
         child: ClipOval(
@@ -519,6 +544,7 @@ class _AnimatedSelectionIcon extends HookConsumerWidget {
             alignment: const Alignment(0, -0.2),
             child: SvgPicture.asset(
               Resources.assetsImagesSelectedSvg,
+              renderingStrategy: RenderingStrategy.raster,
               height: 10,
               width: 10,
             ),

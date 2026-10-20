@@ -165,8 +165,7 @@ class DeviceTransferSender {
                   });
                 } else {
                   e(
-                    'sender verify code failed. except $verificationCode, '
-                    'but got ${command.code}',
+                    'sender verify code failed',
                   );
                   for (final s in _pendingVerificationSockets) {
                     s

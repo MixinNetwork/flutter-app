@@ -29,13 +29,17 @@ class _MoreExtendedText extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expand = useState(false);
+    // The measuring painter needs the inherited font fallback: without it
+    // Linux searches fontconfig for each emoji, about 7ms on first use.
+    final defaultStyle = DefaultTextStyle.of(context).style;
     final style = useMemoized(
-      () => this.style?.merge(const TextStyle(height: 1)),
+      () => defaultStyle.merge(this.style).merge(const TextStyle(height: 1)),
+      [defaultStyle, this.style],
     );
 
     final overflowTextSpan = TextSpan(
       text: '...${context.l10n.more}',
-      style: style?.merge(TextStyle(color: context.theme.accent)),
+      style: style.merge(TextStyle(color: context.theme.accent)),
       recognizer: TapGestureRecognizer()
         ..onTap = () {
           expand.value = true;

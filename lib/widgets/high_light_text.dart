@@ -1,8 +1,9 @@
+import 'dart:collection';
+import 'dart:ffi';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:data_detector/data_detector.dart';
-import 'package:emojis/emoji.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,6 +17,7 @@ import '../db/dao/user_dao.dart';
 import '../ui/provider/conversation_provider.dart';
 import '../utils/emoji.dart';
 import '../utils/extension/extension.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
@@ -57,8 +59,9 @@ class CustomText extends HookConsumerWidget {
     final spans = useMemoized(
       () => TextMatcher.applyTextMatchers([
         textSpan ?? TextSpan(text: text, style: style),
-      ], textMatchers ?? [EmojiTextMatcher()]).toList(),
-      [text, style, textMatchers],
+      ], textMatchers ?? [EmojiTextMatcher()]).map(withoutCrLf).toList(),
+      // Matchers read theme colors when they build spans.
+      [text, textSpan, style, context.theme, ...?textMatchers],
     );
 
     final defaultTextStyle = DefaultTextStyle.of(context);
@@ -103,6 +106,44 @@ class CustomText extends HookConsumerWidget {
   }
 }
 
+/// [span] with each "\r\n" as "\n".
+///
+/// On Linux the text engine asks fontconfig for a font for both characters of
+/// each "\r\n", about 0.4 ms each, while "\n" alone breaks the line the same
+/// way with no lookup. Messages from Windows keep "\r\n" in their text.
+@visibleForTesting
+InlineSpan withoutCrLf(InlineSpan span) {
+  if (span is! TextSpan) return span;
+  final text = span.text;
+  final newText = text != null && text.contains('\r\n')
+      ? text.replaceAll('\r\n', '\n')
+      : text;
+  final children = span.children;
+  List<InlineSpan>? newChildren;
+  if (children != null) {
+    for (var i = 0; i < children.length; i++) {
+      final child = withoutCrLf(children[i]);
+      if (!identical(child, children[i])) {
+        (newChildren ??= [...children])[i] = child;
+      }
+    }
+  }
+  if (identical(newText, text) && newChildren == null) return span;
+  return TextSpan(
+    text: newText,
+    children: newChildren ?? children,
+    style: span.style,
+    recognizer: span.recognizer,
+    mouseCursor: span.mouseCursor,
+    onEnter: span.onEnter,
+    onExit: span.onExit,
+    semanticsLabel: span.semanticsLabel,
+    semanticsIdentifier: span.semanticsIdentifier,
+    locale: span.locale,
+    spellOut: span.spellOut,
+  );
+}
+
 class CustomSelectableText extends HookWidget {
   const CustomSelectableText(
     String this.text, {
@@ -141,7 +182,8 @@ class CustomSelectableText extends HookWidget {
       () => TextMatcher.applyTextMatchers([
         textSpan ?? TextSpan(text: text, style: style),
       ], textMatchers ?? [EmojiTextMatcher()]).toList(),
-      [text, style, textMatchers],
+      // Matchers read theme colors when they build spans.
+      [text, textSpan, style, context.theme, ...?textMatchers],
     );
     return SelectableText.rich(
       TextSpan(children: spans, style: style),
@@ -161,6 +203,23 @@ typedef InlineMatchBuilder =
       String displayString,
       String linkString,
     );
+
+// A row runs every matcher again each time it is built, as when it scrolls
+// back into view. Regular expressions run in an interpreter in AOT builds, so
+// a long message costs milliseconds per build; keep the ranges of recent
+// texts.
+const _cachedTextRangesLimit = 1000;
+
+List<TextRange> _cachedTextRanges<K>(
+  Map<K, List<TextRange>> cache,
+  K key,
+  List<TextRange> Function() find,
+) {
+  final cached = cache.remove(key);
+  if (cached != null) return cache[key] = cached;
+  if (cache.length >= _cachedTextRangesLimit) cache.remove(cache.keys.first);
+  return cache[key] = find();
+}
 
 class TextMatcher {
   TextMatcher.regExp({required this.regExp, required this.matchBuilder})
@@ -192,10 +251,21 @@ class TextMatcher {
     (previousValue, element) => matchSpans(previousValue, [element]),
   );
 
+  static final _rangesByMatch = <(String, int, String), List<TextRange>>{};
+
   static Iterable<TextRange> _textRangesFromText(String text, RegExp regExp) {
-    final matches = regExp.allMatches(text);
-    return matches.map(
-      (match) => TextRange(start: match.start, end: match.end),
+    final flags =
+        (regExp.isCaseSensitive ? 1 : 0) |
+        (regExp.isMultiLine ? 2 : 0) |
+        (regExp.isUnicode ? 4 : 0) |
+        (regExp.isDotAll ? 8 : 0);
+    return _cachedTextRanges(
+      _rangesByMatch,
+      (regExp.pattern, flags, text),
+      () => [
+        for (final match in regExp.allMatches(text))
+          TextRange(start: match.start, end: match.end),
+      ],
     );
   }
 
@@ -248,8 +318,10 @@ class _TextMatch {
 }
 
 class _TextCache {
+  // Spans are keyed by identity: TextSpan.hashCode hashes the whole subtree
+  // and its styles, and equal spans in one tree are still different spans.
   factory _TextCache({required InlineSpan span}) {
-    final lengths = <InlineSpan, int>{span: 0};
+    final lengths = HashMap<InlineSpan, int>.identity()..[span] = 0;
     final text = StringBuffer();
 
     int visitSpan(InlineSpan span) {
@@ -284,7 +356,7 @@ class _TextCache {
     return textCache;
   }
 
-  _TextCache._empty() : text = '', _lengths = <InlineSpan, int>{};
+  _TextCache._empty() : text = '', _lengths = HashMap.identity();
 
   const _TextCache._({
     required this.text,
@@ -297,7 +369,9 @@ class _TextCache {
 
   _TextCache _merge(_TextCache other) => _TextCache._(
     text: text + other.text,
-    lengths: Map<InlineSpan, int>.from(_lengths)..addAll(other._lengths),
+    lengths: HashMap<InlineSpan, int>.identity()
+      ..addAll(_lengths)
+      ..addAll(other._lengths),
   );
 
   int? getLength(InlineSpan span) => _lengths[span];
@@ -513,15 +587,118 @@ class _MatchedSpans {
   }
 }
 
-class UrlTextMatcher extends TextMatcher implements Equatable {
+// Creating an NSDataDetector costs about 1 ms, so share one per isolate.
+final _linkDetector = DataDetector(NSTextCheckingType.NSTextCheckingTypeLink);
+
+// NSDataDetector identifies the language and tokenizes CJK text before it
+// scans: about 1 ms per 1000 characters of mixed text, and about 20 ms for
+// 700 characters of Chinese. The message list finds the links of loaded
+// messages in the background (see [prepareLinkRanges]), and rows read them
+// here.
+final _linkRanges = <String, List<TextRange>>{};
+const _linkRangesLimit = 1000;
+
+/// Whether [text] can contain a link: a "." between two characters that are
+/// not spaces, or "://". It is the check of the iOS app's
+/// MXMFastURLDetector, so both apps find the same links.
+@visibleForTesting
+bool mayContainUrl(String text) {
+  if (text.length < 3) return false;
+  const dot = 0x2E;
+  const space = 0x20;
+  const colon = 0x3A;
+  const slash = 0x2F;
+  var dotSequence = 0;
+  var last = 0;
+  for (var i = 0; i < text.length - 1; i++) {
+    final c = text.codeUnitAt(i);
+    if (c == dot) {
+      dotSequence = dotSequence == 0 && last != space ? 1 : 0;
+    } else if (c != space && last == dot && dotSequence == 1) {
+      return true;
+    } else if (c == colon &&
+        i + 2 < text.length - 1 &&
+        text.codeUnitAt(i + 1) == slash &&
+        text.codeUnitAt(i + 2) == slash) {
+      return true;
+    } else {
+      dotSequence = 0;
+    }
+    last = c;
+  }
+  return false;
+}
+
+List<TextRange> _detectLinkRanges(String text) => _linkDetector
+    .matchesInString(text)
+    .map((e) => e.range)
+    .toList(growable: false);
+
+// The Objective-C runtime functions behind @autoreleasepool.
+final _autoreleasePoolPush = DynamicLibrary.process()
+    .lookupFunction<Pointer<Void> Function(), Pointer<Void> Function()>(
+      'objc_autoreleasePoolPush',
+    );
+final _autoreleasePoolPop = DynamicLibrary.process()
+    .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
+      'objc_autoreleasePoolPop',
+    );
+
+// A background isolate has no run loop to drain the autoreleased results, so
+// drain them here. The ranges are copied out before the pool drains.
+List<List<TextRange>> _detectLinkRangesInBackground(List<String> texts) {
+  final pool = _autoreleasePoolPush();
+  try {
+    return texts.map(_detectLinkRanges).toList();
+  } finally {
+    _autoreleasePoolPop(pool);
+  }
+}
+
+void _storeLinkRanges(String text, List<TextRange> ranges) {
+  if (_linkRanges.length >= _linkRangesLimit) {
+    _linkRanges.remove(_linkRanges.keys.first);
+  }
+  _linkRanges[text] = ranges;
+}
+
+/// The link ranges of [text], from [prepareLinkRanges] when it found them.
+@visibleForTesting
+List<TextRange> darwinLinkRanges(String text) {
+  if (!mayContainUrl(text)) return const [];
+  final cached = _linkRanges.remove(text);
+  if (cached != null) return _linkRanges[text] = cached;
+  final ranges = _detectLinkRanges(text);
+  _storeLinkRanges(text, ranges);
+  return ranges;
+}
+
+/// Whether the link ranges of [text] are ready without detecting them.
+@visibleForTesting
+bool linkRangesReady(String text) =>
+    !mayContainUrl(text) || _linkRanges.containsKey(text);
+
+/// Finds the links of [texts] in a background isolate, so that rows that
+/// show them do not stall a frame.
+Future<void> prepareLinkRanges(Iterable<String> texts) async {
+  if (!kPlatformIsDarwin) return;
+  final pending = {
+    for (final text in texts)
+      if (!linkRangesReady(text)) text,
+  }.toList();
+  if (pending.isEmpty) return;
+  final ranges = await runLoadBalancer(_detectLinkRangesInBackground, pending);
+  for (var i = 0; i < pending.length; i++) {
+    _storeLinkRanges(pending[i], ranges[i]);
+  }
+}
+
+class UrlTextMatcher extends TextMatcher with Equatable {
   UrlTextMatcher(BuildContext context)
     : super.textRangesFromText(
         textRangesFromText: (text) {
           if (kPlatformIsDarwin) {
-            final dataDetector = DataDetector(
-              NSTextCheckingType.NSTextCheckingTypeLink,
-            );
-            return dataDetector.matchesInString(text).map((e) => e.range);
+            return darwinLinkRanges(text);
           } else {
             return TextMatcher._textRangesFromText(text, uriRegExp);
           }
@@ -548,7 +725,7 @@ class UrlTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class MailTextMatcher extends TextMatcher implements Equatable {
+class MailTextMatcher extends TextMatcher with Equatable {
   MailTextMatcher(BuildContext context)
     : super.regExp(
         regExp: mailRegExp,
@@ -568,10 +745,19 @@ class MailTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class EmojiTextMatcher extends TextMatcher implements Equatable {
+final _emojiRanges = <String, List<TextRange>>{};
+
+class EmojiTextMatcher extends TextMatcher with Equatable {
   EmojiTextMatcher()
-    : super.regExp(
-        regExp: emojiRegex,
+    : super.textRangesFromText(
+        textRangesFromText: (text) {
+          if (!mayContainTextStyleEmoji(text)) return const [];
+          return _cachedTextRanges(
+            _emojiRanges,
+            text,
+            () => textStyleEmojiRanges(text),
+          );
+        },
         matchBuilder: (span, displayString, linkString) => TextSpan(
           text: displayString,
           style: TextStyle(fontFamily: kEmojiFontFamily),
@@ -592,7 +778,7 @@ class EmojiTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class KeyWordTextMatcher extends TextMatcher implements Equatable {
+class KeyWordTextMatcher extends TextMatcher with Equatable {
   KeyWordTextMatcher(this.keyword, {this.style, this.caseSensitive = true})
     : super.regExp(
         regExp: RegExp(RegExp.escape(keyword), caseSensitive: caseSensitive),
@@ -620,7 +806,7 @@ class KeyWordTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class MultiKeyWordTextMatcher extends TextMatcher implements Equatable {
+class MultiKeyWordTextMatcher extends TextMatcher with Equatable {
   MultiKeyWordTextMatcher(
     this.keywords, {
     this.style,
@@ -699,7 +885,7 @@ class MultiKeyWordTextMatcher extends TextMatcher implements Equatable {
   }
 }
 
-class BotNumberTextMatcher extends TextMatcher implements Equatable {
+class BotNumberTextMatcher extends TextMatcher with Equatable {
   BotNumberTextMatcher(BuildContext context)
     : super.regExp(
         regExp: botNumberRegExp,
@@ -719,7 +905,7 @@ class BotNumberTextMatcher extends TextMatcher implements Equatable {
   bool? get stringify => true;
 }
 
-class MentionTextMatcher extends TextMatcher implements Equatable {
+class MentionTextMatcher extends TextMatcher with Equatable {
   MentionTextMatcher(BuildContext context, this.map)
     : super.regExp(
         regExp: mentionNumberRegExp,

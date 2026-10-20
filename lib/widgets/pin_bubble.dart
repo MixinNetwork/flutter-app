@@ -36,20 +36,27 @@ class PinMessageBubble extends StatelessWidget {
   }
 }
 
-class _PinBubbleClipper extends CustomClipper<Path> {
+class _PinBubbleClipper extends BubbleShapeClipper {
   const _PinBubbleClipper();
 
   @override
   Path getClip(Size size) {
-    final bubblePath = _bubblePath(Size(size.width - _nipWidth, size.height));
+    final bubblePath = Path()
+      ..addRRect(
+        const BorderRadius.all(
+          Radius.circular(8),
+        ).toRRect(Offset.zero & Size(size.width - _nipWidth, size.height)),
+      );
     final nipPath = _rightNipPath(size);
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
-  Path _bubblePath(Size size) => Path()
-    ..addRRect(
-      const BorderRadius.all(Radius.circular(8)).toRRect(Offset.zero & size),
-    );
+  // The nip is at the middle of the right edge, so the height stays fixed.
+  @override
+  EdgeInsets fixedInsets(Size size) {
+    final top = (size.height / 2).floorToDouble();
+    return EdgeInsets.fromLTRB(8, top, _nipWidth + 8, size.height - top - 1);
+  }
 
   Path _rightNipPath(Size bubbleSize) {
     const size = Size(_nipWidth, 10);

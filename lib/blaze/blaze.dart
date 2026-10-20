@@ -252,7 +252,7 @@ class Blaze {
               }
 
               _connectedState = ConnectedState.connected;
-              d('blazeMessage receive: ${blazeMessage.toJson()}');
+              d('blazeMessage receive: ${blazeMessage.action}');
 
               if (blazeMessage.action == kErrorAction &&
                   blazeMessage.error?.code == authentication) {
@@ -398,8 +398,10 @@ class Blaze {
         .messageStatusById(messageId)
         .getSingleOrNull();
 
-    if (currentStatus != null && status.index > currentStatus.index) {
-      await database.messageDao.updateMessageStatusById(messageId, status);
+    if (currentStatus != null) {
+      if (canUpdateMessageStatus(currentStatus, status)) {
+        await database.messageDao.updateMessageStatusById(messageId, status);
+      }
       return;
     }
 
@@ -424,7 +426,7 @@ class Blaze {
         .getLastBlazeMessageCreatedAt();
     final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
-    d('blaze send: ${m.toJson()}');
+    d('blaze send: ${m.action}');
     await _sendGZip(m);
   }
 
@@ -492,7 +494,7 @@ class Blaze {
       return null;
     }
 
-    d('blaze send: ${blazeMessage.toJson()}');
+    d('blaze send: ${blazeMessage.action}');
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
     d('sendMessage transactions size: ${transactions.length}');
@@ -566,7 +568,7 @@ class Blaze {
     if (url == proxyConfig) {
       return;
     }
-    i('Proxy settings changed to: $url');
+    i('Proxy settings changed');
     proxyConfig = url;
 
     i('Triggering DISCONNECT event: Proxy settings changed');
@@ -654,3 +656,15 @@ class WebSocketTransaction<T> {
     }
   }
 }
+
+/// Whether a delivery receipt moves a stored message from [current] to [next].
+///
+/// A message that failed to decrypt or is unknown keeps its status, as
+/// `MessageDao.markMessageRead` does. Its content is still the encrypted
+/// data, which a read message would show as text, and only a failed message
+/// is requested again from its sender.
+@visibleForTesting
+bool canUpdateMessageStatus(MessageStatus current, MessageStatus next) =>
+    current != MessageStatus.failed &&
+    current != MessageStatus.unknown &&
+    next.index > current.index;

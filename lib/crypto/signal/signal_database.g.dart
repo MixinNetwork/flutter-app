@@ -2205,7 +2205,16 @@ class $SenderKeysTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<SenderKeys, SenderKey>(table),
+                  BaseReferences<_$SignalDatabase, SenderKeys, SenderKey>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2436,7 +2445,16 @@ class $IdentitiesTableManager
                 timestamp: timestamp,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Identities, Identity>(table),
+                  BaseReferences<_$SignalDatabase, Identities, Identity>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2580,7 +2598,16 @@ class $PrekeysTableManager
                 record: record,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Prekeys, Prekey>(table),
+                  BaseReferences<_$SignalDatabase, Prekeys, Prekey>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2752,7 +2779,16 @@ class $SignedPrekeysTableManager
                 timestamp: timestamp,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<SignedPrekeys, SignedPrekey>(table),
+                  BaseReferences<_$SignalDatabase, SignedPrekeys, SignedPrekey>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2940,7 +2976,16 @@ class $SessionsTableManager
                 timestamp: timestamp,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<Sessions, Session>(table),
+                  BaseReferences<_$SignalDatabase, Sessions, Session>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3141,7 +3186,16 @@ class $RatchetSenderKeysTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<RatchetSenderKeys, RatchetSenderKey>(table),
+                  BaseReferences<
+                    _$SignalDatabase,
+                    RatchetSenderKeys,
+                    RatchetSenderKey
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

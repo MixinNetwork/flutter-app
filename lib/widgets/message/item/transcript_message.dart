@@ -7,6 +7,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
 import 'package:provider/provider.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
@@ -54,8 +56,8 @@ class TranscriptMessageWidget extends HookConsumerWidget {
             )
             .toList();
       } catch (error) {
-        e('TranscriptMessageWidget.build $error');
-        e('parse json failed: $content');
+        e('TranscriptMessageWidget.build ${error.runtimeType}');
+        e('parse json failed, content length: ${content.length}');
         return null;
       }
     }, [content]);
@@ -151,6 +153,7 @@ class TranscriptMessageWidget extends HookConsumerWidget {
                               alignment: Alignment.center,
                               child: SvgPicture.asset(
                                 Resources.assetsImagesPostDetailSvg,
+                                renderingStrategy: RenderingStrategy.raster,
                                 width: 20,
                                 height: 20,
                               ),

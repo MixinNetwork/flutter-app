@@ -80,10 +80,16 @@ Future<void> showUserDialog(
 }
 
 class UserDialog extends StatelessWidget {
-  const UserDialog({required this.userId, super.key, this.refreshUser = true});
+  const UserDialog({
+    required this.userId,
+    super.key,
+    this.refreshUser = true,
+    this.showMainWindow,
+  });
 
   final String userId;
   final bool refreshUser;
+  final Future<BuildContext?> Function()? showMainWindow;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -103,7 +109,11 @@ class UserDialog extends StatelessWidget {
                 ),
               ],
             ),
-            _UserProfileLoader(userId, refreshUser: refreshUser),
+            _UserProfileLoader(
+              userId,
+              refreshUser: refreshUser,
+              showMainWindow: showMainWindow,
+            ),
           ],
         ),
       ),
@@ -112,10 +122,15 @@ class UserDialog extends StatelessWidget {
 }
 
 class _UserProfileLoader extends HookConsumerWidget {
-  const _UserProfileLoader(this.userId, {this.refreshUser = true});
+  const _UserProfileLoader(
+    this.userId, {
+    this.refreshUser = true,
+    this.showMainWindow,
+  });
 
   final String userId;
   final bool refreshUser;
+  final Future<BuildContext?> Function()? showMainWindow;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -139,14 +154,15 @@ class _UserProfileLoader extends HookConsumerWidget {
     }, [userId, refreshUser]);
 
     if (user == null) return const SizedBox();
-    return _UserProfileBody(user: user);
+    return _UserProfileBody(user: user, showMainWindow: showMainWindow);
   }
 }
 
 class _UserProfileBody extends StatelessWidget {
-  const _UserProfileBody({required this.user});
+  const _UserProfileBody({required this.user, this.showMainWindow});
 
   final User user;
+  final Future<BuildContext?> Function()? showMainWindow;
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +264,10 @@ class _UserProfileBody extends StatelessWidget {
               if (!anonymous)
                 Padding(
                   padding: const EdgeInsets.only(top: 24),
-                  child: _UserProfileButtonBar(user: user),
+                  child: _UserProfileButtonBar(
+                    user: user,
+                    showMainWindow: showMainWindow,
+                  ),
                 ),
             ],
           ),
@@ -306,9 +325,20 @@ class _AddToContactsButton extends StatelessWidget {
 }
 
 class _UserProfileButtonBar extends StatelessWidget {
-  const _UserProfileButtonBar({required this.user});
+  const _UserProfileButtonBar({required this.user, this.showMainWindow});
 
   final User user;
+  final Future<BuildContext?> Function()? showMainWindow;
+
+  /// Where the buttons act: this dialog, or the main window once the dialog
+  /// is closed when it is shown in a browser window.
+  Future<BuildContext?> _actionContext(BuildContext context) async {
+    final show = showMainWindow;
+    if (show == null) return context;
+    Navigator.pop(context);
+    final main = await show();
+    return main != null && main.mounted ? main : null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,46 +348,9 @@ class _UserProfileButtonBar extends StatelessWidget {
         name: Resources.assetsImagesInviteShareSvg,
         size: 30,
         onTap: () async {
-          final result = await showConversationSelector(
-            context: context,
-            singleSelect: true,
-            title: context.l10n.shareContact,
-            onlyContact: false,
-            action: CustomPopupMenuButton(
-              alignment: Alignment.bottomCenter,
-              itemBuilder: (context) => [
-                CustomPopupMenuItem(
-                  icon: Resources.assetsImagesContextMenuCopySvg,
-                  title: context.l10n.copyLink,
-                  value: null,
-                ),
-              ],
-              onSelected: (_) async {
-                final codeUrl = user.codeUrl;
-                if (codeUrl == null) {
-                  e('codeUrl is null: $user');
-                  return;
-                }
-                i('share contact ${user.userId} $codeUrl');
-                await Clipboard.setData(ClipboardData(text: codeUrl));
-              },
-              color: context.theme.icon,
-              icon: Resources.assetsImagesInviteShareSvg,
-            ),
-          );
-
-          if (result == null || result.isEmpty) return;
-          final conversationId = result.first.conversationId;
-
-          await runFutureWithToast(
-            context.accountServer.sendContactMessage(
-              user.userId,
-              user.fullName,
-              result.first.encryptCategory!,
-              conversationId: conversationId,
-              recipientId: result.first.userId,
-            ),
-          );
+          final target = await _actionContext(context);
+          if (target == null) return;
+          await shareUser(target, user);
         },
         color: context.theme.icon,
       ),
@@ -370,8 +363,10 @@ class _UserProfileButtonBar extends StatelessWidget {
               // skip self.
               return;
             }
-            await ConversationFocus.selectUser(context, user.userId);
-            Navigator.pop(context);
+            final target = await _actionContext(context);
+            if (target == null) return;
+            await ConversationFocus.selectUser(target, user.userId);
+            if (target == context) Navigator.pop(context);
           },
           color: context.theme.icon,
         ),
@@ -380,12 +375,14 @@ class _UserProfileButtonBar extends StatelessWidget {
           name: Resources.assetsImagesInformationSvg,
           size: 30,
           onTap: () async {
+            final target = await _actionContext(context);
+            if (target == null) return;
             await ConversationFocus.selectUser(
-              context,
+              target,
               user.userId,
               initialChatSidePage: ConversationInfoDestination.infoPage,
             );
-            Navigator.pop(context);
+            if (target == context) Navigator.pop(context);
           },
           color: context.theme.icon,
         ),
@@ -400,4 +397,48 @@ class _UserProfileButtonBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Selects a conversation and shares the user's contact card.
+Future<void> shareUser(BuildContext context, User user) async {
+  final result = await showConversationSelector(
+    context: context,
+    singleSelect: true,
+    title: context.l10n.shareContact,
+    onlyContact: false,
+    action: CustomPopupMenuButton(
+      alignment: Alignment.bottomCenter,
+      itemBuilder: (context) => [
+        CustomPopupMenuItem(
+          icon: Resources.assetsImagesContextMenuCopySvg,
+          title: context.l10n.copyLink,
+          value: null,
+        ),
+      ],
+      onSelected: (_) async {
+        final codeUrl = user.codeUrl;
+        if (codeUrl == null) {
+          e('codeUrl is null: $user');
+          return;
+        }
+        i('share contact ${user.userId} $codeUrl');
+        await Clipboard.setData(ClipboardData(text: codeUrl));
+      },
+      color: context.theme.icon,
+      icon: Resources.assetsImagesInviteShareSvg,
+    ),
+  );
+
+  if (!context.mounted || result == null || result.isEmpty) return;
+  final conversationId = result.first.conversationId;
+
+  await runFutureWithToast(
+    context.accountServer.sendContactMessage(
+      user.userId,
+      user.fullName,
+      result.first.encryptCategory!,
+      conversationId: conversationId,
+      recipientId: result.first.userId,
+    ),
+  );
 }

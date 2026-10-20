@@ -13,7 +13,7 @@ const _kQuality = 85;
 const _kMinGifFrameDelayCentiseconds = 2;
 const _kDefaultGifFrameDelayCentiseconds = 10;
 // ponytail: remote images above this are too risky to decode in memory.
-const _kMaxDownloadedImageBytes = 32 * 1024 * 1024;
+const maxDownloadedImageBytes = 32 * 1024 * 1024;
 
 enum ImageType { gif, jpeg, png }
 
@@ -99,7 +99,7 @@ Future<(Uint8List, ImageType, int, int)?> compressFileWithIsolate(File file) =>
 Future<File?> downloadImageFile(
   String url, {
   ProxyConfig? proxyConfig,
-  int maxBytes = _kMaxDownloadedImageBytes,
+  int maxBytes = maxDownloadedImageBytes,
 }) async {
   final resolved = Uri.base.resolve(url);
   final response = await _sendImageRequest(resolved, proxyConfig);
@@ -133,7 +133,7 @@ Future<File?> downloadImageFile(
 Future<Uint8List> downloadImageBytes(
   String url, {
   ProxyConfig? proxyConfig,
-  int maxBytes = _kMaxDownloadedImageBytes,
+  int maxBytes = maxDownloadedImageBytes,
 }) async {
   final resolved = Uri.base.resolve(url);
   final response = await _sendImageRequest(resolved, proxyConfig);

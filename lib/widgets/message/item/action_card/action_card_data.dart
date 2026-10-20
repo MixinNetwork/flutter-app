@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../../../utils/uri_utils.dart';
 import '../action/action_data.dart';
 
 part 'action_card_data.g.dart';
@@ -92,18 +91,9 @@ class Cover {
 
 extension on ActionData {
   bool get isValidSharedAction {
-    try {
-      final uri = Uri.parse(action);
-      if (uri.isSendToUser) {
-        return true;
-      }
-      if ((uri.isScheme('http') || uri.isScheme('https')) &&
-          !uri.isHttpsSendUrl) {
-        return true;
-      }
-    } catch (err) {
-      return false;
-    }
-    return false;
+    final url = action.toLowerCase();
+    return !url.startsWith('mixin://send') &&
+        !url.startsWith('mixin://mixin.one/send') &&
+        !url.startsWith('https://mixin.one/send');
   }
 }

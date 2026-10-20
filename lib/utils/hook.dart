@@ -13,18 +13,25 @@ AsyncSnapshot<T> useMemoizedFuture<T>(
   Future<T> Function() futureBuilder,
   T initialData, {
   List<Object?> keys = const <Object>[],
+  bool preserveState = true,
 }) => _logSnapshotError(
-  useFuture(useMemoized(futureBuilder, keys), initialData: initialData),
+  useFuture(
+    useMemoized(futureBuilder, keys),
+    initialData: initialData,
+    preserveState: preserveState,
+  ),
 );
 
 AsyncSnapshot<T> useMemoizedStream<T>(
   Stream<T> Function() valueBuilder, {
   T? initialData,
   List<Object?> keys = const <Object>[],
+  bool preserveState = true,
 }) => _logSnapshotError(
   useStream<T>(
     useMemoized<Stream<T>>(valueBuilder, keys),
     initialData: initialData,
+    preserveState: preserveState,
   ),
 );
 
@@ -64,7 +71,11 @@ AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
 }) {
   final streamController = useStreamController<T>(keys: [listenable, ...keys]);
 
-  final initialData = useMemoized(() => converter(listenable));
+  // A new key converts again: its stream starts without a value.
+  final initialData = useMemoized(
+    () => converter(listenable),
+    [listenable, ...keys],
+  );
 
   useEffect(() {
     void onListen() => streamController.add(converter(listenable));
@@ -79,7 +90,7 @@ AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
     listenable,
     ...keys,
   ]);
-  return useStream(stream, initialData: initialData);
+  return useStream(stream, initialData: initialData, preserveState: false);
 }
 
 class _RouteCallbacks with RouteAware {

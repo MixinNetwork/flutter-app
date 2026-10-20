@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../constants/resources.dart';
 import '../../../db/dao/message_dao.dart';
@@ -136,6 +138,7 @@ class QuoteMessage extends HookConsumerWidget {
           description: context.l10n.messageNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           inputMode: inputMode,
@@ -184,6 +187,7 @@ class QuoteMessage extends HookConsumerWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesImageSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.image,
@@ -199,6 +203,7 @@ class QuoteMessage extends HookConsumerWidget {
           image: ImageByBlurHashOrBase64(imageData: thumbImage!),
           icon: SvgPicture.asset(
             Resources.assetsImagesVideoSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.video,
@@ -222,6 +227,7 @@ class QuoteMessage extends HookConsumerWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesLiveSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.live,
@@ -236,6 +242,7 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: mediaName ?? context.l10n.file,
@@ -250,6 +257,7 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.transcript,
@@ -264,6 +272,7 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: (content ?? '').postOptimizeMarkdown,
@@ -278,6 +287,7 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesLocationSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.location,
@@ -292,6 +302,7 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesAudioSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.audio,
@@ -313,6 +324,7 @@ class QuoteMessage extends HookConsumerWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: context.l10n.sticker,
@@ -336,6 +348,7 @@ class QuoteMessage extends HookConsumerWidget {
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesContactSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: sharedUserIdentityNumber ?? '',
@@ -367,6 +380,7 @@ class QuoteMessage extends HookConsumerWidget {
           name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesAppButtonSvg,
+            renderingStrategy: RenderingStrategy.raster,
             colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
           ),
           description: description ?? context.l10n.bots,
@@ -384,6 +398,7 @@ class QuoteMessage extends HookConsumerWidget {
       description: context.l10n.messageNotFound,
       icon: SvgPicture.asset(
         Resources.assetsImagesRecallSvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
       ),
       inputMode: inputMode,

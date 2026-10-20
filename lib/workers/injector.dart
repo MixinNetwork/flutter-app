@@ -174,10 +174,10 @@ class Injector {
     try {
       if (ids.length == 1) {
         final response = await client.userApi.getUserById(ids.first);
-        return insertUpdateUsers([response.data]);
+        return await insertUpdateUsers([response.data]);
       } else {
         final response = await client.userApi.getUsers(ids);
-        return insertUpdateUsers(response.data);
+        return await insertUpdateUsers(response.data);
       }
     } catch (e, s) {
       w('_fetchUsers error $e, stack: $s');

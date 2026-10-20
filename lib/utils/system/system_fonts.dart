@@ -4,23 +4,95 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../emoji.dart';
 import '../logger.dart';
 
 bool _fallbackFontsLoaded = false;
 
 String? loadedFallbackFonts;
 
-// TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
-Future<void> loadFallbackFonts() async {
-  if (!Platform.isLinux) {
-    return;
-  }
+/// The system CJK font family on Linux. Text whose fonts lack a character
+/// falls back through fontconfig for every paragraph, which costs about 3 ms
+/// per paragraph, so the theme uses a CJK family and lists the emoji family.
+///
+/// The theme also uses it as the main family: the default 'Roboto' is not
+/// installed on most Linux systems, and the first layout of a missing family
+/// costs about 30 ms for each font weight.
+String? _linuxCjkFamily;
 
+/// The system monospace font family on Linux, for code text. The usual code
+/// font names are not installed on Linux, and each missing name costs a
+/// fontconfig search on first use.
+String? linuxMonospaceFamily;
+
+Future<String?> _matchLinuxFamily(String pattern) async {
+  try {
+    final result = await Process.run('fc-match', [
+      '-f',
+      '%{family[0]}',
+      pattern,
+    ]);
+    final family = (result.stdout as String).trim();
+    if (result.exitCode == 0 && family.isNotEmpty) return family;
+  } catch (error) {
+    w('failed to match a font family for $pattern: $error');
+  }
+  return null;
+}
+
+Future<void> loadFallbackFonts() async {
+  if (!Platform.isLinux) return;
+  await _loadLinuxFonts();
+  _warmLinuxFonts();
+}
+
+/// Lays out text once in each font weight the app uses, before the first
+/// frame. The first layout of a family and weight searches fontconfig for
+/// about 10 ms, which would otherwise stall the first chat or post that uses
+/// it.
+void _warmLinuxFonts() {
+  final watch = Stopwatch()..start();
+  final fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+  final families = [
+    loadedFallbackFonts ?? _linuxCjkFamily,
+    ?linuxMonospaceFamily,
+  ];
+  for (final family in families) {
+    for (final weight in const [
+      FontWeight.w400,
+      FontWeight.w500,
+      FontWeight.w600,
+      FontWeight.w700,
+    ]) {
+      TextPainter(
+          text: TextSpan(
+            text: 'a',
+            style: TextStyle(
+              fontFamily: family,
+              fontFamilyFallback: fallback,
+              fontWeight: weight,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )
+        ..layout()
+        ..dispose();
+    }
+  }
+  i('warmed linux fonts in ${watch.elapsedMilliseconds} ms');
+}
+
+// TODO(BIN): remove this when https://github.com/flutter/flutter/issues/90951 has been fixed.
+Future<void> _loadLinuxFonts() async {
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
+  final monospace = _matchLinuxFamily('monospace');
   if (PlatformDispatcher.instance.locale.languageCode == 'en') {
+    _linuxCjkFamily = await _matchLinuxFamily(':lang=zh-cn');
+    linuxMonospaceFamily = await monospace;
     return;
   }
+  linuxMonospaceFamily = await monospace;
   if (_fallbackFontsLoaded) {
     return;
   }
@@ -85,20 +157,18 @@ Future<void> loadFallbackFonts() async {
 
 extension ApplyFontsExtension on ThemeData {
   ThemeData withFallbackFonts() {
-    if (loadedFallbackFonts == null) {
-      if (Platform.isWindows) {
-        return copyWith(
-          textTheme: textTheme.applyFonts(null, ['Microsoft Yahei']),
-          primaryTextTheme: primaryTextTheme.applyFonts(null, [
-            'Microsoft Yahei',
-          ]),
-        );
-      }
+    final List<String> fallback;
+    if (Platform.isWindows) {
+      fallback = ['Microsoft Yahei', kEmojiFontFamily];
+    } else if (Platform.isLinux) {
+      fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+    } else {
       return this;
     }
+    final family = loadedFallbackFonts ?? _linuxCjkFamily;
     return copyWith(
-      textTheme: textTheme.applyFonts(loadedFallbackFonts, null),
-      primaryTextTheme: primaryTextTheme.applyFonts(loadedFallbackFonts, null),
+      textTheme: textTheme.applyFonts(family, fallback),
+      primaryTextTheme: primaryTextTheme.applyFonts(family, fallback),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
@@ -117,7 +119,10 @@ class _ItemVideo extends HookConsumerWidget {
               child: Row(
                 children: [
                   const SizedBox(width: 5),
-                  SvgPicture.asset(Resources.assetsImagesVideoMessageSvg),
+                  SvgPicture.asset(
+                    Resources.assetsImagesVideoMessageSvg,
+                    renderingStrategy: RenderingStrategy.raster,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     durationText,

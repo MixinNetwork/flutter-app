@@ -7,6 +7,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../constants/brightness_theme_data.dart';
 import '../../constants/constants.dart';
@@ -207,8 +209,9 @@ class _ConversationSelector extends HookConsumerWidget {
             selectItem(element);
           });
         },
+        selectedConversationIds: initSelected.map((e) => e.conversationId),
       ),
-      [accountServer, onlyContact, filteredIds],
+      [accountServer, onlyContact, filteredIds, initSelected],
     );
     useEffect(
       () => conversationFilterNotifier.dispose,
@@ -509,6 +512,7 @@ class _FilterTextField extends HookConsumerWidget {
                 padding: const EdgeInsetsDirectional.only(end: 8),
                 child: SvgPicture.asset(
                   Resources.assetsImagesIcSearchSmallSvg,
+                  renderingStrategy: RenderingStrategy.raster,
                   colorFilter: ColorFilter.mode(
                     context.theme.secondaryText,
                     BlendMode.srcIn,
@@ -579,6 +583,7 @@ class _AvatarSmallCloseIcon extends StatelessWidget {
             child: Center(
               child: SvgPicture.asset(
                 Resources.assetsImagesSmallCloseSvg,
+                renderingStrategy: RenderingStrategy.raster,
                 colorFilter: ColorFilter.mode(
                   Colors.white.withValues(alpha: 0.9),
                   BlendMode.srcIn,
@@ -668,7 +673,10 @@ class _BaseItem extends StatelessWidget {
                       : context.theme.secondaryText,
                 ),
                 alignment: Alignment.center,
-                child: SvgPicture.asset(Resources.assetsImagesSelectedSvg),
+                child: SvgPicture.asset(
+                  Resources.assetsImagesSelectedSvg,
+                  renderingStrategy: RenderingStrategy.raster,
+                ),
               ),
             ),
           ),

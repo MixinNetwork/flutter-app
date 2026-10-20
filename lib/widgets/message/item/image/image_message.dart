@@ -10,6 +10,7 @@ import '../../../../enum/media_status.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../../media_image_pipeline.dart';
 import '../../../mixin_image.dart';
 import '../../../status.dart';
 import '../../message.dart';
@@ -75,6 +76,8 @@ class MessageImage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranscriptPage = useIsTranscriptPage();
+    final transcriptId = TranscriptPage.of(context)?.messageId;
+    final isPinnedPage = useIsPinnedPage();
     final type = useMessageConverter(converter: (state) => state.type);
     final conversationId = useMessageConverter(
       converter: (state) => state.conversationId,
@@ -141,6 +144,7 @@ class MessageImage extends HookConsumerWidget {
               conversationId: message.conversationId,
               messageId: message.messageId,
               isTranscriptPage: isTranscriptPage,
+              isPinnedPage: isPinnedPage,
             );
           case MediaStatus.canceled:
             if (message.mediaUrl?.isNotEmpty == true && isMessageSentOut) {
@@ -163,11 +167,15 @@ class MessageImage extends HookConsumerWidget {
                 context.accountServer.reUploadAttachment(message);
               }
             } else {
-              context.accountServer.downloadAttachment(message.messageId);
+              context.accountServer.downloadAttachment(
+                message.messageId,
+                transcriptId: transcriptId,
+              );
             }
           case MediaStatus.pending:
             context.accountServer.cancelProgressAttachmentJob(
               message.messageId,
+              transcriptId: transcriptId,
             );
           case null:
           case MediaStatus.expired:
@@ -180,17 +188,30 @@ class MessageImage extends HookConsumerWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            MixinImage.file(
-              File(
-                context.accountServer.convertAbsolutePath(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final path = context.accountServer.convertAbsolutePath(
                   type,
                   conversationId,
                   mediaUrl,
                   isTranscriptPage,
-                ),
-              ),
-              placeholder: () => thumbWidget,
-              errorBuilder: (_, _, _) => thumbWidget,
+                );
+                return MixinImage(
+                  // A cell that a list reuses for another photo starts again,
+                  // so only a new decode size of this photo keeps the old frame.
+                  key: ValueKey(path),
+                  image: coverDecodeImage(
+                    FileImage(File(path)),
+                    box: constraints.biggest,
+                    devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                  ),
+                  // A resize can change the decode size; the old image stays
+                  // until the new one is ready.
+                  gaplessPlayback: true,
+                  placeholder: () => thumbWidget,
+                  errorBuilder: (_, _, _) => thumbWidget,
+                );
+              },
             ),
             Center(
               child: HookBuilder(
@@ -205,7 +226,9 @@ class MessageImage extends HookConsumerWidget {
                           ? const StatusUpload()
                           : const StatusDownload();
                     case MediaStatus.pending:
-                      return const StatusPending();
+                      return StatusPending(
+                        transcriptId: transcriptId,
+                      );
                     case MediaStatus.expired:
                       return const StatusWarning();
                     case MediaStatus.done:

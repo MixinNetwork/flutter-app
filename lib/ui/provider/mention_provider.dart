@@ -23,6 +23,9 @@ class MentionState extends Equatable {
   final List<User> users;
   final int index;
 
+  User? get selectedUser =>
+      index >= 0 && index < users.length ? users[index] : null;
+
   @override
   List<Object?> get props => [text, users, index];
 

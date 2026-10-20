@@ -16,7 +16,7 @@ class ConversationHotKey extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => FocusableActionDetector(
+  Widget build(BuildContext context) => Shortcuts(
     shortcuts: {
       SingleActivator(
         LogicalKeyboardKey.arrowDown,
@@ -29,16 +29,38 @@ class ConversationHotKey extends StatelessWidget {
         control: !kPlatformIsDarwin,
       ): const PreviousConversationIntent(),
     },
-    actions: {
-      NextConversationIntent: CallbackAction<NextConversationIntent>(
-        onInvoke: (_) => _navigationConversation(context, forward: true),
-      ),
-      PreviousConversationIntent: CallbackAction<PreviousConversationIntent>(
-        onInvoke: (_) => _navigationConversation(context, forward: false),
-      ),
-    },
-    child: child,
+    child: Actions(
+      actions: {
+        NextConversationIntent:
+            _ConversationNavigationAction<NextConversationIntent>(
+              onInvoke: (_) => _navigationConversation(context, forward: true),
+            ),
+        PreviousConversationIntent:
+            _ConversationNavigationAction<PreviousConversationIntent>(
+              onInvoke: (_) => _navigationConversation(context, forward: false),
+            ),
+      },
+      child: child,
+    ),
   );
+}
+
+// The shortcut tree stays the same when focus moves: a structure change
+// re-parents the whole home page, and that rebuilds every widget in it.
+class _ConversationNavigationAction<T extends Intent>
+    extends CallbackAction<T> {
+  _ConversationNavigationAction({required super.onInvoke});
+
+  // A disabled action leaves the key to a focused multiline text field.
+  @override
+  bool isEnabled(T intent) => !_isMultilineEditableTextFocused();
+}
+
+bool _isMultilineEditableTextFocused() {
+  final context = FocusManager.instance.primaryFocus?.context;
+  final editableText = context?.findAncestorWidgetOfExactType<EditableText>();
+  final maxLines = editableText?.maxLines;
+  return editableText != null && (maxLines == null || maxLines > 1);
 }
 
 class NextConversationIntent extends Intent {

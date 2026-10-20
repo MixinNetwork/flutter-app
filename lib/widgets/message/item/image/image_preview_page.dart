@@ -8,10 +8,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
+import '../../../../utils/app_lifecycle.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../../utils/system/clipboard.dart';
@@ -22,6 +25,7 @@ import '../../../interactive_decorated_box.dart';
 import '../../../menu.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
+import '../../message_actions_menu.dart';
 import '../transcript_message.dart';
 import 'preview_image_widget.dart';
 
@@ -30,23 +34,27 @@ class ImagePreviewPage extends HookConsumerWidget {
     required this.conversationId,
     required this.messageId,
     required this.isTranscriptPage,
+    this.isPinnedPage = false,
     super.key,
   });
 
   final String conversationId;
   final String messageId;
   final bool isTranscriptPage;
+  final bool isPinnedPage;
 
   static Future<void> push(
     BuildContext context, {
     required String conversationId,
     required String messageId,
     bool isTranscriptPage = false,
+    bool isPinnedPage = false,
   }) => showGeneralDialog(
     context: context,
     barrierColor: Colors.transparent,
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    requestFocus: true,
     pageBuilder:
         (
           buildContext,
@@ -57,6 +65,7 @@ class ImagePreviewPage extends HookConsumerWidget {
             conversationId: conversationId,
             messageId: messageId,
             isTranscriptPage: isTranscriptPage,
+            isPinnedPage: isPinnedPage,
           );
 
           try {
@@ -76,6 +85,8 @@ class ImagePreviewPage extends HookConsumerWidget {
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
+    final showedMenu = useState(false);
+    final focusNode = useFocusNode(debugLabel: 'image_preview');
 
     final controller = useMemoized(TransformImageController.new, [
       current.value?.messageId,
@@ -174,8 +185,10 @@ class ImagePreviewPage extends HookConsumerWidget {
       [conversationId],
     );
 
-    return FocusableActionDetector(
+    final child = FocusableActionDetector(
+      focusNode: focusNode,
       shortcuts: {
+        const SingleActivator(LogicalKeyboardKey.escape): const _EscapeIntent(),
         SingleActivator(
           LogicalKeyboardKey.keyC,
           meta: kPlatformIsDarwin,
@@ -206,6 +219,9 @@ class ImagePreviewPage extends HookConsumerWidget {
         ): const _ImageRotateIntent(),
       },
       actions: {
+        _EscapeIntent: CallbackAction<Intent>(
+          onInvoke: (intent) => Navigator.maybePop(context),
+        ),
         _CopyIntent: CallbackAction<Intent>(
           onInvoke: (intent) => copyFile(
             context.accountServer.convertMessageAbsolutePath(
@@ -295,6 +311,8 @@ class ImagePreviewPage extends HookConsumerWidget {
                                         prev.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesNextSvg,
+                                      renderingStrategy:
+                                          RenderingStrategy.raster,
                                     ),
                                   ),
                                 const Spacer(),
@@ -304,6 +322,8 @@ class ImagePreviewPage extends HookConsumerWidget {
                                         next.value!.messageId,
                                     child: SvgPicture.asset(
                                       Resources.assetsImagesPrevSvg,
+                                      renderingStrategy:
+                                          RenderingStrategy.raster,
                                     ),
                                   ),
                               ],
@@ -319,6 +339,26 @@ class ImagePreviewPage extends HookConsumerWidget {
           ),
         ),
       ),
+    );
+    if (!kPlatformIsDesktop) return child;
+    return CustomContextMenuWidget(
+      hitTestBehavior: HitTestBehavior.translucent,
+      menuProvider: (request) {
+        final message = current.value;
+        if (message == null) return null;
+        return buildMessageActionsMenu(
+          context: context,
+          ref: ref,
+          request: request,
+          message: message,
+          isTranscriptPage: isTranscriptPage,
+          isPinnedPage: isPinnedPage,
+          showedMenu: showedMenu,
+          focusNode: focusNode,
+        );
+      },
+      desktopMenuWidgetBuilder: CustomDesktopMenuWidgetBuilder(),
+      child: child,
     );
   }
 }
@@ -571,25 +611,27 @@ class _Item extends HookConsumerWidget {
       child: DecoratedBox(
         decoration: const BoxDecoration(color: Color.fromRGBO(62, 65, 72, 0.9)),
         child: ClipRect(
-          child: ImagPreviewWidget(
-            scale: initialScale,
-            minScale: math.min(initialScale / 2, 0.5),
-            maxScale: math.max(initialScale * 2, 2),
-            controller: controller,
-            onEmptyAreaTapped: () {
-              Navigator.maybePop(context);
-            },
-            image: Image.file(
-              File(
-                context.accountServer.convertMessageAbsolutePath(
-                  message,
-                  isTranscriptPage,
+          child: AppActiveTickerMode(
+            child: ImagPreviewWidget(
+              scale: initialScale,
+              minScale: math.min(initialScale / 2, 0.5),
+              maxScale: math.max(initialScale * 2, 2),
+              controller: controller,
+              onEmptyAreaTapped: () {
+                Navigator.maybePop(context);
+              },
+              image: Image.file(
+                File(
+                  context.accountServer.convertMessageAbsolutePath(
+                    message,
+                    isTranscriptPage,
+                  ),
                 ),
-              ),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
-                imageData: message.thumbImage ?? '',
                 fit: BoxFit.contain,
+                errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
+                  imageData: message.thumbImage ?? '',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
@@ -621,4 +663,8 @@ class _ImageZoomOutIntent extends Intent {
 
 class _ImageRotateIntent extends Intent {
   const _ImageRotateIntent();
+}
+
+class _EscapeIntent extends Intent {
+  const _EscapeIntent();
 }

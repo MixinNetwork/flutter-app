@@ -13,9 +13,9 @@ import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/mention_provider.dart';
 import '../utils/extension/extension.dart';
-import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
+import 'conversation/badges_widget.dart';
 import 'high_light_text.dart';
 import 'interactive_decorated_box.dart';
 
@@ -57,22 +57,18 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
 
     return FocusableActionDetector(
       enabled: selectable,
-      shortcuts: {
-        const SingleActivator(LogicalKeyboardKey.arrowDown):
-            const ListSelectionNextIntent(),
-        const SingleActivator(LogicalKeyboardKey.arrowUp):
-            const ListSelectionPrevIntent(),
-        const SingleActivator(LogicalKeyboardKey.tab):
-            const ListSelectionNextIntent(),
-        const SingleActivator(LogicalKeyboardKey.enter):
-            const ListSelectionSelectedIntent(),
-        if (kPlatformIsDarwin) ...{
-          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
-              const ListSelectionNextIntent(),
-          const SingleActivator(LogicalKeyboardKey.keyP, control: true):
-              const ListSelectionPrevIntent(),
-        },
-      },
+      shortcuts: selectable
+          ? {
+              const SingleActivator(LogicalKeyboardKey.arrowDown):
+                  const ListSelectionNextIntent(),
+              const SingleActivator(LogicalKeyboardKey.arrowUp):
+                  const ListSelectionPrevIntent(),
+              const SingleActivator(LogicalKeyboardKey.tab):
+                  const ListSelectionSelectedIntent(),
+              const SingleActivator(LogicalKeyboardKey.enter):
+                  const ListSelectionSelectedIntent(),
+            }
+          : const {},
       actions: {
         ListSelectionNextIntent: CallbackAction<Intent>(
           onInvoke: (intent) =>
@@ -82,11 +78,9 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
           onInvoke: (intent) =>
               ref.read(mentionProviderInstance.notifier).prev(),
         ),
-        ListSelectionSelectedIntent: CallbackAction<Intent>(
-          onInvoke: (intent) {
-            final state = ref.read(mentionProviderInstance);
-            _select(state.users[state.index], ref.read(mentionCacheProvider));
-          },
+        ListSelectionSelectedIntent: _MentionSelectionAction(
+          selectedUser: () => ref.read(mentionProviderInstance).selectedUser,
+          onSelect: (user) => _select(user, ref.read(mentionCacheProvider)),
         ),
       },
       child: PortalTarget(
@@ -143,6 +137,26 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ..selection = TextSelection.fromPosition(
         TextPosition(offset: beforeSelectionOffset.length),
       );
+  }
+}
+
+class _MentionSelectionAction extends Action<ListSelectionSelectedIntent> {
+  _MentionSelectionAction({
+    required this.selectedUser,
+    required this.onSelect,
+  });
+
+  final User? Function() selectedUser;
+  final void Function(User user) onSelect;
+
+  @override
+  bool isEnabled(ListSelectionSelectedIntent intent) => selectedUser() != null;
+
+  @override
+  Object? invoke(ListSelectionSelectedIntent intent) {
+    final user = selectedUser();
+    if (user != null) onSelect(user);
+    return null;
   }
 }
 
@@ -205,47 +219,61 @@ class _MentionItem extends StatelessWidget {
             size: 32,
           ),
           const SizedBox(width: 6),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                user.fullName ?? '',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.theme.text,
-                  height: 1,
-                ),
-                textMatchers: [
-                  EmojiTextMatcher(),
-                  if (keyword != null && keyword!.trim().isNotEmpty)
-                    MultiKeyWordTextMatcher.createKeywordMatcher(
-                      keyword: keyword!,
-                      style: TextStyle(color: context.theme.accent),
-                      caseSensitive: false,
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: CustomText(
+                        user.fullName ?? '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: context.theme.text,
+                          height: 1,
+                        ),
+                        textMatchers: [
+                          EmojiTextMatcher(),
+                          if (keyword != null && keyword!.trim().isNotEmpty)
+                            MultiKeyWordTextMatcher.createKeywordMatcher(
+                              keyword: keyword!,
+                              style: TextStyle(color: context.theme.accent),
+                              caseSensitive: false,
+                            ),
+                        ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                ],
-                maxLines: 1,
-              ),
-              const SizedBox(height: 2),
-              CustomText(
-                user.identityNumber,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.theme.secondaryText,
-                ),
-                textMatchers: [
-                  EmojiTextMatcher(),
-                  if (keyword != null && keyword!.trim().isNotEmpty)
-                    MultiKeyWordTextMatcher.createKeywordMatcher(
-                      keyword: keyword!,
-                      style: TextStyle(color: context.theme.accent),
-                      caseSensitive: false,
+                    BadgesWidget(
+                      verified: user.isVerified ?? false,
+                      isBot: user.isBot,
+                      membership: user.membership,
                     ),
-                ],
-                maxLines: 1,
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  user.identityNumber,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.theme.secondaryText,
+                  ),
+                  textMatchers: [
+                    EmojiTextMatcher(),
+                    if (keyword != null && keyword!.trim().isNotEmpty)
+                      MultiKeyWordTextMatcher.createKeywordMatcher(
+                        keyword: keyword!,
+                        style: TextStyle(color: context.theme.accent),
+                        caseSensitive: false,
+                      ),
+                  ],
+                  maxLines: 1,
+                ),
+              ],
+            ),
           ),
         ],
       ),

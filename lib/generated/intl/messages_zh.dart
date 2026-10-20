@@ -603,6 +603,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "oneYear": MessageLookupByLibrary.simpleMessage("1 年"),
     "open": MessageLookupByLibrary.simpleMessage("打开"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("打开主页"),
+    "openInBrowser": MessageLookupByLibrary.simpleMessage("在浏览器中打开"),
     "openLink": m35,
     "openLogDirectory": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
     "openingBalance": MessageLookupByLibrary.simpleMessage("期初余额"),

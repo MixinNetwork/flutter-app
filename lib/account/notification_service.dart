@@ -213,5 +213,7 @@ class NotificationService {
   Future<void> close() async {
     clearNotificationEvent();
     await Future.wait(streamSubscriptions.map((e) => e.cancel()));
+    // The account is gone, so its notifications must not open in another one.
+    await dismissAllNotifications();
   }
 }

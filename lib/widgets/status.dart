@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
@@ -8,7 +10,9 @@ import '../utils/hook.dart';
 import 'message/message.dart';
 
 class StatusPending extends HookConsumerWidget {
-  const StatusPending({super.key});
+  const StatusPending({super.key, this.transcriptId});
+
+  final String? transcriptId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,9 +22,11 @@ class StatusPending extends HookConsumerWidget {
 
     final value = useListenableConverter(
       context.accountServer.attachmentUtil,
-      converter: (attachmentUtil) =>
-          attachmentUtil.getAttachmentProgress(messageId),
-      keys: [messageId],
+      converter: (attachmentUtil) => attachmentUtil.getAttachmentProgress(
+        messageId,
+        transcriptId: transcriptId,
+      ),
+      keys: [messageId, transcriptId],
     ).requireData;
 
     return _StatusPending(value: value);
@@ -66,6 +72,7 @@ class StatusWarning extends StatelessWidget {
     child: Center(
       child: SvgPicture.asset(
         Resources.assetsImagesWarningSvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(context.theme.text, BlendMode.srcIn),
       ),
     ),
@@ -80,6 +87,7 @@ class StatusDownload extends StatelessWidget {
     child: Center(
       child: SvgPicture.asset(
         Resources.assetsImagesDownloadSvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
       ),
     ),
@@ -94,6 +102,7 @@ class StatusUpload extends StatelessWidget {
     child: Center(
       child: SvgPicture.asset(
         Resources.assetsImagesUploadSvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
       ),
     ),
@@ -108,6 +117,7 @@ class StatusAudioPlay extends StatelessWidget {
     child: Center(
       child: SvgPicture.asset(
         Resources.assetsImagesAudioPlaySvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
       ),
     ),
@@ -122,6 +132,7 @@ class StatusAudioStop extends StatelessWidget {
     child: Center(
       child: SvgPicture.asset(
         Resources.assetsImagesAudioStopSvg,
+        renderingStrategy: RenderingStrategy.raster,
         colorFilter: ColorFilter.mode(context.theme.accent, BlendMode.srcIn),
       ),
     ),

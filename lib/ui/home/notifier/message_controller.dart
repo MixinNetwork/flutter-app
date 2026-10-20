@@ -14,6 +14,8 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../widgets/high_light_text.dart' show prepareLinkRanges;
+import '../../../widgets/markdown.dart' show preparePosts;
 import '../../provider/conversation_provider.dart';
 import '../../provider/mention_cache_provider.dart';
 import '../chat/chat_jump_trace.dart';
@@ -195,6 +197,14 @@ class MessageState extends Equatable {
     anchor: anchor ?? this.anchor,
   );
 
+  // A page load does not see live inserts and deletes while it runs, so the
+  // page goes into the window as it is when the load ends.
+  MessageState addOlder(List<MessageItem> page, {required bool isOldest}) =>
+      copyWith(top: [...page, ...top], isOldest: isOldest);
+
+  MessageState addNewer(List<MessageItem> page, {required bool isLatest}) =>
+      copyWith(bottom: [...bottom, ...page], isLatest: isLatest ? true : null);
+
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
       return MessageState(
@@ -231,7 +241,11 @@ class MessageController extends ValueNotifier<MessageState> {
     required this.database,
     required this.mentionCache,
     required this.accountServer,
-  }) : super(MessageState()) {
+    @visibleForTesting MessageWindowLoader? messageWindowLoader,
+  }) : _messageWindowLoader =
+           messageWindowLoader ??
+           MessageWindowLoader.fromDao(database.messageDao),
+       super(MessageState()) {
     _init(
       centerMessageId: conversationNotifier.state?.initIndexMessageId,
       lastReadMessageId: conversationNotifier.state?.lastReadMessageId,
@@ -288,9 +302,11 @@ class MessageController extends ValueNotifier<MessageState> {
   var _generation = 0;
   var _loadAfterInFlight = false;
   var _loadBeforeInFlight = false;
+  // Live changes by message ID for each page load in flight. Null is a
+  // delete.
+  final _pageChanges = <Map<String, MessageItem?>>[];
   var _disposed = false;
-  late final MessageWindowLoader _messageWindowLoader =
-      MessageWindowLoader.fromDao(messageDao);
+  final MessageWindowLoader _messageWindowLoader;
 
   MessageState get state => value;
 
@@ -312,6 +328,23 @@ class MessageController extends ValueNotifier<MessageState> {
         e('preCacheMention failed: $error');
       }),
     );
+  }
+
+  // Text rows otherwise find their links on the UI thread, which costs
+  // milliseconds for a long Chinese message.
+  Future<void> _prepareLinksSafely(List<MessageItem> messages) async {
+    try {
+      await Future.wait([
+        preparePosts(messages),
+        prepareLinkRanges([
+          for (final message in messages)
+            if (message.type.isText && message.content != null)
+              message.content!,
+        ]),
+      ]);
+    } catch (error) {
+      e('prepare message content failed: $error');
+    }
   }
 
   Future<void> _preCacheMentionSafely(MessageState state) async {
@@ -419,7 +452,10 @@ class MessageController extends ValueNotifier<MessageState> {
       'lastRead=${shortMessageId(nextState.lastReadMessageId)} '
       '${_formatWindow(nextState)}',
     );
-    await _preCacheMentionSafely(nextState);
+    await Future.wait([
+      _preCacheMentionSafely(nextState),
+      _prepareLinksSafely(nextState.list),
+    ]);
     if (!_isCurrent(generation, conversationId)) return;
     _emit(nextState, warmMentionCache: false);
   }
@@ -480,23 +516,76 @@ class MessageController extends ValueNotifier<MessageState> {
     );
   }
 
-  Future<void> _loadAfter(int generation, String conversationId) async {
-    final messageState = await _after(conversationId);
-    if (!_isCurrent(generation, conversationId)) return;
-    _emit(_pretreatment(messageState));
+  Future<void> _loadAfter(int generation, String conversationId) =>
+      _loadPage(generation, conversationId, newer: true);
+
+  Future<void> _loadBefore(int generation, String conversationId) =>
+      _loadPage(generation, conversationId, newer: false);
+
+  Future<void> _loadPage(
+    int generation,
+    String conversationId, {
+    required bool newer,
+  }) async {
+    // The window size can change the limit during the load.
+    final limit = this.limit;
+    final changes = <String, MessageItem?>{};
+    _pageChanges.add(changes);
+    try {
+      final page = await (newer
+          ? _messageWindowLoader.loadAfter
+          : _messageWindowLoader.loadBefore)(state, conversationId, limit);
+      if (!_isCurrent(generation, conversationId)) return;
+      await _prepareLinksSafely(page);
+      if (!_isCurrent(generation, conversationId)) return;
+      final end = page.length < limit;
+      final window = state;
+      // The page and the window were read before the live changes that
+      // arrived during the load, so apply those changes to the page and add
+      // it to the window as it is now.
+      final current = [
+        for (final message in page)
+          if (changes.containsKey(message.messageId))
+            ?changes[message.messageId]
+          else
+            message,
+      ];
+      // A message inserted during the load is in neither the page nor the
+      // window when it falls in the range of the page, or past the end of the
+      // history.
+      final known = {
+        for (final message in page) message.messageId,
+        for (final message in window.list) message.messageId,
+      };
+      final edge = newer ? window.bottomMessage : window.topMessage;
+      final far = end ? null : (newer ? page.lastOrNull : page.firstOrNull);
+      bool inPageRange(DateTime time) => newer
+          ? (edge == null || time.isAfter(edge.createdAt)) &&
+                (far == null || !time.isAfter(far.createdAt))
+          : (edge == null || time.isBefore(edge.createdAt)) &&
+                (far == null || !time.isBefore(far.createdAt));
+      for (final message in changes.values) {
+        if (message == null ||
+            known.contains(message.messageId) ||
+            !inPageRange(message.createdAt)) {
+          continue;
+        }
+        final index = current.indexWhere(
+          (other) => other.createdAt.isAfter(message.createdAt),
+        );
+        current.insert(index < 0 ? current.length : index, message);
+      }
+      _emit(
+        _pretreatment(
+          newer
+              ? window.addNewer(current, isLatest: end)
+              : window.addOlder(current, isOldest: end),
+        ),
+      );
+    } finally {
+      _pageChanges.remove(changes);
+    }
   }
-
-  Future<void> _loadBefore(int generation, String conversationId) async {
-    final messageState = await _before(conversationId);
-    if (!_isCurrent(generation, conversationId)) return;
-    _emit(_pretreatment(messageState));
-  }
-
-  Future<MessageState> _before(String conversationId) =>
-      _messageWindowLoader.loadBefore(state, conversationId, limit);
-
-  Future<MessageState> _after(String conversationId) =>
-      _messageWindowLoader.loadAfter(state, conversationId, limit);
 
   Future<MessageState> _resetMessageList(
     String conversationId,
@@ -614,6 +703,13 @@ class MessageController extends ValueNotifier<MessageState> {
     if (conversationId == null || state.conversationId != conversationId) {
       return;
     }
+    for (final changes in _pageChanges) {
+      for (final item in list) {
+        if (item.conversationId == conversationId) {
+          changes[item.messageId] = item;
+        }
+      }
+    }
 
     traceChatScroll(
       'insert current conv=${shortMessageId(conversationId)} '
@@ -635,6 +731,9 @@ class MessageController extends ValueNotifier<MessageState> {
     final conversationId = conversationNotifier.state?.conversationId;
     if (conversationId == null || state.conversationId != conversationId) {
       return;
+    }
+    for (final changes in _pageChanges) {
+      changes[messageId] = null;
     }
 
     _emit(_pretreatment(state.removeMessage(messageId)));

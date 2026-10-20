@@ -47,8 +47,6 @@ String? encryptPin(String code) {
     return null;
   }
 
-  d('pinToken: $pinToken');
-
   final pinBytes = Uint8List.fromList(utf8.encode(code));
   final timeBytes = Uint8List(8);
   final iteratorBytes = Uint8List(8);
