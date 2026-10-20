@@ -13,11 +13,11 @@ String? loadedFallbackFonts;
 
 /// The system CJK font family on Linux. Text whose fonts lack a character
 /// falls back through fontconfig for every paragraph, which costs about 3 ms
-/// per paragraph, so the theme uses a CJK family and lists the emoji family.
+/// per paragraph, so the theme lists a CJK family and the emoji family as
+/// fallbacks.
 ///
-/// The theme also uses it as the main family: the default 'Roboto' is not
-/// installed on most Linux systems, and the first layout of a missing family
-/// costs about 30 ms for each font weight.
+/// It is not the main family: its Latin glyphs differ from the system UI
+/// font, so Latin text would no longer look like the system font.
 String? _linuxCjkFamily;
 
 /// The system monospace font family on Linux, for code text. The usual code
@@ -53,10 +53,7 @@ Future<void> loadFallbackFonts() async {
 void _warmLinuxFonts() {
   final watch = Stopwatch()..start();
   final fallback = [?_linuxCjkFamily, kEmojiFontFamily];
-  final families = [
-    loadedFallbackFonts ?? _linuxCjkFamily,
-    ?linuxMonospaceFamily,
-  ];
+  final families = [loadedFallbackFonts, ?linuxMonospaceFamily];
   for (final family in families) {
     for (final weight in const [
       FontWeight.w400,
@@ -165,10 +162,12 @@ extension ApplyFontsExtension on ThemeData {
     } else {
       return this;
     }
-    final family = loadedFallbackFonts ?? _linuxCjkFamily;
     return copyWith(
-      textTheme: textTheme.applyFonts(family, fallback),
-      primaryTextTheme: primaryTextTheme.applyFonts(family, fallback),
+      textTheme: textTheme.applyFonts(loadedFallbackFonts, fallback),
+      primaryTextTheme: primaryTextTheme.applyFonts(
+        loadedFallbackFonts,
+        fallback,
+      ),
     );
   }
 }
