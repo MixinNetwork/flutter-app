@@ -951,10 +951,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
+      sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
       url: "https://pub.dev"
     source: hosted
-    version: "0.20.2"
+    version: "0.20.3"
   intl_phone_number_input:
     dependency: "direct main"
     description:
@@ -1254,10 +1254,11 @@ packages:
   media_kit_video:
     dependency: "direct main"
     description:
-      name: media_kit_video
-      sha256: afaa509e7b7e0bf247557a3a740cde903a52c34ace9810f94500e127bd7b043d
-      url: "https://pub.dev"
-    source: hosted
+      path: media_kit_video
+      ref: "462d73bcb4bc6b72bbb14aaf0399ab3cfc76105c"
+      resolved-ref: "462d73bcb4bc6b72bbb14aaf0399ab3cfc76105c"
+      url: "https://github.com/boyan01/media-kit.git"
+    source: git
     version: "2.0.1"
   meta:
     dependency: transitive
