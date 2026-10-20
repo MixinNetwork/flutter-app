@@ -109,6 +109,16 @@ class _VideoControlShowHideNotifier extends StateNotifier<bool> {
   }
 }
 
+// Pause on hidden too: minimizing on macOS reports hidden, not paused.
+@visibleForTesting
+void usePauseWhenWindowHidden(VoidCallback pause) =>
+    useOnAppLifecycleStateChange((previous, current) {
+      if (current == AppLifecycleState.hidden ||
+          current == AppLifecycleState.paused) {
+        pause();
+      }
+    });
+
 class _VideoPreviewPage extends HookConsumerWidget {
   const _VideoPreviewPage({
     required this.path,
@@ -128,13 +138,7 @@ class _VideoPreviewPage extends HookConsumerWidget {
 
     useEffect(() => controller.dispose, [controller]);
 
-    // Pause on hidden too: minimizing on macOS reports hidden, not paused.
-    useOnAppLifecycleStateChange((previous, current) {
-      if (current == AppLifecycleState.hidden ||
-          current == AppLifecycleState.paused) {
-        controller.pause();
-      }
-    });
+    usePauseWhenWindowHidden(controller.pause);
 
     return ProviderScope(
       overrides: [videoPlayerProvider.overrideWith((ref) => controller)],
