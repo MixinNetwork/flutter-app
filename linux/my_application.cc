@@ -109,6 +109,10 @@ static void my_application_activate(GApplication *application) {
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
+  // Impeller (default on Linux since Flutter 3.47) draws blank and partial
+  // frames on some Mesa drivers, e.g. SVGA3D in VMware (flutter/flutter#192915).
+  // Release builds ignore --no-enable-impeller, so opt out here.
+  fl_dart_project_set_enable_impeller(project, FALSE);
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));
