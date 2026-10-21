@@ -16,9 +16,16 @@ String? loadedFallbackFonts;
 /// per paragraph, so the theme lists a CJK family and the emoji family as
 /// fallbacks.
 ///
-/// It is not the main family: its Latin glyphs differ from the system UI
-/// font, so Latin text would no longer look like the system font.
+/// It is not the main family: its Latin glyphs and punctuation differ from
+/// the system UI font.
 String? _linuxCjkFamily;
+
+/// The first installed family of the Material fallbacks for Linux ('Ubuntu',
+/// 'Cantarell', 'DejaVu Sans' and others), which drew Latin text while the
+/// theme kept them. The theme fallbacks are replaced with the CJK and emoji
+/// families, so the theme uses this family as the main family. It also
+/// avoids the search for the missing 'Roboto' on first layout.
+String? _linuxLatinFamily;
 
 /// The system monospace font family on Linux, for code text. The usual code
 /// font names are not installed on Linux, and each missing name costs a
@@ -53,7 +60,10 @@ Future<void> loadFallbackFonts() async {
 void _warmLinuxFonts() {
   final watch = Stopwatch()..start();
   final fallback = [?_linuxCjkFamily, kEmojiFontFamily];
-  final families = [loadedFallbackFonts, ?linuxMonospaceFamily];
+  final families = [
+    loadedFallbackFonts ?? _linuxLatinFamily,
+    ?linuxMonospaceFamily,
+  ];
   for (final family in families) {
     for (final weight in const [
       FontWeight.w400,
@@ -84,6 +94,12 @@ Future<void> _loadLinuxFonts() async {
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
   final monospace = _matchLinuxFamily('monospace');
+  final latinFallbacks = Typography.material2021(
+    platform: TargetPlatform.linux,
+  ).black.bodyMedium?.fontFamilyFallback;
+  if (latinFallbacks != null) {
+    _linuxLatinFamily = await _matchLinuxFamily(latinFallbacks.join(','));
+  }
   if (PlatformDispatcher.instance.locale.languageCode == 'en') {
     _linuxCjkFamily = await _matchLinuxFamily(':lang=zh-cn');
     linuxMonospaceFamily = await monospace;
@@ -162,12 +178,10 @@ extension ApplyFontsExtension on ThemeData {
     } else {
       return this;
     }
+    final family = loadedFallbackFonts ?? _linuxLatinFamily;
     return copyWith(
-      textTheme: textTheme.applyFonts(loadedFallbackFonts, fallback),
-      primaryTextTheme: primaryTextTheme.applyFonts(
-        loadedFallbackFonts,
-        fallback,
-      ),
+      textTheme: textTheme.applyFonts(family, fallback),
+      primaryTextTheme: primaryTextTheme.applyFonts(family, fallback),
     );
   }
 }
