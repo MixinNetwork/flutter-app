@@ -189,7 +189,8 @@ class MarkdownColumn extends HookConsumerWidget {
         streaming: streaming,
         useColumn: true,
         selectable: selectable,
-        contextMenuBuilder: (_, _, _, _) => const SizedBox.shrink(),
+        // The message menu handles right clicks.
+        contextMenuBuilder: null,
         padding: EdgeInsets.zero,
         theme: _createMarkdownTheme(context, chatFontSizeDelta),
         imageBuilder: _buildMarkdownImage,
@@ -258,7 +259,7 @@ class _MarkdownView extends HookWidget {
     this.streaming = false,
     this.useColumn = false,
     this.selectable = true,
-    this.contextMenuBuilder,
+    this.contextMenuBuilder = defaultMarkdownContextMenuBuilder,
   });
 
   final String data;
