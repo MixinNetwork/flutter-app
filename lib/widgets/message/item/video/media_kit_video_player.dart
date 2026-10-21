@@ -124,6 +124,8 @@ class MediaKitVideoPlayer extends ChangeNotifier {
 
   @override
   void dispose() {
+    // The video preview page and its provider both dispose this player.
+    if (_disposed) return;
     _disposed = true;
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
