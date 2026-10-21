@@ -170,39 +170,45 @@ class VoiceRecorderNotifier extends ValueNotifier<VoiceRecorderState> {
 }
 
 class _Player {
-  _Player(this.path);
+  _Player(this.path) : _player = Player() {
+    _subscriptions.addAll([
+      _player.stream.playing.listen((playing) {
+        isPlaying.value = playing;
+      }),
+      _player.stream.completed.listen((completed) {
+        if (completed) {
+          unawaited(stop());
+        }
+      }),
+    ]);
+  }
 
   final String path;
 
   final isPlaying = ValueNotifier<bool>(false);
 
-  double get position => _player?.currentPosition ?? 0.0;
+  double get position =>
+      _player.state.position.inMicroseconds / Duration.microsecondsPerSecond;
 
-  OggOpusPlayer? _player;
+  final Player _player;
+  final _subscriptions = <StreamSubscription<dynamic>>[];
 
   Future<void> start() async {
     await AudioSession.instance.activePlayback();
-    final player = OggOpusPlayer(path);
-    player.state.addListener(() {
-      final state = player.state.value;
-      isPlaying.value = state == PlayerState.playing;
-      if (state == PlayerState.ended) {
-        stop();
-      }
-    });
-    player.play();
-    _player = player;
+    await _player.open(Media(path));
   }
 
   Future<void> stop() async {
-    _player?.pause();
-    _player?.dispose();
-    _player = null;
+    await _player.stop();
     await AudioSession.instance.deactivate();
     isPlaying.value = false;
   }
 
   void dispose() {
-    stop();
+    unawaited(stop());
+    for (final subscription in _subscriptions) {
+      unawaited(subscription.cancel());
+    }
+    unawaited(_player.dispose());
   }
 }

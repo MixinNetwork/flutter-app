@@ -18,18 +18,19 @@ AppDir:
     arch: amd64
     allow_unauthenticated: true
     sources:
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
-      - sourceline: deb http://security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble-backports main restricted universe multiverse
+      - sourceline: deb http://security.ubuntu.com/ubuntu noble-security main restricted universe multiverse
     include:
-      - libgtk-3-0
+      - libgtk-3-0t64
       - libwebkit2gtk-4.1-0
       # Bundle GTK input method clients, but keep the input method daemon on the host.
       - ibus-gtk3
       - fcitx5-frontend-gtk3
       - libsdl2-2.0-0
       - libopus0
+      - libmpv2
     exclude:
       - humanity-icon-theme
       - hicolor-icon-theme
@@ -45,7 +46,7 @@ AppDir:
   after_bundle:
     # Package extraction does not run Debian's GTK cache trigger. AppRun v2 maps
     # the generated build-time AppDir paths to the runtime AppDir mount point.
-    - LD_LIBRARY_PATH=AppDir/lib/x86_64-linux-gnu:AppDir/usr/lib/x86_64-linux-gnu AppDir/usr/lib/x86_64-linux-gnu/libgtk-3-0/gtk-query-immodules-3.0 AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules/*.so > AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
+    - LD_LIBRARY_PATH=AppDir/lib/x86_64-linux-gnu:AppDir/usr/lib/x86_64-linux-gnu AppDir/usr/lib/x86_64-linux-gnu/libgtk-3-0t64/gtk-query-immodules-3.0 AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules/*.so > AppDir/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
   runtime:
     env:
       GIO_MODULE_DIR: $APPDIR/usr/lib/x86_64-linux-gnu/gio/modules/

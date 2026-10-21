@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
+import 'package:media_kit/media_kit.dart';
 import 'package:ogg_opus_player/ogg_opus_player.dart';
 import 'package:provider/provider.dart';
 

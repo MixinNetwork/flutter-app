@@ -36,6 +36,7 @@ parts:
     plugin: dump
     stage-packages:
       - libsdl2-2.0-0
-      - libgtk-3-0
+      - libgtk-3-0t64
       - libwebkit2gtk-4.1-0
       - libopus0
+      - libmpv2

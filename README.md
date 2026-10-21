@@ -35,10 +35,15 @@ sudo apt-get install libsqlite3-dev
 sudo apt-get install webkit2gtk-4.1
 sudo apt-get install libsdl2-dev
 sudo apt-get install libopus-dev libogg-dev
+sudo apt-get install libmpv-dev mpv
 ```
+
+### Portable archive runtime
+
+The portable Linux archive uses the system's shared libraries. Install the
+`libmpv` runtime before using it (`libmpv2` on Debian and Ubuntu).
 
 
 # License
 
 Released under the [GPLv3](https://github.com/MixinNetwork/flutter-app/blob/master/LICENSE) license.
-

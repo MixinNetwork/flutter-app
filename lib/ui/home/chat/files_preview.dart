@@ -14,6 +14,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as image;
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -21,7 +22,6 @@ import 'package:super_context_menu/super_context_menu.dart';
 import 'package:vector_graphics/vector_graphics_compat.dart'
     show RenderingStrategy;
 import 'package:video_compress/video_compress.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/constants.dart';
@@ -43,6 +43,7 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/image.dart';
 import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
+import '../../../widgets/message/item/video/media_kit_video_player.dart';
 import '../../../widgets/mixin_image.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
@@ -783,11 +784,12 @@ class _AnimatedListBuilder extends HookConsumerWidget {
 }
 
 final _videoControllerProvider = ChangeNotifierProvider.autoDispose
-    .family<VideoPlayerController, _VideoFile>(
-      (ref, file) => VideoPlayerController.file(File(file.path))
-        ..initialize()
-        ..setVolume(0)
-        ..setLooping(true),
+    .family<MediaKitVideoPlayer, _VideoFile>(
+      (ref, file) => MediaKitVideoPlayer(
+        file.path,
+        looping: true,
+        muted: true,
+      ),
     );
 
 final _videoBlurHashProvider = FutureProvider.autoDispose
@@ -836,7 +838,10 @@ class _TileBigVideo extends HookConsumerWidget {
               Center(
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
-                  child: VideoPlayer(controller),
+                  child: Video(
+                    controller: controller.controller,
+                    controls: null,
+                  ),
                 ),
               ),
               Positioned(
