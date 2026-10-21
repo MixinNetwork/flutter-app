@@ -1238,10 +1238,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_markdown_widget
-      sha256: d211333d11bdce6532eb86bdc1be6f0c4826c979cb326fd12b279bba9460d37b
+      sha256: "0a4e88760e2e66d358259391fae4b56c4ed20c5fb59af29c8bec8cf05181b3c0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.4.0"
   msix:
     dependency: "direct dev"
     description:
@@ -1887,15 +1887,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
-  string_tokenizer:
-    dependency: "direct main"
-    description:
-      path: "packages/string_tokenizer"
-      ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
-      resolved-ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
-    version: "0.0.1"
   super_clipboard:
     dependency: "direct main"
     description:
@@ -2313,6 +2304,14 @@ packages:
       resolved-ref: "12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1"
       url: "https://github.com/google/flutter-desktop-embedding.git"
     source: git
+    version: "0.1.0"
+  word_segmenter:
+    dependency: "direct main"
+    description:
+      name: word_segmenter
+      sha256: b3c23d7111ca6cb2c8d88b146d2b5f694246d7d6b1bc53cce166f13b5a31d2cb
+      url: "https://pub.dev"
+    source: hosted
     version: "0.1.0"
   x25519:
     dependency: transitive

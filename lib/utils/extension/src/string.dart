@@ -103,14 +103,13 @@ extension SqlStringExt on String {
     var tokens = split(' ').map((e) => e.trim()).where((e) => e.isNotEmpty);
 
     if (tokenize && kPlatformIsDarwin) {
-      // use string_tokenizer to tokenize the string.
+      // Split each word at the platform's word boundaries.
       tokens = tokens
-          .map(
-            (e) => string_tokenizer.tokenize(
-              e,
-              options: [string_tokenizer.TokenizerUnit.wordBoundary],
-            ),
-          )
+          .map((e) {
+            final ranges = wordBoundaries(e);
+            if (ranges == null) return [e];
+            return [for (final range in ranges) range.textInside(e)];
+          })
           // to avoid some special case which will cause the tokenizer spilt the
           // number and alphabet into two tokens, we need to merge them.
           // for example: "1a" might be spilt into "1" and "a", but we need to
