@@ -294,6 +294,7 @@ class ConversationItemWidget extends StatelessWidget {
                                       verified: conversation.ownerVerified,
                                       isBot: conversation.isBotConversation,
                                       membership: conversation.membership,
+                                      isGroup: conversation.isGroupConversation,
                                     ),
                                   ],
                                 ),

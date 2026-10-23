@@ -26,17 +26,25 @@ Future<ImageEditorSnapshot?> showImageEditor(
   BuildContext context, {
   required String path,
   ImageEditorSnapshot? snapshot,
+  double? cropRatio,
 }) => showDialog<ImageEditorSnapshot?>(
   context: context,
-  builder: (context) => _ImageEditorDialog(path: path, snapshot: snapshot),
+  builder: (context) => _ImageEditorDialog(
+    path: path,
+    snapshot: snapshot,
+    cropRatio: cropRatio,
+  ),
 );
 
 class _ImageEditorDialog extends HookConsumerWidget {
-  const _ImageEditorDialog({required this.path, this.snapshot});
+  const _ImageEditorDialog({required this.path, this.snapshot, this.cropRatio});
 
   final String path;
 
   final ImageEditorSnapshot? snapshot;
+
+  /// The crop keeps this width to height ratio, and the user cannot change it.
+  final double? cropRatio;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,9 +70,13 @@ class _ImageEditorDialog extends HookConsumerWidget {
       return const SizedBox();
     }
     final editorNotifier = useMemoized(
-      () =>
-          _ImageEditorNotifier(path: path, image: uiImage, snapshot: snapshot),
-      [path, uiImage, snapshot],
+      () => _ImageEditorNotifier(
+        path: path,
+        image: uiImage,
+        snapshot: snapshot,
+        lockedCropRatio: cropRatio,
+      ),
+      [path, uiImage, snapshot, cropRatio],
     );
     useEffect(() => editorNotifier.dispose, [editorNotifier]);
 
@@ -139,6 +151,7 @@ class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
     required this.path,
     required this.image,
     ImageEditorSnapshot? snapshot,
+    this.lockedCropRatio,
   }) : super(
          _ImageEditorState(
            rotate: ImageRotate.none,
@@ -163,8 +176,17 @@ class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
       _setState(
         state.copyWith(rotate: snapshot.imageRotate, flip: snapshot.flip),
       );
+    } else if (lockedCropRatio != null) {
+      setCropRatio(lockedCropRatio);
     }
   }
+
+  final double? lockedCropRatio;
+
+  double? _cropRatio;
+
+  /// The width to height ratio that a corner drag keeps, in image space.
+  double? get cropRatio => _cropRatio;
 
   _ImageEditorState get state => value;
 
@@ -318,6 +340,7 @@ class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
   }
 
   void setCropRatio(double? ratio) {
+    _cropRatio = ratio;
     if (ratio == null) {
       _setState(
         state.copyWith(
@@ -463,6 +486,7 @@ class _ImageEditorNotifier extends ValueNotifier<_ImageEditorState> {
         rotate: ImageRotate.none,
       ),
     );
+    setCropRatio(lockedCropRatio);
   }
 }
 
@@ -681,8 +705,39 @@ class _CropRectWidget extends HookConsumerWidget {
               // Cannot use transformedRect because transformedRect update by build method
               // which may slow than gesture update.
               final currentCropRect = cacheTransformedRect.value;
+              final ratio = context.read<_ImageEditorNotifier>().cropRatio;
               Rect cropRect;
               switch (corner) {
+                case _ImageDragArea.center:
+                  cropRect = currentCropRect
+                      .shift(delta)
+                      .ensureShiftInside(imageRect);
+                case _ when ratio != null:
+                  final (moving, anchor) = switch (corner) {
+                    _ImageDragArea.topLeft => (
+                      currentCropRect.topLeft,
+                      currentCropRect.bottomRight,
+                    ),
+                    _ImageDragArea.topRight => (
+                      currentCropRect.topRight,
+                      currentCropRect.bottomLeft,
+                    ),
+                    _ImageDragArea.bottomLeft => (
+                      currentCropRect.bottomLeft,
+                      currentCropRect.topRight,
+                    ),
+                    _ => (
+                      currentCropRect.bottomRight,
+                      currentCropRect.topLeft,
+                    ),
+                  };
+                  cropRect = dragCropCornerWithRatio(
+                    moving: moving,
+                    anchor: anchor,
+                    delta: delta,
+                    bounds: imageRect,
+                    ratio: rotate.apply(Size(ratio, 1)).aspectRatio,
+                  );
                 case _ImageDragArea.topLeft:
                   cropRect = Rect.fromPoints(
                     currentCropRect.topLeft + delta,
@@ -703,10 +758,6 @@ class _CropRectWidget extends HookConsumerWidget {
                     currentCropRect.topLeft,
                     currentCropRect.bottomRight + delta,
                   ).ensureInside(imageRect);
-                case _ImageDragArea.center:
-                  cropRect = currentCropRect
-                      .shift(delta)
-                      .ensureShiftInside(imageRect);
               }
 
               if (cropRect.isEmpty) {
@@ -931,8 +982,40 @@ enum _ImageDragArea { topLeft, topRight, bottomLeft, bottomRight, center }
 
 const _kImageCropHandleSize = 30.0;
 
+/// Moves the [moving] corner of a crop rect by [delta] and keeps the width to
+/// height [ratio]. The [anchor] corner stays in place, and the rect stays
+/// inside [bounds].
+@visibleForTesting
+Rect dragCropCornerWithRatio({
+  required Offset moving,
+  required Offset anchor,
+  required Offset delta,
+  required Rect bounds,
+  required double ratio,
+}) {
+  final sx = moving.dx < anchor.dx ? -1.0 : 1.0;
+  final sy = moving.dy < anchor.dy ? -1.0 : 1.0;
+  final target = moving + delta;
+  final maxWidth = math.min(
+    sx > 0 ? bounds.right - anchor.dx : anchor.dx - bounds.left,
+    (sy > 0 ? bounds.bottom - anchor.dy : anchor.dy - bounds.top) * ratio,
+  );
+  final minWidth = math.min(
+    maxWidth,
+    _kImageCropHandleSize * 2 * math.max(1, ratio),
+  );
+  final width = math
+      .max(sx * (target.dx - anchor.dx), sy * (target.dy - anchor.dy) * ratio)
+      .clamp(minWidth, maxWidth);
+  return Rect.fromPoints(
+    anchor,
+    anchor + Offset(sx * width, sy * width / ratio),
+  );
+}
+
 _ImageDragArea? _hitTestImageDragArea(Rect rect, Offset offset) {
-  if (!rect.contains(offset)) return null;
+  // A corner can be grabbed a little outside the crop rect too.
+  if (!rect.inflate(_kImageCropHandleSize / 2).contains(offset)) return null;
   if (offset.dx < rect.left + _kImageCropHandleSize &&
       offset.dy < rect.top + _kImageCropHandleSize) {
     return _ImageDragArea.topLeft;
@@ -1350,31 +1433,32 @@ class _NormalOperationBar extends HookConsumerWidget {
               onTap: imageEditorNotifier.flip,
             ),
             const SizedBox(width: 4),
-            CustomPopupMenuButton<double>(
-              alignment: Alignment.topCenter,
-              itemBuilder: (context) => [
-                CustomPopupMenuItem(
-                  title: context.l10n.originalImage,
-                  value: 0,
-                ),
-                CustomPopupMenuItem(title: '1:1', value: 1),
-                CustomPopupMenuItem(title: '2:3', value: 2 / 3),
-                CustomPopupMenuItem(title: '3:2', value: 3 / 2),
-                CustomPopupMenuItem(title: '3:4', value: 3 / 4),
-                CustomPopupMenuItem(title: '4:3', value: 4 / 3),
-                CustomPopupMenuItem(title: '9:16', value: 9 / 16),
-                CustomPopupMenuItem(title: '16:9', value: 16 / 9),
-              ],
-              onSelected: (value) {
-                if (value == 0) {
-                  imageEditorNotifier.setCropRatio(null);
-                } else {
-                  imageEditorNotifier.setCropRatio(value);
-                }
-              },
-              color: hasCrop ? context.theme.accent : context.theme.icon,
-              icon: Resources.assetsImagesEditImageClipSvg,
-            ),
+            if (imageEditorNotifier.lockedCropRatio == null)
+              CustomPopupMenuButton<double>(
+                alignment: Alignment.topCenter,
+                itemBuilder: (context) => [
+                  CustomPopupMenuItem(
+                    title: context.l10n.originalImage,
+                    value: 0,
+                  ),
+                  CustomPopupMenuItem(title: '1:1', value: 1),
+                  CustomPopupMenuItem(title: '2:3', value: 2 / 3),
+                  CustomPopupMenuItem(title: '3:2', value: 3 / 2),
+                  CustomPopupMenuItem(title: '3:4', value: 3 / 4),
+                  CustomPopupMenuItem(title: '4:3', value: 4 / 3),
+                  CustomPopupMenuItem(title: '9:16', value: 9 / 16),
+                  CustomPopupMenuItem(title: '16:9', value: 16 / 9),
+                ],
+                onSelected: (value) {
+                  if (value == 0) {
+                    imageEditorNotifier.setCropRatio(null);
+                  } else {
+                    imageEditorNotifier.setCropRatio(value);
+                  }
+                },
+                color: hasCrop ? context.theme.accent : context.theme.icon,
+                icon: Resources.assetsImagesEditImageClipSvg,
+              ),
             const SizedBox(width: 4),
             ActionButton(
               color: hasCustomDraw ? context.theme.accent : context.theme.icon,

@@ -275,6 +275,10 @@ class Resources {
   /// {@macro assets_generator.assetsImagesGroupSvg.preview}
   static const String assetsImagesGroupSvg = 'assets/images/group.svg';
 
+  /// {@macro assets_generator.assetsImagesGroupBadgeSvg.preview}
+  static const String assetsImagesGroupBadgeSvg =
+      'assets/images/group_badge.svg';
+
   /// {@macro assets_generator.assetsImagesIcAboutSvg.preview}
   static const String assetsImagesIcAboutSvg = 'assets/images/ic_about.svg';
 

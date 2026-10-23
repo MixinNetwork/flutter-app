@@ -8,6 +8,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../../constants/resources.dart';
 import '../../../db/database_event_bus.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/file.dart';
+import '../../../utils/group_photo.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../../widgets/action_button.dart';
@@ -22,6 +24,7 @@ import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
 import '../chat/chat_bar.dart';
+import '../chat/image_editor.dart';
 import '../conversation/conversation_focus.dart';
 import '../conversation_info_destination.dart';
 import '../notifier/chat_side_notifier.dart';
@@ -274,6 +277,32 @@ class ChatInfoPage extends HookConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    CellItem(
+                      title: Text(context.l10n.changeGroupPhoto),
+                      onTap: () async {
+                        final path = await selectImage();
+                        if (path == null || !context.mounted) return;
+                        final snapshot = await showImageEditor(
+                          context,
+                          path: path,
+                          cropRatio: 1,
+                        );
+                        if (snapshot == null) return;
+
+                        await runFutureWithToast(() async {
+                          final iconBase64 = await encodeGroupPhoto(
+                            snapshot.imagePath,
+                          );
+                          if (iconBase64 == null) {
+                            throw Exception('Failed to decode image: $path');
+                          }
+                          await accountServer.editGroup(
+                            conversationId,
+                            iconBase64: iconBase64,
+                          );
+                        }());
+                      },
+                    ),
                     Builder(
                       builder: (context) {
                         final announcementTitle = announcement?.isEmpty ?? true
