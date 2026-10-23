@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -407,6 +408,16 @@ class Localization {
   /// `Change`
   String get change {
     return Intl.message('Change', name: 'change', desc: '', args: []);
+  }
+
+  /// `Change Group Photo`
+  String get changeGroupPhoto {
+    return Intl.message(
+      'Change Group Photo',
+      name: 'changeGroupPhoto',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Change Number`

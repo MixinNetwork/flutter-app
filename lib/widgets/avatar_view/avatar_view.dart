@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 
@@ -10,6 +11,7 @@ import '../../db/mixin_database.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../media_image_pipeline.dart';
 import '../mixin_image.dart';
 
 class ConversationAvatarWidget extends HookConsumerWidget {
@@ -47,6 +49,11 @@ class ConversationAvatarWidget extends HookConsumerWidget {
     assert(_category != null);
 
     final _userId = conversation?.ownerId ?? userId;
+    // A group photo that an owner or admin uploaded replaces the member puzzle.
+    final hasGroupPhoto =
+        _category == ConversationCategory.group &&
+        (_groupIconUrl?.startsWith('https://') == true ||
+            _groupIconUrl?.startsWith('http://') == true);
 
     final list =
         useMemoizedStream(
@@ -82,7 +89,58 @@ class ConversationAvatarWidget extends HookConsumerWidget {
                 avatarUrl: _avatarUrl ?? _groupIconUrl ?? '',
                 size: size,
               )
+            : hasGroupPhoto
+            ? _GroupPhoto(
+                key: ValueKey(_conversationId),
+                url: _groupIconUrl!,
+                users: users,
+                size: size,
+              )
             : AvatarPuzzlesWidget(users, size),
+      ),
+    );
+  }
+}
+
+class _GroupPhoto extends HookWidget {
+  const _GroupPhoto({
+    required this.url,
+    required this.users,
+    required this.size,
+    super.key,
+  });
+
+  final String url;
+  final List<User> users;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    // A new photo of the same group loads first, then fades in over the old
+    // one. Thus the letter or the member puzzle does not show between them.
+    final shownUrl = useState(url);
+    useEffect(() {
+      if (url == shownUrl.value) return null;
+      var active = true;
+      final image = resolveMediaImageProvider(
+        NetworkImage(url),
+        context.database.settingProperties.activatedProxy,
+      );
+      precacheImage(image, context, onError: (_, _) {}).whenComplete(() {
+        if (active) shownUrl.value = url;
+      });
+      return () => active = false;
+    }, [url]);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: MixinImage.network(
+        shownUrl.value,
+        key: ValueKey(shownUrl.value),
+        width: size,
+        height: size,
+        placeholder: () => AvatarPuzzlesWidget(users, size),
+        errorBuilder: (_, _, _) => AvatarPuzzlesWidget(users, size),
       ),
     );
   }

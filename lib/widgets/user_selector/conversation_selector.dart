@@ -404,6 +404,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               verified: item.ownerVerified,
                               isBot: item.isBotConversation,
                               membership: item.membership,
+                              isGroup: item.isGroupConversation,
                               selected: selected.any(
                                 (element) =>
                                     _getConversationId(element, context) ==
@@ -640,6 +641,7 @@ class _BaseItem extends StatelessWidget {
     required this.verified,
     required this.isBot,
     required this.membership,
+    this.isGroup = false,
     this.showSelector = false,
     this.selected = false,
   });
@@ -653,6 +655,7 @@ class _BaseItem extends StatelessWidget {
   final bool verified;
   final bool isBot;
   final sdk.Membership? membership;
+  final bool isGroup;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -706,6 +709,7 @@ class _BaseItem extends StatelessWidget {
                 verified: verified,
                 isBot: isBot,
                 membership: membership,
+                isGroup: isGroup,
               ),
             ],
           ),

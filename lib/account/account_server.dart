@@ -1426,6 +1426,7 @@ class AccountServer {
     String conversationId, {
     String? announcement,
     String? name,
+    String? iconBase64,
   }) async {
     final response = await client.conversationApi.update(
       conversationId,
@@ -1433,6 +1434,7 @@ class AccountServer {
         conversationId: conversationId,
         announcement: announcement,
         name: name,
+        iconBase64: iconBase64,
       ),
     );
 

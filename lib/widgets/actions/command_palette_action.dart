@@ -366,6 +366,7 @@ class CommandPalettePage extends HookConsumerWidget {
                                 verified: item.isVerified,
                                 isBot: item.type == 'BOT',
                                 membership: item.membership,
+                                isGroup: item.type == 'GROUP',
                               ),
                               keyword: keyword.trim(),
                               onTap: () => navigationState.select(index),
