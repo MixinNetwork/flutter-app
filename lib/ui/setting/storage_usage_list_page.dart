@@ -2,6 +2,8 @@ import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
+    show ConversationCategory;
 import 'package:watcher/watcher.dart';
 
 import '../../db/dao/conversation_dao.dart';
@@ -11,6 +13,7 @@ import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
+import '../../widgets/conversation/badges_widget.dart';
 import '../provider/major_navigation_provider.dart';
 
 class StorageUsageListPage extends HookConsumerWidget {
@@ -109,7 +112,21 @@ class _Item extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(conversationValidName(item.name, item.fullName)),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      conversationValidName(item.name, item.fullName),
+                    ),
+                  ),
+                  BadgesWidget(
+                    verified: false,
+                    isBot: false,
+                    membership: null,
+                    isGroup: item.category == ConversationCategory.group,
+                  ),
+                ],
+              ),
               Text(
                 sizeString,
                 style: TextStyle(
