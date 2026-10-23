@@ -13,8 +13,9 @@ String? loadedFallbackFonts;
 
 /// The system CJK font family on Linux. Text whose fonts lack a character
 /// falls back through fontconfig for every paragraph, which costs about 3 ms
-/// per paragraph, so the theme lists a CJK family and the emoji family as
-/// fallbacks.
+/// per paragraph, so the theme lists the emoji family and a CJK family as
+/// fallbacks. The emoji family is first: the CJK fonts also have black and
+/// white glyphs for some emoji, for example U+1F17F.
 ///
 /// It is not the main family: its Latin glyphs and punctuation differ from
 /// the system UI font.
@@ -22,7 +23,7 @@ String? _linuxCjkFamily;
 
 /// The first installed family of the Material fallbacks for Linux ('Ubuntu',
 /// 'Cantarell', 'DejaVu Sans' and others), which drew Latin text while the
-/// theme kept them. The theme fallbacks are replaced with the CJK and emoji
+/// theme kept them. The theme fallbacks are replaced with the emoji and CJK
 /// families, so the theme uses this family as the main family. It also
 /// avoids the search for the missing 'Roboto' on first layout.
 String? _linuxLatinFamily;
@@ -59,7 +60,7 @@ Future<void> loadFallbackFonts() async {
 /// it.
 void _warmLinuxFonts() {
   final watch = Stopwatch()..start();
-  final fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+  final fallback = [kEmojiFontFamily, ?_linuxCjkFamily];
   final families = [
     loadedFallbackFonts ?? _linuxLatinFamily,
     ?linuxMonospaceFamily,
@@ -174,7 +175,7 @@ extension ApplyFontsExtension on ThemeData {
     if (Platform.isWindows) {
       fallback = ['Microsoft Yahei', kEmojiFontFamily];
     } else if (Platform.isLinux) {
-      fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+      fallback = [kEmojiFontFamily, ?_linuxCjkFamily];
     } else {
       return this;
     }
