@@ -19,14 +19,21 @@ on:
         required: false
         default: ""
       platforms:
-        description: "platforms to build, eg: linux, windows"
+        description: "platforms to build, eg: linux, windows, macos"
         required: false
         type: choice
         options:
+          - 'linux,windows,macos'
           - 'linux,windows'
           - 'linux'
           - 'windows'
-        default: "linux,windows"
+          - 'macos'
+        default: "linux,windows,macos"
+      upload_app_store:
+        description: "upload the macOS build to App Store Connect"
+        required: false
+        type: boolean
+        default: false
   push:
     tags:
       - 'v*'
@@ -378,3 +385,132 @@ jobs:
           asset_name: mixin_desktop_windows_setup_amd64.exe
           tag: ${{ github.ref }}
           overwrite: true
+
+  build-macos:
+    runs-on: macos-26
+    if: contains(github.event.inputs.platforms, 'macos') || github.event.inputs.platforms == ''
+    permissions:
+      contents: write
+    env:
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      # altool looks up AuthKey_<id>.p8 in API_PRIVATE_KEYS_DIR.
+      API_PRIVATE_KEYS_DIR: ${{ github.workspace }}/../private_keys
+      APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/../private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+      UPLOAD_APP_STORE: ${{ github.event.inputs.upload_app_store == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      # appdmg needs npm to run install scripts for its native modules.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - run: flutter --version
+
+      - name: Generator ENV
+        run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+
+      - name: Run Build Runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build APP
+        id: build-app
+        run: |
+          version_str=$(sed -n 's/^version: //p' pubspec.yaml)
+          version=${version_str%+*}
+          build_number=${version_str#*+}
+          flutter build macos --release --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Import signing certificates
+        env:
+          MACOS_CERTIFICATES_P12: ${{ secrets.MACOS_CERTIFICATES_P12 }}
+          MACOS_CERTIFICATES_PASSWORD: ${{ secrets.MACOS_CERTIFICATES_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(uuidgen)"
+          echo "$MACOS_CERTIFICATES_P12" | base64 --decode > "$RUNNER_TEMP/certificates.p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/certificates.p12" -P "$MACOS_CERTIFICATES_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/certificates.p12"
+          security find-identity -v "$keychain"
+
+          mkdir -p "$(dirname "$APP_STORE_CONNECT_API_KEY_PATH")"
+          echo "$APP_STORE_CONNECT_API_KEY" > "$APP_STORE_CONNECT_API_KEY_PATH"
+
+      - name: Sign and notarize APP
+        run: |
+          identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)
+          rm -rf dist/Mixin.app
+          ditto build/macos/Build/Products/Release/Mixin.app dist/Mixin.app
+          ./dist/macos_sign.sh dist/Mixin.app "$identity" macos/Runner/Release.entitlements
+          ./dist/macos_notarize.sh dist/Mixin.app
+
+      - name: Package dmg
+        run: |
+          identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)
+          ./dist/macos.sh
+          codesign --timestamp --sign "$identity" dist/mixin.dmg
+          ./dist/macos_notarize.sh dist/mixin.dmg
+          mv dist/mixin.dmg dist/mixin-${{ steps.build-app.outputs.version }}.dmg
+
+      - name: Upload dmg
+        uses: actions/upload-artifact@v4
+        with:
+          name: mixin-${{ steps.build-app.outputs.version }}.dmg.zip
+          path: dist/mixin-${{ steps.build-app.outputs.version }}.dmg
+
+      - name: Upload macOS dmg
+        uses: svenstaro/upload-release-action@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/mixin-${{ steps.build-app.outputs.version }}.dmg
+          asset_name: mixin-${{ steps.build-app.outputs.version }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload to App Store Connect
+        if: env.UPLOAD_APP_STORE == 'true'
+        env:
+          MACOS_APP_STORE_PROVISIONING_PROFILE: ${{ secrets.MACOS_APP_STORE_PROVISIONING_PROFILE }}
+        run: |
+          app_identity=$(security find-identity -v -p codesigning | sed -n -E 's/.*"((Apple Distribution|3rd Party Mac Developer Application): .*)"/\1/p' | head -1)
+          installer_identity=$(security find-identity -v | sed -n -E 's/.*"((3rd Party Mac Developer Installer|Mac Installer Distribution): .*)"/\1/p' | head -1)
+          work="$RUNNER_TEMP/app-store"
+          mkdir -p "$work"
+          echo "$MACOS_APP_STORE_PROVISIONING_PROFILE" | base64 --decode > "$work/embedded.provisionprofile"
+
+          # The App Store requires the application and team identifiers from the profile.
+          security cms -D -i "$work/embedded.provisionprofile" > "$work/profile.plist"
+          cp macos/Runner/Release.entitlements "$work/app.entitlements"
+          for key in com.apple.application-identifier com.apple.developer.team-identifier; do
+            value=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:$key" "$work/profile.plist")
+            /usr/libexec/PlistBuddy -c "Add :$key string $value" "$work/app.entitlements"
+          done
+
+          ditto build/macos/Build/Products/Release/Mixin.app "$work/Mixin.app"
+          ./dist/macos_sign.sh "$work/Mixin.app" "$app_identity" "$work/app.entitlements" "$work/embedded.provisionprofile"
+          productbuild --component "$work/Mixin.app" /Applications --sign "$installer_identity" "$work/Mixin.pkg"
+          xcrun altool --upload-package "$work/Mixin.pkg" \
+            --api-key "$APP_STORE_CONNECT_API_KEY_ID" \
+            --api-issuer "$APP_STORE_CONNECT_ISSUER_ID"
+
+      - name: Clean up signing
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -f "$APP_STORE_CONNECT_API_KEY_PATH"
