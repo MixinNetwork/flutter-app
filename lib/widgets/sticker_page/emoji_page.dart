@@ -33,11 +33,9 @@ const emojiGroups = [
 
 final _emojiStyle = TextStyle(
   fontSize: 26,
-  height: 1,
   fontFamily: kEmojiFontFamily,
   inherit: false,
 );
-const _emojiStrutStyle = StrutStyle(height: 1);
 
 List<String> _groupEmojis(List<EmojiGroup> group) => group
     .expand(Emoji.byGroup)
@@ -154,7 +152,6 @@ class _EmojiImages extends ChangeNotifier {
   Future<void> _render(String emoji, double pixelRatio) async {
     final painter = TextPainter(
       text: TextSpan(text: emoji, style: _emojiStyle),
-      strutStyle: _emojiStrutStyle,
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     )..layout();
