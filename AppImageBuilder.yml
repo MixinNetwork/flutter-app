@@ -25,6 +25,10 @@ AppDir:
     include:
       - libgtk-3-0
       - libwebkit2gtk-4.1-0
+      # Provides libpixbufloader-svg.so, referenced by the generated GdkPixbuf
+      # loaders.cache. Without it, loading SVG icons (e.g. in the file chooser
+      # under SVG icon themes) aborts GTK with a missing loader assertion.
+      - librsvg2-common
       # Bundle GTK input method clients, but keep the input method daemon on the host.
       - ibus-gtk3
       - fcitx5-frontend-gtk3
