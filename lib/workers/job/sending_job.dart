@@ -42,6 +42,38 @@ Map<String, dynamic> transcriptMessageToSendingJson(
   return map;
 }
 
+// A sent attachment keeps only its AttachmentExtra as content, so rebuild the
+// payload the receiver expects from the media columns.
+@visibleForTesting
+Future<String> attachmentResendPayload(SendingMessage message) async {
+  final AttachmentExtra extra;
+  try {
+    extra = AttachmentExtra.fromJson(
+      await jsonDecodeWithIsolate(message.content!) as Map<String, dynamic>,
+    );
+  } catch (_) {
+    // The content was never replaced by an AttachmentExtra, so it is the payload.
+    return message.content!;
+  }
+  return jsonBase64EncodeWithIsolate(
+    AttachmentMessage(
+      message.mediaKey,
+      message.mediaDigest,
+      extra.attachmentId,
+      message.mediaMimeType ?? '',
+      message.mediaSize ?? 0,
+      message.name,
+      message.mediaWidth,
+      message.mediaHeight,
+      message.thumbImage,
+      int.tryParse(message.mediaDuration ?? ''),
+      message.mediaWaveform,
+      message.caption,
+      extra.createdAt,
+    ),
+  );
+}
+
 class SendingJob extends JobQueue<Job, List<Job>> {
   SendingJob({
     required super.database,
@@ -492,7 +524,11 @@ class SendingJob extends JobQueue<Job, List<Job>> {
         );
         if (check) {
           final encrypted = await signalProtocol.encryptSessionMessage(
-            message,
+            message.category.isAttachment
+                ? message.copyWith(
+                    content: await attachmentResendPayload(message),
+                  )
+                : message,
             message.resendUserId!,
             resendMessageId: message.messageId,
             sessionId: message.resendSessionId,
