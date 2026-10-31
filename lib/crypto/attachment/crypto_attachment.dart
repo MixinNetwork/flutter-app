@@ -293,7 +293,18 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
         Uint8List ciphertext;
         _aesCipher = _getAesCipher(cbcCipher, aesKey, lastBlock, true);
         final input = Uint8List.fromList(event);
-        if (event.length < _blockSize) {
+        if (event.isEmpty) {
+          // Input that is a multiple of the chunk size ends with an empty chunk,
+          // which PaddedBlockCipher.process rejects. Write the padding block.
+          ciphertext = Uint8List(_cbcBlockSize);
+          _aesCipher.processBlock(
+            Uint8List(_cbcBlockSize)
+              ..fillRange(0, _cbcBlockSize, _cbcBlockSize),
+            0,
+            ciphertext,
+            0,
+          );
+        } else if (event.length < _blockSize) {
           ciphertext = _aesCipher.process(input);
         } else {
           ciphertext = Uint8List(input.lengthInBytes);
