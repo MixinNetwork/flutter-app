@@ -88,6 +88,7 @@ void main() {
         attachmentId: 'attachment',
         messageId: 'message',
         createdAt: '2026-10-31T12:00:00Z',
+        shareable: false,
       ),
     );
 
@@ -124,6 +125,7 @@ void main() {
     expect(payload.thumbnail, 'thumb');
     expect(payload.caption, 'caption');
     expect(payload.createdAt, '2026-10-31T12:00:00Z');
+    expect(payload.shareable, isFalse);
   });
 
   test('resent text keeps its content', () async {

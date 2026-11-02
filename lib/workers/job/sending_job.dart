@@ -70,7 +70,7 @@ Future<String> attachmentResendPayload(SendingMessage message) async {
       message.mediaWaveform,
       message.caption,
       extra.createdAt,
-    ),
+    )..shareable = extra.shareable,
   );
 }
 
