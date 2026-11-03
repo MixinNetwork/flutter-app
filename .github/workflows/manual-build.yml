@@ -382,7 +382,7 @@ jobs:
           overwrite: true
 
   build-macos:
-    runs-on: macos-15
+    runs-on: macos-26
     if: contains(github.event.inputs.platforms, 'macos') || github.event.inputs.platforms == ''
     permissions:
       contents: write
@@ -408,6 +408,8 @@ jobs:
           components: rustfmt, clippy
 
       - run: flutter --version
+
+      - run: xcodebuild -version
 
       - name: Run Build Runner
         run: dart run build_runner build --delete-conflicting-outputs
