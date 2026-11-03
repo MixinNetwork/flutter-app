@@ -2,10 +2,12 @@
 """Write appcast.xml for the desktop app updater and sign every package.
 
 Each package gets one <item>. The macOS DMG has a Sparkle EdDSA signature over
-the whole file. The other packages have a signature over this text, so a valid
-package of an older release cannot be listed as a newer one:
+the whole file; Sparkle also checks the CFBundleVersion of the update. The
+other packages have a signature over this text, and the client compares the
+signed tag and build with its own, so a valid package of an older release
+cannot be listed as a newer one:
 
-    mixin-desktop-update\\n<tag>\\n<file name>\\n<sha256 hex>
+    mixin-desktop-update\\n<tag>\\n<build>\\n<package>\\n<file name>\\n<sha256 hex>
 
 The script verifies every signature with the public key that the app ships
 before it writes the file. Needs OpenSSL 3 (LibreSSL has no Ed25519).
@@ -52,8 +54,9 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def signed_text(tag, name, sha256):
-    return f"mixin-desktop-update\n{tag}\n{name}\n{sha256}".encode()
+def signed_text(tag, build, package, name, sha256):
+    return (f"mixin-desktop-update\n{tag}\n{build}\n{package}\n{name}\n"
+            f"{sha256}").encode()
 
 
 def openssl(openssl_bin, *args):
@@ -131,6 +134,7 @@ def main():
                 "type": "application/octet-stream",
                 f"{{{SPARKLE_NS}}}os": PACKAGES[package],
                 f"{{{MIXIN_NS}}}package": package,
+                f"{{{MIXIN_NS}}}tag": args.tag,
                 f"{{{MIXIN_NS}}}sha256": sha256,
             }
             if package == "dmg":
@@ -140,7 +144,8 @@ def main():
             else:
                 signed_path = os.path.join(tmp, name + ".txt")
                 with open(signed_path, "wb") as f:
-                    f.write(signed_text(args.tag, name, sha256))
+                    f.write(signed_text(args.tag, args.build, package, name,
+                                        sha256))
                 signature = sign(args.openssl, args.key, signed_path)
                 enclosure[f"{{{MIXIN_NS}}}signature"] = signature
 

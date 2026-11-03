@@ -101,13 +101,18 @@ class UpdateAppcastTest(unittest.TestCase):
             else:
                 signature = enclosure.get(M + "signature")
                 self.assertIsNone(enclosure.get(S + "edSignature"))
-                self.assertTrue(self.verify(
-                    appcast.signed_text("v6.3.7", name, sha256), signature))
-                # Another tag, file name or file must not match.
-                for text in [appcast.signed_text("v6.3.6", name, sha256),
-                             appcast.signed_text("v6.3.7", "other", sha256),
-                             appcast.signed_text("v6.3.7", name, "0" * 64)]:
-                    self.assertFalse(self.verify(text, signature))
+                self.assertEqual(enclosure.get(M + "tag"), "v6.3.7")
+                signed = ("v6.3.7", "602", package, name, sha256)
+                self.assertTrue(self.verify(appcast.signed_text(*signed),
+                                            signature))
+                # Any other tag, build, package, file name or file must not
+                # match.
+                for i, value in enumerate(["v6.3.6", "9999", "deb-x64",
+                                           "other", "0" * 64]):
+                    changed = list(signed)
+                    changed[i] = value
+                    self.assertFalse(self.verify(
+                        appcast.signed_text(*changed), signature))
 
     def test_rejects_key_that_does_not_match_app_key(self):
         _, other_pub = make_key(self.dir, "other")
