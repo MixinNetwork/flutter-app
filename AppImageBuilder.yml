@@ -55,10 +55,11 @@ AppDir:
       GIO_MODULE_DIR: $APPDIR/usr/lib/x86_64-linux-gnu/gio/modules/
       GTK_PATH: $APPDIR/usr/lib/x86_64-linux-gnu/gtk-3.0
       GTK_IM_MODULE_FILE: $APPDIR/usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
-      # Default to the X11 backend, but respect an externally supplied
-      # GDK_BACKEND so users can opt into native Wayland (e.g. to work around
-      # Xwayland window-mapping issues on some compositors).
-      GDK_BACKEND: ${GDK_BACKEND:-x11}
+      # Prefer an externally supplied backend and fall back to X11. AppRun
+      # expands $GDK_BACKEND at launch (an unset value leaves ",x11"), and GTK
+      # tries each comma-separated backend in order. AppRun has no ${VAR:-x}
+      # syntax, and appimage-builder resolves ${VAR} at build time.
+      GDK_BACKEND: $GDK_BACKEND,x11
   test:
     fedora:
       image: appimagecrafters/tests-env:fedora-30
