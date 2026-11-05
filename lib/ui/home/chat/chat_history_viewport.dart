@@ -77,7 +77,9 @@ class ChatHistoryViewport extends HookConsumerWidget {
     );
 
     final messageIds = messages.map((e) => e.messageId).toSet();
-    final messageIdsKey = messages.map((e) => e.messageId).join('|');
+    // A separator per ID keeps an empty window apart from one with only the
+    // secret row, whose message ID is ''.
+    final messageIdsKey = messages.map((e) => '${e.messageId}|').join();
     final resetScrollWindow = timelineWindow.resetScrollWindow(
       previousConversationId: previousConversationIdRef.value,
       previousRefreshKey: previousRefreshKeyRef.value,
