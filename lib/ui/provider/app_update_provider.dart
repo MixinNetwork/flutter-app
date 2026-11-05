@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../utils/app_update.dart';
 import '../../utils/logger.dart';
@@ -26,6 +27,8 @@ class AppUpdateState {
   final double progress;
 }
 
+const _macChannel = MethodChannel('mixin_desktop/app_update');
+
 class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   AppUpdateNotifier(this._ref) : super(AppUpdateState.none) {
     unawaited(_start());
@@ -36,9 +39,11 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   late String _package;
   late List<int> _publicKey;
   AppUpdateItem? _item;
+  MacUpdateChannel? _mac;
 
   Future<void> _start() async {
-    // shortcut: Linux only; macOS and Windows come in later changes.
+    if (Platform.isMacOS) return _startMac();
+    // shortcut: Linux and macOS only; Windows comes in a later change.
     if (!Platform.isLinux) return;
     final environment = Platform.environment;
     final executable = Platform.resolvedExecutable;
@@ -60,9 +65,37 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     }
     _package = package;
     _publicKey = base64Decode(key);
+    await _schedule();
+  }
+
+  Future<void> _startMac() async {
+    final info = (await _macChannel.invokeMapMethod<String, dynamic>(
+      'channel',
+    ))!;
+    _mac = macUpdateChannel(
+      receipt: info['receipt'] as String?,
+      sparkle: info['sparkle'] as bool,
+    );
+    if (_mac == null) return;
+    _macChannel.setMethodCallHandler((call) async {
+      if (call.method == 'progress' && mounted) {
+        state = AppUpdateState(
+          AppUpdateStatus.downloading,
+          progress: call.arguments as double,
+        );
+      }
+    });
+    await _schedule();
+  }
+
+  Future<void> _schedule() async {
     await _check();
     _timer = Timer.periodic(const Duration(hours: 6), (_) => _check());
   }
+
+  String get _appcastUrl =>
+      // A test appcast; its packages still need the release key.
+      Platform.environment['MIXIN_UPDATE_APPCAST_URL'] ?? appcastUrl;
 
   Dio _dio() =>
       Dio(
@@ -81,15 +114,22 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   Future<void> _check() async {
     if (state.status == AppUpdateStatus.downloading) return;
     try {
-      final build = int.parse((await getPackageInfo()).buildNumber);
-      final response = await _dio().get<String>(
-        // A test appcast; its packages still need the release key.
-        Platform.environment['MIXIN_UPDATE_APPCAST_URL'] ?? appcastUrl,
-        options: Options(responseType: ResponseType.plain),
-      );
-      final item = findAppUpdate(response.data!, _package, build);
-      if (!mounted || item == null) return;
-      _item = item;
+      final info = await getPackageInfo();
+      final build = int.parse(info.buildNumber);
+      if (_mac == null) {
+        _item = findAppUpdate(await _get(_appcastUrl), _package, build);
+      }
+      final available = switch (_mac) {
+        MacUpdateChannel.appStore => isNewerVersion(
+          appStoreVersion(await _get(macAppStoreLookupUrl)) ?? '',
+          info.version,
+        ),
+        // TestFlight gets the same builds as the DMG.
+        MacUpdateChannel.testFlight || MacUpdateChannel.dmg =>
+          (latestAppcastBuild(await _get(_appcastUrl), 'dmg') ?? 0) > build,
+        null => _item != null,
+      };
+      if (!mounted || !available) return;
       if (state.status == AppUpdateStatus.none) {
         state = const AppUpdateState(AppUpdateStatus.available);
       }
@@ -99,7 +139,23 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     }
   }
 
+  Future<String> _get(String url) async => (await _dio().get<String>(
+    url,
+    options: Options(responseType: ResponseType.plain),
+  )).data!;
+
   Future<void> update() async {
+    switch (_mac) {
+      case MacUpdateChannel.appStore:
+        await launchUrlString(macAppStoreUrl);
+        return;
+      case MacUpdateChannel.testFlight:
+        await launchUrlString(macTestFlightUrl);
+        return;
+      case MacUpdateChannel.dmg:
+        return _installSparkle();
+      case null:
+    }
     final item = _item;
     if (item == null || state.status == AppUpdateStatus.downloading) return;
     state = const AppUpdateState(AppUpdateStatus.downloading);
@@ -132,6 +188,18 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     } catch (error, stack) {
       e('app update: install ${item.fileName} failed: $error $stack');
       if (file != null) await file.parent.delete(recursive: true);
+      if (mounted) state = const AppUpdateState(AppUpdateStatus.failed);
+    }
+  }
+
+  Future<void> _installSparkle() async {
+    if (state.status == AppUpdateStatus.downloading) return;
+    state = const AppUpdateState(AppUpdateStatus.downloading);
+    try {
+      // Sparkle checks the EdDSA signature, then quits and relaunches the app.
+      await _macChannel.invokeMethod('install', _appcastUrl);
+    } catch (error) {
+      e('app update: Sparkle install failed: $error');
       if (mounted) state = const AppUpdateState(AppUpdateStatus.failed);
     }
   }

@@ -310,4 +310,73 @@ void main() {
       }
     });
   });
+
+  group('macUpdateChannel', () {
+    test('tells the App Store, TestFlight and DMG builds apart', () {
+      expect(
+        macUpdateChannel(receipt: 'receipt', sparkle: false),
+        MacUpdateChannel.appStore,
+      );
+      expect(
+        macUpdateChannel(receipt: 'sandboxReceipt', sparkle: false),
+        MacUpdateChannel.testFlight,
+      );
+      expect(
+        macUpdateChannel(receipt: null, sparkle: true),
+        MacUpdateChannel.dmg,
+      );
+    });
+
+    test('a store receipt wins over Sparkle; a dev build has none', () {
+      expect(
+        macUpdateChannel(receipt: 'receipt', sparkle: true),
+        MacUpdateChannel.appStore,
+      );
+      expect(macUpdateChannel(receipt: null, sparkle: false), isNull);
+    });
+  });
+
+  group('App Store version', () {
+    test('reads the version of the lookup result', () {
+      expect(
+        appStoreVersion('{"resultCount":1,"results":[{"version":"6.3.7"}]}'),
+        '6.3.7',
+      );
+      expect(appStoreVersion('{"resultCount":0,"results":[]}'), isNull);
+    });
+
+    test('compares each part as a number', () {
+      expect(isNewerVersion('6.3.7', '6.3.6'), isTrue);
+      expect(isNewerVersion('6.10.0', '6.9.1'), isTrue);
+      expect(isNewerVersion('7.0', '6.9.9'), isTrue);
+      expect(isNewerVersion('6.3.6.1', '6.3.6'), isTrue);
+      expect(isNewerVersion('6.3.6', '6.3.6'), isFalse);
+      expect(isNewerVersion('6.3', '6.3.0'), isFalse);
+      expect(isNewerVersion('6.3.5', '6.3.6'), isFalse);
+      expect(isNewerVersion('', '6.3.6'), isFalse);
+    });
+  });
+
+  group('latestAppcastBuild', () {
+    String dmg(int build) =>
+        '''
+<item>
+  <sparkle:version>$build</sparkle:version>
+  <enclosure url="https://example.com/mixin.dmg" length="1" sparkle:os="macos"
+    mixin:package="dmg" mixin:tag="v6.3.7" sparkle:edSignature="c2ln" />
+</item>''';
+
+    test('takes the newest DMG build for TestFlight', () {
+      final appcast = _appcast([
+        dmg(602),
+        _item('appimage-x64', 700),
+        dmg(605),
+      ]);
+      expect(latestAppcastBuild(appcast, 'dmg'), 605);
+      expect(
+        latestAppcastBuild(_appcast([_item('tar-x64', 1)]), 'dmg'),
+        isNull,
+      );
+    });
+  });
 }
