@@ -14,7 +14,7 @@ before it writes the file. Needs OpenSSL 3 (LibreSSL has no Ed25519).
 
 Usage:
   update_appcast.py --tag v6.3.7 --build 602 --key key.pem \\
-      --public-key dist/update_ed25519.pub --url-prefix <download url prefix> \\
+      --public-key assets/update_ed25519.pub --url-prefix <download url prefix> \\
       --out appcast.xml <package>=<file> ...
 """
 
@@ -91,7 +91,10 @@ def verify(openssl_bin, public_key_der, data_path, signature):
 
 def read_public_key(path):
     with open(path) as f:
-        raw = base64.b64decode(f.read().strip())
+        text = f.read().strip()
+    if not text:
+        sys.exit(f"{path} is empty: commit the public key of the signing key")
+    raw = base64.b64decode(text)
     if len(raw) != 32:
         sys.exit(f"{path}: expected a base64 raw 32-byte Ed25519 key")
     return ED25519_SPKI_PREFIX + raw

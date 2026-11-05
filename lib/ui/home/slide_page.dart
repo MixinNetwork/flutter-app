@@ -29,6 +29,7 @@ import '../../widgets/window/move_window.dart';
 import '../provider/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
+import 'app_update_item.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({required this.showCollapse, super.key});
@@ -93,6 +94,7 @@ class SlidePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 const Expanded(child: _CircleList()),
+                const AppUpdateItem(),
                 AnimatedVisibility(
                   alignment: Alignment.bottomCenter,
                   visible: showCollapse,
