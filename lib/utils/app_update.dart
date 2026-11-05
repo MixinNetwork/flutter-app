@@ -242,14 +242,15 @@ const macTestFlightUrl = 'itms-beta://';
 
 enum MacUpdateChannel { appStore, testFlight, dmg }
 
-/// How this copy of the macOS app gets updates. [receipt] is the file name of
-/// the App Store receipt, when the file exists. [sparkle] is whether the DMG
-/// build added Sparkle. Null for a development build.
+/// How this copy of the macOS app gets updates. [environment] is the StoreKit
+/// environment of the App Store receipt (Sandbox for TestFlight), when there is
+/// a receipt. [sparkle] is whether the DMG build added Sparkle. Null for a
+/// development build.
 MacUpdateChannel? macUpdateChannel({
-  required String? receipt,
+  required String? environment,
   required bool sparkle,
-}) => switch (receipt) {
-  'sandboxReceipt' => MacUpdateChannel.testFlight,
+}) => switch (environment) {
+  'Sandbox' => MacUpdateChannel.testFlight,
   null => sparkle ? MacUpdateChannel.dmg : null,
   _ => MacUpdateChannel.appStore,
 };

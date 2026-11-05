@@ -1,5 +1,6 @@
 import Cocoa
 import FlutterMacOS
+import StoreKit
 import mixin_logger
 import window_manager
 
@@ -68,18 +69,35 @@ class AppUpdatePlugin: NSObject, FlutterPlugin {
   func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "channel":
-      let receipt = Bundle.main.appStoreReceiptURL.flatMap {
-        FileManager.default.fileExists(atPath: $0.path) ? $0.lastPathComponent : nil
-      }
+      let receipt = Bundle.main.appStoreReceiptURL.map {
+        FileManager.default.fileExists(atPath: $0.path)
+      } ?? false
       let key = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String ?? ""
-      result([
-        "receipt": receipt as Any,
-        "sparkle": !key.isEmpty && FileManager.default.fileExists(atPath: sparklePath),
-      ])
+      let sparkle = !key.isEmpty && FileManager.default.fileExists(atPath: sparklePath)
+      Task { @MainActor in
+        var environment: String?
+        if receipt { environment = await self.storeEnvironment() }
+        result(["environment": environment as Any, "sparkle": sparkle])
+      }
     case "install":
       install(feedURL: call.arguments as! String, result: result)
     default:
       result(FlutterMethodNotImplemented)
+    }
+  }
+
+  // On macOS the receipt file is always named receipt, also for TestFlight, so
+  // ask StoreKit: TestFlight builds are in the Sandbox environment.
+  private func storeEnvironment() async -> String {
+    guard #available(macOS 13.0, *) else { return "Production" }
+    do {
+      switch try await AppTransaction.shared {
+      case .verified(let transaction), .unverified(let transaction, _):
+        return transaction.environment.rawValue
+      }
+    } catch {
+      mixin_logger_write_log("app update: no app transaction: \(error)")
+      return "Production"
     }
   }
 

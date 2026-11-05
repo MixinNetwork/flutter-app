@@ -73,7 +73,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       'channel',
     ))!;
     _mac = macUpdateChannel(
-      receipt: info['receipt'] as String?,
+      environment: info['environment'] as String?,
       sparkle: info['sparkle'] as bool,
     );
     if (_mac == null) return;

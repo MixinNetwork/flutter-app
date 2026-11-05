@@ -314,25 +314,25 @@ void main() {
   group('macUpdateChannel', () {
     test('tells the App Store, TestFlight and DMG builds apart', () {
       expect(
-        macUpdateChannel(receipt: 'receipt', sparkle: false),
+        macUpdateChannel(environment: 'Production', sparkle: false),
         MacUpdateChannel.appStore,
       );
       expect(
-        macUpdateChannel(receipt: 'sandboxReceipt', sparkle: false),
+        macUpdateChannel(environment: 'Sandbox', sparkle: false),
         MacUpdateChannel.testFlight,
       );
       expect(
-        macUpdateChannel(receipt: null, sparkle: true),
+        macUpdateChannel(environment: null, sparkle: true),
         MacUpdateChannel.dmg,
       );
     });
 
     test('a store receipt wins over Sparkle; a dev build has none', () {
       expect(
-        macUpdateChannel(receipt: 'receipt', sparkle: true),
+        macUpdateChannel(environment: 'Production', sparkle: true),
         MacUpdateChannel.appStore,
       );
-      expect(macUpdateChannel(receipt: null, sparkle: false), isNull);
+      expect(macUpdateChannel(environment: null, sparkle: false), isNull);
     });
   });
 
