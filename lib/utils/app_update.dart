@@ -316,13 +316,21 @@ int? latestAppcastBuild(String appcast, String package) {
 }
 
 // Inno Setup flags: no wizard and no message boxes, and nothing to close or
-// restart, as the app has exited. The [Run] entry with skipifnotsilent in
-// windows_inno_setup.iss starts the new app.
+// restart, as the app has exited. /MIXINUPDATE=1 lets the [Run] entry in
+// windows_inno_setup.iss start the new app, which other silent installs
+// (winget, Intune) must not do.
 const _innoSilentArguments =
     '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS '
-    '/NORESTARTAPPLICATIONS';
+    '/NORESTARTAPPLICATIONS /MIXINUPDATE=1';
 
-String _powerShellString(String value) => "'${value.replaceAll("'", "''")}'";
+String _powerShellString(String value) {
+  // PowerShell also ends a single-quoted string at U+2018 to U+201B.
+  final escaped = value.replaceAllMapped(
+    RegExp("['\u2018-\u201B]"),
+    (m) => '${m[0]}${m[0]}',
+  );
+  return "'$escaped'";
+}
 
 /// Waits for [pid] to exit, so the AppMutex is free, runs the [installer]
 /// silently and deletes its directory. When the installer fails, it starts
@@ -336,7 +344,11 @@ String windowsInstallScript({
     '''
 \$installer = ${_powerShellString(installer)}
 Wait-Process -Id $pid -ErrorAction SilentlyContinue
-\$setup = Start-Process -FilePath \$installer -ArgumentList '$_innoSilentArguments' -Wait -PassThru
+# Not -Wait: it also waits for the new app that Setup starts. The handle is
+# read first, else ExitCode can be empty after WaitForExit.
+\$setup = Start-Process -FilePath \$installer -ArgumentList '$_innoSilentArguments' -PassThru
+\$null = \$setup.Handle
+\$setup.WaitForExit()
 Remove-Item -LiteralPath (Split-Path -Parent \$installer) -Recurse -Force
 if (\$setup.ExitCode -ne 0) { Start-Process -FilePath ${_powerShellString(executable)} }
 ''';

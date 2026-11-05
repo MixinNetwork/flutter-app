@@ -436,10 +436,27 @@ void main() {
         r'''
 $installer = 'C:\Users\O''Brien Li\AppData\Local\Temp\.mixin_update_1\update.exe'
 Wait-Process -Id 4242 -ErrorAction SilentlyContinue
-$setup = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS' -Wait -PassThru
+# Not -Wait: it also waits for the new app that Setup starts. The handle is
+# read first, else ExitCode can be empty after WaitForExit.
+$setup = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS /MIXINUPDATE=1' -PassThru
+$null = $setup.Handle
+$setup.WaitForExit()
 Remove-Item -LiteralPath (Split-Path -Parent $installer) -Recurse -Force
 if ($setup.ExitCode -ne 0) { Start-Process -FilePath 'C:\Users\O''Brien Li\AppData\Local\Programs\Mixin\mixin_desktop.exe' }
 ''',
+      );
+    });
+
+    test('doubles the curly quotes that end a PowerShell string', () {
+      final script = windowsInstallScript(
+        pid: 1,
+        installer: 'C:\\Users\\O\u2019Brien \u2018\u201A\u201B\\update.exe',
+        executable: r'C:\mixin_desktop.exe',
+      );
+      expect(
+        script.split('\n').first,
+        "\$installer = 'C:\\Users\\O\u2019\u2019Brien "
+        "\u2018\u2018\u201A\u201A\u201B\u201B\\update.exe'",
       );
     });
 

@@ -17,6 +17,9 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+
 env:
   FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
   FLUTTER_CHANNEL: stable
@@ -76,20 +79,29 @@ jobs:
 
       - name: Install 6.3.6, let it update, check 6.3.7 runs
         env:
-          # The silent install starts the app with this environment.
+          # 6.3.6 and the 6.3.7 that its updater starts get this environment.
           MIXIN_UPDATE_APPCAST_URL: http://127.0.0.1:8765/appcast.xml
         run: |
           Start-Process python -ArgumentList '-m','http.server','8765','--directory','served'
           $exe = "$env:LOCALAPPDATA\Programs\Mixin\mixin_desktop.exe"
-          $setup = Start-Process .\old_setup.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+          # Not -Wait: it waits for all descendants, such as an app that Setup starts.
+          $setup = Start-Process .\old_setup.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -PassThru
+          $null = $setup.Handle
+          $setup.WaitForExit()
           if ($setup.ExitCode -ne 0) { throw "old setup exit code $($setup.ExitCode)" }
           (Get-Item $exe).VersionInfo.ProductVersion
+          Start-Sleep 5
+          # Only the in-app updater passes /MIXINUPDATE=1, which starts the app.
+          if (Get-Process mixin_desktop -ErrorAction SilentlyContinue) { throw 'a plain silent install started the app' }
+          Start-Process $exe
           for ($i = 0; $i -lt 60; $i++) {
             Start-Sleep 5
             $version = (Get-Item $exe -ErrorAction SilentlyContinue).VersionInfo.ProductVersion
             $running = Get-Process mixin_desktop -ErrorAction SilentlyContinue | Where-Object Path -eq $exe
             Write-Output "$i version=$version running=$([bool]$running)"
             if ($version -like '6.3.7*' -and $running) {
+              # Setup starts the app just before it exits and the updater deletes it.
+              Start-Sleep 5
               if (Get-ChildItem $env:TEMP -Filter '.mixin_update_*' -Directory) { throw 'the download directory is left' }
               exit 0
             }

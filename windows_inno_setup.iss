@@ -50,5 +50,12 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-; The app updater runs Setup very silent; start the new app then.
-Filename: "{app}\{#MyAppExeName}"; Flags: nowait skipifnotsilent
+; The in-app updater runs Setup very silent with /MIXINUPDATE=1; start the new
+; app then, but not after other silent installs (winget, Intune).
+Filename: "{app}\{#MyAppExeName}"; Flags: nowait skipifnotsilent; Check: IsMixinUpdate
+
+[Code]
+function IsMixinUpdate: Boolean;
+begin
+  Result := ExpandConstant('{param:MIXINUPDATE|0}') = '1';
+end;
