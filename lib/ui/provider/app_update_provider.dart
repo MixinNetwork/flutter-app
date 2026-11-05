@@ -4,6 +4,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -30,11 +31,25 @@ class AppUpdateState {
 const _macChannel = MethodChannel('mixin_desktop/app_update');
 
 class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
-  AppUpdateNotifier(this._ref) : super(AppUpdateState.none) {
+  AppUpdateNotifier(this._ref) : _testDio = null, super(AppUpdateState.none) {
     unawaited(_start());
   }
 
+  /// A Linux updater of [package] that does not check by itself and gets the
+  /// network through [dio].
+  @visibleForTesting
+  AppUpdateNotifier.test(
+    this._ref, {
+    required String package,
+    required List<int> publicKey,
+    required Dio Function() dio,
+  }) : _package = package,
+       _publicKey = publicKey,
+       _testDio = dio,
+       super(AppUpdateState.none);
+
   final Ref _ref;
+  final Dio Function()? _testDio;
   Timer? _timer;
   late String _package;
   late List<int> _publicKey;
@@ -97,28 +112,29 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       // A test appcast; its packages still need the release key.
       Platform.environment['MIXIN_UPDATE_APPCAST_URL'] ?? appcastUrl;
 
+  ProxyConfig? get _proxy =>
+      _ref.read(databaseProvider).valueOrNull?.settingProperties.activatedProxy;
+
   Dio _dio() =>
-      Dio(
+      _testDio?.call() ??
+      (Dio(
         BaseOptions(
           connectTimeout: const Duration(seconds: 30),
           receiveTimeout: const Duration(seconds: 60),
         ),
-      )..applyProxy(
-        _ref
-            .read(databaseProvider)
-            .valueOrNull
-            ?.settingProperties
-            .activatedProxy,
-      );
+      )..applyProxy(_proxy));
+
+  @visibleForTesting
+  Future<void> check() => _check();
 
   Future<void> _check() async {
     if (state.status == AppUpdateStatus.downloading) return;
     try {
       final info = await getPackageInfo();
       final build = int.parse(info.buildNumber);
-      if (_mac == null) {
-        _item = findAppUpdate(await _get(_appcastUrl), _package, build);
-      }
+      final item = _mac == null
+          ? findAppUpdate(await _get(_appcastUrl), _package, build)
+          : null;
       final available = switch (_mac) {
         MacUpdateChannel.appStore => isNewerVersion(
           appStoreVersion(await _get(macAppStoreLookupUrl)) ?? '',
@@ -127,9 +143,12 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
         // TestFlight gets the same builds as the DMG.
         MacUpdateChannel.testFlight || MacUpdateChannel.dmg =>
           (latestAppcastBuild(await _get(_appcastUrl), 'dmg') ?? 0) > build,
-        null => _item != null,
+        null => item != null,
       };
       if (!mounted || !available) return;
+      // The state stays available, so a later appcast without this package
+      // must not empty the item.
+      _item = item ?? _item;
       if (state.status == AppUpdateStatus.none) {
         state = const AppUpdateState(AppUpdateStatus.available);
       }
