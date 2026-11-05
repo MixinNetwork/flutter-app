@@ -681,7 +681,7 @@ class MessageController extends ValueNotifier<MessageState> {
             ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         } else {
           top = [item, ...top]
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         }
       } else {
         if (currentUserSent && item.status == MessageStatus.sending) {
@@ -768,10 +768,11 @@ class MessageController extends ValueNotifier<MessageState> {
     List<MessageItem>? top;
     // check secretMessage
     if (messageState.isOldest && conversationNotifier.state?.isBot == false) {
-      if (messageState.top.firstOrNull?.type == MessageCategory.secret) {
-        messageState.top.remove(messageState.top.first);
-      }
-
+      // A new list: the old one can belong to the state that is shown.
+      final messages = [
+        for (final message in messageState.top)
+          if (message.type != MessageCategory.secret) message,
+      ];
       top = [
         MessageItem(
           sharedUserIdentityNumber: '',
@@ -782,12 +783,17 @@ class MessageController extends ValueNotifier<MessageState> {
           participantUserId: '',
           userId: '',
           type: MessageCategory.secret,
-          createdAt: messageState.topMessage?.createdAt ?? DateTime.now(),
+          createdAt:
+              (messages.firstOrNull ??
+                      messageState.center ??
+                      messageState.bottom.firstOrNull)
+                  ?.createdAt ??
+              DateTime.now(),
           pinned: false,
           isVerified: false,
           sharedUserIsVerified: false,
         ),
-        ...messageState.top,
+        ...messages,
       ];
     }
     final _messageState = messageState.copyWith(top: top);
