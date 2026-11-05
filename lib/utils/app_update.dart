@@ -129,11 +129,14 @@ Future<File> createLinuxUpdateFile(
       ? Directory(p.dirname(environment['APPIMAGE']!))
       : Directory.systemTemp;
   // A download that was interrupted (the app was closed or killed) leaves its
-  // directory behind.
+  // directory behind. A recent one can belong to an installer that still
+  // waits, for example at the pkexec prompt.
+  final now = DateTime.now();
   try {
     await for (final entity in parent.list()) {
       if (entity is Directory &&
-          p.basename(entity.path).startsWith('.mixin_update_')) {
+          p.basename(entity.path).startsWith('.mixin_update_') &&
+          now.difference(entity.statSync().modified).inDays >= 1) {
         try {
           await entity.delete(recursive: true);
         } on FileSystemException {

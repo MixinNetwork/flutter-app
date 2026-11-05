@@ -267,11 +267,22 @@ void main() {
       expect(mode & 0x12, 0);
     });
 
-    test('deletes the directories of earlier downloads', () async {
+    test('deletes the directories of downloads older than a day', () async {
       final environment = {'APPIMAGE': p.join(dir.path, 'Mixin.AppImage')};
       final stale = Directory(p.join(dir.path, '.mixin_update_old'))
         ..createSync();
       File(p.join(stale.path, 'update.AppImage')).writeAsStringSync('partial');
+      expect(
+        (await Process.run('touch', [
+          '-t',
+          '202001010000',
+          stale.path,
+        ])).exitCode,
+        0,
+      );
+      // An installer can still wait for this one.
+      final recent = Directory(p.join(dir.path, '.mixin_update_recent'))
+        ..createSync();
       final probe = File(p.join(dir.path, '.mixin_update_1_probe'))
         ..writeAsStringSync('');
       final other = Directory(p.join(dir.path, 'other'))..createSync();
@@ -279,6 +290,7 @@ void main() {
       final file = await createLinuxUpdateFile('appimage-x64', environment);
 
       expect(stale.existsSync(), isFalse);
+      expect(recent.existsSync(), isTrue);
       expect(file.parent.existsSync(), isTrue);
       expect(probe.existsSync(), isTrue);
       expect(other.existsSync(), isTrue);
