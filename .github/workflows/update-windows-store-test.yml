@@ -12,6 +12,9 @@ on:
       - 'windows/runner/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   store-update:
     runs-on: windows-2022
@@ -54,11 +57,13 @@ jobs:
           Import-Certificate -FilePath test.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
 
       # msix:create does not sign a store: true package and has no way to
-      # turn the pubspec value off from the command line.
+      # turn the pubspec value off from the command line. Custom signtool
+      # options replace its /tr timestamp server: the timestamp step failed
+      # (0x80096005), and a self-signed test package does not need one.
       - name: Build msix
         run: |
           (Get-Content pubspec.yaml) -replace '^  store: true$', '  store: false' | Set-Content pubspec.yaml
-          dart run msix:create --build-windows false --publisher $env:PUBLISHER --certificate-path test.pfx --certificate-password test --install-certificate false -v
+          dart run msix:create --build-windows false --publisher $env:PUBLISHER --signtool-options '/v /fd SHA256 /f test.pfx /p test' --install-certificate false -v
 
       - name: Install and start
         run: |
