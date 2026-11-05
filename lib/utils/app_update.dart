@@ -54,11 +54,7 @@ class AppUpdateItem {
 
 /// The newest item of [appcast] for [package] with a build after
 /// [currentBuild], or null.
-AppUpdateItem? findAppUpdate(
-  String appcast,
-  String package,
-  int currentBuild,
-) {
+AppUpdateItem? findAppUpdate(String appcast, String package, int currentBuild) {
   AppUpdateItem? newest;
   for (final item in XmlDocument.parse(appcast).findAllElements('item')) {
     final enclosure = item.getElement('enclosure');
@@ -132,6 +128,22 @@ Future<File> createLinuxUpdateFile(
   final parent = package.startsWith('appimage-')
       ? Directory(p.dirname(environment['APPIMAGE']!))
       : Directory.systemTemp;
+  // A download that was interrupted (the app was closed or killed) leaves its
+  // directory behind.
+  try {
+    await for (final entity in parent.list()) {
+      if (entity is Directory &&
+          p.basename(entity.path).startsWith('.mixin_update_')) {
+        try {
+          await entity.delete(recursive: true);
+        } on FileSystemException {
+          // Another user's directory in the shared temp directory.
+        }
+      }
+    }
+  } on FileSystemException {
+    // The parent cannot be listed; createTemp reports a real problem.
+  }
   final directory = await parent.createTemp('.mixin_update_');
   final name = package.startsWith('appimage-')
       ? 'update.AppImage'

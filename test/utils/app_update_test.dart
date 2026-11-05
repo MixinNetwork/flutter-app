@@ -257,14 +257,31 @@ void main() {
       final first = await createLinuxUpdateFile('appimage-x64', environment);
       final second = await createLinuxUpdateFile('appimage-x64', environment);
 
-      expect(first.parent.parent.path, dir.path);
+      expect(second.parent.parent.path, dir.path);
       expect(first.parent.path, isNot(second.parent.path));
-      expect(p.basename(first.path), 'update.AppImage');
+      expect(p.basename(second.path), 'update.AppImage');
       // Only the owner can write into it (createTemp gives 0700 on macOS and
       // 0755 on Linux), so another user cannot add or change the download.
-      final mode = first.parent.statSync().mode;
+      final mode = second.parent.statSync().mode;
       expect(mode & 0x1c0, 0x1c0);
       expect(mode & 0x12, 0);
+    });
+
+    test('deletes the directories of earlier downloads', () async {
+      final environment = {'APPIMAGE': p.join(dir.path, 'Mixin.AppImage')};
+      final stale = Directory(p.join(dir.path, '.mixin_update_old'))
+        ..createSync();
+      File(p.join(stale.path, 'update.AppImage')).writeAsStringSync('partial');
+      final probe = File(p.join(dir.path, '.mixin_update_1_probe'))
+        ..writeAsStringSync('');
+      final other = Directory(p.join(dir.path, 'other'))..createSync();
+
+      final file = await createLinuxUpdateFile('appimage-x64', environment);
+
+      expect(stale.existsSync(), isFalse);
+      expect(file.parent.existsSync(), isTrue);
+      expect(probe.existsSync(), isTrue);
+      expect(other.existsSync(), isTrue);
     });
 
     test('names the file by the package, not by the appcast', () async {
@@ -273,7 +290,9 @@ void main() {
         ('tar-arm64', 'update.tar'),
       ]) {
         final file = await createLinuxUpdateFile(package, const {});
-        addTearDown(() => file.parent.deleteSync(recursive: true));
+        addTearDown(() {
+          if (file.parent.existsSync()) file.parent.deleteSync(recursive: true);
+        });
         expect(p.basename(file.path), name);
         expect(file.parent.parent.path, Directory.systemTemp.path);
       }
