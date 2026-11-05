@@ -65,7 +65,9 @@ jobs:
           (Get-Content pubspec.yaml) -replace '^  store: true$', '  store: false' | Set-Content pubspec.yaml
           dart run msix:create --build-windows false --publisher $env:PUBLISHER --signtool-options '/v /fd SHA256 /f test.pfx /p test' --install-certificate false -v
 
+      # Appx does not load in PowerShell 7.
       - name: Install and start
+        shell: powershell
         run: |
           Add-AppxPackage -Path build\windows\x64\runner\Release\flutter_app.msix
           $package = Get-AppxPackage -Name 14801MixinLtd.MixinDesktop
