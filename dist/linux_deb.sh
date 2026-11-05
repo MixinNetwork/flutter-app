@@ -27,10 +27,11 @@ control_file="${current_dir}/deb/DEBIAN/control"
 
 # read version from pubspec.yaml
 version=$(cat "${project_dir}/pubspec.yaml" | grep "^version:" | awk '{print $2}' | tr -d '"')
-version=$(echo "${version}" | sed 's/+.*//')
+# Keep the build number: an update that raises only the build must have a
+# newer package version, or apt does not install it.
 
-# check version only contains numbers and dots
-if ! [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+# check version is x.y.z or x.y.z+build
+if ! [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(\+[0-9]+)?$ ]]; then
   echo "Error: Invalid version format: ${version}"
   exit 1
 fi

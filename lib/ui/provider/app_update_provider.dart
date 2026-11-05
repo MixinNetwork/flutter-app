@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:path/path.dart' as p;
 
 import '../../utils/app_update.dart';
 import '../../utils/logger.dart';
@@ -105,13 +104,9 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     if (item == null || state.status == AppUpdateStatus.downloading) return;
     state = const AppUpdateState(AppUpdateStatus.downloading);
     final environment = Platform.environment;
-    final file = File(
-      p.join(
-        linuxUpdateDownloadDirectory(item.package, environment).path,
-        '.mixin_update_${item.build}_${item.fileName}',
-      ),
-    );
+    File? file;
     try {
+      file = await createLinuxUpdateFile(item.package, environment);
       await _dio().downloadUri(
         item.url,
         file.path,
@@ -136,7 +131,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       exit(0);
     } catch (error, stack) {
       e('app update: install ${item.fileName} failed: $error $stack');
-      if (file.existsSync()) file.deleteSync();
+      if (file != null) await file.parent.delete(recursive: true);
       if (mounted) state = const AppUpdateState(AppUpdateStatus.failed);
     }
   }
