@@ -5,6 +5,7 @@
 #include "bot_window_composer.h"
 #include "flutter/generated_plugin_registrant.h"
 #include "raw_hwnd_plugin.h"
+#include "store_update_plugin.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -29,6 +30,9 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   RawHwndPluginRegisterWithRegistrar(
       flutter_controller_->engine()->GetRegistrarForPlugin("RawHwndPlugin"), GetHandle());
+  StoreUpdatePluginRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("StoreUpdatePlugin"),
+      GetHandle());
   bot_window_composer::Install(flutter_controller_->engine()->messenger());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   return true;
