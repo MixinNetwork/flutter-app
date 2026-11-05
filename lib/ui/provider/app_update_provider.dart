@@ -31,25 +31,34 @@ class AppUpdateState {
 const _macChannel = MethodChannel('mixin_desktop/app_update');
 
 class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
-  AppUpdateNotifier(this._ref) : _testDio = null, super(AppUpdateState.none) {
+  AppUpdateNotifier(this._ref)
+    : _testDio = null,
+      _testProxy = null,
+      super(AppUpdateState.none) {
     unawaited(_start());
   }
 
-  /// A Linux updater of [package] that does not check by itself and gets the
-  /// network through [dio].
+  /// An updater of [package] (or of the macOS [mac] channel) that does not
+  /// check by itself and gets the network through [dio] and the in-app proxy
+  /// from [proxy].
   @visibleForTesting
   AppUpdateNotifier.test(
     this._ref, {
     required String package,
     required List<int> publicKey,
     required Dio Function() dio,
+    MacUpdateChannel? mac,
+    ProxyConfig? Function()? proxy,
   }) : _package = package,
        _publicKey = publicKey,
        _testDio = dio,
+       _mac = mac,
+       _testProxy = proxy,
        super(AppUpdateState.none);
 
   final Ref _ref;
   final Dio Function()? _testDio;
+  final ProxyConfig? Function()? _testProxy;
   Timer? _timer;
   late String _package;
   late List<int> _publicKey;
@@ -112,8 +121,13 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       // A test appcast; its packages still need the release key.
       Platform.environment['MIXIN_UPDATE_APPCAST_URL'] ?? appcastUrl;
 
-  ProxyConfig? get _proxy =>
-      _ref.read(databaseProvider).valueOrNull?.settingProperties.activatedProxy;
+  ProxyConfig? get _proxy => _testProxy != null
+      ? _testProxy()
+      : _ref
+            .read(databaseProvider)
+            .valueOrNull
+            ?.settingProperties
+            .activatedProxy;
 
   Dio _dio() =>
       _testDio?.call() ??
@@ -127,16 +141,20 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   @visibleForTesting
   Future<void> check() => _check();
 
+  // Checked again before each use, because the proxy can change at any time.
+  bool _sparkleNeedsProxy() {
+    if (_mac != MacUpdateChannel.dmg || _proxy == null) return false;
+    // Sparkle downloads with NSURLSession, which ignores the in-app proxy,
+    // so the install would fail. Sparkle refuses a file:// feed, so the app
+    // cannot download the DMG for it.
+    i('app update: no DMG update, Sparkle cannot use the in-app proxy');
+    if (mounted) state = AppUpdateState.none;
+    return true;
+  }
+
   Future<void> _check() async {
     if (state.status == AppUpdateStatus.downloading) return;
-    if (_mac == MacUpdateChannel.dmg && _proxy != null) {
-      // Sparkle downloads with NSURLSession, which ignores the in-app proxy,
-      // so the install would fail. Sparkle refuses a file:// feed, so the app
-      // cannot download the DMG for it.
-      i('app update: no DMG update, Sparkle cannot use the in-app proxy');
-      if (mounted) state = AppUpdateState.none;
-      return;
-    }
+    if (_sparkleNeedsProxy()) return;
     try {
       final info = await getPackageInfo();
       final build = int.parse(info.buildNumber);
@@ -153,7 +171,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
           (latestAppcastBuild(await _get(_appcastUrl), 'dmg') ?? 0) > build,
         null => item != null,
       };
-      if (!mounted || !available) return;
+      if (!mounted || !available || _sparkleNeedsProxy()) return;
       // The state stays available, so a later appcast without this package
       // must not empty the item.
       _item = item ?? _item;
@@ -220,7 +238,9 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   }
 
   Future<void> _installSparkle() async {
-    if (state.status == AppUpdateStatus.downloading) return;
+    if (state.status == AppUpdateStatus.downloading || _sparkleNeedsProxy()) {
+      return;
+    }
     state = const AppUpdateState(AppUpdateStatus.downloading);
     try {
       // Sparkle checks the EdDSA signature, then quits and relaunches the app.

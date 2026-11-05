@@ -243,8 +243,9 @@ const macTestFlightUrl = 'itms-beta://';
 enum MacUpdateChannel { appStore, testFlight, dmg }
 
 /// How this copy of the macOS app gets updates. [environment] is the StoreKit
-/// environment of the App Store receipt (Sandbox for TestFlight), when there is
-/// a receipt. [sparkle] is whether the DMG build added Sparkle. Null for a
+/// environment of the App Store receipt (Sandbox for TestFlight). It is null
+/// without a receipt, and on macOS 12, where TestFlight cannot be told from the
+/// App Store. [sparkle] is whether the DMG build added Sparkle. Null for a
 /// development build.
 MacUpdateChannel? macUpdateChannel({
   required String? environment,

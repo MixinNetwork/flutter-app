@@ -88,8 +88,10 @@ class AppUpdatePlugin: NSObject, FlutterPlugin {
 
   // On macOS the receipt file is always named receipt, also for TestFlight, so
   // ask StoreKit: TestFlight builds are in the Sandbox environment.
-  private func storeEnvironment() async -> String {
-    guard #available(macOS 13.0, *) else { return "Production" }
+  // nil on macOS 12, where AppTransaction is missing and TestFlight cannot be
+  // told from the App Store, so the app shows no update item.
+  private func storeEnvironment() async -> String? {
+    guard #available(macOS 13.0, *) else { return nil }
     do {
       switch try await AppTransaction.shared {
       case .verified(let transaction), .unverified(let transaction, _):
