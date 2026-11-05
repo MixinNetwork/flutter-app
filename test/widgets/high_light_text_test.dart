@@ -206,6 +206,7 @@ void main() {
       for (final (link, host, path) in [
         ('example.com', 'example.com', ''),
         ('www.mixin.one/blog', 'www.mixin.one', '/blog'),
+        ('example.com:8080/path', 'example.com', '/path'),
       ]) {
         final uri = Uri.parse(linkUrl(link));
         expect(uri.scheme, anyOf('http', 'https'), reason: link);
