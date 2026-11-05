@@ -3,15 +3,18 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:desktop_webview_window/desktop_webview_window.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../account/account_server.dart';
 import '../../../app.dart' show rootRouteObserver;
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/constants.dart';
+import '../../../crypto/bot_signature.dart';
 import '../../../db/extension/app.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/provider/setting_provider.dart';
@@ -36,7 +39,9 @@ class BotWindow {
     required this.appCardData,
     required this.conversationId,
     required String themeKey,
-  }) : _themeKey = themeKey;
+    required AccountServer? accountServer,
+  }) : _themeKey = themeKey,
+       _accountServer = accountServer;
 
   static final _windows = <int, BotWindow>{};
 
@@ -46,6 +51,11 @@ class BotWindow {
 
   /// Bot icons as decoded PNGs, so a reopened window shows the icon at once.
   static final _icons = <String, Uint8List>{};
+
+  /// Session public keys of bots, by app id, for signing requests to them.
+  /// Kept as futures so a page asking for several signatures at once fetches
+  /// the key once.
+  static final _botPublicKeys = <String, Future<List<int>?>>{};
   static _AppearanceObserver? _appearance;
   static var _hasComposer = true;
 
@@ -69,6 +79,9 @@ class BotWindow {
   Completer<void>? _popupHidden;
 
   final String _themeKey;
+
+  /// Signs requests to the bot as the account that opened the window.
+  final AccountServer? _accountServer;
   Color? _themeColor;
   String? _lastHandledUrl;
   var _lastHandledAt = DateTime.fromMillisecondsSinceEpoch(0);
@@ -147,6 +160,7 @@ class BotWindow {
       appCardData: appCardData,
       conversationId: conversationId,
       themeKey: themeKey,
+      accountServer: app == null ? null : context.accountServer,
     ).._brightness = brightness;
     _windows[webview.id] = window;
     // `appearance` is read from prefers-color-scheme when the page asks,
@@ -186,7 +200,11 @@ class BotWindow {
         // Any page in the window can call it: web links only.
         final uri = data is String ? Uri.tryParse(data) : null;
         if (uri != null && _isWeb(uri)) unawaited(launchUrl(uri));
-      });
+      })
+      ..addJavaScriptMessageHandler(
+        'signBotSignature',
+        (message) => unawaited(_signBotSignature(message)),
+      );
     await webview.addScriptToExecuteOnDocumentCreated(
       _mixinContextScript(jsonEncode(context)),
     );
@@ -279,6 +297,137 @@ class BotWindow {
     final icon = png.buffer.asUint8List();
     if (app case final app?) _icons[app.appId] = icon;
     await _invoke('setChrome', {'icon': icon});
+  }
+
+  /// Answers `MixinContext.signBotSignature` with the timestamp and the
+  /// signature, or with `'[]'` as Android does when it declines.
+  Future<void> _signBotSignature(JavaScriptMessage message) async {
+    final data = message.data;
+    if (data is! Map) return;
+    final url = message.url;
+    var args = const <Object>['[]'];
+    try {
+      final signature = url == null
+          ? null
+          : await _botSignature(data['body'], url);
+      if (signature != null) {
+        args = ['${signature.timestamp}', signature.signature];
+      }
+    } catch (error) {
+      w('sign bot signature failed: $error');
+    }
+    try {
+      // Only the page that asked gets the reply, even if the window has
+      // navigated elsewhere while signing.
+      await webview.postMessage(
+        'signBotSignature',
+        {'id': data['id'], 'args': args},
+        targetOrigin: url == null ? null : message.origin,
+      );
+    } catch (error) {
+      // The window closed while signing.
+      w('reply bot signature failed: $error');
+    }
+  }
+
+  /// Signs only for the bot this window opened, when it is verified and the
+  /// page that sent the request, at [url], is one of its resources, as on
+  /// Android and iOS.
+  Future<({int timestamp, String signature})?> _botSignature(
+    Object? body,
+    Uri url,
+  ) async {
+    final accountServer = _accountServer;
+    if (accountServer == null) return null;
+    if (body case [
+      final String appId,
+      final reloadPublicKey,
+      final String method,
+      final String path,
+      final content,
+    ] when appId == app?.appId) {
+      return _sign(
+        accountServer,
+        url,
+        appId: appId,
+        reloadPublicKey: reloadPublicKey == true || reloadPublicKey == 'true',
+        method: method,
+        path: path,
+        body: content is String ? content : null,
+      );
+    }
+    return null;
+  }
+
+  Future<({int timestamp, String signature})?> _sign(
+    AccountServer accountServer,
+    Uri url, {
+    required String appId,
+    required bool reloadPublicKey,
+    required String method,
+    required String path,
+    required String? body,
+  }) async {
+    var user = (await accountServer.refreshUsers([appId]))?.firstOrNull;
+    var current = await accountServer.database.appDao.findAppById(appId);
+    if (current == null || !current.matchesResource(url.toString())) {
+      // The resource patterns may have changed since the app was stored.
+      user = (await accountServer.refreshUsers(
+        [appId],
+        force: true,
+      ))?.firstOrNull;
+      current = await accountServer.database.appDao.findAppById(appId);
+    }
+    if (user?.isVerified != true ||
+        current == null ||
+        !current.matchesResource(url.toString())) {
+      return null;
+    }
+
+    final botPublicKey = await _botPublicKey(
+      accountServer,
+      appId,
+      reload: reloadPublicKey,
+    );
+    if (botPublicKey == null) return null;
+    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    return (
+      timestamp: timestamp,
+      signature: signBotRequest(
+        accountId: accountServer.userId,
+        privateKey: ed.PrivateKey(base64Decode(accountServer.privateKey)),
+        botPublicKey: botPublicKey,
+        timestamp: timestamp,
+        method: method,
+        path: path,
+        body: body,
+      ),
+    );
+  }
+
+  static Future<List<int>?> _botPublicKey(
+    AccountServer accountServer,
+    String appId, {
+    required bool reload,
+  }) {
+    if (!reload) {
+      if (_botPublicKeys[appId] case final key?) return key;
+    }
+    final key = _botPublicKeys[appId] = () async {
+      final response = await accountServer.client.userApi.getSessions([appId]);
+      final publicKey = response.data.firstOrNull?.publicKey;
+      if (publicKey == null) return null;
+      return base64Url.decode(base64Url.normalize(publicKey));
+    }();
+    // A failed fetch is not cached: the next request tries again.
+    void forget() {
+      if (_botPublicKeys[appId] == key) _botPublicKeys.remove(appId);
+    }
+
+    key.then((value) {
+      if (value == null) forget();
+    }, onError: (_) => forget());
+    return key;
   }
 
   bool _onUrlRequest(String url) {
@@ -518,7 +667,8 @@ String _mixinContextScript(String contextJson) =>
   function post(name, data) {
     window.desktopWebview.postMessage(name, data === undefined ? null : data);
   }
-  function reply(callback, value) {
+  function reply(callback) {
+    var args = Array.prototype.slice.call(arguments, 1);
     if (typeof callback !== 'string' ||
         !/^[A-Za-z_\$][\\w\$]*(\\.[A-Za-z_\$][\\w\$]*)*\$/.test(callback)) {
       return;
@@ -531,9 +681,21 @@ String _mixinContextScript(String contextJson) =>
         owner = target;
         target = target[path[i]];
       }
-      if (typeof target === 'function') target.call(owner, value);
+      if (typeof target === 'function') target.apply(owner, args);
     }, 0);
   }
+  // Signatures come back through the bridge, so the callback stays in the
+  // page. Dart addresses replies to the asking page's origin; ids keep a
+  // reply for an earlier page of the same origin from calling anything.
+  var signPrefix = Math.random().toString(36).slice(2) + '-';
+  var nextSign = 0;
+  var signs = Object.create(null);
+  window.desktopWebview.addEventListener('signBotSignature', function(result) {
+    var callback = result && signs[result.id];
+    if (callback === undefined) return;
+    delete signs[result.id];
+    reply.apply(null, [callback].concat(result.args));
+  });
   window.MixinContext = {
     getContext: function() {
       context.appearance =
@@ -551,7 +713,13 @@ String _mixinContextScript(String contextJson) =>
     tipSign: function(chainId, message, callback) { reply(callback, ''); },
     verifyPin: function(callback) { reply(callback, false); },
     signBotSignature: function(body) {
-      if (body && body.length > 5) reply(body[5], '');
+      if (!body || body.length < 6) return;
+      var id = signPrefix + (++nextSign);
+      signs[id] = body[5];
+      post('signBotSignature', {
+        id: id,
+        body: Array.prototype.slice.call(body, 0, 5)
+      });
     }
   };
   // Re-themes as soon as the parser reaches a theme-color, and when a page

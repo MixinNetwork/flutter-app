@@ -30,4 +30,19 @@ extension AppExt on App {
   List<String>? get capabilitiesList => _parseFromString(capabilities);
 
   List<String>? get resourcePatternsList => _parseFromString(resourcePatterns);
+
+  /// Whether [url] is under one of the resource patterns: the same scheme and
+  /// host, and a path starting with the pattern's, as on Android.
+  bool matchesResource(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.scheme.isEmpty || uri.host.isEmpty) return false;
+    return resourcePatternsList?.any((pattern) {
+          final rule = Uri.tryParse(pattern.trim());
+          return rule != null &&
+              rule.scheme.toLowerCase() == uri.scheme.toLowerCase() &&
+              rule.host.toLowerCase() == uri.host.toLowerCase() &&
+              uri.path.startsWith(rule.path);
+        }) ??
+        false;
+  }
 }
