@@ -693,6 +693,18 @@ Future<void> prepareLinkRanges(Iterable<String> texts) async {
   }
 }
 
+/// The URL to open for the found link [link]. NSDataDetector also finds links
+/// without a scheme, such as "mixin.one" or an email address, and gives each
+/// one its URL, as the iOS app opens it.
+@visibleForTesting
+String linkUrl(String link) {
+  if (!kPlatformIsDarwin || Uri.tryParse(link)?.hasScheme != false) {
+    return link;
+  }
+  return _linkDetector.matchesInString(link).firstOrNull?.url?.toString() ??
+      link;
+}
+
 class UrlTextMatcher extends TextMatcher with Equatable {
   UrlTextMatcher(BuildContext context)
     : super.textRangesFromText(
@@ -710,7 +722,7 @@ class UrlTextMatcher extends TextMatcher with Equatable {
           recognizer: TapGestureRecognizer()
             ..onTap = () => openUri(
               context,
-              linkString,
+              linkUrl(linkString),
               app: context.providerContainer.read(
                 conversationProvider.select((value) => value?.app),
               ),
