@@ -362,10 +362,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_webview_window
-      sha256: faeb95926f046a93a2b8325445a7f889d4b7772ff01b4b63b47c7c891bf9ac5b
+      sha256: e187a7a45d5c30b702be85870a74cc2e09e2bd85e528b8d867bdf75de460c211
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   device_info_plus:
     dependency: "direct main"
     description:
