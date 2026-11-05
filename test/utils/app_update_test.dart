@@ -191,7 +191,7 @@ void main() {
 
     test('replaces the AppImage and starts the new one', () async {
       final appimage = program(p.join(dir.path, 'Mixin.AppImage'), 'old');
-      final update = program(p.join(dir.path, '.update'), 'new');
+      final update = program(p.join(dir.path, 'download', 'u'), 'new');
       await run([
         await deadPid(),
         'appimage-x64',
@@ -203,7 +203,7 @@ void main() {
         File(p.join(dir.path, 'started')).readAsStringSync().trim(),
         'new',
       );
-      expect(update.existsSync(), isFalse);
+      expect(Directory(p.join(dir.path, 'download')).existsSync(), isFalse);
     });
 
     test('replaces the tar bundle and starts it', () async {
@@ -214,8 +214,10 @@ void main() {
       final newBundle = p.join(dir.path, 'new');
       program(p.join(newBundle, 'mixin_desktop'), 'new');
       Process.runSync('chmod', ['+x', p.join(newBundle, 'mixin_desktop')]);
-      final archive = p.join(dir.path, 'update.tar.gz');
-      Process.runSync('tar', ['-czf', archive, '-C', newBundle, '.']);
+      final archive = p.join(dir.path, 'download', 'update.tar');
+      Directory(p.dirname(archive)).createSync();
+      // As .github/workflows/manual-build.yml builds it: not compressed.
+      Process.runSync('tar', ['-cf', archive, '-C', newBundle, '.']);
 
       await run([await deadPid(), 'tar-x64', archive, executable, '']);
       expect(
@@ -223,7 +225,7 @@ void main() {
         'new',
       );
       expect(Directory('$bundle.old').existsSync(), isFalse);
-      expect(File(archive).existsSync(), isFalse);
+      expect(Directory(p.dirname(archive)).existsSync(), isFalse);
     });
 
     test('keeps the old tar bundle when the archive is broken', () async {
@@ -231,7 +233,8 @@ void main() {
       final executable = p.join(bundle, 'mixin_desktop');
       program(executable, 'old');
       Process.runSync('chmod', ['+x', executable]);
-      final archive = File(p.join(dir.path, 'update.tar.gz'))
+      final archive = File(p.join(dir.path, 'download', 'update.tar'))
+        ..createSync(recursive: true)
         ..writeAsStringSync('broken');
 
       await run([await deadPid(), 'tar-x64', archive.path, executable, '']);
@@ -240,6 +243,36 @@ void main() {
         'old',
       );
       expect(Directory('$bundle.update').existsSync(), isFalse);
+      expect(archive.parent.existsSync(), isFalse);
+    });
+  });
+
+  group('createLinuxUpdateFile', () {
+    late Directory dir;
+    setUp(() => dir = Directory.systemTemp.createTempSync());
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    test('puts each download alone in a new private directory', () async {
+      final environment = {'APPIMAGE': p.join(dir.path, 'Mixin.AppImage')};
+      final first = await createLinuxUpdateFile('appimage-x64', environment);
+      final second = await createLinuxUpdateFile('appimage-x64', environment);
+
+      expect(first.parent.parent.path, dir.path);
+      expect(first.parent.path, isNot(second.parent.path));
+      expect(p.basename(first.path), 'update.AppImage');
+      expect(first.parent.statSync().modeString(), 'rwx------');
+    });
+
+    test('names the file by the package, not by the appcast', () async {
+      for (final (package, name) in [
+        ('deb-x64', 'update.deb'),
+        ('tar-arm64', 'update.tar'),
+      ]) {
+        final file = await createLinuxUpdateFile(package, const {});
+        addTearDown(() => file.parent.deleteSync(recursive: true));
+        expect(p.basename(file.path), name);
+        expect(file.parent.parent.path, Directory.systemTemp.path);
+      }
     });
   });
 }

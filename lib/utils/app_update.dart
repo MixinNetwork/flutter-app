@@ -122,14 +122,24 @@ bool verifyAppUpdate(
   return ed.verify(ed.PublicKey(publicKey), utf8.encode(text), signature);
 }
 
-/// Where to download the package: next to an AppImage, so the update is a
-/// rename; else the temp directory.
-Directory linuxUpdateDownloadDirectory(
+/// A new file to download [package] into, alone in a new private directory:
+/// next to an AppImage, so the update is a rename; else in the temp
+/// directory. Its name does not come from the appcast.
+Future<File> createLinuxUpdateFile(
   String package,
   Map<String, String> environment,
-) => package.startsWith('appimage-')
-    ? Directory(p.dirname(environment['APPIMAGE']!))
-    : Directory.systemTemp;
+) async {
+  final parent = package.startsWith('appimage-')
+      ? Directory(p.dirname(environment['APPIMAGE']!))
+      : Directory.systemTemp;
+  final directory = await parent.createTemp('.mixin_update_');
+  final name = package.startsWith('appimage-')
+      ? 'update.AppImage'
+      : package.startsWith('deb-')
+      ? 'update.deb'
+      : 'update.tar';
+  return File(p.join(directory.path, name));
+}
 
 /// Whether this copy can install [package] by itself.
 Future<bool> canInstallLinuxUpdate(
@@ -160,26 +170,29 @@ Future<bool> canInstallLinuxUpdate(
 const linuxInstallScript = r'''
 while kill -0 "$1" 2>/dev/null; do sleep 0.2; done
 package=$2 file=$3 executable=$4 appimage=$5
+dir=$(dirname "$file")
 case "$package" in
 appimage-*)
   chmod +x "$file" && mv -f "$file" "$appimage"
+  rm -rf "$dir"
   exec "$appimage"
   ;;
 tar-*)
   bundle=$(dirname "$executable")
   new="$bundle.update" old="$bundle.old"
   rm -rf "$new" "$old"
-  if mkdir "$new" && tar -xzf "$file" -C "$new" && [ -x "$new/$(basename "$executable")" ]; then
+  # The release tar is not compressed, though its name ends in .tar.gz.
+  if mkdir "$new" && tar -xf "$file" -C "$new" && [ -x "$new/$(basename "$executable")" ]; then
     if mv "$bundle" "$old"; then
       if mv "$new" "$bundle"; then rm -rf "$old"; else mv "$old" "$bundle"; fi
     fi
   fi
-  rm -rf "$new" "$file"
+  rm -rf "$new" "$dir"
   exec "$executable"
   ;;
 deb-*)
   pkexec apt-get install -y "$file"
-  rm -f "$file"
+  rm -rf "$dir"
   exec "$executable"
   ;;
 esac
