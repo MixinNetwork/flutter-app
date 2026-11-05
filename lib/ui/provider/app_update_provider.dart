@@ -129,6 +129,14 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
 
   Future<void> _check() async {
     if (state.status == AppUpdateStatus.downloading) return;
+    if (_mac == MacUpdateChannel.dmg && _proxy != null) {
+      // Sparkle downloads with NSURLSession, which ignores the in-app proxy,
+      // so the install would fail. Sparkle refuses a file:// feed, so the app
+      // cannot download the DMG for it.
+      i('app update: no DMG update, Sparkle cannot use the in-app proxy');
+      if (mounted) state = AppUpdateState.none;
+      return;
+    }
     try {
       final info = await getPackageInfo();
       final build = int.parse(info.buildNumber);
