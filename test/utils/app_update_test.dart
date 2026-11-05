@@ -260,7 +260,11 @@ void main() {
       expect(first.parent.parent.path, dir.path);
       expect(first.parent.path, isNot(second.parent.path));
       expect(p.basename(first.path), 'update.AppImage');
-      expect(first.parent.statSync().modeString(), 'rwx------');
+      // Only the owner can write into it (createTemp gives 0700 on macOS and
+      // 0755 on Linux), so another user cannot add or change the download.
+      final mode = first.parent.statSync().mode;
+      expect(mode & 0x1c0, 0x1c0);
+      expect(mode & 0x12, 0);
     });
 
     test('names the file by the package, not by the appcast', () async {
