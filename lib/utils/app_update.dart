@@ -367,6 +367,8 @@ List<String> powerShellArguments(String script) => [
 
 /// Starts the Inno installer [file]. It waits until this process exits, so
 /// call `exit` after it.
+// Not detached: powershell.exe started with DETACHED_PROCESS has no console and
+// exits without running the script. An attached child outlives the app.
 Future<void> startWindowsUpdateInstall({
   required File file,
   required String executable,
@@ -379,5 +381,4 @@ Future<void> startWindowsUpdateInstall({
       executable: executable,
     ),
   ),
-  mode: ProcessStartMode.detached,
 );
