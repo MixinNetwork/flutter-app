@@ -191,6 +191,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
                 users.appId.isNull();
           case SlideCategoryType.circle:
           case SlideCategoryType.setting:
+          case SlideCategoryType.wallet:
             assert(false, 'Unsupported category: $category');
             return const Constant(false);
         }

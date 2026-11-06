@@ -4,6 +4,7 @@ import '../../db/database_event_bus.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import 'account_server_provider.dart';
+import 'multi_auth_provider.dart';
 
 final tokenProvider = StreamProvider.autoDispose.family<Token?, String?>((
   ref,
@@ -64,4 +65,23 @@ final assetChainProvider = StreamProvider.autoDispose.family<Chain?, String?>((
         duration: kDefaultThrottleDuration,
       );
   return stream;
+});
+
+final fiatRateProvider = StreamProvider.autoDispose<double?>((ref) {
+  final accountServer = ref.watch(accountServerProvider).valueOrNull;
+  if (accountServer == null) {
+    return const Stream.empty();
+  }
+  final db = accountServer.database.mixinDatabase;
+  final fiatCurrency = ref.watch(
+    authAccountProvider.select((value) => value?.fiatCurrency),
+  );
+  if (fiatCurrency == null) {
+    return const Stream.empty();
+  }
+  return (db.select(db.fiats)..where(
+        (tbl) => tbl.code.equals(fiatCurrency),
+      ))
+      .map((e) => e.rate)
+      .watchSingle();
 });

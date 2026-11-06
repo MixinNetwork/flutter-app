@@ -44,6 +44,7 @@ mixin _$ParticipantSessionDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Selectable<ParticipantSessionKey> participantSessionKeyWithoutSelf(
     String conversationId,
     String userId,
@@ -193,6 +194,8 @@ class ParticipantSessionDaoManager {
       );
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }
 
 class ParticipantSessionKey {

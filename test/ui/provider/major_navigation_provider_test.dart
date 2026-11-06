@@ -1,4 +1,5 @@
 import 'package:flutter_app/ui/provider/major_navigation_provider.dart';
+import 'package:flutter_app/ui/provider/slide_category_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -16,9 +17,33 @@ void main() {
     final notifier = MajorNavigationNotifier()
       ..open(MajorNavigationDestination.chatPage);
 
-    final opened = notifier.syncSettingCategory(true, routeMode: true);
+    final opened = notifier.syncCategory(
+      SlideCategoryType.setting,
+      routeMode: true,
+    );
 
     expect(opened, isFalse);
+    expect(notifier.state.entries, isEmpty);
+  });
+
+  test('opening another wallet token replaces the token page', () {
+    final notifier = MajorNavigationNotifier()
+      ..openWalletToken('a')
+      ..openWalletToken('b');
+
+    expect(notifier.state.entries, [
+      const MajorNavigationEntry(
+        MajorNavigationDestination.walletTokenPage,
+        arguments: 'b',
+      ),
+    ]);
+  });
+
+  test('leaving the wallet removes the token page', () {
+    final notifier = MajorNavigationNotifier()
+      ..openWalletToken('a')
+      ..syncCategory(SlideCategoryType.chats, routeMode: false);
+
     expect(notifier.state.entries, isEmpty);
   });
 
