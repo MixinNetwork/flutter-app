@@ -19,14 +19,16 @@ on:
         required: false
         default: ""
       platforms:
-        description: "platforms to build, eg: linux, windows"
+        description: "platforms to build, eg: linux, windows, macos"
         required: false
         type: choice
         options:
+          - 'linux,windows,macos'
           - 'linux,windows'
           - 'linux'
           - 'windows'
-        default: "linux,windows"
+          - 'macos'
+        default: "linux,windows,macos"
   push:
     tags:
       - 'v*'
@@ -376,5 +378,193 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/mixin_desktop_windows_setup_amd64.exe
           asset_name: mixin_desktop_windows_setup_amd64.exe
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  build-macos:
+    runs-on: macos-26
+    if: contains(github.event.inputs.platforms, 'macos') || github.event.inputs.platforms == ''
+    permissions:
+      contents: write
+    env:
+      # Without these secrets the app is signed ad-hoc and not uploaded.
+      MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+      MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      NOTARY_API_KEY_P8: ${{ secrets.NOTARY_API_KEY_P8 }}
+      NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+      NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 'stable' # 'stable' or 'nightly'
+          override: true
+          components: rustfmt, clippy
+
+      - run: flutter --version
+
+      - run: xcodebuild -version
+
+      - name: Run Build Runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build APP
+        run: flutter build macos --release
+
+      - name: Import signing certificate
+        id: certificate
+        run: |
+          if [ -z "$MACOS_CERTIFICATE_P12" ]; then
+            echo "::warning::No signing certificate. The app is signed ad-hoc and is not uploaded."
+            echo "identity=-" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password="$(openssl rand -hex 16)"
+          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" \
+            -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$keychain"
+          security list-keychains -d user -s "$keychain"
+          rm "$RUNNER_TEMP/certificate.p12"
+          identity="$(security find-identity -v -p codesigning "$keychain" \
+            | awk '/Developer ID Application/ { print $2; exit }')"
+          if [ -z "$identity" ]; then
+            echo "No Developer ID Application identity in the certificate" >&2
+            exit 1
+          fi
+          echo "identity=$identity" >> "$GITHUB_OUTPUT"
+
+      - name: Sign APP
+        run: |
+          rm -rf dist/Mixin.app
+          cp -R build/macos/Build/Products/Release/Mixin.app dist/Mixin.app
+          ./dist/macos_sign.sh dist/Mixin.app "${{ steps.certificate.outputs.identity }}"
+
+      - name: Notarize APP
+        if: env.MACOS_CERTIFICATE_P12 != '' && env.NOTARY_API_KEY_P8 != ''
+        run: |
+          echo "$NOTARY_API_KEY_P8" > "$RUNNER_TEMP/notary.p8"
+          ditto -c -k --keepParent dist/Mixin.app "$RUNNER_TEMP/Mixin.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/Mixin.zip" --wait \
+            --key "$RUNNER_TEMP/notary.p8" --key-id "$NOTARY_API_KEY_ID" \
+            --issuer "$NOTARY_API_ISSUER_ID"
+          xcrun stapler staple dist/Mixin.app
+
+      - name: Build DMG
+        id: dmg
+        run: |
+          # Install a fixed appdmg so that macos.sh does not fetch the latest one with npx.
+          npm install --global appdmg@0.6.6
+          ./dist/macos.sh
+          version="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+            version="$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)"
+          fi
+          name="mixin-$version.dmg"
+          mv dist/mixin.dmg "$name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Sign and notarize DMG
+        if: env.MACOS_CERTIFICATE_P12 != '' && env.NOTARY_API_KEY_P8 != ''
+        run: |
+          dmg="${{ steps.dmg.outputs.name }}"
+          codesign --force --sign "${{ steps.certificate.outputs.identity }}" --timestamp "$dmg"
+          xcrun notarytool submit "$dmg" --wait \
+            --key "$RUNNER_TEMP/notary.p8" --key-id "$NOTARY_API_KEY_ID" \
+            --issuer "$NOTARY_API_ISSUER_ID"
+          xcrun stapler staple "$dmg"
+          spctl --assess --type open --context context:primary-signature --verbose "$dmg"
+
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dmg.outputs.name }}
+          path: ${{ steps.dmg.outputs.name }}
+
+      - name: Upload macOS DMG
+        uses: svenstaro/upload-release-action@v2
+        # Only a notarized DMG goes to the release: Gatekeeper blocks the others.
+        if: startsWith(github.ref, 'refs/tags/v') && env.MACOS_CERTIFICATE_P12 != '' && env.NOTARY_API_KEY_P8 != ''
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ steps.dmg.outputs.name }}
+          asset_name: ${{ steps.dmg.outputs.name }}
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  publish-appcast:
+    # Runs when some builds failed too: the appcast lists only the packages
+    # that are in the release.
+    needs: [build-linux, build-linux-appimage, build-windows, build-macos]
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    env:
+      UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test appcast script
+        run: python3 dist/test_update_appcast.py
+
+      - name: Download release packages
+        if: env.UPDATE_SIGNING_KEY != ''
+        run: |
+          mkdir packages
+          gh release download "$GITHUB_REF_NAME" --dir packages \
+            --pattern 'mixin-*.dmg' \
+            --pattern 'mixin_desktop_windows_setup_amd64.exe' \
+            --pattern 'mixin_desktop_linux_*.AppImage' \
+            --pattern 'mixin_desktop_linux_*.deb' \
+            --pattern 'mixin_desktop_linux_*_portable.tar.gz'
+          ls -l packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write appcast
+        if: env.UPDATE_SIGNING_KEY != ''
+        run: |
+          echo "$UPDATE_SIGNING_KEY" > "$RUNNER_TEMP/update_key.pem"
+          args=""
+          for file in packages/*; do
+            case "$(basename "$file")" in
+              mixin-*.dmg) package=dmg ;;
+              mixin_desktop_windows_setup_amd64.exe) package=inno-x64 ;;
+              mixin_desktop_linux_amd64.AppImage) package=appimage-x64 ;;
+              mixin_desktop_linux_arm64.AppImage) package=appimage-arm64 ;;
+              mixin_desktop_linux_amd64.deb) package=deb-x64 ;;
+              mixin_desktop_linux_arm64.deb) package=deb-arm64 ;;
+              mixin_desktop_linux_amd64_portable.tar.gz) package=tar-x64 ;;
+              mixin_desktop_linux_arm64_portable.tar.gz) package=tar-arm64 ;;
+              *) continue ;;
+            esac
+            args="$args $package=$file"
+          done
+          build="$(sed -n 's/^version: [^+]*+\(.*\)/\1/p' pubspec.yaml)"
+          python3 dist/update_appcast.py --tag "$GITHUB_REF_NAME" --build "$build" \
+            --key "$RUNNER_TEMP/update_key.pem" --public-key dist/update_ed25519.pub \
+            --url-prefix "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME" \
+            --out appcast.xml $args
+          rm "$RUNNER_TEMP/update_key.pem"
+          cat appcast.xml
+
+      - name: Upload appcast
+        if: env.UPDATE_SIGNING_KEY != ''
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: appcast.xml
+          asset_name: appcast.xml
           tag: ${{ github.ref }}
           overwrite: true
