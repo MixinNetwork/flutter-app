@@ -448,6 +448,7 @@ jobs:
         run: |
           rm -rf dist/Mixin.app
           cp -R build/macos/Build/Products/Release/Mixin.app dist/Mixin.app
+          ./dist/macos_sparkle.sh dist/Mixin.app
           ./dist/macos_sign.sh dist/Mixin.app "${{ steps.certificate.outputs.identity }}"
 
       - name: Notarize APP

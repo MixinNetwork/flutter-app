@@ -234,3 +234,64 @@ Future<void> startLinuxUpdateInstall({
   ],
   mode: ProcessStartMode.detached,
 );
+
+const macAppStoreLookupUrl =
+    'https://itunes.apple.com/lookup?bundleId=one.mixin.messenger.desktop';
+const macAppStoreUrl = 'macappstore://apps.apple.com/app/id1571128582';
+const macTestFlightUrl = 'itms-beta://';
+
+enum MacUpdateChannel { appStore, testFlight, dmg }
+
+/// How this copy of the macOS app gets updates. [environment] is the StoreKit
+/// environment of the App Store receipt (Sandbox for TestFlight). It is null
+/// without a receipt, and on macOS 12, where TestFlight cannot be told from the
+/// App Store. [sparkle] is whether the DMG build added Sparkle. Null for a
+/// development build.
+MacUpdateChannel? macUpdateChannel({
+  required String? environment,
+  required bool sparkle,
+}) => switch (environment) {
+  'Sandbox' => MacUpdateChannel.testFlight,
+  null => sparkle ? MacUpdateChannel.dmg : null,
+  _ => MacUpdateChannel.appStore,
+};
+
+/// The version in an iTunes lookup response, or null.
+String? appStoreVersion(String lookup) {
+  final results = (jsonDecode(lookup) as Map<String, dynamic>)['results'];
+  if (results is! List || results.isEmpty) return null;
+  final version = (results.first as Map<String, dynamic>)['version'];
+  return version is String ? version : null;
+}
+
+/// Whether the dotted version [other] is after [current], as 6.10.0 > 6.9.1.
+bool isNewerVersion(String other, String current) {
+  List<int> parts(String v) =>
+      v.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+  final a = parts(other);
+  final b = parts(current);
+  for (var i = 0; i < a.length || i < b.length; i++) {
+    final x = i < a.length ? a[i] : 0;
+    final y = i < b.length ? b[i] : 0;
+    if (x != y) return x > y;
+  }
+  return false;
+}
+
+/// The newest build of [package] in [appcast], or null.
+int? latestAppcastBuild(String appcast, String package) {
+  int? newest;
+  for (final item in XmlDocument.parse(appcast).findAllElements('item')) {
+    if (item
+            .getElement('enclosure')
+            ?.getAttribute('package', namespace: _mixinNs) !=
+        package) {
+      continue;
+    }
+    final build = int.tryParse(
+      item.getElement('version', namespace: _sparkleNs)?.innerText ?? '',
+    );
+    if (build != null && (newest == null || build > newest)) newest = build;
+  }
+  return newest;
+}
