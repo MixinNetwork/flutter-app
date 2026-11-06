@@ -44,6 +44,7 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Selectable<SafeSnapshotItem> _snapshotItem(
     SnapshotItem$where where,
     SnapshotItem$order order,
@@ -82,7 +83,7 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
     );
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT s.snapshot_id, s.type, s.asset_id, s.amount, s.created_at, s.opponent_id, s.trace_id, s.memo, s.confirmations, s.transaction_hash, s.opening_balance, s.closing_balance, u.avatar_url, u.full_name AS opponent_ful_name, t.symbol AS asset_symbol, t.confirmations AS asset_confirmations FROM safe_snapshots AS s LEFT JOIN users AS u ON u.user_id = s.opponent_id LEFT JOIN tokens AS t ON t.asset_id = s.asset_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+      'SELECT s.snapshot_id, s.type, s.asset_id, s.amount, s.created_at, s.opponent_id, s.trace_id, s.memo, s.confirmations, s.transaction_hash, s.opening_balance, s.closing_balance, s.withdrawal, s.deposit, u.avatar_url, u.full_name AS opponent_ful_name, t.symbol AS asset_symbol, t.confirmations AS asset_confirmations FROM safe_snapshots AS s LEFT JOIN users AS u ON u.user_id = s.opponent_id LEFT JOIN tokens AS t ON t.asset_id = s.asset_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
       variables: [
         ...generatedwhere.introducedVariables,
         ...generatedorder.introducedVariables,
@@ -110,6 +111,12 @@ mixin _$SafeSnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         transactionHash: row.read<String>('transaction_hash'),
         openingBalance: row.readNullable<String>('opening_balance'),
         closingBalance: row.readNullable<String>('closing_balance'),
+        withdrawal: SafeSnapshots.$converterwithdrawal.fromSql(
+          row.readNullable<String>('withdrawal'),
+        ),
+        deposit: SafeSnapshots.$converterdeposit.fromSql(
+          row.readNullable<String>('deposit'),
+        ),
         avatarUrl: row.readNullable<String>('avatar_url'),
         opponentFulName: row.readNullable<String>('opponent_ful_name'),
         assetSymbol: row.readNullable<String>('asset_symbol'),
@@ -228,6 +235,8 @@ class SafeSnapshotDaoManager {
       );
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }
 
 class SafeSnapshotItem {
@@ -243,6 +252,8 @@ class SafeSnapshotItem {
   final String transactionHash;
   final String? openingBalance;
   final String? closingBalance;
+  final sdk.SafeWithdrawal? withdrawal;
+  final sdk.SafeDeposit? deposit;
   final String? avatarUrl;
   final String? opponentFulName;
   final String? assetSymbol;
@@ -260,6 +271,8 @@ class SafeSnapshotItem {
     required this.transactionHash,
     this.openingBalance,
     this.closingBalance,
+    this.withdrawal,
+    this.deposit,
     this.avatarUrl,
     this.opponentFulName,
     this.assetSymbol,
@@ -279,6 +292,8 @@ class SafeSnapshotItem {
     transactionHash,
     openingBalance,
     closingBalance,
+    withdrawal,
+    deposit,
     avatarUrl,
     opponentFulName,
     assetSymbol,
@@ -300,6 +315,8 @@ class SafeSnapshotItem {
           other.transactionHash == this.transactionHash &&
           other.openingBalance == this.openingBalance &&
           other.closingBalance == this.closingBalance &&
+          other.withdrawal == this.withdrawal &&
+          other.deposit == this.deposit &&
           other.avatarUrl == this.avatarUrl &&
           other.opponentFulName == this.opponentFulName &&
           other.assetSymbol == this.assetSymbol &&
@@ -319,6 +336,8 @@ class SafeSnapshotItem {
           ..write('transactionHash: $transactionHash, ')
           ..write('openingBalance: $openingBalance, ')
           ..write('closingBalance: $closingBalance, ')
+          ..write('withdrawal: $withdrawal, ')
+          ..write('deposit: $deposit, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('opponentFulName: $opponentFulName, ')
           ..write('assetSymbol: $assetSymbol, ')

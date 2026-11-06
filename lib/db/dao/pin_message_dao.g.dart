@@ -44,6 +44,7 @@ mixin _$PinMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Selectable<PinMessageItemResult> pinMessageItem(
     String messageId,
     String conversationId,
@@ -172,6 +173,8 @@ class PinMessageDaoManager {
       );
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }
 
 class PinMessageItemResult {

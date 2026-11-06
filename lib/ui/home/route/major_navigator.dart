@@ -15,6 +15,7 @@ import '../../setting/security_page.dart';
 import '../../setting/storage_page.dart';
 import '../../setting/storage_usage_detail_page.dart';
 import '../../setting/storage_usage_list_page.dart';
+import '../../wallet/wallet_token_page.dart';
 import '../chat/chat_page.dart';
 import '../desktop_shell_layout.dart';
 
@@ -163,6 +164,14 @@ MaterialPage _pageFor(MajorNavigationEntry entry) {
         key: ValueKey(MajorNavigationDestination.securityPage),
         name: 'securityPage',
         child: SecurityPage(key: ValueKey('securityPage')),
+      );
+    case MajorNavigationDestination.walletTokenPage:
+      final assetId = entry.arguments;
+      if (assetId is! String) throw ArgumentError('Invalid route');
+      return MaterialPage(
+        key: const ValueKey(MajorNavigationDestination.walletTokenPage),
+        name: 'walletTokenPage',
+        child: WalletTokenPage(key: ValueKey(assetId), assetId: assetId),
       );
   }
 }

@@ -44,6 +44,7 @@ mixin _$InscriptionItemDaoMixin on DatabaseAccessor<MixinDatabase> {
   Properties get properties => attachedDatabase.properties;
   SafeSnapshots get safeSnapshots => attachedDatabase.safeSnapshots;
   Tokens get tokens => attachedDatabase.tokens;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Selectable<Inscription> inscriptionByHash(String hash) {
     return customSelect(
       'SELECT i.collection_hash, i.inscription_hash, ic.name, i.sequence, i.content_type, i.content_url, ic.icon_url FROM inscription_items AS i LEFT JOIN inscription_collections AS ic ON ic.collection_hash = i.collection_hash WHERE inscription_hash = ?1',
@@ -155,4 +156,6 @@ class InscriptionItemDaoManager {
       $SafeSnapshotsTableManager(_db.attachedDatabase, _db.safeSnapshots);
   $TokensTableManager get tokens =>
       $TokensTableManager(_db.attachedDatabase, _db.tokens);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }

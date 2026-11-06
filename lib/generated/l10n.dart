@@ -1124,6 +1124,38 @@ class Localization {
     return Intl.message('Deposit', name: 'deposit', desc: '', args: []);
   }
 
+  /// `Please try a small amount for the first deposit.`
+  String get depositAttention {
+    return Intl.message(
+      'Please try a small amount for the first deposit.',
+      name: 'depositAttention',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one{Deposit will arrive {arg0} block confirmation} other{Deposit will arrive {arg0} block confirmations}}`
+  String depositConfirmation(num count, Object arg0) {
+    return Intl.plural(
+      count,
+      one: 'Deposit will arrive $arg0 block confirmation',
+      other: 'Deposit will arrive $arg0 block confirmations',
+      name: 'depositConfirmation',
+      desc: '',
+      args: [count, arg0],
+    );
+  }
+
+  /// `Minimum deposit: {arg0} {arg1}`
+  String depositDust(Object arg0, Object arg1) {
+    return Intl.message(
+      'Minimum deposit: $arg0 $arg1',
+      name: 'depositDust',
+      desc: '',
+      args: [arg0, arg1],
+    );
+  }
+
   /// `Deposit Hash`
   String get depositHash {
     return Intl.message(
@@ -1131,6 +1163,26 @@ class Localization {
       name: 'depositHash',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Memo is required, or you will lose your coins.`
+  String get depositMemoNotice {
+    return Intl.message(
+      'Memo is required, or you will lose your coins.',
+      name: 'depositMemoNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deposit {arg0}`
+  String depositToken(Object arg0) {
+    return Intl.message(
+      'Deposit $arg0',
+      name: 'depositToken',
+      desc: '',
+      args: [arg0],
     );
   }
 
@@ -2128,6 +2180,21 @@ class Localization {
     return Intl.message('Help Center', name: 'helpCenter', desc: '', args: []);
   }
 
+  /// `Hidden Assets`
+  String get hiddenAssets {
+    return Intl.message(
+      'Hidden Assets',
+      name: 'hiddenAssets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide`
+  String get hide {
+    return Intl.message('Hide', name: 'hide', desc: '', args: []);
+  }
+
   /// `Hide Mixin`
   String get hideMixin {
     return Intl.message('Hide Mixin', name: 'hideMixin', desc: '', args: []);
@@ -2627,6 +2694,16 @@ class Localization {
     return Intl.message('NO FILES', name: 'noFiles', desc: '', args: []);
   }
 
+  /// `No hidden assets`
+  String get noHiddenAssets {
+    return Intl.message(
+      'No hidden assets',
+      name: 'noHiddenAssets',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `NO LINKS`
   String get noLinks {
     return Intl.message('NO LINKS', name: 'noLinks', desc: '', args: []);
@@ -2655,6 +2732,16 @@ class Localization {
   /// `NO RESULTS`
   String get noResults {
     return Intl.message('NO RESULTS', name: 'noResults', desc: '', args: []);
+  }
+
+  /// `No transactions`
+  String get noTransactions {
+    return Intl.message(
+      'No transactions',
+      name: 'noTransactions',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Not found`
@@ -3246,6 +3333,16 @@ class Localization {
     );
   }
 
+  /// `Name, Symbol`
+  String get searchPlaceholderAsset {
+    return Intl.message(
+      'Name, Symbol',
+      name: 'searchPlaceholderAsset',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Search Mixin ID or phone number:`
   String get searchPlaceholderNumber {
     return Intl.message(
@@ -3713,6 +3810,16 @@ class Localization {
     );
   }
 
+  /// `Total Balance`
+  String get totalBalance {
+    return Intl.message(
+      'Total Balance',
+      name: 'totalBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Trace`
   String get trace {
     return Intl.message('Trace', name: 'trace', desc: '', args: []);
@@ -4101,6 +4208,11 @@ class Localization {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Wallet`
+  String get wallet {
+    return Intl.message('Wallet', name: 'wallet', desc: '', args: []);
   }
 
   /// `The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first.`

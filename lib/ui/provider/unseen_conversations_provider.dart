@@ -83,6 +83,7 @@ final unseenConversationsProvider =
                 duration: kSlowThrottleDuration,
               );
         case SlideCategoryType.setting:
+        case SlideCategoryType.wallet:
           unseenConversations = const Stream.empty();
       }
 

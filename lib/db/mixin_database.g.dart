@@ -18781,6 +18781,280 @@ class InscriptionItemsCompanion extends UpdateCompanion<InscriptionItem> {
   }
 }
 
+class TokensExtra extends Table with TableInfo<TokensExtra, TokensExtraData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  TokensExtra(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _kernelAssetIdMeta = const VerificationMeta(
+    'kernelAssetId',
+  );
+  late final GeneratedColumn<String> kernelAssetId = GeneratedColumn<String>(
+    'kernel_asset_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _balanceMeta = const VerificationMeta(
+    'balance',
+  );
+  late final GeneratedColumn<String> balance = GeneratedColumn<String>(
+    'balance',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _hiddenMeta = const VerificationMeta('hidden');
+  late final GeneratedColumn<bool> hidden = GeneratedColumn<bool>(
+    'hidden',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT FALSE',
+    defaultValue: const CustomExpression('FALSE'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [kernelAssetId, balance, hidden];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tokens_extra';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TokensExtraData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('kernel_asset_id')) {
+      context.handle(
+        _kernelAssetIdMeta,
+        kernelAssetId.isAcceptableOrUnknown(
+          data['kernel_asset_id']!,
+          _kernelAssetIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_kernelAssetIdMeta);
+    }
+    if (data.containsKey('balance')) {
+      context.handle(
+        _balanceMeta,
+        balance.isAcceptableOrUnknown(data['balance']!, _balanceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_balanceMeta);
+    }
+    if (data.containsKey('hidden')) {
+      context.handle(
+        _hiddenMeta,
+        hidden.isAcceptableOrUnknown(data['hidden']!, _hiddenMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {kernelAssetId};
+  @override
+  TokensExtraData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TokensExtraData(
+      kernelAssetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kernel_asset_id'],
+      )!,
+      balance: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}balance'],
+      )!,
+      hidden: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hidden'],
+      )!,
+    );
+  }
+
+  @override
+  TokensExtra createAlias(String alias) {
+    return TokensExtra(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(kernel_asset_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class TokensExtraData extends DataClass implements Insertable<TokensExtraData> {
+  final String kernelAssetId;
+  final String balance;
+  final bool hidden;
+  const TokensExtraData({
+    required this.kernelAssetId,
+    required this.balance,
+    required this.hidden,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['kernel_asset_id'] = Variable<String>(kernelAssetId);
+    map['balance'] = Variable<String>(balance);
+    map['hidden'] = Variable<bool>(hidden);
+    return map;
+  }
+
+  TokensExtraCompanion toCompanion(bool nullToAbsent) {
+    return TokensExtraCompanion(
+      kernelAssetId: Value(kernelAssetId),
+      balance: Value(balance),
+      hidden: Value(hidden),
+    );
+  }
+
+  factory TokensExtraData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TokensExtraData(
+      kernelAssetId: serializer.fromJson<String>(json['kernel_asset_id']),
+      balance: serializer.fromJson<String>(json['balance']),
+      hidden: serializer.fromJson<bool>(json['hidden']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'kernel_asset_id': serializer.toJson<String>(kernelAssetId),
+      'balance': serializer.toJson<String>(balance),
+      'hidden': serializer.toJson<bool>(hidden),
+    };
+  }
+
+  TokensExtraData copyWith({
+    String? kernelAssetId,
+    String? balance,
+    bool? hidden,
+  }) => TokensExtraData(
+    kernelAssetId: kernelAssetId ?? this.kernelAssetId,
+    balance: balance ?? this.balance,
+    hidden: hidden ?? this.hidden,
+  );
+  TokensExtraData copyWithCompanion(TokensExtraCompanion data) {
+    return TokensExtraData(
+      kernelAssetId: data.kernelAssetId.present
+          ? data.kernelAssetId.value
+          : this.kernelAssetId,
+      balance: data.balance.present ? data.balance.value : this.balance,
+      hidden: data.hidden.present ? data.hidden.value : this.hidden,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TokensExtraData(')
+          ..write('kernelAssetId: $kernelAssetId, ')
+          ..write('balance: $balance, ')
+          ..write('hidden: $hidden')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(kernelAssetId, balance, hidden);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TokensExtraData &&
+          other.kernelAssetId == this.kernelAssetId &&
+          other.balance == this.balance &&
+          other.hidden == this.hidden);
+}
+
+class TokensExtraCompanion extends UpdateCompanion<TokensExtraData> {
+  final Value<String> kernelAssetId;
+  final Value<String> balance;
+  final Value<bool> hidden;
+  final Value<int> rowid;
+  const TokensExtraCompanion({
+    this.kernelAssetId = const Value.absent(),
+    this.balance = const Value.absent(),
+    this.hidden = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TokensExtraCompanion.insert({
+    required String kernelAssetId,
+    required String balance,
+    this.hidden = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : kernelAssetId = Value(kernelAssetId),
+       balance = Value(balance);
+  static Insertable<TokensExtraData> custom({
+    Expression<String>? kernelAssetId,
+    Expression<String>? balance,
+    Expression<bool>? hidden,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (kernelAssetId != null) 'kernel_asset_id': kernelAssetId,
+      if (balance != null) 'balance': balance,
+      if (hidden != null) 'hidden': hidden,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TokensExtraCompanion copyWith({
+    Value<String>? kernelAssetId,
+    Value<String>? balance,
+    Value<bool>? hidden,
+    Value<int>? rowid,
+  }) {
+    return TokensExtraCompanion(
+      kernelAssetId: kernelAssetId ?? this.kernelAssetId,
+      balance: balance ?? this.balance,
+      hidden: hidden ?? this.hidden,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (kernelAssetId.present) {
+      map['kernel_asset_id'] = Variable<String>(kernelAssetId.value);
+    }
+    if (balance.present) {
+      map['balance'] = Variable<String>(balance.value);
+    }
+    if (hidden.present) {
+      map['hidden'] = Variable<bool>(hidden.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TokensExtraCompanion(')
+          ..write('kernelAssetId: $kernelAssetId, ')
+          ..write('balance: $balance, ')
+          ..write('hidden: $hidden, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(e);
   $MixinDatabaseManager get managers => $MixinDatabaseManager(this);
@@ -18824,6 +19098,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final InscriptionCollections inscriptionCollections =
       InscriptionCollections(this);
   late final InscriptionItems inscriptionItems = InscriptionItems(this);
+  late final TokensExtra tokensExtra = TokensExtra(this);
   late final Index indexConversationsCategoryStatus = Index(
     'index_conversations_category_status',
     'CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations (category, status)',
@@ -19436,6 +19711,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     properties,
     inscriptionCollections,
     inscriptionItems,
+    tokensExtra,
     indexConversationsCategoryStatus,
     indexConversationsMuteUntil,
     indexFloodMessagesCreatedAt,
@@ -28871,6 +29147,179 @@ typedef $InscriptionItemsProcessedTableManager =
       InscriptionItem,
       PrefetchHooks Function()
     >;
+typedef $TokensExtraCreateCompanionBuilder =
+    TokensExtraCompanion Function({
+      required String kernelAssetId,
+      required String balance,
+      Value<bool> hidden,
+      Value<int> rowid,
+    });
+typedef $TokensExtraUpdateCompanionBuilder =
+    TokensExtraCompanion Function({
+      Value<String> kernelAssetId,
+      Value<String> balance,
+      Value<bool> hidden,
+      Value<int> rowid,
+    });
+
+class $TokensExtraFilterComposer
+    extends Composer<_$MixinDatabase, TokensExtra> {
+  $TokensExtraFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get kernelAssetId => $composableBuilder(
+    column: $table.kernelAssetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get balance => $composableBuilder(
+    column: $table.balance,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hidden => $composableBuilder(
+    column: $table.hidden,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $TokensExtraOrderingComposer
+    extends Composer<_$MixinDatabase, TokensExtra> {
+  $TokensExtraOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get kernelAssetId => $composableBuilder(
+    column: $table.kernelAssetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get balance => $composableBuilder(
+    column: $table.balance,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hidden => $composableBuilder(
+    column: $table.hidden,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $TokensExtraAnnotationComposer
+    extends Composer<_$MixinDatabase, TokensExtra> {
+  $TokensExtraAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get kernelAssetId => $composableBuilder(
+    column: $table.kernelAssetId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get balance =>
+      $composableBuilder(column: $table.balance, builder: (column) => column);
+
+  GeneratedColumn<bool> get hidden =>
+      $composableBuilder(column: $table.hidden, builder: (column) => column);
+}
+
+class $TokensExtraTableManager
+    extends
+        RootTableManager<
+          _$MixinDatabase,
+          TokensExtra,
+          TokensExtraData,
+          $TokensExtraFilterComposer,
+          $TokensExtraOrderingComposer,
+          $TokensExtraAnnotationComposer,
+          $TokensExtraCreateCompanionBuilder,
+          $TokensExtraUpdateCompanionBuilder,
+          (
+            TokensExtraData,
+            BaseReferences<_$MixinDatabase, TokensExtra, TokensExtraData>,
+          ),
+          TokensExtraData,
+          PrefetchHooks Function()
+        > {
+  $TokensExtraTableManager(_$MixinDatabase db, TokensExtra table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $TokensExtraFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $TokensExtraOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $TokensExtraAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> kernelAssetId = const Value.absent(),
+                Value<String> balance = const Value.absent(),
+                Value<bool> hidden = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TokensExtraCompanion(
+                kernelAssetId: kernelAssetId,
+                balance: balance,
+                hidden: hidden,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String kernelAssetId,
+                required String balance,
+                Value<bool> hidden = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TokensExtraCompanion.insert(
+                kernelAssetId: kernelAssetId,
+                balance: balance,
+                hidden: hidden,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<TokensExtra, TokensExtraData>(table),
+                  BaseReferences<_$MixinDatabase, TokensExtra, TokensExtraData>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $TokensExtraProcessedTableManager =
+    ProcessedTableManager<
+      _$MixinDatabase,
+      TokensExtra,
+      TokensExtraData,
+      $TokensExtraFilterComposer,
+      $TokensExtraOrderingComposer,
+      $TokensExtraAnnotationComposer,
+      $TokensExtraCreateCompanionBuilder,
+      $TokensExtraUpdateCompanionBuilder,
+      (
+        TokensExtraData,
+        BaseReferences<_$MixinDatabase, TokensExtra, TokensExtraData>,
+      ),
+      TokensExtraData,
+      PrefetchHooks Function()
+    >;
 
 class $MixinDatabaseManager {
   final _$MixinDatabase _db;
@@ -28932,6 +29381,8 @@ class $MixinDatabaseManager {
       $InscriptionCollectionsTableManager(_db, _db.inscriptionCollections);
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db, _db.tokensExtra);
 }
 
 class MessageItem {

@@ -29,6 +29,7 @@ import '../provider/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
+import '../wallet/wallet_page.dart';
 
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
@@ -296,7 +297,7 @@ class _HomePage extends HookConsumerWidget {
                       decoration: BoxDecoration(
                         color: context.theme.chatBackground,
                       ),
-                      child: Empty(text: context.l10n.pickAConversation),
+                      child: const _EmptyPage(),
                     ),
                   ),
                 ),
@@ -350,32 +351,43 @@ class _HomePage extends HookConsumerWidget {
   }
 }
 
+class _EmptyPage extends ConsumerWidget {
+  const _EmptyPage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      ref.watch(
+        slideCategoryStateProvider.select(
+          (value) => value.type.hasConversations,
+        ),
+      )
+      ? Empty(text: context.l10n.pickAConversation)
+      : const SizedBox.shrink();
+}
+
 class _CenterPage extends HookConsumerWidget {
   const _CenterPage();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routeMode = DesktopShellLayout.mainRouteModeOf(context);
-    final isSetting = ref.watch(
-      slideCategoryStateProvider.select(
-        (value) => value.type == SlideCategoryType.setting,
-      ),
+    final type = ref.watch(
+      slideCategoryStateProvider.select((value) => value.type),
     );
+    // Builds the wallet only after the user opens it, so that it does not
+    // query or sync for users who never open it.
+    final walletOpened = useRef(false);
+    if (type == SlideCategoryType.wallet) walletOpened.value = true;
 
     ref.listen(slideCategoryStateProvider, (previous, next) {
-      final isSetting = next.type == SlideCategoryType.setting;
-
       final majorNavigationNotifier = context.providerContainer.read(
         majorNavigationProvider.notifier,
       );
 
-      if (isSetting && !routeMode) {
+      if (!next.type.hasConversations && !routeMode) {
         ref.read(conversationProvider.notifier).unselected();
       }
-      majorNavigationNotifier.syncSettingCategory(
-        isSetting,
-        routeMode: routeMode,
-      );
+      majorNavigationNotifier.syncCategory(next.type, routeMode: routeMode);
     });
 
     return RepaintBoundary(
@@ -385,11 +397,19 @@ class _CenterPage extends HookConsumerWidget {
           border: Border(right: BorderSide(color: context.theme.divider)),
         ),
         child: IndexedStack(
-          index: isSetting ? 1 : 0,
+          index: switch (type) {
+            SlideCategoryType.setting => 1,
+            SlideCategoryType.wallet => 2,
+            _ => 0,
+          },
           sizing: StackFit.expand,
-          children: const [
-            AutomaticKeepAliveClientWidget(child: ConversationPage()),
-            AutomaticKeepAliveClientWidget(child: SettingPage()),
+          children: [
+            const AutomaticKeepAliveClientWidget(child: ConversationPage()),
+            const AutomaticKeepAliveClientWidget(child: SettingPage()),
+            if (walletOpened.value)
+              const AutomaticKeepAliveClientWidget(child: WalletPage())
+            else
+              const SizedBox.shrink(),
           ],
         ),
       ),
