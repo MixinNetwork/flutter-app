@@ -32,6 +32,23 @@ String? linuxUpdatePackage({
   return 'tar-$arch';
 }
 
+/// The appcast package of this copy of the app on Windows, or null when the
+/// app must not update itself. Only the Inno install has its uninstaller next
+/// to the executable; an MSIX (Store) or portable copy does not. An x64 build
+/// also reports [Abi.windowsX64] under emulation on arm64.
+String? windowsUpdatePackage({
+  required String executable,
+  required Abi abi,
+  required bool Function(String path) fileExists,
+}) {
+  if (abi != Abi.windowsX64) return null;
+  return fileExists(
+        p.windows.join(p.windows.dirname(executable), 'unins000.exe'),
+      )
+      ? 'inno-x64'
+      : null;
+}
+
 class AppUpdateItem {
   AppUpdateItem({
     required this.tag,
@@ -121,7 +138,7 @@ bool verifyAppUpdate(
 /// A new file to download [package] into, alone in a new private directory:
 /// next to an AppImage, so the update is a rename; else in the temp
 /// directory. Its name does not come from the appcast.
-Future<File> createLinuxUpdateFile(
+Future<File> createUpdateFile(
   String package,
   Map<String, String> environment,
 ) async {
@@ -152,6 +169,8 @@ Future<File> createLinuxUpdateFile(
       ? 'update.AppImage'
       : package.startsWith('deb-')
       ? 'update.deb'
+      : package.startsWith('inno-')
+      ? 'update.exe'
       : 'update.tar';
   return File(p.join(directory.path, name));
 }
@@ -295,3 +314,71 @@ int? latestAppcastBuild(String appcast, String package) {
   }
   return newest;
 }
+
+// Inno Setup flags: no wizard and no message boxes, and nothing to close or
+// restart, as the app has exited. /MIXINUPDATE=1 lets the [Run] entry in
+// windows_inno_setup.iss start the new app, which other silent installs
+// (winget, Intune) must not do.
+const _innoSilentArguments =
+    '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS '
+    '/NORESTARTAPPLICATIONS /MIXINUPDATE=1';
+
+String _powerShellString(String value) {
+  // PowerShell also ends a single-quoted string at U+2018 to U+201B.
+  final escaped = value.replaceAllMapped(
+    RegExp("['\u2018-\u201B]"),
+    (m) => '${m[0]}${m[0]}',
+  );
+  return "'$escaped'";
+}
+
+/// Waits for [pid] to exit, so the AppMutex is free, runs the [installer]
+/// silently and deletes its directory. When the installer fails, it starts
+/// [executable] again.
+@visibleForTesting
+String windowsInstallScript({
+  required int pid,
+  required String installer,
+  required String executable,
+}) =>
+    '''
+\$installer = ${_powerShellString(installer)}
+Wait-Process -Id $pid -ErrorAction SilentlyContinue
+# Not -Wait: it also waits for the new app that Setup starts. The handle is
+# read first, else ExitCode can be empty after WaitForExit.
+\$setup = Start-Process -FilePath \$installer -ArgumentList '$_innoSilentArguments' -PassThru
+\$null = \$setup.Handle
+\$setup.WaitForExit()
+Remove-Item -LiteralPath (Split-Path -Parent \$installer) -Recurse -Force
+if (\$setup.ExitCode -ne 0) { Start-Process -FilePath ${_powerShellString(executable)} }
+''';
+
+/// The PowerShell arguments that run [script]. -EncodedCommand takes UTF-16LE
+/// in base64, so no path needs command line quoting.
+@visibleForTesting
+List<String> powerShellArguments(String script) => [
+  '-NoProfile',
+  '-NonInteractive',
+  '-EncodedCommand',
+  base64Encode([
+    for (final unit in script.codeUnits) ...[unit & 0xff, unit >> 8],
+  ]),
+];
+
+/// Starts the Inno installer [file]. It waits until this process exits, so
+/// call `exit` after it.
+// Not detached: powershell.exe started with DETACHED_PROCESS has no console and
+// exits without running the script. An attached child outlives the app.
+Future<void> startWindowsUpdateInstall({
+  required File file,
+  required String executable,
+}) => Process.start(
+  'powershell.exe',
+  powerShellArguments(
+    windowsInstallScript(
+      pid: pid,
+      installer: file.path,
+      executable: executable,
+    ),
+  ),
+);

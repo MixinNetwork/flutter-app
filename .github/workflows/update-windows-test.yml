@@ -1,0 +1,110 @@
+name: Update Windows Test
+
+# Installs 6.3.6+601 with Inno Setup, lets it update itself to 6.3.7+602 from a
+# local appcast signed by a throwaway key, and checks that 6.3.7 runs.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/update-windows-test.yml'
+      - 'integration_test/app_update_windows.dart'
+      - 'lib/ui/provider/app_update_provider.dart'
+      - 'lib/utils/app_update.dart'
+      - 'windows_inno_setup.iss'
+  workflow_dispatch:
+    inputs:
+      flutter_version:
+        description: "flutter version. eg 3.19.6"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  update-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 'stable'
+          override: true
+
+      - uses: ilammy/setup-nasm@v1
+
+      - run: git config --system core.longpaths true
+
+      - name: Make a throwaway update key
+        shell: bash
+        run: |
+          openssl version
+          openssl genpkey -algorithm ed25519 -out "$RUNNER_TEMP/update_key.pem"
+          openssl pkey -in "$RUNNER_TEMP/update_key.pem" -pubout -outform DER \
+            | tail -c 32 | base64 > assets/update_ed25519.pub
+          touch .env
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build 6.3.7+602 (the update)
+        run: |
+          flutter build windows --build-name 6.3.7 --build-number 602 --dart-define=APP_VERSION=6.3.7 --dart-define=APP_BUILD_NUMBER=602
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" windows_inno_setup.iss
+          New-Item -ItemType Directory served\v6.3.7 | Out-Null
+          Move-Item build\mixin_desktop_windows_setup_amd64.exe served\v6.3.7\
+
+      - name: Build 6.3.6+601 (installs the first update it finds)
+        run: |
+          flutter build windows -t integration_test/app_update_windows.dart --build-name 6.3.6 --build-number 601 --dart-define=APP_VERSION=6.3.6 --dart-define=APP_BUILD_NUMBER=601
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" windows_inno_setup.iss
+          Move-Item build\mixin_desktop_windows_setup_amd64.exe old_setup.exe
+
+      - name: Write the test appcast
+        shell: bash
+        run: |
+          python3 dist/update_appcast.py --tag v6.3.7 --build 602 \
+            --key "$RUNNER_TEMP/update_key.pem" --public-key assets/update_ed25519.pub \
+            --url-prefix http://127.0.0.1:8765/v6.3.7 --out served/appcast.xml \
+            inno-x64=served/v6.3.7/mixin_desktop_windows_setup_amd64.exe
+          cat served/appcast.xml
+
+      - name: Install 6.3.6, let it update, check 6.3.7 runs
+        env:
+          # 6.3.6 and the 6.3.7 that its updater starts get this environment.
+          MIXIN_UPDATE_APPCAST_URL: http://127.0.0.1:8765/appcast.xml
+        run: |
+          Start-Process python -ArgumentList '-m','http.server','8765','--directory','served'
+          $exe = "$env:LOCALAPPDATA\Programs\Mixin\mixin_desktop.exe"
+          # Not -Wait: it waits for all descendants, such as an app that Setup starts.
+          $setup = Start-Process .\old_setup.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -PassThru
+          $null = $setup.Handle
+          $setup.WaitForExit()
+          if ($setup.ExitCode -ne 0) { throw "old setup exit code $($setup.ExitCode)" }
+          (Get-Item $exe).VersionInfo.ProductVersion
+          Start-Sleep 5
+          # Only the in-app updater passes /MIXINUPDATE=1, which starts the app.
+          if (Get-Process mixin_desktop -ErrorAction SilentlyContinue) { throw 'a plain silent install started the app' }
+          Start-Process $exe
+          for ($i = 0; $i -lt 60; $i++) {
+            Start-Sleep 5
+            $version = (Get-Item $exe -ErrorAction SilentlyContinue).VersionInfo.ProductVersion
+            $running = Get-Process mixin_desktop -ErrorAction SilentlyContinue | Where-Object Path -eq $exe
+            Write-Output "$i version=$version running=$([bool]$running)"
+            if ($version -like '6.3.7*' -and $running) {
+              # Setup starts the app just before it exits and the updater deletes it.
+              Start-Sleep 5
+              if (Get-ChildItem $env:TEMP -Filter '.mixin_update_*' -Directory) { throw 'the download directory is left' }
+              exit 0
+            }
+          }
+          Get-ChildItem "$env:USERPROFILE\Documents\Mixin\log" -ErrorAction SilentlyContinue | Get-Content -Tail 50
+          throw '6.3.7 is not installed and running'
