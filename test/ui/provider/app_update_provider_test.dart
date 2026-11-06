@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/ui/provider/app_update_provider.dart';
@@ -50,18 +52,126 @@ const _dmg = '''
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
-  setUp(
-    () => PackageInfo.setMockInitialValues(
+  late List<String> calls;
+  late int? count;
+  late PlatformException? countError;
+  late Completer<void> install;
+  late PlatformException? installError;
+
+  setUp(() {
+    calls = [];
+    count = 1;
+    countError = null;
+    install = Completer()..complete();
+    installError = null;
+    messenger.setMockMethodCallHandler(storeUpdateChannel, (call) async {
+      calls.add(call.method);
+      switch (call.method) {
+        case 'storeUpdateCount':
+          if (countError != null) throw countError!;
+          return count;
+        case 'installStoreUpdates':
+          await install.future;
+          if (installError != null) throw installError!;
+          return null;
+      }
+      return null;
+    });
+  });
+
+  tearDown(() => messenger.setMockMethodCallHandler(storeUpdateChannel, null));
+
+  Future<(ProviderContainer, AppUpdateNotifier)> start() async {
+    final provider = StateNotifierProvider<AppUpdateNotifier, AppUpdateState>(
+      (ref) => AppUpdateNotifier(ref, windows: true),
+    );
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final notifier = container.read(provider.notifier);
+    await pumpEventQueue();
+    return (container, notifier);
+  }
+
+  Future<void> sendProgress(double progress) => messenger.handlePlatformMessage(
+    storeUpdateChannel.name,
+    storeUpdateChannel.codec.encodeMethodCall(MethodCall('progress', progress)),
+    (_) {},
+  );
+
+  test('not packaged: shows nothing and installs nothing', () async {
+    count = null;
+    final (_, notifier) = await start();
+    expect(notifier.state.status, AppUpdateStatus.none);
+    await notifier.update();
+    expect(calls, ['storeUpdateCount']);
+  });
+
+  test('no updates: shows nothing', () async {
+    count = 0;
+    final (_, notifier) = await start();
+    expect(notifier.state.status, AppUpdateStatus.none);
+  });
+
+  test('store error on check: shows nothing', () async {
+    countError = PlatformException(code: 'store_error');
+    final (_, notifier) = await start();
+    expect(notifier.state.status, AppUpdateStatus.none);
+  });
+
+  test('available, install with progress, done', () async {
+    install = Completer();
+    final (_, notifier) = await start();
+    expect(notifier.state.status, AppUpdateStatus.available);
+
+    final done = notifier.update();
+    await pumpEventQueue();
+    expect(notifier.state.status, AppUpdateStatus.downloading);
+    expect(notifier.state.progress, 0);
+
+    await sendProgress(0.4);
+    expect(notifier.state.status, AppUpdateStatus.downloading);
+    expect(notifier.state.progress, 0.4);
+
+    // A second click while it runs does nothing.
+    await notifier.update();
+    expect(calls, ['storeUpdateCount', 'installStoreUpdates']);
+
+    install.complete();
+    await done;
+    expect(notifier.state.status, AppUpdateStatus.none);
+  });
+
+  test('install canceled or failed: retry', () async {
+    final (_, notifier) = await start();
+    installError = PlatformException(code: 'store_state', message: '4');
+    await notifier.update();
+    expect(notifier.state.status, AppUpdateStatus.failed);
+
+    // Late progress does not hide the retry.
+    await sendProgress(0.9);
+    expect(notifier.state.status, AppUpdateStatus.failed);
+
+    installError = null;
+    await notifier.update();
+    expect(notifier.state.status, AppUpdateStatus.none);
+    expect(calls, [
+      'storeUpdateCount',
+      'installStoreUpdates',
+      'installStoreUpdates',
+    ]);
+  });
+
+  test('a proxy turned on after the check hides the DMG update', () async {
+    PackageInfo.setMockInitialValues(
       appName: 'mixin',
       packageName: 'mixin_desktop',
       version: '6.3.6',
       buildNumber: '600',
       buildSignature: '',
-    ),
-  );
-
-  test('a proxy turned on after the check hides the DMG update', () async {
+    );
     final installs = <MethodCall>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -99,6 +209,13 @@ void main() {
   });
 
   test('a later appcast without the package keeps the update', () async {
+    PackageInfo.setMockInitialValues(
+      appName: 'mixin',
+      packageName: 'mixin_desktop',
+      version: '6.3.6',
+      buildNumber: '600',
+      buildSignature: '',
+    );
     final server = _Server();
     final provider = StateNotifierProvider<AppUpdateNotifier, AppUpdateState>(
       (ref) => AppUpdateNotifier.test(
