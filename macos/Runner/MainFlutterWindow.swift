@@ -4,7 +4,7 @@ import window_manager
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
-    let flutterViewController = FlutterViewController()
+    let flutterViewController = FlutterViewController(project: RendererProject())
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
@@ -30,4 +30,13 @@ class MainFlutterWindow: NSWindow {
     hiddenWindowAtLaunch()
   }
 
+}
+
+// Impeller corrupts the screen on Intel Macs, so they keep Skia. A universal
+// build shares one Info.plist, so this overrides the engine's private getter
+// that reads FLTEnableImpeller.
+private final class RendererProject: FlutterDartProject {
+  #if arch(x86_64)
+  @objc func enableImpeller() -> Bool { false }
+  #endif
 }
