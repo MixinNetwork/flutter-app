@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../constants/constants.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/high_light_text.dart';
+import '../../../widgets/text_field_hint.dart';
 import '../../provider/setting_provider.dart';
 
 class ImageCaptionInputWidget extends HookConsumerWidget {
@@ -41,13 +42,16 @@ class ImageCaptionInputWidget extends HookConsumerWidget {
         textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
           isDense: true,
-          hintText: context.l10n.addACaption,
+          hint: TextFieldHint(
+            context.l10n.addACaption,
+            style: Theme.of(context).textTheme.bodyLarge!.merge(
+              TextStyle(color: context.theme.secondaryText, fontSize: fontSize),
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          hintStyle: TextStyle(
-            color: context.theme.secondaryText,
-            fontSize: fontSize,
-          ),
           contentPadding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
         ),
         selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingMiddle,

@@ -41,6 +41,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/sticker_page/emoji_page.dart' show warmEmojiPage;
 import '../../../widgets/sticker_page/sticker_page.dart';
+import '../../../widgets/text_field_hint.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../../provider/conversation_provider.dart';
@@ -532,7 +533,7 @@ class _SendTextField extends HookConsumerWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: IgnorePointer(
-                    child: Text(
+                    child: TextFieldHint(
                       isEncryptConversation
                           ? context.l10n.chatHintE2e
                           : context.l10n.typeMessage,

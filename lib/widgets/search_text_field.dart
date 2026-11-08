@@ -12,6 +12,7 @@ import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'high_light_text.dart';
 import 'interactive_decorated_box.dart';
+import 'text_field_hint.dart';
 
 class SearchTextField extends HookConsumerWidget {
   const SearchTextField({
@@ -105,13 +106,11 @@ class SearchTextField extends HookConsumerWidget {
                         fontSize: fontSize,
                       ),
                       scrollPadding: EdgeInsets.zero,
+                      // Not filled: Material 3 adds 4 px before the text of a
+                      // filled field, which moves it away from the hint.
                       decoration: const InputDecoration(
                         isDense: true,
-                        filled: true,
                         border: InputBorder.none,
-                        fillColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        focusColor: Colors.transparent,
                         contentPadding: EdgeInsets.zero,
                       ),
                       inputFormatters: [
@@ -129,7 +128,7 @@ class SearchTextField extends HookConsumerWidget {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: IgnorePointer(
-                        child: Text(
+                        child: TextFieldHint(
                           hintText!,
                           style: TextStyle(
                             color: hintColor,

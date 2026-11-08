@@ -693,6 +693,24 @@ Future<void> prepareLinkRanges(Iterable<String> texts) async {
   }
 }
 
+/// The URL to open for the found link [link]. NSDataDetector also finds links
+/// without a scheme, such as "mixin.one" or an email address, and gives each
+/// one its URL, as the iOS app opens it. Dart cannot tell these links: it
+/// reads "example.com" in "example.com:8080" as a scheme.
+@visibleForTesting
+String linkUrl(String link) {
+  if (!kPlatformIsDarwin) return link;
+  final match = _linkDetector.matchesInString(link).firstOrNull;
+  final url = match?.url?.toString();
+  // A match of part of the link, as of a Mixin scheme, opens the text as is.
+  if (url == null ||
+      match!.range.start != 0 ||
+      match.range.end != link.length) {
+    return link;
+  }
+  return url;
+}
+
 class UrlTextMatcher extends TextMatcher with Equatable {
   UrlTextMatcher(BuildContext context)
     : super.textRangesFromText(
@@ -710,7 +728,7 @@ class UrlTextMatcher extends TextMatcher with Equatable {
           recognizer: TapGestureRecognizer()
             ..onTap = () => openUri(
               context,
-              linkString,
+              linkUrl(linkString),
               app: context.providerContainer.read(
                 conversationProvider.select((value) => value?.app),
               ),
