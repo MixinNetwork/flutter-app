@@ -19,6 +19,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
+import '../../widgets/text_field_hint.dart';
 
 class ProxyPage extends StatelessWidget {
   const ProxyPage({super.key});
@@ -331,10 +332,13 @@ class _ProxyInputWidget extends StatelessWidget {
         ],
         decoration: InputDecoration(
           isDense: true,
-          hintText: firstHintText,
-          hintStyle: TextStyle(
-            color: context.theme.secondaryText,
-            fontSize: 14,
+          hint: TextFieldHint(
+            firstHintText,
+            style: Theme.of(context).textTheme.bodyLarge!.merge(
+              TextStyle(color: context.theme.secondaryText, fontSize: 14),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -359,10 +363,13 @@ class _ProxyInputWidget extends StatelessWidget {
         ],
         decoration: InputDecoration(
           isDense: true,
-          hintText: secondHintText,
-          hintStyle: TextStyle(
-            color: context.theme.secondaryText,
-            fontSize: 14,
+          hint: TextFieldHint(
+            secondHintText,
+            style: Theme.of(context).textTheme.bodyLarge!.merge(
+              TextStyle(color: context.theme.secondaryText, fontSize: 14),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
