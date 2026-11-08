@@ -6,7 +6,6 @@ import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user_selector/conversation_selector.dart';
 import '../extension/extension.dart';
-import '../logger.dart';
 
 /// Forwards a web page to a conversation the user picks: as an app card when
 /// it is one of the app's resources, otherwise as its link. Returns whether
@@ -44,7 +43,7 @@ Future<bool> forwardWebPage(
       );
     }
 
-    if (cardApp != null && _matchResourcePattern(url, cardApp)) {
+    if (cardApp != null && cardApp.matchesResource(url)) {
       final pageTitle = title?.trim();
       await accountServer.sendAppCardMessage(
         conversationId: conversation.conversationId,
@@ -76,22 +75,4 @@ Future<bool> forwardWebPage(
       recipientId: conversation.userId,
     );
   });
-}
-
-bool _matchResourcePattern(String url, App app) {
-  String? toSchemeHostOrNull(String url) {
-    final uri = Uri.tryParse(url);
-    if (uri == null) return null;
-    return '${uri.scheme.toLowerCase()}://${uri.host.toLowerCase()}';
-  }
-
-  final uri = toSchemeHostOrNull(url);
-  final patterns = app.resourcePatternsList;
-  if (patterns == null) return false;
-  try {
-    return patterns.any((element) => toSchemeHostOrNull(element.trim()) == uri);
-  } catch (error, stacktrace) {
-    e('decode resource patterns error: $error, $stacktrace');
-    return false;
-  }
 }

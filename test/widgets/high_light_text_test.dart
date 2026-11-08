@@ -198,4 +198,25 @@ void main() {
     },
     skip: !Platform.isMacOS,
   );
+
+  test(
+    'linkUrl gives a found link without a scheme the URL NSDataDetector finds',
+    () {
+      // The system picks http or https.
+      for (final (link, host, path) in [
+        ('example.com', 'example.com', ''),
+        ('www.mixin.one/blog', 'www.mixin.one', '/blog'),
+        ('example.com:8080/path', 'example.com', '/path'),
+      ]) {
+        final uri = Uri.parse(linkUrl(link));
+        expect(uri.scheme, anyOf('http', 'https'), reason: link);
+        expect(uri.host, host, reason: link);
+        expect(uri.path, path, reason: link);
+      }
+      expect(linkUrl('a@b.com'), 'mailto:a@b.com');
+      expect(linkUrl('https://mixin.one'), 'https://mixin.one');
+      expect(linkUrl('mixin://users/1'), 'mixin://users/1');
+    },
+    skip: !Platform.isMacOS,
+  );
 }

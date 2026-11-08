@@ -30,6 +30,7 @@ class AppDelegate: FlutterAppDelegate {
     
     override func applicationDidFinishLaunching(_ aNotification: Notification) {
         beginActivity()
+        NSMenu.showImagesInContextMenus()
         
         let instance = PathProviderPlugin()
         let dir = getDirectory(ofType: .documentDirectory)
@@ -106,6 +107,39 @@ class AppDelegate: FlutterAppDelegate {
 
 
 
+
+extension NSMenu {
+    // macOS 27 hides menu item images unless the item opts in through
+    // `preferredImageVisibility`. super_native_extensions shows context menus
+    // with `popUpContextMenu(_:with:for:)` and does not set it, so opt the
+    // items in right before the menu pops up.
+    static func showImagesInContextMenus() {
+        guard let original = class_getClassMethod(
+            NSMenu.self, #selector(NSMenu.popUpContextMenu(_:with:for:))),
+              let replacement = class_getClassMethod(
+                NSMenu.self, #selector(NSMenu.mixin_popUpContextMenu(_:with:for:)))
+        else { return }
+        method_exchangeImplementations(original, replacement)
+    }
+
+    @objc private class func mixin_popUpContextMenu(_ menu: NSMenu, with event: NSEvent, for view: NSView) {
+        menu.makeItemImagesVisible()
+        // Calls the original implementation after the exchange.
+        mixin_popUpContextMenu(menu, with: event, for: view)
+    }
+
+    private func makeItemImagesVisible() {
+        // NSMenuItem.ImageVisibility.visible; set through KVC so the app
+        // still builds with SDKs older than macOS 27.
+        let selector = Selector(("setPreferredImageVisibility:"))
+        for item in items {
+            if item.image != nil && item.responds(to: selector) {
+                item.setValue(1, forKey: "preferredImageVisibility")
+            }
+            item.submenu?.makeItemImagesVisible()
+        }
+    }
+}
 
 private func getDirectory(ofType directory: FileManager.SearchPathDirectory) -> String? {
   let paths = NSSearchPathForDirectoriesInDomains(
