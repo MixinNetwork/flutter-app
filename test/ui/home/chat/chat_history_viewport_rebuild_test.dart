@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Offset;
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/ui/home/chat/chat_history_viewport.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/home/notifier/chat_side_notifier.dart';
+import 'package:flutter_app/ui/home/notifier/message_controller.dart';
 import 'package:flutter_app/ui/provider/keyword_provider.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
@@ -9,6 +12,7 @@ import 'package:flutter_app/widgets/message/item/text/text_message.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' show MessageStatus;
 import 'package:provider/provider.dart' as provider;
 
 import '../../../../integration_test/chat_timeline_fixture.dart';
@@ -53,6 +57,54 @@ void main() {
     debugOnRebuildDirtyWidget = null;
     await tester.pumpWidget(const SizedBox());
     // isBotGroupProvider closes its keep-alive 10 minutes after dispose.
+    await tester.pump(const Duration(minutes: 11));
+  });
+
+  testWidgets('an empty window then a window with only the secret row', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1000, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    // The controller starts empty, then opens a chat with no messages: the
+    // real controller adds only the secret row, whose message ID is ''.
+    final controller = FakeMessageController(const [], initial: 0);
+    await tester.pumpWidget(
+      ChatTimelineFixture(
+        controller: controller,
+        blinkNotifier: BlinkNotifier(tester),
+        database: createFixtureDatabase(),
+      ),
+    );
+    await tester.pump();
+
+    controller.value = MessageState(
+      conversationId: conversationId,
+      top: [
+        MessageItem(
+          sharedUserIdentityNumber: '',
+          status: MessageStatus.read,
+          messageId: '',
+          conversationId: '',
+          userIdentityNumber: '',
+          participantUserId: '',
+          userId: '',
+          type: MessageCategory.secret,
+          createdAt: DateTime(2026, 10),
+          pinned: false,
+          isVerified: false,
+          sharedUserIsVerified: false,
+        ),
+      ],
+      isLatest: true,
+      isOldest: true,
+      refreshKey: Object(),
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(minutes: 11));
   });
 

@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../utils/extension/extension.dart';
-import '../utils/hook.dart';
 import '../utils/system/text_input.dart';
 import 'disable.dart';
 import 'high_light_text.dart';
 import 'interactive_decorated_box.dart';
+import 'text_field_hint.dart';
 
 Future<T?> _showDialog<T>({
   required BuildContext context,
@@ -269,62 +269,49 @@ class DialogTextField extends HookConsumerWidget {
   final int? maxLength;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final textStream = useValueNotifierConvertSteam(textEditingController);
-    final hasText =
-        useMemoizedStream(
-          () => textStream.map((event) => event.text.isNotEmpty).distinct(),
-        ).data ??
-        textEditingController.text.isNotEmpty;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 48),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: context.theme.background,
-        borderRadius: const BorderRadius.all(Radius.circular(5)),
-      ),
-      alignment: Alignment.center,
-      child: Stack(
-        children: [
-          TextField(
-            autofocus: true,
-            controller: textEditingController,
-            style: TextStyle(color: context.theme.text),
-            maxLines: maxLines ?? 1,
-            minLines: 1,
-            maxLength: maxLength,
-            scrollPadding: EdgeInsets.zero,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.zero,
-              isDense: true,
-              focusedBorder: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              counterStyle: TextStyle(
-                fontSize: 14,
-                color: context.theme.secondaryText,
-              ),
-            ),
-            inputFormatters: inputFormatters,
-            selectionHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
-          ),
-          if (hintText.isNotEmpty && !hasText)
-            IgnorePointer(
-              child: Text(
+  Widget build(BuildContext context, WidgetRef ref) => Container(
+    constraints: const BoxConstraints(minHeight: 48),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    decoration: BoxDecoration(
+      color: context.theme.background,
+      borderRadius: const BorderRadius.all(Radius.circular(5)),
+    ),
+    alignment: Alignment.center,
+    child: TextField(
+      autofocus: true,
+      controller: textEditingController,
+      style: TextStyle(color: context.theme.text),
+      maxLines: maxLines ?? 1,
+      minLines: 1,
+      maxLength: maxLength,
+      scrollPadding: EdgeInsets.zero,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        isDense: true,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        counterStyle: TextStyle(
+          fontSize: 14,
+          color: context.theme.secondaryText,
+        ),
+        hint: hintText.isEmpty
+            ? null
+            : TextFieldHint(
                 hintText,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  height: 1,
+                style: Theme.of(context).textTheme.bodyLarge!.merge(
+                  TextStyle(color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
-        ],
+        hintFadeDuration: Duration.zero,
       ),
-    );
-  }
+      inputFormatters: inputFormatters,
+      selectionHeightStyle: BoxHeightStyle.includeLineSpacingMiddle,
+      contextMenuBuilder: (context, state) =>
+          MixinAdaptiveSelectionToolbar(editableTextState: state),
+    ),
+  );
 }
 
 enum DialogEvent { positive, neutral }
