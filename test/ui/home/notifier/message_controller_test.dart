@@ -234,6 +234,49 @@ void main() {
           'user',
         );
 
+    group('a window with the whole chat', () {
+      setUp(() async {
+        controller
+          ..limit = 60
+          ..loadAroundMessage(_id(18));
+        await until(
+          () =>
+              controller.value.center?.messageId == _id(18) &&
+              controller.value.isOldest &&
+              controller.value.isLatest,
+        );
+      });
+
+      List<MessageItem> secretRows() => [
+        for (final message in controller.value.list)
+          if (message.type == MessageCategory.secret) message,
+      ];
+
+      test('keeps an older incoming message in time order', () async {
+        await insertMessage('older', DateTime(2026, 1, 1, 12, 15, 30));
+        await until(() => ids().contains('older'));
+
+        expect(ids(), [
+          for (var i = 1; i <= 15; i++) _id(i),
+          'older',
+          for (var i = 16; i <= 20; i++) _id(i),
+        ]);
+        expect(secretRows(), hasLength(1));
+        expect(controller.value.list.first.type, MessageCategory.secret);
+      });
+
+      test('does not change the window that is shown', () async {
+        final shown = controller.value;
+        final shownIds = [for (final m in shown.list) m.messageId];
+
+        await mixinDatabase.messageDao.deleteMessage(_conversationId, _id(19));
+        await until(() => !ids().contains(_id(19)));
+
+        expect([for (final m in shown.list) m.messageId], shownIds);
+        expect(secretRows(), hasLength(1));
+      });
+    });
+
     test('shows a message received while the last page loads', () async {
       controller.limit = 9;
       gate = Completer();
