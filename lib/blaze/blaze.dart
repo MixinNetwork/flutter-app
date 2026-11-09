@@ -251,14 +251,17 @@ class Blaze {
                 return;
               }
 
-              _connectedState = ConnectedState.connected;
-              d('blazeMessage receive: ${blazeMessage.action}');
-
               if (blazeMessage.action == kErrorAction &&
                   blazeMessage.error?.code == authentication) {
                 _disconnect();
+                // Confirm with a fresh HTTP token so the existing error handler
+                // can distinguish a revoked session from a local clock error.
+                unawaited(reconnect());
                 return;
               }
+
+              _connectedState = ConnectedState.connected;
+              d('blazeMessage receive: ${blazeMessage.action}');
 
               if (blazeMessage.error == null) {
                 final transaction = transactions[blazeMessage.id];

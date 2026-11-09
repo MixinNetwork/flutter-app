@@ -111,7 +111,6 @@ class AccountDeletePage extends StatelessWidget {
                     if (deleted) {
                       w('account deleted');
                       await context.accountServer.signOutAndClear();
-                      context.multiAuthChangeNotifier.signOut();
                     }
                   } else {
                     e('delete account no pin');
