@@ -93,6 +93,23 @@ void main() {
     });
   });
 
+  group('canInstallUpdate', () {
+    test('needs a writable install directory for the Inno install', () async {
+      final directory = await Directory.systemTemp.createTemp('inno');
+      addTearDown(() async {
+        await Process.run('chmod', ['755', directory.path]);
+        await directory.delete(recursive: true);
+      });
+      final executable = p.join(directory.path, 'mixin_desktop.exe');
+
+      expect(await canInstallUpdate('inno-x64', const {}, executable), isTrue);
+      expect(directory.listSync(), isEmpty);
+
+      await Process.run('chmod', ['555', directory.path]);
+      expect(await canInstallUpdate('inno-x64', const {}, executable), isFalse);
+    }, testOn: 'posix');
+  });
+
   group('findAppUpdate', () {
     test('takes the newest build of this package after the current build', () {
       final appcast = _appcast([

@@ -176,7 +176,7 @@ Future<File> createUpdateFile(
 }
 
 /// Whether this copy can install [package] by itself.
-Future<bool> canInstallLinuxUpdate(
+Future<bool> canInstallUpdate(
   String package,
   Map<String, String> environment,
   String executable,
@@ -184,8 +184,13 @@ Future<bool> canInstallLinuxUpdate(
   if (package.startsWith('deb-')) {
     return (await Process.run('sh', ['-c', 'command -v pkexec'])).exitCode == 0;
   }
-  // The AppImage file or the bundle directory is replaced in its parent.
-  final parent = package.startsWith('appimage-')
+  // The update runs without elevation. Inno Setup writes into the install
+  // directory, so an install that an elevated Setup put into a protected
+  // directory fails, and Setup hides the error. The AppImage file or the
+  // bundle directory is replaced in its parent.
+  final parent = package.startsWith('inno-')
+      ? p.dirname(executable)
+      : package.startsWith('appimage-')
       ? p.dirname(environment['APPIMAGE']!)
       : p.dirname(p.dirname(executable));
   final probe = File(p.join(parent, '.mixin_update_${pid}_probe'));
