@@ -97,8 +97,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     )).trim();
     // The release key is not set up yet, so there is nothing to trust.
     if (key.isEmpty) return;
-    if (Platform.isLinux &&
-        !await canInstallLinuxUpdate(package, environment, executable)) {
+    if (!await canInstallUpdate(package, environment, executable)) {
       i('app update: $package cannot install by itself');
       return;
     }
