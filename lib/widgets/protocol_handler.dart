@@ -13,8 +13,31 @@ import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import '../utils/logger.dart';
 import '../utils/uri_utils.dart';
+import 'auth.dart' show appLocked;
 
 String? _initialUrl;
+
+/// Opens a link that another app, such as a browser, gave to this app. A page
+/// can open a link without a click, so a message is sent only after the user
+/// confirms it, and nothing opens behind the lock screen.
+Future<bool> openExternalUri(
+  BuildContext context,
+  String url, {
+  @visibleForTesting
+  Future<bool> Function(
+        BuildContext context,
+        String url, {
+        required bool confirmSend,
+      })
+      open =
+      openUri,
+}) async {
+  if (appLocked.value) {
+    w('ignore external link while locked');
+    return false;
+  }
+  return open(context, url, confirmSend: true);
+}
 
 Future<void> parseAppInitialArguments(List<String> args) async {
   try {
@@ -37,7 +60,7 @@ class AppProtocolHandler extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       if (_initialUrl != null) {
-        openUri(context, _initialUrl!);
+        openExternalUri(context, _initialUrl!);
       }
     }, [_initialUrl]);
     if (Platform.isLinux) {
@@ -62,7 +85,7 @@ class _LinuxAppProtocolHandler extends HookConsumerWidget {
           windowManager.show();
           bringWindowToFront();
           if (url != null) {
-            openUri(context, url);
+            openExternalUri(context, url);
           }
         },
       );
@@ -118,7 +141,7 @@ class _ProtocolHandler extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     useProtocol((url) {
       windowManager.show();
-      openUri(context, url);
+      openExternalUri(context, url);
     });
     return child;
   }
