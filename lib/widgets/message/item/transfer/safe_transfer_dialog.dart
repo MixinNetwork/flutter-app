@@ -16,11 +16,51 @@ import '../../../high_light_text.dart';
 import 'safe_transfer_message.dart';
 import 'transfer_page.dart';
 
-Future<void> showSafeTransferDialog(BuildContext context, String snapshotId) =>
-    showMixinDialog(
+Future<void> showSafeTransferDialog(
+  BuildContext context,
+  String snapshotId,
+) async {
+  // Reads the local data before the dialog shows, so that its first frame is
+  // whole and only the data from the network comes in later.
+  final container = context.providerContainer;
+  final subscriptions = <ProviderSubscription<Object?>>[];
+  Future<void> preload() async {
+    final snapshotProvider = safeSnapshotProvider(snapshotId);
+    subscriptions.add(container.listen(snapshotProvider, (_, _) {}));
+    final snapshot = await container.read(snapshotProvider.future);
+    if (snapshot != null) {
+      final token = tokenProvider(snapshot.assetId);
+      subscriptions
+        ..add(container.listen(token, (_, _) {}))
+        ..add(container.listen(fiatRateProvider, (_, _) {}));
+      final (tokenValue, _) = await (
+        container.read(token.future),
+        container.read(fiatRateProvider.future),
+      ).wait;
+      if (tokenValue != null) {
+        final chain = assetChainProvider(tokenValue.chainId);
+        subscriptions.add(container.listen(chain, (_, _) {}));
+        await container.read(chain.future);
+      }
+    }
+  }
+
+  try {
+    try {
+      // The dialog reads what is still missing itself.
+      await preload().timeout(const Duration(milliseconds: 300));
+    } on Object catch (_) {}
+    if (!context.mounted) return;
+    await showMixinDialog(
       context: context,
       child: _SafeTransferDialog(snapshotId: snapshotId),
     );
+  } finally {
+    for (final subscription in subscriptions) {
+      subscription.close();
+    }
+  }
+}
 
 final _snapshotTypeProvider = Provider.family.autoDispose<String, SafeSnapshot>(
   (ref, snapshot) {
@@ -125,7 +165,8 @@ class _SafeTransferDialog extends HookConsumerWidget {
                     snapshotType: type,
                   ),
                   AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
+                    duration: Durations.short3,
+                    curve: Easing.standard,
                     alignment: Alignment.topCenter,
                     child: Builder(
                       builder: (context) {
@@ -232,17 +273,52 @@ class _ValuesDescription extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           CustomSelectableText(currentValue, enableInteractiveSelection: false),
-          if (thatTimeValue != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: CustomSelectableText(
-                thatTimeValue,
-                enableInteractiveSelection: false,
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            // Holds the line while the price is loading, so that nothing
+            // moves when it comes in.
+            child: thatTimeValue == null
+                ? Visibility.maintain(
+                    visible: false,
+                    child: CustomSelectableText(
+                      context.l10n.valueThen(context.l10n.na),
+                      enableInteractiveSelection: false,
+                    ),
+                  )
+                : _FadeIn(
+                    child: CustomSelectableText(
+                      thatTimeValue,
+                      enableInteractiveSelection: false,
+                    ),
+                  ),
+          ),
         ],
       ),
     );
+  }
+}
+
+/// Fades in when it first shows. It does not grow, because it is a line under
+/// a line of the same kind.
+class _FadeIn extends HookWidget {
+  const _FadeIn({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = useAnimationController(duration: Durations.short3);
+    useEffect(() {
+      controller.forward();
+      return null;
+    }, const []);
+    final animation = useMemoized(
+      () => CurvedAnimation(
+        parent: controller,
+        curve: Easing.emphasizedDecelerate,
+      ),
+    );
+    return FadeTransition(opacity: animation, child: child);
   }
 }
 

@@ -16,6 +16,7 @@ import '../../setting/storage_page.dart';
 import '../../setting/storage_usage_detail_page.dart';
 import '../../setting/storage_usage_list_page.dart';
 import '../../wallet/wallet_token_page.dart';
+import '../../wallet/wallet_widgets.dart';
 import '../chat/chat_page.dart';
 import '../desktop_shell_layout.dart';
 
@@ -171,7 +172,11 @@ MaterialPage _pageFor(MajorNavigationEntry entry) {
       return MaterialPage(
         key: const ValueKey(MajorNavigationDestination.walletTokenPage),
         name: 'walletTokenPage',
-        child: WalletTokenPage(key: ValueKey(assetId), assetId: assetId),
+        // The page key stays when the token changes, so cross-fade the content.
+        child: AnimatedSwitcher(
+          duration: kWalletMotion,
+          child: WalletTokenPage(key: ValueKey(assetId), assetId: assetId),
+        ),
       );
   }
 }
