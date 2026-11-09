@@ -16,9 +16,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart' hide ThrottleExtensions;
-import 'package:string_tokenizer/string_tokenizer.dart' as string_tokenizer;
 import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
+import 'package:word_segmenter/word_segmenter.dart';
 
 import '../../account/account_server.dart';
 import '../../db/dao/snapshot_dao.dart';

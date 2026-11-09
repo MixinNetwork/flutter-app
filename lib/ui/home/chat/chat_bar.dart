@@ -271,6 +271,7 @@ class ConversationName extends StatelessWidget {
         verified: conversationState.isVerified,
         isBot: conversationState.isBot,
         membership: conversationState.membership,
+        isGroup: conversationState.isGroup ?? false,
       ),
     ],
   );

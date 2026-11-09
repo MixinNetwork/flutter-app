@@ -227,6 +227,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "card": MessageLookupByLibrary.simpleMessage("Card"),
     "change": MessageLookupByLibrary.simpleMessage("Change"),
+    "changeGroupPhoto": MessageLookupByLibrary.simpleMessage(
+      "Change Group Photo",
+    ),
     "changeNumber": MessageLookupByLibrary.simpleMessage("Change Number"),
     "changeNumberInstead": MessageLookupByLibrary.simpleMessage(
       "Change Number Instead",

@@ -12,6 +12,7 @@ import '../buttons.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import '../toast.dart';
+import 'badges_widget.dart';
 
 Future<void> showConversationDialog(
   BuildContext context,
@@ -118,10 +119,27 @@ class _ConversationInfo extends HookConsumerWidget {
         ),
       ),
       const SizedBox(height: 8),
-      CustomSelectableText(
-        conversationResponse.name,
-        style: TextStyle(color: context.theme.text, fontSize: 16, height: 1),
-        textAlign: TextAlign.center,
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: CustomSelectableText(
+              conversationResponse.name,
+              style: TextStyle(
+                color: context.theme.text,
+                fontSize: 16,
+                height: 1,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const BadgesWidget(
+            verified: false,
+            isBot: false,
+            membership: null,
+            isGroup: true,
+          ),
+        ],
       ),
       const SizedBox(height: 4),
       CustomSelectableText(

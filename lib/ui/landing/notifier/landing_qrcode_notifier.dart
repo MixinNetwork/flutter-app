@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -44,6 +45,8 @@ class LandingQrCodeNotifier extends ValueNotifier<LandingState> {
          dioOptions: BaseOptions(
            headers: {'Accept-Language': locale.languageCode},
          ),
+         // ignore: avoid_redundant_argument_values
+         httpLogLevel: kReleaseMode ? null : HttpLogLevel.all,
        ),
        multiAuthChangeNotifier = multiAuthChangeNotifier,
        super(

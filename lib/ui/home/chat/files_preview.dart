@@ -45,6 +45,7 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/video/media_kit_video_player.dart';
 import '../../../widgets/mixin_image.dart';
+import '../../../widgets/text_field_hint.dart';
 import '../../provider/conversation_provider.dart';
 import '../../provider/quote_message_provider.dart';
 import 'chat_send_outcome.dart';
@@ -689,10 +690,16 @@ class _ZipPasswordInputEditText extends HookWidget {
                     hoverColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     contentPadding: EdgeInsets.zero,
-                    hintText: context.l10n.encryptZipFileWithPassword,
-                    hintStyle: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: 14,
+                    hint: TextFieldHint(
+                      context.l10n.encryptZipFileWithPassword,
+                      style: Theme.of(context).textTheme.bodyLarge!.merge(
+                        TextStyle(
+                          color: context.theme.secondaryText,
+                          fontSize: 14,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   inputFormatters: [

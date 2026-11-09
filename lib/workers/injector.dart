@@ -86,6 +86,7 @@ class Injector {
           ownerId: ownerId,
           category: response.data.category,
           name: response.data.name,
+          iconUrl: response.data.iconUrl,
           announcement: response.data.announcement,
           createdAt: response.data.createdAt,
           status: status,

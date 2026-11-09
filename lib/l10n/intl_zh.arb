@@ -50,6 +50,7 @@
 "cancel" : "取消",
 "card" : "卡片",
 "change" : "更改",
+"changeGroupPhoto" : "更换群头像",
 "changeNumber" : "修改手机号",
 "changeNumberInstead" : "仅修改手机号码",
 "changedDisappearingMessageSettings" : "{arg0}修改了限时消息设置",

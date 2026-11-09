@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 6.3.2+598
+version: 6.5.1+606
 
 environment:
   sdk: "^3.10.0"
@@ -44,7 +44,7 @@ dependencies:
       ref: ceca9081fbdccb2e3a71e32f9bfcc7b3e9c2b360
       path: packages/desktop_drop
   desktop_keep_screen_on: ^0.0.3
-  desktop_webview_window: ^0.4.0
+  desktop_webview_window: ^0.4.1
   device_info_plus: ^11.3.0
   dio: ^5.10.0
   dio_smart_retry: ^7.0.1
@@ -96,7 +96,7 @@ dependencies:
       url: https://github.com/boyan01/media-kit.git
       ref: 462d73bcb4bc6b72bbb14aaf0399ab3cfc76105c
       path: media_kit_video
-  mixin_markdown_widget: ^0.3.3
+  mixin_markdown_widget: ^0.4.0
   mime: ^2.0.0
   mixin_bot_sdk_dart: ^1.5.1
   mixin_logger: ^0.2.0
@@ -119,11 +119,6 @@ dependencies:
   simple_animations: ^5.3.0
   sliver_tools: ^0.2.12
   stream_transform: ^2.1.2
-  string_tokenizer:
-    git:
-      url: https://github.com/MixinNetwork/flutter-plugins.git
-      path: packages/string_tokenizer
-      ref: 66a8ed5f955fa35c9aaac76842b9dab83c51db92
   super_clipboard: ^0.9.1
   super_context_menu: ^0.9.1
   super_native_extensions: ^0.9.1
@@ -146,6 +141,7 @@ dependencies:
   win32: ^5.15.0
   win_toast: ^0.4.0
   window_manager: 0.5.2
+  word_segmenter: ^0.1.0
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
@@ -172,7 +168,7 @@ dev_dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 77f03330001941f0ac303de6276dd2380f5bcc7e
       path: packages/debug_info_collector
-  drift_dev: ^2.34.5
+  drift_dev: ^2.35.2
   flutter_test:
     sdk: flutter
   flutter_driver:
@@ -180,7 +176,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   intl_utils: ^2.8.16
-  json_serializable: ^6.14.1
+  json_serializable: ^6.15.2
   msix:
     git:
       url: https://github.com/riccardo-lomazzi/msix.git

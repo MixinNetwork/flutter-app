@@ -316,14 +316,27 @@ class DecryptMessage extends Injector {
           );
         }
       } else if (plainJsonMessage.action == kDeviceTransfer) {
-        final json =
-            jsonDecode(plainJsonMessage.content!) as Map<String, dynamic>;
-        final command = TransferDataCommand.fromJson(json);
-        if (_deviceTransfer == null) {
-          e('DeviceTransfer is null, but received command $command');
+        final deviceTransfer = _deviceTransfer;
+        if (deviceTransfer == null ||
+            !deviceTransfer.acceptsRemoteSource(
+              sourceUserId: data.userId,
+              senderId: data.senderId,
+              sessionId: data.sessionId,
+            )) {
+          w('Ignoring device transfer command from unexpected source');
+          return;
+        }
+        final TransferDataCommand command;
+        try {
+          final json =
+              jsonDecode(plainJsonMessage.content!) as Map<String, dynamic>;
+          command = TransferDataCommand.fromJson(json);
+        } catch (_) {
+          w('Ignoring malformed device transfer command');
+          return;
         }
         i('on device transfer command: $command');
-        _deviceTransfer?.handleRemoteCommand(command);
+        deviceTransfer.handleRemoteCommand(command);
       }
       await database.messageHistoryDao.insert(
         MessagesHistoryData(messageId: data.messageId),

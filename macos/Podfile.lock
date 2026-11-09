@@ -1,8 +1,6 @@
 PODS:
   - desktop_drop (0.0.1):
     - FlutterMacOS
-  - desktop_keep_screen_on (0.0.1):
-    - FlutterMacOS
   - flutter_app_icon_badge (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
@@ -24,7 +22,6 @@ PODS:
 
 DEPENDENCIES:
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
-  - desktop_keep_screen_on (from `Flutter/ephemeral/.symlinks/plugins/desktop_keep_screen_on/macos`)
   - flutter_app_icon_badge (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
@@ -43,8 +40,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
-  desktop_keep_screen_on:
-    :path: Flutter/ephemeral/.symlinks/plugins/desktop_keep_screen_on/macos
   flutter_app_icon_badge:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos
   FlutterMacOS:
@@ -66,7 +61,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   desktop_drop: e0b672a7d84c0a6cbc378595e82cdb15f2970a43
-  desktop_keep_screen_on: bfedcf75be8bd8b4a21db3dcf48667427087792c
   flutter_app_icon_badge: e05568a57ac0d98a0e7bc35c5b9ae9b118109b1e
   FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba

@@ -200,6 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel": MessageLookupByLibrary.simpleMessage("取消"),
     "card": MessageLookupByLibrary.simpleMessage("卡片"),
     "change": MessageLookupByLibrary.simpleMessage("更改"),
+    "changeGroupPhoto": MessageLookupByLibrary.simpleMessage("更換羣頭像"),
     "changeNumber": MessageLookupByLibrary.simpleMessage("修改手機號"),
     "changeNumberInstead": MessageLookupByLibrary.simpleMessage("僅修改手機號碼"),
     "changedDisappearingMessageSettings": m0,

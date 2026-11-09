@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' hide Key;
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -65,7 +65,8 @@ Client createClient({
       sendTimeout: tenSecond,
       followRedirects: false,
     ),
-    // httpLogLevel: HttpLogLevel.none,
+    // ignore: avoid_redundant_argument_values
+    httpLogLevel: kReleaseMode ? null : HttpLogLevel.all,
     jsonDecodeCallback: jsonDecode,
     interceptors: [
       if (upgradeGate != null)

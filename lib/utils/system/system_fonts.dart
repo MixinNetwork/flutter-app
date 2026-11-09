@@ -13,12 +13,20 @@ String? loadedFallbackFonts;
 
 /// The system CJK font family on Linux. Text whose fonts lack a character
 /// falls back through fontconfig for every paragraph, which costs about 3 ms
-/// per paragraph, so the theme uses a CJK family and lists the emoji family.
+/// per paragraph, so the theme lists the emoji family and a CJK family as
+/// fallbacks. The emoji family is first: the CJK fonts also have black and
+/// white glyphs for some emoji, for example U+1F17F.
 ///
-/// The theme also uses it as the main family: the default 'Roboto' is not
-/// installed on most Linux systems, and the first layout of a missing family
-/// costs about 30 ms for each font weight.
+/// It is not the main family: its Latin glyphs and punctuation differ from
+/// the system UI font.
 String? _linuxCjkFamily;
+
+/// The first installed family of the Material fallbacks for Linux ('Ubuntu',
+/// 'Cantarell', 'DejaVu Sans' and others), which drew Latin text while the
+/// theme kept them. The theme fallbacks are replaced with the emoji and CJK
+/// families, so the theme uses this family as the main family. It also
+/// avoids the search for the missing 'Roboto' on first layout.
+String? _linuxLatinFamily;
 
 /// The system monospace font family on Linux, for code text. The usual code
 /// font names are not installed on Linux, and each missing name costs a
@@ -52,9 +60,9 @@ Future<void> loadFallbackFonts() async {
 /// it.
 void _warmLinuxFonts() {
   final watch = Stopwatch()..start();
-  final fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+  final fallback = [kEmojiFontFamily, ?_linuxCjkFamily];
   final families = [
-    loadedFallbackFonts ?? _linuxCjkFamily,
+    loadedFallbackFonts ?? _linuxLatinFamily,
     ?linuxMonospaceFamily,
   ];
   for (final family in families) {
@@ -87,6 +95,12 @@ Future<void> _loadLinuxFonts() async {
   // Skip load fallback fonts if current system language is en.
   // See more: https://github.com/flutter/flutter/issues/90951
   final monospace = _matchLinuxFamily('monospace');
+  final latinFallbacks = Typography.material2021(
+    platform: TargetPlatform.linux,
+  ).black.bodyMedium?.fontFamilyFallback;
+  if (latinFallbacks != null) {
+    _linuxLatinFamily = await _matchLinuxFamily(latinFallbacks.join(','));
+  }
   if (PlatformDispatcher.instance.locale.languageCode == 'en') {
     _linuxCjkFamily = await _matchLinuxFamily(':lang=zh-cn');
     linuxMonospaceFamily = await monospace;
@@ -161,11 +175,11 @@ extension ApplyFontsExtension on ThemeData {
     if (Platform.isWindows) {
       fallback = ['Microsoft Yahei', kEmojiFontFamily];
     } else if (Platform.isLinux) {
-      fallback = [?_linuxCjkFamily, kEmojiFontFamily];
+      fallback = [kEmojiFontFamily, ?_linuxCjkFamily];
     } else {
       return this;
     }
-    final family = loadedFallbackFonts ?? _linuxCjkFamily;
+    final family = loadedFallbackFonts ?? _linuxLatinFamily;
     return copyWith(
       textTheme: textTheme.applyFonts(family, fallback),
       primaryTextTheme: primaryTextTheme.applyFonts(family, fallback),

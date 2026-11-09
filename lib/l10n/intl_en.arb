@@ -50,6 +50,7 @@
 "cancel" : "Cancel",
 "card" : "Card",
 "change" : "Change",
+"changeGroupPhoto" : "Change Group Photo",
 "changeNumber" : "Change Number",
 "changeNumberInstead" : "Change Number Instead",
 "changedDisappearingMessageSettings" : "{arg0} changed disappearing message settings.",

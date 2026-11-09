@@ -369,6 +369,7 @@ class SearchList extends HookConsumerWidget {
                           verified: conversation.ownerVerified,
                           isBot: conversation.appId != null,
                           membership: conversation.membership,
+                          isGroup: conversation.isGroupConversation,
                         ),
                         keyword: keyword,
                         onTap: () async {

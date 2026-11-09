@@ -31,6 +31,22 @@ Future<List<XFile>> selectFiles() async {
   }
 }
 
+Future<String?> selectImage() async {
+  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    final file = await file_selector.openFile(
+      acceptedTypeGroups: const [
+        file_selector.XTypeGroup(
+          label: 'images',
+          extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'],
+        ),
+      ],
+    );
+    return file?.path;
+  }
+  final result = await FilePicker.pickFiles(type: FileType.image);
+  return result?.paths.firstOrNull;
+}
+
 /// Copy [file] to user file system.
 /// TODO: support Android/iOS.
 Future<bool> saveFileToSystem(

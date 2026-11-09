@@ -25,6 +25,7 @@ import '../conversation/badges_widget.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import '../interactive_decorated_box.dart';
+import '../text_field_hint.dart';
 import 'conversation_filter_notifier.dart';
 
 String _getConversationName(dynamic item) {
@@ -404,6 +405,7 @@ class _ConversationSelector extends HookConsumerWidget {
                               verified: item.ownerVerified,
                               isBot: item.isBotConversation,
                               membership: item.membership,
+                              isGroup: item.isGroupConversation,
                               selected: selected.any(
                                 (element) =>
                                     _getConversationId(element, context) ==
@@ -485,70 +487,56 @@ class _FilterTextField extends HookConsumerWidget {
   final ConversationFilterNotifier conversationFilterNotifier;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final filterState = useValueListenable(conversationFilterNotifier);
-    final isTextEmpty = filterState.keyword?.isEmpty ?? true;
-    return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
-      decoration: BoxDecoration(
-        color: context.theme.background,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-      ),
-      alignment: Alignment.center,
-      child: Stack(
-        children: [
-          TextField(
-            onChanged: (string) => conversationFilterNotifier.keyword = string,
-            style: TextStyle(color: context.theme.text, fontSize: 14),
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
-            ],
-            autofocus: true,
-            scrollPadding: EdgeInsets.zero,
-            decoration: InputDecoration(
-              prefixIcon: Padding(
-                padding: const EdgeInsetsDirectional.only(end: 8),
-                child: SvgPicture.asset(
-                  Resources.assetsImagesIcSearchSmallSvg,
-                  renderingStrategy: RenderingStrategy.raster,
-                  colorFilter: ColorFilter.mode(
-                    context.theme.secondaryText,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-              prefixIconConstraints: const BoxConstraints(
-                minHeight: 16,
-                minWidth: 16,
-              ),
-              isDense: true,
-              focusedBorder: InputBorder.none,
-              enabledBorder: InputBorder.none,
+  Widget build(BuildContext context, WidgetRef ref) => Container(
+    height: 32,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
+    decoration: BoxDecoration(
+      color: context.theme.background,
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
+    ),
+    alignment: Alignment.center,
+    child: TextField(
+      onChanged: (string) => conversationFilterNotifier.keyword = string,
+      style: TextStyle(color: context.theme.text, fontSize: 14),
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(kDefaultTextInputLimit),
+      ],
+      autofocus: true,
+      scrollPadding: EdgeInsets.zero,
+      decoration: InputDecoration(
+        prefixIcon: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 8),
+          child: SvgPicture.asset(
+            Resources.assetsImagesIcSearchSmallSvg,
+            renderingStrategy: RenderingStrategy.raster,
+            colorFilter: ColorFilter.mode(
+              context.theme.secondaryText,
+              BlendMode.srcIn,
             ),
-            contextMenuBuilder: (context, state) =>
-                MixinAdaptiveSelectionToolbar(editableTextState: state),
           ),
-          if (isTextEmpty)
-            IgnorePointer(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 24, top: 7),
-                child: Text(
-                  context.l10n.search,
-                  style: TextStyle(
-                    color: context.theme.secondaryText,
-                    height: 1,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-        ],
+        ),
+        prefixIconConstraints: const BoxConstraints(
+          minHeight: 16,
+          minWidth: 16,
+        ),
+        isDense: true,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        hint: TextFieldHint(
+          context.l10n.search,
+          style: Theme.of(context).textTheme.bodyLarge!.merge(
+            TextStyle(color: context.theme.secondaryText, fontSize: 14),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        hintFadeDuration: Duration.zero,
       ),
-    );
-  }
+      contextMenuBuilder: (context, state) =>
+          MixinAdaptiveSelectionToolbar(editableTextState: state),
+    ),
+  );
 }
 
 class _AvatarSmallCloseIcon extends StatelessWidget {
@@ -640,6 +628,7 @@ class _BaseItem extends StatelessWidget {
     required this.verified,
     required this.isBot,
     required this.membership,
+    this.isGroup = false,
     this.showSelector = false,
     this.selected = false,
   });
@@ -653,6 +642,7 @@ class _BaseItem extends StatelessWidget {
   final bool verified;
   final bool isBot;
   final sdk.Membership? membership;
+  final bool isGroup;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -706,6 +696,7 @@ class _BaseItem extends StatelessWidget {
                 verified: verified,
                 isBot: isBot,
                 membership: membership,
+                isGroup: isGroup,
               ),
             ],
           ),

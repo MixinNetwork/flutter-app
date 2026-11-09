@@ -362,10 +362,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_webview_window
-      sha256: faeb95926f046a93a2b8325445a7f889d4b7772ff01b4b63b47c7c891bf9ac5b
+      sha256: e187a7a45d5c30b702be85870a74cc2e09e2bd85e528b8d867bdf75de460c211
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -434,10 +434,10 @@ packages:
     dependency: "direct dev"
     description:
       name: drift_dev
-      sha256: e0d16aaa21f3408cbe2dd4bfc56c36cea43e53a537e6613b91380c0924b3bd30
+      sha256: ff4201b38dfbbbc85ffcd85597ad63c7146d2303126241623ebfce89fc4c4bfe
       url: "https://pub.dev"
     source: hosted
-    version: "2.35.1"
+    version: "2.35.2"
   ecache:
     dependency: "direct main"
     description:
@@ -1062,10 +1062,10 @@ packages:
     dependency: "direct dev"
     description:
       name: json_serializable
-      sha256: e45aefa0324f08c683caafbb94b72837aa6193c61822799c916e45f4a263113d
+      sha256: cc7822761b40be9237bcaae62b755ffe5453ceff96a0001f1f5f2439251c66f1
       url: "https://pub.dev"
     source: hosted
-    version: "6.14.1"
+    version: "6.15.2"
   latlng:
     dependency: transitive
     description:
@@ -1303,10 +1303,10 @@ packages:
     dependency: "direct main"
     description:
       name: mixin_markdown_widget
-      sha256: d211333d11bdce6532eb86bdc1be6f0c4826c979cb326fd12b279bba9460d37b
+      sha256: "0a4e88760e2e66d358259391fae4b56c4ed20c5fb59af29c8bec8cf05181b3c0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.4.0"
   msix:
     dependency: "direct dev"
     description:
@@ -1960,15 +1960,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
-  string_tokenizer:
-    dependency: "direct main"
-    description:
-      path: "packages/string_tokenizer"
-      ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
-      resolved-ref: "66a8ed5f955fa35c9aaac76842b9dab83c51db92"
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
-    version: "0.0.1"
   super_clipboard:
     dependency: "direct main"
     description:
@@ -2378,6 +2369,14 @@ packages:
       resolved-ref: "12decbe0f592e14e03223f6f2c0c7e0e2dbd70a1"
       url: "https://github.com/google/flutter-desktop-embedding.git"
     source: git
+    version: "0.1.0"
+  word_segmenter:
+    dependency: "direct main"
+    description:
+      name: word_segmenter
+      sha256: b3c23d7111ca6cb2c8d88b146d2b5f694246d7d6b1bc53cce166f13b5a31d2cb
+      url: "https://pub.dev"
+    source: hosted
     version: "0.1.0"
   x25519:
     dependency: transitive

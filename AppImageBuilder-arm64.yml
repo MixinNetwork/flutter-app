@@ -25,6 +25,10 @@ AppDir:
     include:
       - libgtk-3-0t64
       - libwebkit2gtk-4.1-0
+      # Provides libpixbufloader-svg.so, referenced by the generated GdkPixbuf
+      # loaders.cache. Without it, loading SVG icons (e.g. in the file chooser
+      # under SVG icon themes) aborts GTK with a missing loader assertion.
+      - librsvg2-common
       # Bundle GTK input method clients, but keep the input method daemon on the host.
       - ibus-gtk3
       - fcitx5-frontend-gtk3
@@ -52,8 +56,11 @@ AppDir:
       GIO_MODULE_DIR: $APPDIR/usr/lib/aarch64-linux-gnu/gio/modules/
       GTK_PATH: $APPDIR/usr/lib/aarch64-linux-gnu/gtk-3.0
       GTK_IM_MODULE_FILE: $APPDIR/usr/lib/aarch64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
-      # Needed by Wayland
-      GDK_BACKEND: x11
+      # Prefer an externally supplied backend and fall back to X11. AppRun
+      # expands $GDK_BACKEND at launch (an unset value leaves ",x11"), and GTK
+      # tries each comma-separated backend in order. AppRun has no ${VAR:-x}
+      # syntax, and appimage-builder resolves ${VAR} at build time.
+      GDK_BACKEND: $GDK_BACKEND,x11
   test:
     fedora:
       image: appimagecrafters/tests-env:fedora-30

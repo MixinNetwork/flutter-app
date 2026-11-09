@@ -50,6 +50,7 @@
 "cancel" : "取消",
 "card" : "卡片",
 "change" : "更改",
+"changeGroupPhoto" : "更換群頭像",
 "changeNumber" : "修改手機號",
 "changeNumberInstead" : "僅修改手機號碼",
 "changedDisappearingMessageSettings" : "{arg0}修改了限時訊息設定",
