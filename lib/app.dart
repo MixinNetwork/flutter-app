@@ -274,9 +274,7 @@ class _Home extends HookConsumerWidget {
           }
 
           if (deviceId.toLowerCase() != currentDeviceId.toLowerCase()) {
-            final multiAuthNotifier = context.multiAuthChangeNotifier;
             await accountServer.signOutAndClear();
-            multiAuthNotifier.signOut();
           }
         } catch (e) {
           w('checkDeviceId error: $e');

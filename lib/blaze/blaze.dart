@@ -251,14 +251,18 @@ class Blaze {
                 return;
               }
 
-              _connectedState = ConnectedState.connected;
-              d('blazeMessage receive: ${blazeMessage.action}');
-
               if (blazeMessage.action == kErrorAction &&
                   blazeMessage.error?.code == authentication) {
+                _token = null;
                 _disconnect();
+                // Confirm with a fresh HTTP token so the existing error handler
+                // can distinguish a revoked session from a local clock error.
+                unawaited(reconnect(delayRetry: true));
                 return;
               }
+
+              _connectedState = ConnectedState.connected;
+              d('blazeMessage receive: ${blazeMessage.action}');
 
               if (blazeMessage.error == null) {
                 final transaction = transactions[blazeMessage.id];
@@ -525,7 +529,7 @@ class Blaze {
     _eventController.add(_ConnectionEvent.connect);
   }
 
-  Future<void> reconnect() async {
+  Future<void> reconnect({bool delayRetry = false}) async {
     i('Public reconnect called. Current state: $_connectedState');
     if (_stoppedForUpgrade || upgradeGate.isRequired) return;
     if (_connectedState == ConnectedState.connecting ||
@@ -538,13 +542,27 @@ class Blaze {
     try {
       // Test HTTP connection
       await client.accountApi.getMe();
+      if (_eventController.isClosed ||
+          _stoppedForUpgrade ||
+          upgradeGate.isRequired) {
+        return;
+      }
       i('http ping successful');
+
+      if (delayRetry) {
+        _scheduleRetry();
+        return;
+      }
 
       i('Triggering CONNECT event: User requested reconnection');
       _eventController.add(_ConnectionEvent.connect);
     } catch (e) {
       w('ws ping error: $e');
-      if (_stoppedForUpgrade || upgradeGate.isRequired) return;
+      if (_eventController.isClosed ||
+          _stoppedForUpgrade ||
+          upgradeGate.isRequired) {
+        return;
+      }
       if (e is MixinApiError &&
           e.error != null &&
           e.error is MixinError &&

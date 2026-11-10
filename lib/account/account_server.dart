@@ -120,7 +120,6 @@ class AccountServer {
     } catch (e, s) {
       w('$e, $s');
       await signOutAndClear();
-      multiAuthNotifier.signOut();
       rethrow;
     }
 
@@ -203,6 +202,7 @@ class AccountServer {
   }
 
   Future<void> _onClientRequestError(DioException e) async {
+    if (_signOutFuture != null) return;
     if (e is MixinApiError) {
       final mixinError = e.error! as MixinError;
       if (mixinError.code == authentication) {
@@ -230,8 +230,7 @@ class AccountServer {
             return;
           }
         }
-        await signOutAndClear();
-        multiAuthNotifier.signOut();
+        await signOutAndClear(revokeSession: false);
       } else if (mixinError.code == oldVersion) {
         _requireUpgrade();
       }
@@ -427,12 +426,20 @@ class AccountServer {
     }
   }
 
-  Future<void> signOutAndClear() async {
+  Future<void>? _signOutFuture;
+
+  Future<void> signOutAndClear({bool revokeSession = true}) =>
+      _signOutFuture ??= _signOutAndClear(revokeSession: revokeSession);
+
+  Future<void> _signOutAndClear({required bool revokeSession}) async {
     _sendEventToWorkerIsolate(MainIsolateEventType.exit);
-    try {
-      await client.accountApi.logout(LogoutRequest(sessionId));
-    } catch (error, stacktrace) {
-      e('logout api error: $error, $stacktrace');
+    checkSignalKeyTimer?.cancel();
+    if (revokeSession) {
+      try {
+        await client.accountApi.logout(LogoutRequest(sessionId));
+      } catch (error, stacktrace) {
+        e('logout api error: $error, $stacktrace');
+      }
     }
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
@@ -453,6 +460,9 @@ class AccountServer {
     }
 
     MixinWebView.instance.clearWebViewCacheAndCookies();
+    if (multiAuthNotifier.current?.account.sessionId == sessionId) {
+      multiAuthNotifier.signOut();
+    }
   }
 
   Future<void> sendTextMessage(

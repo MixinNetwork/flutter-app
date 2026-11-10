@@ -144,11 +144,9 @@ class SettingPage extends HookConsumerWidget {
                       leadingAssetName: Resources.assetsImagesIcSignOutSvg,
                       title: context.l10n.signOut,
                       onTap: () async {
-                        final succeed = await runFutureWithToast(
+                        await runFutureWithToast(
                           context.accountServer.signOutAndClear(),
                         );
-                        if (!succeed) return;
-                        context.multiAuthChangeNotifier.signOut();
                       },
                       color: context.theme.red,
                       trailing: const SizedBox(),
