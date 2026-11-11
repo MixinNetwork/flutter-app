@@ -1,52 +1,67 @@
 #!/bin/sh
-# Sign Mixin.app inside-out with the hardened runtime, for notarization.
-# Usage: dist/macos_sign.sh <Mixin.app> <identity>   ("-" signs ad-hoc)
+
+# Re-sign a built Mixin.app with a distribution identity.
+#
+# usage: macos_sign.sh <app> <identity> <entitlements> [provisioning_profile]
+#
+# Nested code is signed first, deepest paths first, then the app itself with
+# the entitlements. Pass a provisioning profile for Mac App Store builds.
 
 set -eu
 
+if [ $# -lt 3 ]; then
+	echo "usage: $0 <app> <identity> <entitlements> [provisioning_profile]" >&2
+	exit 1
+fi
+
 APP="$1"
 IDENTITY="$2"
-ENTITLEMENTS="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)/macos/Runner/Release.entitlements"
+ENTITLEMENTS="$3"
+PROFILE="${4:-}"
 
-if [ "$IDENTITY" = "-" ]; then
-	TIMESTAMP="--timestamp=none"
-else
-	TIMESTAMP="--timestamp"
+if [ ! -x "$APP/Contents/MacOS/Mixin" ]; then
+	echo "error: invalid app bundle: $APP" >&2
+	exit 1
+fi
+
+if [ -n "$PROFILE" ]; then
+	cp "$PROFILE" "$APP/Contents/embedded.provisionprofile"
 fi
 
 sign() {
-	codesign --force --sign "$IDENTITY" --options runtime "$TIMESTAMP" "$@"
+	codesign --force --timestamp --options runtime --sign "$IDENTITY" "$@"
 }
 
-# Sparkle, when dist/macos_sparkle.sh added it: its helpers are signed first,
-# and the sandboxed app may then look up its installer services.
-SPARKLE="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+# Sparkle, when dist/macos_sparkle.sh added it, is signed here in its own
+# order: Downloader.xpc keeps its entitlements, Autoupdate is an executable
+# and not a bundle, and the sandboxed app may then look up the installer
+# services of Sparkle.
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
 if [ -d "$SPARKLE" ]; then
-	sign "$SPARKLE/XPCServices/Installer.xpc"
-	sign --preserve-metadata=entitlements "$SPARKLE/XPCServices/Downloader.xpc"
-	sign "$SPARKLE/Autoupdate"
-	sign "$SPARKLE/Updater.app"
+	sign "$SPARKLE/Versions/B/XPCServices/Installer.xpc"
+	sign --preserve-metadata=entitlements "$SPARKLE/Versions/B/XPCServices/Downloader.xpc"
+	sign "$SPARKLE/Versions/B/Autoupdate"
+	sign "$SPARKLE/Versions/B/Updater.app"
+	sign "$SPARKLE"
+
 	ID="$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Contents/Info.plist")"
-	DMG_ENTITLEMENTS="$(mktemp)"
-	trap 'rm -f "$DMG_ENTITLEMENTS"' EXIT
-	cp "$ENTITLEMENTS" "$DMG_ENTITLEMENTS"
+	APP_ENTITLEMENTS="$(mktemp)"
+	trap 'rm -f "$APP_ENTITLEMENTS"' EXIT
+	cp "$ENTITLEMENTS" "$APP_ENTITLEMENTS"
 	KEY=com.apple.security.temporary-exception.mach-lookup.global-name
 	/usr/libexec/PlistBuddy -c "Add :$KEY array" \
 		-c "Add :$KEY:0 string $ID-spks" -c "Add :$KEY:1 string $ID-spki" \
-		"$DMG_ENTITLEMENTS"
-	if [ "$IDENTITY" = "-" ]; then
-		# An ad-hoc signature has no Team ID, so library validation rejects Sparkle.
-		/usr/libexec/PlistBuddy -c "Add :com.apple.security.cs.disable-library-validation bool true" \
-			"$DMG_ENTITLEMENTS"
-	fi
-	ENTITLEMENTS="$DMG_ENTITLEMENTS"
+		"$APP_ENTITLEMENTS"
+	ENTITLEMENTS="$APP_ENTITLEMENTS"
 fi
 
-# The Xcode build leaves some frameworks without the hardened runtime, so sign
-# every framework again before the app.
-for framework in "$APP"/Contents/Frameworks/*.framework; do
-	sign "$framework"
-done
+find "$APP/Contents" -depth \( -name "*.framework" -o -name "*.dylib" -o -name "*.xpc" -o -name "*.app" \) |
+	while IFS= read -r item; do
+		case "$item" in
+		"$SPARKLE" | "$SPARKLE"/*) ;;
+		*) sign "$item" ;;
+		esac
+	done
 
 sign --entitlements "$ENTITLEMENTS" "$APP"
 
