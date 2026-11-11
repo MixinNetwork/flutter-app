@@ -31,6 +31,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_style.dart';
 import 'send_image_data.dart';
+import 'send_recipient.dart';
 
 enum _Category {
   text,
@@ -107,7 +108,14 @@ Future<bool> showSendDialog(
       !confirm ||
       await showMixinDialog<bool>(
             context: context,
-            child: _SendPage(_category, null, result, app, confirmOnly: true),
+            child: _SendPage(
+              _category,
+              null,
+              result,
+              app,
+              confirmOnly: true,
+              recipientId: user,
+            ),
           ) ==
           true;
 
@@ -196,6 +204,7 @@ class _SendPage extends HookConsumerWidget {
     this.data,
     this.app, {
     this.confirmOnly = false,
+    this.recipientId,
   });
 
   final _Category category;
@@ -205,6 +214,10 @@ class _SendPage extends HookConsumerWidget {
 
   /// Pops `true` on send and leaves the sending to the caller.
   final bool confirmOnly;
+
+  /// Whom a `user=` link would send to: the confirmation shows them, since
+  /// the page that opened the link chooses the recipient.
+  final String? recipientId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -293,6 +306,10 @@ class _SendPage extends HookConsumerWidget {
             backgroundColor: context.theme.popUp,
           ),
           const SizedBox(height: 12),
+          if (recipientId != null) ...[
+            _Recipient(recipientId!),
+            const SizedBox(height: 12),
+          ],
           Container(
             width: 340,
             height: 340,
@@ -493,6 +510,49 @@ class _Sticker extends HookConsumerWidget {
         stickerId: sticker.stickerId,
         assetUrl: sticker.assetUrl,
         assetType: sticker.assetType,
+      ),
+    );
+  }
+}
+
+class _Recipient extends HookConsumerWidget {
+  const _Recipient(this.userId);
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = useMemoizedFuture(
+      () async {
+        final list = await context.accountServer.refreshUsers([userId]);
+        return (list != null && list.isNotEmpty) ? list.first : null;
+      },
+      null,
+      keys: [userId],
+    ).data;
+
+    return SizedBox(
+      width: 340,
+      child: Row(
+        children: [
+          Text(
+            context.l10n.to,
+            style: TextStyle(color: context.theme.secondaryText, fontSize: 14),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              recipientLine(
+                userId: userId,
+                fullName: user?.fullName,
+                identityNumber: user?.identityNumber,
+              ),
+              style: TextStyle(color: context.theme.text, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
