@@ -541,15 +541,11 @@ class _Recipient extends HookConsumerWidget {
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(
-              recipientLine(
-                userId: userId,
-                fullName: user?.fullName,
-                identityNumber: user?.identityNumber,
-              ),
+            child: SendRecipientLabel(
+              userId: userId,
+              fullName: user?.fullName,
+              identityNumber: user?.identityNumber,
               style: TextStyle(color: context.theme.text, fontSize: 14),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
