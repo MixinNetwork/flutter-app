@@ -24,7 +24,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable' # 'master', 'beta', 'dev' or 'stable'
-          # flutter-version: '3.29.3'
+          # Pinned to the last known-good stable; bump it deliberately instead of tracking latest.
+          flutter-version: '3.47.9'
 
       - uses: actions-rs/toolchain@v1
         with:
