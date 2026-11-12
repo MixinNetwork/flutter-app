@@ -4,10 +4,10 @@ import 'dart:ui' as ui;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image/image.dart' as img;
-import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/resources.dart';

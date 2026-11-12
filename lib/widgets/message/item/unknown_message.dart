@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';

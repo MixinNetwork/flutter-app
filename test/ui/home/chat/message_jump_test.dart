@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_app/ui/home/chat/chat_scroll_coordinator.dart';
 import 'package:flutter_app/ui/home/chat/message_jump.dart';
 import 'package:flutter_app/ui/home/conversation_info_destination.dart';
@@ -6,7 +7,6 @@ import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/ui/home/notifier/chat_side_notifier.dart';
 import 'package:flutter_app/ui/home/notifier/message_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 class _BlinkNotifier implements BlinkNotifier {

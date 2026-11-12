@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:open_file/open_file.dart';
 
 import '../../account/account_server.dart';

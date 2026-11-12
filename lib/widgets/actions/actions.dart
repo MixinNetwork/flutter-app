@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 import 'command_palette_action.dart';
 import 'create_circle_action.dart';

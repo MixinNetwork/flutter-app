@@ -2,8 +2,8 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
 
 import '../../utils/local_state_storage.dart';
 import '../../utils/logger.dart';

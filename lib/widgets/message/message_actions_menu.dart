@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart'
+    hide SelectableRegion, SelectableRegionState;
 import 'package:flutter/rendering.dart' show SelectedContent, SelectionStatus;
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:material_ui/material_ui.dart'
-    hide SelectableRegion, SelectableRegionState;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 

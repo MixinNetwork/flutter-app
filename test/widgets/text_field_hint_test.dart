@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/search_text_field.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
 
 void main() {
   for (final platform in [TargetPlatform.macOS, TargetPlatform.windows]) {

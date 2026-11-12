@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:common_crypto/common_crypto.dart';
-import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/pointycastle.dart';

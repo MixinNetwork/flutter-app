@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:emojis/emoji.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'platform.dart';
 import 'system/windows.dart';

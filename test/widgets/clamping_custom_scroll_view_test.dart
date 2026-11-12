@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets(

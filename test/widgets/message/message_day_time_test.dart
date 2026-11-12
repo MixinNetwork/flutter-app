@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/message/message_day_time.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('date traversal skips non-message sliver children', (

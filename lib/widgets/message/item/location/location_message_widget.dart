@@ -1,12 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart' as map;
-import 'package:material_ui/material_ui.dart';
 import 'package:vector_graphics/vector_graphics_compat.dart'
     show RenderingStrategy;
 

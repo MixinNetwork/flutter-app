@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/database.dart';
@@ -21,11 +22,9 @@ import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/utils/system/system_fonts.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'
-    show GlobalWidgetsLocalizations;
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
-import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart' as provider;
 

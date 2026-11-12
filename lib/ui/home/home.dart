@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Provider;
-import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -29,6 +29,7 @@ import '../provider/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
+
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';

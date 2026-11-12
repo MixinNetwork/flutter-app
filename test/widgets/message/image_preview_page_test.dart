@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/database.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_app/widgets/message/item/image/image_preview_page.dart';
 import 'package:flutter_app/widgets/message/item/post_message.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class _TestDatabaseOpener extends DatabaseOpener {

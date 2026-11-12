@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/qr_code.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('renders a QR code when Q-level capacity is exceeded', (

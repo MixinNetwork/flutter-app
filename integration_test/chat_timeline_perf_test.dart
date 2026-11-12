@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_app/utils/system/system_fonts.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'chat_timeline_fixture.dart';

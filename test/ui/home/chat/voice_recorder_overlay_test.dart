@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/ui/home/chat/voice_recorder_bottom_bar.dart';
 import 'package:flutter_app/utils/audio_message_player/audio_message_service.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
-import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 void main() {

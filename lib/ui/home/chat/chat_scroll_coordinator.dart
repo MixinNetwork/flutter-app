@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:material_ui/material_ui.dart';
 
 import '../../../db/mixin_database.dart' hide Offset;
 import 'chat_jump_trace.dart';
