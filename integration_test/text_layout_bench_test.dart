@@ -2,11 +2,11 @@
 import 'dart:math';
 
 import 'package:emojis/emoji.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_app/utils/extension/extension.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // Measures TextPainter.layout for message-like text, one new string per
 // layout so no paragraph cache helps.

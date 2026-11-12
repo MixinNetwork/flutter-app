@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The placeholder of an empty [TextField], moved right so that the caret at
 /// the start of the field does not cover the first glyph.
