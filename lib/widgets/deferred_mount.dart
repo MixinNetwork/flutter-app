@@ -58,8 +58,20 @@ class _DeferredMountState extends State<DeferredMount> {
 // 120 Hz.
 const _budget = Duration(milliseconds: 3);
 
+/// Replaces the clock that measures the frame's budget, for tests.
+///
+/// It returns the current time; the budget runs out once it moves [_budget]
+/// past its value at the first layout in a frame. Tests set it to a fake clock
+/// that the children advance, so the result does not depend on how fast or
+/// loaded the machine is, and reset it to null after the test. Null uses a
+/// real [Stopwatch].
+@visibleForTesting
+Duration Function()? debugDeferredMountClock;
+
 // Runs from the first layout in a frame to the end of that frame.
 final _frame = Stopwatch();
+// The value of [debugDeferredMountClock] at the first layout in the frame.
+Duration? _debugFrameStart;
 var _endScheduled = false;
 var _shownThisFrame = 0;
 
@@ -71,15 +83,23 @@ bool _take(_DeferredMountState state) {
     _frame
       ..reset()
       ..start();
+    _debugFrameStart = debugDeferredMountClock?.call();
   }
   _scheduleEnd();
-  if (_frame.elapsed < _budget) {
+  if (_elapsed() < _budget) {
     _waiting.remove(state);
     _shownThisFrame++;
     return true;
   }
   _waiting.add(state);
   return false;
+}
+
+Duration _elapsed() {
+  final clock = debugDeferredMountClock;
+  if (clock == null) return _frame.elapsed;
+  final now = clock();
+  return now - (_debugFrameStart ??= now);
 }
 
 // A waiting child that stops waiting or unmounts leaves the queue, and the
@@ -98,6 +118,7 @@ void _scheduleEnd() {
 void _endFrame() {
   _endScheduled = false;
   _frame.stop();
+  _debugFrameStart = null;
   // Retry only the head of the queue: a fast scroll can leave hundreds of
   // children waiting, and building each placeholder again costs time. The
   // layout still checks the time, so the count only needs to be enough.
