@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_app/widgets/message/item/post_message.dart';
 import 'package:flutter_app/widgets/message/message_style.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mixin_markdown_widget/mixin_markdown_widget.dart'
     as mixin_markdown;
 

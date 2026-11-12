@@ -5,13 +5,13 @@ import 'dart:ui' as ui show BoxHeightStyle;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide ChangeNotifierProvider;
 import 'package:image_picker/image_picker.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart' hide Consumer;
 import 'package:rxdart/rxdart.dart';
 import 'package:simple_animations/simple_animations.dart';

@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/message/item/video/video_preview_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 

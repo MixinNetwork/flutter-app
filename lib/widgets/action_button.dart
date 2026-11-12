@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:vector_graphics/vector_graphics_compat.dart'
     show RenderingStrategy;
 
