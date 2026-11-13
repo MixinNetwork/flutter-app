@@ -13,6 +13,7 @@ import '../action/action_data.dart';
 import '../action/action_message.dart';
 import '../text/text_message.dart';
 import 'action_card_data.dart';
+import 'network_cover_preview.dart';
 
 class ActionsCardMessage extends StatelessWidget {
   ActionsCardMessage({required this.data, super.key})
@@ -118,7 +119,13 @@ class ActionsCardBody extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       if (data.coverUrl.isNotEmpty)
-        AspectRatio(aspectRatio: 1, child: MixinImage.network(data.coverUrl))
+        _PreviewableCover(
+          url: data.coverUrl,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: MixinImage.network(data.coverUrl),
+          ),
+        )
       else if (data.cover != null)
         _CoverWidget(cover: data.cover!),
       const SizedBox(height: 10),
@@ -143,6 +150,23 @@ class ActionsCardBody extends StatelessWidget {
   );
 }
 
+class _PreviewableCover extends StatelessWidget {
+  const _PreviewableCover({required this.url, required this.child});
+
+  final String url;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    cursor: SystemMouseCursors.click,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => NetworkCoverPreview.push(context, url),
+      child: child,
+    ),
+  );
+}
+
 class _CoverWidget extends StatelessWidget {
   const _CoverWidget({required this.cover});
 
@@ -156,9 +180,12 @@ class _CoverWidget extends StatelessWidget {
     } catch (err) {
       aspect = 1;
     }
-    return AspectRatio(
-      aspectRatio: aspect,
-      child: MixinImage.network(cover.url),
+    return _PreviewableCover(
+      url: cover.url,
+      child: AspectRatio(
+        aspectRatio: aspect,
+        child: MixinImage.network(cover.url),
+      ),
     );
   }
 }
