@@ -44,6 +44,7 @@ mixin _$CircleConversationDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Future<int> _deleteByCircleId(String circleId) {
     return customUpdate(
       'DELETE FROM circle_conversations WHERE circle_id = ?1',
@@ -156,4 +157,6 @@ class CircleConversationDaoManager {
       );
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }

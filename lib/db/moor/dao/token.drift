@@ -2,3 +2,15 @@ import '../mixin.drift';
 
 countAssets:
 SELECT COUNT(1) FROM tokens;
+
+walletTokens AS WalletTokenItem:
+SELECT t.asset_id, t.kernel_asset_id, t.symbol, t.name, t.icon_url, t.price_usd, t.change_usd,
+       t.chain_id, t.confirmations, t.dust, c.icon_url AS chain_icon_url,
+       c.name AS chain_name, COALESCE(e.balance, '0') AS balance,
+       COALESCE(e.hidden, FALSE) AS hidden
+FROM tokens t
+LEFT JOIN tokens_extra e ON e.kernel_asset_id = t.kernel_asset_id
+LEFT JOIN chains c ON c.chain_id = t.chain_id
+WHERE $where
+ORDER BY CAST(e.balance AS REAL) * CAST(t.price_usd AS REAL) DESC,
+         CAST(e.balance AS REAL) DESC, t.name ASC;

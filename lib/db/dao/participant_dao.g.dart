@@ -44,6 +44,7 @@ mixin _$ParticipantDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
       'SELECT user.* FROM participants AS participant INNER JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
@@ -227,6 +228,8 @@ class ParticipantDaoManager {
       );
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }
 
 class ParticipantUser {

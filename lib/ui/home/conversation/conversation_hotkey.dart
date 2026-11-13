@@ -75,7 +75,7 @@ void _navigationConversation(BuildContext context, {required bool forward}) {
   final category = context.providerContainer.read(slideCategoryStateProvider);
   final conversationListController = context.read<ConversationListController>();
 
-  if (category.type == SlideCategoryType.setting) return;
+  if (!category.type.hasConversations) return;
 
   final currentConversationId = context.providerContainer.read(
     currentConversationIdProvider,

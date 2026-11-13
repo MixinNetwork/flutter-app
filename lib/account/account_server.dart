@@ -48,6 +48,7 @@ import '../workers/message_worker_isolate.dart';
 import 'account_key_value.dart';
 import 'send_message_helper.dart';
 import 'show_pin_message_key_value.dart';
+import 'wallet_sync.dart';
 
 class AccountServer {
   AccountServer({
@@ -280,6 +281,12 @@ class AccountServer {
   late Injector _injector;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil attachmentUtil;
+  late final walletSync = WalletSync(
+    client: client,
+    database: database,
+    userId: userId,
+    refreshUsers: refreshUsers,
+  );
 
   IsolateChannel<dynamic>? _isolateChannel;
 

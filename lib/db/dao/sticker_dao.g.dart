@@ -44,6 +44,7 @@ mixin _$StickerDaoMixin on DatabaseAccessor<MixinDatabase> {
   InscriptionCollections get inscriptionCollections =>
       attachedDatabase.inscriptionCollections;
   InscriptionItems get inscriptionItems => attachedDatabase.inscriptionItems;
+  TokensExtra get tokensExtra => attachedDatabase.tokensExtra;
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
       'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
@@ -161,4 +162,6 @@ class StickerDaoManager {
       );
   $InscriptionItemsTableManager get inscriptionItems =>
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
+  $TokensExtraTableManager get tokensExtra =>
+      $TokensExtraTableManager(_db.attachedDatabase, _db.tokensExtra);
 }
