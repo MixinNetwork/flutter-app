@@ -5,6 +5,8 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../../utils/app_lifecycle.dart';
+
 enum _ImageRotate { rotate0, rotate90, rotate180, rotate270 }
 
 extension _ImageRotateExt on _ImageRotate {
@@ -611,4 +613,53 @@ extension _RectExtension on Rect {
 double _getFinalTime(double velocity, double drag) {
   const effectivelyMotionless = 10.0;
   return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
+}
+
+/// [image] at its own size in [viewport]. It first shows at the scale that fits
+/// [imageSize] in [viewport], and never above its own size. A tap outside the
+/// image closes the route.
+class PreviewImageViewport extends StatelessWidget {
+  const PreviewImageViewport({
+    required this.imageSize,
+    required this.viewport,
+    required this.controller,
+    required this.image,
+    super.key,
+  });
+
+  final Size imageSize;
+  final Size viewport;
+  final TransformImageController controller;
+  final Widget image;
+
+  @override
+  Widget build(BuildContext context) {
+    final initialScale = imageSize.isEmpty
+        ? 1.0
+        : math.min<double>(
+            math.min(
+              viewport.width / imageSize.width,
+              viewport.height / imageSize.height,
+            ),
+            1,
+          );
+    return GestureDetector(
+      onDoubleTap: () => controller.animatedToScale(initialScale),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(color: Color.fromRGBO(62, 65, 72, 0.9)),
+        child: ClipRect(
+          child: AppActiveTickerMode(
+            child: ImagPreviewWidget(
+              scale: initialScale,
+              minScale: math.min(initialScale / 2, 0.5),
+              maxScale: math.max(initialScale * 2, 2),
+              controller: controller,
+              onEmptyAreaTapped: () => Navigator.maybePop(context),
+              image: image,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
