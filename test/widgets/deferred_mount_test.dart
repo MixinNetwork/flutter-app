@@ -2,6 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/widgets/deferred_mount.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// The time the children have spent, as the fake clock of DeferredMount sees
+// it. Building a child advances it instead of busy-waiting, so the tests do not
+// depend on how fast or loaded the machine is.
+var _now = Duration.zero;
+
 class _Slow extends StatelessWidget {
   const _Slow(this.index, {this.micros = 1000});
 
@@ -10,13 +15,18 @@ class _Slow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final watch = Stopwatch()..start();
-    while (watch.elapsedMicroseconds < micros) {}
+    _now += Duration(microseconds: micros);
     return Text('$index', textDirection: TextDirection.ltr);
   }
 }
 
 void main() {
+  setUp(() {
+    _now = Duration.zero;
+    debugDeferredMountClock = () => _now;
+  });
+  tearDown(() => debugDeferredMountClock = null);
+
   Widget list(Widget Function(int index) child) => Column(
     children: [
       for (var i = 0; i < 20; i++)
@@ -82,8 +92,7 @@ void main() {
     await tester.pumpWidget(
       list((i) => _Slow(i, micros: i < 10 ? 100 : 2000)),
     );
-    // Cheap children may still fill in on a loaded machine; the costly ones
-    // must not exceed the budget.
+    // The costly children must not exceed the budget.
     int costly() => shown().where((i) => i >= 10).length;
     while (shown().length < 20) {
       final before = costly();
