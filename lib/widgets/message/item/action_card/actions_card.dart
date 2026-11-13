@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../utils/extension/extension.dart';
 import '../../../high_light_text.dart';
+import '../../../interactive_decorated_box.dart';
 import '../../../mixin_image.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -13,6 +14,7 @@ import '../action/action_data.dart';
 import '../action/action_message.dart';
 import '../text/text_message.dart';
 import 'action_card_data.dart';
+import 'network_cover_preview.dart';
 
 class ActionsCardMessage extends StatelessWidget {
   ActionsCardMessage({required this.data, super.key})
@@ -36,6 +38,7 @@ class ActionsCardMessage extends StatelessWidget {
                 child: MessageSelectionArea(
                   child: ActionsCardBody(
                     data: data,
+                    previewCover: true,
                     description: MessageTextWidget(
                       enableSelection: false,
                       color: context.theme.text,
@@ -51,10 +54,7 @@ class ActionsCardMessage extends StatelessWidget {
               builder: (context) => MessageBubbleNipPadding(
                 currentUser: useIsCurrentUser(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: width,
-                    minWidth: width,
-                  ),
+                  constraints: BoxConstraints(maxWidth: width, minWidth: width),
                   child: _Actions(actions: data.actions),
                 ),
               ),
@@ -107,20 +107,31 @@ class ActionsCardBody extends StatelessWidget {
   const ActionsCardBody({
     required this.description,
     required this.data,
+    this.previewCover = false,
     super.key,
   });
 
   final AppCardData data;
   final Widget description;
 
+  /// Whether a tap on the cover opens it in an image preview.
+  final bool previewCover;
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       if (data.coverUrl.isNotEmpty)
-        AspectRatio(aspectRatio: 1, child: MixinImage.network(data.coverUrl))
+        _PreviewableCover(
+          enabled: previewCover,
+          url: data.coverUrl,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: MixinImage.network(data.coverUrl),
+          ),
+        )
       else if (data.cover != null)
-        _CoverWidget(cover: data.cover!),
+        _CoverWidget(cover: data.cover!, preview: previewCover),
       const SizedBox(height: 10),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -143,10 +154,38 @@ class ActionsCardBody extends StatelessWidget {
   );
 }
 
+class _PreviewableCover extends StatelessWidget {
+  const _PreviewableCover({
+    required this.enabled,
+    required this.url,
+    required this.child,
+    this.thumbnail,
+  });
+
+  final bool enabled;
+  final String url;
+  final String? thumbnail;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => enabled
+      ? InteractiveDecoratedBox(
+          cursor: SystemMouseCursors.click,
+          onTap: () => NetworkCoverPreview.push(
+            context,
+            url: url,
+            thumbnail: thumbnail,
+          ),
+          child: child,
+        )
+      : child;
+}
+
 class _CoverWidget extends StatelessWidget {
-  const _CoverWidget({required this.cover});
+  const _CoverWidget({required this.cover, required this.preview});
 
   final Cover cover;
+  final bool preview;
 
   @override
   Widget build(BuildContext context) {
@@ -156,9 +195,14 @@ class _CoverWidget extends StatelessWidget {
     } catch (err) {
       aspect = 1;
     }
-    return AspectRatio(
-      aspectRatio: aspect,
-      child: MixinImage.network(cover.url),
+    return _PreviewableCover(
+      enabled: preview,
+      url: cover.url,
+      thumbnail: cover.thumbnail,
+      child: AspectRatio(
+        aspectRatio: aspect,
+        child: MixinImage.network(cover.url),
+      ),
     );
   }
 }

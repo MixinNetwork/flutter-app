@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -14,7 +13,6 @@ import 'package:vector_graphics/vector_graphics_compat.dart'
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
-import '../../../../utils/app_lifecycle.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../../utils/system/clipboard.dart';
@@ -568,7 +566,7 @@ class _Action extends StatelessWidget {
   }
 }
 
-class _Item extends HookConsumerWidget {
+class _Item extends StatelessWidget {
   const _Item({
     required this.message,
     required this.controller,
@@ -584,57 +582,30 @@ class _Item extends HookConsumerWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // scale image to fit viewport on first show.
-    final initialScale = useMemoized(() {
-      final imageSize = Size(
-        (message.mediaWidth ?? 0).toDouble(),
-        (message.mediaHeight ?? 0).toDouble(),
-      );
-      if (imageSize.isEmpty) {
-        assert(false, 'image message size is empty: ${message.messageId}');
-        return 1.0;
-      }
-      final layoutSize = constraints.biggest;
-
-      final scale = math.min(
-        layoutSize.width / imageSize.width,
-        layoutSize.height / imageSize.height,
-      );
-      return math.min<double>(scale, 1);
-    }, [message.messageId]);
-
-    return GestureDetector(
-      onDoubleTap: () {
-        controller.animatedToScale(initialScale);
-      },
-      child: DecoratedBox(
-        decoration: const BoxDecoration(color: Color.fromRGBO(62, 65, 72, 0.9)),
-        child: ClipRect(
-          child: AppActiveTickerMode(
-            child: ImagPreviewWidget(
-              scale: initialScale,
-              minScale: math.min(initialScale / 2, 0.5),
-              maxScale: math.max(initialScale * 2, 2),
-              controller: controller,
-              onEmptyAreaTapped: () {
-                Navigator.maybePop(context);
-              },
-              image: Image.file(
-                File(
-                  context.accountServer.convertMessageAbsolutePath(
-                    message,
-                    isTranscriptPage,
-                  ),
-                ),
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
-                  imageData: message.thumbImage ?? '',
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
+  Widget build(BuildContext context) {
+    final imageSize = Size(
+      (message.mediaWidth ?? 0).toDouble(),
+      (message.mediaHeight ?? 0).toDouble(),
+    );
+    assert(
+      !imageSize.isEmpty,
+      'image message size is empty: ${message.messageId}',
+    );
+    return PreviewImageViewport(
+      imageSize: imageSize,
+      viewport: constraints.biggest,
+      controller: controller,
+      image: Image.file(
+        File(
+          context.accountServer.convertMessageAbsolutePath(
+            message,
+            isTranscriptPage,
           ),
+        ),
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
+          imageData: message.thumbImage ?? '',
+          fit: BoxFit.contain,
         ),
       ),
     );
