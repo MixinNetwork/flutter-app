@@ -52,10 +52,7 @@ class ActionsCardMessage extends StatelessWidget {
               builder: (context) => MessageBubbleNipPadding(
                 currentUser: useIsCurrentUser(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: width,
-                    minWidth: width,
-                  ),
+                  constraints: BoxConstraints(maxWidth: width, minWidth: width),
                   child: _Actions(actions: data.actions),
                 ),
               ),

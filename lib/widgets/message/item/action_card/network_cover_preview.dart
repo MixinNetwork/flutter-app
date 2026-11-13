@@ -11,14 +11,16 @@ class NetworkCoverPreview extends StatefulWidget {
 
   final String url;
 
-  static Future<void> push(BuildContext context, String url) => showGeneralDialog(
-    context: context,
-    barrierColor: Colors.transparent,
-    barrierDismissible: true,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    requestFocus: true,
-    pageBuilder: (_, _, _) => NetworkCoverPreview(url: url),
-  );
+  static Future<void> push(BuildContext context, String url) =>
+      showGeneralDialog(
+        context: context,
+        barrierColor: Colors.transparent,
+        barrierDismissible: true,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        requestFocus: true,
+        pageBuilder: (_, _, _) => NetworkCoverPreview(url: url),
+      );
 
   @override
   State<NetworkCoverPreview> createState() => _NetworkCoverPreviewState();

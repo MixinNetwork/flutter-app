@@ -88,9 +88,9 @@ void main() {
           .url,
       url,
     );
-    final controller = tester.widget<ImagPreviewWidget>(
-      find.byType(ImagPreviewWidget),
-    ).controller!;
+    final controller = tester
+        .widget<ImagPreviewWidget>(find.byType(ImagPreviewWidget))
+        .controller!;
     await tester.tap(
       find.byWidgetPredicate(
         (widget) =>
