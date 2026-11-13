@@ -16,8 +16,9 @@ class NetworkCoverPreview extends StatefulWidget {
         context: context,
         barrierColor: Colors.transparent,
         barrierDismissible: true,
-        barrierLabel: MaterialLocalizations.of(context)
-            .modalBarrierDismissLabel,
+        barrierLabel: MaterialLocalizations.of(
+          context,
+        ).modalBarrierDismissLabel,
         requestFocus: true,
         pageBuilder: (_, _, _) => NetworkCoverPreview(url: url),
       );

@@ -1,5 +1,4 @@
 import 'package:drift/native.dart';
-import 'package:flutter/painting.dart' show NetworkImage;
 import 'package:flutter/services.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/constants/resources.dart';
@@ -25,6 +24,8 @@ class _TestDatabaseOpener extends DatabaseOpener {
 }
 
 void main() {
+  WidgetController.hitTestWarningShouldBeFatal = true;
+
   Future<void> pumpCard(WidgetTester tester, AppCardData data) async {
     final database = Database(
       MixinDatabase(NativeDatabase.memory()),
@@ -78,7 +79,14 @@ void main() {
     const url = 'https://example.com/cover-url.png';
     await pumpCard(tester, card(coverUrl: url));
 
-    await tester.tap(find.byType(MixinImage).first);
+    await tester.tap(
+      find
+          .ancestor(
+            of: find.byType(MixinImage).first,
+            matching: find.byType(GestureDetector),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(ImagPreviewWidget), findsOneWidget);
@@ -129,7 +137,14 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(MixinImage).first);
+    await tester.tap(
+      find
+          .ancestor(
+            of: find.byType(MixinImage).first,
+            matching: find.byType(GestureDetector),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
     expect(find.byType(ImagPreviewWidget), findsOneWidget);
     expect(
