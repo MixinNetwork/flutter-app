@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_app/widgets/message/send_message_dialog/send_recipient.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // The confirmation row leaves about 316 px for the recipient after "To".
 const _width = 316.0;
