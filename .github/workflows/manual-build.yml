@@ -566,7 +566,7 @@ jobs:
           done
           build="$(sed -n 's/^version: [^+]*+\(.*\)/\1/p' pubspec.yaml)"
           python3 dist/update_appcast.py --tag "$GITHUB_REF_NAME" --build "$build" \
-            --key "$RUNNER_TEMP/update_key.pem" --public-key dist/update_ed25519.pub \
+            --key "$RUNNER_TEMP/update_key.pem" --public-key assets/update_ed25519.pub \
             --url-prefix "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME" \
             --out appcast.xml $args
           rm "$RUNNER_TEMP/update_key.pem"

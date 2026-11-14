@@ -36,6 +36,7 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: af28658a415cf89383e3c9cf9f8230c79be5566c
       path: packages/common_crypto
+  crypto: ^3.0.7
   dbus: ^0.7.15
   decimal: ^3.2.6
   desktop_drop:
@@ -53,6 +54,7 @@ dependencies:
   drift: ^2.34.3
   sqlite3_flutter_libs: ^0.5.41
   ecache: ^2.2.0
+  ed25519_edwards: ^0.3.2
   emojis: ^3.2.0
   equatable: ^2.0.8
   file_picker: ^11.0.3
@@ -135,6 +137,7 @@ dependencies:
   win_toast: ^0.4.0
   window_manager: 0.5.2
   word_segmenter: ^0.1.0
+  xml: ^6.6.1
   window_size:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
