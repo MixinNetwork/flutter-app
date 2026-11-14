@@ -456,6 +456,7 @@ jobs:
           identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)
           rm -rf dist/Mixin.app
           ditto build/macos/Build/Products/Release/Mixin.app dist/Mixin.app
+          ./dist/macos_sparkle.sh dist/Mixin.app
           ./dist/macos_sign.sh dist/Mixin.app "$identity" macos/Runner/Release.entitlements
           ./dist/macos_notarize.sh dist/Mixin.app
 
