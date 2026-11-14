@@ -29,13 +29,16 @@ class AppUpdateState {
 }
 
 const _macChannel = MethodChannel('mixin_desktop/app_update');
+@visibleForTesting
+const storeUpdateChannel = MethodChannel('mixin_desktop/store_update');
 
 class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
-  AppUpdateNotifier(this._ref)
-    : _testDio = null,
+  AppUpdateNotifier(this._ref, {@visibleForTesting bool? windows})
+    : _windows = windows ?? Platform.isWindows,
+      _testDio = null,
       _testProxy = null,
       super(AppUpdateState.none) {
-    unawaited(_start());
+    unawaited(_windows ? _startStore() : _start());
   }
 
   /// An updater of [package] (or of the macOS [mac] channel) that does not
@@ -54,11 +57,14 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
        _testDio = dio,
        _mac = mac,
        _testProxy = proxy,
+       _windows = false,
        super(AppUpdateState.none);
 
   final Ref _ref;
   final Dio Function()? _testDio;
   final ProxyConfig? Function()? _testProxy;
+  final bool _windows;
+  var _store = false;
   Timer? _timer;
   late String _package;
   late List<int> _publicKey;
@@ -66,9 +72,9 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   MacUpdateChannel? _mac;
 
   Future<void> _start() async {
-    if (Platform.isMacOS) return _startMac();
-    // shortcut: Linux, macOS and the Windows Inno install only; the Microsoft
-    // Store comes in a later change.
+    // The Store build was checked first; this is the Inno install or
+    // a copy that does not update itself.
+    if (!_windows && Platform.isMacOS) return _startMac();
     final environment = Platform.environment;
     final executable = Platform.resolvedExecutable;
     final package = Platform.isLinux
@@ -77,7 +83,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
             executable: executable,
             abi: Abi.current(),
           )
-        : Platform.isWindows
+        : _windows
         ? windowsUpdatePackage(
             executable: executable,
             abi: Abi.current(),
@@ -197,7 +203,57 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     options: Options(responseType: ResponseType.plain),
   )).data!;
 
+  Future<void> _startStore() async {
+    storeUpdateChannel.setMethodCallHandler((call) async {
+      if (call.method == 'progress' &&
+          mounted &&
+          state.status == AppUpdateStatus.downloading) {
+        state = AppUpdateState(
+          AppUpdateStatus.downloading,
+          progress: call.arguments as double,
+        );
+      }
+    });
+    // Not packaged: not the Store build.
+    if (!await _checkStore()) return _start();
+    _store = true;
+    _timer = Timer.periodic(const Duration(hours: 6), (_) => _checkStore());
+  }
+
+  /// False when the app is not packaged, so it is not the Store build.
+  Future<bool> _checkStore() async {
+    if (state.status == AppUpdateStatus.downloading) return true;
+    try {
+      final count = await storeUpdateChannel.invokeMethod<int>(
+        'storeUpdateCount',
+      );
+      if (count == null) return false;
+      if (mounted && count > 0 && state.status == AppUpdateStatus.none) {
+        state = const AppUpdateState(AppUpdateStatus.available);
+      }
+    } on PlatformException catch (error) {
+      i('app update: store check failed: $error');
+    }
+    return true;
+  }
+
+  Future<void> _installStore() async {
+    state = const AppUpdateState(AppUpdateStatus.downloading);
+    try {
+      await storeUpdateChannel.invokeMethod<void>('installStoreUpdates');
+      // The Store restarts the app after the install.
+      if (mounted) state = AppUpdateState.none;
+    } on PlatformException catch (error) {
+      e('app update: store install failed: $error');
+      if (mounted) state = const AppUpdateState(AppUpdateStatus.failed);
+    }
+  }
+
   Future<void> update() async {
+    if (state.status case AppUpdateStatus.none || AppUpdateStatus.downloading) {
+      return;
+    }
+    if (_store) return _installStore();
     switch (_mac) {
       case MacUpdateChannel.appStore:
         await launchUrlString(macAppStoreUrl);
@@ -210,7 +266,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       case null:
     }
     final item = _item;
-    if (item == null || state.status == AppUpdateStatus.downloading) return;
+    if (item == null) return;
     state = const AppUpdateState(AppUpdateStatus.downloading);
     final environment = Platform.environment;
     File? file;

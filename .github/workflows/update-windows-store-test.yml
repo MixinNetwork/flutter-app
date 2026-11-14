@@ -1,0 +1,82 @@
+name: Windows Store Update Test
+
+# Compiles the Store update channel and calls it from an installed MSIX.
+# The package is sideloaded, so it is not associated with the Store: the
+# check must give a Store error or 0, not crash. A real update is not tested.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/update-windows-store-test.yml'
+      - 'integration_test/store_update_main.dart'
+      - 'lib/ui/provider/app_update_provider.dart'
+      - 'windows/runner/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  store-update:
+    runs-on: windows-2022
+    env:
+      PUBLISHER: CN=272248D5-9A62-44D7-A299-5E1F8B46A9B0
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 'stable'
+          override: true
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - run: git config --system core.longpaths true
+
+      - run: flutter config --enable-windows-desktop
+
+      # fix error when dump debug info: (msdia*.dll unregistered?)
+      - run: regsvr32 "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Remote Debugger\x64\msdia140.dll"
+
+      - uses: ilammy/setup-nasm@v1
+
+      - name: Build app with the test entry
+        run: flutter build windows -t integration_test/store_update_main.dart
+
+      - name: Create test certificate
+        run: |
+          $cert = New-SelfSignedCertificate -Type Custom -Subject $env:PUBLISHER `
+            -KeyUsage DigitalSignature -CertStoreLocation Cert:\CurrentUser\My `
+            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
+          $password = ConvertTo-SecureString -String test -Force -AsPlainText
+          Export-PfxCertificate -Cert $cert -FilePath test.pfx -Password $password
+          Export-Certificate -Cert $cert -FilePath test.cer
+          Import-Certificate -FilePath test.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+
+      # msix:create does not sign a store: true package and has no way to
+      # turn the pubspec value off from the command line. Custom signtool
+      # options replace its /tr timestamp server: the timestamp step failed
+      # (0x80096005), and a self-signed test package does not need one.
+      - name: Build msix
+        run: |
+          (Get-Content pubspec.yaml) -replace '^  store: true$', '  store: false' | Set-Content pubspec.yaml
+          dart run msix:create --build-windows false --publisher $env:PUBLISHER --signtool-options '/v /fd SHA256 /f test.pfx /p test' --install-certificate false -v
+
+      # Appx does not load in PowerShell 7.
+      - name: Install and start
+        shell: powershell
+        run: |
+          Add-AppxPackage -Path build\windows\x64\runner\Release\flutter_app.msix
+          $package = Get-AppxPackage -Name 14801MixinLtd.MixinDesktop
+          $app = (Get-AppxPackageManifest $package).Package.Applications.Application.Id
+          $result = "$env:USERPROFILE\store_update_result.txt"
+          Start-Process "shell:AppsFolder\$($package.PackageFamilyName)!$app"
+          for ($i = 0; $i -lt 60 -and -not (Test-Path $result); $i++) { Start-Sleep 1 }
+          if (-not (Test-Path $result)) { Write-Error "no result: the app did not start or crashed"; exit 1 }
+          $text = Get-Content $result
+          echo "storeUpdateCount: $text"
+          # null means the native side found no package identity.
+          if ($text -ne 'count 0' -and $text -notlike 'error PlatformException(store_error*') { exit 1 }
