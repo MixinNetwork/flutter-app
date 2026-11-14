@@ -67,15 +67,23 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
 
   Future<void> _start() async {
     if (Platform.isMacOS) return _startMac();
-    // shortcut: Linux and macOS only; Windows comes in a later change.
-    if (!Platform.isLinux) return;
+    // shortcut: Linux, macOS and the Windows Inno install only; the Microsoft
+    // Store comes in a later change.
     final environment = Platform.environment;
     final executable = Platform.resolvedExecutable;
-    final package = linuxUpdatePackage(
-      environment: environment,
-      executable: executable,
-      abi: Abi.current(),
-    );
+    final package = Platform.isLinux
+        ? linuxUpdatePackage(
+            environment: environment,
+            executable: executable,
+            abi: Abi.current(),
+          )
+        : Platform.isWindows
+        ? windowsUpdatePackage(
+            executable: executable,
+            abi: Abi.current(),
+            fileExists: (path) => File(path).existsSync(),
+          )
+        : null;
     if (package == null) return;
 
     final key = (await rootBundle.loadString(
@@ -83,7 +91,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     )).trim();
     // The release key is not set up yet, so there is nothing to trust.
     if (key.isEmpty) return;
-    if (!await canInstallLinuxUpdate(package, environment, executable)) {
+    if (!await canInstallUpdate(package, environment, executable)) {
       i('app update: $package cannot install by itself');
       return;
     }
@@ -207,7 +215,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     final environment = Platform.environment;
     File? file;
     try {
-      file = await createLinuxUpdateFile(item.package, environment);
+      file = await createUpdateFile(item.package, environment);
       await _dio().downloadUri(
         item.url,
         file.path,
@@ -223,12 +231,19 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       if (!verifyAppUpdate(item, await sha256File(file), _publicKey)) {
         throw const FormatException('the package does not match its signature');
       }
-      await startLinuxUpdateInstall(
-        package: item.package,
-        file: file,
-        executable: Platform.resolvedExecutable,
-        environment: environment,
-      );
+      if (Platform.isWindows) {
+        await startWindowsUpdateInstall(
+          file: file,
+          executable: Platform.resolvedExecutable,
+        );
+      } else {
+        await startLinuxUpdateInstall(
+          package: item.package,
+          file: file,
+          executable: Platform.resolvedExecutable,
+          environment: environment,
+        );
+      }
       exit(0);
     } catch (error, stack) {
       e('app update: install ${item.fileName} failed: $error $stack');

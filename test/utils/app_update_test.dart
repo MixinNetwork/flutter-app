@@ -57,6 +57,59 @@ void main() {
     });
   });
 
+  group('windowsUpdatePackage', () {
+    String? package(
+      String exe,
+      Set<String> files, [
+      Abi abi = Abi.windowsX64,
+    ]) => windowsUpdatePackage(
+      executable: exe,
+      abi: abi,
+      fileExists: files.contains,
+    );
+
+    test('updates only the Inno install', () {
+      expect(
+        package(r'C:\Users\a\AppData\Local\Programs\Mixin\mixin_desktop.exe', {
+          r'C:\Users\a\AppData\Local\Programs\Mixin\unins000.exe',
+        }),
+        'inno-x64',
+      );
+      // MSIX from the Store: no uninstaller in the package.
+      expect(
+        package(
+          r'C:\Program Files\WindowsApps\14801MixinLtd.MixinDesktop_1.0.0.0_x64__x\mixin_desktop.exe',
+          {},
+        ),
+        isNull,
+      );
+      expect(package(r'D:\mixin\mixin_desktop.exe', {}), isNull);
+      expect(
+        package(r'C:\Mixin\mixin_desktop.exe', {
+          r'C:\Mixin\unins000.exe',
+        }, Abi.windowsArm64),
+        isNull,
+      );
+    });
+  });
+
+  group('canInstallUpdate', () {
+    test('needs a writable install directory for the Inno install', () async {
+      final directory = await Directory.systemTemp.createTemp('inno');
+      addTearDown(() async {
+        await Process.run('chmod', ['755', directory.path]);
+        await directory.delete(recursive: true);
+      });
+      final executable = p.join(directory.path, 'mixin_desktop.exe');
+
+      expect(await canInstallUpdate('inno-x64', const {}, executable), isTrue);
+      expect(directory.listSync(), isEmpty);
+
+      await Process.run('chmod', ['555', directory.path]);
+      expect(await canInstallUpdate('inno-x64', const {}, executable), isFalse);
+    }, testOn: 'posix');
+  });
+
   group('findAppUpdate', () {
     test('takes the newest build of this package after the current build', () {
       final appcast = _appcast([
@@ -247,15 +300,15 @@ void main() {
     });
   });
 
-  group('createLinuxUpdateFile', () {
+  group('createUpdateFile', () {
     late Directory dir;
     setUp(() => dir = Directory.systemTemp.createTempSync());
     tearDown(() => dir.deleteSync(recursive: true));
 
     test('puts each download alone in a new private directory', () async {
       final environment = {'APPIMAGE': p.join(dir.path, 'Mixin.AppImage')};
-      final first = await createLinuxUpdateFile('appimage-x64', environment);
-      final second = await createLinuxUpdateFile('appimage-x64', environment);
+      final first = await createUpdateFile('appimage-x64', environment);
+      final second = await createUpdateFile('appimage-x64', environment);
 
       expect(second.parent.parent.path, dir.path);
       expect(first.parent.path, isNot(second.parent.path));
@@ -287,7 +340,7 @@ void main() {
         ..writeAsStringSync('');
       final other = Directory(p.join(dir.path, 'other'))..createSync();
 
-      final file = await createLinuxUpdateFile('appimage-x64', environment);
+      final file = await createUpdateFile('appimage-x64', environment);
 
       expect(stale.existsSync(), isFalse);
       expect(recent.existsSync(), isTrue);
@@ -301,7 +354,7 @@ void main() {
         ('deb-x64', 'update.deb'),
         ('tar-arm64', 'update.tar'),
       ]) {
-        final file = await createLinuxUpdateFile(package, const {});
+        final file = await createUpdateFile(package, const {});
         addTearDown(() {
           if (file.parent.existsSync()) file.parent.deleteSync(recursive: true);
         });
@@ -377,6 +430,71 @@ void main() {
         latestAppcastBuild(_appcast([_item('tar-x64', 1)]), 'dmg'),
         isNull,
       );
+    });
+  });
+
+  test('createUpdateFile names the Inno installer update.exe', () async {
+    final file = await createUpdateFile('inno-x64', const {});
+    addTearDown(() => file.parent.deleteSync(recursive: true));
+    expect(p.basename(file.path), 'update.exe');
+    expect(file.parent.parent.path, Directory.systemTemp.path);
+  });
+
+  group('windowsInstallScript', () {
+    test('quotes paths with spaces and quotes', () {
+      expect(
+        windowsInstallScript(
+          pid: 4242,
+          installer:
+              r"C:\Users\O'Brien Li\AppData\Local\Temp\.mixin_update_1\update.exe",
+          executable:
+              r"C:\Users\O'Brien Li\AppData\Local\Programs\Mixin\mixin_desktop.exe",
+        ),
+        r'''
+$installer = 'C:\Users\O''Brien Li\AppData\Local\Temp\.mixin_update_1\update.exe'
+Wait-Process -Id 4242 -ErrorAction SilentlyContinue
+# Not -Wait: it also waits for the new app that Setup starts. The handle is
+# read first, else ExitCode can be empty after WaitForExit.
+$setup = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS /MIXINUPDATE=1' -PassThru
+$null = $setup.Handle
+$setup.WaitForExit()
+Remove-Item -LiteralPath (Split-Path -Parent $installer) -Recurse -Force
+if ($setup.ExitCode -ne 0) { Start-Process -FilePath 'C:\Users\O''Brien Li\AppData\Local\Programs\Mixin\mixin_desktop.exe' }
+''',
+      );
+    });
+
+    test('doubles the curly quotes that end a PowerShell string', () {
+      final script = windowsInstallScript(
+        pid: 1,
+        installer: 'C:\\Users\\O\u2019Brien \u2018\u201A\u201B\\update.exe',
+        executable: r'C:\mixin_desktop.exe',
+      );
+      expect(
+        script.split('\n').first,
+        "\$installer = 'C:\\Users\\O\u2019\u2019Brien "
+        "\u2018\u2018\u201A\u201A\u201B\u201B\\update.exe'",
+      );
+    });
+
+    test('passes the script as UTF-16LE base64', () {
+      const script = "Write-Output '用户 ü'\n";
+      final arguments = powerShellArguments(script);
+      expect(arguments.take(3), [
+        '-NoProfile',
+        '-NonInteractive',
+        '-EncodedCommand',
+      ]);
+      final bytes = base64Decode(arguments[3]);
+      expect(
+        String.fromCharCodes([
+          for (var i = 0; i < bytes.length; i += 2)
+            bytes[i] | bytes[i + 1] << 8,
+        ]),
+        script,
+      );
+      // "A" is 41 00 in UTF-16LE.
+      expect(powerShellArguments('A')[3], 'QQA=');
     });
   });
 }
