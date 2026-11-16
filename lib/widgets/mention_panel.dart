@@ -13,6 +13,7 @@ import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/mention_provider.dart';
 import '../utils/extension/extension.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
 import 'conversation/badges_widget.dart';
@@ -55,8 +56,8 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ),
     );
 
-    // Keep the focus tree stable when suggestions or IME composition change.
-    // Toggling FocusableActionDetector.enabled reparents the editor subtree.
+    // Keep the widget tree fixed when selectable changes, so the editor is not
+    // reparented.
     return Shortcuts(
       shortcuts: selectable
           ? {
@@ -68,22 +69,17 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
                   const ListSelectionSelectedIntent(),
               const SingleActivator(LogicalKeyboardKey.enter):
                   const ListSelectionSelectedIntent(),
+              if (kPlatformIsDarwin) ...{
+                const SingleActivator(LogicalKeyboardKey.keyN, control: true):
+                    const ListSelectionNextIntent(),
+                const SingleActivator(LogicalKeyboardKey.keyP, control: true):
+                    const ListSelectionPrevIntent(),
+              },
             }
           : const {},
       child: Actions(
         actions: selectable
             ? {
-                // macOS can deliver vertical movement as text input selectors instead
-                // of key events, so handle the EditableText action as well as shortcuts.
-                ExtendSelectionVerticallyToAdjacentLineIntent:
-                    _MentionNavigationAction(
-                      onNavigate: (forward) {
-                        final notifier = ref.read(
-                          mentionProviderInstance.notifier,
-                        );
-                        forward ? notifier.next() : notifier.prev();
-                      },
-                    ),
                 ListSelectionNextIntent: CallbackAction<Intent>(
                   onInvoke: (intent) =>
                       ref.read(mentionProviderInstance.notifier).next(),
@@ -155,21 +151,6 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ..selection = TextSelection.fromPosition(
         TextPosition(offset: beforeSelectionOffset.length),
       );
-  }
-}
-
-class _MentionNavigationAction extends Action<DirectionalCaretMovementIntent> {
-  _MentionNavigationAction({required this.onNavigate});
-
-  final void Function(bool forward) onNavigate;
-
-  @override
-  Object? invoke(DirectionalCaretMovementIntent intent) {
-    if (!intent.collapseSelection) {
-      return callingAction?.invoke(intent);
-    }
-    onNavigate(intent.forward);
-    return null;
   }
 }
 

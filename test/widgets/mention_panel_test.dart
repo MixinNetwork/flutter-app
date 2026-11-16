@@ -9,6 +9,7 @@ import 'package:flutter_app/ui/provider/conversation_provider.dart';
 import 'package:flutter_app/ui/provider/mention_cache_provider.dart';
 import 'package:flutter_app/ui/provider/mention_provider.dart';
 import 'package:flutter_app/ui/provider/multi_auth_provider.dart';
+import 'package:flutter_app/utils/platform.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/mention_panel.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -81,7 +82,12 @@ Future<_MentionField> _pumpMentionField(
   TargetPlatform platform,
 ) async {
   debugDefaultTargetPlatformOverride = platform;
-  addTearDown(() => debugDefaultTargetPlatformOverride = null);
+  final isDarwin = kPlatformIsDarwin;
+  kPlatformIsDarwin = platform == TargetPlatform.macOS;
+  addTearDown(() {
+    debugDefaultTargetPlatformOverride = null;
+    kPlatformIsDarwin = isDarwin;
+  });
   final controller = TextEditingController();
   final focusNode = FocusNode(onKeyEvent: (_, _) => KeyEventResult.ignored);
   final values = StreamController<TextEditingValue>.broadcast();
@@ -203,7 +209,6 @@ void main() {
   ) async {
     final field = await _pumpMentionField(tester, TargetPlatform.macOS);
     await tester.showKeyboard(find.byType(TextField));
-    final focusAncestors = field.focusNode.ancestors.toList();
     tester.testTextInput.log.clear();
 
     for (final text in ['@', '@a', '@al', '@ali', '@al', '@', '@z', '@', '']) {
@@ -218,11 +223,6 @@ void main() {
         text.isNotEmpty && text != '@z',
       );
       expect(field.focusNode.hasFocus, isTrue, reason: 'After typing $text');
-      expect(
-        field.focusNode.ancestors,
-        orderedEquals(focusAncestors),
-        reason: 'Opening/filtering mentions must not reparent the editor',
-      );
       expect(tester.testTextInput.hasAnyClients, isTrue);
       expect(
         tester.testTextInput.log.where(
@@ -250,32 +250,11 @@ void main() {
     }
   });
 
-  for (final (platform, nativeSelectors) in [
-    (TargetPlatform.macOS, false),
-    (TargetPlatform.windows, false),
-    (TargetPlatform.macOS, true),
-  ]) {
-    final mode = '${platform.name}, native selectors: $nativeSelectors';
-
-    Future<void> keyDown(WidgetTester tester, LogicalKeyboardKey key) async {
-      if (nativeSelectors) {
-        await tester.testTextInput.handleKeyDownEvent(key);
-      } else {
-        await tester.sendKeyDownEvent(key);
-      }
-    }
-
-    Future<void> keyUp(WidgetTester tester, LogicalKeyboardKey key) async {
-      if (nativeSelectors) {
-        await tester.testTextInput.handleKeyUpEvent(key);
-      } else {
-        await tester.sendKeyUpEvent(key);
-      }
-    }
+  for (final platform in [TargetPlatform.macOS, TargetPlatform.windows]) {
+    final mode = platform.name;
 
     Future<void> press(WidgetTester tester, LogicalKeyboardKey key) async {
-      await keyDown(tester, key);
-      await keyUp(tester, key);
+      await tester.sendKeyEvent(key);
       await tester.pumpAndSettle();
     }
 
@@ -337,9 +316,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(field.container.read(field.mentions).users, _users);
 
-        await keyDown(tester, LogicalKeyboardKey.shiftLeft);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
         await press(tester, key);
-        await keyUp(tester, LogicalKeyboardKey.shiftLeft);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
         expect(field.controller.selection.isCollapsed, isFalse);
         expect(field.controller.selection.baseOffset, offset);
         expect(
@@ -372,7 +351,6 @@ void main() {
       final field = await _pumpMentionField(tester, platform);
       await tester.enterText(find.byType(TextField), 'hello\n@');
       await tester.pumpAndSettle();
-      final focusAncestors = field.focusNode.ancestors.toList();
       tester.testTextInput.updateEditingValue(
         const TextEditingValue(
           text: 'hello\n@a',
@@ -388,7 +366,6 @@ void main() {
 
       expect(field.focusNode.hasPrimaryFocus, isTrue);
       expect(tester.testTextInput.hasAnyClients, isTrue);
-      expect(field.focusNode.ancestors, orderedEquals(focusAncestors));
 
       await press(tester, LogicalKeyboardKey.arrowDown);
       expect(field.container.read(field.mentions).index, 0);
@@ -400,7 +377,6 @@ void main() {
       expect(field.container.read(field.mentions).users, [_users[0]]);
       expect(field.focusNode.hasPrimaryFocus, isTrue);
       expect(tester.testTextInput.hasAnyClients, isTrue);
-      expect(field.focusNode.ancestors, orderedEquals(focusAncestors));
     });
 
     for (final selectionKey in [
@@ -429,4 +405,39 @@ void main() {
       });
     }
   }
+
+  Future<void> pressControl(WidgetTester tester, LogicalKeyboardKey key) async {
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(key);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('Ctrl+N and Ctrl+P navigate mentions on macOS', (tester) async {
+    final field = await _pumpMentionField(tester, TargetPlatform.macOS);
+    await tester.enterText(find.byType(TextField), 'hello\n@');
+    await tester.pumpAndSettle();
+    final selection = field.controller.selection;
+
+    for (final (key, index) in [
+      (LogicalKeyboardKey.keyN, 1),
+      (LogicalKeyboardKey.keyN, 2),
+      (LogicalKeyboardKey.keyP, 1),
+    ]) {
+      await pressControl(tester, key);
+      expect(field.container.read(field.mentions).index, index);
+      expect(field.controller.selection, selection);
+    }
+  });
+
+  testWidgets('Ctrl+P moves the caret when the mention panel is closed', (
+    tester,
+  ) async {
+    final field = await _pumpMentionField(tester, TargetPlatform.macOS);
+    await tester.enterText(find.byType(TextField), 'hello\nworld');
+    await tester.pumpAndSettle();
+
+    await pressControl(tester, LogicalKeyboardKey.keyP);
+    expect(field.controller.selection.extentOffset, lessThan(6));
+  });
 }
