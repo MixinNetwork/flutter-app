@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_app/blaze/blaze.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -19,13 +20,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 void main() {
-  for (final (sessionValid, disposeDuringConfirmation) in [
-    (false, false),
-    (true, false),
-    (true, true),
+  for (final (sessionValid, disposeDuringConfirmation, loginByPhoneNumber) in [
+    (false, false, false),
+    (true, false, false),
+    (true, true, false),
+    (false, false, true),
   ]) {
     test(
-      disposeDuringConfirmation
+      loginByPhoneNumber
+          ? 'Blaze signs phone number login sessions with FULL scope'
+          : disposeDuringConfirmation
           ? 'Disposing Blaze during session confirmation prevents reconnect'
           : sessionValid
           ? 'Blaze authentication retries are delayed and use fresh tokens'
@@ -96,6 +100,7 @@ void main() {
             'test',
             _UnusedAckJob(),
             _UnusedFloodJob(),
+            loginByPhoneNumber: loginByPhoneNumber,
             upgradeGate: ApiUpgradeGate(),
           );
           await blaze.connect();
@@ -108,6 +113,10 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 200));
           expect(adapter.meRequests, 1);
           expect(sockets, hasLength(1));
+          expect(
+            _tokenScope(tokens.first),
+            loginByPhoneNumber ? scpFull : scp,
+          );
           expect(
             blaze.connectedStateStream.value,
             isNot(ConnectedState.connected),
@@ -141,6 +150,12 @@ void main() {
   }
 }
 
+String? _tokenScope(String? authorization) {
+  final payload = authorization!.substring('Bearer '.length).split('.')[1];
+  final json = utf8.decode(base64Url.decode(base64Url.normalize(payload)));
+  return (jsonDecode(json) as Map<String, dynamic>)['scp'] as String?;
+}
+
 class _RedirectClient implements HttpClient {
   _RedirectClient(this.delegate, this.port);
   final HttpClient delegate;
@@ -152,6 +167,12 @@ class _RedirectClient implements HttpClient {
 
   @override
   set findProxy(String Function(Uri url)? value) {}
+
+  @override
+  String? get userAgent => delegate.userAgent;
+
+  @override
+  set userAgent(String? value) => delegate.userAgent = value;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

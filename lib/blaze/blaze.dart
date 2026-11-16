@@ -53,6 +53,7 @@ class Blaze {
     this.userAgent,
     this.ackJob,
     this.floodJob, {
+    required this.loginByPhoneNumber,
     required this.upgradeGate,
     this.onUpgradeRequired,
   }) {
@@ -72,6 +73,8 @@ class Blaze {
   final Client client;
   final AckJob ackJob;
   final FloodJob floodJob;
+  // Phone number login sessions sign with FULL, like the API client.
+  final bool loginByPhoneNumber;
   final ApiUpgradeGate upgradeGate;
   final void Function()? onUpgradeRequired;
 
@@ -218,7 +221,7 @@ class Blaze {
         userId,
         sessionId,
         Key.fromBase64(privateKey),
-        scp,
+        loginByPhoneNumber ? scpFull : scp,
         'GET',
         '/',
         '',
