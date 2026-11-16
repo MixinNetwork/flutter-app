@@ -232,9 +232,13 @@ class Blaze {
       channel = IOWebSocketChannel.connect(
         _host,
         protocols: ['Mixin-Blaze-1'],
-        headers: {'User-Agent': userAgent, 'Authorization': 'Bearer $_token'},
+        headers: {'Authorization': 'Bearer $_token'},
         pingInterval: const Duration(seconds: 10),
-        customClient: HttpClient()..setProxy(proxyConfig),
+        // Set on the client: WebSocket.connect appends header values, which
+        // would join ours with the default "Dart/x (dart:io)" user agent.
+        customClient: HttpClient()
+          ..userAgent = userAgent
+          ..setProxy(proxyConfig),
       );
 
       subscription = channel?.stream
