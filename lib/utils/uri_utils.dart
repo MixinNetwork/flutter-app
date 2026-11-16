@@ -147,7 +147,8 @@ Future<bool> openUri(
         uri.isMultisigs ||
         uri.isSwap ||
         uri.isMarkets ||
-        uri.isMembership) {
+        uri.isMembership ||
+        uri.isTrade) {
       await showUnknownMixinUrlDialog(context, uri);
       return false;
     }
@@ -398,6 +399,10 @@ extension _MixinUriExtension on Uri {
       _isTypeScheme(MixinSchemeHost.markets);
 
   bool get isMembership => _isTypeHost(MixinSchemeHost.membership);
+
+  bool get isTrade =>
+      _isTypeHost(MixinSchemeHost.trade) ||
+      _isTypeScheme(MixinSchemeHost.trade);
 
   String? get startTextOfConversation {
     if (!isMixin) return null;
