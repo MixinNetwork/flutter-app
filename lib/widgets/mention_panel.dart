@@ -55,8 +55,9 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ),
     );
 
-    return FocusableActionDetector(
-      enabled: selectable,
+    // Keep the focus tree stable when suggestions or IME composition change.
+    // Toggling FocusableActionDetector.enabled reparents the editor subtree.
+    return Shortcuts(
       shortcuts: selectable
           ? {
               const SingleActivator(LogicalKeyboardKey.arrowDown):
@@ -69,52 +70,69 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
                   const ListSelectionSelectedIntent(),
             }
           : const {},
-      actions: {
-        ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (intent) =>
-              ref.read(mentionProviderInstance.notifier).next(),
-        ),
-        ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (intent) =>
-              ref.read(mentionProviderInstance.notifier).prev(),
-        ),
-        ListSelectionSelectedIntent: _MentionSelectionAction(
-          selectedUser: () => ref.read(mentionProviderInstance).selectedUser,
-          onSelect: (user) => _select(user, ref.read(mentionCacheProvider)),
-        ),
-      },
-      child: PortalTarget(
-        visible: visible && isGroupOrBot,
-        anchor: const Aligned(
-          follower: Alignment.bottomCenter,
-          target: Alignment.topCenter,
-        ),
-        closeDuration: const Duration(milliseconds: 150),
-        portalFollower: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: kMentionItemHeight * 4,
-            minWidth: constraints.maxWidth,
-            maxWidth: constraints.maxWidth,
+      child: Actions(
+        actions: selectable
+            ? {
+                // macOS can deliver vertical movement as text input selectors instead
+                // of key events, so handle the EditableText action as well as shortcuts.
+                ExtendSelectionVerticallyToAdjacentLineIntent:
+                    _MentionNavigationAction(
+                      onNavigate: (forward) {
+                        final notifier = ref.read(
+                          mentionProviderInstance.notifier,
+                        );
+                        forward ? notifier.next() : notifier.prev();
+                      },
+                    ),
+                ListSelectionNextIntent: CallbackAction<Intent>(
+                  onInvoke: (intent) =>
+                      ref.read(mentionProviderInstance.notifier).next(),
+                ),
+                ListSelectionPrevIntent: CallbackAction<Intent>(
+                  onInvoke: (intent) =>
+                      ref.read(mentionProviderInstance.notifier).prev(),
+                ),
+                ListSelectionSelectedIntent: _MentionSelectionAction(
+                  selectedUser: () =>
+                      ref.read(mentionProviderInstance).selectedUser,
+                  onSelect: (user) =>
+                      _select(user, ref.read(mentionCacheProvider)),
+                ),
+              }
+            : const {},
+        child: PortalTarget(
+          visible: visible && isGroupOrBot,
+          anchor: const Aligned(
+            follower: Alignment.bottomCenter,
+            target: Alignment.topCenter,
           ),
-          child: ClipRRect(
-            child: TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 150),
-              curve: Curves.easeOut,
-              tween: Tween(begin: 0, end: visible ? 1 : 0),
-              builder: (context, progress, child) => FractionalTranslation(
-                translation: Offset(0, 1 - progress),
-                child: child,
-              ),
-              child: _MentionPanel(
-                mentionState: mentionState,
-                scrollController: scrollController,
-                onSelect: (user) =>
-                    _select(user, ref.read(mentionCacheProvider)),
+          closeDuration: const Duration(milliseconds: 150),
+          portalFollower: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: kMentionItemHeight * 4,
+              minWidth: constraints.maxWidth,
+              maxWidth: constraints.maxWidth,
+            ),
+            child: ClipRRect(
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                tween: Tween(begin: 0, end: visible ? 1 : 0),
+                builder: (context, progress, child) => FractionalTranslation(
+                  translation: Offset(0, 1 - progress),
+                  child: child,
+                ),
+                child: _MentionPanel(
+                  mentionState: mentionState,
+                  scrollController: scrollController,
+                  onSelect: (user) =>
+                      _select(user, ref.read(mentionCacheProvider)),
+                ),
               ),
             ),
           ),
+          child: child,
         ),
-        child: child,
       ),
     );
   }
@@ -137,6 +155,21 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ..selection = TextSelection.fromPosition(
         TextPosition(offset: beforeSelectionOffset.length),
       );
+  }
+}
+
+class _MentionNavigationAction extends Action<DirectionalCaretMovementIntent> {
+  _MentionNavigationAction({required this.onNavigate});
+
+  final void Function(bool forward) onNavigate;
+
+  @override
+  Object? invoke(DirectionalCaretMovementIntent intent) {
+    if (!intent.collapseSelection) {
+      return callingAction?.invoke(intent);
+    }
+    onNavigate(intent.forward);
+    return null;
   }
 }
 
