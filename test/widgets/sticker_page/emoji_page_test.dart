@@ -1,17 +1,18 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_key_value.dart';
 import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/sticker_page/emoji_page.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    show GlobalWidgetsLocalizations;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart' as provider;
 
 void main() {

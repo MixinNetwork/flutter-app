@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:desktop_keep_screen_on/desktop_keep_screen_on.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:vector_graphics/vector_graphics_compat.dart'
     show RenderingStrategy;

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:vector_graphics/vector_graphics_compat.dart'
     show RenderingStrategy;
 
@@ -144,11 +144,9 @@ class SettingPage extends HookConsumerWidget {
                       leadingAssetName: Resources.assetsImagesIcSignOutSvg,
                       title: context.l10n.signOut,
                       onTap: () async {
-                        final succeed = await runFutureWithToast(
+                        await runFutureWithToast(
                           context.accountServer.signOutAndClear(),
                         );
-                        if (!succeed) return;
-                        context.multiAuthChangeNotifier.signOut();
                       },
                       color: context.theme.red,
                       trailing: const SizedBox(),

@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart'
     show PointerDeviceKind, kLongPressTimeout, kTouchSlop;
-import 'package:flutter/material.dart'
-    hide SelectableRegion, SelectableRegionState;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart'
+    hide SelectableRegion, SelectableRegionState;
 
 import '../../../../ui/home/notifier/chat_side_notifier.dart';
 import '../../../../ui/provider/conversation_provider.dart';

@@ -5,9 +5,10 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show GlobalCupertinoLocalizations;
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/app.dart' show rootRouteObserver;
 import 'package:flutter_app/constants/brightness_theme_data.dart';
@@ -19,10 +20,12 @@ import 'package:flutter_app/utils/web_view/desktop/bot_window.dart';
 import 'package:flutter_app/utils/web_view/desktop/bot_window_popup.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    show GlobalWidgetsLocalizations;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:window_manager/window_manager.dart';
 
 const _channel = MethodChannel('one.mixin/bot_window');

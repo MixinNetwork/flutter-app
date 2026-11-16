@@ -220,6 +220,7 @@ class _MessageProcessRunner {
       await generateUserAgent(),
       _ackJob,
       _floodJob,
+      loginByPhoneNumber: initParams.loginByPhoneNumber,
       upgradeGate: _upgradeGate,
       onUpgradeRequired: _onUpgradeRequired,
     );
