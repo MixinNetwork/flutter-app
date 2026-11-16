@@ -47,6 +47,14 @@ class LandingQrCodeNotifier extends ValueNotifier<LandingState> {
          ),
          // ignore: avoid_redundant_argument_values
          httpLogLevel: kReleaseMode ? null : HttpLogLevel.all,
+         interceptors: [
+           InterceptorsWrapper(
+             onRequest: (options, handler) async {
+               options.headers['User-Agent'] = await generateUserAgent();
+               handler.next(options);
+             },
+           ),
+         ],
        ),
        multiAuthChangeNotifier = multiAuthChangeNotifier,
        super(
