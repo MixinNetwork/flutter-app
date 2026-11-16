@@ -89,7 +89,7 @@ dependencies:
   local_auth: ^3.0.1
   lottie: ^3.3.3
   map: ^2.0.2
-  mixin_markdown_widget: ^0.4.0
+  mixin_markdown_widget: ^0.5.0
   mime: ^2.0.0
   mixin_bot_sdk_dart: ^1.5.1
   mixin_logger: ^0.2.0
@@ -100,7 +100,7 @@ dependencies:
   package_info_plus: ^9.0.1
   path: ^1.8.0
   path_provider: ^2.1.2
-  pin_code_fields: ^8.0.1
+  pin_code_fields: ^10.1.1
   pretty_qr_code: ^3.6.0
   protocol_handler: ^0.2.0
   provider: ^6.1.5

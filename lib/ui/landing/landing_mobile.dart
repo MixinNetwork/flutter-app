@@ -24,6 +24,7 @@ import '../../utils/platform.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/pin_field.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/user/captcha_web_view_dialog.dart';
 import '../../widgets/user/phone_number_input.dart';
@@ -151,6 +152,9 @@ class _CodeInputScene extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final codeInputController = useTextEditingController();
+    final pinController = usePinInputController(
+      textController: codeInputController,
+    );
 
     final verification = useRef<VerificationResponse>(
       initialVerificationResponse,
@@ -244,24 +248,20 @@ class _CodeInputScene extends HookConsumerWidget {
           const SizedBox(height: 20),
           SizedBox(
             width: 135,
-            child: PinCodeTextField(
+            child: MaterialPinField(
               autoFocus: true,
               length: 4,
-              autoDisposeControllers: false,
-              controller: codeInputController,
-              appContext: context,
+              pinController: pinController,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              keyboardType: TextInputType.number,
               onCompleted: performLogin,
-              useHapticFeedback: true,
-              pinTheme: PinTheme(
-                activeColor: context.theme.accent,
-                inactiveColor: context.theme.secondaryText,
-                fieldWidth: 15,
+              theme: borderPinTheme(
+                borderColor: context.theme.secondaryText,
+                focusedBorderColor: context.theme.accent,
+                filledBorderColor: context.theme.accent,
                 borderWidth: 2,
+                spacing: 25,
+                textStyle: TextStyle(fontSize: 18, color: context.theme.text),
               ),
-              textStyle: TextStyle(fontSize: 18, color: context.theme.text),
-              onChanged: (value) {},
             ),
           ),
           const SizedBox(height: 0),

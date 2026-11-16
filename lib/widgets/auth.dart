@@ -20,6 +20,7 @@ import '../utils/event_bus.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'dialog.dart';
+import 'pin_field.dart';
 
 const _lockDuration = Duration(minutes: 1);
 
@@ -54,6 +55,10 @@ class _AuthGuard extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final focusNode = useFocusNode();
     final textEditingController = useTextEditingController();
+    final pinController = usePinInputController(
+      textController: textEditingController,
+      focusNode: focusNode,
+    );
 
     final hasPasscode =
         useMemoizedStream(SecurityKeyValue.instance.watchHasPasscode).data ??
@@ -183,34 +188,37 @@ class _AuthGuard extends HookConsumerWidget {
                         SizedBox(
                           width: 204,
                           // height: 14,
-                          child: PinCodeTextField(
-                            appContext: context,
+                          child: MaterialPinField(
                             length: 6,
-                            controller: textEditingController,
+                            pinController: pinController,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
-                            pinTheme: PinTheme(
-                              activeColor: context.theme.text,
-                              inactiveColor: context.theme.text,
-                              selectedColor: context.theme.text,
-                              fieldWidth: 15,
+                            theme: borderPinTheme(
+                              borderColor: context.theme.text,
+                              focusedBorderColor: context.theme.text,
+                              filledBorderColor: context.theme.text,
                               borderWidth: 1,
-                              shape: PinCodeFieldShape.circle,
+                              // (204 - 6 * 15) / 5
+                              spacing: 22.8,
+                              shape: MaterialPinShape.circle,
                             ),
                             obscureText: true,
-                            autoDisposeControllers: false,
+                            blinkWhenObscuring: false,
+                            enableHapticFeedback: false,
                             obscuringWidget: Container(
+                              width: 15,
+                              height: 15,
                               decoration: BoxDecoration(
                                 color: context.theme.text,
                                 shape: BoxShape.circle,
                               ),
                             ),
                             autoFocus: true,
-                            focusNode: focusNode,
-                            showCursor: false,
                             onCompleted: (value) {
-                              textEditingController.text = '';
+                              // Clearing inside the callback would leave the
+                              // field thinking it is still complete.
+                              scheduleMicrotask(pinController.clear);
                               if (SecurityKeyValue.instance.passcode == value) {
                                 lock.value = false;
                               } else {

@@ -12,6 +12,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import '../dialog.dart';
 import '../interactive_decorated_box.dart';
+import '../pin_field.dart';
 import '../toast.dart';
 import 'captcha_web_view_dialog.dart';
 
@@ -147,6 +148,9 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final codeInputController = useTextEditingController();
+    final pinController = usePinInputController(
+      textController: codeInputController,
+    );
     final verification = useRef<VerificationResponse>(
       initialVerificationResponse,
     );
@@ -168,24 +172,20 @@ class VerificationCodeInputLayout extends HookConsumerWidget {
         const SizedBox(height: 20),
         SizedBox(
           width: 135,
-          child: PinCodeTextField(
+          child: MaterialPinField(
             autoFocus: true,
             length: 4,
-            autoDisposeControllers: false,
-            controller: codeInputController,
-            appContext: context,
+            pinController: pinController,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            keyboardType: TextInputType.number,
             onCompleted: (code) => onVerification(code, verification.value),
-            useHapticFeedback: true,
-            pinTheme: PinTheme(
-              activeColor: context.theme.accent,
-              inactiveColor: context.theme.secondaryText,
-              fieldWidth: 15,
+            theme: borderPinTheme(
+              borderColor: context.theme.secondaryText,
+              focusedBorderColor: context.theme.accent,
+              filledBorderColor: context.theme.accent,
               borderWidth: 2,
+              spacing: 25,
+              textStyle: TextStyle(fontSize: 18, color: context.theme.text),
             ),
-            textStyle: TextStyle(fontSize: 18, color: context.theme.text),
-            onChanged: (value) {},
           ),
         ),
         const SizedBox(height: 0),
