@@ -19,6 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 void main() {
+  _userAgentTest();
+
   for (final (sessionValid, disposeDuringConfirmation) in [
     (false, false),
     (true, false),
@@ -141,6 +143,57 @@ void main() {
   }
 }
 
+void _userAgentTest() {
+  test('Blaze sends only the Mixin User-Agent', () async {
+    final database = Database(
+      MixinDatabase(NativeDatabase.memory()),
+      FtsDatabase(NativeDatabase.memory()),
+    );
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final userAgent = Completer<List<String>?>();
+    final sockets = <WebSocket>[];
+    final serverSubscription = server.listen((request) async {
+      if (!userAgent.isCompleted) {
+        userAgent.complete(request.headers[HttpHeaders.userAgentHeader]);
+      }
+      sockets.add(await WebSocketTransformer.upgrade(request));
+    });
+    final client = Client(accessToken: 'test', httpLogLevel: null);
+    final httpClient = HttpClient();
+    late Blaze blaze;
+    addTearDown(() async {
+      blaze.dispose();
+      client.dio.close();
+      for (final socket in sockets) {
+        await socket.close();
+      }
+      await serverSubscription.cancel();
+      await server.close(force: true);
+      httpClient.close(force: true);
+      await database.dispose();
+    });
+
+    await HttpOverrides.runZoned(() async {
+      blaze = Blaze(
+        'user',
+        'session',
+        base64Encode(List.filled(64, 1)),
+        database,
+        client,
+        'Mixin/1.0.0',
+        _UnusedAckJob(),
+        _UnusedFloodJob(),
+        upgradeGate: ApiUpgradeGate(),
+      );
+      await blaze.connect();
+      expect(
+        await userAgent.future.timeout(const Duration(seconds: 2)),
+        ['Mixin/1.0.0'],
+      );
+    }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
+  });
+}
+
 class _RedirectClient implements HttpClient {
   _RedirectClient(this.delegate, this.port);
   final HttpClient delegate;
@@ -152,6 +205,12 @@ class _RedirectClient implements HttpClient {
 
   @override
   set findProxy(String Function(Uri url)? value) {}
+
+  @override
+  String? get userAgent => delegate.userAgent;
+
+  @override
+  set userAgent(String? value) => delegate.userAgent = value;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

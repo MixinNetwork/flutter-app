@@ -234,7 +234,11 @@ class Blaze {
         protocols: ['Mixin-Blaze-1'],
         headers: {'User-Agent': userAgent, 'Authorization': 'Bearer $_token'},
         pingInterval: const Duration(seconds: 10),
-        customClient: HttpClient()..setProxy(proxyConfig),
+        // dart:io adds its own `Dart/x (dart:io)` before the headers above,
+        // so the server would read two User-Agent values.
+        customClient: HttpClient()
+          ..userAgent = null
+          ..setProxy(proxyConfig),
       );
 
       subscription = channel?.stream
