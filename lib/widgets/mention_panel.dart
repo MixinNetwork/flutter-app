@@ -13,6 +13,7 @@ import '../ui/provider/conversation_provider.dart';
 import '../ui/provider/mention_cache_provider.dart';
 import '../ui/provider/mention_provider.dart';
 import '../utils/extension/extension.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
 import 'conversation/badges_widget.dart';
@@ -55,8 +56,9 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
       ),
     );
 
-    return FocusableActionDetector(
-      enabled: selectable,
+    // Keep the widget tree fixed when selectable changes, so the editor is not
+    // reparented.
+    return Shortcuts(
       shortcuts: selectable
           ? {
               const SingleActivator(LogicalKeyboardKey.arrowDown):
@@ -67,54 +69,66 @@ class MentionPanelPortalEntry extends HookConsumerWidget {
                   const ListSelectionSelectedIntent(),
               const SingleActivator(LogicalKeyboardKey.enter):
                   const ListSelectionSelectedIntent(),
+              if (kPlatformIsDarwin) ...{
+                const SingleActivator(LogicalKeyboardKey.keyN, control: true):
+                    const ListSelectionNextIntent(),
+                const SingleActivator(LogicalKeyboardKey.keyP, control: true):
+                    const ListSelectionPrevIntent(),
+              },
             }
           : const {},
-      actions: {
-        ListSelectionNextIntent: CallbackAction<Intent>(
-          onInvoke: (intent) =>
-              ref.read(mentionProviderInstance.notifier).next(),
-        ),
-        ListSelectionPrevIntent: CallbackAction<Intent>(
-          onInvoke: (intent) =>
-              ref.read(mentionProviderInstance.notifier).prev(),
-        ),
-        ListSelectionSelectedIntent: _MentionSelectionAction(
-          selectedUser: () => ref.read(mentionProviderInstance).selectedUser,
-          onSelect: (user) => _select(user, ref.read(mentionCacheProvider)),
-        ),
-      },
-      child: PortalTarget(
-        visible: visible && isGroupOrBot,
-        anchor: const Aligned(
-          follower: Alignment.bottomCenter,
-          target: Alignment.topCenter,
-        ),
-        closeDuration: const Duration(milliseconds: 150),
-        portalFollower: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: kMentionItemHeight * 4,
-            minWidth: constraints.maxWidth,
-            maxWidth: constraints.maxWidth,
+      child: Actions(
+        actions: selectable
+            ? {
+                ListSelectionNextIntent: CallbackAction<Intent>(
+                  onInvoke: (intent) =>
+                      ref.read(mentionProviderInstance.notifier).next(),
+                ),
+                ListSelectionPrevIntent: CallbackAction<Intent>(
+                  onInvoke: (intent) =>
+                      ref.read(mentionProviderInstance.notifier).prev(),
+                ),
+                ListSelectionSelectedIntent: _MentionSelectionAction(
+                  selectedUser: () =>
+                      ref.read(mentionProviderInstance).selectedUser,
+                  onSelect: (user) =>
+                      _select(user, ref.read(mentionCacheProvider)),
+                ),
+              }
+            : const {},
+        child: PortalTarget(
+          visible: visible && isGroupOrBot,
+          anchor: const Aligned(
+            follower: Alignment.bottomCenter,
+            target: Alignment.topCenter,
           ),
-          child: ClipRRect(
-            child: TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 150),
-              curve: Curves.easeOut,
-              tween: Tween(begin: 0, end: visible ? 1 : 0),
-              builder: (context, progress, child) => FractionalTranslation(
-                translation: Offset(0, 1 - progress),
-                child: child,
-              ),
-              child: _MentionPanel(
-                mentionState: mentionState,
-                scrollController: scrollController,
-                onSelect: (user) =>
-                    _select(user, ref.read(mentionCacheProvider)),
+          closeDuration: const Duration(milliseconds: 150),
+          portalFollower: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: kMentionItemHeight * 4,
+              minWidth: constraints.maxWidth,
+              maxWidth: constraints.maxWidth,
+            ),
+            child: ClipRRect(
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                tween: Tween(begin: 0, end: visible ? 1 : 0),
+                builder: (context, progress, child) => FractionalTranslation(
+                  translation: Offset(0, 1 - progress),
+                  child: child,
+                ),
+                child: _MentionPanel(
+                  mentionState: mentionState,
+                  scrollController: scrollController,
+                  onSelect: (user) =>
+                      _select(user, ref.read(mentionCacheProvider)),
+                ),
               ),
             ),
           ),
+          child: child,
         ),
-        child: child,
       ),
     );
   }
