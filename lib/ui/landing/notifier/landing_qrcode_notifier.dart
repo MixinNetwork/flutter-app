@@ -51,6 +51,7 @@ class LandingQrCodeNotifier extends ValueNotifier<LandingState> {
            InterceptorsWrapper(
              onRequest: (options, handler) async {
                options.headers['User-Agent'] = await generateUserAgent();
+               options.headers['Mixin-Device-Id'] = await getDeviceId();
                handler.next(options);
              },
            ),
