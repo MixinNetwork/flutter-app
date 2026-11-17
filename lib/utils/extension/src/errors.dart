@@ -69,7 +69,7 @@ extension GetErrorStringByCode on BuildContext {
       case timeInaccurate:
         return '$code TIME_INACCURATE';
       default:
-        return '${l10n.errorUnknownWithCode}: $message';
+        return l10n.errorUnknownWithCode('$code $message');
     }
   }
 }

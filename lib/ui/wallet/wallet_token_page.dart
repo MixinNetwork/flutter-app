@@ -17,6 +17,7 @@ import '../../widgets/message/item/transfer/safe_transfer_dialog.dart';
 import '../../widgets/message/item/transfer/transfer_page.dart';
 import '../provider/transfer_provider.dart';
 import '../provider/wallet_provider.dart';
+import 'deposit_dialog.dart';
 import 'wallet_widgets.dart';
 
 const _kPageSize = 50;
@@ -167,12 +168,12 @@ class _BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fiatRate = this.fiatRate;
     return WalletCard(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
@@ -226,8 +227,31 @@ class _BalanceCard extends StatelessWidget {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          SizedBox(
+            height: 1,
+            child: ColoredBox(color: context.theme.divider),
+          ),
+          InteractiveDecoratedBox(
+            hoveringDecoration: BoxDecoration(
+              color: context.theme.listSelected,
+            ),
+            onTap: () => showDepositDialog(context, token.assetId),
+            child: SizedBox(
+              height: 48,
+              child: Center(
+                child: Text(
+                  context.l10n.deposit,
+                  style: TextStyle(
+                    color: context.theme.accent,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
