@@ -42,6 +42,7 @@ void main() {
         final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
         final sockets = <WebSocket>[];
         final tokens = <String?>[];
+        final deviceIds = <String?>[];
         final connectionTimes = <Duration>[];
         final stopwatch = Stopwatch()..start();
         final secondConnection = Completer<void>();
@@ -50,6 +51,7 @@ void main() {
           sockets.add(socket);
           connectionTimes.add(stopwatch.elapsed);
           tokens.add(request.headers.value(HttpHeaders.authorizationHeader));
+          deviceIds.add(request.headers.value('Mixin-Device-Id'));
           if (sockets.length == 2) secondConnection.complete();
           socket.add(
             gzip.encode(
@@ -98,6 +100,7 @@ void main() {
             database,
             client,
             'test',
+            'test-device',
             _UnusedAckJob(),
             _UnusedFloodJob(),
             loginByPhoneNumber: loginByPhoneNumber,
@@ -113,6 +116,7 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 200));
           expect(adapter.meRequests, 1);
           expect(sockets, hasLength(1));
+          expect(deviceIds.first, 'test-device');
           expect(
             _tokenScope(tokens.first),
             loginByPhoneNumber ? scpFull : scp,

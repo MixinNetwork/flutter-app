@@ -51,6 +51,7 @@ class Blaze {
     this.database,
     this.client,
     this.userAgent,
+    this.deviceId,
     this.ackJob,
     this.floodJob, {
     required this.loginByPhoneNumber,
@@ -79,6 +80,7 @@ class Blaze {
   final void Function()? onUpgradeRequired;
 
   final String? userAgent;
+  final String deviceId;
 
   ProxyConfig? proxyConfig;
 
@@ -235,7 +237,10 @@ class Blaze {
       channel = IOWebSocketChannel.connect(
         _host,
         protocols: ['Mixin-Blaze-1'],
-        headers: {'Authorization': 'Bearer $_token'},
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Mixin-Device-Id': deviceId,
+        },
         pingInterval: const Duration(seconds: 10),
         // Set on the client: WebSocket.connect appends header values, which
         // would join ours with the default "Dart/x (dart:io)" user agent.

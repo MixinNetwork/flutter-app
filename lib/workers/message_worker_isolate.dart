@@ -26,6 +26,7 @@ import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/logger.dart';
 import '../utils/mixin_api_client.dart';
+import '../utils/platform.dart';
 import '../utils/system/package_info.dart';
 import 'decrypt_message.dart';
 import 'device_transfer.dart';
@@ -218,6 +219,7 @@ class _MessageProcessRunner {
       database,
       client,
       await generateUserAgent(),
+      await getDeviceId(),
       _ackJob,
       _floodJob,
       loginByPhoneNumber: initParams.loginByPhoneNumber,
