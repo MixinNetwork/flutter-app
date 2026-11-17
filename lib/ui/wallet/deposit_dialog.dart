@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -33,24 +32,20 @@ class _DepositDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final token = ref.watch(walletTokenProvider(assetId)).valueOrNull;
-    final retry = useState(0);
     final client = context.accountServer.client;
     final chainId = token?.chainId;
     final entry = useMemoizedFuture<SafeDepositEntry?>(
       () async {
         if (chainId == null) return null;
-        final entry = await fetchDepositEntry(
+        return fetchDepositEntryRetrying(
           client,
           chainId: chainId,
           assetId: assetId,
+          isActive: () => context.mounted,
         );
-        // An entry without a valid signature can be an address of someone
-        // else, so it is an error, not an empty result.
-        if (entry == null) throw ToastError.builder((c) => c.l10n.failed);
-        return entry;
       },
       null,
-      keys: [chainId, retry.value],
+      keys: [chainId],
     );
 
     final data = entry.data;
@@ -96,7 +91,6 @@ class _DepositDialog extends HookConsumerWidget {
                       warning: context.l10n.depositMemoNotice,
                       token: token,
                       error: null,
-                      onRetry: null,
                     ),
                   ],
                   _EntryCard(
@@ -104,7 +98,6 @@ class _DepositDialog extends HookConsumerWidget {
                     value: data?.destination,
                     token: token,
                     error: error,
-                    onRetry: () => retry.value++,
                   ),
                   if (token != null) _Notes(token: token),
                 ],
@@ -126,7 +119,6 @@ class _EntryCard extends StatelessWidget {
     required this.value,
     required this.token,
     required this.error,
-    required this.onRetry,
     this.warning,
   });
 
@@ -135,7 +127,6 @@ class _EntryCard extends StatelessWidget {
   final String? warning;
   final WalletTokenItem? token;
   final Object? error;
-  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -268,26 +259,16 @@ class _EntryCard extends StatelessWidget {
                           ],
                         )
                       : error != null
-                      ? Column(
+                      ? Center(
                           key: const ValueKey('error'),
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              ToastError.errorToString(context, error),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: context.theme.red,
-                                fontSize: 14,
-                              ),
+                          child: Text(
+                            ToastError.errorToString(context, error),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: context.theme.red,
+                              fontSize: 14,
                             ),
-                            if (!_isDepositSuspended(error)) ...[
-                              const SizedBox(height: 12),
-                              MixinButton(
-                                onTap: onRetry,
-                                child: Text(context.l10n.retry),
-                              ),
-                            ],
-                          ],
+                          ),
                         )
                       : const Center(
                           key: ValueKey('loading'),
@@ -345,9 +326,3 @@ class _Notes extends StatelessWidget {
     );
   }
 }
-
-/// The server answers 202 with code 10104 while it cannot give a deposit
-/// address for the chain. iOS shows the deposit as suspended, and a retry
-/// gets the same answer.
-bool _isDepositSuspended(Object error) =>
-    error is MixinApiError && (error.error as MixinError?)?.code == 10104;

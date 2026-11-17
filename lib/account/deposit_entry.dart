@@ -57,3 +57,38 @@ Future<SafeDepositEntry?> fetchDepositEntry(
       .where(isDepositEntrySignatureValid)
       .firstWhereOrNull((e) => e.isPrimary);
 }
+
+/// Returns the primary deposit entry with a valid signature, and asks again
+/// every [interval] until it gets one, as iOS does. Only a suspended deposit
+/// (code 10104) and an unauthorized session (401) end the wait with an
+/// error, because asking again gets the same answer. Stops with null once
+/// [isActive] returns false.
+Future<SafeDepositEntry?> fetchDepositEntryRetrying(
+  Client client, {
+  required String chainId,
+  required String assetId,
+  required bool Function() isActive,
+  Duration interval = const Duration(seconds: 3),
+}) async {
+  while (isActive()) {
+    try {
+      final entry = await fetchDepositEntry(
+        client,
+        chainId: chainId,
+        assetId: assetId,
+      );
+      if (entry != null) return entry;
+    } on MixinApiError catch (error) {
+      final code = (error.error as MixinError?)?.code;
+      if (code == depositSuspendedCode || code == 401) rethrow;
+    } catch (_) {
+      // A network error: ask again.
+    }
+    await Future<void>.delayed(interval);
+  }
+  return null;
+}
+
+/// The server answers 202 with this code while it cannot give a deposit
+/// address for the chain. iOS and Android show the deposit as suspended.
+const depositSuspendedCode = 10104;
