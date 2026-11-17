@@ -11,7 +11,11 @@ if [ ! -x "$FLUTTER_ROOT/bin/flutter" ]; then
   git clone https://github.com/flutter/flutter.git --depth 1 -b "$FLUTTER_VERSION" "$FLUTTER_ROOT"
 fi
 
-export PATH="$FLUTTER_ROOT/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$FLUTTER_ROOT/bin:$PATH"
+
+if [ ! -x "$HOME/.cargo/bin/rustup" ]; then
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+fi
 
 flutter --version
 flutter precache --macos
