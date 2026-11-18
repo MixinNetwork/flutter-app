@@ -11,6 +11,10 @@ enum SlideCategoryType {
   strangers,
   circle,
   setting,
+  wallet;
+
+  /// Whether the center page shows a conversation list for this category.
+  bool get hasConversations => this != setting && this != wallet;
 }
 
 class SlideCategoryState extends Equatable {
@@ -33,8 +37,8 @@ class SlideCategoryStateNotifier
   void select(SlideCategoryType type, [String? id]) =>
       state = SlideCategoryState(type: type, id: id);
 
-  void switchToChatsIfSettings() {
-    if (state.type != SlideCategoryType.setting) return;
+  void switchToChatsIfNoConversations() {
+    if (state.type.hasConversations) return;
     select(SlideCategoryType.chats);
   }
 }

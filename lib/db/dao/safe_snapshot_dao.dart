@@ -46,6 +46,31 @@ class SafeSnapshotDao extends DatabaseAccessor<MixinDatabase>
         return value;
       });
 
+  Selectable<SafeSnapshotItem> snapshotItemsByAssetId(
+    String assetId, {
+    required int limit,
+  }) => _snapshotItem(
+    (s, u, t) => s.assetId.equals(assetId),
+    (s, u, t) => OrderBy([
+      OrderingTerm.desc(s.createdAt),
+      OrderingTerm.desc(s.snapshotId),
+    ]),
+    (s, u, t) => Limit(limit, null),
+  );
+
+  Future<void> insertSdkSnapshots(List<sdk.SafeSnapshot> snapshots) async {
+    if (snapshots.isEmpty) return;
+    await batch(
+      (batch) => batch.insertAllOnConflictUpdate(
+        safeSnapshots,
+        snapshots.map((e) => e.asDbSafeSnapshotObject),
+      ),
+    );
+    DataBaseEventBus.instance.updateSafeSnapshot(
+      snapshots.map((e) => e.snapshotId),
+    );
+  }
+
   Future<List<SafeSnapshot>> snapshotItem(String assetId) => (select(
     db.safeSnapshots,
   )..where((tbl) => tbl.assetId.equals(assetId))).get();

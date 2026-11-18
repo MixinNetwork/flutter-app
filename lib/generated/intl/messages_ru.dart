@@ -52,97 +52,104 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(arg0) => "Удалить ${arg0} круг?";
 
-  static String m15(arg0) => "${arg0} отключил исчезающие сообщения";
+  static String m15(count, arg0) =>
+      "${Intl.plural(count, one: 'Депозит поступит после ${arg0} подтверждения блока', other: 'Депозит поступит после ${arg0} подтверждений блока')}";
 
-  static String m17(arg0) =>
+  static String m16(arg0, arg1) => "Минимальный депозит: ${arg0} ${arg1}";
+
+  static String m17(arg0) => "Депозит ${arg0}";
+
+  static String m18(arg0) => "${arg0} отключил исчезающие сообщения";
+
+  static String m20(arg0) =>
       "ОШИБКА 20124: Недостаточная комиссия за транзакцию. Убедитесь, что в вашем кошельке есть ${arg0} в качестве комиссии.";
 
-  static String m18(arg0, arg1) =>
+  static String m21(arg0, arg1) =>
       "ОШИБКА 30102: Недопустимый формат адреса. Пожалуйста, введите правильный адрес ${arg0} ${arg1}!";
 
-  static String m19(arg0) =>
+  static String m22(arg0) =>
       "ОШИБКА 10006: Обновите Mixin(${arg0}), чтобы продолжить использование сервиса.";
 
-  static String m20(count, arg0) =>
+  static String m23(count, arg0) =>
       "${Intl.plural(count, one: 'ОШИБКА 20119: Неверный PIN-код. У вас еще есть шанс ${arg0}. Пожалуйста, подождите 24 часа, чтобы повторить попытку позже.', other: 'ОШИБКА 20119: Неверный PIN-код. У вас еще есть ${arg0} шансов. Пожалуйста, подождите 24 часа, чтобы повторить попытку позже.')}";
 
-  static String m21(arg0) => "Сервер находится на обслуживании: ${arg0}";
+  static String m24(arg0) => "Сервер находится на обслуживании: ${arg0}";
 
-  static String m22(arg0) => "ОШИБКА: ${arg0}";
+  static String m25(arg0) => "ОШИБКА: ${arg0}";
 
-  static String m23(arg0) => "ОШИБКА: ${arg0}";
+  static String m26(arg0) => "ОШИБКА: ${arg0}";
 
-  static String m24(arg0) => "Сообщение ${arg0}";
+  static String m27(arg0) => "Сообщение ${arg0}";
 
-  static String m25(arg0) => "Удалить ${arg0}";
+  static String m28(arg0) => "Удалить ${arg0}";
 
-  static String m26(count, arg0) =>
+  static String m29(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} час', other: '${arg0} часы')}";
 
-  static String m27(arg0) => "Присоединился к ${arg0}";
+  static String m30(arg0) => "Присоединился к ${arg0}";
 
-  static String m29(arg0) =>
+  static String m32(arg0) =>
       "Мы отправим 4-значный код на ваш номер телефона ${arg0}. Введите код на следующем экране.";
 
-  static String m30(arg0) =>
+  static String m33(arg0) =>
       "Введите 4-значный код, отправленный вам на ${arg0}.";
 
-  static String m32(arg0) => "Мой Mixin ID: ${arg0}";
+  static String m35(arg0) => "Мой Mixin ID: ${arg0}";
 
-  static String m33(arg0, arg1) =>
+  static String m36(arg0, arg1) =>
       "Доступен Mixin Messenger ${arg0}; у вас установлена ${arg1}. Загрузить сейчас?";
 
-  static String m34(arg0) => "${arg0} теперь администратор";
+  static String m37(arg0) => "${arg0} теперь администратор";
 
-  static String m35(arg0) => "Открыть ссылку: ${arg0}";
+  static String m38(arg0) => "Открыть ссылку: ${arg0}";
 
-  static String m36(arg0) => "${arg0} УЧАСТНИКОВ";
+  static String m39(arg0) => "${arg0} УЧАСТНИКОВ";
 
-  static String m37(count, arg0, arg1) =>
+  static String m40(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} подтверждение', other: '${arg0}/${arg1} подтверждения')}";
 
-  static String m38(count, arg0) =>
+  static String m41(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} закрепленное сообщение', other: '${arg0} закрепленных сообщений')}";
 
-  static String m39(arg0) => "Повторно отправить код через ${arg0} с.";
+  static String m42(arg0) => "Повторно отправить код через ${arg0} с.";
 
-  static String m40(count, arg0) =>
+  static String m43(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} связанное сообщение', other: '${arg0} похожие сообщения')}";
 
-  static String m41(arg0, arg1) =>
+  static String m44(arg0, arg1) =>
       "${arg0} установил время исчезновения сообщения на ${arg1}.";
 
-  static String m42(arg0) =>
+  static String m45(arg0) =>
       "Если вы продолжите, ваш профиль и данные аккаунта будут удалены ${arg0}. прочтите наш документ, чтобы **Узнать больше**.";
 
-  static String m43(arg0, arg1) =>
+  static String m46(arg0, arg1) =>
       "Вы уверены, что хотите отправить ${arg0} от ${arg1}?";
 
-  static String m44(arg0) => "Вы уверены, что хотите отправить ${arg0}?";
+  static String m47(arg0) => "Вы уверены, что хотите отправить ${arg0}?";
 
-  static String m45(arg0) => "Не удалось открыть файл: ${arg0}";
-
-  static String m46(count) =>
-      "${Intl.plural(count, one: 'день', other: 'дни')}";
-
-  static String m47(count) =>
-      "${Intl.plural(count, one: 'час', other: 'часы')}";
-
-  static String m48(count) =>
-      "${Intl.plural(count, one: 'минута', other: 'минуты')}";
+  static String m48(arg0) => "Не удалось открыть файл: ${arg0}";
 
   static String m49(count) =>
-      "${Intl.plural(count, one: 'секунда', other: 'секунды')}";
+      "${Intl.plural(count, one: 'день', other: 'дни')}";
 
   static String m50(count) =>
+      "${Intl.plural(count, one: 'час', other: 'часы')}";
+
+  static String m51(count) =>
+      "${Intl.plural(count, one: 'минута', other: 'минуты')}";
+
+  static String m52(count) =>
+      "${Intl.plural(count, one: 'секунда', other: 'секунды')}";
+
+  static String m53(count) =>
       "${Intl.plural(count, one: 'неделя', other: 'недели')}";
 
-  static String m51(arg0) =>
+  static String m54(arg0) =>
       "Текущая версия (${arg0}) больше не доступна!\nНажмите «Обновить» ниже, чтобы выполнить обновление до последней версии из Google Play.";
 
-  static String m52(arg0) => "значение сейчас ${arg0}";
+  static String m55(arg0) => "значение сейчас ${arg0}";
 
-  static String m53(arg0) => "значение затем ${arg0}";
+  static String m56(arg0) => "значение затем ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -321,8 +328,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "deleteTheCircle": m14,
     "deposit": MessageLookupByLibrary.simpleMessage("Депозит"),
+    "depositAttention": MessageLookupByLibrary.simpleMessage(
+      "Пожалуйста, попробуйте небольшую сумму для первого депозита.",
+    ),
+    "depositConfirmation": m15,
+    "depositDust": m16,
+    "depositMemoNotice": MessageLookupByLibrary.simpleMessage(
+      "Памятка требуется, или вы потеряете свои монеты.",
+    ),
+    "depositToken": m17,
     "developer": MessageLookupByLibrary.simpleMessage("Разработчик"),
-    "disableDisappearingMessage": m15,
+    "disableDisappearingMessage": m18,
     "disappearingMessage": MessageLookupByLibrary.simpleMessage(
       "Исчезающие сообщения",
     ),
@@ -402,8 +418,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorInsufficientBalance": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 20117: Недостаточный баланс",
     ),
-    "errorInsufficientTransactionFeeWithAmount": m17,
-    "errorInvalidAddress": m18,
+    "errorInsufficientTransactionFeeWithAmount": m20,
+    "errorInvalidAddress": m21,
     "errorInvalidAddressPlain": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 30102: Недопустимый формат адреса.",
     ),
@@ -425,7 +441,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorNumberReachedLimit": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 20132: число достигло предела.",
     ),
-    "errorOldVersion": m19,
+    "errorOldVersion": m22,
     "errorOpenLocation": MessageLookupByLibrary.simpleMessage(
       "Не могу найти приложение карты",
     ),
@@ -450,11 +466,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorPinIncorrect": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 20119: Неверный PIN-код",
     ),
-    "errorPinIncorrectWithTimes": m20,
+    "errorPinIncorrectWithTimes": m23,
     "errorRecaptchaIsInvalid": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 10004: Recaptcha недействительна",
     ),
-    "errorServer5xxCode": m21,
+    "errorServer5xxCode": m24,
     "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 429: Превышен предел скорости",
     ),
@@ -473,8 +489,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
       "Не удается найти приложение, способное открыть этот носитель.",
     ),
-    "errorUnknownWithCode": m22,
-    "errorUnknownWithMessage": m23,
+    "errorUnknownWithCode": m25,
+    "errorUnknownWithMessage": m26,
     "errorUsedPhone": MessageLookupByLibrary.simpleMessage(
       "ОШИБКА 20122: этот номер телефона уже связан с другой учетной записью.",
     ),
@@ -516,14 +532,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "groupName": MessageLookupByLibrary.simpleMessage("Название группы"),
     "groupParticipants": MessageLookupByLibrary.simpleMessage("Участники"),
-    "groupPopMenuMessage": m24,
-    "groupPopMenuRemove": m25,
+    "groupPopMenuMessage": m27,
+    "groupPopMenuRemove": m28,
     "groups": MessageLookupByLibrary.simpleMessage("Группы"),
     "groupsInCommon": MessageLookupByLibrary.simpleMessage("Общие группы"),
     "help": MessageLookupByLibrary.simpleMessage("Помощь"),
     "helpCenter": MessageLookupByLibrary.simpleMessage("Центр помощи"),
+    "hiddenAssets": MessageLookupByLibrary.simpleMessage("Скрытые активы"),
+    "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
     "hideMixin": MessageLookupByLibrary.simpleMessage("Скрыть Mixin"),
-    "hour": m26,
+    "hour": m29,
     "howAreYou": MessageLookupByLibrary.simpleMessage("Привет, как дела?"),
     "iAmGood": MessageLookupByLibrary.simpleMessage("Я в порядке."),
     "ignoreThisVersion": MessageLookupByLibrary.simpleMessage(
@@ -545,9 +563,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "joinGroupWithPlus": MessageLookupByLibrary.simpleMessage(
       "+ Присоединиться к группе",
     ),
-    "joinedIn": m27,
-    "landingInvitationDialogContent": m29,
-    "landingValidationTitle": m30,
+    "joinedIn": m30,
+    "landingInvitationDialogContent": m32,
+    "landingValidationTitle": m33,
     "learnMore": MessageLookupByLibrary.simpleMessage("Узнать больше"),
     "less": MessageLookupByLibrary.simpleMessage("меньше"),
     "light": MessageLookupByLibrary.simpleMessage("Светлое"),
@@ -595,7 +613,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Мультиподписная транзакция",
     ),
     "mute": MessageLookupByLibrary.simpleMessage("Беззвучный"),
-    "myMixinId": m32,
+    "myMixinId": m35,
     "myStickers": MessageLookupByLibrary.simpleMessage("Мои стикеры"),
     "na": MessageLookupByLibrary.simpleMessage("Нет данных"),
     "name": MessageLookupByLibrary.simpleMessage("Имя"),
@@ -603,7 +621,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "newVersionAvailable": MessageLookupByLibrary.simpleMessage(
       "Доступна новая версия",
     ),
-    "newVersionDescription": m33,
+    "newVersionDescription": m36,
     "next": MessageLookupByLibrary.simpleMessage("Следующий"),
     "nextConversation": MessageLookupByLibrary.simpleMessage(
       "Следующий разговор",
@@ -612,6 +630,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noCamera": MessageLookupByLibrary.simpleMessage("Нет камеры"),
     "noData": MessageLookupByLibrary.simpleMessage("Нет данных"),
     "noFiles": MessageLookupByLibrary.simpleMessage("ФАЙЛОВ НЕТ"),
+    "noHiddenAssets": MessageLookupByLibrary.simpleMessage(
+      "Нет скрытых активов",
+    ),
     "noLinks": MessageLookupByLibrary.simpleMessage("НЕТ ССЫЛОК"),
     "noMedia": MessageLookupByLibrary.simpleMessage("НЕТ МЕДИА"),
     "noNetworkConnection": MessageLookupByLibrary.simpleMessage(
@@ -619,12 +640,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noPosts": MessageLookupByLibrary.simpleMessage("НЕТ СООБЩЕНИЙ"),
     "noResults": MessageLookupByLibrary.simpleMessage("НЕТ РЕЗУЛЬТАТОВ"),
+    "noTransactions": MessageLookupByLibrary.simpleMessage("Нет транзакций"),
     "notFound": MessageLookupByLibrary.simpleMessage("Не найден"),
     "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
       "Уведомления запрещены. Чтобы включить их, перейдите в настройки уведомлений.",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("Уведомления"),
-    "nowAnAddmin": m34,
+    "nowAnAddmin": m37,
     "oneByOneForward": MessageLookupByLibrary.simpleMessage(
       "Один за другим вперед",
     ),
@@ -633,21 +655,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "openHomePage": MessageLookupByLibrary.simpleMessage(
       "Открыть домашнюю страницу",
     ),
-    "openLink": m35,
+    "openLink": m38,
     "openLogDirectory": MessageLookupByLibrary.simpleMessage(
       "открыть каталог журналов",
     ),
     "originalImage": MessageLookupByLibrary.simpleMessage("Оригинал"),
     "owner": MessageLookupByLibrary.simpleMessage("Владелец"),
-    "participantsCount": m36,
-    "pendingConfirmation": m37,
+    "participantsCount": m39,
+    "pendingConfirmation": m40,
     "phoneNumber": MessageLookupByLibrary.simpleMessage("Номер телефона"),
     "photos": MessageLookupByLibrary.simpleMessage("Фото"),
     "pickAConversation": MessageLookupByLibrary.simpleMessage(
       "Выберите беседу и начните отправлять сообщение",
     ),
     "pinTitle": MessageLookupByLibrary.simpleMessage("Закрепить"),
-    "pinnedMessageTitle": m38,
+    "pinnedMessageTitle": m41,
     "post": MessageLookupByLibrary.simpleMessage("Публикация"),
     "preferences": MessageLookupByLibrary.simpleMessage("Настройки"),
     "previousConversation": MessageLookupByLibrary.simpleMessage(
@@ -682,7 +704,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Отправить журнал бесед разработчикам?",
     ),
     "resendCode": MessageLookupByLibrary.simpleMessage("Отправить код еще раз"),
-    "resendCodeIn": m39,
+    "resendCodeIn": m42,
     "reset": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
     "resetLink": MessageLookupByLibrary.simpleMessage("Сбросить ссылку"),
     "restoreChat": MessageLookupByLibrary.simpleMessage("Восстановить чаты"),
@@ -714,10 +736,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "searchEmpty": MessageLookupByLibrary.simpleMessage(
       "Чаты, контакты или сообщения не найдены.",
     ),
+    "searchPlaceholderAsset": MessageLookupByLibrary.simpleMessage(
+      "Имя, Символ",
+    ),
     "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
       "Найдите Mixin ID или номер телефона:",
     ),
-    "searchRelatedMessage": m40,
+    "searchRelatedMessage": m43,
     "secretUrl": MessageLookupByLibrary.simpleMessage(
       "https://mixin.one/pages/1000007",
     ),
@@ -738,14 +763,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Отправить без звука",
     ),
     "set": MessageLookupByLibrary.simpleMessage("Установлен"),
-    "setDisappearingMessageTimeTo": m41,
+    "setDisappearingMessageTimeTo": m44,
     "settingAuthSearchHint": MessageLookupByLibrary.simpleMessage(
       "Mixin ID, имя",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
       "Создайте резервную копию истории чата в iCloud. Если вы потеряете свой iPhone или переключитесь на новый, вы сможете восстановить историю чата при переустановке Mixin Messenger. Сообщения, которые вы резервируете, не защищены сквозным шифрованием Mixin Messenger в iCloud.",
     ),
-    "settingDeleteAccountPinContent": m42,
+    "settingDeleteAccountPinContent": m45,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
       "https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl",
     ),
@@ -756,8 +781,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "shareError": MessageLookupByLibrary.simpleMessage("Поделитесь ошибкой."),
     "shareLink": MessageLookupByLibrary.simpleMessage("Поделиться ссылкой"),
-    "shareMessageDescription": m43,
-    "shareMessageDescriptionEmpty": m44,
+    "shareMessageDescription": m46,
+    "shareMessageDescriptionEmpty": m47,
     "sharedMedia": MessageLookupByLibrary.simpleMessage("Общие медиа"),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "showAvatar": MessageLookupByLibrary.simpleMessage("Показать аватар"),
@@ -808,6 +833,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleChatInfo": MessageLookupByLibrary.simpleMessage(
       "Переключить информацию о чате",
     ),
+    "totalBalance": MessageLookupByLibrary.simpleMessage("Общий баланс"),
     "trace": MessageLookupByLibrary.simpleMessage("След"),
     "transactionHash": MessageLookupByLibrary.simpleMessage("Хэш транзакции"),
     "transactionId": MessageLookupByLibrary.simpleMessage("ID транзакции"),
@@ -819,13 +845,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "transcript": MessageLookupByLibrary.simpleMessage("Стенограмма"),
     "transfer": MessageLookupByLibrary.simpleMessage("Передача"),
     "typeMessage": MessageLookupByLibrary.simpleMessage("Введите сообщение"),
-    "unableToOpenFile": m45,
+    "unableToOpenFile": m48,
     "unblock": MessageLookupByLibrary.simpleMessage("Разблокировать"),
-    "unitDay": m46,
-    "unitHour": m47,
-    "unitMinute": m48,
-    "unitSecond": m49,
-    "unitWeek": m50,
+    "unitDay": m49,
+    "unitHour": m50,
+    "unitMinute": m51,
+    "unitSecond": m52,
+    "unitWeek": m53,
     "unmute": MessageLookupByLibrary.simpleMessage("Включить звук"),
     "unpin": MessageLookupByLibrary.simpleMessage("Открепить"),
     "unpinAllMessages": MessageLookupByLibrary.simpleMessage(
@@ -838,13 +864,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Непрочитанные сообщения",
     ),
     "updateMixin": MessageLookupByLibrary.simpleMessage("Обновить Mixin"),
-    "updateMixinDescription": m51,
+    "updateMixinDescription": m54,
     "upgrading": MessageLookupByLibrary.simpleMessage("Обновление"),
     "userNotFound": MessageLookupByLibrary.simpleMessage(
       "Пользователь не найден",
     ),
-    "valueNow": m52,
-    "valueThen": m53,
+    "valueNow": m55,
+    "valueThen": m56,
     "verifyPin": MessageLookupByLibrary.simpleMessage("Подтвердить PIN-код"),
     "video": MessageLookupByLibrary.simpleMessage("Видео"),
     "videos": MessageLookupByLibrary.simpleMessage("Видео"),
@@ -854,6 +880,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
       "Ожидание подключения другого устройства.",
     ),
+    "wallet": MessageLookupByLibrary.simpleMessage("Кошелек"),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "На устройстве не установлен компонент WebView2 Runtime. Сначала загрузите и установите WebView2 Runtime.",
     ),

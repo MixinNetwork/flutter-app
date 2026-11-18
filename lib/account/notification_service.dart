@@ -195,7 +195,7 @@ class NotificationService {
 
           context.providerContainer
               .read(slideCategoryStateProvider.notifier)
-              .switchToChatsIfSettings();
+              .switchToChatsIfNoConversations();
 
           final conversationId =
               event.queryParameters[_keyConversationId] ?? event.host;

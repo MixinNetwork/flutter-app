@@ -53,104 +53,111 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(arg0) => "Do you want to delete the ${arg0} circle?";
 
-  static String m15(arg0) => "${arg0} disabled disappearing message";
+  static String m15(count, arg0) =>
+      "${Intl.plural(count, one: 'Deposit will arrive ${arg0} block confirmation', other: 'Deposit will arrive ${arg0} block confirmations')}";
 
-  static String m16(arg0) => "The maximum time is ${arg0}.";
+  static String m16(arg0, arg1) => "Minimum deposit: ${arg0} ${arg1}";
 
-  static String m17(arg0) =>
+  static String m17(arg0) => "Deposit ${arg0}";
+
+  static String m18(arg0) => "${arg0} disabled disappearing message";
+
+  static String m19(arg0) => "The maximum time is ${arg0}.";
+
+  static String m20(arg0) =>
       "ERROR 20124: Insufficient transaction fee. Please make sure your wallet has ${arg0} as fee";
 
-  static String m18(arg0, arg1) =>
+  static String m21(arg0, arg1) =>
       "ERROR 30102: Invalid address format. Please enter the correct ${arg0} ${arg1} address!";
 
-  static String m19(arg0) =>
+  static String m22(arg0) =>
       "ERROR 10006: Please update Mixin (${arg0}) to continue using the service.";
 
-  static String m20(count, arg0) =>
+  static String m23(count, arg0) =>
       "${Intl.plural(count, one: 'ERROR 20119: PIN incorrect. You still have ${arg0} chance. Please wait for 24 hours to retry later.', other: 'ERROR 20119: PIN incorrect. You still have ${arg0} chances. Please wait for 24 hours to retry later.')}";
 
-  static String m21(arg0) => "Server is under maintenance: ${arg0}";
+  static String m24(arg0) => "Server is under maintenance: ${arg0}";
 
-  static String m22(arg0) => "ERROR: ${arg0}";
+  static String m25(arg0) => "ERROR: ${arg0}";
 
-  static String m23(arg0) => "ERROR: ${arg0}";
+  static String m26(arg0) => "ERROR: ${arg0}";
 
-  static String m24(arg0) => "Message ${arg0}";
+  static String m27(arg0) => "Message ${arg0}";
 
-  static String m25(arg0) => "Remove ${arg0}";
+  static String m28(arg0) => "Remove ${arg0}";
 
-  static String m26(count, arg0) =>
+  static String m29(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Hour', other: '${arg0} Hours')}";
 
-  static String m27(arg0) => "Joined on ${arg0}";
+  static String m30(arg0) => "Joined on ${arg0}";
 
-  static String m28(arg0, arg1) =>
+  static String m31(arg0, arg1) =>
       "You requested to delete your account on ${arg0}. The account will be deleted on ${arg1}. If you continue to log in, your account deletion will be cancelled.";
 
-  static String m29(arg0) =>
+  static String m32(arg0) =>
       "We will send a 4-digit code to your phone number ${arg0}. Please enter the code on the next screen.";
 
-  static String m30(arg0) => "Enter the 4-digit code sent to you at ${arg0}";
+  static String m33(arg0) => "Enter the 4-digit code sent to you at ${arg0}";
 
-  static String m31(count, arg0) =>
+  static String m34(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Minute', other: '${arg0} Minutes')}";
 
-  static String m32(arg0) => "My Mixin ID: ${arg0}";
+  static String m35(arg0) => "My Mixin ID: ${arg0}";
 
-  static String m33(arg0, arg1) =>
+  static String m36(arg0, arg1) =>
       "Mixin Messenger ${arg0} is now available, you have ${arg1}. Would you like to download it now?";
 
-  static String m34(arg0) => "${arg0} now an admin";
+  static String m37(arg0) => "${arg0} now an admin";
 
-  static String m35(arg0) => "Open Link: ${arg0}";
+  static String m38(arg0) => "Open Link: ${arg0}";
 
-  static String m36(arg0) => "${arg0} PARTICIPANTS";
+  static String m39(arg0) => "${arg0} PARTICIPANTS";
 
-  static String m37(count, arg0, arg1) =>
+  static String m40(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} confirmation', other: '${arg0}/${arg1} confirmations')}";
 
-  static String m38(count, arg0) =>
+  static String m41(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Pinned Message', other: '${arg0} Pinned Messages')}";
 
-  static String m39(arg0) => "Resend code in ${arg0} s";
+  static String m42(arg0) => "Resend code in ${arg0} s";
 
-  static String m40(count, arg0) =>
+  static String m43(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} related message', other: '${arg0} related messages')}";
 
-  static String m41(arg0, arg1) =>
+  static String m44(arg0, arg1) =>
       "${arg0} set disappearing message time to ${arg1}";
 
-  static String m42(arg0) =>
+  static String m45(arg0) =>
       "If you continue, your profile and account details will be deleted on ${arg0}. Read our document to **learn more**.";
 
-  static String m43(arg0, arg1) =>
+  static String m46(arg0, arg1) =>
       "Are you sure you want to send ${arg0} from ${arg1}?";
 
-  static String m44(arg0) => "Are you sure you want to send the ${arg0}?";
+  static String m47(arg0) => "Are you sure you want to send the ${arg0}?";
 
-  static String m45(arg0) => "Unable to open file: ${arg0}";
-
-  static String m46(count) =>
-      "${Intl.plural(count, one: 'day', other: 'days')}";
-
-  static String m47(count) =>
-      "${Intl.plural(count, one: 'hour', other: 'hours')}";
-
-  static String m48(count) =>
-      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+  static String m48(arg0) => "Unable to open file: ${arg0}";
 
   static String m49(count) =>
-      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+      "${Intl.plural(count, one: 'day', other: 'days')}";
 
   static String m50(count) =>
+      "${Intl.plural(count, one: 'hour', other: 'hours')}";
+
+  static String m51(count) =>
+      "${Intl.plural(count, one: 'minute', other: 'minutes')}";
+
+  static String m52(count) =>
+      "${Intl.plural(count, one: 'second', other: 'seconds')}";
+
+  static String m53(count) =>
       "${Intl.plural(count, one: 'week', other: 'weeks')}";
 
-  static String m51(arg0) =>
+  static String m54(arg0) =>
       "The current version (${arg0}) is no longer available!\nPlease click \"Update\" below to update to the latest version.";
 
-  static String m52(arg0) => "value now ${arg0}";
+  static String m55(arg0) => "value now ${arg0}";
 
-  static String m53(arg0) => "value then ${arg0}";
+  static String m56(arg0) => "value then ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -367,14 +374,23 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "deleteTheCircle": m14,
     "deposit": MessageLookupByLibrary.simpleMessage("Deposit"),
+    "depositAttention": MessageLookupByLibrary.simpleMessage(
+      "Please try a small amount for the first deposit.",
+    ),
+    "depositConfirmation": m15,
+    "depositDust": m16,
     "depositHash": MessageLookupByLibrary.simpleMessage("Deposit Hash"),
+    "depositMemoNotice": MessageLookupByLibrary.simpleMessage(
+      "Memo is required, or you will lose your coins.",
+    ),
+    "depositToken": m17,
     "developer": MessageLookupByLibrary.simpleMessage("Developer"),
     "deviceTransferFailed": MessageLookupByLibrary.simpleMessage(
       "Transfer failed",
     ),
-    "disableDisappearingMessage": m15,
+    "disableDisappearingMessage": m18,
     "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
-    "disappearingCustomTimeMaxWarning": m16,
+    "disappearingCustomTimeMaxWarning": m19,
     "disappearingMessage": MessageLookupByLibrary.simpleMessage(
       "Disappearing Messages",
     ),
@@ -461,8 +477,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorInsufficientBalance": MessageLookupByLibrary.simpleMessage(
       "ERROR 20117: Insufficient balance",
     ),
-    "errorInsufficientTransactionFeeWithAmount": m17,
-    "errorInvalidAddress": m18,
+    "errorInsufficientTransactionFeeWithAmount": m20,
+    "errorInvalidAddress": m21,
     "errorInvalidAddressPlain": MessageLookupByLibrary.simpleMessage(
       "ERROR 30102: Invalid address format.",
     ),
@@ -496,7 +512,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorNumberReachedLimit": MessageLookupByLibrary.simpleMessage(
       "ERROR 20132: The number has reached the limit.",
     ),
-    "errorOldVersion": m19,
+    "errorOldVersion": m22,
     "errorOpenLocation": MessageLookupByLibrary.simpleMessage(
       "Can\'t find a map app",
     ),
@@ -521,11 +537,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorPinIncorrect": MessageLookupByLibrary.simpleMessage(
       "ERROR 20119: PIN incorrect",
     ),
-    "errorPinIncorrectWithTimes": m20,
+    "errorPinIncorrectWithTimes": m23,
     "errorRecaptchaIsInvalid": MessageLookupByLibrary.simpleMessage(
       "ERROR 10004: Recaptcha is invalid",
     ),
-    "errorServer5xxCode": m21,
+    "errorServer5xxCode": m24,
     "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
       "ERROR 429: Rate limit exceeded",
     ),
@@ -547,8 +563,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
       "Can\'t find an app that can open this media.",
     ),
-    "errorUnknownWithCode": m22,
-    "errorUnknownWithMessage": m23,
+    "errorUnknownWithCode": m25,
+    "errorUnknownWithMessage": m26,
     "errorUploadAttachmentFailed": MessageLookupByLibrary.simpleMessage(
       "Failed to upload message attachment",
     ),
@@ -602,16 +618,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "groupName": MessageLookupByLibrary.simpleMessage("Group Name"),
     "groupParticipants": MessageLookupByLibrary.simpleMessage("Participants"),
-    "groupPopMenuMessage": m24,
-    "groupPopMenuRemove": m25,
+    "groupPopMenuMessage": m27,
+    "groupPopMenuRemove": m28,
     "groups": MessageLookupByLibrary.simpleMessage("Groups"),
     "groupsInCommon": MessageLookupByLibrary.simpleMessage("Groups in Common"),
     "hash": MessageLookupByLibrary.simpleMessage("HASH"),
     "help": MessageLookupByLibrary.simpleMessage("Help"),
     "helpCenter": MessageLookupByLibrary.simpleMessage("Help Center"),
+    "hiddenAssets": MessageLookupByLibrary.simpleMessage("Hidden Assets"),
+    "hide": MessageLookupByLibrary.simpleMessage("Hide"),
     "hideMixin": MessageLookupByLibrary.simpleMessage("Hide Mixin"),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
-    "hour": m26,
+    "hour": m29,
     "howAreYou": MessageLookupByLibrary.simpleMessage("Hi, how are you?"),
     "iAmGood": MessageLookupByLibrary.simpleMessage("I’m good."),
     "id": MessageLookupByLibrary.simpleMessage("ID"),
@@ -632,10 +650,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Invite to Group via Link",
     ),
     "joinGroupWithPlus": MessageLookupByLibrary.simpleMessage("+ Join group"),
-    "joinedIn": m27,
-    "landingDeleteContent": m28,
-    "landingInvitationDialogContent": m29,
-    "landingValidationTitle": m30,
+    "joinedIn": m30,
+    "landingDeleteContent": m31,
+    "landingInvitationDialogContent": m32,
+    "landingValidationTitle": m33,
     "learnMore": MessageLookupByLibrary.simpleMessage("Learn More"),
     "less": MessageLookupByLibrary.simpleMessage("less"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
@@ -679,7 +697,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messages": MessageLookupByLibrary.simpleMessage("Messages"),
     "minimize": MessageLookupByLibrary.simpleMessage("Minimize"),
-    "minute": m31,
+    "minute": m34,
     "mixinMessengerDesktop": MessageLookupByLibrary.simpleMessage(
       "Mixin Messenger Desktop",
     ),
@@ -688,7 +706,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Multisig Transaction",
     ),
     "mute": MessageLookupByLibrary.simpleMessage("Mute"),
-    "myMixinId": m32,
+    "myMixinId": m35,
     "myStickers": MessageLookupByLibrary.simpleMessage("My Stickers"),
     "na": MessageLookupByLibrary.simpleMessage("N/A"),
     "name": MessageLookupByLibrary.simpleMessage("Name"),
@@ -699,7 +717,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "newVersionAvailable": MessageLookupByLibrary.simpleMessage(
       "New version available",
     ),
-    "newVersionDescription": m33,
+    "newVersionDescription": m36,
     "next": MessageLookupByLibrary.simpleMessage("Next"),
     "nextConversation": MessageLookupByLibrary.simpleMessage(
       "Next conversation",
@@ -708,6 +726,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "noCamera": MessageLookupByLibrary.simpleMessage("No camera"),
     "noData": MessageLookupByLibrary.simpleMessage("No Data"),
     "noFiles": MessageLookupByLibrary.simpleMessage("NO FILES"),
+    "noHiddenAssets": MessageLookupByLibrary.simpleMessage("No hidden assets"),
     "noLinks": MessageLookupByLibrary.simpleMessage("NO LINKS"),
     "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
     "noNetworkConnection": MessageLookupByLibrary.simpleMessage(
@@ -715,6 +734,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noPosts": MessageLookupByLibrary.simpleMessage("NO POSTS"),
     "noResults": MessageLookupByLibrary.simpleMessage("NO RESULTS"),
+    "noTransactions": MessageLookupByLibrary.simpleMessage("No transactions"),
     "notFound": MessageLookupByLibrary.simpleMessage("Not found"),
     "notSupportBiometric": MessageLookupByLibrary.simpleMessage(
       "This device does not support biometric authentication",
@@ -726,7 +746,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Notifications are disabled. Please go to Notification Settings to turn them on.",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
-    "nowAnAddmin": m34,
+    "nowAnAddmin": m37,
     "objects": MessageLookupByLibrary.simpleMessage("Objects"),
     "oneByOneForward": MessageLookupByLibrary.simpleMessage(
       "One-by-One Forward",
@@ -736,19 +756,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "open": MessageLookupByLibrary.simpleMessage("Open"),
     "openHomePage": MessageLookupByLibrary.simpleMessage("Open Homepage"),
     "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in Browser"),
-    "openLink": m35,
+    "openLink": m38,
     "openLogDirectory": MessageLookupByLibrary.simpleMessage(
       "Open Log Directory",
     ),
     "openingBalance": MessageLookupByLibrary.simpleMessage("Opening Balance"),
     "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
     "owner": MessageLookupByLibrary.simpleMessage("Owner"),
-    "participantsCount": m36,
+    "participantsCount": m39,
     "passcodeIncorrect": MessageLookupByLibrary.simpleMessage(
       "Passcode incorrect",
     ),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
-    "pendingConfirmation": m37,
+    "pendingConfirmation": m40,
     "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone Number"),
     "photos": MessageLookupByLibrary.simpleMessage("Photos"),
     "pickAConversation": MessageLookupByLibrary.simpleMessage(
@@ -758,7 +778,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Pictures & Videos",
     ),
     "pinTitle": MessageLookupByLibrary.simpleMessage("Pin"),
-    "pinnedMessageTitle": m38,
+    "pinnedMessageTitle": m41,
     "port": MessageLookupByLibrary.simpleMessage("Port"),
     "post": MessageLookupByLibrary.simpleMessage("Post"),
     "preferences": MessageLookupByLibrary.simpleMessage("Preferences"),
@@ -799,7 +819,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Send the conversation log to developers?",
     ),
     "resendCode": MessageLookupByLibrary.simpleMessage("Resend code"),
-    "resendCodeIn": m39,
+    "resendCodeIn": m42,
     "reset": MessageLookupByLibrary.simpleMessage("Reset"),
     "resetLink": MessageLookupByLibrary.simpleMessage("Reset Link"),
     "restoreChat": MessageLookupByLibrary.simpleMessage("Restore Chat"),
@@ -834,10 +854,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "searchEmpty": MessageLookupByLibrary.simpleMessage(
       "No chats, contacts or messages found.",
     ),
+    "searchPlaceholderAsset": MessageLookupByLibrary.simpleMessage(
+      "Name, Symbol",
+    ),
     "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
       "Search Mixin ID or phone number:",
     ),
-    "searchRelatedMessage": m40,
+    "searchRelatedMessage": m43,
     "searchUnread": MessageLookupByLibrary.simpleMessage("Search Unread"),
     "secretUrl": MessageLookupByLibrary.simpleMessage(
       "https://mixin.one/pages/1000007",
@@ -857,7 +880,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Send Without Sound",
     ),
     "set": MessageLookupByLibrary.simpleMessage("Set"),
-    "setDisappearingMessageTimeTo": m41,
+    "setDisappearingMessageTimeTo": m44,
     "setPasscodeDesc": MessageLookupByLibrary.simpleMessage(
       "Set a passcode to unlock Mixin Messenger",
     ),
@@ -867,7 +890,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
       "Back up your chat history to iCloud. If you lose your iPhone or switch to a new one, you can restore your chat history when you reinstall Mixin Messenger. Messages you back up are not protected by Mixin Messenger end-to-end encryption while in iCloud.",
     ),
-    "settingDeleteAccountPinContent": m42,
+    "settingDeleteAccountPinContent": m45,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
       "https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl",
     ),
@@ -876,8 +899,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
     "shareError": MessageLookupByLibrary.simpleMessage("Share error."),
     "shareLink": MessageLookupByLibrary.simpleMessage("Share Link"),
-    "shareMessageDescription": m43,
-    "shareMessageDescriptionEmpty": m44,
+    "shareMessageDescription": m46,
+    "shareMessageDescriptionEmpty": m47,
     "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "showAvatar": MessageLookupByLibrary.simpleMessage("Show avatar"),
@@ -932,6 +955,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "to": MessageLookupByLibrary.simpleMessage("To"),
     "today": MessageLookupByLibrary.simpleMessage("Today"),
     "toggleChatInfo": MessageLookupByLibrary.simpleMessage("Toggle chat info"),
+    "totalBalance": MessageLookupByLibrary.simpleMessage("Total Balance"),
     "trace": MessageLookupByLibrary.simpleMessage("Trace"),
     "transactionHash": MessageLookupByLibrary.simpleMessage("Transaction Hash"),
     "transactionId": MessageLookupByLibrary.simpleMessage("Transaction Id"),
@@ -956,13 +980,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "travelAndPlaces": MessageLookupByLibrary.simpleMessage("Travel & Places"),
     "typeMessage": MessageLookupByLibrary.simpleMessage("Type message"),
-    "unableToOpenFile": m45,
+    "unableToOpenFile": m48,
     "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
-    "unitDay": m46,
-    "unitHour": m47,
-    "unitMinute": m48,
-    "unitSecond": m49,
-    "unitWeek": m50,
+    "unitDay": m49,
+    "unitHour": m50,
+    "unitMinute": m51,
+    "unitSecond": m52,
+    "unitWeek": m53,
     "unknowError": MessageLookupByLibrary.simpleMessage("Unknow error"),
     "unlockMixinMessenger": MessageLookupByLibrary.simpleMessage(
       "Unlock Mixin Messenger",
@@ -980,7 +1004,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "unreadMessages": MessageLookupByLibrary.simpleMessage("Unread messages"),
     "updateMixin": MessageLookupByLibrary.simpleMessage("Update Mixin"),
-    "updateMixinDescription": m51,
+    "updateMixinDescription": m54,
     "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
     "upgrading": MessageLookupByLibrary.simpleMessage("Upgrading"),
     "useBiometric": MessageLookupByLibrary.simpleMessage("Use Biometric"),
@@ -989,8 +1013,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
     "username": MessageLookupByLibrary.simpleMessage("Username"),
-    "valueNow": m52,
-    "valueThen": m53,
+    "valueNow": m55,
+    "valueThen": m56,
     "verifyPin": MessageLookupByLibrary.simpleMessage("Verify PIN"),
     "video": MessageLookupByLibrary.simpleMessage("Video"),
     "videos": MessageLookupByLibrary.simpleMessage("Videos"),
@@ -1000,6 +1024,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "waitingOtherDeviceConnection": MessageLookupByLibrary.simpleMessage(
       "Waiting for the other device to connect.",
     ),
+    "wallet": MessageLookupByLibrary.simpleMessage("Wallet"),
     "webview2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
       "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first.",
     ),

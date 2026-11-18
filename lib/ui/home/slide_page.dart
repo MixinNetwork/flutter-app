@@ -64,6 +64,12 @@ class SlidePage extends StatelessWidget {
                   title: context.l10n.allChats,
                   type: SlideCategoryType.chats,
                 ),
+                const SizedBox(height: 8),
+                _Item(
+                  asset: Resources.assetsImagesWalletSvg,
+                  title: context.l10n.wallet,
+                  type: SlideCategoryType.wallet,
+                ),
                 const SizedBox(height: 12),
                 const _Divider(),
                 const SizedBox(height: 12),
@@ -490,6 +496,7 @@ class _Item extends HookConsumerWidget {
         case SlideCategoryType.chats:
         case SlideCategoryType.circle:
         case SlideCategoryType.setting:
+        case SlideCategoryType.wallet:
           return const Stream.empty();
       }
     }, keys: [type]).data;

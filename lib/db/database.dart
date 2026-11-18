@@ -247,6 +247,7 @@ class Database {
           conversationIds: conversationIds,
         );
       case SlideCategoryType.setting:
+      case SlideCategoryType.wallet:
         assert(false, 'should not search setting');
         return Future.value(const []);
     }

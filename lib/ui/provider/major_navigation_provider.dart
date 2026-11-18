@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../utils/rivepod.dart';
+import 'slide_category_provider.dart';
 
 enum MajorNavigationDestination {
   chatPage,
@@ -17,6 +18,7 @@ enum MajorNavigationDestination {
   storageUsageDetail,
   proxyPage,
   securityPage,
+  walletTokenPage,
 }
 
 class MajorNavigationEntry extends Equatable {
@@ -76,11 +78,18 @@ class MajorNavigationNotifier
     open(MajorNavigationDestination.chatPage);
   }
 
-  bool syncSettingCategory(bool isSetting, {required bool routeMode}) {
-    final openSettingPage = isSetting && !routeMode;
+  static const walletDestinations = {
+    MajorNavigationDestination.walletTokenPage,
+  };
+
+  /// Removes the pages of the other categories, and opens the first setting
+  /// page for [SlideCategoryType.setting].
+  bool syncCategory(SlideCategoryType type, {required bool routeMode}) {
+    final openSettingPage = type == SlideCategoryType.setting && !routeMode;
     _removeWhere((entry) {
       if (routeMode) return true;
-      return settingDestinations.contains(entry.destination);
+      return settingDestinations.contains(entry.destination) ||
+          walletDestinations.contains(entry.destination);
     });
     if (openSettingPage) {
       open(settingDestinations.first);
@@ -91,6 +100,12 @@ class MajorNavigationNotifier
   void openSetting(MajorNavigationDestination destination) {
     _removeWhere((entry) => settingDestinations.contains(entry.destination));
     open(destination);
+  }
+
+  void openWalletToken(String assetId) {
+    // open() keeps the last entry when only its arguments change.
+    _removeWhere((entry) => walletDestinations.contains(entry.destination));
+    open(MajorNavigationDestination.walletTokenPage, arguments: assetId);
   }
 
   void remove(MajorNavigationDestination destination) {

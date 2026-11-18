@@ -1,0 +1,125 @@
+{
+  "source": "Each ios_valid is the result of DepositEntry.isSignatureValid, copied verbatim from ios-app MixinServices/Database/User/Model/DepositEntry.swift with its SHA3_256 (XKCP), run in the iOS simulator with public_key in place of the deposit keys. Addresses are public examples from the Ethereum and XRP Ledger docs.",
+  "public_key": "ea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
+  "cases": [
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": true,
+      "name": "no tag",
+      "signature": "75f978e53b7b45af852f0ce55ff850a837828c58068c84b180a98d3dd6de2631c30588c5c14b464887ee4d71cd40c0c2bfe81dda3e93cd0fb590660f15e7e601",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": true,
+      "name": "empty tag",
+      "signature": "8b6b245bd3d1bd229193ec19a1812e48de5809a6ecc689f7d69a5cc088c5c3f3c2a46f4b1092b0a3e696d6effe96b304a4df3672b1661078e4d34101f516b804",
+      "tag": ""
+    },
+    {
+      "destination": "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      "ios_valid": true,
+      "name": "tag",
+      "signature": "c065e146a16f0d9881d413fe7186fbcad00ab93cf5e1c0075eb79dc789589e8c1c2faf447c8defe421aa4681b29e5332f5ab1fddc8f5a849df8dcdea28530504",
+      "tag": "12345"
+    },
+    {
+      "destination": "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      "ios_valid": true,
+      "name": "unicode tag",
+      "signature": "e65c0b9b4a587fabb8b8175a7ff94fdb1e8e1ca0d5f32493c6238787bd6943ed168d91ee9f8d6b280cbdce82c1842e96149cb39be4db779eb0a34ee4eef17001",
+      "tag": "备注"
+    },
+    {
+      "destination": "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      "ios_valid": false,
+      "name": "tag, signed without the tag",
+      "signature": "3228947f74f27ca1004a274c44c8acc7ece7377d56e39fde0a6cdc7ac837b03a84b806a92e9353df8834f81298b40822fb9ad45e3f34b41839f59fa729468f00",
+      "tag": "12345"
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "no tag, signed with a tag",
+      "signature": "fed1034ffd78c14da406b6e0499fcad275fe8aba71e8709ec087f4f7c3b403685769102e80bc5f69cd6899853184cfce091c8201fa096624a4a73a5a62a27206",
+      "tag": null
+    },
+    {
+      "destination": "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      "ios_valid": false,
+      "name": "other tag",
+      "signature": "56774fbea799b9693b526e32b7b1f57730b4697b98b7e45804f02b2910bef7b719d6441929fdec13b833681b9a572a7b68a19c6df906eebf7862dc9a1f615a08",
+      "tag": "54321"
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAee",
+      "ios_valid": false,
+      "name": "other destination",
+      "signature": "086c20ae2e5e1a02a30890a8458bff9253ecc16b1bcf7a35252f10558ed4534f2068d7d103b8309e38f4daef93b9ddca4004c3fc8ab192ec9c3521cad3fd5205",
+      "tag": null
+    },
+    {
+      "destination": "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      "ios_valid": true,
+      "name": "whitespace tag, signed with the tag",
+      "signature": "577d2a0c0dd3c06a58fd446cbf36ee62ecececfca6145ab35a3bf56b8a291b6b6fa041907eb0060c5ad800a4acd32cdf515cffb510964fdd32f57f64dfee7805",
+      "tag": " "
+    },
+    {
+      "destination": "rEb8TK3gBgk5auZkwc6sHnwrGVJH8DuaLh",
+      "ios_valid": false,
+      "name": "whitespace tag, signed without the tag",
+      "signature": "8c951267b62e7d8f5802118ef8ef9d5b1951e1f44269d7b0d1a4df9885db642e65ffb7d9128aa97640d2bd4a78621c50dfe4cc6e79158ef8b4690d7ec827ea0b",
+      "tag": " "
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "signed by another key",
+      "signature": "8e2707c0da6a23c42cff839deac4089024f1d526f4b175dcc6d87b35aeae2e11c7a0f88854f2dfa896955ab19bfec4f52364433c2cccb12715b4afbb4e7ce808",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "one bit of the signature flipped",
+      "signature": "45e2af696917142af22cc2b00fab35e38d8ab5011338e4272ec06393dcf300a7834c01dd3b2d50bcdb175fa00e52b096b916574712ab8d607ac79a09f5e32504",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "S + L (non-canonical S)",
+      "signature": "e2e499e4821c0c4ee3d9a54fd6654142ddd6d339cc393bb8e5b9fdf0bfbd3662e24f4aafb44284ad5c08e117bafc2aef73dbbc45e8a12391512c46e8a5f42516",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "signature one byte short",
+      "signature": "80848d84f8e8aacc348175ed0414373a5e6c9f2af687a9f0a940cf821a55f87080f4dd4be10f0a120f561093d7c156ebf24c27203053095861fc301d12de20",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "signature not hex",
+      "signature": "zz",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": false,
+      "name": "empty signature",
+      "signature": "",
+      "tag": null
+    },
+    {
+      "destination": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ios_valid": true,
+      "name": "uppercase hex signature",
+      "signature": "36DCFE8059E50B08E7B03EB0E358DB0B9160D217A3D4431CDD728F13748BBE91D3F9298108B41B8111C31280976E088388D04F7D6195A7C960163D72F5191B0F",
+      "tag": null
+    }
+  ]
+}

@@ -16,6 +16,7 @@ class AccountKeyValue extends HiveKeyValue {
   static const _keyRecentUsedEmoji = 'recentUsedEmoji';
   static const _deviceId = 'deviceId';
   static const _alreadyCleanupQuoteContent = 'alreadyCleanupQuoteContent';
+  static const _safeSnapshotOffset = 'safeSnapshotOffset';
 
   String? get deviceId => box.get(_deviceId) as String?;
 
@@ -45,6 +46,13 @@ class AccountKeyValue extends HiveKeyValue {
 
   List<String> get recentUsedEmoji => _recentUsedEmoji ??=
       (box.get(_keyRecentUsedEmoji, defaultValue: []) as List).cast<String>();
+
+  /// The created_at of the last snapshot that the wallet synced.
+  String get safeSnapshotOffset =>
+      box.get(_safeSnapshotOffset, defaultValue: '1970-01-01T00:00:00Z')
+          as String;
+
+  set safeSnapshotOffset(String value) => box.put(_safeSnapshotOffset, value);
 
   bool get alreadyCleanupQuoteContent =>
       box.get(_alreadyCleanupQuoteContent, defaultValue: false) as bool;

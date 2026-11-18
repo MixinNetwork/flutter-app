@@ -108,6 +108,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             owner.appId.isNull();
       case SlideCategoryType.circle:
       case SlideCategoryType.setting:
+      case SlideCategoryType.wallet:
         throw UnsupportedError('Unsupported category: $category');
     }
     return predicate;
@@ -524,6 +525,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
 
           case SlideCategoryType.circle:
           case SlideCategoryType.setting:
+          case SlideCategoryType.wallet:
             assert(false, 'Invalid category type: ${category!.type}');
           case null:
           case SlideCategoryType.chats:

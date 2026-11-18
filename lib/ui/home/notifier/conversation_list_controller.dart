@@ -115,7 +115,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
   }
 
   void _switchCategory(SlideCategoryState state) {
-    if (state.type == SlideCategoryType.setting) return;
+    if (!state.type.hasConversations) return;
     _views.putIfAbsent(
       state,
       () => _ConversationListView(
@@ -191,7 +191,7 @@ class ConversationListController extends ValueNotifier<ConversationListState> {
                   .contains(item.conversationId),
             )
             .toList(),
-      SlideCategoryType.setting => const [],
+      SlideCategoryType.setting || SlideCategoryType.wallet => const [],
     };
   }
 

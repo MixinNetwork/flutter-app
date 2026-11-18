@@ -583,6 +583,9 @@ class Resources {
   static const String assetsImagesVideoMessageSvg =
       'assets/images/video_message.svg';
 
+  /// {@macro assets_generator.assetsImagesWalletSvg.preview}
+  static const String assetsImagesWalletSvg = 'assets/images/wallet.svg';
+
   /// {@macro assets_generator.assetsImagesWarningSvg.preview}
   static const String assetsImagesWarningSvg = 'assets/images/warning.svg';
 
