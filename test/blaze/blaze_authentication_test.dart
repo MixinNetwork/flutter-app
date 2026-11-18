@@ -152,6 +152,79 @@ void main() {
       },
     );
   }
+
+  test('Blaze signs a new token when it reconnects after a drop', () async {
+    final database = Database(
+      MixinDatabase(NativeDatabase.memory()),
+      FtsDatabase(NativeDatabase.memory()),
+    );
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final sockets = <WebSocket>[];
+    final tokens = <String?>[];
+    final secondConnection = Completer<void>();
+    final serverSubscription = server.listen((request) async {
+      final socket = await WebSocketTransformer.upgrade(request);
+      sockets.add(socket);
+      tokens.add(request.headers.value(HttpHeaders.authorizationHeader));
+      if (sockets.length == 2) {
+        secondConnection.complete();
+        return;
+      }
+      // A message without an error marks the connection as connected; then
+      // the server drops it, as the network or the server can.
+      socket.add(
+        gzip.encode(
+          utf8.encode(
+            jsonEncode({'id': 'ok', 'action': 'LIST_PENDING_MESSAGES'}),
+          ),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await socket.close();
+    });
+    final adapter = _ConnectedAdapter(
+      _AuthenticationAdapter(Completer<void>(), sessionValid: true),
+    );
+    final client = Client(accessToken: 'test', httpLogLevel: null);
+    client.dio.httpClientAdapter = adapter;
+    final httpClient = HttpClient();
+    late Blaze blaze;
+    addTearDown(() async {
+      blaze.dispose();
+      client.dio.close();
+      for (final socket in sockets) {
+        await socket.close();
+      }
+      await serverSubscription.cancel();
+      await server.close(force: true);
+      httpClient.close(force: true);
+      await database.dispose();
+    });
+
+    await HttpOverrides.runZoned(() async {
+      blaze = Blaze(
+        'user',
+        'session',
+        base64Encode(List.filled(64, 1)),
+        database,
+        client,
+        'test',
+        'test-device',
+        _UnusedAckJob(),
+        _UnusedFloodJob(),
+        loginByPhoneNumber: false,
+        upgradeGate: ApiUpgradeGate(),
+      );
+      await blaze.connect();
+      await secondConnection.future.timeout(const Duration(seconds: 8));
+      // Compare without printing either Authorization header on failure.
+      expect(
+        tokens[0] == tokens[1],
+        isFalse,
+        reason: 'Each connection must sign its own token',
+      );
+    }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
+  });
 }
 
 String? _tokenScope(String? authorization) {
@@ -249,6 +322,36 @@ class _AuthenticationAdapter implements HttpClientAdapter {
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+// Answers /me as a valid session and every other request, such as the
+// offset refresh after connecting, with an empty list.
+class _ConnectedAdapter implements HttpClientAdapter {
+  _ConnectedAdapter(this.me);
+  final _AuthenticationAdapter me;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    if (options.path == '/me') {
+      return me.fetch(options, requestStream, cancelFuture);
+    }
+    return Future.value(
+      ResponseBody.fromString(
+        '{"data":[]}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      ),
     );
   }
 

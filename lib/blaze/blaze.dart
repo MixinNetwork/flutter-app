@@ -85,7 +85,6 @@ class Blaze {
   ProxyConfig? proxyConfig;
 
   String _host = _wsHost1;
-  String? _token;
 
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
@@ -219,7 +218,9 @@ class Blaze {
 
     try {
       i('ws connect');
-      _token ??= signAuthTokenWithEdDSA(
+      // Tokens expire 5 minutes after they are issued, so each connection
+      // signs its own.
+      final token = signAuthTokenWithEdDSA(
         userId,
         sessionId,
         Key.fromBase64(privateKey),
@@ -228,7 +229,7 @@ class Blaze {
         '/',
         '',
       );
-      i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
+      i('ws token.isNotEmpty: ${token.isNotEmpty}');
       i('ws _userAgent: $userAgent');
 
       // Ensure previous resources are released before attempting new connection
@@ -238,7 +239,7 @@ class Blaze {
         _host,
         protocols: ['Mixin-Blaze-1'],
         headers: {
-          'Authorization': 'Bearer $_token',
+          'Authorization': 'Bearer $token',
           'Mixin-Device-Id': deviceId,
         },
         pingInterval: const Duration(seconds: 10),
@@ -265,7 +266,6 @@ class Blaze {
 
               if (blazeMessage.action == kErrorAction &&
                   blazeMessage.error?.code == authentication) {
-                _token = null;
                 _disconnect();
                 // Confirm with a fresh HTTP token so the existing error handler
                 // can distinguish a revoked session from a local clock error.
