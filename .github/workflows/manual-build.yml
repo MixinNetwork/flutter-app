@@ -29,11 +29,6 @@ on:
           - 'windows'
           - 'macos'
         default: "linux,windows,macos"
-      upload_app_store:
-        description: "upload the macOS build to App Store Connect"
-        required: false
-        type: boolean
-        default: false
   push:
     tags:
       - 'v*'
@@ -394,10 +389,7 @@ jobs:
     env:
       APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
       APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-      # altool looks up AuthKey_<id>.p8 in API_PRIVATE_KEYS_DIR.
-      API_PRIVATE_KEYS_DIR: ${{ github.workspace }}/../private_keys
       APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/../private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
-      UPLOAD_APP_STORE: ${{ github.event.inputs.upload_app_store == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -482,32 +474,6 @@ jobs:
           asset_name: mixin-${{ steps.build-app.outputs.version }}.dmg
           tag: ${{ github.ref }}
           overwrite: true
-
-      - name: Upload to App Store Connect
-        if: env.UPLOAD_APP_STORE == 'true'
-        env:
-          MACOS_APP_STORE_PROVISIONING_PROFILE: ${{ secrets.MACOS_APP_STORE_PROVISIONING_PROFILE }}
-        run: |
-          app_identity=$(security find-identity -v -p codesigning | sed -n -E 's/.*"((Apple Distribution|3rd Party Mac Developer Application): .*)"/\1/p' | head -1)
-          installer_identity=$(security find-identity -v | sed -n -E 's/.*"((3rd Party Mac Developer Installer|Mac Installer Distribution): .*)"/\1/p' | head -1)
-          work="$RUNNER_TEMP/app-store"
-          mkdir -p "$work"
-          echo "$MACOS_APP_STORE_PROVISIONING_PROFILE" | base64 --decode > "$work/embedded.provisionprofile"
-
-          # The App Store requires the application and team identifiers from the profile.
-          security cms -D -i "$work/embedded.provisionprofile" > "$work/profile.plist"
-          cp macos/Runner/Release.entitlements "$work/app.entitlements"
-          for key in com.apple.application-identifier com.apple.developer.team-identifier; do
-            value=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:$key" "$work/profile.plist")
-            /usr/libexec/PlistBuddy -c "Add :$key string $value" "$work/app.entitlements"
-          done
-
-          ditto build/macos/Build/Products/Release/Mixin.app "$work/Mixin.app"
-          ./dist/macos_sign.sh "$work/Mixin.app" "$app_identity" "$work/app.entitlements" "$work/embedded.provisionprofile"
-          productbuild --component "$work/Mixin.app" /Applications --sign "$installer_identity" "$work/Mixin.pkg"
-          xcrun altool --upload-package "$work/Mixin.pkg" \
-            --api-key "$APP_STORE_CONNECT_API_KEY_ID" \
-            --api-issuer "$APP_STORE_CONNECT_ISSUER_ID"
 
       - name: Clean up signing
         if: always()
