@@ -217,7 +217,14 @@ void main() {
       );
       await blaze.connect();
       await secondConnection.future.timeout(const Duration(seconds: 8));
-      // Compare without printing either Authorization header on failure.
+      // Check without printing either Authorization header on failure.
+      for (final token in tokens) {
+        expect(
+          token?.startsWith('Bearer ') == true && token!.length > 7,
+          isTrue,
+          reason: 'Each connection must send a bearer token',
+        );
+      }
       expect(
         tokens[0] == tokens[1],
         isFalse,
