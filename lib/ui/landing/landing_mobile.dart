@@ -21,6 +21,7 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/logger.dart';
 import '../../utils/platform.dart';
+import '../../utils/proxy.dart';
 import '../../utils/system/package_info.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/dialog.dart';
@@ -55,7 +56,7 @@ class LoginWithMobileWidget extends HookConsumerWidget {
         ),
         // ignore: avoid_redundant_argument_values
         httpLogLevel: kReleaseMode ? null : HttpLogLevel.all,
-      ),
+      )..dio.applyProxy(null),
       [locale, userAgent, deviceId],
     );
     return provider.Provider<Client>.value(
