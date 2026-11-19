@@ -16,6 +16,7 @@ import '../../../generated/l10n.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
+import '../../../utils/proxy.dart';
 import '../../../utils/system/package_info.dart';
 import '../../provider/multi_auth_provider.dart';
 import '../landing_state.dart';
@@ -56,7 +57,7 @@ class LandingQrCodeNotifier extends ValueNotifier<LandingState> {
              },
            ),
          ],
-       ),
+       )..dio.applyProxy(null),
        multiAuthChangeNotifier = multiAuthChangeNotifier,
        super(
          LandingState(

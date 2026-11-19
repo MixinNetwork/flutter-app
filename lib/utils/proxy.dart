@@ -100,16 +100,22 @@ Future<rhttp.RhttpCompatibleClient> createRHttpClient({
 }
 
 class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
-  _CustomHttpClientAdapterWrapper(ProxyConfig? proxyConfig)
-    : client = createRHttpClient(proxyConfig: proxyConfig);
+  _CustomHttpClientAdapterWrapper(this.proxyConfig);
 
-  final Future<rhttp.RhttpCompatibleClient> client;
+  final ProxyConfig? proxyConfig;
+
+  // Created on first request so building a Dio client does not load rhttp.
+  Future<rhttp.RhttpCompatibleClient>? _client;
+
+  Future<rhttp.RhttpCompatibleClient> get client =>
+      _client ??= createRHttpClient(proxyConfig: proxyConfig);
 
   @override
   void close({bool force = false}) {
+    final client = _client;
+    if (client == null) return;
     Future.sync(() async {
-      final client = await this.client;
-      client.close();
+      (await client).close();
     });
   }
 
