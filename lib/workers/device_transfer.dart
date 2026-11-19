@@ -229,7 +229,7 @@ class DeviceTransfer {
               return;
             }
             _remotePushData = null;
-            await receiver.connectToServer(
+            await _connectToServer(
               data.ip,
               data.port,
               data.code,
@@ -475,6 +475,9 @@ class DeviceTransfer {
         DeviceTransferEventBus.instance.fire(
           DeviceTransferCallbackType.onRestoreRequestReceived,
         );
+      case kTransferCommandActionCancel:
+        // The other device gave up, so it will not connect to our server.
+        unawaited(sender.close(debugReason: 'remote cancel'));
       default:
         e('handleRemoteCommand: unknown action ${command.action}');
         return;
@@ -500,7 +503,7 @@ class DeviceTransfer {
     final transferSecretKey = TransferSecretKey(keyBytes);
     if (_waitingForRemotePush) {
       _waitingForRemotePush = false;
-      await receiver.connectToServer(ip, port, code, transferSecretKey);
+      await _connectToServer(ip, port, code, transferSecretKey);
     } else {
       _remotePushData = _RemotePushData(
         ip: ip,
@@ -510,6 +513,27 @@ class DeviceTransfer {
       );
       DeviceTransferEventBus.instance.fire(
         DeviceTransferCallbackType.onBackupRequestReceived,
+      );
+    }
+  }
+
+  Future<void> _connectToServer(
+    String ip,
+    int port,
+    int code,
+    TransferSecretKey secretKey,
+  ) async {
+    try {
+      await receiver.connectToServer(ip, port, code, secretKey);
+    } on SocketException catch (error) {
+      e('connect to $ip:$port failed: $error');
+      DeviceTransferEventBus.instance.fire(
+        DeviceTransferCallbackType.onConnectionFailed,
+        ConnectionFailedReason.unknown,
+      );
+      // The other device waits for this connection until it gets a cancel.
+      await _sendCommandAsPlainJson(
+        TransferDataCommand.cancel(deviceId: deviceId),
       );
     }
   }
