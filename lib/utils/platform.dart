@@ -1,14 +1,18 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:ui_device/ui_device.dart' as ui_device;
 import 'package:uuid/uuid.dart';
 
 import '../crypto/uuid/uuid.dart';
+import 'file.dart';
 import 'logger.dart';
+import 'system/windows_device_id.dart';
 
 bool kPlatformIsDarwin = Platform.isMacOS || Platform.isIOS;
 
@@ -45,7 +49,11 @@ Future<String> getPlatformVersion() async {
   return '${defaultTargetPlatform.name}_unknown';
 }
 
+String? _cachedDeviceId;
+
 Future<String> getDeviceId() async {
+  final cached = _cachedDeviceId;
+  if (cached != null) return cached;
   try {
     String? id;
     if (Platform.isWindows) {
@@ -65,10 +73,10 @@ Future<String> getDeviceId() async {
       throw Exception("${Platform.operatingSystem}'s device id is empty");
     }
     if (Platform.isAndroid || kIsWeb || Platform.isLinux) {
-      return nameUuidFromBytes(utf8.encode(id)).uuid;
+      return _cachedDeviceId = nameUuidFromBytes(utf8.encode(id)).uuid;
     }
 
-    return id.toLowerCase();
+    return _cachedDeviceId = id.toLowerCase();
   } catch (error, stack) {
     e('failed to get device id. $error $stack');
   }
@@ -95,22 +103,69 @@ Future<String?> _getLinuxDeviceId() async {
   return machineId;
 }
 
-// ref: https://github.com/BestBurning/platform_device_id/issues/15#issuecomment-1064081170
+/// Returns the SMBIOS system UUID that earlier versions read with WMIC, so
+/// the id, and the account bound to it, survives an upgrade.
 Future<String?> _getWindowsDeviceId() async {
-  final process = await Process.start('wmic', [
-    'csproduct',
-    'get',
-    'UUID',
-  ], mode: ProcessStartMode.detachedWithStdio);
-  final result = await process.stdout.transform(utf8.decoder).toList();
-  String? deviceID;
-  for (final element in result) {
-    final item = element.replaceAll(RegExp('\r|\n|\\s|UUID|uuid'), '');
-    if (item.isNotEmpty) {
-      deviceID = item;
+  final fallbackFile = File(
+    p.join(mixinDocumentsDirectory.path, 'device_id'),
+  );
+  // A machine that needed the fallback id once keeps using it.
+  if (fallbackFile.existsSync()) {
+    final id = fallbackFile.readAsStringSync().trim();
+    if (id.isNotEmpty) return id;
+  }
+
+  final sources = <(String, FutureOr<String?> Function())>[
+    ('SMBIOS', readWindowsSmbiosSystemUuid),
+    (
+      'wmic',
+      () => _runWindowsUuidCommand('wmic', ['csproduct', 'get', 'UUID']),
+    ),
+    (
+      'powershell',
+      () => _runWindowsUuidCommand('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        '(Get-CimInstance -ClassName Win32_ComputerSystemProduct).UUID',
+      ]),
+    ),
+  ];
+  for (final (name, read) in sources) {
+    try {
+      final id = (await read())?.trim();
+      if (id != null && id.isNotEmpty) return id;
+      w('windows device id from $name is empty');
+    } catch (error, stack) {
+      w('failed to get windows device id from $name. $error $stack');
     }
   }
-  return deviceID;
+
+  final id = const Uuid().v4();
+  await fallbackFile.parent.create(recursive: true);
+  await fallbackFile.writeAsString(id);
+  w('windows device id falls back to a generated id');
+  return id;
+}
+
+Future<String?> _runWindowsUuidCommand(
+  String executable,
+  List<String> arguments,
+) async {
+  final result = await Process.run(executable, arguments);
+  if (result.exitCode != 0) {
+    throw ProcessException(
+      executable,
+      arguments,
+      '${result.stderr}',
+      result.exitCode,
+    );
+  }
+  final id = result.stdout.toString().replaceAll(
+    RegExp(r'\s|UUID', caseSensitive: false),
+    '',
+  );
+  return id.isEmpty ? null : id;
 }
 
 // ref: https://github.com/BestBurning/platform_device_id/blob/master/platform_device_id_macos/macos/Classes/PlatformDeviceIdMacosPlugin.swift

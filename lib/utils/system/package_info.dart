@@ -8,7 +8,7 @@ import '../logger.dart';
 // auto added by .github/workflows/manual-build.yml
 const _kAppVersion = String.fromEnvironment(
   'APP_VERSION',
-  defaultValue: '4.3.0',
+  defaultValue: '7.0.1',
 );
 const _kAppBuildNumber = String.fromEnvironment(
   'APP_BUILD_NUMBER',
@@ -73,5 +73,8 @@ Future<String> _generateUserAgent(PackageInfo packageInfo) async {
   }
   systemAndVersion ??=
       '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
-  return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName})';
+  // A localized OS name such as "Windows 11 专业版" is not a valid header
+  // value, and the server drops a request that carries one.
+  return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName})'
+      .replaceAll(RegExp(r'[^\x20-\x7E]'), '');
 }
