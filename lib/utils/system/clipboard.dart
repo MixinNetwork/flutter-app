@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 

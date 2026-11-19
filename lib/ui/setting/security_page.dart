@@ -1,8 +1,10 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'dart:async';
+
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 import '../../account/security_key_value.dart';
@@ -13,6 +15,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/pin_field.dart';
 import '../../widgets/toast.dart';
 
 class SecurityPage extends StatelessWidget {
@@ -189,6 +192,10 @@ class _InputPasscode extends HookConsumerWidget {
     }, []);
 
     final textEditingController = useTextEditingController();
+    final pinController = usePinInputController(
+      textController: textEditingController,
+      focusNode: focusNode,
+    );
 
     final passcode = useState<String?>(null);
     final confirmPasscode = useState<String?>(null);
@@ -240,31 +247,27 @@ class _InputPasscode extends HookConsumerWidget {
           const SizedBox(height: 40),
           SizedBox(
             width: 215,
-            child: PinCodeTextField(
-              appContext: context,
+            child: MaterialPinField(
               length: 6,
+              pinController: pinController,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               autoFocus: true,
-              keyboardType: TextInputType.number,
-              useHapticFeedback: true,
-              pinTheme: PinTheme(
-                activeColor: context.theme.text,
-                inactiveColor: context.theme.text,
-                selectedColor: context.theme.text,
-                fieldWidth: 15,
+              theme: borderPinTheme(
+                borderColor: context.theme.text,
+                focusedBorderColor: context.theme.text,
+                filledBorderColor: context.theme.text,
                 borderWidth: 2,
+                spacing: 25,
+                textStyle: TextStyle(fontSize: 18, color: context.theme.text),
               ),
-              textStyle: TextStyle(fontSize: 18, color: context.theme.text),
-              autoDisposeControllers: false,
-              focusNode: focusNode,
-              controller: textEditingController,
-              showCursor: false,
               onCompleted: (value) {
                 if (passcode.value != null) {
                   confirmPasscode.value = value;
                 } else {
                   passcode.value = value;
-                  textEditingController.text = '';
+                  // Clearing inside the callback would leave the field
+                  // thinking it is still complete.
+                  scheduleMicrotask(pinController.clear);
                 }
               },
             ),

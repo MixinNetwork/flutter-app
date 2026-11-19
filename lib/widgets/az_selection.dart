@@ -1,8 +1,8 @@
 import 'dart:collection';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
 
 typedef OnSelection = void Function(String char);
 

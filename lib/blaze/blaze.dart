@@ -6,6 +6,7 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
@@ -51,8 +52,10 @@ class Blaze {
     this.database,
     this.client,
     this.userAgent,
+    this.deviceId,
     this.ackJob,
     this.floodJob, {
+    required this.loginByPhoneNumber,
     required this.upgradeGate,
     this.onUpgradeRequired,
   }) {
@@ -72,15 +75,17 @@ class Blaze {
   final Client client;
   final AckJob ackJob;
   final FloodJob floodJob;
+  // Phone number login sessions sign with FULL, like the API client.
+  final bool loginByPhoneNumber;
   final ApiUpgradeGate upgradeGate;
   final void Function()? onUpgradeRequired;
 
   final String? userAgent;
+  final String deviceId;
 
   ProxyConfig? proxyConfig;
 
   String _host = _wsHost1;
-  String? _token;
 
   final BehaviorSubject<ConnectedState> _connectedStateBehaviorSubject =
       BehaviorSubject<ConnectedState>();
@@ -214,16 +219,21 @@ class Blaze {
 
     try {
       i('ws connect');
-      _token ??= signAuthTokenWithEdDSA(
+      // Tokens expire 5 minutes after they are issued, so each connection
+      // signs its own. The server checks that the token's jti is the
+      // X-Request-Id of the connection.
+      final requestId = const Uuid().v4();
+      final token = signAuthTokenWithEdDSA(
         userId,
         sessionId,
         Key.fromBase64(privateKey),
-        scp,
+        loginByPhoneNumber ? scpFull : scp,
         'GET',
         '/',
         '',
+        requestId,
       );
-      i('ws _token?.isNotEmpty == true: ${_token?.isNotEmpty == true}');
+      i('ws token.isNotEmpty: ${token.isNotEmpty}');
       i('ws _userAgent: $userAgent');
 
       // Ensure previous resources are released before attempting new connection
@@ -232,9 +242,17 @@ class Blaze {
       channel = IOWebSocketChannel.connect(
         _host,
         protocols: ['Mixin-Blaze-1'],
-        headers: {'User-Agent': userAgent, 'Authorization': 'Bearer $_token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Mixin-Device-Id': deviceId,
+          'X-Request-Id': requestId,
+        },
         pingInterval: const Duration(seconds: 10),
-        customClient: HttpClient()..setProxy(proxyConfig),
+        // Set on the client: WebSocket.connect appends header values, which
+        // would join ours with the default "Dart/x (dart:io)" user agent.
+        customClient: HttpClient()
+          ..userAgent = userAgent
+          ..setProxy(proxyConfig),
       );
 
       subscription = channel?.stream
@@ -251,14 +269,17 @@ class Blaze {
                 return;
               }
 
-              _connectedState = ConnectedState.connected;
-              d('blazeMessage receive: ${blazeMessage.action}');
-
               if (blazeMessage.action == kErrorAction &&
                   blazeMessage.error?.code == authentication) {
                 _disconnect();
+                // Confirm with a fresh HTTP token so the existing error handler
+                // can distinguish a revoked session from a local clock error.
+                unawaited(reconnect(delayRetry: true));
                 return;
               }
+
+              _connectedState = ConnectedState.connected;
+              d('blazeMessage receive: ${blazeMessage.action}');
 
               if (blazeMessage.error == null) {
                 final transaction = transactions[blazeMessage.id];
@@ -525,7 +546,7 @@ class Blaze {
     _eventController.add(_ConnectionEvent.connect);
   }
 
-  Future<void> reconnect() async {
+  Future<void> reconnect({bool delayRetry = false}) async {
     i('Public reconnect called. Current state: $_connectedState');
     if (_stoppedForUpgrade || upgradeGate.isRequired) return;
     if (_connectedState == ConnectedState.connecting ||
@@ -538,13 +559,27 @@ class Blaze {
     try {
       // Test HTTP connection
       await client.accountApi.getMe();
+      if (_eventController.isClosed ||
+          _stoppedForUpgrade ||
+          upgradeGate.isRequired) {
+        return;
+      }
       i('http ping successful');
+
+      if (delayRetry) {
+        _scheduleRetry();
+        return;
+      }
 
       i('Triggering CONNECT event: User requested reconnection');
       _eventController.add(_ConnectionEvent.connect);
     } catch (e) {
       w('ws ping error: $e');
-      if (_stoppedForUpgrade || upgradeGate.isRequired) return;
+      if (_eventController.isClosed ||
+          _stoppedForUpgrade ||
+          upgradeGate.isRequired) {
+        return;
+      }
       if (e is MixinApiError &&
           e.error != null &&
           e.error is MixinError &&

@@ -26,9 +26,9 @@ list(APPEND FLUTTER_FFI_PLUGIN_LIST
   flutter_local_notifications_windows
   jni
   mixin_logger
-  ogg_opus_player
   rhttp
   system_clock
+  ogg_opus_player
   webcrypto
 )
 

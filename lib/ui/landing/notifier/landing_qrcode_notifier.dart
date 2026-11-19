@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
+import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../account/account_key_value.dart';
@@ -47,6 +47,15 @@ class LandingQrCodeNotifier extends ValueNotifier<LandingState> {
          ),
          // ignore: avoid_redundant_argument_values
          httpLogLevel: kReleaseMode ? null : HttpLogLevel.all,
+         interceptors: [
+           InterceptorsWrapper(
+             onRequest: (options, handler) async {
+               options.headers['User-Agent'] = await generateUserAgent();
+               options.headers['Mixin-Device-Id'] = await getDeviceId();
+               handler.next(options);
+             },
+           ),
+         ],
        ),
        multiAuthChangeNotifier = multiAuthChangeNotifier,
        super(

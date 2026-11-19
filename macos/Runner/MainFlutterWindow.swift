@@ -4,7 +4,10 @@ import window_manager
 
 class MainFlutterWindow: NSWindow {
   override func awakeFromNib() {
-    let flutterViewController = FlutterViewController(project: RendererProject())
+    #if arch(x86_64)
+    useSkia()
+    #endif
+    let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
@@ -33,10 +36,13 @@ class MainFlutterWindow: NSWindow {
 }
 
 // Impeller corrupts the screen on Intel Macs, so they keep Skia. A universal
-// build shares one Info.plist, so this overrides the engine's private getter
-// that reads FLTEnableImpeller.
-private final class RendererProject: FlutterDartProject {
-  #if arch(x86_64)
-  @objc func enableImpeller() -> Bool { false }
-  #endif
+// build shares one Info.plist, so this replaces the engine's private getter
+// that reads FLTEnableImpeller. It patches FlutterDartProject itself: a
+// subclass makes the engine look for icudtl.dat in the app bundle, and text
+// layout then runs without ICU data.
+private func useSkia() {
+  let block: @convention(block) (AnyObject) -> Bool = { _ in false }
+  class_replaceMethod(
+    FlutterDartProject.self, NSSelectorFromString("enableImpeller"),
+    imp_implementationWithBlock(block), "c@:")
 }
