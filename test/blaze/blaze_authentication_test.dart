@@ -161,11 +161,13 @@ void main() {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final sockets = <WebSocket>[];
     final tokens = <String?>[];
+    final requestIds = <String?>[];
     final secondConnection = Completer<void>();
     final serverSubscription = server.listen((request) async {
       final socket = await WebSocketTransformer.upgrade(request);
       sockets.add(socket);
       tokens.add(request.headers.value(HttpHeaders.authorizationHeader));
+      requestIds.add(request.headers.value('X-Request-Id'));
       if (sockets.length == 2) {
         secondConnection.complete();
         return;
@@ -230,14 +232,24 @@ void main() {
         isFalse,
         reason: 'Each connection must sign its own token',
       );
+      for (var i = 0; i < 2; i++) {
+        expect(requestIds[i], isNotNull);
+        expect(
+          _tokenClaim(tokens[i], 'jti'),
+          requestIds[i],
+          reason: 'The server rejects a jti that is not the X-Request-Id',
+        );
+      }
     }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
   });
 }
 
-String? _tokenScope(String? authorization) {
+String? _tokenScope(String? authorization) => _tokenClaim(authorization, 'scp');
+
+String? _tokenClaim(String? authorization, String claim) {
   final payload = authorization!.substring('Bearer '.length).split('.')[1];
   final json = utf8.decode(base64Url.decode(base64Url.normalize(payload)));
-  return (jsonDecode(json) as Map<String, dynamic>)['scp'] as String?;
+  return (jsonDecode(json) as Map<String, dynamic>)[claim] as String?;
 }
 
 class _RedirectClient implements HttpClient {

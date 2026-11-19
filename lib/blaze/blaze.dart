@@ -6,6 +6,7 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
@@ -219,7 +220,9 @@ class Blaze {
     try {
       i('ws connect');
       // Tokens expire 5 minutes after they are issued, so each connection
-      // signs its own.
+      // signs its own. The server checks that the token's jti is the
+      // X-Request-Id of the connection.
+      final requestId = const Uuid().v4();
       final token = signAuthTokenWithEdDSA(
         userId,
         sessionId,
@@ -228,6 +231,7 @@ class Blaze {
         'GET',
         '/',
         '',
+        requestId,
       );
       i('ws token.isNotEmpty: ${token.isNotEmpty}');
       i('ws _userAgent: $userAgent');
@@ -241,6 +245,7 @@ class Blaze {
         headers: {
           'Authorization': 'Bearer $token',
           'Mixin-Device-Id': deviceId,
+          'X-Request-Id': requestId,
         },
         pingInterval: const Duration(seconds: 10),
         // Set on the client: WebSocket.connect appends header values, which
