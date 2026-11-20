@@ -220,23 +220,30 @@ appimage-*)
   ;;
 tar-*)
   bundle=$(dirname "$executable") name=$(basename "$executable")
-  # Checked again: a file added since the app started would go with the bundle.
-  only_bundle=yes
-  for entry in "$bundle"/* "$bundle"/.[!.]* "$bundle"/..?*; do
-    [ -e "$entry" ] || continue
-    case $(basename "$entry") in "$name" | data | lib) ;; *) only_bundle=no ;; esac
-  done
+  # Whether a directory holds only the bundle. Checked right before the swap
+  # and before the old bundle is deleted, as files can appear at any time;
+  # a dangling symlink counts too.
+  only_bundle() {
+    for entry in "$1"/* "$1"/.[!.]* "$1"/..?*; do
+      [ -e "$entry" ] || [ -L "$entry" ] || continue
+      case $(basename "$entry") in "$name" | data | lib) ;; *) return 1 ;; esac
+    done
+    return 0
+  }
   # The new and the old bundle stay in a new directory beside the bundle, so
   # the cleanup deletes only what this script made.
   stage=
   # The release tar is not compressed, though its name ends in .tar.gz.
-  if [ $only_bundle = yes ] && stage=$(mktemp -d "$bundle.update.XXXXXX") &&
-    mkdir "$stage/new" && tar -xf "$file" -C "$stage/new" && [ -x "$stage/new/$name" ]; then
-    if mv "$bundle" "$stage/old"; then
-      mv "$stage/new" "$bundle" || mv "$stage/old" "$bundle"
-    fi
+  if stage=$(mktemp -d "$bundle.update.XXXXXX") && mkdir "$stage/new" &&
+    tar -xf "$file" -C "$stage/new" && [ -x "$stage/new/$name" ] &&
+    only_bundle "$bundle" && mv "$bundle" "$stage/old"; then
+    mv "$stage/new" "$bundle" || mv "$stage/old" "$bundle"
   fi
-  [ -n "$stage" ] && [ -d "$bundle" ] && rm -rf "$stage"
+  # A file that got into the old bundle is kept with it in $stage.
+  if [ -n "$stage" ] && [ -d "$bundle" ] &&
+    { [ ! -d "$stage/old" ] || only_bundle "$stage/old"; }; then
+    rm -rf "$stage"
+  fi
   rm -rf "$dir"
   exec "$executable"
   ;;
