@@ -97,10 +97,18 @@ def read_public_key(path):
     return ED25519_SPKI_PREFIX + raw
 
 
+def build_number(value):
+    # The app skips an item whose build is not a plain number, so a typo in
+    # pubspec.yaml would stop every update without an error.
+    if not value.isascii() or not value.isdigit() or value.startswith("0"):
+        raise argparse.ArgumentTypeError(f"not a build number: {value!r}")
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", required=True)
-    parser.add_argument("--build", required=True,
+    parser.add_argument("--build", required=True, type=build_number,
                         help="build number, compared with CFBundleVersion")
     parser.add_argument("--key", required=True, help="Ed25519 private key PEM")
     parser.add_argument("--public-key", required=True,

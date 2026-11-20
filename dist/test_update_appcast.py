@@ -53,9 +53,9 @@ class UpdateAppcastTest(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def run_script(self, pub):
+    def run_script(self, pub, build="602"):
         return subprocess.run(
-            [sys.executable, SCRIPT, "--tag", "v6.3.7", "--build", "602",
+            [sys.executable, SCRIPT, "--tag", "v6.3.7", "--build", build,
              "--key", self.key, "--public-key", pub,
              "--url-prefix", "https://example.com/v6.3.7/",
              "--out", self.out, "--openssl", OPENSSL,
@@ -120,6 +120,13 @@ class UpdateAppcastTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("does not match the public key", result.stderr)
         self.assertFalse(os.path.exists(self.out))
+
+    def test_rejects_a_build_that_is_not_a_number(self):
+        for build in ["602 # x", "+602", "0602", "6.0.2", ""]:
+            result = self.run_script(self.pub, build)
+            self.assertNotEqual(result.returncode, 0, build)
+            self.assertIn("not a build number", result.stderr)
+            self.assertFalse(os.path.exists(self.out))
 
 
 if __name__ == "__main__":
