@@ -19,14 +19,16 @@ on:
         required: false
         default: ""
       platforms:
-        description: "platforms to build, eg: linux, windows"
+        description: "platforms to build, eg: linux, windows, macos"
         required: false
         type: choice
         options:
+          - 'linux,windows,macos'
           - 'linux,windows'
           - 'linux'
           - 'windows'
-        default: "linux,windows"
+          - 'macos'
+        default: "linux,windows,macos"
   push:
     tags:
       - 'v*'
@@ -34,6 +36,10 @@ on:
 env:
   FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
   FLUTTER_CHANNEL: ${{ github.event.inputs.flutter_channel || 'stable' }}
+
+# Jobs that upload to the release ask for write access themselves.
+permissions:
+  contents: read
 
 jobs:
   build-linux:
@@ -73,13 +79,13 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           # https://github.com/subosito/flutter-action/issues/345#issuecomment-2657332687
           channel: 'master'
           flutter-version: ${{ steps.flutter-version.outputs.version }}
 
-      - uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # v1
         with:
           toolchain: 'stable' # 'stable' or 'nightly'
           override: true
@@ -141,7 +147,7 @@ jobs:
           path: build/mixin_desktop_${{ matrix.arch }}.deb
 
       - name: upload linux binary
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -151,7 +157,7 @@ jobs:
           overwrite: true
 
       - name: upload linux deb
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -194,7 +200,7 @@ jobs:
         run: ./dist/linux_snap_prepare.sh ${{ matrix.arch == 'amd64' && '' || matrix.arch }}
 
       - name: Build .snap
-        uses: snapcore/action-build@v1
+        uses: snapcore/action-build@3bdaa03e1ba6bf59a65f84a751d943d549a54e79 # v1
         id: build-snap
         with:
           path: dist/snap
@@ -209,7 +215,7 @@ jobs:
           path: mixin_desktop_linux_${{ matrix.arch }}.snap
 
       - name: Upload linux snap
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -281,7 +287,7 @@ jobs:
           path: mixin_desktop_linux_${{ matrix.arch }}.AppImage
 
       - name: Upload linux AppImage
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -293,15 +299,17 @@ jobs:
   build-windows:
     runs-on: windows-2022
     if: contains(github.event.inputs.platforms, 'windows') || github.event.inputs.platforms == ''
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # v1
         with:
           toolchain: 'stable' # 'stable' or 'nightly'
           override: true
@@ -323,8 +331,7 @@ jobs:
       # fix error when dump debug info: (msdia*.dll unregistered?)
       - run: regsvr32 "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\Remote Debugger\x64\msdia140.dll"
 
-      - uses: ilammy/setup-nasm@v1
-
+      - uses: ilammy/setup-nasm@72793074d3c8cdda771dba85f6deafe00623038b # v1
       - name: Build APP
         id: build-app
         run: |
@@ -370,11 +377,191 @@ jobs:
           path: build\syms
 
       - name: Upload windows setup exe
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/mixin_desktop_windows_setup_amd64.exe
           asset_name: mixin_desktop_windows_setup_amd64.exe
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  build-macos:
+    runs-on: macos-26
+    if: contains(github.event.inputs.platforms, 'macos') || github.event.inputs.platforms == ''
+    # The signing and notary secrets live in this environment, which only
+    # release tags can use.
+    environment: release
+    permissions:
+      contents: write
+    env:
+      APP_STORE_CONNECT_API_KEY_PATH: ${{ github.workspace }}/../private_keys/AuthKey.p8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      # appdmg needs npm to run install scripts for its native modules.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - run: flutter --version
+
+      - name: Generator ENV
+        run: echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
+
+      - name: Run Build Runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build APP
+        id: build-app
+        run: |
+          version_str=$(sed -n 's/^version: //p' pubspec.yaml)
+          version=${version_str%+*}
+          build_number=${version_str#*+}
+          flutter build macos --release --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Import signing certificates
+        env:
+          MACOS_CERTIFICATES_P12: ${{ secrets.MACOS_CERTIFICATES_P12 }}
+          MACOS_CERTIFICATES_PASSWORD: ${{ secrets.MACOS_CERTIFICATES_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password="$(uuidgen)"
+          echo "$MACOS_CERTIFICATES_P12" | base64 --decode > "$RUNNER_TEMP/certificates.p12"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security import "$RUNNER_TEMP/certificates.p12" -P "$MACOS_CERTIFICATES_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/certificates.p12"
+          security find-identity -v "$keychain"
+
+          mkdir -p "$(dirname "$APP_STORE_CONNECT_API_KEY_PATH")"
+          echo "$APP_STORE_CONNECT_API_KEY" > "$APP_STORE_CONNECT_API_KEY_PATH"
+
+      - name: Sign and notarize APP
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)
+          rm -rf dist/Mixin.app
+          ditto build/macos/Build/Products/Release/Mixin.app dist/Mixin.app
+          ./dist/macos_sign.sh dist/Mixin.app "$identity" macos/Runner/Release.entitlements
+          ./dist/macos_notarize.sh dist/Mixin.app
+
+      - name: Package dmg
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          identity=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)
+          ./dist/macos.sh
+          codesign --timestamp --sign "$identity" dist/mixin.dmg
+          ./dist/macos_notarize.sh dist/mixin.dmg
+          mv dist/mixin.dmg dist/mixin-${{ steps.build-app.outputs.version }}.dmg
+
+      # Remove the keys before the upload steps run.
+      - name: Clean up signing
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -f "$APP_STORE_CONNECT_API_KEY_PATH"
+
+      - name: Upload dmg
+        uses: actions/upload-artifact@v4
+        with:
+          name: mixin-${{ steps.build-app.outputs.version }}.dmg.zip
+          path: dist/mixin-${{ steps.build-app.outputs.version }}.dmg
+
+      - name: Upload macOS dmg
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/mixin-${{ steps.build-app.outputs.version }}.dmg
+          asset_name: mixin-${{ steps.build-app.outputs.version }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  publish-appcast:
+    # Runs when some builds failed too: the appcast lists only the packages
+    # that are in the release.
+    needs: [build-linux, build-linux-appimage, build-windows, build-macos]
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-22.04
+    # UPDATE_SIGNING_KEY lives in this environment, which only release tags
+    # can use.
+    environment: release
+    permissions:
+      contents: write
+    env:
+      HAS_UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test appcast script
+        run: python3 dist/test_update_appcast.py
+
+      - name: Download release packages
+        if: env.HAS_UPDATE_SIGNING_KEY == 'true'
+        run: |
+          mkdir packages
+          gh release download "$GITHUB_REF_NAME" --dir packages \
+            --pattern 'mixin-*.dmg' \
+            --pattern 'mixin_desktop_windows_setup_amd64.exe' \
+            --pattern 'mixin_desktop_linux_*.AppImage' \
+            --pattern 'mixin_desktop_linux_*.deb' \
+            --pattern 'mixin_desktop_linux_*_portable.tar.gz'
+          ls -l packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write appcast
+        if: env.HAS_UPDATE_SIGNING_KEY == 'true'
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+        run: |
+          echo "$UPDATE_SIGNING_KEY" > "$RUNNER_TEMP/update_key.pem"
+          args=""
+          for file in packages/*; do
+            case "$(basename "$file")" in
+              mixin-*.dmg) package=dmg ;;
+              mixin_desktop_windows_setup_amd64.exe) package=inno-x64 ;;
+              mixin_desktop_linux_amd64.AppImage) package=appimage-x64 ;;
+              mixin_desktop_linux_arm64.AppImage) package=appimage-arm64 ;;
+              mixin_desktop_linux_amd64.deb) package=deb-x64 ;;
+              mixin_desktop_linux_arm64.deb) package=deb-arm64 ;;
+              mixin_desktop_linux_amd64_portable.tar.gz) package=tar-x64 ;;
+              mixin_desktop_linux_arm64_portable.tar.gz) package=tar-arm64 ;;
+              *) continue ;;
+            esac
+            args="$args $package=$file"
+          done
+          build="$(sed -n 's/^version: [^+]*+\(.*\)/\1/p' pubspec.yaml)"
+          python3 dist/update_appcast.py --tag "$GITHUB_REF_NAME" --build "$build" \
+            --key "$RUNNER_TEMP/update_key.pem" --public-key dist/update_ed25519.pub \
+            --url-prefix "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME" \
+            --out appcast.xml $args
+          rm "$RUNNER_TEMP/update_key.pem"
+          cat appcast.xml
+
+      - name: Upload appcast
+        if: env.HAS_UPDATE_SIGNING_KEY == 'true'
+        uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: appcast.xml
+          asset_name: appcast.xml
           tag: ${{ github.ref }}
           overwrite: true
