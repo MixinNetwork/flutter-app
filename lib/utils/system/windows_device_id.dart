@@ -13,6 +13,18 @@ const _rsmbProvider = 0x52534D42;
 /// WMIC is removed from recent Windows releases, so this reads the firmware
 /// table directly instead of starting a process.
 String? readWindowsSmbiosSystemUuid() {
+  final raw = _readRawSmbios();
+  return raw == null ? null : parseSmbiosSystemUuid(raw);
+}
+
+/// Reads the manufacturer and product name of the SMBIOS system information,
+/// such as "Dell Inc. XPS 13 9310".
+String? readWindowsSmbiosSystemModel() {
+  final raw = _readRawSmbios();
+  return raw == null ? null : parseSmbiosSystemModel(raw);
+}
+
+Uint8List? _readRawSmbios() {
   final getSystemFirmwareTable = DynamicLibrary.open('kernel32.dll')
       .lookupFunction<
         Uint32 Function(Uint32, Uint32, Pointer<Uint8>, Uint32),
@@ -27,9 +39,7 @@ String? readWindowsSmbiosSystemUuid() {
   try {
     final written = getSystemFirmwareTable(_rsmbProvider, 0, buffer, size);
     if (written == 0 || written > size) return null;
-    return parseSmbiosSystemUuid(
-      Uint8List.fromList(buffer.asTypedList(written)),
-    );
+    return Uint8List.fromList(buffer.asTypedList(written));
   } finally {
     calloc.free(buffer);
   }
@@ -41,6 +51,43 @@ String? readWindowsSmbiosSystemUuid() {
 /// The first three fields are little-endian, as Windows has always formatted
 /// them, so the result matches what WMI reports.
 String? parseSmbiosSystemUuid(Uint8List raw) {
+  final system = _findSystemInformation(raw);
+  // The UUID occupies offsets 08h to 17h.
+  if (system == null || system.length < 0x18) return null;
+  return _formatSmbiosUuid(
+    raw.sublist(system.offset + 8, system.offset + 0x18),
+  );
+}
+
+/// Parses the manufacturer (offset 04h) and product name (offset 05h) strings
+/// of the System Information (type 1) structure.
+String? parseSmbiosSystemModel(Uint8List raw) {
+  final system = _findSystemInformation(raw);
+  if (system == null || system.length < 6) return null;
+
+  // The strings follow the formatted area, each ending with a zero, and
+  // the set ends with one more zero. A string number of 0 means no string.
+  final strings = <String>[];
+  var start = system.offset + system.length;
+  for (var i = start; i < system.end && raw[i] != 0; i = start) {
+    var stop = i;
+    while (stop < system.end && raw[stop] != 0) {
+      stop++;
+    }
+    strings.add(String.fromCharCodes(raw.sublist(i, stop)).trim());
+    start = stop + 1;
+  }
+  String? string(int number) =>
+      number == 0 || number > strings.length ? null : strings[number - 1];
+
+  final model = [
+    string(raw[system.offset + 4]),
+    string(raw[system.offset + 5]),
+  ].whereType<String>().where((e) => e.isNotEmpty).join(' ');
+  return model.isEmpty ? null : model;
+}
+
+({int offset, int length, int end})? _findSystemInformation(Uint8List raw) {
   // RawSMBIOSData: 4 bytes of version info, a 4-byte length, then the table.
   const headerLength = 8;
   if (raw.length < headerLength) return null;
@@ -55,11 +102,7 @@ String? parseSmbiosSystemUuid(Uint8List raw) {
     final length = raw[offset + 1];
     if (length < 4 || offset + length > end) return null;
 
-    if (type == 1) {
-      // The UUID occupies offsets 08h to 17h.
-      if (length < 0x18) return null;
-      return _formatSmbiosUuid(raw.sublist(offset + 8, offset + 0x18));
-    }
+    if (type == 1) return (offset: offset, length: length, end: end);
     if (type == 127) return null; // End-of-table.
 
     // Skip the formatted area, then the string set ending with two zeros.

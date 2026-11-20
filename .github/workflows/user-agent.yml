@@ -1,0 +1,38 @@
+# Runs the User-Agent tests on each desktop platform, so the log shows the
+# User-Agent and the hardware model that a real machine reports.
+name: User-Agent
+
+on:
+  pull_request:
+    paths:
+      - lib/utils/system/package_info.dart
+      - lib/utils/system/windows_device_id.dart
+      - test/utils/package_info_test.dart
+      - test/utils/windows_device_id_test.dart
+      - .github/workflows/user-agent.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-15, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - run: git config --system core.longpaths true
+        if: runner.os == 'Windows'
+
+      - run: flutter pub get
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - run: flutter test test/utils/package_info_test.dart test/utils/windows_device_id_test.dart --reporter expanded

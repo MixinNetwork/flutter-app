@@ -30,6 +30,17 @@ List<int> _systemInformation(List<int> uuid) => [
   0, 0,
 ];
 
+// A System Information (type 1) structure with the given strings, of which
+// the first is the manufacturer and the second the product name.
+List<int> _systemInformationWithStrings(List<String> strings) => [
+  1, 0x1b, 0x01, 0x00, //
+  1, 2, 0, 0, // Manufacturer, product name, version and serial strings.
+  ...List.filled(16, 0),
+  6, 0, 0, // Wake-up type, SKU and family strings.
+  for (final string in strings) ...[...string.codeUnits, 0],
+  0,
+];
+
 const _endOfTable = [127, 4, 0xff, 0xff, 0, 0];
 
 void main() {
@@ -62,6 +73,64 @@ void main() {
     expect(parseSmbiosSystemUuid(raw.sublist(0, raw.length - 20)), isNull);
     expect(parseSmbiosSystemUuid(Uint8List(4)), isNull);
   });
+
+  test('joins the manufacturer and product name', () {
+    final raw = _rawSmbios([
+      ..._biosInformation,
+      ..._systemInformationWithStrings([' Dell Inc. ', 'XPS 13 9310']),
+      ..._endOfTable,
+    ]);
+
+    expect(parseSmbiosSystemModel(raw), 'Dell Inc. XPS 13 9310');
+  });
+
+  test('skips a missing or blank model string', () {
+    final noProduct = _rawSmbios([
+      ..._systemInformationWithStrings(['LENOVO']),
+      ..._endOfTable,
+    ]);
+    final blank = _rawSmbios([
+      ..._systemInformationWithStrings([' ', '']),
+      ..._endOfTable,
+    ]);
+
+    expect(parseSmbiosSystemModel(noProduct), 'LENOVO');
+    expect(parseSmbiosSystemModel(blank), isNull);
+  });
+
+  test('returns null for a model without strings or structure', () {
+    final noStrings = _rawSmbios([
+      ..._systemInformation(List.filled(16, 0)),
+      ..._endOfTable,
+    ]);
+
+    expect(parseSmbiosSystemModel(noStrings), isNull);
+    expect(
+      parseSmbiosSystemModel(_rawSmbios([..._biosInformation, ..._endOfTable])),
+      isNull,
+    );
+    expect(parseSmbiosSystemModel(Uint8List(4)), isNull);
+  });
+
+  test(
+    'reads the same model as WMI',
+    () async {
+      const command =
+          r'$s = Get-CimInstance -ClassName Win32_ComputerSystem; '
+          r'"$($s.Manufacturer.Trim()) $($s.Model.Trim())".Trim()';
+      final result = await Process.run('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        command,
+      ]);
+      final wmiModel = result.stdout.toString().trim();
+
+      expect(wmiModel, isNotEmpty);
+      expect(readWindowsSmbiosSystemModel(), wmiModel);
+    },
+    skip: !Platform.isWindows,
+  );
 
   test(
     'reads the same UUID as WMI',
