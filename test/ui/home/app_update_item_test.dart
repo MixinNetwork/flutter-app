@@ -124,6 +124,17 @@ void main() {
       expect(opened, 0);
     });
 
+    testWidgets('offers the download page with an update', (tester) async {
+      await pump(
+        tester,
+        const AppUpdateState(AppUpdateStatus.available),
+        child: button(),
+      );
+      await tester.tap(find.text('Download'));
+      expect(opened, 1);
+      expect(updater.updates, 0);
+    });
+
     testWidgets('keeps the download page after a failure', (tester) async {
       await pump(
         tester,

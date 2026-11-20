@@ -66,8 +66,9 @@ class AppUpdateItem extends ConsumerWidget {
 /// The button of the page that blocks the app when the server finds this
 /// version too old (10006). That page covers the sidebar, so the button
 /// installs the update itself when the updater has one, else it runs
-/// [onNoUpdate], which opens the download page. After a failed install the
-/// download page stays one click away, as a retry can keep failing.
+/// [onNoUpdate], which opens the download page. While an update is offered the
+/// download page stays one click away: an install can keep failing, also one
+/// that fails after the app quit and starts again with the update offered.
 class AppUpdateButton extends ConsumerWidget {
   const AppUpdateButton({required this.onNoUpdate, super.key});
 
@@ -89,7 +90,7 @@ class AppUpdateButton extends ConsumerWidget {
         AppUpdateStatus.available => context.l10n.upgrade,
       }),
     );
-    if (state.status != AppUpdateStatus.failed) return button;
+    if (state.status == AppUpdateStatus.none) return button;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
