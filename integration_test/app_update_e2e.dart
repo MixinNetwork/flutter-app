@@ -19,7 +19,7 @@ import 'package:rhttp/rhttp.dart';
 import 'package:window_manager/window_manager.dart';
 
 // The app of the end-to-end update tests (dist/test_update_macos.sh,
-// .github/workflows/update-windows-test.yml): it shows its version and the
+// .github/workflows/update-test.yml): it shows its version and the
 // sidebar update item, without an account. With MIXIN_UPDATE_E2E_TAP=1 it
 // taps the item when it shows, else a person clicks it. Not shipped.
 Future<void> main() async {
