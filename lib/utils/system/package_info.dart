@@ -37,20 +37,26 @@ Future<PackageInfo> getPackageInfo() async {
   return _packageInfo;
 }
 
-Future<String?> generateUserAgent() async {
+Future<String?> generateUserAgent({
+  Future<ProcessResult> Function(String, List<String>) runProcess = Process.run,
+}) async {
   try {
-    return await _generateUserAgent(await getPackageInfo());
+    return await _generateUserAgent(await getPackageInfo(), runProcess);
   } catch (error, stack) {
     e('generate user agent failed. $error $stack');
     return null;
   }
 }
 
-Future<String> _generateUserAgent(PackageInfo packageInfo) async {
+Future<String> _generateUserAgent(
+  PackageInfo packageInfo,
+  Future<ProcessResult> Function(String, List<String>) runProcess,
+) async {
   String? systemAndVersion;
+  var modelSuffix = '';
   if (Platform.isMacOS) {
     try {
-      final result = await Process.run('sw_vers', []);
+      final result = await runProcess('sw_vers', []);
       if (result.stdout != null) {
         final stdout = result.stdout as String;
         final map = Map.fromEntries(
@@ -70,11 +76,20 @@ Future<String> _generateUserAgent(PackageInfo packageInfo) async {
     } catch (e) {
       w('ws mac get user agent error: $e');
     }
+    try {
+      final result = await runProcess('/usr/sbin/sysctl', ['-n', 'hw.model']);
+      final model = (result.stdout as String).trim();
+      if (result.exitCode == 0 && model.isNotEmpty) {
+        modelSuffix = '; model=$model';
+      }
+    } catch (e) {
+      w('ws mac get hardware model error: $e');
+    }
   }
   systemAndVersion ??=
       '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
   // A localized OS name such as "Windows 11 专业版" is not a valid header
   // value, and the server drops a request that carries one.
-  return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName})'
+  return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName}$modelSuffix)'
       .replaceAll(RegExp(r'[^\x20-\x7E]'), '');
 }
