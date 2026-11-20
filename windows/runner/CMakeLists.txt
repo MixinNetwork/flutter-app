@@ -16,6 +16,7 @@ add_executable(${BINARY_NAME} WIN32
   "Runner.rc"
   "runner.exe.manifest"
   "raw_hwnd_plugin.cpp"
+  "store_update_plugin.cpp"
 )
 
 # Apply the standard set of build settings. This can be removed for applications
@@ -36,7 +37,7 @@ target_compile_definitions(${BINARY_NAME} PRIVATE "NOMINMAX")
 # dependencies here.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter flutter_wrapper_app flutter_wrapper_plugin)
 target_link_libraries(${BINARY_NAME} PRIVATE breakpad_client mixin_logger)
-target_link_libraries(${BINARY_NAME} PRIVATE comctl32 crypt32 dwmapi gdiplus shlwapi uxtheme)
+target_link_libraries(${BINARY_NAME} PRIVATE comctl32 crypt32 dwmapi gdiplus shlwapi uxtheme windowsapp)
 target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
