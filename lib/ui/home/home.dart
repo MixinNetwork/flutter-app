@@ -29,6 +29,7 @@ import '../provider/multi_auth_provider.dart';
 import '../provider/setting_provider.dart';
 import '../provider/slide_category_provider.dart';
 import '../setting/setting_page.dart';
+import 'app_update_item.dart';
 import 'command_palette_wrapper.dart';
 import 'conversation/conversation_hotkey.dart';
 import 'conversation/conversation_page.dart';
@@ -114,11 +115,10 @@ class _RequiredUpdateWidget extends HookWidget {
                   style: TextStyle(color: context.theme.text, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
-                MixinButton(
-                  onTap: () async {
+                AppUpdateButton(
+                  onNoUpdate: () async {
                     await launchUrlString('https://mixin.one/messenger');
                   },
-                  child: Text(context.l10n.upgrade),
                 ),
               ],
             ),

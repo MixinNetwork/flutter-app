@@ -1,0 +1,61 @@
+name: Update Test
+
+# End-to-end tests of the in-app update, one job per platform, with a
+# throwaway update key: no release secret is needed. One path list for all,
+# so a change to the shared update code runs every platform.
+#
+# update-macos: builds 6.3.6 (601) and 6.3.7 (602) with Sparkle, ad-hoc
+# signed, lets 6.3.6 update itself from a local appcast, and checks that 6.3.7
+# runs (dist/test_update_macos.sh).
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/update-test.yml'
+      - 'dist/macos_sign.sh'
+      - 'dist/macos_sparkle.sh'
+      - 'dist/test_update_macos.sh'
+      - 'dist/update_appcast.py'
+      - 'integration_test/app_update_e2e.dart'
+      - 'lib/ui/home/app_update_item.dart'
+      - 'lib/ui/provider/app_update_provider.dart'
+      - 'lib/utils/app_update.dart'
+      - 'lib/widgets/select_item.dart'
+      - 'macos/Runner/MainFlutterWindow.swift'
+  workflow_dispatch:
+    inputs:
+      flutter_version:
+        description: "flutter version. eg 3.19.6"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: ${{ github.event.inputs.flutter_version }}
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  update-macos:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - run: touch .env
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Update 6.3.6 to 6.3.7 through Sparkle
+        run: |
+          # The system LibreSSL cannot make Ed25519 keys.
+          OPENSSL="$(brew --prefix openssl@3)/bin/openssl"
+          [ -x "$OPENSSL" ] || brew install openssl@3
+          "$OPENSSL" version
+          OPENSSL="$OPENSSL" ./dist/test_update_macos.sh
