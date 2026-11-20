@@ -219,16 +219,25 @@ appimage-*)
   exec "$appimage"
   ;;
 tar-*)
-  bundle=$(dirname "$executable")
-  new="$bundle.update" old="$bundle.old"
-  rm -rf "$new" "$old"
+  bundle=$(dirname "$executable") name=$(basename "$executable")
+  # Checked again: a file added since the app started would go with the bundle.
+  only_bundle=yes
+  for entry in "$bundle"/* "$bundle"/.[!.]* "$bundle"/..?*; do
+    [ -e "$entry" ] || continue
+    case $(basename "$entry") in "$name" | data | lib) ;; *) only_bundle=no ;; esac
+  done
+  # The new and the old bundle stay in a new directory beside the bundle, so
+  # the cleanup deletes only what this script made.
+  stage=
   # The release tar is not compressed, though its name ends in .tar.gz.
-  if mkdir "$new" && tar -xf "$file" -C "$new" && [ -x "$new/$(basename "$executable")" ]; then
-    if mv "$bundle" "$old"; then
-      if mv "$new" "$bundle"; then rm -rf "$old"; else mv "$old" "$bundle"; fi
+  if [ $only_bundle = yes ] && stage=$(mktemp -d "$bundle.update.XXXXXX") &&
+    mkdir "$stage/new" && tar -xf "$file" -C "$stage/new" && [ -x "$stage/new/$name" ]; then
+    if mv "$bundle" "$stage/old"; then
+      mv "$stage/new" "$bundle" || mv "$stage/old" "$bundle"
     fi
   fi
-  rm -rf "$new" "$dir"
+  [ -n "$stage" ] && [ -d "$bundle" ] && rm -rf "$stage"
+  rm -rf "$dir"
   exec "$executable"
   ;;
 deb-*)

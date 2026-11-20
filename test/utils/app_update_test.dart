@@ -287,8 +287,56 @@ void main() {
         File(p.join(dir.path, 'started')).readAsStringSync().trim(),
         'old',
       );
-      expect(Directory('$bundle.update').existsSync(), isFalse);
+      expect(
+        dir.listSync().map((e) => p.basename(e.path)),
+        isNot(contains(startsWith('mixin.update'))),
+      );
       expect(archive.parent.existsSync(), isFalse);
+    });
+
+    Future<(String, String)> tarUpdate() async {
+      final executable = p.join(dir.path, 'mixin', 'mixin_desktop');
+      program(executable, 'old');
+      Process.runSync('chmod', ['+x', executable]);
+      final newBundle = p.join(dir.path, 'new');
+      program(p.join(newBundle, 'mixin_desktop'), 'new');
+      Process.runSync('chmod', ['+x', p.join(newBundle, 'mixin_desktop')]);
+      final archive = p.join(dir.path, 'download', 'update.tar');
+      Directory(p.dirname(archive)).createSync();
+      Process.runSync('tar', ['-cf', archive, '-C', newBundle, '.']);
+      return (executable, archive);
+    }
+
+    test('keeps a file added to the bundle after the check', () async {
+      final (executable, archive) = await tarUpdate();
+      final notes = File(p.join(dir.path, 'mixin', 'notes.txt'))
+        ..writeAsStringSync('mine');
+
+      await run([await deadPid(), 'tar-x64', archive, executable, '']);
+      expect(
+        File(p.join(dir.path, 'started')).readAsStringSync().trim(),
+        'old',
+      );
+      expect(notes.readAsStringSync(), 'mine');
+    });
+
+    test('leaves the directories beside the bundle alone', () async {
+      final (executable, archive) = await tarUpdate();
+      final others = [
+        for (final name in ['mixin.update', 'mixin.old'])
+          File(p.join(dir.path, name, 'keep'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync(name),
+      ];
+
+      await run([await deadPid(), 'tar-x64', archive, executable, '']);
+      expect(
+        File(p.join(dir.path, 'started')).readAsStringSync().trim(),
+        'new',
+      );
+      for (final file in others) {
+        expect(file.existsSync(), isTrue, reason: file.path);
+      }
     });
   });
 
