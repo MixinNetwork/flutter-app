@@ -82,6 +82,8 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     if (state.status == AppUpdateStatus.downloading) return;
     try {
       final build = int.parse((await getPackageInfo()).buildNumber);
+      // 0 is the fallback when the build is unknown; every item is newer.
+      if (build <= 0) return;
       final response = await _dio().get<String>(
         // A test appcast; its packages still need the release key.
         Platform.environment['MIXIN_UPDATE_APPCAST_URL'] ?? appcastUrl,
@@ -127,12 +129,17 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
         file: file,
         executable: Platform.resolvedExecutable,
         environment: environment,
+        sha256: item.sha256,
       );
       exit(0);
     } catch (error, stack) {
       e('app update: install ${item.fileName} failed: $error $stack');
-      if (file != null) await file.parent.delete(recursive: true);
       if (mounted) state = const AppUpdateState(AppUpdateStatus.failed);
+      try {
+        await file?.parent.delete(recursive: true);
+      } on FileSystemException catch (error) {
+        w('app update: cannot delete the download: $error');
+      }
     }
   }
 

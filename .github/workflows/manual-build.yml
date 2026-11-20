@@ -124,7 +124,10 @@ jobs:
         run: flutter test
 
       - name: Build APP
-        run: flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN
+        run: |
+          version_str=$(sed -n 's/^version: //p' pubspec.yaml)
+          flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN \
+            --dart-define="APP_VERSION=${version_str%+*}" --dart-define="APP_BUILD_NUMBER=${version_str#*+}"
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 

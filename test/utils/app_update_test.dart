@@ -41,13 +41,29 @@ void main() {
 
     test('detects how the app was installed', () {
       expect(
-        package({'APPIMAGE': '/home/a/Mixin.AppImage'}, '/tmp/.mount/x'),
+        package({
+          'APPIMAGE': '/home/a/Mixin.AppImage',
+          'APPDIR': '/tmp/.mount_Mixin',
+        }, '/tmp/.mount_Mixin/usr/bin/mixin_desktop'),
         'appimage-x64',
       );
       expect(package({}, '/usr/lib/mixin_desktop/mixin_desktop'), 'deb-x64');
       expect(
         package({}, '/home/a/mixin/mixin_desktop', Abi.linuxArm64),
         'tar-arm64',
+      );
+    });
+
+    test('ignores an APPIMAGE inherited from another AppImage app', () {
+      const other = {
+        'APPIMAGE': '/home/a/Other.AppImage',
+        'APPDIR': '/tmp/.mount_Other',
+      };
+      expect(package(other, '/usr/lib/mixin_desktop/mixin_desktop'), 'deb-x64');
+      expect(package(other, '/home/a/mixin/mixin_desktop'), 'tar-x64');
+      expect(
+        package({'APPIMAGE': '/home/a/Mixin.AppImage'}, '/tmp/.mount/x'),
+        'tar-x64',
       );
     });
 
@@ -164,6 +180,35 @@ void main() {
     );
   });
 
+  group('isLinuxBundleDirectory', () {
+    late Directory dir;
+    setUp(() => dir = Directory.systemTemp.createTempSync());
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    String bundle() {
+      final executable = p.join(dir.path, 'mixin_desktop');
+      File(executable).createSync();
+      Directory(p.join(dir.path, 'data')).createSync();
+      Directory(p.join(dir.path, 'lib')).createSync();
+      return executable;
+    }
+
+    test('accepts a directory with only the release bundle', () {
+      expect(isLinuxBundleDirectory(bundle()), isTrue);
+    });
+
+    test('refuses a bundle extracted among other files', () async {
+      final executable = bundle();
+      File(p.join(dir.path, 'my_tax_return.pdf')).createSync();
+
+      expect(isLinuxBundleDirectory(executable), isFalse);
+      expect(
+        await canInstallLinuxUpdate('tar-x64', const {}, executable),
+        isFalse,
+      );
+    });
+  });
+
   group('linuxInstallScript', () {
     late Directory dir;
     setUp(() => dir = Directory.systemTemp.createTempSync());
@@ -246,6 +291,68 @@ void main() {
       expect(archive.parent.existsSync(), isFalse);
     });
   });
+
+  group('linuxInstallScript deb', () {
+    late Directory dir;
+    late File deb;
+    late String fakeBin;
+    setUp(() {
+      dir = Directory.systemTemp.createTempSync();
+      deb = File(p.join(dir.path, 'download', 'update.deb'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('signed deb');
+      // pkexec runs the command as is, and apt-get records the file it got.
+      fakeBin = p.join(dir.path, 'bin');
+      for (final (name, body) in [
+        ('pkexec', r'exec "$@"'),
+        ('apt-get', 'cat "\$3" > "${dir.path}/installed"'),
+      ]) {
+        File(p.join(fakeBin, name))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('#!/bin/sh\n$body\n');
+        Process.runSync('chmod', ['+x', p.join(fakeBin, name)]);
+      }
+    });
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    Future<void> run(String sha256) async {
+      final executable = File(p.join(dir.path, 'mixin_desktop'))
+        ..writeAsStringSync('#!/bin/sh\n');
+      Process.runSync('chmod', ['+x', executable.path]);
+      final result = await Process.run(
+        '/bin/sh',
+        [
+          '-c',
+          linuxInstallScript,
+          'sh',
+          '${(await Process.start('true', [])).pid}',
+          'deb-x64',
+          deb.path,
+          executable.path,
+          '',
+          sha256,
+        ],
+        environment: {'PATH': '$fakeBin:${Platform.environment['PATH']}'},
+      );
+      expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+    }
+
+    test('installs a copy that still has the signed sha256', () async {
+      await run(await sha256File(deb));
+      expect(
+        File(p.join(dir.path, 'installed')).readAsStringSync(),
+        'signed deb',
+      );
+      expect(deb.parent.existsSync(), isFalse);
+    });
+
+    test('does not install a file that changed after the check', () async {
+      final signed = await sha256File(deb);
+      deb.writeAsStringSync('swapped deb');
+      await run(signed);
+      expect(File(p.join(dir.path, 'installed')).existsSync(), isFalse);
+    });
+  }, skip: !Platform.isLinux);
 
   group('createLinuxUpdateFile', () {
     late Directory dir;

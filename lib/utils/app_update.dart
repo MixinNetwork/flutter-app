@@ -27,7 +27,15 @@ String? linuxUpdatePackage({
     _ => null,
   };
   if (arch == null || environment.containsKey('SNAP')) return null;
-  if ((environment['APPIMAGE'] ?? '').isNotEmpty) return 'appimage-$arch';
+  // A child of another AppImage app (a terminal opened from an IDE, say)
+  // inherits its APPIMAGE, so it counts only when this executable runs from
+  // that AppImage's mount.
+  final appDir = environment['APPDIR'] ?? '';
+  if ((environment['APPIMAGE'] ?? '').isNotEmpty &&
+      appDir.isNotEmpty &&
+      p.isWithin(appDir, executable)) {
+    return 'appimage-$arch';
+  }
   if (p.isWithin('/usr/lib', executable)) return 'deb-$arch';
   return 'tar-$arch';
 }
@@ -165,6 +173,9 @@ Future<bool> canInstallLinuxUpdate(
   if (package.startsWith('deb-')) {
     return (await Process.run('sh', ['-c', 'command -v pkexec'])).exitCode == 0;
   }
+  if (package.startsWith('tar-') && !isLinuxBundleDirectory(executable)) {
+    return false;
+  }
   // The AppImage file or the bundle directory is replaced in its parent.
   final parent = package.startsWith('appimage-')
       ? p.dirname(environment['APPIMAGE']!)
@@ -179,12 +190,27 @@ Future<bool> canInstallLinuxUpdate(
   }
 }
 
+/// Whether the directory of [executable] holds only the bundle of the release
+/// tar, so the update can replace the whole directory. A tar that was
+/// extracted into a directory with other files, such as ~/Downloads, does not
+/// update itself, as the swap would delete those files.
+bool isLinuxBundleDirectory(String executable) {
+  final allowed = {p.basename(executable), 'data', 'lib'};
+  try {
+    return Directory(
+      p.dirname(executable),
+    ).listSync().every((e) => allowed.contains(p.basename(e.path)));
+  } on FileSystemException {
+    return false;
+  }
+}
+
 // Waits for the app to exit, installs the package and starts the app again.
-// The arguments are: pid, package, file, executable, APPIMAGE.
+// The arguments are: pid, package, file, executable, APPIMAGE, sha256.
 @visibleForTesting
 const linuxInstallScript = r'''
 while kill -0 "$1" 2>/dev/null; do sleep 0.2; done
-package=$2 file=$3 executable=$4 appimage=$5
+package=$2 file=$3 executable=$4 appimage=$5 sha256=$6
 dir=$(dirname "$file")
 case "$package" in
 appimage-*)
@@ -206,7 +232,11 @@ tar-*)
   exec "$executable"
   ;;
 deb-*)
-  pkexec apt-get install -y "$file"
+  # Root installs a copy in a directory that only root can write, checked
+  # again: the user's own processes can still change the downloaded file.
+  pkexec /bin/sh -c 'd=$(mktemp -d) && cp "$1" "$d/update.deb" &&
+    echo "$2  $d/update.deb" | sha256sum -c --status &&
+    apt-get install -y "$d/update.deb"; rm -rf "$d"' sh "$file" "$sha256"
   rm -rf "$dir"
   exec "$executable"
   ;;
@@ -220,6 +250,7 @@ Future<void> startLinuxUpdateInstall({
   required File file,
   required String executable,
   required Map<String, String> environment,
+  required String sha256,
 }) => Process.start(
   '/bin/sh',
   [
@@ -231,6 +262,7 @@ Future<void> startLinuxUpdateInstall({
     file.path,
     executable,
     environment['APPIMAGE'] ?? '',
+    sha256,
   ],
   mode: ProcessStartMode.detached,
 );
