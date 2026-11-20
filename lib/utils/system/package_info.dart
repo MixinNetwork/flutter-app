@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
 
 import '../logger.dart';
+import 'windows_device_id.dart';
 
 // auto added by .github/workflows/manual-build.yml
 const _kAppVersion = String.fromEnvironment(
@@ -53,7 +55,6 @@ Future<String> _generateUserAgent(
   Future<ProcessResult> Function(String, List<String>) runProcess,
 ) async {
   String? systemAndVersion;
-  var modelSuffix = '';
   if (Platform.isMacOS) {
     try {
       final result = await runProcess('sw_vers', []);
@@ -76,20 +77,80 @@ Future<String> _generateUserAgent(
     } catch (e) {
       w('ws mac get user agent error: $e');
     }
-    try {
-      final result = await runProcess('/usr/sbin/sysctl', ['-n', 'hw.model']);
-      final model = (result.stdout as String).trim();
-      if (result.exitCode == 0 && model.isNotEmpty) {
-        modelSuffix = '; model=$model';
-      }
-    } catch (e) {
-      w('ws mac get hardware model error: $e');
-    }
   }
   systemAndVersion ??=
       '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
+  return formatUserAgent(
+    version: packageInfo.version,
+    system: systemAndVersion,
+    model: await readHardwareModel(runProcess: runProcess),
+    locale: Platform.localeName,
+  );
+}
+
+/// The model sits between the system and the locale, as in the iOS
+/// User-Agent: `Mixin/1.2.3 (Flutter macOS 15.1(24B83); Mac16,10; en_US)`.
+String formatUserAgent({
+  required String version,
+  required String system,
+  required String? model,
+  required String locale,
+}) {
+  final modelPart = model == null ? '' : '; $model';
   // A localized OS name such as "Windows 11 专业版" is not a valid header
   // value, and the server drops a request that carries one.
-  return 'Mixin/${packageInfo.version} (Flutter $systemAndVersion; ${Platform.localeName}$modelSuffix)'
-      .replaceAll(RegExp(r'[^\x20-\x7E]'), '');
+  return 'Mixin/$version (Flutter $system$modelPart; $locale)'.replaceAll(
+    RegExp(r'[^\x20-\x7E]'),
+    '',
+  );
+}
+
+/// Reads the hardware model: `hw.model` on macOS (`Mac16,10`), the SMBIOS
+/// manufacturer and product name on Windows and Linux (`Dell Inc. XPS 13
+/// 9310`), or the device tree model on Linux boards without SMBIOS.
+Future<String?> readHardwareModel({
+  Future<ProcessResult> Function(String, List<String>) runProcess = Process.run,
+  String linuxRoot = '/',
+}) async {
+  try {
+    final String? model;
+    if (Platform.isMacOS) {
+      final result = await runProcess('/usr/sbin/sysctl', ['-n', 'hw.model']);
+      model = result.exitCode == 0 ? result.stdout as String : null;
+    } else if (Platform.isWindows) {
+      model = readWindowsSmbiosSystemModel();
+    } else if (Platform.isLinux) {
+      model = readLinuxHardwareModel(root: linuxRoot);
+    } else {
+      model = null;
+    }
+    return cleanHardwareModel(model);
+  } catch (error) {
+    w('read hardware model failed: $error');
+    return null;
+  }
+}
+
+String? readLinuxHardwareModel({String root = '/'}) {
+  String? read(String path) {
+    final file = File(p.join(root, path));
+    return file.existsSync() ? file.readAsStringSync() : null;
+  }
+
+  final dmi = [
+    read('sys/class/dmi/id/sys_vendor'),
+    read('sys/class/dmi/id/product_name'),
+  ].whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty);
+  if (dmi.isNotEmpty) return dmi.join(' ');
+  return read('proc/device-tree/model');
+}
+
+/// Keeps the model one User-Agent field: `;`, `(` and `)` would split it,
+/// and the device tree model ends with a NUL.
+String? cleanHardwareModel(String? model) {
+  final cleaned = model
+      ?.replaceAll(RegExp(r'[;()\x00-\x1F]'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+  return cleaned == null || cleaned.isEmpty ? null : cleaned;
 }
