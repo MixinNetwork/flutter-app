@@ -250,7 +250,8 @@ tar-*)
   only_bundle() {
     for entry in "$1"/* "$1"/.[!.]* "$1"/..?*; do
       [ -e "$entry" ] || [ -L "$entry" ] || continue
-      case $(basename "$entry") in "$name" | data | lib) ;; *) return 1 ;; esac
+      # Not basename: $(...) drops trailing newlines from the name.
+      case ${entry##*/} in "$name" | data | lib) ;; *) return 1 ;; esac
     done
     return 0
   }

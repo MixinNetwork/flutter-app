@@ -236,8 +236,11 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
       if (!mounted) return true;
       if (count > 0 && state.status == AppUpdateStatus.none) {
         state = const AppUpdateState(AppUpdateStatus.available);
-      } else if (count == 0 && state.status != AppUpdateStatus.none) {
+      } else if (count == 0 &&
+          (state.status == AppUpdateStatus.available ||
+              state.status == AppUpdateStatus.failed)) {
         // Installed elsewhere or withdrawn: a click would fail with no_updates.
+        // Not while installing: this check may have started before the click.
         state = AppUpdateState.none;
       }
     } on PlatformException catch (error) {

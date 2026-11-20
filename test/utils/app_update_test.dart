@@ -373,6 +373,19 @@ void main() {
       expect(notes.readAsStringSync(), 'mine');
     });
 
+    test('keeps a file whose name ends in a newline', () async {
+      final (executable, archive) = await tarUpdate();
+      // basename would drop the newline and take it for lib.
+      final odd = File(p.join(dir.path, 'mixin', 'lib\n'))..createSync();
+
+      await run([await deadPid(), 'tar-x64', archive, executable, '']);
+      expect(
+        File(p.join(dir.path, 'started')).readAsStringSync().trim(),
+        'old',
+      );
+      expect(odd.existsSync(), isTrue);
+    });
+
     test('keeps a dangling symlink in the bundle', () async {
       final (executable, archive) = await tarUpdate();
       final link = Link(p.join(dir.path, 'mixin', 'notes.txt'))

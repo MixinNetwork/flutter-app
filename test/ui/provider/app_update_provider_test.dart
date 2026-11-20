@@ -60,6 +60,8 @@ void main() {
   late PlatformException? countError;
   late Completer<void> install;
   late PlatformException? installError;
+  // A reply that the test completes, for a check still running at a click.
+  Completer<int?>? countReply;
 
   setUp(() {
     calls = [];
@@ -67,11 +69,13 @@ void main() {
     countError = null;
     install = Completer()..complete();
     installError = null;
+    countReply = null;
     messenger.setMockMethodCallHandler(storeUpdateChannel, (call) async {
       calls.add(call.method);
       switch (call.method) {
         case 'storeUpdateCount':
           if (countError != null) throw countError!;
+          if (countReply != null) return countReply!.future;
           return count;
         case 'installStoreUpdates':
           await install.future;
@@ -162,6 +166,26 @@ void main() {
     count = 0;
     await notifier.checkStore();
     expect(notifier.state.status, AppUpdateStatus.none);
+  });
+
+  test('a check that ends during the install keeps the install', () async {
+    install = Completer();
+    final (_, notifier) = await start();
+    final reply = Completer<int?>();
+    countReply = reply;
+    final check = notifier.checkStore();
+    await pumpEventQueue();
+
+    unawaited(notifier.update());
+    await pumpEventQueue();
+    expect(notifier.state.status, AppUpdateStatus.downloading);
+
+    reply.complete(0);
+    await check;
+    expect(notifier.state.status, AppUpdateStatus.downloading);
+    await sendProgress(0.5);
+    expect(notifier.state.progress, 0.5);
+    install.complete();
   });
 
   test('install canceled or failed: retry', () async {
