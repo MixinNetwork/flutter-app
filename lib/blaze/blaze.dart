@@ -124,6 +124,7 @@ class Blaze {
   Timer? _checkTimeoutTimer;
   Timer? _reconnectTimer;
   bool _stoppedForUpgrade = false;
+  bool _confirmingHandshakeRejection = false;
 
   // --- Event Stream ---
   final StreamController<_ConnectionEvent> _eventController =
@@ -239,7 +240,7 @@ class Blaze {
       // Ensure previous resources are released before attempting new connection
       _closeChannelAndSubscription();
 
-      channel = IOWebSocketChannel.connect(
+      final currentChannel = IOWebSocketChannel.connect(
         _host,
         protocols: ['Mixin-Blaze-1'],
         headers: {
@@ -253,6 +254,16 @@ class Blaze {
         customClient: HttpClient()
           ..userAgent = userAgent
           ..setProxy(proxyConfig),
+      );
+      channel = currentChannel;
+      unawaited(
+        currentChannel.ready.catchError((Object error, StackTrace s) {
+          w('ws ready error: $error');
+          if (_stoppedForUpgrade || upgradeGate.isRequired) return;
+          if (_isHandshakeAcceptedError(error)) {
+            unawaited(_confirmHandshakeRejection());
+          }
+        }),
       );
 
       subscription = channel?.stream
@@ -308,6 +319,9 @@ class Blaze {
             },
             onError: (error, s) {
               i('ws error: $error, s: $s');
+              if (_isHandshakeAcceptedError(error)) {
+                unawaited(_confirmHandshakeRejection());
+              }
               i('Triggering ERROR event: WebSocket stream error');
               _eventController.add(_ConnectionEvent.error);
             },
@@ -589,6 +603,26 @@ class Blaze {
       }
       i('Triggering ERROR event: HTTP ping failed');
       _eventController.add(_ConnectionEvent.error);
+    }
+  }
+
+  bool _isHandshakeAcceptedError(Object? error) =>
+      error.toString().contains('HTTP status code: 202');
+
+  Future<void> _confirmHandshakeRejection() async {
+    if (_confirmingHandshakeRejection ||
+        _stoppedForUpgrade ||
+        upgradeGate.isRequired ||
+        _eventController.isClosed) {
+      return;
+    }
+    _confirmingHandshakeRejection = true;
+    try {
+      await client.accountApi.getMe();
+    } catch (e) {
+      w('ws handshake rejection confirm error: $e');
+    } finally {
+      _confirmingHandshakeRejection = false;
     }
   }
 

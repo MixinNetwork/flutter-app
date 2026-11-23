@@ -60,7 +60,8 @@ class AccountServer {
   });
 
   static String? sid;
-  static final _upgradeGate = ApiUpgradeGate();
+  final _upgradeGate = ApiUpgradeGate();
+  var _upgradeHandled = false;
 
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
@@ -194,7 +195,9 @@ class AccountServer {
   ValueStream<bool> get isUpdateRequired => _isUpdateRequired;
 
   void _requireUpgrade() {
-    if (!_upgradeGate.require()) return;
+    _upgradeGate.require();
+    if (_upgradeHandled) return;
+    _upgradeHandled = true;
     _isUpdateRequired.value = true;
     if (_isolateChannel != null) {
       _sendEventToWorkerIsolate(MainIsolateEventType.requireUpgrade);

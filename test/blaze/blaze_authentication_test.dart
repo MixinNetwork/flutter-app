@@ -242,6 +242,93 @@ void main() {
       }
     }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
   });
+
+  test(
+    'Blaze handshake HTTP 202 confirms upgrade over HTTP and stops reconnecting',
+    () async {
+      final database = Database(
+        MixinDatabase(NativeDatabase.memory()),
+        FtsDatabase(NativeDatabase.memory()),
+      );
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      var handshakeAttempts = 0;
+      final serverSubscription = server.listen((request) async {
+        handshakeAttempts++;
+        request.response
+          ..statusCode = HttpStatus.accepted
+          ..headers.contentType = ContentType.json
+          ..write(
+            '{"error":{"status":202,"code":10006,"description":"Update required."}}',
+          );
+        await request.response.close();
+      });
+
+      final upgradeGate = ApiUpgradeGate();
+      final upgradeTriggered = Completer<void>();
+      var upgradeCalls = 0;
+      late Blaze blaze;
+      void onUpgradeRequired() {
+        upgradeGate.require();
+        upgradeCalls++;
+        blaze.stopForUpgrade();
+        if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
+      }
+
+      final adapter = _OldVersionAdapter();
+      final client = Client(
+        accessToken: 'test',
+        httpLogLevel: null,
+        interceptors: [
+          InterceptorsWrapper(
+            onError: (error, handler) {
+              final mixinError = error is MixinApiError ? error.error : null;
+              if (mixinError is MixinError && mixinError.code == oldVersion) {
+                if (upgradeGate.require()) onUpgradeRequired();
+              }
+              handler.next(error);
+            },
+          ),
+        ],
+      );
+      client.dio.httpClientAdapter = adapter;
+      final httpClient = HttpClient();
+
+      addTearDown(() async {
+        blaze.dispose();
+        client.dio.close();
+        await serverSubscription.cancel();
+        await server.close(force: true);
+        httpClient.close(force: true);
+        await database.dispose();
+      });
+
+      await HttpOverrides.runZoned(() async {
+        blaze = Blaze(
+          'user',
+          'session',
+          base64Encode(List.filled(64, 1)),
+          database,
+          client,
+          'test',
+          'test-device',
+          _UnusedAckJob(),
+          _UnusedFloodJob(),
+          loginByPhoneNumber: false,
+          upgradeGate: upgradeGate,
+          onUpgradeRequired: onUpgradeRequired,
+        );
+        await blaze.connect();
+        await upgradeTriggered.future.timeout(const Duration(seconds: 5));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(handshakeAttempts, 1);
+        expect(adapter.meRequests, 1);
+        expect(upgradeGate.isRequired, isTrue);
+        expect(upgradeCalls, 1);
+        expect(blaze.connectedStateStream.value, ConnectedState.disconnected);
+      }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
+    },
+  );
 }
 
 String? _tokenScope(String? authorization) => _tokenClaim(authorization, 'scp');
@@ -371,6 +458,31 @@ class _ConnectedAdapter implements HttpClientAdapter {
           Headers.contentTypeHeader: [Headers.jsonContentType],
         },
       ),
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _OldVersionAdapter implements HttpClientAdapter {
+  int meRequests = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (options.path == '/me') {
+      meRequests++;
+    }
+    return ResponseBody.fromString(
+      '{"error":{"status":202,"code":10006,"description":"Update required."}}',
+      202,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
     );
   }
 
