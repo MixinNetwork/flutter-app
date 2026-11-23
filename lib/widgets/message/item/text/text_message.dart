@@ -83,32 +83,33 @@ class MessageTextWidget extends HookConsumerWidget {
 
     final keywordNotifier = context.read<SearchConversationKeywordNotifier>();
     final localKeyword =
-        useListenableConverter<ValueNotifier<(String?, String)>, String>(
+        useListenableConverter<ValueNotifier<(String?, String)>, String?>(
           keywordNotifier,
           converter: (notifier) {
             final state = notifier.value;
+            if (state.$2.isEmpty) return null;
             if (state.$1 != null && state.$1 != userId) return '';
             return shows(state.$2) ? state.$2 : '';
           },
           keys: [userId, mentionText],
-        ).data ??
-        '';
+        ).data;
     final conversationKeyword =
         ref.watch(conversationProvider.select((value) => value?.keyword)) ?? '';
-    // The keyword this row shows when there is no global keyword.
-    final rowKeyword = conversationKeyword.isNotEmpty
-        ? (shows(conversationKeyword) ? conversationKeyword : '')
-        : localKeyword;
-    // A global keyword hides the other keywords even where it does not match,
-    // so it changes a row only where it shows or hides a match.
+    final fallbackKeyword = shows(conversationKeyword)
+        ? conversationKeyword
+        : '';
+    // An active in-chat search takes precedence over the sidebar query;
+    // otherwise a sidebar query only rebuilds rows where it shows or hides a
+    // match.
     final globalKeyword = ref.watch(
       trimmedKeywordProvider.select((keyword) {
+        if (localKeyword != null) return null;
         if (shows(keyword)) return keyword;
-        if (keyword.isNotEmpty && rowKeyword.isNotEmpty) return '';
+        if (keyword.isNotEmpty && fallbackKeyword.isNotEmpty) return '';
         return null;
       }),
     );
-    final keyword = globalKeyword ?? rowKeyword;
+    final keyword = localKeyword ?? globalKeyword ?? fallbackKeyword;
 
     Widget child = MessageLayout(
       spacing: 6,
