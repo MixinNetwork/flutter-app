@@ -291,6 +291,15 @@ void main() {
       await tester.pump();
       expect(highlighted(), {true});
 
+      localSearch.value = (null, '   ');
+      await tester.pump();
+      expect(highlighted(), {true});
+
+      container.read(keywordProvider.notifier).state = '会议室';
+      localSearch.value = (null, ' 收到 ');
+      await tester.pump();
+      expect(highlighted(), {true});
+
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(minutes: 11));
     },

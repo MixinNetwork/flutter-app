@@ -87,9 +87,10 @@ class MessageTextWidget extends HookConsumerWidget {
           keywordNotifier,
           converter: (notifier) {
             final state = notifier.value;
-            if (state.$2.isEmpty) return null;
+            final local = state.$2.trim();
+            if (local.isEmpty) return null;
             if (state.$1 != null && state.$1 != userId) return '';
-            return shows(state.$2) ? state.$2 : '';
+            return shows(local) ? local : '';
           },
           keys: [userId, mentionText],
         ).data;
