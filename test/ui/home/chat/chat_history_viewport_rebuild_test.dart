@@ -232,58 +232,76 @@ void main() {
     await tester.pump(const Duration(minutes: 11));
   });
 
-  testWidgets('a global keyword hides the chat search keyword', (
-    tester,
-  ) async {
-    tester.view
-      ..physicalSize = const Size(1000, 800)
-      ..devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final messages = buildMessages(30, imagePath: '', withImages: false);
-    final controller = FakeMessageController(messages, initial: 30);
-    await tester.pumpWidget(
-      ChatTimelineFixture(
-        controller: controller,
-        blinkNotifier: BlinkNotifier(tester),
-        database: createFixtureDatabase(),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final element = tester.element(find.byType(ChatHistoryViewport));
-    final container = ProviderScope.containerOf(element);
+  testWidgets(
+    'the chat search keyword takes precedence over a global keyword',
+    (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(1000, 800)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final messages = buildMessages(30, imagePath: '', withImages: false);
+      final controller = FakeMessageController(messages, initial: 30);
+      await tester.pumpWidget(
+        ChatTimelineFixture(
+          controller: controller,
+          blinkNotifier: BlinkNotifier(tester),
+          database: createFixtureDatabase(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final element = tester.element(find.byType(ChatHistoryViewport));
+      final container = ProviderScope.containerOf(element);
 
-    // Whether the rows that say 收到 highlight it.
-    Set<bool> highlighted() => {
-      for (final text in tester.widgetList<CustomText>(
-        find.byWidgetPredicate((w) => w is CustomText && w.text == '收到'),
-      ))
-        text.textMatchers!
-            .whereType<KeyWordTextMatcher>()
-            .single
-            .regExp!
-            .allMatches('收到')
-            .any((match) => match.end > match.start),
-    };
+      // Whether the rows that say 收到 highlight it.
+      Set<bool> highlighted() => {
+        for (final text in tester.widgetList<CustomText>(
+          find.byWidgetPredicate((w) => w is CustomText && w.text == '收到'),
+        ))
+          text.textMatchers!
+              .whereType<KeyWordTextMatcher>()
+              .single
+              .regExp!
+              .allMatches('收到')
+              .any((match) => match.end > match.start),
+      };
 
-    provider.Provider.of<SearchConversationKeywordNotifier>(
-      element,
-      listen: false,
-    ).value = (
-      null,
-      '收到',
-    );
-    await tester.pump();
-    expect(highlighted(), {true});
+      container.read(keywordProvider.notifier).state = 'no match';
+      await tester.pump();
+      expect(highlighted(), {false});
 
-    container.read(keywordProvider.notifier).state = 'no match';
-    await tester.pump();
-    expect(highlighted(), {false});
+      final localSearch =
+          provider.Provider.of<SearchConversationKeywordNotifier>(
+            element,
+            listen: false,
+          )..value = (null, '收到');
+      await tester.pump();
+      expect(highlighted(), {true});
 
-    container.read(keywordProvider.notifier).state = '';
-    await tester.pump();
-    expect(highlighted(), {true});
+      container.read(keywordProvider.notifier).state = '会议室';
+      await tester.pump();
+      expect(highlighted(), {true});
 
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(minutes: 11));
-  });
+      localSearch.value = (null, '');
+      await tester.pump();
+      expect(highlighted(), {false});
+
+      container.read(keywordProvider.notifier).state = '收到';
+      await tester.pump();
+      expect(highlighted(), {true});
+
+      localSearch.value = (null, '   ');
+      await tester.pump();
+      expect(highlighted(), {true});
+
+      container.read(keywordProvider.notifier).state = '会议室';
+      localSearch.value = (null, ' 收到 ');
+      await tester.pump();
+      expect(highlighted(), {true});
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(minutes: 11));
+    },
+  );
 }

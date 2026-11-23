@@ -244,14 +244,11 @@ class SearchList extends HookConsumerWidget {
                     membership: user.membership,
                   ),
                   keyword: keyword,
-                  onTap: () async {
-                    await ConversationFocus.selectUser(
-                      context,
-                      user.userId,
-                      user: user,
-                    );
-                    _clear(context);
-                  },
+                  onTap: () => ConversationFocus.selectUser(
+                    context,
+                    user.userId,
+                    user: user,
+                  ),
                 );
               },
               childCount: type.value == _ShowMoreType.contact
@@ -372,14 +369,10 @@ class SearchList extends HookConsumerWidget {
                           isGroup: conversation.isGroupConversation,
                         ),
                         keyword: keyword,
-                        onTap: () async {
-                          await ConversationFocus.selectConversation(
-                            context,
-                            conversation.conversationId,
-                          );
-
-                          _clear(context);
-                        },
+                        onTap: () => ConversationFocus.selectConversation(
+                          context,
+                          conversation.conversationId,
+                        ),
                       ),
                     );
                   },
@@ -499,7 +492,6 @@ class _SearchMaoUserWidget extends StatelessWidget {
       keyword: keyword,
       onTap: () async {
         if (maoUser.user.userId == context.accountServer.userId) {
-          _clear(context);
           await showUserDialog(context, maoUser.user.userId);
           return;
         }
@@ -508,7 +500,6 @@ class _SearchMaoUserWidget extends StatelessWidget {
           maoUser.user.userId,
           user: maoUser.user,
         );
-        _clear(context);
       },
     );
   }
@@ -793,19 +784,16 @@ class _SearchHeader extends StatelessWidget {
 
 enum _ShowMoreType { contact, conversation, message }
 
-Future Function() _searchMessageItemOnTap(
+Future<void> Function() _searchMessageItemOnTap(
   BuildContext context,
   SearchMessageDetailItem message,
-) => () async {
-  await ConversationFocus.selectConversation(
-    context,
-    message.conversationId,
-    initIndexMessageId: message.messageId,
-    keyword: context.providerContainer.read(trimmedKeywordProvider),
-  );
-
-  _clear(context);
-};
+) =>
+    () => ConversationFocus.selectConversation(
+      context,
+      message.conversationId,
+      initIndexMessageId: message.messageId,
+      keyword: context.providerContainer.read(trimmedKeywordProvider),
+    );
 
 class SearchMessageItem extends HookConsumerWidget {
   const SearchMessageItem({
