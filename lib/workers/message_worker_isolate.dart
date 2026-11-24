@@ -192,10 +192,13 @@ class _MessageProcessRunner {
       interceptors: [
         InterceptorsWrapper(
           onError: (e, handler) async {
-            _sendEventToMainIsolate(
-              WorkerIsolateEventType.onApiRequestedError,
-              e,
-            );
+            final sanitized = sanitizeWorkerApiErrorForSendPort(e);
+            if (sanitized != null) {
+              _sendEventToMainIsolate(
+                WorkerIsolateEventType.onApiRequestedError,
+                sanitized,
+              );
+            }
             handler.next(e);
           },
         ),
@@ -463,4 +466,35 @@ class _MessageProcessRunner {
     jobSubscribers.forEach((subscription) => subscription.cancel());
     _deviceTransfer?.dispose();
   }
+}
+
+@visibleForTesting
+MixinApiError? sanitizeWorkerApiErrorForSendPort(DioException e) {
+  if (e is! MixinApiError) return null;
+  final error = e.error;
+  final response = e.response;
+  if (error is! MixinError || response == null) return null;
+  final authorization = e.requestOptions.headers['Authorization'];
+  final requestTime = e.requestOptions.extra[kRequestTimeStampKey];
+  final serverTime = response.headers.value('x-server-time');
+  final requestOptions = RequestOptions(
+    path: e.requestOptions.path,
+    headers: {
+      'Authorization': ?authorization,
+    },
+    extra: {
+      kRequestTimeStampKey: ?requestTime,
+    },
+  );
+  return MixinApiError(
+    requestOptions: requestOptions,
+    response: Response<dynamic>(
+      requestOptions: requestOptions,
+      statusCode: response.statusCode,
+      headers: Headers.fromMap({
+        if (serverTime != null) 'x-server-time': [serverTime],
+      }),
+    ),
+    error: error,
+  );
 }
