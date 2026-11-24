@@ -19,14 +19,14 @@ class ClampingCustomScrollView extends CustomScrollView {
     super.physics,
     super.shrinkWrap,
     super.center,
-    double anchor = 0.0,
+    this._anchor = 0.0,
     super.scrollCacheExtent,
     this.scrollOffsetCorrection,
     this.suppressAutoBottomTracking,
     super.slivers,
     super.semanticChildCount,
     super.dragStartBehavior,
-  }) : _anchor = anchor;
+  });
 
   // [CustomScrollView] enforces constraints on [CustomScrollView.anchor], so
   // we need our own version.

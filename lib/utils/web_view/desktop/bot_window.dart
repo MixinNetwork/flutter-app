@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../../account/account_server.dart';
 import '../../../app.dart' show rootRouteObserver;
@@ -24,6 +23,7 @@ import '../../../widgets/global_image_cache.dart';
 import '../../../widgets/message/item/action_card/action_card_data.dart';
 import '../../extension/extension.dart';
 import '../../logger.dart';
+import '../../system/main_window.dart' as desktop;
 import '../../uri_utils.dart';
 
 /// Talks to the runner's native composer (BotWindowComposer on each platform).
@@ -38,10 +38,9 @@ class BotWindow {
     required this.app,
     required this.appCardData,
     required this.conversationId,
-    required String themeKey,
-    required AccountServer? accountServer,
-  }) : _themeKey = themeKey,
-       _accountServer = accountServer;
+    required this._themeKey,
+    required this._accountServer,
+  });
 
   static final _windows = <int, BotWindow>{};
 
@@ -216,9 +215,8 @@ class BotWindow {
     if (brightness == _brightness) return;
     _brightness = brightness;
     try {
-      // WebKitGTK follows the process-wide GTK dark theme preference, which
-      // the main window sets with windowManager.setBrightness; the plugin
-      // throws there.
+      // WebKitGTK follows the GTK dark theme preference set by the app.
+      // The webview plugin's brightness API is unavailable on Linux.
       if (defaultTargetPlatform != TargetPlatform.linux) {
         await webview.setBrightness(brightness);
       }
@@ -339,13 +337,15 @@ class BotWindow {
   ) async {
     final accountServer = _accountServer;
     if (accountServer == null) return null;
-    if (body case [
-      final String appId,
-      final reloadPublicKey,
-      final String method,
-      final String path,
-      final content,
-    ] when appId == app?.appId) {
+    if (body
+        case [
+          final String appId,
+          final reloadPublicKey,
+          final String method,
+          final String path,
+          final content,
+        ]
+        when appId == app?.appId) {
       return _sign(
         accountServer,
         url,
@@ -483,8 +483,8 @@ class BotWindow {
   /// act on the account. Returns the main window's navigator context.
   Future<BuildContext?> showMainWindow() async {
     await hidePopup();
-    await windowManager.show();
-    await windowManager.focus();
+    desktop.showMainWindow();
+    desktop.mainWindow?.focus();
     return rootRouteObserver.navigator?.context;
   }
 

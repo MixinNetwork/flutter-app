@@ -9,10 +9,9 @@ import 'message_jump.dart';
 @visibleForTesting
 class ChatSendOutcome {
   const ChatSendOutcome({
-    required Future<void> Function() jumpToLatest,
-    required VoidCallback clearQuote,
-  }) : _jumpToLatest = jumpToLatest,
-       _clearQuote = clearQuote;
+    required this._jumpToLatest,
+    required this._clearQuote,
+  });
 
   final Future<void> Function() _jumpToLatest;
   final VoidCallback _clearQuote;

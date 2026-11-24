@@ -16,12 +16,11 @@ const _kGlobalImageCacheMaxSizeBytes = 1024 * 1024 * 1024;
 const _kDefaultImageCacheMaxAge = Duration(days: 7);
 const _kCacheEntryFileExtension = '.image';
 
-typedef ImageCacheFetcher =
-    Future<http.StreamedResponse> Function(
-      Uri uri,
-      ProxyConfig? proxyConfig,
-      Map<String, String> headers,
-    );
+typedef ImageCacheFetcher = Future<http.StreamedResponse> Function(
+  Uri uri,
+  ProxyConfig? proxyConfig,
+  Map<String, String> headers,
+);
 
 /// Global disk cache for visual remote images.
 ///

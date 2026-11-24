@@ -323,16 +323,19 @@ class UserDaoManager {
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
 }
 
-typedef FuzzySearchUser$firstFilter =
-    Expression<bool> Function(Users users, Conversations conversations);
-typedef FuzzySearchUser$lastFilter =
-    Expression<bool> Function(Users users, Conversations conversations);
-typedef FuzzySearchUserInCircle$filter =
-    Expression<bool> Function(
-      Users users,
-      Conversations conversations,
-      CircleConversations circleConversation,
-    );
+typedef FuzzySearchUser$firstFilter = Expression<bool> Function(
+  Users users,
+  Conversations conversations,
+);
+typedef FuzzySearchUser$lastFilter = Expression<bool> Function(
+  Users users,
+  Conversations conversations,
+);
+typedef FuzzySearchUserInCircle$filter = Expression<bool> Function(
+  Users users,
+  Conversations conversations,
+  CircleConversations circleConversation,
+);
 
 class MentionUser {
   final String userId;

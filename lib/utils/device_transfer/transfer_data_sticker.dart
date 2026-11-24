@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import '../../db/mixin_database.dart' as db;
 
 part 'transfer_data_sticker.g.dart';

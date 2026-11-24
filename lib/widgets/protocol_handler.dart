@@ -7,11 +7,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:protocol_handler/protocol_handler.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import '../utils/logger.dart';
+import '../utils/system/main_window.dart';
 import '../utils/uri_utils.dart';
 import 'auth.dart' show appLocked;
 
@@ -82,7 +82,7 @@ class _LinuxAppProtocolHandler extends HookConsumerWidget {
     useEffect(() {
       final object = _MixinDbusObject(
         open: (url) {
-          windowManager.show();
+          showMainWindow();
           bringWindowToFront();
           if (url != null) {
             openExternalUri(context, url);
@@ -140,7 +140,7 @@ class _ProtocolHandler extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     useProtocol((url) {
-      windowManager.show();
+      showMainWindow();
       openExternalUri(context, url);
     });
     return child;

@@ -51,8 +51,9 @@ extension ContextMenuPortalEntrySender on BuildContext {
   void closeMenu() => read<ValueNotifier<Offset?>?>()?.value = null;
 }
 
-typedef CustomPopupMenuItemBuilder<T> =
-    List<CustomPopupMenuItem<T>> Function(BuildContext context);
+typedef CustomPopupMenuItemBuilder<T> = List<CustomPopupMenuItem<T>> Function(
+  BuildContext context,
+);
 
 class CustomPopupMenuButton<T> extends HookConsumerWidget {
   const CustomPopupMenuButton({

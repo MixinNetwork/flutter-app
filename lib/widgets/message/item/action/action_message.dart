@@ -191,10 +191,9 @@ class RenderActionButtonLayout extends RenderBox
         ContainerRenderObjectMixin<RenderBox, _ParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _ParentData> {
   RenderActionButtonLayout({
-    required double horizontalSpacing,
-    required double verticalSpacing,
-  }) : _horizontalSpacing = horizontalSpacing,
-       _verticalSpacing = verticalSpacing;
+    required this._horizontalSpacing,
+    required this._verticalSpacing,
+  });
 
   double get horizontalSpacing => _horizontalSpacing;
   double _horizontalSpacing;

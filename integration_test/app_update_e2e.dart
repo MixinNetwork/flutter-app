@@ -8,6 +8,7 @@ import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/app_update_item.dart';
 import 'package:flutter_app/ui/provider/app_update_provider.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
+import 'package:flutter_app/utils/system/main_window.dart';
 import 'package:flutter_app/utils/system/package_info.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'
@@ -49,17 +50,13 @@ Future<void> main() async {
       ),
     ),
   );
-  // The runner keeps the window hidden until the app shows it, and a hidden
-  // app gets no frames to tap in. After runApp, as in lib/main.dart: the
-  // window is ready only once Flutter draws.
-  await windowManager.ensureInitialized();
-  await windowManager.waitUntilReadyToShow(
-    const WindowOptions(size: Size(480, 320)),
-    () async {
-      await windowManager.show();
-      await windowManager.focus();
-    },
-  );
+  final window = await ensureMainWindow();
+  if (window == null) return;
+  restoreWindowForStartup(window);
+  window
+    ..setSize(const Size(480, 320).toNative(), false)
+    ..show()
+    ..focus();
 }
 
 class _UpdatePage extends ConsumerStatefulWidget {

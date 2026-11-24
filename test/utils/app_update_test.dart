@@ -626,10 +626,8 @@ void main() {
       expect(
         windowsInstallScript(
           pid: 4242,
-          installer:
-              r"C:\Users\O'Brien Li\AppData\Local\Temp\.mixin_update_1\update.exe",
-          executable:
-              r"C:\Users\O'Brien Li\AppData\Local\Programs\Mixin\mixin_desktop.exe",
+          installer: r"C:\Users\O'Brien Li\AppData\Local\Temp\.mixin_update_1\update.exe",
+          executable: r"C:\Users\O'Brien Li\AppData\Local\Programs\Mixin\mixin_desktop.exe",
         ),
         r'''
 $installer = 'C:\Users\O''Brien Li\AppData\Local\Temp\.mixin_update_1\update.exe'

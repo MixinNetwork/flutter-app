@@ -133,13 +133,10 @@ class ConversationStateNotifier
     extends DistinctStateNotifier<ConversationState?>
     with SubscriberMixin {
   ConversationStateNotifier({
-    required AccountServer accountServer,
-    required MajorNavigationNotifier majorNavigationNotifier,
-    required ChatNavigationIntentNotifier chatNavigationIntentNotifier,
-  }) : _majorNavigationNotifier = majorNavigationNotifier,
-       _chatNavigationIntentNotifier = chatNavigationIntentNotifier,
-       _accountServer = accountServer,
-       super(null) {
+    required this._accountServer,
+    required this._majorNavigationNotifier,
+    required this._chatNavigationIntentNotifier,
+  }) : super(null) {
     addSubscription(
       stream
           .map((event) => event?.conversationId)

@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_app/ui/home/notifier/blink_notifier.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/utils/system/linux_accessibility.dart';
+import 'package:flutter_app/utils/system/main_window.dart';
 import 'package:flutter_app/utils/system/system_fonts.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,14 +52,13 @@ void main() {
     if (Platform.isLinux) await watchLinuxAccessibility();
     // The macOS runner starts with a hidden window, and a hidden window gets
     // no frames. The app's main() shows it; this test does not run main().
-    await windowManager.ensureInitialized();
-    await windowManager.waitUntilReadyToShow(
-      const WindowOptions(size: Size(1000, 800)),
-      () async {
-        await windowManager.show();
-        await windowManager.focus();
-      },
-    );
+    final window = await ensureMainWindow();
+    if (window == null) return;
+    restoreWindowForStartup(window);
+    window
+      ..setSize(const Size(1000, 800).toNative(), false)
+      ..show()
+      ..focus();
   });
 
   // TRACE=true records a timeline with one event per widget build instead of

@@ -8,10 +8,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:win_toast/win_toast.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../constants/resources.dart';
 import 'logger.dart';
+import 'system/main_window.dart';
 
 class Notification {
   Notification({
@@ -220,7 +220,7 @@ class _WindowsNotificationManager extends _NotificationManager {
     if (uri == null) {
       return;
     }
-    windowManager.show(inactive: true);
+    mainWindow?.showInactive();
     onNotificationSelected(uri);
   }
 

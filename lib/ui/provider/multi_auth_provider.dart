@@ -47,7 +47,7 @@ class AuthState extends Equatable {
 }
 
 class MultiAuthState extends Equatable {
-  const MultiAuthState({Set<AuthState> auths = const {}}) : _auths = auths;
+  const MultiAuthState({this._auths = const {}});
 
   factory MultiAuthState.fromMap(Map<String, dynamic> map) {
     final list = map['auths'] as Iterable<dynamic>?;

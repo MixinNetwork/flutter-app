@@ -391,27 +391,24 @@ class SnapshotItem {
   }
 }
 
-typedef SnapshotItems$where =
-    Expression<bool> Function(
-      Snapshots snapshot,
-      Users opponent,
-      Assets asset,
-      Chains chain,
-      Fiats fiat,
-    );
-typedef SnapshotItems$order =
-    OrderBy Function(
-      Snapshots snapshot,
-      Users opponent,
-      Assets asset,
-      Chains chain,
-      Fiats fiat,
-    );
-typedef SnapshotItems$limit =
-    Limit Function(
-      Snapshots snapshot,
-      Users opponent,
-      Assets asset,
-      Chains chain,
-      Fiats fiat,
-    );
+typedef SnapshotItems$where = Expression<bool> Function(
+  Snapshots snapshot,
+  Users opponent,
+  Assets asset,
+  Chains chain,
+  Fiats fiat,
+);
+typedef SnapshotItems$order = OrderBy Function(
+  Snapshots snapshot,
+  Users opponent,
+  Assets asset,
+  Chains chain,
+  Fiats fiat,
+);
+typedef SnapshotItems$limit = Limit Function(
+  Snapshots snapshot,
+  Users opponent,
+  Assets asset,
+  Chains chain,
+  Fiats fiat,
+);

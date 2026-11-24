@@ -9,12 +9,10 @@ const kStickerReadModelThrottleDuration = Duration(seconds: 3);
 
 class StickerReadModel {
   StickerReadModel({
-    required StickerDao stickerDao,
-    required StickerAlbumDao stickerAlbumDao,
+    required this._stickerDao,
+    required this._stickerAlbumDao,
     DataBaseEventBus? eventBus,
-  }) : _stickerDao = stickerDao,
-       _stickerAlbumDao = stickerAlbumDao,
-       _eventBus = eventBus ?? DataBaseEventBus.instance;
+  }) : _eventBus = eventBus ?? DataBaseEventBus.instance;
 
   final StickerDao _stickerDao;
   final StickerAlbumDao _stickerAlbumDao;

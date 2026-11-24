@@ -10,12 +10,10 @@ import 'chat_scroll_coordinator.dart';
 
 class ChatTimelineLocation {
   ChatTimelineLocation({
-    required BlinkNotifier blinkNotifier,
-    required ChatScrollCoordinator scrollCoordinator,
-    required MessageController messageController,
-  }) : _blinkNotifier = blinkNotifier,
-       _scrollCoordinator = scrollCoordinator,
-       _messageController = messageController;
+    required this._blinkNotifier,
+    required this._scrollCoordinator,
+    required this._messageController,
+  });
 
   final BlinkNotifier _blinkNotifier;
   final ChatScrollCoordinator _scrollCoordinator;

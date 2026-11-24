@@ -19472,50 +19472,48 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   ]);
 }
 
-typedef $ConversationsCreateCompanionBuilder =
-    ConversationsCompanion Function({
-      required String conversationId,
-      Value<String?> ownerId,
-      Value<ConversationCategory?> category,
-      Value<String?> name,
-      Value<String?> iconUrl,
-      Value<String?> announcement,
-      Value<String?> codeUrl,
-      Value<String?> payType,
-      required DateTime createdAt,
-      Value<DateTime?> pinTime,
-      Value<String?> lastMessageId,
-      Value<DateTime?> lastMessageCreatedAt,
-      Value<String?> lastReadMessageId,
-      Value<int?> unseenMessageCount,
-      required ConversationStatus status,
-      Value<String?> draft,
-      Value<DateTime?> muteUntil,
-      Value<int?> expireIn,
-      Value<int> rowid,
-    });
-typedef $ConversationsUpdateCompanionBuilder =
-    ConversationsCompanion Function({
-      Value<String> conversationId,
-      Value<String?> ownerId,
-      Value<ConversationCategory?> category,
-      Value<String?> name,
-      Value<String?> iconUrl,
-      Value<String?> announcement,
-      Value<String?> codeUrl,
-      Value<String?> payType,
-      Value<DateTime> createdAt,
-      Value<DateTime?> pinTime,
-      Value<String?> lastMessageId,
-      Value<DateTime?> lastMessageCreatedAt,
-      Value<String?> lastReadMessageId,
-      Value<int?> unseenMessageCount,
-      Value<ConversationStatus> status,
-      Value<String?> draft,
-      Value<DateTime?> muteUntil,
-      Value<int?> expireIn,
-      Value<int> rowid,
-    });
+typedef $ConversationsCreateCompanionBuilder = ConversationsCompanion Function({
+  required String conversationId,
+  Value<String?> ownerId,
+  Value<ConversationCategory?> category,
+  Value<String?> name,
+  Value<String?> iconUrl,
+  Value<String?> announcement,
+  Value<String?> codeUrl,
+  Value<String?> payType,
+  required DateTime createdAt,
+  Value<DateTime?> pinTime,
+  Value<String?> lastMessageId,
+  Value<DateTime?> lastMessageCreatedAt,
+  Value<String?> lastReadMessageId,
+  Value<int?> unseenMessageCount,
+  required ConversationStatus status,
+  Value<String?> draft,
+  Value<DateTime?> muteUntil,
+  Value<int?> expireIn,
+  Value<int> rowid,
+});
+typedef $ConversationsUpdateCompanionBuilder = ConversationsCompanion Function({
+  Value<String> conversationId,
+  Value<String?> ownerId,
+  Value<ConversationCategory?> category,
+  Value<String?> name,
+  Value<String?> iconUrl,
+  Value<String?> announcement,
+  Value<String?> codeUrl,
+  Value<String?> payType,
+  Value<DateTime> createdAt,
+  Value<DateTime?> pinTime,
+  Value<String?> lastMessageId,
+  Value<DateTime?> lastMessageCreatedAt,
+  Value<String?> lastReadMessageId,
+  Value<int?> unseenMessageCount,
+  Value<ConversationStatus> status,
+  Value<String?> draft,
+  Value<DateTime?> muteUntil,
+  Value<int?> expireIn,
+  Value<int> rowid,
+});
 
 class $ConversationsFilterComposer
     extends Composer<_$MixinDatabase, Conversations> {
@@ -19952,76 +19950,74 @@ typedef $ConversationsProcessedTableManager =
       Conversation,
       PrefetchHooks Function()
     >;
-typedef $MessagesCreateCompanionBuilder =
-    MessagesCompanion Function({
-      required String messageId,
-      required String conversationId,
-      required String userId,
-      required String category,
-      Value<String?> content,
-      Value<String?> mediaUrl,
-      Value<String?> mediaMimeType,
-      Value<int?> mediaSize,
-      Value<String?> mediaDuration,
-      Value<int?> mediaWidth,
-      Value<int?> mediaHeight,
-      Value<String?> mediaHash,
-      Value<String?> thumbImage,
-      Value<String?> mediaKey,
-      Value<String?> mediaDigest,
-      Value<MediaStatus?> mediaStatus,
-      required MessageStatus status,
-      required DateTime createdAt,
-      Value<String?> action,
-      Value<String?> participantId,
-      Value<String?> snapshotId,
-      Value<String?> hyperlink,
-      Value<String?> name,
-      Value<String?> albumId,
-      Value<String?> stickerId,
-      Value<String?> sharedUserId,
-      Value<String?> mediaWaveform,
-      Value<String?> quoteMessageId,
-      Value<String?> quoteContent,
-      Value<String?> thumbUrl,
-      Value<String?> caption,
-      Value<int> rowid,
-    });
-typedef $MessagesUpdateCompanionBuilder =
-    MessagesCompanion Function({
-      Value<String> messageId,
-      Value<String> conversationId,
-      Value<String> userId,
-      Value<String> category,
-      Value<String?> content,
-      Value<String?> mediaUrl,
-      Value<String?> mediaMimeType,
-      Value<int?> mediaSize,
-      Value<String?> mediaDuration,
-      Value<int?> mediaWidth,
-      Value<int?> mediaHeight,
-      Value<String?> mediaHash,
-      Value<String?> thumbImage,
-      Value<String?> mediaKey,
-      Value<String?> mediaDigest,
-      Value<MediaStatus?> mediaStatus,
-      Value<MessageStatus> status,
-      Value<DateTime> createdAt,
-      Value<String?> action,
-      Value<String?> participantId,
-      Value<String?> snapshotId,
-      Value<String?> hyperlink,
-      Value<String?> name,
-      Value<String?> albumId,
-      Value<String?> stickerId,
-      Value<String?> sharedUserId,
-      Value<String?> mediaWaveform,
-      Value<String?> quoteMessageId,
-      Value<String?> quoteContent,
-      Value<String?> thumbUrl,
-      Value<String?> caption,
-      Value<int> rowid,
-    });
+typedef $MessagesCreateCompanionBuilder = MessagesCompanion Function({
+  required String messageId,
+  required String conversationId,
+  required String userId,
+  required String category,
+  Value<String?> content,
+  Value<String?> mediaUrl,
+  Value<String?> mediaMimeType,
+  Value<int?> mediaSize,
+  Value<String?> mediaDuration,
+  Value<int?> mediaWidth,
+  Value<int?> mediaHeight,
+  Value<String?> mediaHash,
+  Value<String?> thumbImage,
+  Value<String?> mediaKey,
+  Value<String?> mediaDigest,
+  Value<MediaStatus?> mediaStatus,
+  required MessageStatus status,
+  required DateTime createdAt,
+  Value<String?> action,
+  Value<String?> participantId,
+  Value<String?> snapshotId,
+  Value<String?> hyperlink,
+  Value<String?> name,
+  Value<String?> albumId,
+  Value<String?> stickerId,
+  Value<String?> sharedUserId,
+  Value<String?> mediaWaveform,
+  Value<String?> quoteMessageId,
+  Value<String?> quoteContent,
+  Value<String?> thumbUrl,
+  Value<String?> caption,
+  Value<int> rowid,
+});
+typedef $MessagesUpdateCompanionBuilder = MessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<String> category,
+  Value<String?> content,
+  Value<String?> mediaUrl,
+  Value<String?> mediaMimeType,
+  Value<int?> mediaSize,
+  Value<String?> mediaDuration,
+  Value<int?> mediaWidth,
+  Value<int?> mediaHeight,
+  Value<String?> mediaHash,
+  Value<String?> thumbImage,
+  Value<String?> mediaKey,
+  Value<String?> mediaDigest,
+  Value<MediaStatus?> mediaStatus,
+  Value<MessageStatus> status,
+  Value<DateTime> createdAt,
+  Value<String?> action,
+  Value<String?> participantId,
+  Value<String?> snapshotId,
+  Value<String?> hyperlink,
+  Value<String?> name,
+  Value<String?> albumId,
+  Value<String?> stickerId,
+  Value<String?> sharedUserId,
+  Value<String?> mediaWaveform,
+  Value<String?> quoteMessageId,
+  Value<String?> quoteContent,
+  Value<String?> thumbUrl,
+  Value<String?> caption,
+  Value<int> rowid,
+});
 
 class $MessagesFilterComposer extends Composer<_$MixinDatabase, Messages> {
   $MessagesFilterComposer({
@@ -20678,48 +20674,46 @@ typedef $MessagesProcessedTableManager =
       Message,
       PrefetchHooks Function()
     >;
-typedef $UsersCreateCompanionBuilder =
-    UsersCompanion Function({
-      required String userId,
-      required String identityNumber,
-      Value<UserRelationship?> relationship,
-      Value<Membership?> membership,
-      Value<String?> fullName,
-      Value<String?> avatarUrl,
-      Value<String?> phone,
-      Value<bool?> isVerified,
-      Value<DateTime?> createdAt,
-      Value<DateTime?> muteUntil,
-      Value<int?> hasPin,
-      Value<String?> appId,
-      Value<String?> biography,
-      Value<int?> isScam,
-      Value<String?> codeUrl,
-      Value<String?> codeId,
-      Value<bool?> isDeactivated,
-      Value<int> rowid,
-    });
-typedef $UsersUpdateCompanionBuilder =
-    UsersCompanion Function({
-      Value<String> userId,
-      Value<String> identityNumber,
-      Value<UserRelationship?> relationship,
-      Value<Membership?> membership,
-      Value<String?> fullName,
-      Value<String?> avatarUrl,
-      Value<String?> phone,
-      Value<bool?> isVerified,
-      Value<DateTime?> createdAt,
-      Value<DateTime?> muteUntil,
-      Value<int?> hasPin,
-      Value<String?> appId,
-      Value<String?> biography,
-      Value<int?> isScam,
-      Value<String?> codeUrl,
-      Value<String?> codeId,
-      Value<bool?> isDeactivated,
-      Value<int> rowid,
-    });
+typedef $UsersCreateCompanionBuilder = UsersCompanion Function({
+  required String userId,
+  required String identityNumber,
+  Value<UserRelationship?> relationship,
+  Value<Membership?> membership,
+  Value<String?> fullName,
+  Value<String?> avatarUrl,
+  Value<String?> phone,
+  Value<bool?> isVerified,
+  Value<DateTime?> createdAt,
+  Value<DateTime?> muteUntil,
+  Value<int?> hasPin,
+  Value<String?> appId,
+  Value<String?> biography,
+  Value<int?> isScam,
+  Value<String?> codeUrl,
+  Value<String?> codeId,
+  Value<bool?> isDeactivated,
+  Value<int> rowid,
+});
+typedef $UsersUpdateCompanionBuilder = UsersCompanion Function({
+  Value<String> userId,
+  Value<String> identityNumber,
+  Value<UserRelationship?> relationship,
+  Value<Membership?> membership,
+  Value<String?> fullName,
+  Value<String?> avatarUrl,
+  Value<String?> phone,
+  Value<bool?> isVerified,
+  Value<DateTime?> createdAt,
+  Value<DateTime?> muteUntil,
+  Value<int?> hasPin,
+  Value<String?> appId,
+  Value<String?> biography,
+  Value<int?> isScam,
+  Value<String?> codeUrl,
+  Value<String?> codeId,
+  Value<bool?> isDeactivated,
+  Value<int> rowid,
+});
 
 class $UsersFilterComposer extends Composer<_$MixinDatabase, Users> {
   $UsersFilterComposer({
@@ -21118,22 +21112,20 @@ typedef $UsersProcessedTableManager =
       User,
       PrefetchHooks Function()
     >;
-typedef $ParticipantsCreateCompanionBuilder =
-    ParticipantsCompanion Function({
-      required String conversationId,
-      required String userId,
-      Value<ParticipantRole?> role,
-      required DateTime createdAt,
-      Value<int> rowid,
-    });
-typedef $ParticipantsUpdateCompanionBuilder =
-    ParticipantsCompanion Function({
-      Value<String> conversationId,
-      Value<String> userId,
-      Value<ParticipantRole?> role,
-      Value<DateTime> createdAt,
-      Value<int> rowid,
-    });
+typedef $ParticipantsCreateCompanionBuilder = ParticipantsCompanion Function({
+  required String conversationId,
+  required String userId,
+  Value<ParticipantRole?> role,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $ParticipantsUpdateCompanionBuilder = ParticipantsCompanion Function({
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<ParticipantRole?> role,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
 
 class $ParticipantsFilterComposer
     extends Composer<_$MixinDatabase, Participants> {
@@ -21309,44 +21301,42 @@ typedef $ParticipantsProcessedTableManager =
       Participant,
       PrefetchHooks Function()
     >;
-typedef $SnapshotsCreateCompanionBuilder =
-    SnapshotsCompanion Function({
-      required String snapshotId,
-      Value<String?> traceId,
-      required String type,
-      required String assetId,
-      required String amount,
-      required DateTime createdAt,
-      Value<String?> opponentId,
-      Value<String?> transactionHash,
-      Value<String?> sender,
-      Value<String?> receiver,
-      Value<String?> memo,
-      Value<int?> confirmations,
-      Value<String?> snapshotHash,
-      Value<String?> openingBalance,
-      Value<String?> closingBalance,
-      Value<int> rowid,
-    });
-typedef $SnapshotsUpdateCompanionBuilder =
-    SnapshotsCompanion Function({
-      Value<String> snapshotId,
-      Value<String?> traceId,
-      Value<String> type,
-      Value<String> assetId,
-      Value<String> amount,
-      Value<DateTime> createdAt,
-      Value<String?> opponentId,
-      Value<String?> transactionHash,
-      Value<String?> sender,
-      Value<String?> receiver,
-      Value<String?> memo,
-      Value<int?> confirmations,
-      Value<String?> snapshotHash,
-      Value<String?> openingBalance,
-      Value<String?> closingBalance,
-      Value<int> rowid,
-    });
+typedef $SnapshotsCreateCompanionBuilder = SnapshotsCompanion Function({
+  required String snapshotId,
+  Value<String?> traceId,
+  required String type,
+  required String assetId,
+  required String amount,
+  required DateTime createdAt,
+  Value<String?> opponentId,
+  Value<String?> transactionHash,
+  Value<String?> sender,
+  Value<String?> receiver,
+  Value<String?> memo,
+  Value<int?> confirmations,
+  Value<String?> snapshotHash,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<int> rowid,
+});
+typedef $SnapshotsUpdateCompanionBuilder = SnapshotsCompanion Function({
+  Value<String> snapshotId,
+  Value<String?> traceId,
+  Value<String> type,
+  Value<String> assetId,
+  Value<String> amount,
+  Value<DateTime> createdAt,
+  Value<String?> opponentId,
+  Value<String?> transactionHash,
+  Value<String?> sender,
+  Value<String?> receiver,
+  Value<String?> memo,
+  Value<int?> confirmations,
+  Value<String?> snapshotHash,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<int> rowid,
+});
 
 class $SnapshotsFilterComposer extends Composer<_$MixinDatabase, Snapshots> {
   $SnapshotsFilterComposer({
@@ -21715,46 +21705,44 @@ typedef $SnapshotsProcessedTableManager =
       Snapshot,
       PrefetchHooks Function()
     >;
-typedef $SafeSnapshotsCreateCompanionBuilder =
-    SafeSnapshotsCompanion Function({
-      required String snapshotId,
-      required String type,
-      required String assetId,
-      required String amount,
-      required String userId,
-      required String opponentId,
-      required String memo,
-      required String transactionHash,
-      required String createdAt,
-      Value<String?> traceId,
-      Value<int?> confirmations,
-      Value<String?> openingBalance,
-      Value<String?> closingBalance,
-      Value<SafeWithdrawal?> withdrawal,
-      Value<SafeDeposit?> deposit,
-      Value<String?> inscriptionHash,
-      Value<int> rowid,
-    });
-typedef $SafeSnapshotsUpdateCompanionBuilder =
-    SafeSnapshotsCompanion Function({
-      Value<String> snapshotId,
-      Value<String> type,
-      Value<String> assetId,
-      Value<String> amount,
-      Value<String> userId,
-      Value<String> opponentId,
-      Value<String> memo,
-      Value<String> transactionHash,
-      Value<String> createdAt,
-      Value<String?> traceId,
-      Value<int?> confirmations,
-      Value<String?> openingBalance,
-      Value<String?> closingBalance,
-      Value<SafeWithdrawal?> withdrawal,
-      Value<SafeDeposit?> deposit,
-      Value<String?> inscriptionHash,
-      Value<int> rowid,
-    });
+typedef $SafeSnapshotsCreateCompanionBuilder = SafeSnapshotsCompanion Function({
+  required String snapshotId,
+  required String type,
+  required String assetId,
+  required String amount,
+  required String userId,
+  required String opponentId,
+  required String memo,
+  required String transactionHash,
+  required String createdAt,
+  Value<String?> traceId,
+  Value<int?> confirmations,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<SafeWithdrawal?> withdrawal,
+  Value<SafeDeposit?> deposit,
+  Value<String?> inscriptionHash,
+  Value<int> rowid,
+});
+typedef $SafeSnapshotsUpdateCompanionBuilder = SafeSnapshotsCompanion Function({
+  Value<String> snapshotId,
+  Value<String> type,
+  Value<String> assetId,
+  Value<String> amount,
+  Value<String> userId,
+  Value<String> opponentId,
+  Value<String> memo,
+  Value<String> transactionHash,
+  Value<String> createdAt,
+  Value<String?> traceId,
+  Value<int?> confirmations,
+  Value<String?> openingBalance,
+  Value<String?> closingBalance,
+  Value<SafeWithdrawal?> withdrawal,
+  Value<SafeDeposit?> deposit,
+  Value<String?> inscriptionHash,
+  Value<int> rowid,
+});
 
 class $SafeSnapshotsFilterComposer
     extends Composer<_$MixinDatabase, SafeSnapshots> {
@@ -22152,44 +22140,42 @@ typedef $SafeSnapshotsProcessedTableManager =
       SafeSnapshot,
       PrefetchHooks Function()
     >;
-typedef $AssetsCreateCompanionBuilder =
-    AssetsCompanion Function({
-      required String assetId,
-      required String symbol,
-      required String name,
-      required String iconUrl,
-      required String balance,
-      required String destination,
-      Value<String?> tag,
-      required String priceBtc,
-      required String priceUsd,
-      required String chainId,
-      required String changeUsd,
-      required String changeBtc,
-      required int confirmations,
-      Value<String?> assetKey,
-      Value<String?> reserve,
-      Value<int> rowid,
-    });
-typedef $AssetsUpdateCompanionBuilder =
-    AssetsCompanion Function({
-      Value<String> assetId,
-      Value<String> symbol,
-      Value<String> name,
-      Value<String> iconUrl,
-      Value<String> balance,
-      Value<String> destination,
-      Value<String?> tag,
-      Value<String> priceBtc,
-      Value<String> priceUsd,
-      Value<String> chainId,
-      Value<String> changeUsd,
-      Value<String> changeBtc,
-      Value<int> confirmations,
-      Value<String?> assetKey,
-      Value<String?> reserve,
-      Value<int> rowid,
-    });
+typedef $AssetsCreateCompanionBuilder = AssetsCompanion Function({
+  required String assetId,
+  required String symbol,
+  required String name,
+  required String iconUrl,
+  required String balance,
+  required String destination,
+  Value<String?> tag,
+  required String priceBtc,
+  required String priceUsd,
+  required String chainId,
+  required String changeUsd,
+  required String changeBtc,
+  required int confirmations,
+  Value<String?> assetKey,
+  Value<String?> reserve,
+  Value<int> rowid,
+});
+typedef $AssetsUpdateCompanionBuilder = AssetsCompanion Function({
+  Value<String> assetId,
+  Value<String> symbol,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String> balance,
+  Value<String> destination,
+  Value<String?> tag,
+  Value<String> priceBtc,
+  Value<String> priceUsd,
+  Value<String> chainId,
+  Value<String> changeUsd,
+  Value<String> changeBtc,
+  Value<int> confirmations,
+  Value<String?> assetKey,
+  Value<String?> reserve,
+  Value<int> rowid,
+});
 
 class $AssetsFilterComposer extends Composer<_$MixinDatabase, Assets> {
   $AssetsFilterComposer({
@@ -22542,44 +22528,42 @@ typedef $AssetsProcessedTableManager =
       Asset,
       PrefetchHooks Function()
     >;
-typedef $TokensCreateCompanionBuilder =
-    TokensCompanion Function({
-      required String assetId,
-      required String kernelAssetId,
-      required String symbol,
-      required String name,
-      required String iconUrl,
-      required String priceBtc,
-      required String priceUsd,
-      required String chainId,
-      required String changeUsd,
-      required String changeBtc,
-      required int confirmations,
-      required String assetKey,
-      required String dust,
-      Value<String?> collectionHash,
-      Value<int> precision,
-      Value<int> rowid,
-    });
-typedef $TokensUpdateCompanionBuilder =
-    TokensCompanion Function({
-      Value<String> assetId,
-      Value<String> kernelAssetId,
-      Value<String> symbol,
-      Value<String> name,
-      Value<String> iconUrl,
-      Value<String> priceBtc,
-      Value<String> priceUsd,
-      Value<String> chainId,
-      Value<String> changeUsd,
-      Value<String> changeBtc,
-      Value<int> confirmations,
-      Value<String> assetKey,
-      Value<String> dust,
-      Value<String?> collectionHash,
-      Value<int> precision,
-      Value<int> rowid,
-    });
+typedef $TokensCreateCompanionBuilder = TokensCompanion Function({
+  required String assetId,
+  required String kernelAssetId,
+  required String symbol,
+  required String name,
+  required String iconUrl,
+  required String priceBtc,
+  required String priceUsd,
+  required String chainId,
+  required String changeUsd,
+  required String changeBtc,
+  required int confirmations,
+  required String assetKey,
+  required String dust,
+  Value<String?> collectionHash,
+  Value<int> precision,
+  Value<int> rowid,
+});
+typedef $TokensUpdateCompanionBuilder = TokensCompanion Function({
+  Value<String> assetId,
+  Value<String> kernelAssetId,
+  Value<String> symbol,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String> priceBtc,
+  Value<String> priceUsd,
+  Value<String> chainId,
+  Value<String> changeUsd,
+  Value<String> changeBtc,
+  Value<int> confirmations,
+  Value<String> assetKey,
+  Value<String> dust,
+  Value<String?> collectionHash,
+  Value<int> precision,
+  Value<int> rowid,
+});
 
 class $TokensFilterComposer extends Composer<_$MixinDatabase, Tokens> {
   $TokensFilterComposer({
@@ -22934,24 +22918,22 @@ typedef $TokensProcessedTableManager =
       Token,
       PrefetchHooks Function()
     >;
-typedef $ChainsCreateCompanionBuilder =
-    ChainsCompanion Function({
-      required String chainId,
-      required String name,
-      required String symbol,
-      required String iconUrl,
-      required int threshold,
-      Value<int> rowid,
-    });
-typedef $ChainsUpdateCompanionBuilder =
-    ChainsCompanion Function({
-      Value<String> chainId,
-      Value<String> name,
-      Value<String> symbol,
-      Value<String> iconUrl,
-      Value<int> threshold,
-      Value<int> rowid,
-    });
+typedef $ChainsCreateCompanionBuilder = ChainsCompanion Function({
+  required String chainId,
+  required String name,
+  required String symbol,
+  required String iconUrl,
+  required int threshold,
+  Value<int> rowid,
+});
+typedef $ChainsUpdateCompanionBuilder = ChainsCompanion Function({
+  Value<String> chainId,
+  Value<String> name,
+  Value<String> symbol,
+  Value<String> iconUrl,
+  Value<int> threshold,
+  Value<int> rowid,
+});
 
 class $ChainsFilterComposer extends Composer<_$MixinDatabase, Chains> {
   $ChainsFilterComposer({
@@ -23130,32 +23112,30 @@ typedef $ChainsProcessedTableManager =
       Chain,
       PrefetchHooks Function()
     >;
-typedef $StickersCreateCompanionBuilder =
-    StickersCompanion Function({
-      required String stickerId,
-      Value<String?> albumId,
-      required String name,
-      required String assetUrl,
-      required String assetType,
-      required int assetWidth,
-      required int assetHeight,
-      required DateTime createdAt,
-      Value<DateTime?> lastUseAt,
-      Value<int> rowid,
-    });
-typedef $StickersUpdateCompanionBuilder =
-    StickersCompanion Function({
-      Value<String> stickerId,
-      Value<String?> albumId,
-      Value<String> name,
-      Value<String> assetUrl,
-      Value<String> assetType,
-      Value<int> assetWidth,
-      Value<int> assetHeight,
-      Value<DateTime> createdAt,
-      Value<DateTime?> lastUseAt,
-      Value<int> rowid,
-    });
+typedef $StickersCreateCompanionBuilder = StickersCompanion Function({
+  required String stickerId,
+  Value<String?> albumId,
+  required String name,
+  required String assetUrl,
+  required String assetType,
+  required int assetWidth,
+  required int assetHeight,
+  required DateTime createdAt,
+  Value<DateTime?> lastUseAt,
+  Value<int> rowid,
+});
+typedef $StickersUpdateCompanionBuilder = StickersCompanion Function({
+  Value<String> stickerId,
+  Value<String?> albumId,
+  Value<String> name,
+  Value<String> assetUrl,
+  Value<String> assetType,
+  Value<int> assetWidth,
+  Value<int> assetHeight,
+  Value<DateTime> createdAt,
+  Value<DateTime?> lastUseAt,
+  Value<int> rowid,
+});
 
 class $StickersFilterComposer extends Composer<_$MixinDatabase, Stickers> {
   $StickersFilterComposer({
@@ -23412,24 +23392,22 @@ typedef $StickersProcessedTableManager =
       Sticker,
       PrefetchHooks Function()
     >;
-typedef $HyperlinksCreateCompanionBuilder =
-    HyperlinksCompanion Function({
-      required String hyperlink,
-      required String siteName,
-      required String siteTitle,
-      Value<String?> siteDescription,
-      Value<String?> siteImage,
-      Value<int> rowid,
-    });
-typedef $HyperlinksUpdateCompanionBuilder =
-    HyperlinksCompanion Function({
-      Value<String> hyperlink,
-      Value<String> siteName,
-      Value<String> siteTitle,
-      Value<String?> siteDescription,
-      Value<String?> siteImage,
-      Value<int> rowid,
-    });
+typedef $HyperlinksCreateCompanionBuilder = HyperlinksCompanion Function({
+  required String hyperlink,
+  required String siteName,
+  required String siteTitle,
+  Value<String?> siteDescription,
+  Value<String?> siteImage,
+  Value<int> rowid,
+});
+typedef $HyperlinksUpdateCompanionBuilder = HyperlinksCompanion Function({
+  Value<String> hyperlink,
+  Value<String> siteName,
+  Value<String> siteTitle,
+  Value<String?> siteDescription,
+  Value<String?> siteImage,
+  Value<int> rowid,
+});
 
 class $HyperlinksFilterComposer extends Composer<_$MixinDatabase, Hyperlinks> {
   $HyperlinksFilterComposer({
@@ -23789,20 +23767,18 @@ typedef $MessageMentionsProcessedTableManager =
       MessageMention,
       PrefetchHooks Function()
     >;
-typedef $PinMessagesCreateCompanionBuilder =
-    PinMessagesCompanion Function({
-      required String messageId,
-      required String conversationId,
-      required DateTime createdAt,
-      Value<int> rowid,
-    });
-typedef $PinMessagesUpdateCompanionBuilder =
-    PinMessagesCompanion Function({
-      Value<String> messageId,
-      Value<String> conversationId,
-      Value<DateTime> createdAt,
-      Value<int> rowid,
-    });
+typedef $PinMessagesCreateCompanionBuilder = PinMessagesCompanion Function({
+  required String messageId,
+  required String conversationId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $PinMessagesUpdateCompanionBuilder = PinMessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
 
 class $PinMessagesFilterComposer
     extends Composer<_$MixinDatabase, PinMessages> {
@@ -24131,34 +24107,32 @@ typedef $ExpiredMessagesProcessedTableManager =
       ExpiredMessage,
       PrefetchHooks Function()
     >;
-typedef $AddressesCreateCompanionBuilder =
-    AddressesCompanion Function({
-      required String addressId,
-      required String type,
-      required String assetId,
-      required String destination,
-      required String label,
-      required DateTime updatedAt,
-      required String reserve,
-      required String fee,
-      Value<String?> tag,
-      Value<String?> dust,
-      Value<int> rowid,
-    });
-typedef $AddressesUpdateCompanionBuilder =
-    AddressesCompanion Function({
-      Value<String> addressId,
-      Value<String> type,
-      Value<String> assetId,
-      Value<String> destination,
-      Value<String> label,
-      Value<DateTime> updatedAt,
-      Value<String> reserve,
-      Value<String> fee,
-      Value<String?> tag,
-      Value<String?> dust,
-      Value<int> rowid,
-    });
+typedef $AddressesCreateCompanionBuilder = AddressesCompanion Function({
+  required String addressId,
+  required String type,
+  required String assetId,
+  required String destination,
+  required String label,
+  required DateTime updatedAt,
+  required String reserve,
+  required String fee,
+  Value<String?> tag,
+  Value<String?> dust,
+  Value<int> rowid,
+});
+typedef $AddressesUpdateCompanionBuilder = AddressesCompanion Function({
+  Value<String> addressId,
+  Value<String> type,
+  Value<String> assetId,
+  Value<String> destination,
+  Value<String> label,
+  Value<DateTime> updatedAt,
+  Value<String> reserve,
+  Value<String> fee,
+  Value<String?> tag,
+  Value<String?> dust,
+  Value<int> rowid,
+});
 
 class $AddressesFilterComposer extends Composer<_$MixinDatabase, Addresses> {
   $AddressesFilterComposer({
@@ -24430,40 +24404,38 @@ typedef $AddressesProcessedTableManager =
       Address,
       PrefetchHooks Function()
     >;
-typedef $AppsCreateCompanionBuilder =
-    AppsCompanion Function({
-      required String appId,
-      required String appNumber,
-      required String homeUri,
-      required String redirectUri,
-      required String name,
-      required String iconUrl,
-      Value<String?> category,
-      required String description,
-      required String appSecret,
-      Value<String?> capabilities,
-      required String creatorId,
-      Value<String?> resourcePatterns,
-      Value<DateTime?> updatedAt,
-      Value<int> rowid,
-    });
-typedef $AppsUpdateCompanionBuilder =
-    AppsCompanion Function({
-      Value<String> appId,
-      Value<String> appNumber,
-      Value<String> homeUri,
-      Value<String> redirectUri,
-      Value<String> name,
-      Value<String> iconUrl,
-      Value<String?> category,
-      Value<String> description,
-      Value<String> appSecret,
-      Value<String?> capabilities,
-      Value<String> creatorId,
-      Value<String?> resourcePatterns,
-      Value<DateTime?> updatedAt,
-      Value<int> rowid,
-    });
+typedef $AppsCreateCompanionBuilder = AppsCompanion Function({
+  required String appId,
+  required String appNumber,
+  required String homeUri,
+  required String redirectUri,
+  required String name,
+  required String iconUrl,
+  Value<String?> category,
+  required String description,
+  required String appSecret,
+  Value<String?> capabilities,
+  required String creatorId,
+  Value<String?> resourcePatterns,
+  Value<DateTime?> updatedAt,
+  Value<int> rowid,
+});
+typedef $AppsUpdateCompanionBuilder = AppsCompanion Function({
+  Value<String> appId,
+  Value<String> appNumber,
+  Value<String> homeUri,
+  Value<String> redirectUri,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<String?> category,
+  Value<String> description,
+  Value<String> appSecret,
+  Value<String?> capabilities,
+  Value<String> creatorId,
+  Value<String?> resourcePatterns,
+  Value<DateTime?> updatedAt,
+  Value<int> rowid,
+});
 
 class $AppsFilterComposer extends Composer<_$MixinDatabase, Apps> {
   $AppsFilterComposer({
@@ -25010,22 +24982,20 @@ typedef $CircleConversationsProcessedTableManager =
       CircleConversation,
       PrefetchHooks Function()
     >;
-typedef $CirclesCreateCompanionBuilder =
-    CirclesCompanion Function({
-      required String circleId,
-      required String name,
-      required DateTime createdAt,
-      Value<DateTime?> orderedAt,
-      Value<int> rowid,
-    });
-typedef $CirclesUpdateCompanionBuilder =
-    CirclesCompanion Function({
-      Value<String> circleId,
-      Value<String> name,
-      Value<DateTime> createdAt,
-      Value<DateTime?> orderedAt,
-      Value<int> rowid,
-    });
+typedef $CirclesCreateCompanionBuilder = CirclesCompanion Function({
+  required String circleId,
+  required String name,
+  required DateTime createdAt,
+  Value<DateTime?> orderedAt,
+  Value<int> rowid,
+});
+typedef $CirclesUpdateCompanionBuilder = CirclesCompanion Function({
+  Value<String> circleId,
+  Value<String> name,
+  Value<DateTime> createdAt,
+  Value<DateTime?> orderedAt,
+  Value<int> rowid,
+});
 
 class $CirclesFilterComposer extends Composer<_$MixinDatabase, Circles> {
   $CirclesFilterComposer({
@@ -25193,20 +25163,18 @@ typedef $CirclesProcessedTableManager =
       Circle,
       PrefetchHooks Function()
     >;
-typedef $FloodMessagesCreateCompanionBuilder =
-    FloodMessagesCompanion Function({
-      required String messageId,
-      required String data,
-      required DateTime createdAt,
-      Value<int> rowid,
-    });
-typedef $FloodMessagesUpdateCompanionBuilder =
-    FloodMessagesCompanion Function({
-      Value<String> messageId,
-      Value<String> data,
-      Value<DateTime> createdAt,
-      Value<int> rowid,
-    });
+typedef $FloodMessagesCreateCompanionBuilder = FloodMessagesCompanion Function({
+  required String messageId,
+  required String data,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $FloodMessagesUpdateCompanionBuilder = FloodMessagesCompanion Function({
+  Value<String> messageId,
+  Value<String> data,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
 
 class $FloodMessagesFilterComposer
     extends Composer<_$MixinDatabase, FloodMessages> {
@@ -25365,34 +25333,32 @@ typedef $FloodMessagesProcessedTableManager =
       FloodMessage,
       PrefetchHooks Function()
     >;
-typedef $JobsCreateCompanionBuilder =
-    JobsCompanion Function({
-      required String jobId,
-      required String action,
-      required DateTime createdAt,
-      Value<int?> orderId,
-      required int priority,
-      Value<String?> userId,
-      Value<String?> blazeMessage,
-      Value<String?> conversationId,
-      Value<String?> resendMessageId,
-      required int runCount,
-      Value<int> rowid,
-    });
-typedef $JobsUpdateCompanionBuilder =
-    JobsCompanion Function({
-      Value<String> jobId,
-      Value<String> action,
-      Value<DateTime> createdAt,
-      Value<int?> orderId,
-      Value<int> priority,
-      Value<String?> userId,
-      Value<String?> blazeMessage,
-      Value<String?> conversationId,
-      Value<String?> resendMessageId,
-      Value<int> runCount,
-      Value<int> rowid,
-    });
+typedef $JobsCreateCompanionBuilder = JobsCompanion Function({
+  required String jobId,
+  required String action,
+  required DateTime createdAt,
+  Value<int?> orderId,
+  required int priority,
+  Value<String?> userId,
+  Value<String?> blazeMessage,
+  Value<String?> conversationId,
+  Value<String?> resendMessageId,
+  required int runCount,
+  Value<int> rowid,
+});
+typedef $JobsUpdateCompanionBuilder = JobsCompanion Function({
+  Value<String> jobId,
+  Value<String> action,
+  Value<DateTime> createdAt,
+  Value<int?> orderId,
+  Value<int> priority,
+  Value<String?> userId,
+  Value<String?> blazeMessage,
+  Value<String?> conversationId,
+  Value<String?> resendMessageId,
+  Value<int> runCount,
+  Value<int> rowid,
+});
 
 class $JobsFilterComposer extends Composer<_$MixinDatabase, Jobs> {
   $JobsFilterComposer({
@@ -25750,12 +25716,10 @@ class $MessagesHistoryTableManager
               $MessagesHistoryOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $MessagesHistoryAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> messageId = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) =>
-                  MessagesHistoryCompanion(messageId: messageId, rowid: rowid),
+          updateCompanionCallback: ({
+            Value<String> messageId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => MessagesHistoryCompanion(messageId: messageId, rowid: rowid),
           createCompanionCallback:
               ({
                 required String messageId,
@@ -25798,18 +25762,16 @@ typedef $MessagesHistoryProcessedTableManager =
       MessagesHistoryData,
       PrefetchHooks Function()
     >;
-typedef $OffsetsCreateCompanionBuilder =
-    OffsetsCompanion Function({
-      required String key,
-      required String timestamp,
-      Value<int> rowid,
-    });
-typedef $OffsetsUpdateCompanionBuilder =
-    OffsetsCompanion Function({
-      Value<String> key,
-      Value<String> timestamp,
-      Value<int> rowid,
-    });
+typedef $OffsetsCreateCompanionBuilder = OffsetsCompanion Function({
+  required String key,
+  required String timestamp,
+  Value<int> rowid,
+});
+typedef $OffsetsUpdateCompanionBuilder = OffsetsCompanion Function({
+  Value<String> key,
+  Value<String> timestamp,
+  Value<int> rowid,
+});
 
 class $OffsetsFilterComposer extends Composer<_$MixinDatabase, Offsets> {
   $OffsetsFilterComposer({
@@ -25890,16 +25852,11 @@ class $OffsetsTableManager
               $OffsetsOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $OffsetsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> key = const Value.absent(),
-                Value<String> timestamp = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => OffsetsCompanion(
-                key: key,
-                timestamp: timestamp,
-                rowid: rowid,
-              ),
+          updateCompanionCallback: ({
+            Value<String> key = const Value.absent(),
+            Value<String> timestamp = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => OffsetsCompanion(key: key, timestamp: timestamp, rowid: rowid),
           createCompanionCallback:
               ({
                 required String key,
@@ -26653,38 +26610,36 @@ typedef $SentSessionSenderKeysProcessedTableManager =
       SentSessionSenderKey,
       PrefetchHooks Function()
     >;
-typedef $StickerAlbumsCreateCompanionBuilder =
-    StickerAlbumsCompanion Function({
-      required String albumId,
-      required String name,
-      required String iconUrl,
-      required DateTime createdAt,
-      required DateTime updateAt,
-      Value<int> orderedAt,
-      required String userId,
-      required String category,
-      required String description,
-      Value<String?> banner,
-      Value<bool?> added,
-      Value<bool> isVerified,
-      Value<int> rowid,
-    });
-typedef $StickerAlbumsUpdateCompanionBuilder =
-    StickerAlbumsCompanion Function({
-      Value<String> albumId,
-      Value<String> name,
-      Value<String> iconUrl,
-      Value<DateTime> createdAt,
-      Value<DateTime> updateAt,
-      Value<int> orderedAt,
-      Value<String> userId,
-      Value<String> category,
-      Value<String> description,
-      Value<String?> banner,
-      Value<bool?> added,
-      Value<bool> isVerified,
-      Value<int> rowid,
-    });
+typedef $StickerAlbumsCreateCompanionBuilder = StickerAlbumsCompanion Function({
+  required String albumId,
+  required String name,
+  required String iconUrl,
+  required DateTime createdAt,
+  required DateTime updateAt,
+  Value<int> orderedAt,
+  required String userId,
+  required String category,
+  required String description,
+  Value<String?> banner,
+  Value<bool?> added,
+  Value<bool> isVerified,
+  Value<int> rowid,
+});
+typedef $StickerAlbumsUpdateCompanionBuilder = StickerAlbumsCompanion Function({
+  Value<String> albumId,
+  Value<String> name,
+  Value<String> iconUrl,
+  Value<DateTime> createdAt,
+  Value<DateTime> updateAt,
+  Value<int> orderedAt,
+  Value<String> userId,
+  Value<String> category,
+  Value<String> description,
+  Value<String?> banner,
+  Value<bool?> added,
+  Value<bool> isVerified,
+  Value<int> rowid,
+});
 
 class $StickerAlbumsFilterComposer
     extends Composer<_$MixinDatabase, StickerAlbums> {
@@ -27825,18 +27780,16 @@ typedef $TranscriptMessagesProcessedTableManager =
       TranscriptMessage,
       PrefetchHooks Function()
     >;
-typedef $FiatsCreateCompanionBuilder =
-    FiatsCompanion Function({
-      required String code,
-      required double rate,
-      Value<int> rowid,
-    });
-typedef $FiatsUpdateCompanionBuilder =
-    FiatsCompanion Function({
-      Value<String> code,
-      Value<double> rate,
-      Value<int> rowid,
-    });
+typedef $FiatsCreateCompanionBuilder = FiatsCompanion Function({
+  required String code,
+  required double rate,
+  Value<int> rowid,
+});
+typedef $FiatsUpdateCompanionBuilder = FiatsCompanion Function({
+  Value<String> code,
+  Value<double> rate,
+  Value<int> rowid,
+});
 
 class $FiatsFilterComposer extends Composer<_$MixinDatabase, Fiats> {
   $FiatsFilterComposer({
@@ -27917,18 +27870,16 @@ class $FiatsTableManager
               $FiatsOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $FiatsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> code = const Value.absent(),
-                Value<double> rate = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => FiatsCompanion(code: code, rate: rate, rowid: rowid),
-          createCompanionCallback:
-              ({
-                required String code,
-                required double rate,
-                Value<int> rowid = const Value.absent(),
-              }) => FiatsCompanion.insert(code: code, rate: rate, rowid: rowid),
+          updateCompanionCallback: ({
+            Value<String> code = const Value.absent(),
+            Value<double> rate = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => FiatsCompanion(code: code, rate: rate, rowid: rowid),
+          createCompanionCallback: ({
+            required String code,
+            required double rate,
+            Value<int> rowid = const Value.absent(),
+          }) => FiatsCompanion.insert(code: code, rate: rate, rowid: rowid),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
@@ -27956,20 +27907,18 @@ typedef $FiatsProcessedTableManager =
       Fiat,
       PrefetchHooks Function()
     >;
-typedef $FavoriteAppsCreateCompanionBuilder =
-    FavoriteAppsCompanion Function({
-      required String appId,
-      required String userId,
-      required DateTime createdAt,
-      Value<int> rowid,
-    });
-typedef $FavoriteAppsUpdateCompanionBuilder =
-    FavoriteAppsCompanion Function({
-      Value<String> appId,
-      Value<String> userId,
-      Value<DateTime> createdAt,
-      Value<int> rowid,
-    });
+typedef $FavoriteAppsCreateCompanionBuilder = FavoriteAppsCompanion Function({
+  required String appId,
+  required String userId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $FavoriteAppsUpdateCompanionBuilder = FavoriteAppsCompanion Function({
+  Value<String> appId,
+  Value<String> userId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
 
 class $FavoriteAppsFilterComposer
     extends Composer<_$MixinDatabase, FavoriteApps> {
@@ -28125,20 +28074,18 @@ typedef $FavoriteAppsProcessedTableManager =
       FavoriteApp,
       PrefetchHooks Function()
     >;
-typedef $PropertiesCreateCompanionBuilder =
-    PropertiesCompanion Function({
-      required String key,
-      required PropertyGroup group,
-      required String value,
-      Value<int> rowid,
-    });
-typedef $PropertiesUpdateCompanionBuilder =
-    PropertiesCompanion Function({
-      Value<String> key,
-      Value<PropertyGroup> group,
-      Value<String> value,
-      Value<int> rowid,
-    });
+typedef $PropertiesCreateCompanionBuilder = PropertiesCompanion Function({
+  required String key,
+  required PropertyGroup group,
+  required String value,
+  Value<int> rowid,
+});
+typedef $PropertiesUpdateCompanionBuilder = PropertiesCompanion Function({
+  Value<String> key,
+  Value<PropertyGroup> group,
+  Value<String> value,
+  Value<int> rowid,
+});
 
 class $PropertiesFilterComposer extends Composer<_$MixinDatabase, Properties> {
   $PropertiesFilterComposer({
@@ -29272,101 +29219,96 @@ class MessageItem {
   }
 }
 
-typedef BaseMessageItems$where =
-    Expression<bool> Function(
-      Messages message,
-      Users sender,
-      Participants senderParticipant,
-      Users participant,
-      Snapshots snapshot,
-      SafeSnapshots safe_snapshot,
-      Assets asset,
-      Tokens token,
-      Chains chain,
-      Stickers sticker,
-      Hyperlinks hyperlink,
-      Users sharedUser,
-      Conversations conversation,
-      MessageMentions messageMention,
-      PinMessages pinMessage,
-      ExpiredMessages em,
-    );
-typedef BaseMessageItems$order =
-    OrderBy Function(
-      Messages message,
-      Users sender,
-      Participants senderParticipant,
-      Users participant,
-      Snapshots snapshot,
-      SafeSnapshots safe_snapshot,
-      Assets asset,
-      Tokens token,
-      Chains chain,
-      Stickers sticker,
-      Hyperlinks hyperlink,
-      Users sharedUser,
-      Conversations conversation,
-      MessageMentions messageMention,
-      PinMessages pinMessage,
-      ExpiredMessages em,
-    );
-typedef BaseMessageItems$limit =
-    Limit Function(
-      Messages message,
-      Users sender,
-      Participants senderParticipant,
-      Users participant,
-      Snapshots snapshot,
-      SafeSnapshots safe_snapshot,
-      Assets asset,
-      Tokens token,
-      Chains chain,
-      Stickers sticker,
-      Hyperlinks hyperlink,
-      Users sharedUser,
-      Conversations conversation,
-      MessageMentions messageMention,
-      PinMessages pinMessage,
-      ExpiredMessages em,
-    );
-typedef BasePinMessageItems$order =
-    OrderBy Function(
-      PinMessages pinMessage,
-      Messages message,
-      Users sender,
-      Participants senderParticipant,
-      Users participant,
-      Snapshots snapshot,
-      SafeSnapshots safe_snapshot,
-      Assets asset,
-      Tokens token,
-      Chains chain,
-      Stickers sticker,
-      Hyperlinks hyperlink,
-      Users sharedUser,
-      Conversations conversation,
-      MessageMentions messageMention,
-      ExpiredMessages em,
-    );
-typedef BasePinMessageItems$limit =
-    Limit Function(
-      PinMessages pinMessage,
-      Messages message,
-      Users sender,
-      Participants senderParticipant,
-      Users participant,
-      Snapshots snapshot,
-      SafeSnapshots safe_snapshot,
-      Assets asset,
-      Tokens token,
-      Chains chain,
-      Stickers sticker,
-      Hyperlinks hyperlink,
-      Users sharedUser,
-      Conversations conversation,
-      MessageMentions messageMention,
-      ExpiredMessages em,
-    );
+typedef BaseMessageItems$where = Expression<bool> Function(
+  Messages message,
+  Users sender,
+  Participants senderParticipant,
+  Users participant,
+  Snapshots snapshot,
+  SafeSnapshots safe_snapshot,
+  Assets asset,
+  Tokens token,
+  Chains chain,
+  Stickers sticker,
+  Hyperlinks hyperlink,
+  Users sharedUser,
+  Conversations conversation,
+  MessageMentions messageMention,
+  PinMessages pinMessage,
+  ExpiredMessages em,
+);
+typedef BaseMessageItems$order = OrderBy Function(
+  Messages message,
+  Users sender,
+  Participants senderParticipant,
+  Users participant,
+  Snapshots snapshot,
+  SafeSnapshots safe_snapshot,
+  Assets asset,
+  Tokens token,
+  Chains chain,
+  Stickers sticker,
+  Hyperlinks hyperlink,
+  Users sharedUser,
+  Conversations conversation,
+  MessageMentions messageMention,
+  PinMessages pinMessage,
+  ExpiredMessages em,
+);
+typedef BaseMessageItems$limit = Limit Function(
+  Messages message,
+  Users sender,
+  Participants senderParticipant,
+  Users participant,
+  Snapshots snapshot,
+  SafeSnapshots safe_snapshot,
+  Assets asset,
+  Tokens token,
+  Chains chain,
+  Stickers sticker,
+  Hyperlinks hyperlink,
+  Users sharedUser,
+  Conversations conversation,
+  MessageMentions messageMention,
+  PinMessages pinMessage,
+  ExpiredMessages em,
+);
+typedef BasePinMessageItems$order = OrderBy Function(
+  PinMessages pinMessage,
+  Messages message,
+  Users sender,
+  Participants senderParticipant,
+  Users participant,
+  Snapshots snapshot,
+  SafeSnapshots safe_snapshot,
+  Assets asset,
+  Tokens token,
+  Chains chain,
+  Stickers sticker,
+  Hyperlinks hyperlink,
+  Users sharedUser,
+  Conversations conversation,
+  MessageMentions messageMention,
+  ExpiredMessages em,
+);
+typedef BasePinMessageItems$limit = Limit Function(
+  PinMessages pinMessage,
+  Messages message,
+  Users sender,
+  Participants senderParticipant,
+  Users participant,
+  Snapshots snapshot,
+  SafeSnapshots safe_snapshot,
+  Assets asset,
+  Tokens token,
+  Chains chain,
+  Stickers sticker,
+  Hyperlinks hyperlink,
+  Users sharedUser,
+  Conversations conversation,
+  MessageMentions messageMention,
+  ExpiredMessages em,
+);
 
 class SearchItem {
   final String type;
@@ -29428,7 +29370,11 @@ class SearchItem {
 
 typedef FuzzySearchUserItem$where = Expression<bool> Function(Users users);
 typedef FuzzySearchUserItem$limit = Limit Function(Users users);
-typedef FuzzySearchConversationItem$where =
-    Expression<bool> Function(Conversations conversation, Users owner);
-typedef FuzzySearchConversationItem$limit =
-    Limit Function(Conversations conversation, Users owner);
+typedef FuzzySearchConversationItem$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+);
+typedef FuzzySearchConversationItem$limit = Limit Function(
+  Conversations conversation,
+  Users owner,
+);

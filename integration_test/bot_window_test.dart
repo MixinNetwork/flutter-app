@@ -16,6 +16,7 @@ import 'package:flutter_app/db/mixin_database.dart' show App;
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/utils/extension/extension.dart';
 import 'package:flutter_app/utils/local_state_storage.dart';
+import 'package:flutter_app/utils/system/main_window.dart';
 import 'package:flutter_app/utils/web_view/desktop/bot_window.dart';
 import 'package:flutter_app/utils/web_view/desktop/bot_window_popup.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -26,7 +27,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:nativeapi/nativeapi.dart' as nativeapi;
 
 const _channel = MethodChannel('one.mixin/bot_window');
 
@@ -57,13 +58,15 @@ void main() {
   final events = <PointerEvent>[];
 
   setUpAll(() async {
-    await windowManager.ensureInitialized();
-    await windowManager.show();
-    // The main window sets GTK's dark theme preference, which WebKitGTK
-    // follows; without it bot windows here would follow the system theme.
+    await ensureMainWindow();
+    showMainWindow();
+    // WebKitGTK follows the GTK dark theme preference set by the app.
     if (Platform.isLinux) {
-      await windowManager.setBrightness(
-        ui.PlatformDispatcher.instance.platformBrightness,
+      final brightness = ui.PlatformDispatcher.instance.platformBrightness;
+      nativeapi.Application.instance.setBrightness(
+        brightness == Brightness.dark
+            ? nativeapi.Brightness.dark
+            : nativeapi.Brightness.light,
       );
     }
     final directory = await Directory.systemTemp.createTemp('bot_window_test');
@@ -240,8 +243,8 @@ document.querySelector('meta[name="theme-color"]').content = '#101010';
 
     // A test desktop may keep the foreground elsewhere, as Windows does for
     // apps started by a scheduled task; focus is then checked nowhere.
-    await windowManager.focus();
-    final canFocus = await windowManager.isFocused();
+    mainWindow?.focus();
+    final canFocus = mainWindow?.isFocused ?? false;
     if (!canFocus) {
       debugPrint('The app cannot take focus here; skipping focus checks.');
     }
@@ -297,7 +300,7 @@ document.querySelector('meta[name="theme-color"]').content = '#101010';
     await window.waitFor('main window handoff', () => handedOff);
     expect(main, isNotNull);
     expect(hiddenAtHandoff, true);
-    if (canFocus) expect(await windowManager.isFocused(), true);
+    if (canFocus) expect(mainWindow?.isFocused, true);
     final mainViewId = View.of(context).viewId;
     final dialog = showMixinDialog<void>(
       context: main!,

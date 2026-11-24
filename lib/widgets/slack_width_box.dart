@@ -26,7 +26,7 @@ class SlackWidthBox extends SingleChildRenderObjectWidget {
 }
 
 class RenderSlackWidthBox extends RenderProxyBox {
-  RenderSlackWidthBox({required double slack}) : _slack = slack;
+  RenderSlackWidthBox({required this._slack});
 
   double get slack => _slack;
   double _slack;

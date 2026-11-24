@@ -1,25 +1,25 @@
 part of 'message_controller.dart';
 
-typedef RecentMessagesQuery =
-    Future<List<MessageItem>> Function(String conversationId, int limit);
-typedef MessageOrderInfoQuery =
-    Future<MessageOrderInfo?> Function(String messageId);
-typedef AroundMessageIdsQuery =
-    Future<List<String>> Function(
-      MessageOrderInfo anchor,
-      String conversationId,
-      int limit,
-    );
-typedef AroundMessagesQuery =
-    Future<List<MessageItem>> Function(
-      MessageOrderInfo anchor,
-      String conversationId,
-      int limit,
-    );
-typedef MessagesByIdsQuery =
-    Future<List<MessageItem>> Function(
-      List<String> messageIds,
-    );
+typedef RecentMessagesQuery = Future<List<MessageItem>> Function(
+  String conversationId,
+  int limit,
+);
+typedef MessageOrderInfoQuery = Future<MessageOrderInfo?> Function(
+  String messageId,
+);
+typedef AroundMessageIdsQuery = Future<List<String>> Function(
+  MessageOrderInfo anchor,
+  String conversationId,
+  int limit,
+);
+typedef AroundMessagesQuery = Future<List<MessageItem>> Function(
+  MessageOrderInfo anchor,
+  String conversationId,
+  int limit,
+);
+typedef MessagesByIdsQuery = Future<List<MessageItem>> Function(
+  List<String> messageIds,
+);
 
 enum MessageWindowDirection { older, newer }
 

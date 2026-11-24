@@ -268,8 +268,11 @@ class MessageImage extends HookConsumerWidget {
 }
 
 /// The signature of the [ImageMessageLayout] builder function.
-typedef ImageLayoutBuilder =
-    Widget Function(BuildContext context, double width, double height);
+typedef ImageLayoutBuilder = Widget Function(
+  BuildContext context,
+  double width,
+  double height,
+);
 
 /// Measure layout constraints and image actual size.
 /// calculate a suitable size to layout image.

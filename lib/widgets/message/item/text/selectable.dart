@@ -20,11 +20,10 @@ const Set<PointerDeviceKind> _kLongPressSelectionDevices = <PointerDeviceKind>{
   PointerDeviceKind.invertedStylus,
 };
 
-typedef SelectableRegionContextMenuBuilder =
-    Widget Function(
-      BuildContext context,
-      SelectableRegionState selectableRegionState,
-    );
+typedef SelectableRegionContextMenuBuilder = Widget Function(
+  BuildContext context,
+  SelectableRegionState selectableRegionState,
+);
 
 class SelectableRegion extends StatefulWidget {
   const SelectableRegion({
@@ -164,32 +163,33 @@ class SelectableRegionState extends State<SelectableRegion>
     _initTouchGestureRecognizer();
     // Taps and right clicks.
     _gestureRecognizers[TapGestureRecognizer] =
-        GestureRecognizerFactoryWithHandlers<
-          TapGestureRecognizer
-        >(() => TapGestureRecognizer(debugOwner: this), (
-          instance,
-        ) {
-          instance.onTapUp = (details) {
-            if (defaultTargetPlatform == TargetPlatform.iOS &&
-                _positionIsOnActiveSelection(
-                  globalPosition: details.globalPosition,
-                )) {
-              // On iOS when the tap occurs on the previous selection, instead of
-              // moving the selection, the context menu will be toggled.
-              final toolbarIsVisible =
-                  _selectionOverlay?.toolbarIsVisible ?? false;
-              if (toolbarIsVisible) {
-                hideToolbar(false);
+        GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(debugOwner: this),
+          (
+            instance,
+          ) {
+            instance.onTapUp = (details) {
+              if (defaultTargetPlatform == TargetPlatform.iOS &&
+                  _positionIsOnActiveSelection(
+                    globalPosition: details.globalPosition,
+                  )) {
+                // On iOS when the tap occurs on the previous selection, instead of
+                // moving the selection, the context menu will be toggled.
+                final toolbarIsVisible =
+                    _selectionOverlay?.toolbarIsVisible ?? false;
+                if (toolbarIsVisible) {
+                  hideToolbar(false);
+                } else {
+                  _showToolbar(location: details.globalPosition);
+                }
               } else {
-                _showToolbar(location: details.globalPosition);
+                hideToolbar();
+                _collapseSelectionAt(offset: details.globalPosition);
               }
-            } else {
-              hideToolbar();
-              _collapseSelectionAt(offset: details.globalPosition);
-            }
-          };
-          // ..onSecondaryTapDown = _handleRightClickDown;
-        });
+            };
+            // ..onSecondaryTapDown = _handleRightClickDown;
+          },
+        );
   }
 
   @override

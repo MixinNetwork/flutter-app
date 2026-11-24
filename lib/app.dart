@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:cupertino_ui/cupertino_ui.dart'
@@ -11,8 +10,8 @@ import 'package:flutter_localizations/flutter_localizations.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     hide ChangeNotifierProvider, Consumer, FutureProvider, Provider;
 import 'package:material_ui/material_ui.dart' hide AnimatedTheme;
+import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'account/account_key_value.dart';
 import 'account/notification_service.dart';
@@ -157,7 +156,13 @@ class _MainWindow extends HookConsumerWidget {
     useEffect(() {
       // GTK applies it to every window: the title bars, and WebKitGTK's
       // prefers-color-scheme in bot windows.
-      if (Platform.isLinux) unawaited(windowManager.setBrightness(brightness));
+      if (Platform.isLinux) {
+        nativeapi.Application.instance.setBrightness(
+          brightness == Brightness.dark
+              ? nativeapi.Brightness.dark
+              : nativeapi.Brightness.light,
+        );
+      }
     }, [brightness]);
     return WindowShortcuts(
       child: GlobalMoveWindow(

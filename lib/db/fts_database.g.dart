@@ -650,10 +650,14 @@ abstract class _$FtsDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $MessagesFtsCreateCompanionBuilder =
-    MessagesFtsCompanion Function({required String content, Value<int> rowid});
-typedef $MessagesFtsUpdateCompanionBuilder =
-    MessagesFtsCompanion Function({Value<String> content, Value<int> rowid});
+typedef $MessagesFtsCreateCompanionBuilder = MessagesFtsCompanion Function({
+  required String content,
+  Value<int> rowid,
+});
+typedef $MessagesFtsUpdateCompanionBuilder = MessagesFtsCompanion Function({
+  Value<String> content,
+  Value<int> rowid,
+});
 
 class $MessagesFtsFilterComposer extends Composer<_$FtsDatabase, MessagesFts> {
   $MessagesFtsFilterComposer({
@@ -723,16 +727,14 @@ class $MessagesFtsTableManager
               $MessagesFtsOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $MessagesFtsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> content = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => MessagesFtsCompanion(content: content, rowid: rowid),
-          createCompanionCallback:
-              ({
-                required String content,
-                Value<int> rowid = const Value.absent(),
-              }) => MessagesFtsCompanion.insert(content: content, rowid: rowid),
+          updateCompanionCallback: ({
+            Value<String> content = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => MessagesFtsCompanion(content: content, rowid: rowid),
+          createCompanionCallback: ({
+            required String content,
+            Value<int> rowid = const Value.absent(),
+          }) => MessagesFtsCompanion.insert(content: content, rowid: rowid),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
@@ -764,26 +766,24 @@ typedef $MessagesFtsProcessedTableManager =
       MessagesFt,
       PrefetchHooks Function()
     >;
-typedef $MessagesMetasCreateCompanionBuilder =
-    MessagesMetasCompanion Function({
-      required int docId,
-      required String messageId,
-      required String conversationId,
-      required String category,
-      required String userId,
-      required DateTime createdAt,
-      Value<int> rowid,
-    });
-typedef $MessagesMetasUpdateCompanionBuilder =
-    MessagesMetasCompanion Function({
-      Value<int> docId,
-      Value<String> messageId,
-      Value<String> conversationId,
-      Value<String> category,
-      Value<String> userId,
-      Value<DateTime> createdAt,
-      Value<int> rowid,
-    });
+typedef $MessagesMetasCreateCompanionBuilder = MessagesMetasCompanion Function({
+  required int docId,
+  required String messageId,
+  required String conversationId,
+  required String category,
+  required String userId,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $MessagesMetasUpdateCompanionBuilder = MessagesMetasCompanion Function({
+  Value<int> docId,
+  Value<String> messageId,
+  Value<String> conversationId,
+  Value<String> category,
+  Value<String> userId,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
 
 class $MessagesMetasFilterComposer
     extends Composer<_$FtsDatabase, MessagesMetas> {
