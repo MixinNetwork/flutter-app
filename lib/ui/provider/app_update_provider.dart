@@ -63,7 +63,9 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   final bool _windows;
   var _store = false;
   Timer? _timer;
-  late String _package;
+  Future<void>? _checkInFlight;
+  Future<bool>? _storeCheckInFlight;
+  String? _package;
   late List<int> _publicKey;
   AppUpdateItem? _item;
   MacUpdateChannel? _mac;
@@ -152,27 +154,28 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   @visibleForTesting
   Future<void> check() => _check();
 
-  // Checked again before each use, because the proxy can change at any time.
-  bool _sparkleNeedsProxy() {
-    if (_mac != MacUpdateChannel.dmg || _proxy == null) return false;
-    // Sparkle downloads with NSURLSession, which ignores the in-app proxy,
-    // so the install would fail. Sparkle refuses a file:// feed, so the app
-    // cannot download the DMG for it.
-    i('app update: no DMG update, Sparkle cannot use the in-app proxy');
-    if (mounted) state = AppUpdateState.none;
-    return true;
+  Future<void> checkForUpdate() async {
+    if (!mounted || state.status != AppUpdateStatus.none) return;
+    if (_store) {
+      await _checkStore();
+    } else if (_mac != null || _package != null) {
+      await _check();
+    }
   }
 
-  Future<void> _check() async {
+  Future<void> _check() =>
+      _checkInFlight ??= _runCheck().whenComplete(() => _checkInFlight = null);
+
+  Future<void> _runCheck() async {
     if (state.status == AppUpdateStatus.downloading) return;
-    if (_sparkleNeedsProxy()) return;
     try {
       final info = await getPackageInfo();
       final build = int.parse(info.buildNumber);
       // 0 is the fallback when the build is unknown; every item is newer.
       if (build <= 0) return;
-      final item = _mac == null
-          ? findAppUpdate(await _get(_appcastUrl), _package, build)
+      final package = _package;
+      final item = _mac == null && package != null
+          ? findAppUpdate(await _get(_appcastUrl), package, build)
           : null;
       final available = switch (_mac) {
         MacUpdateChannel.appStore => isNewerVersion(
@@ -184,7 +187,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
           (latestAppcastBuild(await _get(_appcastUrl), 'dmg') ?? 0) > build,
         null => item != null,
       };
-      if (!mounted || !available || _sparkleNeedsProxy()) return;
+      if (!mounted || !available) return;
       // The state stays available, so a later appcast without this package
       // must not empty the item.
       _item = item ?? _item;
@@ -223,7 +226,10 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   Future<bool> checkStore() => _checkStore();
 
   /// False when the app is not packaged, so it is not the Store build.
-  Future<bool> _checkStore() async {
+  Future<bool> _checkStore() => _storeCheckInFlight ??= _runCheckStore()
+      .whenComplete(() => _storeCheckInFlight = null);
+
+  Future<bool> _runCheckStore() async {
     if (state.status == AppUpdateStatus.downloading) return true;
     try {
       final count = await storeUpdateChannel.invokeMethod<int>(
@@ -323,7 +329,7 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
   }
 
   Future<void> _installSparkle() async {
-    if (state.status == AppUpdateStatus.downloading || _sparkleNeedsProxy()) {
+    if (state.status == AppUpdateStatus.downloading) {
       return;
     }
     state = const AppUpdateState(AppUpdateStatus.downloading);
