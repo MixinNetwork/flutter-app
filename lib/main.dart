@@ -27,6 +27,7 @@ import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/local_state_storage.dart';
 import 'utils/logger.dart';
+import 'utils/platform.dart';
 import 'utils/system/linux_accessibility.dart';
 import 'utils/system/main_window.dart';
 import 'utils/system/system_fonts.dart';
@@ -98,8 +99,12 @@ Future<void> _runApp(List<String> args) async {
 
   runApp(const ProviderScope(child: OverlaySupport.global(child: App())));
 
+  if (!kPlatformIsDesktop) return;
   final window = await ensureMainWindow();
-  if (window == null) return;
+  if (window == null) {
+    e('main window is null at startup');
+    return;
+  }
 
   if (Platform.isMacOS) {
     window

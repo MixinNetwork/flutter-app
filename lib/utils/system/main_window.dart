@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:nativeapi/nativeapi.dart' show DisplayManager;
 import 'package:window_manager/window_manager.dart';
 
+import '../logger.dart';
 import '../platform.dart';
 import 'windows.dart';
 
@@ -36,8 +37,12 @@ void restoreWindowForStartup(Window window) {
 }
 
 void showMainWindow() {
+  if (!kPlatformIsDesktop) return;
   final window = mainWindow;
-  if (window == null) return;
+  if (window == null) {
+    e('main window is null; cannot show');
+    return;
+  }
   if (window.isMinimized) window.restore();
   window.show();
 }
