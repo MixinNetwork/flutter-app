@@ -29,6 +29,7 @@ import 'utils/local_state_storage.dart';
 import 'utils/logger.dart';
 import 'utils/platform.dart';
 import 'utils/system/linux_accessibility.dart';
+import 'utils/system/main_window.dart';
 import 'utils/system/system_fonts.dart';
 import 'widgets/high_light_text.dart' show prepareLinkRanges;
 import 'widgets/protocol_handler.dart';
@@ -98,41 +99,52 @@ Future<void> _runApp(List<String> args) async {
 
   runApp(const ProviderScope(child: OverlaySupport.global(child: App())));
 
-  if (kPlatformIsDesktop) {
-    Size? windowSize;
-    if (Platform.isWindows) {
+  if (!kPlatformIsDesktop) return;
+  final window = await ensureMainWindow();
+  if (window == null) {
+    e('main window is null at startup');
+    return;
+  }
+
+  if (Platform.isMacOS) {
+    window
+      ..titleBarStyle = TitleBarStyle.hidden
+      ..isWindowControlButtonsVisible = true;
+  }
+  restoreWindowForStartup(window);
+
+  if (Platform.isWindows) {
+    const defaultWindowSize = Size(1280, 750);
+    final workArea = workAreaUnderCursor;
+    final Size screenSize;
+    if (workArea != null) {
+      i('workArea: $workArea');
+      screenSize = workArea.size;
+    } else {
       final screen = await getCurrentScreen();
       i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
-      const defaultWindowSize = Size(1280, 750);
-      if (screen != null) {
-        var screenSize = screen.visibleFrame.size;
-        if (Platform.isWindows) {
-          screenSize = screenSize / screen.scaleFactor;
-        }
-        final size = Size(
-          math.min(screenSize.width, defaultWindowSize.width),
-          math.min(screenSize.height, defaultWindowSize.height),
-        );
-        windowSize = size;
-      } else {
-        windowSize = defaultWindowSize;
-      }
+      screenSize = screen == null
+          ? defaultWindowSize
+          : screen.visibleFrame.size / screen.scaleFactor;
     }
-
-    final windowOptions = WindowOptions(
-      titleBarStyle: Platform.isMacOS ? TitleBarStyle.hidden : null,
-      minimumSize: const Size(
-        kSlidePageMinWidth + kResponsiveNavigationMinWidth,
-        480,
-      ),
-      size: windowSize,
-      center: Platform.isWindows ? true : null,
+    final windowSize = Size(
+      math.min(screenSize.width, defaultWindowSize.width),
+      math.min(screenSize.height, defaultWindowSize.height),
     );
-
-    await windowManager.ensureInitialized();
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    window.setSize(windowSize.toNative(), false);
+    if (workArea != null) {
+      window.position = (workArea.center - windowSize.center(Offset.zero))
+          .toNative();
+    } else {
+      window.center();
+    }
   }
+
+  window
+    ..minimumSize = const Size(
+      kSlidePageMinWidth + kResponsiveNavigationMinWidth,
+      480,
+    ).toNative()
+    ..show()
+    ..focus();
 }

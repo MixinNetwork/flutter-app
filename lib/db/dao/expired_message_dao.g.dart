@@ -209,5 +209,6 @@ class ExpiredMessageDaoManager {
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
 }
 
-typedef MarkExpiredMessageRead$where =
-    Expression<bool> Function(ExpiredMessages expired_messages);
+typedef MarkExpiredMessageRead$where = Expression<bool> Function(
+  ExpiredMessages expired_messages,
+);

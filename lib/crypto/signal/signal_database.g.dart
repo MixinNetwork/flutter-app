@@ -2071,20 +2071,18 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   ];
 }
 
-typedef $SenderKeysCreateCompanionBuilder =
-    SenderKeysCompanion Function({
-      required String groupId,
-      required String senderId,
-      required Uint8List record,
-      Value<int> rowid,
-    });
-typedef $SenderKeysUpdateCompanionBuilder =
-    SenderKeysCompanion Function({
-      Value<String> groupId,
-      Value<String> senderId,
-      Value<Uint8List> record,
-      Value<int> rowid,
-    });
+typedef $SenderKeysCreateCompanionBuilder = SenderKeysCompanion Function({
+  required String groupId,
+  required String senderId,
+  required Uint8List record,
+  Value<int> rowid,
+});
+typedef $SenderKeysUpdateCompanionBuilder = SenderKeysCompanion Function({
+  Value<String> groupId,
+  Value<String> senderId,
+  Value<Uint8List> record,
+  Value<int> rowid,
+});
 
 class $SenderKeysFilterComposer extends Composer<_$SignalDatabase, SenderKeys> {
   $SenderKeysFilterComposer({
@@ -2235,26 +2233,24 @@ typedef $SenderKeysProcessedTableManager =
       SenderKey,
       PrefetchHooks Function()
     >;
-typedef $IdentitiesCreateCompanionBuilder =
-    IdentitiesCompanion Function({
-      Value<int> id,
-      required String address,
-      Value<int?> registrationId,
-      required Uint8List publicKey,
-      Value<Uint8List?> privateKey,
-      Value<int?> nextPrekeyId,
-      required int timestamp,
-    });
-typedef $IdentitiesUpdateCompanionBuilder =
-    IdentitiesCompanion Function({
-      Value<int> id,
-      Value<String> address,
-      Value<int?> registrationId,
-      Value<Uint8List> publicKey,
-      Value<Uint8List?> privateKey,
-      Value<int?> nextPrekeyId,
-      Value<int> timestamp,
-    });
+typedef $IdentitiesCreateCompanionBuilder = IdentitiesCompanion Function({
+  Value<int> id,
+  required String address,
+  Value<int?> registrationId,
+  required Uint8List publicKey,
+  Value<Uint8List?> privateKey,
+  Value<int?> nextPrekeyId,
+  required int timestamp,
+});
+typedef $IdentitiesUpdateCompanionBuilder = IdentitiesCompanion Function({
+  Value<int> id,
+  Value<String> address,
+  Value<int?> registrationId,
+  Value<Uint8List> publicKey,
+  Value<Uint8List?> privateKey,
+  Value<int?> nextPrekeyId,
+  Value<int> timestamp,
+});
 
 class $IdentitiesFilterComposer extends Composer<_$SignalDatabase, Identities> {
   $IdentitiesFilterComposer({
@@ -2475,18 +2471,16 @@ typedef $IdentitiesProcessedTableManager =
       Identity,
       PrefetchHooks Function()
     >;
-typedef $PrekeysCreateCompanionBuilder =
-    PrekeysCompanion Function({
-      Value<int> id,
-      required int prekeyId,
-      required Uint8List record,
-    });
-typedef $PrekeysUpdateCompanionBuilder =
-    PrekeysCompanion Function({
-      Value<int> id,
-      Value<int> prekeyId,
-      Value<Uint8List> record,
-    });
+typedef $PrekeysCreateCompanionBuilder = PrekeysCompanion Function({
+  Value<int> id,
+  required int prekeyId,
+  required Uint8List record,
+});
+typedef $PrekeysUpdateCompanionBuilder = PrekeysCompanion Function({
+  Value<int> id,
+  Value<int> prekeyId,
+  Value<Uint8List> record,
+});
 
 class $PrekeysFilterComposer extends Composer<_$SignalDatabase, Prekeys> {
   $PrekeysFilterComposer({
@@ -2580,13 +2574,11 @@ class $PrekeysTableManager
               $PrekeysOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $PrekeysAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<int> prekeyId = const Value.absent(),
-                Value<Uint8List> record = const Value.absent(),
-              }) =>
-                  PrekeysCompanion(id: id, prekeyId: prekeyId, record: record),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> prekeyId = const Value.absent(),
+            Value<Uint8List> record = const Value.absent(),
+          }) => PrekeysCompanion(id: id, prekeyId: prekeyId, record: record),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -2628,20 +2620,18 @@ typedef $PrekeysProcessedTableManager =
       Prekey,
       PrefetchHooks Function()
     >;
-typedef $SignedPrekeysCreateCompanionBuilder =
-    SignedPrekeysCompanion Function({
-      Value<int> id,
-      required int prekeyId,
-      required Uint8List record,
-      required int timestamp,
-    });
-typedef $SignedPrekeysUpdateCompanionBuilder =
-    SignedPrekeysCompanion Function({
-      Value<int> id,
-      Value<int> prekeyId,
-      Value<Uint8List> record,
-      Value<int> timestamp,
-    });
+typedef $SignedPrekeysCreateCompanionBuilder = SignedPrekeysCompanion Function({
+  Value<int> id,
+  required int prekeyId,
+  required Uint8List record,
+  required int timestamp,
+});
+typedef $SignedPrekeysUpdateCompanionBuilder = SignedPrekeysCompanion Function({
+  Value<int> id,
+  Value<int> prekeyId,
+  Value<Uint8List> record,
+  Value<int> timestamp,
+});
 
 class $SignedPrekeysFilterComposer
     extends Composer<_$SignalDatabase, SignedPrekeys> {
@@ -2812,22 +2802,20 @@ typedef $SignedPrekeysProcessedTableManager =
       SignedPrekey,
       PrefetchHooks Function()
     >;
-typedef $SessionsCreateCompanionBuilder =
-    SessionsCompanion Function({
-      Value<int> id,
-      required String address,
-      required int device,
-      required Uint8List record,
-      required int timestamp,
-    });
-typedef $SessionsUpdateCompanionBuilder =
-    SessionsCompanion Function({
-      Value<int> id,
-      Value<String> address,
-      Value<int> device,
-      Value<Uint8List> record,
-      Value<int> timestamp,
-    });
+typedef $SessionsCreateCompanionBuilder = SessionsCompanion Function({
+  Value<int> id,
+  required String address,
+  required int device,
+  required Uint8List record,
+  required int timestamp,
+});
+typedef $SessionsUpdateCompanionBuilder = SessionsCompanion Function({
+  Value<int> id,
+  Value<String> address,
+  Value<int> device,
+  Value<Uint8List> record,
+  Value<int> timestamp,
+});
 
 class $SessionsFilterComposer extends Composer<_$SignalDatabase, Sessions> {
   $SessionsFilterComposer({

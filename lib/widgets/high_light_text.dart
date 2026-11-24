@@ -197,12 +197,11 @@ class CustomSelectableText extends HookWidget {
   }
 }
 
-typedef InlineMatchBuilder =
-    InlineSpan Function(
-      TextSpan originalSpan,
-      String displayString,
-      String linkString,
-    );
+typedef InlineMatchBuilder = InlineSpan Function(
+  TextSpan originalSpan,
+  String displayString,
+  String linkString,
+);
 
 // A row runs every matcher again each time it is built, as when it scrolls
 // back into view. Regular expressions run in an interpreter in AOT builds, so
@@ -360,8 +359,8 @@ class _TextCache {
 
   const _TextCache._({
     required this.text,
-    required Map<InlineSpan, int> lengths,
-  }) : _lengths = lengths;
+    required this._lengths,
+  });
 
   final String text;
 

@@ -41,21 +41,18 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateState> {
     unawaited(_windows ? _startStore() : _start());
   }
 
-  /// An updater of [package] (or of the macOS [mac] channel) that does not
+  /// An updater of [_package] (or of the macOS [_mac] channel) that does not
   /// check by itself and gets the network through [dio] and the in-app proxy
   /// from [proxy].
   @visibleForTesting
   AppUpdateNotifier.test(
     this._ref, {
-    required String package,
-    required List<int> publicKey,
+    required this._package,
+    required this._publicKey,
     required Dio Function() dio,
-    MacUpdateChannel? mac,
+    this._mac,
     ProxyConfig? Function()? proxy,
-  }) : _package = package,
-       _publicKey = publicKey,
-       _testDio = dio,
-       _mac = mac,
+  }) : _testDio = dio,
        _testProxy = proxy,
        _windows = false,
        super(AppUpdateState.none);

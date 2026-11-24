@@ -21,13 +21,13 @@ class ClampingViewport extends Viewport {
     super.key,
     super.axisDirection,
     super.crossAxisDirection,
-    double anchor = 0.0,
+    this._anchor = 0.0,
     super.center,
     super.scrollCacheExtent,
     super.slivers,
     this.scrollOffsetCorrection,
     this.suppressAutoBottomTracking,
-  }) : _anchor = anchor;
+  });
 
   // [Viewport] enforces constraints on [Viewport.anchor], so we need our own
   // version.
@@ -80,13 +80,13 @@ class ClampingRenderViewport extends RenderViewport {
     required super.crossAxisDirection,
     required super.offset,
     super.axisDirection,
-    double anchor = 0.0,
+    this._anchor = 0.0,
     super.children,
     super.center,
     super.scrollCacheExtent,
     this.scrollOffsetCorrection,
     this.suppressAutoBottomTracking,
-  }) : _anchor = anchor;
+  });
 
   static const int _maxLayoutCycles = 10;
 

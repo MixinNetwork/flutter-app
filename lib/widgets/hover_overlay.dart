@@ -27,13 +27,12 @@ class _HoverOverlayForceHiddenTool {
   }
 }
 
-typedef PortalBuilder<T> =
-    Widget Function(
-      BuildContext context,
-      T value,
-      Widget Function(Widget child) portalHoverWrapper,
-      Widget? child,
-    );
+typedef PortalBuilder<T> = Widget Function(
+  BuildContext context,
+  T value,
+  Widget Function(Widget child) portalHoverWrapper,
+  Widget? child,
+);
 
 class HoverOverlay extends HookConsumerWidget {
   const HoverOverlay({

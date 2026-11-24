@@ -8,10 +8,9 @@ const kMentionReadModelThrottleDuration = Duration(seconds: 3);
 
 class MentionReadModel {
   MentionReadModel({
-    required UserDao userDao,
+    required this._userDao,
     DataBaseEventBus? eventBus,
-  }) : _userDao = userDao,
-       _eventBus = eventBus ?? DataBaseEventBus.instance;
+  }) : _eventBus = eventBus ?? DataBaseEventBus.instance;
 
   final UserDao _userDao;
   final DataBaseEventBus _eventBus;
@@ -69,8 +68,9 @@ class MentionReadModel {
   Stream<List<T>> _watch<T>({
     required Iterable<Stream<dynamic>> events,
     required Future<List<T>> Function() fetch,
-  }) => Rx.merge(events)
-      .throttleTime(kMentionReadModelThrottleDuration)
-      .startWith(null)
-      .asyncMap((_) => fetch());
+  }) =>
+      Rx.merge(events)
+          .throttleTime(kMentionReadModelThrottleDuration)
+          .startWith(null)
+          .asyncMap((_) => fetch());
 }

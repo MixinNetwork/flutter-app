@@ -112,7 +112,7 @@ class InteractiveDecoratedBox extends StatelessWidget {
   const InteractiveDecoratedBox({
     required this.child,
     super.key,
-    Decoration? decoration,
+    this._decoration,
     this.hoveringDecoration,
     this.tapDowningDecoration,
     this.inDuration = const Duration(milliseconds: 120),
@@ -127,7 +127,7 @@ class InteractiveDecoratedBox extends StatelessWidget {
     this.onHover,
     this.cursor = MouseCursor.defer,
     this.behavior = HitTestBehavior.opaque,
-  }) : _decoration = decoration;
+  });
 
   InteractiveDecoratedBox.color({
     required this.child,

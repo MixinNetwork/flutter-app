@@ -693,30 +693,27 @@ class QuoteMessageItem {
   }
 }
 
-typedef BaseQuoteMessageItem$where =
-    Expression<bool> Function(
-      Messages message,
-      Users sender,
-      Stickers sticker,
-      Users shareUser,
-      MessageMentions messageMention,
-    );
-typedef BaseQuoteMessageItem$order =
-    OrderBy Function(
-      Messages message,
-      Users sender,
-      Stickers sticker,
-      Users shareUser,
-      MessageMentions messageMention,
-    );
-typedef BaseQuoteMessageItem$limit =
-    Limit Function(
-      Messages message,
-      Users sender,
-      Stickers sticker,
-      Users shareUser,
-      MessageMentions messageMention,
-    );
+typedef BaseQuoteMessageItem$where = Expression<bool> Function(
+  Messages message,
+  Users sender,
+  Stickers sticker,
+  Users shareUser,
+  MessageMentions messageMention,
+);
+typedef BaseQuoteMessageItem$order = OrderBy Function(
+  Messages message,
+  Users sender,
+  Stickers sticker,
+  Users shareUser,
+  MessageMentions messageMention,
+);
+typedef BaseQuoteMessageItem$limit = Limit Function(
+  Messages message,
+  Users sender,
+  Stickers sticker,
+  Users shareUser,
+  MessageMentions messageMention,
+);
 
 class SendingMessage {
   final String messageId;
@@ -1149,15 +1146,18 @@ class MiniMessageItem {
   }
 }
 
-typedef SearchMessage$where =
-    Expression<bool> Function(
-      Messages m,
-      Conversations c,
-      Users u,
-      Users owner,
-    );
-typedef SearchMessage$limit =
-    Limit Function(Messages m, Conversations c, Users u, Users owner);
+typedef SearchMessage$where = Expression<bool> Function(
+  Messages m,
+  Conversations c,
+  Users u,
+  Users owner,
+);
+typedef SearchMessage$limit = Limit Function(
+  Messages m,
+  Conversations c,
+  Users u,
+  Users owner,
+);
 
 class QuoteMinimal {
   final int rowid;

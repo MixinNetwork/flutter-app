@@ -482,9 +482,8 @@ LRESULT CALLBACK PopupProc(HWND hwnd, UINT message, WPARAM wparam,
                            LPARAM lparam) {
   BotWindow* bot = FromHandle(hwnd);
   if (!bot) return DefWindowProcW(hwnd, message, wparam, lparam);
-  // Not forwarded to FlutterDesktopViewControllerHandleTopLevelWindowProc:
-  // plugins registered there, like window_manager, take any HWND for the
-  // main window's.
+  // This popup handles its own messages. Flutter's top-level window
+  // procedure is registered for the main runner window.
   switch (message) {
     case WM_ACTIVATE:
       // Like a menu: anything else taking focus closes it.
@@ -751,8 +750,7 @@ void Closing(void*, int64_t browser) {
   Windows().erase(found);
 }
 
-// Lets the view's alpha through, as window_manager does for a transparent
-// background.
+// Lets the view's alpha through to the desktop compositor.
 void MakeTransparent(HWND window) {
   struct AccentPolicy {
     int state;

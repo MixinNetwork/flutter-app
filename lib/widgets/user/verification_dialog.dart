@@ -34,8 +34,10 @@ Future<T?> showVerificationDialog<T>(
 );
 
 typedef RequestVerification = Future<VerificationResponse> Function();
-typedef VerifyPhoneCode<T> =
-    Future<T> Function(String code, VerificationResponse response);
+typedef VerifyPhoneCode<T> = Future<T> Function(
+  String code,
+  VerificationResponse response,
+);
 
 class _VerificationCodeDialog<T> extends StatelessWidget {
   const _VerificationCodeDialog({

@@ -817,12 +817,11 @@ class ConversationDaoManager {
       $InscriptionItemsTableManager(_db.attachedDatabase, _db.inscriptionItems);
 }
 
-typedef BaseConversationItemCount$where =
-    Expression<bool> Function(
-      Conversations conversation,
-      Users owner,
-      CircleConversations circleConversation,
-    );
+typedef BaseConversationItemCount$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+  CircleConversations circleConversation,
+);
 
 class ConversationItem {
   final String conversationId;
@@ -1012,75 +1011,68 @@ class ConversationItem {
   }
 }
 
-typedef BaseConversationItems$where =
-    Expression<bool> Function(
-      Conversations conversation,
-      Users owner,
-      Messages lastMessage,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-      ExpiredMessages em,
-    );
-typedef BaseConversationItems$order =
-    OrderBy Function(
-      Conversations conversation,
-      Users owner,
-      Messages lastMessage,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-      ExpiredMessages em,
-    );
-typedef BaseConversationItems$limit =
-    Limit Function(
-      Conversations conversation,
-      Users owner,
-      Messages lastMessage,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-      ExpiredMessages em,
-    );
-typedef BaseConversationItemsByCircleId$where =
-    Expression<bool> Function(
-      Conversations conversation,
-      Users owner,
-      CircleConversations circleConversation,
-      Messages lastMessage,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-      ExpiredMessages em,
-    );
-typedef BaseConversationItemsByCircleId$order =
-    OrderBy Function(
-      Conversations conversation,
-      Users owner,
-      CircleConversations circleConversation,
-      Messages lastMessage,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-      ExpiredMessages em,
-    );
-typedef BaseConversationItemsByCircleId$limit =
-    Limit Function(
-      Conversations conversation,
-      Users owner,
-      CircleConversations circleConversation,
-      Messages lastMessage,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-      ExpiredMessages em,
-    );
-typedef BaseUnseenMessageCount$where =
-    Expression<bool> Function(
-      Conversations conversation,
-      Users owner,
-      CircleConversations circleConversation,
-    );
+typedef BaseConversationItems$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+  Messages lastMessage,
+  Users lastMessageSender,
+  Snapshots snapshot,
+  Users participant,
+  ExpiredMessages em,
+);
+typedef BaseConversationItems$order = OrderBy Function(
+  Conversations conversation,
+  Users owner,
+  Messages lastMessage,
+  Users lastMessageSender,
+  Snapshots snapshot,
+  Users participant,
+  ExpiredMessages em,
+);
+typedef BaseConversationItems$limit = Limit Function(
+  Conversations conversation,
+  Users owner,
+  Messages lastMessage,
+  Users lastMessageSender,
+  Snapshots snapshot,
+  Users participant,
+  ExpiredMessages em,
+);
+typedef BaseConversationItemsByCircleId$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+  CircleConversations circleConversation,
+  Messages lastMessage,
+  Users lastMessageSender,
+  Snapshots snapshot,
+  Users participant,
+  ExpiredMessages em,
+);
+typedef BaseConversationItemsByCircleId$order = OrderBy Function(
+  Conversations conversation,
+  Users owner,
+  CircleConversations circleConversation,
+  Messages lastMessage,
+  Users lastMessageSender,
+  Snapshots snapshot,
+  Users participant,
+  ExpiredMessages em,
+);
+typedef BaseConversationItemsByCircleId$limit = Limit Function(
+  Conversations conversation,
+  Users owner,
+  CircleConversations circleConversation,
+  Messages lastMessage,
+  Users lastMessageSender,
+  Snapshots snapshot,
+  Users participant,
+  ExpiredMessages em,
+);
+typedef BaseUnseenMessageCount$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+  CircleConversations circleConversation,
+);
 
 class BaseUnseenConversationCountResult {
   final int unseenConversationCount;
@@ -1109,8 +1101,10 @@ class BaseUnseenConversationCountResult {
   }
 }
 
-typedef BaseUnseenConversationCount$where =
-    Expression<bool> Function(Conversations conversation, Users owner);
+typedef BaseUnseenConversationCount$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+);
 
 class SearchConversationItem {
   final String conversationId;
@@ -1240,48 +1234,43 @@ class SearchConversationItem {
   }
 }
 
-typedef FuzzySearchConversation$where =
-    Expression<bool> Function(
-      Conversations conversation,
-      Users owner,
-      Messages message,
-      Users lastMessageSender,
-      Users participant,
-    );
-typedef FuzzySearchConversation$limit =
-    Limit Function(
-      Conversations conversation,
-      Users owner,
-      Messages message,
-      Users lastMessageSender,
-      Users participant,
-    );
-typedef SearchConversationItemByIn$order =
-    OrderBy Function(
-      Conversations conversation,
-      Users owner,
-      Messages message,
-      Users lastMessageSender,
-      Users participant,
-    );
-typedef FuzzySearchConversationInCircle$where =
-    Expression<bool> Function(
-      Conversations conversation,
-      Users owner,
-      Messages message,
-      Users lastMessageSender,
-      CircleConversations circleConversation,
-      Users participant,
-    );
-typedef FuzzySearchConversationInCircle$limit =
-    Limit Function(
-      Conversations conversation,
-      Users owner,
-      Messages message,
-      Users lastMessageSender,
-      CircleConversations circleConversation,
-      Users participant,
-    );
+typedef FuzzySearchConversation$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+  Messages message,
+  Users lastMessageSender,
+  Users participant,
+);
+typedef FuzzySearchConversation$limit = Limit Function(
+  Conversations conversation,
+  Users owner,
+  Messages message,
+  Users lastMessageSender,
+  Users participant,
+);
+typedef SearchConversationItemByIn$order = OrderBy Function(
+  Conversations conversation,
+  Users owner,
+  Messages message,
+  Users lastMessageSender,
+  Users participant,
+);
+typedef FuzzySearchConversationInCircle$where = Expression<bool> Function(
+  Conversations conversation,
+  Users owner,
+  Messages message,
+  Users lastMessageSender,
+  CircleConversations circleConversation,
+  Users participant,
+);
+typedef FuzzySearchConversationInCircle$limit = Limit Function(
+  Conversations conversation,
+  Users owner,
+  Messages message,
+  Users lastMessageSender,
+  CircleConversations circleConversation,
+  Users participant,
+);
 
 class ConversationStorageUsage {
   final String conversationId;

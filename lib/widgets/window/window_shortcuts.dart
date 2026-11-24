@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:window_manager/window_manager.dart';
+
+import '../../utils/system/main_window.dart';
 
 class WindowShortcuts extends StatelessWidget {
   const WindowShortcuts({required this.child, super.key});
@@ -16,7 +17,7 @@ class WindowShortcuts extends StatelessWidget {
     actions: {
       _CloseWindowIntent: CallbackAction(
         onInvoke: (intent) {
-          windowManager.hide();
+          mainWindow?.hide();
         },
       ),
     },

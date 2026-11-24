@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../utils/logger.dart';
-import '../../utils/platform.dart';
+import '../../utils/system/main_window.dart';
 
 class MoveWindowBarrier extends StatelessWidget {
   const MoveWindowBarrier({required this.child, super.key, this.enable = true});
@@ -43,32 +45,27 @@ class MoveWindow extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
     behavior: behavior,
     onDoubleTap: clickToFullScreen
-        ? () async {
-            if (!kPlatformIsDarwin) {
-              // Only enable for macOS.
-              // Windows and Linux already has a title bar.
-              return;
-            }
-            if (await windowManager.isMaximized()) {
+        ? () {
+            if (!Platform.isMacOS) return;
+            final window = mainWindow;
+            if (window == null) return;
+            if (window.isMaximized) {
               d('window is maximized, restore');
-              await windowManager.unmaximize();
-              if (await windowManager.isMaximized()) {
+              window.unmaximize();
+              if (window.isMaximized) {
                 d('window is still maximized, set to default size');
-                const windowSize = Size(960, 720);
-                final position = await calcWindowPosition(
-                  windowSize,
-                  Alignment.center,
-                );
-                await windowManager.setBounds(
-                  null,
-                  position: position,
-                  size: windowSize,
-                  animate: true,
-                );
+                final bounds = Rect.fromCenter(
+                  center:
+                      workAreaUnderCursor?.center ??
+                      window.bounds.toRect().center,
+                  width: 960,
+                  height: 720,
+                ).toNative();
+                if (!window.animateBounds(bounds)) window.bounds = bounds;
               }
             } else {
               d('window is not maximized, maximize');
-              await windowManager.maximize();
+              window.maximize();
             }
           }
         : null,
@@ -78,10 +75,7 @@ class MoveWindow extends StatelessWidget {
         // Windows already has a title bar.
         return;
       }
-      if (!kPlatformIsDesktop) {
-        return;
-      }
-      windowManager.startDragging();
+      mainWindow?.startDragging();
     },
     child: child,
   );

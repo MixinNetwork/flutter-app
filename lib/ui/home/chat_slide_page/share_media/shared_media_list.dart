@@ -16,12 +16,17 @@ import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/deferred_mount.dart';
 import '../../../../widgets/near_edge_scroll_listener.dart';
 
-typedef SharedMediaInitialLoader =
-    Future<List<MessageItem>> Function(int pageSize);
-typedef SharedMediaBeforeLoader =
-    Future<List<MessageItem>> Function(MessageOrderInfo anchor, int pageSize);
-typedef SharedMediaItemBuilder =
-    Widget Function(BuildContext context, MessageItem message);
+typedef SharedMediaInitialLoader = Future<List<MessageItem>> Function(
+  int pageSize,
+);
+typedef SharedMediaBeforeLoader = Future<List<MessageItem>> Function(
+  MessageOrderInfo anchor,
+  int pageSize,
+);
+typedef SharedMediaItemBuilder = Widget Function(
+  BuildContext context,
+  MessageItem message,
+);
 
 class SharedMediaList extends HookConsumerWidget {
   const SharedMediaList({

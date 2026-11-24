@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../account/security_key_value.dart';
 import '../../ui/home/conversation/conversation_hotkey.dart';
@@ -16,6 +15,7 @@ import '../../utils/event_bus.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/rivepod.dart';
+import '../../utils/system/main_window.dart';
 import '../../utils/uri_utils.dart';
 import '../actions/actions.dart';
 import '../auth.dart';
@@ -166,7 +166,7 @@ class _Menus extends HookConsumerWidget {
                 ),
                 onSelected: signed
                     ? () {
-                        windowManager.show();
+                        showMainWindow();
                         ref
                             .read(slideCategoryStateProvider.notifier)
                             .select(SlideCategoryType.setting);
@@ -213,11 +213,11 @@ class _Menus extends HookConsumerWidget {
                   LogicalKeyboardKey.keyH,
                   meta: true,
                 ),
-                onSelected: windowManager.hide,
+                onSelected: () => mainWindow?.hide(),
               ),
               PlatformMenuItem(
                 label: context.l10n.showMixin,
-                onSelected: windowManager.show,
+                onSelected: showMainWindow,
               ),
             ],
           ),
@@ -244,7 +244,7 @@ class _Menus extends HookConsumerWidget {
                 ),
                 onSelected: signed
                     ? () {
-                        windowManager.show();
+                        showMainWindow();
                         Actions.invoke<CreateConversationIntent>(
                           context,
                           const CreateConversationIntent(),
@@ -261,7 +261,7 @@ class _Menus extends HookConsumerWidget {
                 ),
                 onSelected: signed
                     ? () {
-                        windowManager.show();
+                        showMainWindow();
                         Actions.invoke<CreateGroupConversationIntent>(
                           context,
                           const CreateGroupConversationIntent(),
@@ -286,7 +286,7 @@ class _Menus extends HookConsumerWidget {
                 label: context.l10n.createCircle,
                 onSelected: signed
                     ? () {
-                        windowManager.show();
+                        showMainWindow();
                         Actions.invoke<CreateCircleIntent>(
                           context,
                           const CreateCircleIntent(),
@@ -298,7 +298,7 @@ class _Menus extends HookConsumerWidget {
                 members: [
                   PlatformMenuItem(
                     label: context.l10n.closeWindow,
-                    onSelected: windowManager.close,
+                    onSelected: () => mainWindow?.hide(),
                   ),
                 ],
               ),
@@ -316,13 +316,19 @@ class _Menus extends HookConsumerWidget {
               LogicalKeyboardKey.keyM,
               meta: true,
             ),
-            onSelected: windowManager.minimize,
+            onSelected: () => mainWindow?.minimize(),
           ),
           PlatformMenuItem(
             label: context.l10n.zoom,
-            onSelected: () async => !await windowManager.isMaximized()
-                ? windowManager.maximize()
-                : windowManager.restore(),
+            onSelected: () {
+              final window = mainWindow;
+              if (window == null) return;
+              if (window.isMaximized) {
+                window.unmaximize();
+              } else {
+                window.maximize();
+              }
+            },
           ),
           PlatformMenuItemGroup(
             members: [
@@ -358,15 +364,15 @@ class _Menus extends HookConsumerWidget {
               ),
             ],
           ),
-          PlatformMenuItemGroup(
+          const PlatformMenuItemGroup(
             members: [
               PlatformMenuItem(
                 label: 'Mixin',
-                shortcut: const SingleActivator(
+                shortcut: SingleActivator(
                   LogicalKeyboardKey.keyO,
                   meta: true,
                 ),
-                onSelected: windowManager.show,
+                onSelected: showMainWindow,
               ),
             ],
           ),
@@ -374,11 +380,11 @@ class _Menus extends HookConsumerWidget {
             members: [
               PlatformMenuItem(
                 label: context.l10n.bringAllToFront,
-                onSelected: windowManager.show,
+                onSelected: showMainWindow,
               ),
             ],
           ),
-          PlatformMenuItem(label: 'Mixin', onSelected: windowManager.show),
+          const PlatformMenuItem(label: 'Mixin', onSelected: showMainWindow),
         ],
       ),
       PlatformMenu(

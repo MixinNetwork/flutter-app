@@ -11,13 +11,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   irondash_engine_context
   local_auth_windows
   protocol_handler_windows
-  screen_retriever_windows
   sqlite3_flutter_libs
   super_native_extensions
   system_tray
   url_launcher_windows
   win_toast
-  window_manager
   window_size
 )
 

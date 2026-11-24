@@ -11,24 +11,16 @@ import '../../utils/logger.dart';
 @Deprecated('Use settingProvider instead')
 class _SettingState extends Equatable {
   const _SettingState({
-    int? brightness,
-    bool? messageShowAvatar,
-    bool? messagePreview,
-    bool? photoAutoDownload,
-    bool? videoAutoDownload,
-    bool? fileAutoDownload,
-    bool? collapsedSidebar,
-    double? chatFontSizeDelta,
-    bool? messageShowIdentityNumber,
-  }) : _brightness = brightness,
-       _messageShowAvatar = messageShowAvatar,
-       _messagePreview = messagePreview,
-       _photoAutoDownload = photoAutoDownload,
-       _videoAutoDownload = videoAutoDownload,
-       _fileAutoDownload = fileAutoDownload,
-       _collapsedSidebar = collapsedSidebar,
-       _chatFontSizeDelta = chatFontSizeDelta,
-       _messageShowIdentityNumber = messageShowIdentityNumber;
+    this._brightness,
+    this._messageShowAvatar,
+    this._messagePreview,
+    this._photoAutoDownload,
+    this._videoAutoDownload,
+    this._fileAutoDownload,
+    this._collapsedSidebar,
+    this._chatFontSizeDelta,
+    this._messageShowIdentityNumber,
+  });
 
   factory _SettingState.fromMap(Map<String, dynamic> map) => _SettingState(
     brightness: map['brightness'] as int?,
@@ -121,24 +113,16 @@ class _SettingState extends Equatable {
 
 class SettingChangeNotifier extends ChangeNotifier {
   SettingChangeNotifier({
-    int? brightness,
-    bool? messageShowAvatar,
-    bool? messagePreview,
-    bool? photoAutoDownload,
-    bool? videoAutoDownload,
-    bool? fileAutoDownload,
-    bool? collapsedSidebar,
-    double? chatFontSizeDelta,
-    bool? messageShowIdentityNumber,
-  }) : _brightness = brightness,
-       _messageShowAvatar = messageShowAvatar,
-       _messagePreview = messagePreview,
-       _photoAutoDownload = photoAutoDownload,
-       _videoAutoDownload = videoAutoDownload,
-       _fileAutoDownload = fileAutoDownload,
-       _collapsedSidebar = collapsedSidebar,
-       _chatFontSizeDelta = chatFontSizeDelta,
-       _messageShowIdentityNumber = messageShowIdentityNumber;
+    this._brightness,
+    this._messageShowAvatar,
+    this._messagePreview,
+    this._photoAutoDownload,
+    this._videoAutoDownload,
+    this._fileAutoDownload,
+    this._collapsedSidebar,
+    this._chatFontSizeDelta,
+    this._messageShowIdentityNumber,
+  });
 
   /// The brightness of theme.
   /// 0 : follow system

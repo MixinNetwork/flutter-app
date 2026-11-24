@@ -27,7 +27,7 @@ class ApiUpgradeRequiredException implements Exception {
 }
 
 class ApiUpgradeGate {
-  ApiUpgradeGate({void Function()? onRequired}) : _onRequired = onRequired;
+  ApiUpgradeGate({this._onRequired});
 
   final void Function()? _onRequired;
   bool _required = false;

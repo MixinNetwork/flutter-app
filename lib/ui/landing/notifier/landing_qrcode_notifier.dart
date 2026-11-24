@@ -22,13 +22,13 @@ import '../../provider/multi_auth_provider.dart';
 import '../landing_state.dart';
 
 typedef ProvisioningIdLoader = Future<MixinResponse<ProvisioningId>> Function();
-typedef ProvisioningLoader =
-    Future<MixinResponse<Provisioning>> Function(String deviceId);
-typedef ProvisioningVerifier =
-    FutureOr<(Account, String)> Function(
-      String secret,
-      signal.ECKeyPair keyPair,
-    );
+typedef ProvisioningLoader = Future<MixinResponse<Provisioning>> Function(
+  String deviceId,
+);
+typedef ProvisioningVerifier = FutureOr<(Account, String)> Function(
+  String secret,
+  signal.ECKeyPair keyPair,
+);
 
 class LandingQrCodeNotifier extends ValueNotifier<LandingState> {
   LandingQrCodeNotifier(

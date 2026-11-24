@@ -6,11 +6,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:system_tray/system_tray.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../constants/resources.dart';
 import '../extension/extension.dart';
 import '../logger.dart';
+import 'main_window.dart';
 
 final SystemTray _systemTray = SystemTray();
 
@@ -38,7 +38,7 @@ class SystemTrayWidget extends HookConsumerWidget {
         return;
       }
       _systemTray.setContextMenu([
-        MenuItem(label: show, onClicked: windowManager.show),
+        MenuItem(label: show, onClicked: showMainWindow),
         MenuSeparator(),
         MenuItem(
           label: exitStr,
@@ -88,7 +88,7 @@ Future<void> _initSystemTray() async {
     d('eventName: $eventName');
     switch (eventName) {
       case 'leftMouseUp':
-        windowManager.show();
+        showMainWindow();
       case 'rightMouseUp':
         _systemTray.popUpContextMenu();
       default:

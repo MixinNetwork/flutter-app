@@ -17,20 +17,21 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(
     MessageMention messageMention, {
     bool updateIfConflict = true,
-  }) => into(db.messageMentions)
-      .simpleInsert(messageMention, updateIfConflict: updateIfConflict)
-      .then((value) {
-        DataBaseEventBus.instance.updateMessageMention([
-          MiniMessageItem(
-            conversationId: messageMention.conversationId,
-            messageId: messageMention.messageId,
-          ),
-        ]);
-        DataBaseEventBus.instance.updateConversation(
-          messageMention.conversationId,
-        );
-        return value;
-      });
+  }) =>
+      into(db.messageMentions)
+          .simpleInsert(messageMention, updateIfConflict: updateIfConflict)
+          .then((value) {
+            DataBaseEventBus.instance.updateMessageMention([
+              MiniMessageItem(
+                conversationId: messageMention.conversationId,
+                messageId: messageMention.messageId,
+              ),
+            ]);
+            DataBaseEventBus.instance.updateConversation(
+              messageMention.conversationId,
+            );
+            return value;
+          });
 
   Future deleteMessageMention(MessageMention messageMention) =>
       (delete(db.messageMentions)..where(

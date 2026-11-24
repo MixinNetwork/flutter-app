@@ -15,7 +15,7 @@ publish_to: none
 version: 7.1.1+632
 
 environment:
-  sdk: "^3.10.0"
+  sdk: "^3.14.0"
   flutter: ^3.50.0
 
 dependencies:
@@ -95,6 +95,7 @@ dependencies:
   mime: ^2.0.0
   mixin_bot_sdk_dart: ^2.0.0
   mixin_logger: ^0.2.0
+  nativeapi: ^0.6.2
   network_info_plus: ^7.0.0
   ogg_opus_player: ^0.8.2
   open_file: ^4.0.0
@@ -135,7 +136,7 @@ dependencies:
   webview_flutter: ^4.14.1
   win32: ^5.15.0
   win_toast: ^0.4.0
-  window_manager: 0.5.2
+  window_manager: ^0.7.1
   word_segmenter: ^0.1.0
   xml: ^6.6.1
   window_size:

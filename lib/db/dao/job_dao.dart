@@ -30,13 +30,14 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   static const silentKey = 'silent';
   static const expireInKey = 'expireIn';
 
-  Future<int> insert(Job job) => into(db.jobs)
-      .insertOnConflictUpdate(job)
-      .whenComplete(
-        () => DataBaseEventBus.instance.addJob(
-          MiniJobItem(jobId: job.jobId, action: job.action),
-        ),
-      );
+  Future<int> insert(Job job) =>
+      into(db.jobs)
+          .insertOnConflictUpdate(job)
+          .whenComplete(
+            () => DataBaseEventBus.instance.addJob(
+              MiniJobItem(jobId: job.jobId, action: job.action),
+            ),
+          );
 
   Future<Job> createSendingJob(
     String messageId,

@@ -456,19 +456,17 @@ class TranscriptMessageItem {
   }
 }
 
-typedef BaseTranscriptMessageItem$where =
-    Expression<bool> Function(
-      TranscriptMessages transcript,
-      Messages message,
-      Users sender,
-      Users sharedUser,
-      Stickers sticker,
-    );
-typedef BaseTranscriptMessageItem$limit =
-    Limit Function(
-      TranscriptMessages transcript,
-      Messages message,
-      Users sender,
-      Users sharedUser,
-      Stickers sticker,
-    );
+typedef BaseTranscriptMessageItem$where = Expression<bool> Function(
+  TranscriptMessages transcript,
+  Messages message,
+  Users sender,
+  Users sharedUser,
+  Stickers sticker,
+);
+typedef BaseTranscriptMessageItem$limit = Limit Function(
+  TranscriptMessages transcript,
+  Messages message,
+  Users sender,
+  Users sharedUser,
+  Stickers sticker,
+);

@@ -328,8 +328,14 @@ class SafeSnapshotItem {
   }
 }
 
-typedef SnapshotItem$where =
-    Expression<bool> Function(SafeSnapshots s, Users u, Tokens t);
-typedef SnapshotItem$order =
-    OrderBy Function(SafeSnapshots s, Users u, Tokens t);
+typedef SnapshotItem$where = Expression<bool> Function(
+  SafeSnapshots s,
+  Users u,
+  Tokens t,
+);
+typedef SnapshotItem$order = OrderBy Function(
+  SafeSnapshots s,
+  Users u,
+  Tokens t,
+);
 typedef SnapshotItem$limit = Limit Function(SafeSnapshots s, Users u, Tokens t);
