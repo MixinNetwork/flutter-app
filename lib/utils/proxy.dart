@@ -125,24 +125,26 @@ class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
-    try {
-      final adapter = AbortableHttpClientAdapter(await client);
-      final resp = await adapter.fetch(options, requestStream, cancelFuture);
-      return resp;
-    } on http.RequestAbortedException catch (error, stackTrace) {
-      // RhttpException.request can not send to other isolate by SendPort
-      Error.throwWithStackTrace(
-        http.RequestAbortedException(error.uri),
-        stackTrace,
-      );
-    } on rhttp.RhttpWrappedClientException catch (error, stackTrace) {
-      // RhttpException.request can not send to other isolate by SendPort
-      Error.throwWithStackTrace(
-        http.ClientException(error.message, error.uri),
-        stackTrace,
-      );
-    }
+    final adapter = AbortableHttpClientAdapter(await client);
+    return adapter.fetch(options, requestStream, cancelFuture);
   }
+}
+
+Never _rethrowSendPortSafeError(Object error, StackTrace stackTrace) {
+  // RhttpException.request can not send to other isolate by SendPort
+  if (error is http.RequestAbortedException) {
+    Error.throwWithStackTrace(
+      http.RequestAbortedException(error.uri),
+      stackTrace,
+    );
+  }
+  if (error is rhttp.RhttpWrappedClientException) {
+    Error.throwWithStackTrace(
+      http.ClientException(error.message, error.uri),
+      stackTrace,
+    );
+  }
+  Error.throwWithStackTrace(error, stackTrace);
 }
 
 @visibleForTesting
@@ -204,9 +206,14 @@ class AbortableHttpClientAdapter implements HttpClientAdapter {
       ..maxRedirects = options.maxRedirects
       ..persistentConnection = options.persistentConnection;
 
-    final response = await client.send(request);
+    final http.StreamedResponse response;
+    try {
+      response = await client.send(request);
+    } catch (error, stackTrace) {
+      _rethrowSendPortSafeError(error, stackTrace);
+    }
     return ResponseBody(
-      response.stream.cast<Uint8List>(),
+      response.stream.cast<Uint8List>().handleError(_rethrowSendPortSafeError),
       response.statusCode,
       statusMessage: response.reasonPhrase,
       isRedirect: response.isRedirect,
