@@ -13,6 +13,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/utils/extension/extension.dart';
 import 'package:flutter_app/utils/mixin_api_client.dart';
+import 'package:flutter_app/workers/isolate_event.dart';
 import 'package:flutter_app/workers/job_queue.dart';
 import 'package:flutter_app/workers/message_worker_isolate.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,7 +103,7 @@ void main() {
   });
 
   test(
-    'sanitizeWorkerApiErrorForSendPort strips CancelToken and keeps auth/timing metadata',
+    'WorkerApiError.fromDioException drops CancelToken and keeps auth/timing metadata',
     () async {
       final port = ReceivePort();
       addTearDown(port.close);
@@ -130,25 +131,19 @@ void main() {
 
       expect(() => port.sendPort.send(apiError), throwsArgumentError);
 
-      final sanitized = sanitizeWorkerApiErrorForSendPort(apiError);
-      expect(sanitized, isNotNull);
-      expect(() => port.sendPort.send(sanitized), returnsNormally);
-      expect((sanitized!.error! as MixinError).code, 401);
-      expect(
-        sanitized.requestOptions.headers['Authorization'],
-        'Bearer test-token',
-      );
-      expect(sanitized.requestOptions.extra[kRequestTimeStampKey], requestTime);
-      expect(
-        sanitized.response?.headers.value('x-server-time'),
-        '1763978400000000000',
-      );
+      final dto = WorkerApiError.fromDioException(apiError);
+      expect(dto, isNotNull);
+      expect(() => port.sendPort.send(dto), returnsNormally);
+      expect(dto!.code, 401);
+      expect(dto.authorizationHeader, 'Bearer test-token');
+      expect(dto.requestTime, requestTime);
+      expect(dto.serverTime, 1763978400000000000);
 
       final cancelled = DioException.requestCancelled(
         requestOptions: options,
         reason: 'timeout',
       );
-      expect(sanitizeWorkerApiErrorForSendPort(cancelled), isNull);
+      expect(WorkerApiError.fromDioException(cancelled), isNull);
     },
   );
 }

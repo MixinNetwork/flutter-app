@@ -27,14 +27,17 @@ class ApiUpgradeRequiredException implements Exception {
 }
 
 class ApiUpgradeGate {
+  ApiUpgradeGate({void Function()? onRequired}) : _onRequired = onRequired;
+
+  final void Function()? _onRequired;
   bool _required = false;
 
   bool get isRequired => _required;
 
-  bool require() {
-    if (_required) return false;
+  void require() {
+    if (_required) return;
     _required = true;
-    return true;
+    _onRequired?.call();
   }
 
   DioException error(RequestOptions options) => DioException(
@@ -52,7 +55,6 @@ Client createClient({
   required bool loginByPhoneNumber,
   List<Interceptor> interceptors = const [],
   ApiUpgradeGate? upgradeGate,
-  void Function()? onUpgradeRequired,
 }) {
   final client = Client(
     userId: userId,
@@ -81,7 +83,7 @@ Client createClient({
           onError: (error, handler) {
             final mixinError = error is MixinApiError ? error.error : null;
             if (mixinError is MixinError && mixinError.code == oldVersion) {
-              if (upgradeGate.require()) onUpgradeRequired?.call();
+              upgradeGate.require();
             }
             handler.next(error);
           },

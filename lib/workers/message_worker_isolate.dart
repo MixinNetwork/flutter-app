@@ -160,8 +160,7 @@ class _MessageProcessRunner {
   late Blaze blaze;
   late Sender _sender;
   late SignalProtocol signalProtocol;
-  final _upgradeGate = ApiUpgradeGate();
-  var _upgradeHandled = false;
+  late final _upgradeGate = ApiUpgradeGate(onRequired: _onUpgradeRequired);
   var _blazeReady = false;
   var _jobsReady = false;
 
@@ -192,11 +191,11 @@ class _MessageProcessRunner {
       interceptors: [
         InterceptorsWrapper(
           onError: (e, handler) async {
-            final sanitized = sanitizeWorkerApiErrorForSendPort(e);
-            if (sanitized != null) {
+            final apiError = WorkerApiError.fromDioException(e);
+            if (apiError != null) {
               _sendEventToMainIsolate(
                 WorkerIsolateEventType.onApiRequestedError,
-                sanitized,
+                apiError,
               );
             }
             handler.next(e);
@@ -205,7 +204,6 @@ class _MessageProcessRunner {
       ],
       loginByPhoneNumber: initParams.loginByPhoneNumber,
       upgradeGate: _upgradeGate,
-      onUpgradeRequired: _onUpgradeRequired,
     )..configProxySetting(database.settingProperties);
 
     _ackJob = AckJob(database: database, client: client);
@@ -227,7 +225,6 @@ class _MessageProcessRunner {
       _floodJob,
       loginByPhoneNumber: initParams.loginByPhoneNumber,
       upgradeGate: _upgradeGate,
-      onUpgradeRequired: _onUpgradeRequired,
     );
     _blazeReady = true;
 
@@ -326,9 +323,6 @@ class _MessageProcessRunner {
   }
 
   void _onUpgradeRequired() {
-    _upgradeGate.require();
-    if (_upgradeHandled) return;
-    _upgradeHandled = true;
     if (_blazeReady) blaze.stopForUpgrade();
     _stopJobs();
     _sendEventToMainIsolate(WorkerIsolateEventType.onUpgradeRequired);
@@ -434,7 +428,7 @@ class _MessageProcessRunner {
       case MainIsolateEventType.disconnectBlazeWithTime:
         blaze.waitSyncTime();
       case MainIsolateEventType.requireUpgrade:
-        _onUpgradeRequired();
+        _upgradeGate.require();
       case MainIsolateEventType.reconnectBlaze:
         if (_upgradeGate.isRequired) return;
         i('message worker isolate: reconnect blaze');
@@ -466,35 +460,4 @@ class _MessageProcessRunner {
     jobSubscribers.forEach((subscription) => subscription.cancel());
     _deviceTransfer?.dispose();
   }
-}
-
-@visibleForTesting
-MixinApiError? sanitizeWorkerApiErrorForSendPort(DioException e) {
-  if (e is! MixinApiError) return null;
-  final error = e.error;
-  final response = e.response;
-  if (error is! MixinError || response == null) return null;
-  final authorization = e.requestOptions.headers['Authorization'];
-  final requestTime = e.requestOptions.extra[kRequestTimeStampKey];
-  final serverTime = response.headers.value('x-server-time');
-  final requestOptions = RequestOptions(
-    path: e.requestOptions.path,
-    headers: {
-      'Authorization': ?authorization,
-    },
-    extra: {
-      kRequestTimeStampKey: ?requestTime,
-    },
-  );
-  return MixinApiError(
-    requestOptions: requestOptions,
-    response: Response<dynamic>(
-      requestOptions: requestOptions,
-      statusCode: response.statusCode,
-      headers: Headers.fromMap({
-        if (serverTime != null) 'x-server-time': [serverTime],
-      }),
-    ),
-    error: error,
-  );
 }

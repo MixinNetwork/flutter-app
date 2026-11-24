@@ -265,16 +265,16 @@ void main() {
         await request.response.close();
       });
 
-      final upgradeGate = ApiUpgradeGate();
       final upgradeTriggered = Completer<void>();
       var upgradeCalls = 0;
       late Blaze blaze;
-      void onUpgradeRequired() {
-        upgradeGate.require();
-        upgradeCalls++;
-        blaze.stopForUpgrade();
-        if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
-      }
+      final upgradeGate = ApiUpgradeGate(
+        onRequired: () {
+          upgradeCalls++;
+          blaze.stopForUpgrade();
+          if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
+        },
+      );
 
       final adapter = _OldVersionAdapter();
       final client = Client(
@@ -285,7 +285,7 @@ void main() {
             onError: (error, handler) {
               final mixinError = error is MixinApiError ? error.error : null;
               if (mixinError is MixinError && mixinError.code == oldVersion) {
-                if (upgradeGate.require()) onUpgradeRequired();
+                upgradeGate.require();
               }
               handler.next(error);
             },
@@ -317,7 +317,6 @@ void main() {
           _UnusedFloodJob(),
           loginByPhoneNumber: false,
           upgradeGate: upgradeGate,
-          onUpgradeRequired: onUpgradeRequired,
         );
         await blaze.connect();
         await upgradeTriggered.future.timeout(const Duration(seconds: 5));
@@ -386,16 +385,16 @@ void main() {
         unawaited(socket.flush().then((_) => socket.close()));
       });
 
-      final upgradeGate = ApiUpgradeGate();
       final upgradeTriggered = Completer<void>();
       var upgradeCalls = 0;
       late Blaze blaze;
-      void onUpgradeRequired() {
-        upgradeGate.require();
-        upgradeCalls++;
-        blaze.stopForUpgrade();
-        if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
-      }
+      final upgradeGate = ApiUpgradeGate(
+        onRequired: () {
+          upgradeCalls++;
+          blaze.stopForUpgrade();
+          if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
+        },
+      );
 
       final client = Client(
         accessToken: 'test',
@@ -405,7 +404,7 @@ void main() {
             onError: (error, handler) {
               final mixinError = error is MixinApiError ? error.error : null;
               if (mixinError is MixinError && mixinError.code == oldVersion) {
-                if (upgradeGate.require()) onUpgradeRequired();
+                upgradeGate.require();
               }
               handler.next(error);
             },
@@ -447,7 +446,6 @@ void main() {
           _UnusedFloodJob(),
           loginByPhoneNumber: false,
           upgradeGate: upgradeGate,
-          onUpgradeRequired: onUpgradeRequired,
           handshakeConfirmTimeout: const Duration(milliseconds: 100),
         );
         await blaze.connect();

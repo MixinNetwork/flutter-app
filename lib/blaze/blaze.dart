@@ -58,7 +58,6 @@ class Blaze {
     this.floodJob, {
     required this.loginByPhoneNumber,
     required this.upgradeGate,
-    this.onUpgradeRequired,
     this.handshakeConfirmTimeout = const Duration(seconds: 10),
   }) {
     database.settingProperties.addListener(_onProxySettingChanged);
@@ -80,7 +79,6 @@ class Blaze {
   // Phone number login sessions sign with FULL, like the API client.
   final bool loginByPhoneNumber;
   final ApiUpgradeGate upgradeGate;
-  final void Function()? onUpgradeRequired;
   final Duration handshakeConfirmTimeout;
 
   final String? userAgent;
@@ -278,7 +276,7 @@ class Blaze {
                   blazeMessage.error?.code == oldVersion) {
                 final transaction = transactions.remove(blazeMessage.id);
                 transaction?.error(blazeMessage);
-                if (upgradeGate.require()) onUpgradeRequired?.call();
+                upgradeGate.require();
                 stopForUpgrade();
                 return;
               }

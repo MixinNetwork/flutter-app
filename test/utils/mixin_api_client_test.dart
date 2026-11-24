@@ -8,14 +8,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
-  test('upgrade gate latches once and creates a local error', () {
-    final gate = ApiUpgradeGate();
+  test('upgrade gate latches once, invokes callback once, and creates a local error', () {
+    var calls = 0;
+    final gate = ApiUpgradeGate(onRequired: () => calls++);
     final options = RequestOptions(path: '/me');
 
     expect(gate.isRequired, isFalse);
-    expect(gate.require(), isTrue);
-    expect(gate.require(), isFalse);
+    gate
+      ..require()
+      ..require();
     expect(gate.isRequired, isTrue);
+    expect(calls, 1);
     expect(gate.error(options).error, isA<ApiUpgradeRequiredException>());
   });
 
