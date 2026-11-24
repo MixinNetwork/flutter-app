@@ -43,7 +43,6 @@ abstract class JobQueue<AddType, RunType> {
   void stop() => _stopped = true;
 
   Future<void> add(AddType job) async {
-    if (_stopped) return;
     await insertJob(job);
     if (_stopped) return;
     unawaited(_run());

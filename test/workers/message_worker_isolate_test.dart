@@ -4,10 +4,13 @@ library;
 import 'dart:async';
 
 import 'package:drift/native.dart';
+import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/database_event_bus.dart';
+import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/event_bus.dart';
 import 'package:flutter_app/utils/extension/extension.dart';
+import 'package:flutter_app/workers/job_queue.dart';
 import 'package:flutter_app/workers/message_worker_isolate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rxdart/rxdart.dart';
@@ -79,4 +82,43 @@ void main() {
       );
     },
   );
+
+  test('JobQueue.add persists jobs without running when stopped', () async {
+    final database = Database(
+      MixinDatabase(NativeDatabase.memory()),
+      FtsDatabase(NativeDatabase.memory()),
+    );
+    addTearDown(database.dispose);
+
+    final queue = _RecordingJobQueue(database: database)..stop();
+    await queue.add('job-1');
+
+    expect(queue.inserted, ['job-1']);
+    expect(queue.runs, 0);
+  });
+}
+
+class _RecordingJobQueue extends JobQueue<String, List<String>> {
+  _RecordingJobQueue({required super.database});
+
+  final inserted = <String>[];
+  int runs = 0;
+
+  @override
+  String get name => 'RecordingJobQueue';
+
+  @override
+  Future<void> insertJob(String job) async => inserted.add(job);
+
+  @override
+  Future<List<String>> fetchJobs() async => List.of(inserted);
+
+  @override
+  bool isValid(List<String> job) => job.isNotEmpty;
+
+  @override
+  Future<void> run(List<String> job) async {
+    runs++;
+    inserted.clear();
+  }
 }

@@ -58,6 +58,7 @@ class Blaze {
     required this.loginByPhoneNumber,
     required this.upgradeGate,
     this.onUpgradeRequired,
+    this.handshakeConfirmTimeout = const Duration(seconds: 10),
   }) {
     database.settingProperties.addListener(_onProxySettingChanged);
     proxyConfig = database.settingProperties.activatedProxy;
@@ -79,6 +80,7 @@ class Blaze {
   final bool loginByPhoneNumber;
   final ApiUpgradeGate upgradeGate;
   final void Function()? onUpgradeRequired;
+  final Duration handshakeConfirmTimeout;
 
   final String? userAgent;
   final String deviceId;
@@ -618,7 +620,7 @@ class Blaze {
     }
     _confirmingHandshakeRejection = true;
     try {
-      await client.accountApi.getMe();
+      await client.accountApi.getMe().timeout(handshakeConfirmTimeout);
     } catch (e) {
       w('ws handshake rejection confirm error: $e');
     } finally {
