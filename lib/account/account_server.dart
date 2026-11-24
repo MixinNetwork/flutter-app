@@ -60,7 +60,7 @@ class AccountServer {
   });
 
   static String? sid;
-  static final _upgradeGate = ApiUpgradeGate();
+  late final _upgradeGate = ApiUpgradeGate(onRequired: _onUpgradeRequired);
 
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
@@ -114,7 +114,7 @@ class AccountServer {
       if (err is MixinError && err.code == oldVersion) {
         checkSignalKeyTimer?.cancel();
         checkSignalKeyTimer = null;
-        _requireUpgrade();
+        _upgradeGate.require();
       }
       return;
     } catch (e, s) {
@@ -193,8 +193,7 @@ class AccountServer {
 
   ValueStream<bool> get isUpdateRequired => _isUpdateRequired;
 
-  void _requireUpgrade() {
-    if (!_upgradeGate.require()) return;
+  void _onUpgradeRequired() {
     _isUpdateRequired.value = true;
     if (_isolateChannel != null) {
       _sendEventToWorkerIsolate(MainIsolateEventType.requireUpgrade);
@@ -202,38 +201,31 @@ class AccountServer {
   }
 
   Future<void> _onClientRequestError(DioException e) async {
+    final apiError = WorkerApiError.fromDioException(e);
+    if (apiError != null) {
+      await _handleApiError(apiError);
+    }
+  }
+
+  Future<void> _handleApiError(WorkerApiError error) async {
     if (_signOutFuture != null) return;
-    if (e is MixinApiError) {
-      final mixinError = e.error! as MixinError;
-      if (mixinError.code == authentication) {
-        final authorizationHeaderValue =
-            e.requestOptions.headers['Authorization'];
-        final authorizationHeader = authorizationHeaderValue is String
-            ? authorizationHeaderValue
-            : authorizationHeaderValue is Iterable
-            ? authorizationHeaderValue.whereType<String>().firstOrNull
-            : null;
-        if (isBearerTokenDelayed(authorizationHeader)) {
-          i('ignore authentication error for delayed auth token');
+    if (error.code == authentication) {
+      if (isBearerTokenDelayed(error.authorizationHeader)) {
+        i('ignore authentication error for delayed auth token');
+        return;
+      }
+      final serverTime = error.serverTime;
+      if (serverTime != null) {
+        final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
+        final difference = time.difference(error.requestTime ?? DateTime.now());
+        if (difference.abs() >= const Duration(minutes: 5)) {
+          _notifyBlazeWaitSyncTime();
           return;
         }
-        final serverTime = int.tryParse(
-          e.response?.headers.value('x-server-time') ?? '',
-        );
-        if (serverTime != null) {
-          final time = DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
-          final deviceTime =
-              e.requestOptions.extra[kRequestTimeStampKey] as DateTime?;
-          final difference = time.difference(deviceTime ?? DateTime.now());
-          if (difference.abs() >= const Duration(minutes: 5)) {
-            _notifyBlazeWaitSyncTime();
-            return;
-          }
-        }
-        await signOutAndClear(revokeSession: false);
-      } else if (mixinError.code == oldVersion) {
-        _requireUpgrade();
       }
+      await signOutAndClear(revokeSession: false);
+    } else if (error.code == oldVersion) {
+      _upgradeGate.require();
     }
   }
 
@@ -258,7 +250,6 @@ class AccountServer {
         ),
       ],
       upgradeGate: _upgradeGate,
-      onUpgradeRequired: _requireUpgrade,
     )..configProxySetting(database.settingProperties);
 
     attachmentUtil = AttachmentUtil.init(client, database, identityNumber);
@@ -355,9 +346,9 @@ class AccountServer {
       case WorkerIsolateEventType.onBlazeConnectStateChanged:
         _connectedStateBehaviorSubject.add(event.argument as ConnectedState);
       case WorkerIsolateEventType.onApiRequestedError:
-        _onClientRequestError(event.argument as DioException);
+        _handleApiError(event.argument as WorkerApiError);
       case WorkerIsolateEventType.onUpgradeRequired:
-        _requireUpgrade();
+        _upgradeGate.require();
       case WorkerIsolateEventType.requestDownloadAttachment:
         final request = event.argument as AttachmentRequest;
         _onAttachmentDownloadRequest(request);

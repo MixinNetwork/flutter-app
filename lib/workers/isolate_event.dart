@@ -1,6 +1,10 @@
 import 'dart:isolate';
 
+import 'package:dio/dio.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 import '../db/mixin_database.dart';
+import '../utils/mixin_api_client.dart';
 
 enum MainIsolateEventType {
   reconnectBlaze,
@@ -28,7 +32,7 @@ enum WorkerIsolateEventType {
   /// args: ConnectedState
   onBlazeConnectStateChanged,
 
-  /// args: DioException
+  /// args: [WorkerApiError]
   onApiRequestedError,
 
   onUpgradeRequired,
@@ -56,6 +60,42 @@ class IsolateEvent<T> {
 typedef MainIsolateEvent = IsolateEvent<MainIsolateEventType>;
 // event from worker isolate to main isolate.
 typedef WorkerIsolateEvent = IsolateEvent<WorkerIsolateEventType>;
+
+class WorkerApiError {
+  const WorkerApiError({
+    required this.code,
+    this.authorizationHeader,
+    this.serverTime,
+    this.requestTime,
+  });
+
+  final int code;
+  final String? authorizationHeader;
+  final int? serverTime;
+  final DateTime? requestTime;
+
+  static WorkerApiError? fromDioException(DioException e) {
+    if (e is! MixinApiError) return null;
+    final error = e.error;
+    if (error is! MixinError) return null;
+    final authorizationValue = e.requestOptions.headers['Authorization'];
+    final authorizationHeader = authorizationValue is String
+        ? authorizationValue
+        : authorizationValue is Iterable
+        ? authorizationValue.whereType<String>().firstOrNull
+        : null;
+    final serverTime = int.tryParse(
+      e.response?.headers.value('x-server-time') ?? '',
+    );
+    final requestTime = e.requestOptions.extra[kRequestTimeStampKey];
+    return WorkerApiError(
+      code: error.code,
+      authorizationHeader: authorizationHeader,
+      serverTime: serverTime,
+      requestTime: requestTime is DateTime ? requestTime : null,
+    );
+  }
+}
 
 abstract class AttachmentRequest {}
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
@@ -57,7 +58,7 @@ class Blaze {
     this.floodJob, {
     required this.loginByPhoneNumber,
     required this.upgradeGate,
-    this.onUpgradeRequired,
+    this.handshakeConfirmTimeout = const Duration(seconds: 10),
   }) {
     database.settingProperties.addListener(_onProxySettingChanged);
     proxyConfig = database.settingProperties.activatedProxy;
@@ -78,7 +79,7 @@ class Blaze {
   // Phone number login sessions sign with FULL, like the API client.
   final bool loginByPhoneNumber;
   final ApiUpgradeGate upgradeGate;
-  final void Function()? onUpgradeRequired;
+  final Duration handshakeConfirmTimeout;
 
   final String? userAgent;
   final String deviceId;
@@ -124,6 +125,7 @@ class Blaze {
   Timer? _checkTimeoutTimer;
   Timer? _reconnectTimer;
   bool _stoppedForUpgrade = false;
+  CancelToken? _handshakeConfirmCancelToken;
 
   // --- Event Stream ---
   final StreamController<_ConnectionEvent> _eventController =
@@ -239,7 +241,7 @@ class Blaze {
       // Ensure previous resources are released before attempting new connection
       _closeChannelAndSubscription();
 
-      channel = IOWebSocketChannel.connect(
+      final currentChannel = IOWebSocketChannel.connect(
         _host,
         protocols: ['Mixin-Blaze-1'],
         headers: {
@@ -254,6 +256,16 @@ class Blaze {
           ..userAgent = userAgent
           ..setProxy(proxyConfig),
       );
+      channel = currentChannel;
+      unawaited(
+        currentChannel.ready.catchError((Object error, StackTrace s) {
+          w('ws ready error: $error');
+          if (_stoppedForUpgrade || upgradeGate.isRequired) return;
+          if (_isHandshakeAcceptedError(error)) {
+            unawaited(_confirmHandshakeRejection());
+          }
+        }),
+      );
 
       subscription = channel?.stream
           .cast<List<int>>()
@@ -264,7 +276,7 @@ class Blaze {
                   blazeMessage.error?.code == oldVersion) {
                 final transaction = transactions.remove(blazeMessage.id);
                 transaction?.error(blazeMessage);
-                if (upgradeGate.require()) onUpgradeRequired?.call();
+                upgradeGate.require();
                 stopForUpgrade();
                 return;
               }
@@ -308,6 +320,9 @@ class Blaze {
             },
             onError: (error, s) {
               i('ws error: $error, s: $s');
+              if (_isHandshakeAcceptedError(error)) {
+                unawaited(_confirmHandshakeRejection());
+              }
               i('Triggering ERROR event: WebSocket stream error');
               _eventController.add(_ConnectionEvent.error);
             },
@@ -592,9 +607,43 @@ class Blaze {
     }
   }
 
+  bool _isHandshakeAcceptedError(Object? error) =>
+      error.toString().contains('HTTP status code: 202');
+
+  Future<void> _confirmHandshakeRejection() async {
+    if (_handshakeConfirmCancelToken != null ||
+        _stoppedForUpgrade ||
+        upgradeGate.isRequired ||
+        _eventController.isClosed) {
+      return;
+    }
+    final cancelToken = CancelToken();
+    _handshakeConfirmCancelToken = cancelToken;
+    final timer = Timer(handshakeConfirmTimeout, () {
+      if (!cancelToken.isCancelled) {
+        cancelToken.cancel('ws handshake rejection confirm timeout');
+      }
+    });
+    try {
+      await client.dio.get<Map<String, dynamic>>(
+        '/me',
+        cancelToken: cancelToken,
+      );
+    } catch (e) {
+      w('ws handshake rejection confirm error: $e');
+    } finally {
+      timer.cancel();
+      if (identical(_handshakeConfirmCancelToken, cancelToken)) {
+        _handshakeConfirmCancelToken = null;
+      }
+    }
+  }
+
   void stopForUpgrade() {
     if (_stoppedForUpgrade) return;
     _stoppedForUpgrade = true;
+    _handshakeConfirmCancelToken?.cancel();
+    _handshakeConfirmCancelToken = null;
     _disconnect();
   }
 
@@ -619,6 +668,8 @@ class Blaze {
   void dispose() {
     i('Disposing Blaze...');
     database.settingProperties.removeListener(_onProxySettingChanged);
+    _handshakeConfirmCancelToken?.cancel();
+    _handshakeConfirmCancelToken = null;
     _eventStreamSubscription.cancel();
     _eventController.close();
     _disconnect();

@@ -160,8 +160,7 @@ class _MessageProcessRunner {
   late Blaze blaze;
   late Sender _sender;
   late SignalProtocol signalProtocol;
-  final _upgradeGate = ApiUpgradeGate();
-  var _upgradeHandled = false;
+  late final _upgradeGate = ApiUpgradeGate(onRequired: _onUpgradeRequired);
   var _blazeReady = false;
   var _jobsReady = false;
 
@@ -192,17 +191,19 @@ class _MessageProcessRunner {
       interceptors: [
         InterceptorsWrapper(
           onError: (e, handler) async {
-            _sendEventToMainIsolate(
-              WorkerIsolateEventType.onApiRequestedError,
-              e,
-            );
+            final apiError = WorkerApiError.fromDioException(e);
+            if (apiError != null) {
+              _sendEventToMainIsolate(
+                WorkerIsolateEventType.onApiRequestedError,
+                apiError,
+              );
+            }
             handler.next(e);
           },
         ),
       ],
       loginByPhoneNumber: initParams.loginByPhoneNumber,
       upgradeGate: _upgradeGate,
-      onUpgradeRequired: _onUpgradeRequired,
     )..configProxySetting(database.settingProperties);
 
     _ackJob = AckJob(database: database, client: client);
@@ -224,7 +225,6 @@ class _MessageProcessRunner {
       _floodJob,
       loginByPhoneNumber: initParams.loginByPhoneNumber,
       upgradeGate: _upgradeGate,
-      onUpgradeRequired: _onUpgradeRequired,
     );
     _blazeReady = true;
 
@@ -323,9 +323,6 @@ class _MessageProcessRunner {
   }
 
   void _onUpgradeRequired() {
-    _upgradeGate.require();
-    if (_upgradeHandled) return;
-    _upgradeHandled = true;
     if (_blazeReady) blaze.stopForUpgrade();
     _stopJobs();
     _sendEventToMainIsolate(WorkerIsolateEventType.onUpgradeRequired);
@@ -431,7 +428,7 @@ class _MessageProcessRunner {
       case MainIsolateEventType.disconnectBlazeWithTime:
         blaze.waitSyncTime();
       case MainIsolateEventType.requireUpgrade:
-        _onUpgradeRequired();
+        _upgradeGate.require();
       case MainIsolateEventType.reconnectBlaze:
         if (_upgradeGate.isRequired) return;
         i('message worker isolate: reconnect blaze');
