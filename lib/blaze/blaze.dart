@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
@@ -126,7 +127,7 @@ class Blaze {
   Timer? _checkTimeoutTimer;
   Timer? _reconnectTimer;
   bool _stoppedForUpgrade = false;
-  bool _confirmingHandshakeRejection = false;
+  CancelToken? _handshakeConfirmCancelToken;
 
   // --- Event Stream ---
   final StreamController<_ConnectionEvent> _eventController =
@@ -612,25 +613,39 @@ class Blaze {
       error.toString().contains('HTTP status code: 202');
 
   Future<void> _confirmHandshakeRejection() async {
-    if (_confirmingHandshakeRejection ||
+    if (_handshakeConfirmCancelToken != null ||
         _stoppedForUpgrade ||
         upgradeGate.isRequired ||
         _eventController.isClosed) {
       return;
     }
-    _confirmingHandshakeRejection = true;
+    final cancelToken = CancelToken();
+    _handshakeConfirmCancelToken = cancelToken;
+    final timer = Timer(handshakeConfirmTimeout, () {
+      if (!cancelToken.isCancelled) {
+        cancelToken.cancel('ws handshake rejection confirm timeout');
+      }
+    });
     try {
-      await client.accountApi.getMe().timeout(handshakeConfirmTimeout);
+      await client.dio.get<Map<String, dynamic>>(
+        '/me',
+        cancelToken: cancelToken,
+      );
     } catch (e) {
       w('ws handshake rejection confirm error: $e');
     } finally {
-      _confirmingHandshakeRejection = false;
+      timer.cancel();
+      if (identical(_handshakeConfirmCancelToken, cancelToken)) {
+        _handshakeConfirmCancelToken = null;
+      }
     }
   }
 
   void stopForUpgrade() {
     if (_stoppedForUpgrade) return;
     _stoppedForUpgrade = true;
+    _handshakeConfirmCancelToken?.cancel();
+    _handshakeConfirmCancelToken = null;
     _disconnect();
   }
 
@@ -655,6 +670,8 @@ class Blaze {
   void dispose() {
     i('Disposing Blaze...');
     database.settingProperties.removeListener(_onProxySettingChanged);
+    _handshakeConfirmCancelToken?.cancel();
+    _handshakeConfirmCancelToken = null;
     _eventStreamSubscription.cancel();
     _eventController.close();
     _disconnect();

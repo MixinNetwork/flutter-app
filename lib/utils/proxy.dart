@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:dio_compatibility_layer/dio_compatibility_layer.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_logger/mixin_logger.dart';
@@ -126,9 +126,15 @@ class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     try {
-      final adapter = ConversionLayerAdapter(await client);
+      final adapter = AbortableHttpClientAdapter(await client);
       final resp = await adapter.fetch(options, requestStream, cancelFuture);
       return resp;
+    } on http.RequestAbortedException catch (error, stackTrace) {
+      // RhttpException.request can not send to other isolate by SendPort
+      Error.throwWithStackTrace(
+        http.RequestAbortedException(error.uri),
+        stackTrace,
+      );
     } on rhttp.RhttpWrappedClientException catch (error, stackTrace) {
       // RhttpException.request can not send to other isolate by SendPort
       Error.throwWithStackTrace(
@@ -137,4 +143,79 @@ class _CustomHttpClientAdapterWrapper implements HttpClientAdapter {
       );
     }
   }
+}
+
+@visibleForTesting
+class AbortableHttpClientAdapter implements HttpClientAdapter {
+  AbortableHttpClientAdapter(this.client);
+
+  final http.Client client;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final abortTrigger = cancelFuture?.then<void>((_) {}, onError: (_) {});
+    final http.BaseRequest request;
+    if (requestStream != null) {
+      final streamedRequest = request = http.AbortableStreamedRequest(
+        options.method,
+        options.uri,
+        abortTrigger: abortTrigger,
+      );
+      var closed = false;
+      final sub = requestStream.listen(
+        streamedRequest.sink.add,
+        onError: streamedRequest.sink.addError,
+        onDone: () {
+          closed = true;
+          unawaited(streamedRequest.sink.close());
+        },
+        cancelOnError: true,
+      );
+      if (abortTrigger != null) {
+        unawaited(
+          abortTrigger.whenComplete(() {
+            if (closed) return;
+            closed = true;
+            unawaited(sub.cancel());
+            unawaited(streamedRequest.sink.close());
+          }),
+        );
+      }
+    } else {
+      request = http.AbortableRequest(
+        options.method,
+        options.uri,
+        abortTrigger: abortTrigger,
+      );
+    }
+    request.headers.addAll(
+      Map.fromEntries(
+        options.headers.entries.map(
+          (e) => MapEntry(e.key, e.value.toString().trim()),
+        ),
+      ),
+    );
+    request
+      ..followRedirects = options.followRedirects
+      ..maxRedirects = options.maxRedirects
+      ..persistentConnection = options.persistentConnection;
+
+    final response = await client.send(request);
+    return ResponseBody(
+      response.stream.cast<Uint8List>(),
+      response.statusCode,
+      statusMessage: response.reasonPhrase,
+      isRedirect: response.isRedirect,
+      headers: Map.fromEntries(
+        response.headers.entries.map((e) => MapEntry(e.key, [e.value])),
+      ),
+    );
+  }
+
+  @override
+  void close({bool force = false}) => client.close();
 }
