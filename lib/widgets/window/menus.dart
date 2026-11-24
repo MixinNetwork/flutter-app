@@ -298,7 +298,7 @@ class _Menus extends HookConsumerWidget {
                 members: [
                   PlatformMenuItem(
                     label: context.l10n.closeWindow,
-                    onSelected: () => mainWindow?.close(),
+                    onSelected: () => mainWindow?.hide(),
                   ),
                 ],
               ),

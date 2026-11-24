@@ -220,7 +220,7 @@ class _WindowsNotificationManager extends _NotificationManager {
     if (uri == null) {
       return;
     }
-    mainWindow?.showInactive();
+    showMainWindow();
     onNotificationSelected(uri);
   }
 

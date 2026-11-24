@@ -114,17 +114,23 @@ Future<void> _runApp(List<String> args) async {
   restoreWindowForStartup(window);
 
   if (Platform.isWindows) {
-    final screen = await getCurrentScreen();
-    i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
     const defaultWindowSize = Size(1280, 750);
-    final screenSize = screen == null
-        ? defaultWindowSize
-        : screen.visibleFrame.size / screen.scaleFactor;
+    final workArea = workAreaUnderCursor;
+    final Size screenSize;
+    if (workArea != null) {
+      i('workArea: $workArea');
+      screenSize = workArea.size;
+    } else {
+      final screen = await getCurrentScreen();
+      i('screen: ${screen?.visibleFrame} ${screen?.scaleFactor}');
+      screenSize = screen == null
+          ? defaultWindowSize
+          : screen.visibleFrame.size / screen.scaleFactor;
+    }
     final windowSize = Size(
       math.min(screenSize.width, defaultWindowSize.width),
       math.min(screenSize.height, defaultWindowSize.height),
     );
-    final workArea = workAreaUnderCursor;
     window.setSize(windowSize.toNative(), false);
     if (workArea != null) {
       window.position = (workArea.center - windowSize.center(Offset.zero))
