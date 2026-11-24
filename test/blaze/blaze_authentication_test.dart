@@ -14,9 +14,11 @@ import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/mixin_api_client.dart';
+import 'package:flutter_app/utils/proxy.dart';
 import 'package:flutter_app/workers/job/ack_job.dart';
 import 'package:flutter_app/workers/job/flood_job.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/io_client.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 void main() {
@@ -242,6 +244,223 @@ void main() {
       }
     }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
   });
+
+  test(
+    'Blaze handshake HTTP 202 confirms upgrade over HTTP and stops reconnecting',
+    () async {
+      final database = Database(
+        MixinDatabase(NativeDatabase.memory()),
+        FtsDatabase(NativeDatabase.memory()),
+      );
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      var handshakeAttempts = 0;
+      final serverSubscription = server.listen((request) async {
+        handshakeAttempts++;
+        request.response
+          ..statusCode = HttpStatus.accepted
+          ..headers.contentType = ContentType.json
+          ..write(
+            '{"error":{"status":202,"code":10006,"description":"Update required."}}',
+          );
+        await request.response.close();
+      });
+
+      final upgradeTriggered = Completer<void>();
+      var upgradeCalls = 0;
+      late Blaze blaze;
+      final upgradeGate = ApiUpgradeGate(
+        onRequired: () {
+          upgradeCalls++;
+          blaze.stopForUpgrade();
+          if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
+        },
+      );
+
+      final adapter = _OldVersionAdapter();
+      final client = Client(
+        accessToken: 'test',
+        httpLogLevel: null,
+        interceptors: [
+          InterceptorsWrapper(
+            onError: (error, handler) {
+              final mixinError = error is MixinApiError ? error.error : null;
+              if (mixinError is MixinError && mixinError.code == oldVersion) {
+                upgradeGate.require();
+              }
+              handler.next(error);
+            },
+          ),
+        ],
+      );
+      client.dio.httpClientAdapter = adapter;
+      final httpClient = HttpClient();
+
+      addTearDown(() async {
+        blaze.dispose();
+        client.dio.close();
+        await serverSubscription.cancel();
+        await server.close(force: true);
+        httpClient.close(force: true);
+        await database.dispose();
+      });
+
+      await HttpOverrides.runZoned(() async {
+        blaze = Blaze(
+          'user',
+          'session',
+          base64Encode(List.filled(64, 1)),
+          database,
+          client,
+          'test',
+          'test-device',
+          _UnusedAckJob(),
+          _UnusedFloodJob(),
+          loginByPhoneNumber: false,
+          upgradeGate: upgradeGate,
+        );
+        await blaze.connect();
+        await upgradeTriggered.future.timeout(const Duration(seconds: 5));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(handshakeAttempts, 1);
+        expect(adapter.meRequests, 1);
+        expect(upgradeGate.isRequired, isTrue);
+        expect(upgradeCalls, 1);
+        expect(blaze.connectedStateStream.value, ConnectedState.disconnected);
+      }, createHttpClient: (_) => _RedirectClient(httpClient, server.port));
+    },
+  );
+
+  test(
+    'Blaze aborts a stalled /me probe socket and retries on the next HTTP 202',
+    () async {
+      final database = Database(
+        MixinDatabase(NativeDatabase.memory()),
+        FtsDatabase(NativeDatabase.memory()),
+      );
+      final wsServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      var handshakeAttempts = 0;
+      final wsServerSubscription = wsServer.listen((request) async {
+        handshakeAttempts++;
+        request.response
+          ..statusCode = HttpStatus.accepted
+          ..headers.contentType = ContentType.json
+          ..write(
+            '{"error":{"status":202,"code":10006,"description":"Update required."}}',
+          );
+        await request.response.close();
+      });
+
+      final apiServer = await ServerSocket.bind(
+        InternetAddress.loopbackIPv4,
+        0,
+      );
+      var meConnections = 0;
+      final firstMeSocketClosed = Completer<void>();
+      final openSockets = <Socket>[];
+      final apiServerSubscription = apiServer.listen((socket) {
+        meConnections++;
+        openSockets.add(socket);
+        final attempt = meConnections;
+        if (attempt == 1) {
+          socket.listen(
+            (_) {},
+            onDone: () {
+              if (!firstMeSocketClosed.isCompleted) {
+                firstMeSocketClosed.complete();
+              }
+            },
+          );
+          return;
+        }
+        const body =
+            '{"error":{"status":202,"code":10006,"description":"Update required."}}';
+        socket.write(
+          'HTTP/1.1 202 Accepted\r\n'
+          'content-type: application/json\r\n'
+          'content-length: ${body.length}\r\n'
+          'connection: close\r\n\r\n'
+          '$body',
+        );
+        unawaited(socket.flush().then((_) => socket.close()));
+      });
+
+      final upgradeTriggered = Completer<void>();
+      var upgradeCalls = 0;
+      late Blaze blaze;
+      final upgradeGate = ApiUpgradeGate(
+        onRequired: () {
+          upgradeCalls++;
+          blaze.stopForUpgrade();
+          if (!upgradeTriggered.isCompleted) upgradeTriggered.complete();
+        },
+      );
+
+      final client = Client(
+        accessToken: 'test',
+        httpLogLevel: null,
+        interceptors: [
+          InterceptorsWrapper(
+            onError: (error, handler) {
+              final mixinError = error is MixinApiError ? error.error : null;
+              if (mixinError is MixinError && mixinError.code == oldVersion) {
+                upgradeGate.require();
+              }
+              handler.next(error);
+            },
+          ),
+        ],
+      );
+      client.dio.options.baseUrl = 'http://127.0.0.1:${apiServer.port}';
+      final apiHttpClient = HttpClient();
+      client.dio.httpClientAdapter = AbortableHttpClientAdapter(
+        IOClient(apiHttpClient),
+      );
+      final wsHttpClient = HttpClient();
+
+      addTearDown(() async {
+        blaze.dispose();
+        client.dio.close(force: true);
+        apiHttpClient.close(force: true);
+        wsHttpClient.close(force: true);
+        for (final socket in openSockets) {
+          socket.destroy();
+        }
+        await wsServerSubscription.cancel();
+        await wsServer.close(force: true);
+        await apiServerSubscription.cancel();
+        await apiServer.close();
+        await database.dispose();
+      });
+
+      await HttpOverrides.runZoned(() async {
+        blaze = Blaze(
+          'user',
+          'session',
+          base64Encode(List.filled(64, 1)),
+          database,
+          client,
+          'test',
+          'test-device',
+          _UnusedAckJob(),
+          _UnusedFloodJob(),
+          loginByPhoneNumber: false,
+          upgradeGate: upgradeGate,
+          handshakeConfirmTimeout: const Duration(milliseconds: 100),
+        );
+        await blaze.connect();
+        await firstMeSocketClosed.future.timeout(const Duration(seconds: 2));
+        await upgradeTriggered.future.timeout(const Duration(seconds: 8));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(handshakeAttempts, 2);
+        expect(meConnections, 2);
+        expect(upgradeGate.isRequired, isTrue);
+        expect(upgradeCalls, 1);
+        expect(blaze.connectedStateStream.value, ConnectedState.disconnected);
+      }, createHttpClient: (_) => _RedirectClient(wsHttpClient, wsServer.port));
+    },
+  );
 }
 
 String? _tokenScope(String? authorization) => _tokenClaim(authorization, 'scp');
@@ -371,6 +590,31 @@ class _ConnectedAdapter implements HttpClientAdapter {
           Headers.contentTypeHeader: [Headers.jsonContentType],
         },
       ),
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _OldVersionAdapter implements HttpClientAdapter {
+  int meRequests = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (options.path == '/me') {
+      meRequests++;
+    }
+    return ResponseBody.fromString(
+      '{"error":{"status":202,"code":10006,"description":"Update required."}}',
+      202,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
     );
   }
 

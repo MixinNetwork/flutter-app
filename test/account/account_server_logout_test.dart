@@ -16,6 +16,7 @@ import 'package:flutter_app/ui/provider/multi_auth_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/hive_key_values.dart';
+import 'package:flutter_app/utils/mixin_api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rhttp/src/rust/api/client.dart' as rust;
@@ -116,6 +117,31 @@ void main() {
     expect(auth.signOutCount, 0);
     expect(adapter.logoutRequests, 0);
   });
+
+  test(
+    'HTTP 10006 sets isUpdateRequired and blocks subsequent requests',
+    () async {
+      adapter.errorCode = oldVersion;
+      await expectLater(
+        server.client.accountApi.getMe(),
+        throwsA(isA<MixinApiError>()),
+      );
+      expect(server.isUpdateRequired.valueOrNull, isTrue);
+      expect(adapter.meRequests, 1);
+
+      await expectLater(
+        server.client.accountApi.getMe(),
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.error,
+            'error',
+            isA<ApiUpgradeRequiredException>(),
+          ),
+        ),
+      );
+      expect(adapter.meRequests, 1);
+    },
+  );
 }
 
 class _TestAccountServer extends AccountServer {
@@ -147,6 +173,8 @@ class _TestAccountServer extends AccountServer {
 
 class _RevokedSessionAdapter implements HttpClientAdapter {
   int logoutRequests = 0;
+  int meRequests = 0;
+  int errorCode = authentication;
   DateTime? serverTime;
 
   @override
@@ -156,12 +184,17 @@ class _RevokedSessionAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     if (options.path == '/logout') logoutRequests++;
+    if (options.path == '/me') meRequests++;
     // Bound the broken implementation's recursive requests without allowing
     // cleanup to complete, so the test reports the actual logout timeout.
     if (logoutRequests > 3) return Completer<ResponseBody>().future;
+    final status = errorCode == oldVersion ? 202 : 401;
+    final description = errorCode == oldVersion
+        ? 'Update required.'
+        : 'Unauthorized';
     return ResponseBody.fromString(
-      '{"error":{"status":401,"code":401,"description":"Unauthorized"}}',
-      200,
+      '{"error":{"status":$status,"code":$errorCode,"description":"$description"}}',
+      errorCode == oldVersion ? 202 : 200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
         if (serverTime != null)
