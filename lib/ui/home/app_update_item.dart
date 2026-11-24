@@ -67,11 +67,10 @@ class AppUpdateItem extends ConsumerWidget {
 }
 
 /// The button of the page that blocks the app when the server finds this
-/// version too old (10006). That page covers the sidebar, so the button
-/// installs the update itself when the updater has one, else it runs
-/// [onNoUpdate], which opens the download page. While an update is offered the
-/// download page stays one click away: an install can keep failing, also one
-/// that fails after the app quit and starts again with the update offered.
+/// version too old (10006). That page covers the sidebar, so taps route
+/// through the active update channel (even when status is still none) and
+/// fall back to [onNoUpdate] only when no channel handles the update. While
+/// a channel or update is active, the download page stays one click away.
 class AppUpdateButton extends HookConsumerWidget {
   const AppUpdateButton({required this.onNoUpdate, super.key});
 
@@ -88,9 +87,12 @@ class AppUpdateButton extends HookConsumerWidget {
     final state = ref.watch(appUpdateProvider);
     final button = MixinButton(
       disable: state.status == AppUpdateStatus.downloading,
-      onTap: state.status == AppUpdateStatus.none
-          ? onNoUpdate
-          : () => ref.read(appUpdateProvider.notifier).update(),
+      onTap: () async {
+        final handled = await ref
+            .read(appUpdateProvider.notifier)
+            .update(forced: true);
+        if (!handled) onNoUpdate();
+      },
       child: Text(switch (state.status) {
         AppUpdateStatus.downloading =>
           '${context.l10n.upgrade} ${(state.progress * 100).floor()}%',
@@ -99,7 +101,9 @@ class AppUpdateButton extends HookConsumerWidget {
         AppUpdateStatus.available => context.l10n.upgrade,
       }),
     );
-    if (state.status == AppUpdateStatus.none) return button;
+    if (state.status == AppUpdateStatus.none && !state.hasChannel) {
+      return button;
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

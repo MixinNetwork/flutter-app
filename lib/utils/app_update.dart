@@ -14,6 +14,26 @@ const appcastUrl =
 const _sparkleNs = 'http://www.andymatuschak.org/xml-namespaces/sparkle';
 const _mixinNs = 'https://mixin.one/xml-namespaces/desktop-update';
 
+bool _isWithinSnap(Map<String, String> environment, String executable) {
+  final snap = environment['SNAP'] ?? '';
+  return snap.isNotEmpty && p.isWithin(snap, executable);
+}
+
+/// The Snapcraft architecture of this copy of the app, or null when not
+/// running as a Snap package on a supported architecture.
+String? linuxSnapArch({
+  required Map<String, String> environment,
+  required String executable,
+  required Abi abi,
+}) {
+  if (!_isWithinSnap(environment, executable)) return null;
+  return switch (abi) {
+    Abi.linuxX64 => 'amd64',
+    Abi.linuxArm64 => 'arm64',
+    _ => null,
+  };
+}
+
 /// The appcast package of this copy of the app, or null when the app must not
 /// update itself (a snap, a package manager or a store installs the update).
 String? linuxUpdatePackage({
@@ -26,7 +46,7 @@ String? linuxUpdatePackage({
     Abi.linuxArm64 => 'arm64',
     _ => null,
   };
-  if (arch == null || environment.containsKey('SNAP')) return null;
+  if (arch == null || _isWithinSnap(environment, executable)) return null;
   // A child of another AppImage app (a terminal opened from an IDE, say)
   // inherits its APPIMAGE, so it counts only when this executable runs from
   // that AppImage's mount.
@@ -312,6 +332,30 @@ const macAppStoreLookupUrl =
     'https://itunes.apple.com/lookup?bundleId=one.mixin.messenger.desktop';
 const macAppStoreUrl = 'macappstore://apps.apple.com/app/id1571128582';
 const macTestFlightUrl = 'itms-beta://';
+
+const snapStoreInfoUrl = 'https://api.snapcraft.io/v2/snaps/info/mixin-desktop';
+const snapStoreUrl = 'snap://mixin-desktop';
+const snapStoreWebUrl = 'https://snapcraft.io/mixin-desktop';
+
+const microsoftStoreUrl = 'ms-windows-store://pdp/?productid=9NQ6HF99B8NJ';
+const microsoftStoreWebUrl = 'https://apps.microsoft.com/detail/9NQ6HF99B8NJ';
+
+/// The stable channel version for [arch] in a Snapcraft v2 info response,
+/// or null.
+String? snapStoreVersion(String body, String arch) {
+  final channelMap = (jsonDecode(body) as Map<String, dynamic>)['channel-map'];
+  if (channelMap is! List) return null;
+  for (final entry in channelMap) {
+    if (entry is! Map<String, dynamic>) continue;
+    final channel = entry['channel'];
+    if (channel is! Map<String, dynamic>) continue;
+    if (channel['name'] == 'stable' && channel['architecture'] == arch) {
+      final version = entry['version'];
+      return version is String ? version : null;
+    }
+  }
+  return null;
+}
 
 enum MacUpdateChannel { appStore, testFlight, dmg }
 

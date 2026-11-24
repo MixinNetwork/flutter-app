@@ -71,6 +71,20 @@ void main() {
       expect(package({'SNAP': '/snap/mixin'}, '/snap/mixin/1/mixin'), isNull);
       expect(package({}, '/opt/mixin/mixin', Abi.linuxRiscv64), isNull);
     });
+
+    test('ignores an inherited SNAP env var from another snap app', () {
+      expect(
+        package(
+          {'SNAP': '/snap/code/123'},
+          '/home/user/mixin/mixin_desktop',
+        ),
+        'tar-x64',
+      );
+      expect(
+        package({'SNAP': ''}, '/home/user/mixin/mixin_desktop'),
+        'tar-x64',
+      );
+    });
   });
 
   group('windowsUpdatePackage', () {
@@ -674,6 +688,74 @@ if ($setup.ExitCode -ne 0) { Start-Process -FilePath 'C:\Users\O''Brien Li\AppDa
       );
       // "A" is 41 00 in UTF-16LE.
       expect(powerShellArguments('A')[3], 'QQA=');
+    });
+  });
+
+  group('Linux Snap Store', () {
+    test('linuxSnapArch detects supported architectures only under SNAP', () {
+      expect(
+        linuxSnapArch(
+          environment: const {'SNAP': '/snap/mixin-desktop/42'},
+          executable: '/snap/mixin-desktop/42/mixin_desktop',
+          abi: Abi.linuxX64,
+        ),
+        'amd64',
+      );
+      expect(
+        linuxSnapArch(
+          environment: const {'SNAP': '/snap/mixin-desktop/42'},
+          executable: '/snap/mixin-desktop/42/mixin_desktop',
+          abi: Abi.linuxArm64,
+        ),
+        'arm64',
+      );
+      expect(
+        linuxSnapArch(
+          environment: const {'SNAP': '/snap/mixin-desktop/42'},
+          executable: '/snap/mixin-desktop/42/mixin_desktop',
+          abi: Abi.linuxArm,
+        ),
+        isNull,
+      );
+      expect(
+        linuxSnapArch(
+          environment: const {'SNAP': '/snap/code/123'},
+          executable: '/home/user/mixin/mixin_desktop',
+          abi: Abi.linuxX64,
+        ),
+        isNull,
+      );
+      expect(
+        linuxSnapArch(
+          environment: const {'SNAP': ''},
+          executable: '/home/user/mixin/mixin_desktop',
+          abi: Abi.linuxX64,
+        ),
+        isNull,
+      );
+      expect(
+        linuxSnapArch(
+          environment: const {},
+          executable: '/home/user/mixin/mixin_desktop',
+          abi: Abi.linuxX64,
+        ),
+        isNull,
+      );
+    });
+
+    test('snapStoreVersion picks the stable version for the matching arch', () {
+      const body = '''
+{
+  "channel-map": [
+    {"channel": {"name": "edge", "architecture": "amd64"}, "version": "9.0.0"},
+    {"channel": {"name": "stable", "architecture": "arm64"}, "version": "7.2.0"},
+    {"channel": {"name": "stable", "architecture": "amd64"}, "version": "7.1.2"}
+  ]
+}''';
+      expect(snapStoreVersion(body, 'amd64'), '7.1.2');
+      expect(snapStoreVersion(body, 'arm64'), '7.2.0');
+      expect(snapStoreVersion(body, 'riscv64'), isNull);
+      expect(snapStoreVersion('{}', 'amd64'), isNull);
     });
   });
 }
