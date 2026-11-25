@@ -9,6 +9,28 @@ import '../widgets/message/item/action/action_data.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import 'extension/extension.dart';
 
+/// The text of a recalled message. The actor is the user who recalled it,
+/// kept in `participant_id`, or the sender for messages recalled before it
+/// was kept.
+String recalledMessageText({
+  required String? participantUserId,
+  required String? participantFullName,
+  required String? senderId,
+  required String? senderFullName,
+  required bool Function(String actorId) isCurrentUser,
+}) {
+  final (actorId, actorName) = participantUserId != null
+      ? (participantUserId, participantFullName)
+      : (senderId, senderFullName);
+  if (actorId != null && isCurrentUser(actorId)) {
+    return Localization.current.youDeletedThisMessage;
+  }
+  if (actorName != null && actorName.isNotEmpty) {
+    return Localization.current.deletedThisMessage(actorName);
+  }
+  return Localization.current.thisMessageWasDeleted;
+}
+
 String? messagePreviewOptimize(
   MessageStatus? messageStatus,
   String? messageCategory,

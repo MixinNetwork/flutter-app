@@ -103,6 +103,7 @@
 "deleteGroup" : "Удалить группу",
 "deleteMyAccount" : "Удалить мой аккаунт",
 "deleteTheCircle" : "Удалить {arg0} круг?",
+"deletedThisMessage" : "{arg0} удалил(а) это сообщение.",
 "deposit" : "Депозит",
 "developer" : "Разработчик",
 "disableDisappearingMessage" : "{arg0} отключил исчезающие сообщения",

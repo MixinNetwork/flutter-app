@@ -391,12 +391,80 @@ void main() {
         .cast<ConversationListDelta>()
         .first
         .timeout(const Duration(milliseconds: 200));
-    await database.messageDao.recallMessage('conversation', 'message');
+    await database.messageDao.recallMessage(
+      'conversation',
+      'message',
+      actorUserId: 'user',
+      currentUserId: 'user',
+    );
     await recallDeltaFuture;
 
     expect(store.items.single.contentType, 'MESSAGE_RECALL');
     expect(store.items.single.content, isNull);
     expect(store.items.single.mediaUrl, isNull);
+    expect(
+      (await database.messageDao.findMessageByMessageId('message'))
+          ?.participantId,
+      'user',
+    );
+  });
+
+  test('recalls a failed message as an unseen delivered message', () async {
+    final database = MixinDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+
+    final now = DateTime(2026);
+    await database.batch((batch) {
+      batch
+        ..insert(
+          database.users,
+          const User(userId: 'owner', identityNumber: '1', fullName: 'Owner'),
+        )
+        ..insert(
+          database.conversations,
+          Conversation(
+            conversationId: 'conversation',
+            ownerId: 'owner',
+            category: ConversationCategory.contact,
+            createdAt: now,
+            status: ConversationStatus.success,
+          ),
+        );
+    });
+    await database.messageDao.insert(
+      Message(
+        messageId: 'message',
+        conversationId: 'conversation',
+        userId: 'owner',
+        category: 'SIGNAL_TEXT',
+        content: 'hello',
+        status: MessageStatus.failed,
+        createdAt: now,
+      ),
+      'me',
+      silent: true,
+    );
+
+    await database.messageDao.recallMessage(
+      'conversation',
+      'message',
+      actorUserId: 'owner',
+      currentUserId: 'me',
+    );
+
+    final message = await database.messageDao.findMessageByMessageId(
+      'message',
+    );
+    expect(message?.category, 'MESSAGE_RECALL');
+    expect(message?.status, MessageStatus.delivered);
+    expect(message?.participantId, 'owner');
+    expect(
+      (await database.conversationDao
+              .conversationById('conversation')
+              .getSingle())
+          ?.unseenMessageCount,
+      1,
+    );
   });
 
   test('refreshes contact metadata from user events', () async {

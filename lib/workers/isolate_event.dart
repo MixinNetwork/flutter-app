@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:dio/dio.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -118,8 +116,7 @@ class AttachmentCancelRequest extends AttachmentRequest {
 }
 
 class AttachmentDeleteRequest extends AttachmentRequest {
-  AttachmentDeleteRequest({required this.message, this.resultPort});
+  AttachmentDeleteRequest({required this.message});
 
   final Message message;
-  final SendPort? resultPort;
 }

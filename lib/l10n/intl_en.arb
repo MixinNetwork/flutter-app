@@ -133,6 +133,7 @@
 "deleteGroup" : "Delete Group",
 "deleteMyAccount" : "Delete My Account",
 "deleteTheCircle" : "Do you want to delete the {arg0} circle?",
+"deletedThisMessage" : "{arg0} deleted this message.",
 "deposit" : "Deposit",
 "depositHash" : "Deposit Hash",
 "developer" : "Developer",

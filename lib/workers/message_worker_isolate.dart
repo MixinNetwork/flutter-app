@@ -254,7 +254,10 @@ class _MessageProcessRunner {
       sessionId: sessionId,
       privateKey: privateKey,
       signalProtocol: signalProtocol,
-      deleteAttachment: _deleteAttachment,
+      deleteAttachment: (message) => _sendEventToMainIsolate(
+        WorkerIsolateEventType.requestDownloadAttachment,
+        AttachmentDeleteRequest(message: message),
+      ),
     );
 
     _sessionAckJob = SessionAckJob(
@@ -370,23 +373,6 @@ class _MessageProcessRunner {
     dynamic argument,
   ]) {
     eventSink.add(event.toEvent(argument));
-  }
-
-  Future<void> _deleteAttachment(Message message) async {
-    final resultPort = ReceivePort();
-    try {
-      _sendEventToMainIsolate(
-        WorkerIsolateEventType.requestDownloadAttachment,
-        AttachmentDeleteRequest(
-          message: message,
-          resultPort: resultPort.sendPort,
-        ),
-      );
-      final error = await resultPort.first.timeout(const Duration(seconds: 30));
-      if (error != null) throw StateError(error as String);
-    } finally {
-      resultPort.close();
-    }
   }
 
   Future<void> _scheduleExpiredJob() async {

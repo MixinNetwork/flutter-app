@@ -104,6 +104,7 @@
 "deleteGroup" : "グループを削除",
 "deleteMyAccount" : "アカウント削除",
 "deleteTheCircle" : "{arg0}のグループリストを削除しますか？",
+"deletedThisMessage" : "{arg0}がこのメッセージを削除しました。",
 "deposit" : "入金",
 "developer" : "開発者向け情報",
 "disableDisappearingMessage" : "{arg0}が消えるメッセージを無効にしました",

@@ -697,14 +697,21 @@ class SendMessageHelper {
   Future<void> sendRecallMessage(
     String conversationId,
     List<String> messageIds,
+    String currentUserId,
   ) async {
-    await Future.wait(
-      messageIds.map(
-        (messageId) async => _addSendingJob(
-          await createSendRecallJob(conversationId, messageId),
-        ),
-      ),
-    );
+    for (final messageId in messageIds) {
+      final job = await createSendRecallJob(conversationId, messageId);
+      await _database.transaction(() async {
+        await _jobDao.insert(job);
+        await _database.recallMessage(
+          conversationId,
+          messageId,
+          actorUserId: currentUserId,
+          currentUserId: currentUserId,
+        );
+      });
+      _addSendingJob(job);
+    }
   }
 
   Future<void> forwardMessage(

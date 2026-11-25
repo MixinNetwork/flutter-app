@@ -402,16 +402,7 @@ class AccountServer {
         );
       }
     } else if (request is AttachmentDeleteRequest) {
-      try {
-        await attachmentUtil.removeAttachmentJobsByParentId(
-          request.message.messageId,
-        );
-        await _deleteMessageAttachment(request.message);
-        request.resultPort?.send(null);
-      } catch (error) {
-        request.resultPort?.send(error.toString());
-        if (request.resultPort == null) rethrow;
-      }
+      await _deleteRecalledAttachment(request.message);
     } else {
       assert(false, 'unexpected request: $request');
     }
@@ -651,14 +642,27 @@ class AccountServer {
     );
   }
 
+  /// Recalls [messageIds] locally at once and queues the recall, as the
+  /// mobile clients do.
   Future<void> sendRecallMessage(
     List<String> messageIds, {
     String? conversationId,
     String? recipientId,
-  }) async => _sendMessageHelper.sendRecallMessage(
-    await _initConversation(conversationId, recipientId),
-    messageIds,
-  );
+  }) async {
+    final id = await _initConversation(conversationId, recipientId);
+    for (final messageId in messageIds) {
+      final message = await database.messageDao.findMessageByMessageId(
+        messageId,
+      );
+      if (message != null) await _deleteRecalledAttachment(message);
+    }
+    await _sendMessageHelper.sendRecallMessage(id, messageIds, userId);
+  }
+
+  Future<void> _deleteRecalledAttachment(db.Message message) async {
+    await attachmentUtil.removeAttachmentJobsByParentId(message.messageId);
+    await _deleteMessageAttachment(message);
+  }
 
   Future<void> sendAppCardMessage({
     required AppCardData data,

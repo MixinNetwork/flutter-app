@@ -33,11 +33,14 @@ SELECT message.message_id AS messageId,
     shareUser.identity_number AS sharedUserIdentityNumber,
     shareUser.avatar_url AS sharedUserAvatarUrl,
     shareUser.is_verified AS sharedUserIsVerified,
-    shareUser.app_id AS sharedUserAppId
+    shareUser.app_id AS sharedUserAppId,
+    message.participant_id AS participantUserId,
+    participant.full_name AS participantFullName
 FROM messages message
     INNER JOIN users sender ON message.user_id = sender.user_id
     LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
     LEFT JOIN users shareUser ON message.shared_user_id = shareUser.user_id
+    LEFT JOIN users participant ON message.participant_id = participant.user_id
     LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
 WHERE $where
 ORDER BY $order
@@ -76,7 +79,7 @@ SELECT m.message_id                   AS messageId,
        m.action                       AS actionName,
        conversationOwner.relationship AS relationship,
        pu.full_name                   AS participantFullName,
-       pu.user_id                     AS participantUserId
+       m.participant_id               AS participantUserId
 FROM   messages m
        INNER JOIN users sender
                ON m.user_id = sender.user_id

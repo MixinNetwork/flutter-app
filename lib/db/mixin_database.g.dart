@@ -3760,333 +3760,6 @@ class UsersCompanion extends UpdateCompanion<User> {
   }
 }
 
-class Participants extends Table with TableInfo<Participants, Participant> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Participants(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _conversationIdMeta = const VerificationMeta(
-    'conversationId',
-  );
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-    'conversation_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-    'user_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  late final GeneratedColumnWithTypeConverter<ParticipantRole?, String> role =
-      GeneratedColumn<String>(
-        'role',
-        aliasedName,
-        true,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        $customConstraints: '',
-      ).withConverter<ParticipantRole?>(Participants.$converterrole);
-  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
-      GeneratedColumn<int>(
-        'created_at',
-        aliasedName,
-        false,
-        type: DriftSqlType.int,
-        requiredDuringInsert: true,
-        $customConstraints: 'NOT NULL',
-      ).withConverter<DateTime>(Participants.$convertercreatedAt);
-  @override
-  List<GeneratedColumn> get $columns => [
-    conversationId,
-    userId,
-    role,
-    createdAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'participants';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<Participant> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-        _conversationIdMeta,
-        conversationId.isAcceptableOrUnknown(
-          data['conversation_id']!,
-          _conversationIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(
-        _userIdMeta,
-        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
-  @override
-  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Participant(
-      conversationId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}conversation_id'],
-      )!,
-      userId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}user_id'],
-      )!,
-      role: Participants.$converterrole.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}role'],
-        ),
-      ),
-      createdAt: Participants.$convertercreatedAt.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.int,
-          data['${effectivePrefix}created_at'],
-        )!,
-      ),
-    );
-  }
-
-  @override
-  Participants createAlias(String alias) {
-    return Participants(attachedDatabase, alias);
-  }
-
-  static TypeConverter<ParticipantRole?, String?> $converterrole =
-      const ParticipantRoleConverter();
-  static TypeConverter<DateTime, int> $convertercreatedAt =
-      const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const [
-    'PRIMARY KEY(conversation_id, user_id)',
-    'FOREIGN KEY(conversation_id)REFERENCES conversations(conversation_id)ON UPDATE NO ACTION ON DELETE CASCADE',
-  ];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class Participant extends DataClass implements Insertable<Participant> {
-  final String conversationId;
-  final String userId;
-  final ParticipantRole? role;
-  final DateTime createdAt;
-  const Participant({
-    required this.conversationId,
-    required this.userId,
-    this.role,
-    required this.createdAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['conversation_id'] = Variable<String>(conversationId);
-    map['user_id'] = Variable<String>(userId);
-    if (!nullToAbsent || role != null) {
-      map['role'] = Variable<String>(Participants.$converterrole.toSql(role));
-    }
-    {
-      map['created_at'] = Variable<int>(
-        Participants.$convertercreatedAt.toSql(createdAt),
-      );
-    }
-    return map;
-  }
-
-  ParticipantsCompanion toCompanion(bool nullToAbsent) {
-    return ParticipantsCompanion(
-      conversationId: Value(conversationId),
-      userId: Value(userId),
-      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory Participant.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Participant(
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      role: serializer.fromJson<ParticipantRole?>(json['role']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'user_id': serializer.toJson<String>(userId),
-      'role': serializer.toJson<ParticipantRole?>(role),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  Participant copyWith({
-    String? conversationId,
-    String? userId,
-    Value<ParticipantRole?> role = const Value.absent(),
-    DateTime? createdAt,
-  }) => Participant(
-    conversationId: conversationId ?? this.conversationId,
-    userId: userId ?? this.userId,
-    role: role.present ? role.value : this.role,
-    createdAt: createdAt ?? this.createdAt,
-  );
-  Participant copyWithCompanion(ParticipantsCompanion data) {
-    return Participant(
-      conversationId: data.conversationId.present
-          ? data.conversationId.value
-          : this.conversationId,
-      userId: data.userId.present ? data.userId.value : this.userId,
-      role: data.role.present ? data.role.value : this.role,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Participant(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(conversationId, userId, role, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Participant &&
-          other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
-          other.role == this.role &&
-          other.createdAt == this.createdAt);
-}
-
-class ParticipantsCompanion extends UpdateCompanion<Participant> {
-  final Value<String> conversationId;
-  final Value<String> userId;
-  final Value<ParticipantRole?> role;
-  final Value<DateTime> createdAt;
-  final Value<int> rowid;
-  const ParticipantsCompanion({
-    this.conversationId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.role = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  ParticipantsCompanion.insert({
-    required String conversationId,
-    required String userId,
-    this.role = const Value.absent(),
-    required DateTime createdAt,
-    this.rowid = const Value.absent(),
-  }) : conversationId = Value(conversationId),
-       userId = Value(userId),
-       createdAt = Value(createdAt);
-  static Insertable<Participant> custom({
-    Expression<String>? conversationId,
-    Expression<String>? userId,
-    Expression<String>? role,
-    Expression<int>? createdAt,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (userId != null) 'user_id': userId,
-      if (role != null) 'role': role,
-      if (createdAt != null) 'created_at': createdAt,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  ParticipantsCompanion copyWith({
-    Value<String>? conversationId,
-    Value<String>? userId,
-    Value<ParticipantRole?>? role,
-    Value<DateTime>? createdAt,
-    Value<int>? rowid,
-  }) {
-    return ParticipantsCompanion(
-      conversationId: conversationId ?? this.conversationId,
-      userId: userId ?? this.userId,
-      role: role ?? this.role,
-      createdAt: createdAt ?? this.createdAt,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (role.present) {
-      map['role'] = Variable<String>(
-        Participants.$converterrole.toSql(role.value),
-      );
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<int>(
-        Participants.$convertercreatedAt.toSql(createdAt.value),
-      );
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantsCompanion(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -13648,6 +13321,333 @@ class ParticipantSessionCompanion
   }
 }
 
+class Participants extends Table with TableInfo<Participants, Participant> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Participants(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _conversationIdMeta = const VerificationMeta(
+    'conversationId',
+  );
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+    'conversation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final GeneratedColumnWithTypeConverter<ParticipantRole?, String> role =
+      GeneratedColumn<String>(
+        'role',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<ParticipantRole?>(Participants.$converterrole);
+  late final GeneratedColumnWithTypeConverter<DateTime, int> createdAt =
+      GeneratedColumn<int>(
+        'created_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<DateTime>(Participants.$convertercreatedAt);
+  @override
+  List<GeneratedColumn> get $columns => [
+    conversationId,
+    userId,
+    role,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'participants';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Participant> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+        _conversationIdMeta,
+        conversationId.isAcceptableOrUnknown(
+          data['conversation_id']!,
+          _conversationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
+  @override
+  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Participant(
+      conversationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conversation_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      role: Participants.$converterrole.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}role'],
+        ),
+      ),
+      createdAt: Participants.$convertercreatedAt.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}created_at'],
+        )!,
+      ),
+    );
+  }
+
+  @override
+  Participants createAlias(String alias) {
+    return Participants(attachedDatabase, alias);
+  }
+
+  static TypeConverter<ParticipantRole?, String?> $converterrole =
+      const ParticipantRoleConverter();
+  static TypeConverter<DateTime, int> $convertercreatedAt =
+      const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const [
+    'PRIMARY KEY(conversation_id, user_id)',
+    'FOREIGN KEY(conversation_id)REFERENCES conversations(conversation_id)ON UPDATE NO ACTION ON DELETE CASCADE',
+  ];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Participant extends DataClass implements Insertable<Participant> {
+  final String conversationId;
+  final String userId;
+  final ParticipantRole? role;
+  final DateTime createdAt;
+  const Participant({
+    required this.conversationId,
+    required this.userId,
+    this.role,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || role != null) {
+      map['role'] = Variable<String>(Participants.$converterrole.toSql(role));
+    }
+    {
+      map['created_at'] = Variable<int>(
+        Participants.$convertercreatedAt.toSql(createdAt),
+      );
+    }
+    return map;
+  }
+
+  ParticipantsCompanion toCompanion(bool nullToAbsent) {
+    return ParticipantsCompanion(
+      conversationId: Value(conversationId),
+      userId: Value(userId),
+      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Participant.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Participant(
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      role: serializer.fromJson<ParticipantRole?>(json['role']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'user_id': serializer.toJson<String>(userId),
+      'role': serializer.toJson<ParticipantRole?>(role),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Participant copyWith({
+    String? conversationId,
+    String? userId,
+    Value<ParticipantRole?> role = const Value.absent(),
+    DateTime? createdAt,
+  }) => Participant(
+    conversationId: conversationId ?? this.conversationId,
+    userId: userId ?? this.userId,
+    role: role.present ? role.value : this.role,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Participant copyWithCompanion(ParticipantsCompanion data) {
+    return Participant(
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      role: data.role.present ? data.role.value : this.role,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Participant(')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(conversationId, userId, role, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Participant &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.role == this.role &&
+          other.createdAt == this.createdAt);
+}
+
+class ParticipantsCompanion extends UpdateCompanion<Participant> {
+  final Value<String> conversationId;
+  final Value<String> userId;
+  final Value<ParticipantRole?> role;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ParticipantsCompanion({
+    this.conversationId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParticipantsCompanion.insert({
+    required String conversationId,
+    required String userId,
+    this.role = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : conversationId = Value(conversationId),
+       userId = Value(userId),
+       createdAt = Value(createdAt);
+  static Insertable<Participant> custom({
+    Expression<String>? conversationId,
+    Expression<String>? userId,
+    Expression<String>? role,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (userId != null) 'user_id': userId,
+      if (role != null) 'role': role,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParticipantsCompanion copyWith({
+    Value<String>? conversationId,
+    Value<String>? userId,
+    Value<ParticipantRole?>? role,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ParticipantsCompanion(
+      conversationId: conversationId ?? this.conversationId,
+      userId: userId ?? this.userId,
+      role: role ?? this.role,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(
+        Participants.$converterrole.toSql(role.value),
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(
+        Participants.$convertercreatedAt.toSql(createdAt.value),
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantsCompanion(')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class ResendSessionMessages extends Table
     with TableInfo<ResendSessionMessages, ResendSessionMessage> {
   @override
@@ -18787,7 +18787,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Conversations conversations = Conversations(this);
   late final Messages messages = Messages(this);
   late final Users users = Users(this);
-  late final Participants participants = Participants(this);
   late final Snapshots snapshots = Snapshots(this);
   late final SafeSnapshots safeSnapshots = SafeSnapshots(this);
   late final Assets assets = Assets(this);
@@ -18809,6 +18808,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final MessagesHistory messagesHistory = MessagesHistory(this);
   late final Offsets offsets = Offsets(this);
   late final ParticipantSession participantSession = ParticipantSession(this);
+  late final Participants participants = Participants(this);
   late final ResendSessionMessages resendSessionMessages =
       ResendSessionMessages(this);
   late final SentSessionSenderKeys sentSessionSenderKeys =
@@ -18959,7 +18959,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       where(
         alias(this.messages, 'message'),
         alias(this.users, 'sender'),
-        alias(this.participants, 'senderParticipant'),
         alias(this.users, 'participant'),
         alias(this.snapshots, 'snapshot'),
         alias(this.safeSnapshots, 'safe_snapshot'),
@@ -18982,7 +18981,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       order?.call(
             alias(this.messages, 'message'),
             alias(this.users, 'sender'),
-            alias(this.participants, 'senderParticipant'),
             alias(this.users, 'participant'),
             alias(this.snapshots, 'snapshot'),
             alias(this.safeSnapshots, 'safe_snapshot'),
@@ -19006,7 +19004,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       limit(
         alias(this.messages, 'message'),
         alias(this.users, 'sender'),
-        alias(this.participants, 'senderParticipant'),
         alias(this.users, 'participant'),
         alias(this.snapshots, 'snapshot'),
         alias(this.safeSnapshots, 'safe_snapshot'),
@@ -19026,7 +19023,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, senderParticipant.user_id AS senderParticipantId, senderParticipant.role AS senderRole, sender.avatar_url AS avatarUrl, sender.membership AS membership, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN participants AS senderParticipant ON message.conversation_id = senderParticipant.conversation_id AND message.user_id = senderParticipant.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.sticker_id AS stickerId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, message.participant_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
       variables: [
         ...generatedwhere.introducedVariables,
         ...generatedorder.introducedVariables,
@@ -19035,7 +19032,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       readsFrom: {
         this.messages,
         this.users,
-        this.participants,
         this.conversations,
         this.stickers,
         this.snapshots,
@@ -19086,10 +19082,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         appId: row.readNullable<String>('appId'),
         relationship: Users.$converterrelationship.fromSql(
           row.readNullable<String>('relationship'),
-        ),
-        senderParticipantId: row.readNullable<String>('senderParticipantId'),
-        senderRole: Participants.$converterrole.fromSql(
-          row.readNullable<String>('senderRole'),
         ),
         avatarUrl: row.readNullable<String>('avatarUrl'),
         membership: Users.$convertermembership.fromSql(
@@ -19148,7 +19140,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.pinMessages, 'pinMessage'),
             alias(this.messages, 'message'),
             alias(this.users, 'sender'),
-            alias(this.participants, 'senderParticipant'),
             alias(this.users, 'participant'),
             alias(this.snapshots, 'snapshot'),
             alias(this.safeSnapshots, 'safe_snapshot'),
@@ -19172,7 +19163,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         alias(this.pinMessages, 'pinMessage'),
         alias(this.messages, 'message'),
         alias(this.users, 'sender'),
-        alias(this.participants, 'senderParticipant'),
         alias(this.users, 'participant'),
         alias(this.snapshots, 'snapshot'),
         alias(this.safeSnapshots, 'safe_snapshot'),
@@ -19191,7 +19181,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, senderParticipant.user_id AS senderParticipantId, senderParticipant.role AS senderRole, sender.avatar_url AS avatarUrl, sender.membership AS membership, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN participants AS senderParticipant ON message.conversation_id = senderParticipant.conversation_id AND message.user_id = senderParticipant.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, message.caption AS caption, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sender.membership AS membership, COALESCE(sender.is_verified, FALSE) AS isVerified, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, COALESCE(sharedUser.is_verified, FALSE) AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sharedUser.membership AS sharedUserMembership, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, message.participant_id AS participantUserId, COALESCE(snapshot.snapshot_id, safe_snapshot.snapshot_id) AS snapshotId, COALESCE(snapshot.type, safe_snapshot.type) AS snapshotType, COALESCE(snapshot.amount, safe_snapshot.amount) AS snapshotAmount, COALESCE(snapshot.memo, safe_snapshot.memo) AS snapshotMemo, COALESCE(snapshot.asset_id, safe_snapshot.asset_id) AS assetId, COALESCE(asset.symbol, token.symbol) AS assetSymbol, COALESCE(asset.icon_url, token.icon_url) AS assetIcon, chain.icon_url AS chainIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, em.expire_in AS expireIn, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN safe_snapshots AS safe_snapshot ON message.snapshot_id = safe_snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN tokens AS token ON safe_snapshot.asset_id = token.asset_id LEFT JOIN chains AS chain ON asset.chain_id = chain.chain_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN expired_messages AS em ON message.message_id = em.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
       variables: [
         Variable<String>(conversationId),
         ...generatedorder.introducedVariables,
@@ -19200,7 +19190,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       readsFrom: {
         this.messages,
         this.users,
-        this.participants,
         this.conversations,
         this.stickers,
         this.snapshots,
@@ -19250,10 +19239,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         appId: row.readNullable<String>('appId'),
         relationship: Users.$converterrelationship.fromSql(
           row.readNullable<String>('relationship'),
-        ),
-        senderParticipantId: row.readNullable<String>('senderParticipantId'),
-        senderRole: Participants.$converterrole.fromSql(
-          row.readNullable<String>('senderRole'),
         ),
         avatarUrl: row.readNullable<String>('avatarUrl'),
         membership: Users.$convertermembership.fromSql(
@@ -19406,7 +19391,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     conversations,
     messages,
     users,
-    participants,
     snapshots,
     safeSnapshots,
     assets,
@@ -19426,6 +19410,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     messagesHistory,
     offsets,
     participantSession,
+    participants,
     resendSessionMessages,
     sentSessionSenderKeys,
     stickerAlbums,
@@ -21110,195 +21095,6 @@ typedef $UsersProcessedTableManager =
       $UsersUpdateCompanionBuilder,
       (User, BaseReferences<_$MixinDatabase, Users, User>),
       User,
-      PrefetchHooks Function()
-    >;
-typedef $ParticipantsCreateCompanionBuilder = ParticipantsCompanion Function({
-  required String conversationId,
-  required String userId,
-  Value<ParticipantRole?> role,
-  required DateTime createdAt,
-  Value<int> rowid,
-});
-typedef $ParticipantsUpdateCompanionBuilder = ParticipantsCompanion Function({
-  Value<String> conversationId,
-  Value<String> userId,
-  Value<ParticipantRole?> role,
-  Value<DateTime> createdAt,
-  Value<int> rowid,
-});
-
-class $ParticipantsFilterComposer
-    extends Composer<_$MixinDatabase, Participants> {
-  $ParticipantsFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get conversationId => $composableBuilder(
-    column: $table.conversationId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get userId => $composableBuilder(
-    column: $table.userId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<ParticipantRole?, ParticipantRole, String>
-  get role => $composableBuilder(
-    column: $table.role,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
-      $composableBuilder(
-        column: $table.createdAt,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-}
-
-class $ParticipantsOrderingComposer
-    extends Composer<_$MixinDatabase, Participants> {
-  $ParticipantsOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get conversationId => $composableBuilder(
-    column: $table.conversationId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get userId => $composableBuilder(
-    column: $table.userId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get role => $composableBuilder(
-    column: $table.role,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $ParticipantsAnnotationComposer
-    extends Composer<_$MixinDatabase, Participants> {
-  $ParticipantsAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get conversationId => $composableBuilder(
-    column: $table.conversationId,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get userId =>
-      $composableBuilder(column: $table.userId, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<ParticipantRole?, String> get role =>
-      $composableBuilder(column: $table.role, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<DateTime, int> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-}
-
-class $ParticipantsTableManager
-    extends
-        RootTableManager<
-          _$MixinDatabase,
-          Participants,
-          Participant,
-          $ParticipantsFilterComposer,
-          $ParticipantsOrderingComposer,
-          $ParticipantsAnnotationComposer,
-          $ParticipantsCreateCompanionBuilder,
-          $ParticipantsUpdateCompanionBuilder,
-          (
-            Participant,
-            BaseReferences<_$MixinDatabase, Participants, Participant>,
-          ),
-          Participant,
-          PrefetchHooks Function()
-        > {
-  $ParticipantsTableManager(_$MixinDatabase db, Participants table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $ParticipantsFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $ParticipantsOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $ParticipantsAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> conversationId = const Value.absent(),
-                Value<String> userId = const Value.absent(),
-                Value<ParticipantRole?> role = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => ParticipantsCompanion(
-                conversationId: conversationId,
-                userId: userId,
-                role: role,
-                createdAt: createdAt,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String conversationId,
-                required String userId,
-                Value<ParticipantRole?> role = const Value.absent(),
-                required DateTime createdAt,
-                Value<int> rowid = const Value.absent(),
-              }) => ParticipantsCompanion.insert(
-                conversationId: conversationId,
-                userId: userId,
-                role: role,
-                createdAt: createdAt,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<Participants, Participant>(table),
-                  BaseReferences<_$MixinDatabase, Participants, Participant>(
-                    db,
-                    table,
-                    e,
-                  ),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $ParticipantsProcessedTableManager =
-    ProcessedTableManager<
-      _$MixinDatabase,
-      Participants,
-      Participant,
-      $ParticipantsFilterComposer,
-      $ParticipantsOrderingComposer,
-      $ParticipantsAnnotationComposer,
-      $ParticipantsCreateCompanionBuilder,
-      $ParticipantsUpdateCompanionBuilder,
-      (Participant, BaseReferences<_$MixinDatabase, Participants, Participant>),
-      Participant,
       PrefetchHooks Function()
     >;
 typedef $SnapshotsCreateCompanionBuilder = SnapshotsCompanion Function({
@@ -26141,6 +25937,195 @@ typedef $ParticipantSessionProcessedTableManager =
       ParticipantSessionData,
       PrefetchHooks Function()
     >;
+typedef $ParticipantsCreateCompanionBuilder = ParticipantsCompanion Function({
+  required String conversationId,
+  required String userId,
+  Value<ParticipantRole?> role,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $ParticipantsUpdateCompanionBuilder = ParticipantsCompanion Function({
+  Value<String> conversationId,
+  Value<String> userId,
+  Value<ParticipantRole?> role,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+class $ParticipantsFilterComposer
+    extends Composer<_$MixinDatabase, Participants> {
+  $ParticipantsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ParticipantRole?, ParticipantRole, String>
+  get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime, DateTime, int> get createdAt =>
+      $composableBuilder(
+        column: $table.createdAt,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+}
+
+class $ParticipantsOrderingComposer
+    extends Composer<_$MixinDatabase, Participants> {
+  $ParticipantsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $ParticipantsAnnotationComposer
+    extends Composer<_$MixinDatabase, Participants> {
+  $ParticipantsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get conversationId => $composableBuilder(
+    column: $table.conversationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ParticipantRole?, String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime, int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $ParticipantsTableManager
+    extends
+        RootTableManager<
+          _$MixinDatabase,
+          Participants,
+          Participant,
+          $ParticipantsFilterComposer,
+          $ParticipantsOrderingComposer,
+          $ParticipantsAnnotationComposer,
+          $ParticipantsCreateCompanionBuilder,
+          $ParticipantsUpdateCompanionBuilder,
+          (
+            Participant,
+            BaseReferences<_$MixinDatabase, Participants, Participant>,
+          ),
+          Participant,
+          PrefetchHooks Function()
+        > {
+  $ParticipantsTableManager(_$MixinDatabase db, Participants table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $ParticipantsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $ParticipantsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $ParticipantsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> conversationId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<ParticipantRole?> role = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipantsCompanion(
+                conversationId: conversationId,
+                userId: userId,
+                role: role,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String conversationId,
+                required String userId,
+                Value<ParticipantRole?> role = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ParticipantsCompanion.insert(
+                conversationId: conversationId,
+                userId: userId,
+                role: role,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<Participants, Participant>(table),
+                  BaseReferences<_$MixinDatabase, Participants, Participant>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $ParticipantsProcessedTableManager =
+    ProcessedTableManager<
+      _$MixinDatabase,
+      Participants,
+      Participant,
+      $ParticipantsFilterComposer,
+      $ParticipantsOrderingComposer,
+      $ParticipantsAnnotationComposer,
+      $ParticipantsCreateCompanionBuilder,
+      $ParticipantsUpdateCompanionBuilder,
+      (Participant, BaseReferences<_$MixinDatabase, Participants, Participant>),
+      Participant,
+      PrefetchHooks Function()
+    >;
 typedef $ResendSessionMessagesCreateCompanionBuilder =
     ResendSessionMessagesCompanion Function({
       required String messageId,
@@ -28827,8 +28812,6 @@ class $MixinDatabaseManager {
   $MessagesTableManager get messages =>
       $MessagesTableManager(_db, _db.messages);
   $UsersTableManager get users => $UsersTableManager(_db, _db.users);
-  $ParticipantsTableManager get participants =>
-      $ParticipantsTableManager(_db, _db.participants);
   $SnapshotsTableManager get snapshots =>
       $SnapshotsTableManager(_db, _db.snapshots);
   $SafeSnapshotsTableManager get safeSnapshots =>
@@ -28860,6 +28843,8 @@ class $MixinDatabaseManager {
   $OffsetsTableManager get offsets => $OffsetsTableManager(_db, _db.offsets);
   $ParticipantSessionTableManager get participantSession =>
       $ParticipantSessionTableManager(_db, _db.participantSession);
+  $ParticipantsTableManager get participants =>
+      $ParticipantsTableManager(_db, _db.participants);
   $ResendSessionMessagesTableManager get resendSessionMessages =>
       $ResendSessionMessagesTableManager(_db, _db.resendSessionMessages);
   $SentSessionSenderKeysTableManager get sentSessionSenderKeys =>
@@ -28910,8 +28895,6 @@ class MessageItem {
   final String userIdentityNumber;
   final String? appId;
   final UserRelationship? relationship;
-  final String? senderParticipantId;
-  final ParticipantRole? senderRole;
   final String? avatarUrl;
   final Membership? membership;
   final bool isVerified;
@@ -28975,8 +28958,6 @@ class MessageItem {
     required this.userIdentityNumber,
     this.appId,
     this.relationship,
-    this.senderParticipantId,
-    this.senderRole,
     this.avatarUrl,
     this.membership,
     required this.isVerified,
@@ -29042,8 +29023,6 @@ class MessageItem {
     userIdentityNumber,
     appId,
     relationship,
-    senderParticipantId,
-    senderRole,
     avatarUrl,
     membership,
     isVerified,
@@ -29111,8 +29090,6 @@ class MessageItem {
           other.userIdentityNumber == this.userIdentityNumber &&
           other.appId == this.appId &&
           other.relationship == this.relationship &&
-          other.senderParticipantId == this.senderParticipantId &&
-          other.senderRole == this.senderRole &&
           other.avatarUrl == this.avatarUrl &&
           other.membership == this.membership &&
           other.isVerified == this.isVerified &&
@@ -29178,8 +29155,6 @@ class MessageItem {
           ..write('userIdentityNumber: $userIdentityNumber, ')
           ..write('appId: $appId, ')
           ..write('relationship: $relationship, ')
-          ..write('senderParticipantId: $senderParticipantId, ')
-          ..write('senderRole: $senderRole, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('membership: $membership, ')
           ..write('isVerified: $isVerified, ')
@@ -29222,7 +29197,6 @@ class MessageItem {
 typedef BaseMessageItems$where = Expression<bool> Function(
   Messages message,
   Users sender,
-  Participants senderParticipant,
   Users participant,
   Snapshots snapshot,
   SafeSnapshots safe_snapshot,
@@ -29240,7 +29214,6 @@ typedef BaseMessageItems$where = Expression<bool> Function(
 typedef BaseMessageItems$order = OrderBy Function(
   Messages message,
   Users sender,
-  Participants senderParticipant,
   Users participant,
   Snapshots snapshot,
   SafeSnapshots safe_snapshot,
@@ -29258,7 +29231,6 @@ typedef BaseMessageItems$order = OrderBy Function(
 typedef BaseMessageItems$limit = Limit Function(
   Messages message,
   Users sender,
-  Participants senderParticipant,
   Users participant,
   Snapshots snapshot,
   SafeSnapshots safe_snapshot,
@@ -29277,7 +29249,6 @@ typedef BasePinMessageItems$order = OrderBy Function(
   PinMessages pinMessage,
   Messages message,
   Users sender,
-  Participants senderParticipant,
   Users participant,
   Snapshots snapshot,
   SafeSnapshots safe_snapshot,
@@ -29295,7 +29266,6 @@ typedef BasePinMessageItems$limit = Limit Function(
   PinMessages pinMessage,
   Messages message,
   Users sender,
-  Participants senderParticipant,
   Users participant,
   Snapshots snapshot,
   SafeSnapshots safe_snapshot,

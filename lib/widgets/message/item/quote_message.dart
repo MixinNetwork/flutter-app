@@ -23,6 +23,7 @@ import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/message_optimize.dart';
 import '../../../utils/sticker_watch.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../conversation/badges_widget.dart';
@@ -86,6 +87,8 @@ class QuoteMessage extends HookConsumerWidget {
       String? sharedUserFullName;
       String? sharedUserAvatarUrl;
       String? sharedUserIdentityNumber;
+      String? participantUserId;
+      String? participantFullName;
       switch (quote) {
         case final quote when quote is QuoteMessageItem:
           type = quote.type;
@@ -101,6 +104,8 @@ class QuoteMessage extends HookConsumerWidget {
           sharedUserFullName = quote.sharedUserFullName;
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
           sharedUserIdentityNumber = quote.sharedUserIdentityNumber;
+          participantUserId = quote.participantUserId;
+          participantFullName = quote.participantFullName;
         case final quote when quote is MessageItem:
           type = quote.type;
           userId = quote.userId;
@@ -115,6 +120,8 @@ class QuoteMessage extends HookConsumerWidget {
           sharedUserFullName = quote.sharedUserFullName;
           sharedUserAvatarUrl = quote.sharedUserAvatarUrl;
           sharedUserIdentityNumber = quote.sharedUserIdentityNumber;
+          participantUserId = quote.participantUserId;
+          participantFullName = quote.participantFullName;
       }
 
       final quoteSticker = useMemoizedStream(
@@ -143,6 +150,27 @@ class QuoteMessage extends HookConsumerWidget {
           ),
           inputMode: inputMode,
           onTap: () {},
+        );
+      }
+      if (type.isRecall) {
+        return _QuoteMessageBase(
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
+          userId: userId,
+          name: userFullName,
+          description: recalledMessageText(
+            participantUserId: participantUserId,
+            participantFullName: participantFullName,
+            senderId: userId,
+            senderFullName: userFullName,
+            isCurrentUser: (actorId) => actorId == context.accountServer.userId,
+          ),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesRecallSvg,
+            renderingStrategy: RenderingStrategy.raster,
+            colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+          ),
+          inputMode: inputMode,
         );
       }
       if (type.isText) {
