@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -69,13 +72,19 @@ class AppUpdateItem extends ConsumerWidget {
 /// [onNoUpdate], which opens the download page. While an update is offered the
 /// download page stays one click away: an install can keep failing, also one
 /// that fails after the app quit and starts again with the update offered.
-class AppUpdateButton extends ConsumerWidget {
+class AppUpdateButton extends HookConsumerWidget {
   const AppUpdateButton({required this.onNoUpdate, super.key});
 
   final VoidCallback onNoUpdate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useEffect(() {
+      if (ref.read(appUpdateProvider).status == AppUpdateStatus.none) {
+        unawaited(ref.read(appUpdateProvider.notifier).checkForUpdate());
+      }
+      return null;
+    }, const []);
     final state = ref.watch(appUpdateProvider);
     final button = MixinButton(
       disable: state.status == AppUpdateStatus.downloading,

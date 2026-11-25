@@ -208,49 +208,107 @@ void main() {
     ]);
   });
 
-  test('a proxy turned on after the check hides the DMG update', () async {
-    PackageInfo.setMockInitialValues(
-      appName: 'mixin',
-      packageName: 'mixin_desktop',
-      version: '6.3.6',
-      buildNumber: '600',
-      buildSignature: '',
-    );
-    final installs = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-          const MethodChannel('mixin_desktop/app_update'),
-          (call) async => installs.add(call),
-        );
-    final server = _Server()..appcast = _appcast(_dmg);
-    ProxyConfig? proxy;
-    final provider = StateNotifierProvider<AppUpdateNotifier, AppUpdateState>(
-      (ref) => AppUpdateNotifier.test(
-        ref,
-        package: 'dmg',
-        publicKey: List.filled(32, 0),
-        dio: () => Dio()..httpClientAdapter = server,
-        mac: MacUpdateChannel.dmg,
-        proxy: () => proxy,
-      ),
-    );
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-    final notifier = container.read(provider.notifier);
+  test(
+    'in-app proxy still allows checking and installing DMG updates',
+    () async {
+      PackageInfo.setMockInitialValues(
+        appName: 'mixin',
+        packageName: 'mixin_desktop',
+        version: '6.3.6',
+        buildNumber: '600',
+        buildSignature: '',
+      );
+      final installs = <MethodCall>[];
+      const macChannel = MethodChannel('mixin_desktop/app_update');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(macChannel, (call) async {
+            installs.add(call);
+            return null;
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(macChannel, null),
+      );
+      final server = _Server()..appcast = _appcast(_dmg);
+      final proxy = ProxyConfig(
+        type: ProxyType.http,
+        host: '127.0.0.1',
+        port: 8080,
+        id: 'proxy',
+      );
+      final provider = StateNotifierProvider<AppUpdateNotifier, AppUpdateState>(
+        (ref) => AppUpdateNotifier.test(
+          ref,
+          package: 'dmg',
+          publicKey: List.filled(32, 0),
+          dio: () => Dio()..httpClientAdapter = server,
+          mac: MacUpdateChannel.dmg,
+          proxy: () => proxy,
+        ),
+      );
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(provider.notifier);
 
-    await notifier.check();
-    expect(container.read(provider).status, AppUpdateStatus.available);
+      await notifier.check();
+      expect(container.read(provider).status, AppUpdateStatus.available);
 
-    proxy = ProxyConfig(
-      type: ProxyType.http,
-      host: '127.0.0.1',
-      port: 8080,
-      id: 'proxy',
-    );
-    await notifier.update();
-    expect(installs, isEmpty);
-    expect(container.read(provider).status, AppUpdateStatus.none);
-  });
+      await notifier.update();
+      expect(installs.map((c) => c.method), ['install']);
+      expect(container.read(provider).status, AppUpdateStatus.downloading);
+    },
+  );
+
+  test(
+    'checkForUpdate refreshes Store and appcast channels when none',
+    () async {
+      count = 0;
+      final (_, storeNotifier) = await start();
+      expect(storeNotifier.state.status, AppUpdateStatus.none);
+
+      count = 1;
+      await storeNotifier.checkForUpdate();
+      expect(storeNotifier.state.status, AppUpdateStatus.available);
+      expect(calls, ['storeUpdateCount', 'storeUpdateCount']);
+
+      // Already available: no extra Store check.
+      await storeNotifier.checkForUpdate();
+      expect(calls, ['storeUpdateCount', 'storeUpdateCount']);
+
+      PackageInfo.setMockInitialValues(
+        appName: 'mixin',
+        packageName: 'mixin_desktop',
+        version: '6.3.6',
+        buildNumber: '600',
+        buildSignature: '',
+      );
+      final server = _Server()..appcast = _appcast('');
+      final provider = StateNotifierProvider<AppUpdateNotifier, AppUpdateState>(
+        (ref) => AppUpdateNotifier.test(
+          ref,
+          package: 'tar-x64',
+          publicKey: List.filled(32, 0),
+          dio: () => Dio()..httpClientAdapter = server,
+        ),
+      );
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(provider.notifier);
+
+      await notifier.checkForUpdate();
+      expect(container.read(provider).status, AppUpdateStatus.none);
+      expect(server.requests, hasLength(1));
+
+      server.appcast = _appcast(_tar);
+      await notifier.checkForUpdate();
+      expect(container.read(provider).status, AppUpdateStatus.available);
+      expect(server.requests, hasLength(2));
+
+      // Already available: no extra appcast check.
+      await notifier.checkForUpdate();
+      expect(server.requests, hasLength(2));
+    },
+  );
 
   test('a later appcast without the package keeps the update', () async {
     PackageInfo.setMockInitialValues(
@@ -290,4 +348,27 @@ void main() {
     );
     expect(container.read(provider).status, AppUpdateStatus.failed);
   });
+
+  test(
+    'concurrent Store checks share a single in-flight request',
+    () async {
+      count = 0;
+      final (_, notifier) = await start();
+      expect(notifier.state.status, AppUpdateStatus.none);
+      calls.clear();
+
+      final pending = Completer<int?>();
+      countReply = pending;
+      final firstCheck = notifier.checkStore();
+      await pumpEventQueue();
+
+      final secondCheck = notifier.checkForUpdate();
+      await pumpEventQueue();
+      expect(calls, ['storeUpdateCount']);
+
+      pending.complete(1);
+      await Future.wait([firstCheck, secondCheck]);
+      expect(notifier.state.status, AppUpdateStatus.available);
+    },
+  );
 }

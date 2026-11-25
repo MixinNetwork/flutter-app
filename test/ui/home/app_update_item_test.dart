@@ -16,9 +16,13 @@ class _FakeUpdater extends AppUpdateNotifier {
   }
 
   int updates = 0;
+  int checks = 0;
 
   @override
   Future<void> update() async => updates++;
+
+  @override
+  Future<void> checkForUpdate() async => checks++;
 }
 
 void main() {
@@ -86,6 +90,7 @@ void main() {
 
     testWidgets('opens the download page without an update', (tester) async {
       await pump(tester, AppUpdateState.none, child: button());
+      expect(updater.checks, 1);
       await tester.tap(find.text('Upgrade'));
       expect(opened, 1);
       expect(updater.updates, 0);
@@ -97,6 +102,7 @@ void main() {
         const AppUpdateState(AppUpdateStatus.available),
         child: button(),
       );
+      expect(updater.checks, 0);
       await tester.tap(find.text('Upgrade'));
       expect(updater.updates, 1);
       expect(opened, 0);
