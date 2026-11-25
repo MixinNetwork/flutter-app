@@ -120,12 +120,22 @@ class Database {
   Future<T> transaction<T>(Future<T> Function() action) =>
       mixinDatabase.transaction<T>(action);
 
-  Future<void> recallMessage(String conversationId, String messageId) async {
+  Future<void> recallMessage(
+    String conversationId,
+    String messageId, {
+    required String actorUserId,
+    required String currentUserId,
+  }) async {
     await ftsDatabase.deleteByMessageId(messageId);
     await messageMentionDao.deleteMessageMention(
       MessageMention(messageId: messageId, conversationId: conversationId),
     );
-    await messageDao.recallMessage(conversationId, messageId);
+    await messageDao.recallMessage(
+      conversationId,
+      messageId,
+      actorUserId: actorUserId,
+      currentUserId: currentUserId,
+    );
     final quoteMessage = await messageDao.findMessageItemById(
       conversationId,
       messageId,

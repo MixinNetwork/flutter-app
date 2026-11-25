@@ -56,6 +56,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         alias(this.users, 'sender'),
         alias(this.stickers, 'sticker'),
         alias(this.users, 'shareUser'),
+        alias(this.users, 'participant'),
         alias(this.messageMentions, 'messageMention'),
       ),
       hasMultipleTables: true,
@@ -68,6 +69,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
             alias(this.users, 'sender'),
             alias(this.stickers, 'sticker'),
             alias(this.users, 'shareUser'),
+            alias(this.users, 'participant'),
             alias(this.messageMentions, 'messageMention'),
           ) ??
           const OrderBy.nothing(),
@@ -81,6 +83,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         alias(this.users, 'sender'),
         alias(this.stickers, 'sticker'),
         alias(this.users, 'shareUser'),
+        alias(this.users, 'participant'),
         alias(this.messageMentions, 'messageMention'),
       ),
       hasMultipleTables: true,
@@ -88,7 +91,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     );
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+      'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.sticker_id AS stickerId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.name AS assetName, sticker.asset_type AS assetType, message.shared_user_id AS sharedUserId, shareUser.full_name AS sharedUserFullName, shareUser.identity_number AS sharedUserIdentityNumber, shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified, shareUser.app_id AS sharedUserAppId, message.participant_id AS participantUserId, participant.full_name AS participantFullName FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN users AS shareUser ON message.shared_user_id = shareUser.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
       variables: [
         ...generatedwhere.introducedVariables,
         ...generatedorder.introducedVariables,
@@ -144,6 +147,8 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
         sharedUserAvatarUrl: row.readNullable<String>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.readNullable<bool>('sharedUserIsVerified'),
         sharedUserAppId: row.readNullable<String>('sharedUserAppId'),
+        participantUserId: row.readNullable<String>('participantUserId'),
+        participantFullName: row.readNullable<String>('participantFullName'),
       ),
     );
   }
@@ -212,7 +217,7 @@ mixin _$MessageDaoMixin on DatabaseAccessor<MixinDatabase> {
     final expandedmessageId = $expandVar($arrayStartIndex, messageId.length);
     $arrayStartIndex += messageId.length;
     return customSelect(
-      'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
+      'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, m.participant_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id IN ($expandedmessageId) ORDER BY m.created_at DESC',
       variables: [for (var $ in messageId) Variable<String>($)],
       readsFrom: {
         this.messages,
@@ -544,6 +549,8 @@ class QuoteMessageItem {
   final String? sharedUserAvatarUrl;
   final bool? sharedUserIsVerified;
   final String? sharedUserAppId;
+  final String? participantUserId;
+  final String? participantFullName;
   QuoteMessageItem({
     required this.messageId,
     required this.conversationId,
@@ -578,6 +585,8 @@ class QuoteMessageItem {
     this.sharedUserAvatarUrl,
     this.sharedUserIsVerified,
     this.sharedUserAppId,
+    this.participantUserId,
+    this.participantFullName,
   });
   @override
   int get hashCode => Object.hashAll([
@@ -614,6 +623,8 @@ class QuoteMessageItem {
     sharedUserAvatarUrl,
     sharedUserIsVerified,
     sharedUserAppId,
+    participantUserId,
+    participantFullName,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -651,7 +662,9 @@ class QuoteMessageItem {
           other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
           other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
           other.sharedUserIsVerified == this.sharedUserIsVerified &&
-          other.sharedUserAppId == this.sharedUserAppId);
+          other.sharedUserAppId == this.sharedUserAppId &&
+          other.participantUserId == this.participantUserId &&
+          other.participantFullName == this.participantFullName);
   @override
   String toString() {
     return (StringBuffer('QuoteMessageItem(')
@@ -687,7 +700,9 @@ class QuoteMessageItem {
           ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
           ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
           ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
-          ..write('sharedUserAppId: $sharedUserAppId')
+          ..write('sharedUserAppId: $sharedUserAppId, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('participantFullName: $participantFullName')
           ..write(')'))
         .toString();
   }
@@ -698,6 +713,7 @@ typedef BaseQuoteMessageItem$where = Expression<bool> Function(
   Users sender,
   Stickers sticker,
   Users shareUser,
+  Users participant,
   MessageMentions messageMention,
 );
 typedef BaseQuoteMessageItem$order = OrderBy Function(
@@ -705,6 +721,7 @@ typedef BaseQuoteMessageItem$order = OrderBy Function(
   Users sender,
   Stickers sticker,
   Users shareUser,
+  Users participant,
   MessageMentions messageMention,
 );
 typedef BaseQuoteMessageItem$limit = Limit Function(
@@ -712,6 +729,7 @@ typedef BaseQuoteMessageItem$limit = Limit Function(
   Users sender,
   Stickers sticker,
   Users shareUser,
+  Users participant,
   MessageMentions messageMention,
 );
 

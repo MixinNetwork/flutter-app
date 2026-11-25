@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'intl/messages_all.dart';
@@ -1114,6 +1114,16 @@ class Localization {
     return Intl.message(
       'Do you want to delete the $arg0 circle?',
       name: 'deleteTheCircle',
+      desc: '',
+      args: [arg0],
+    );
+  }
+
+  /// `{arg0} deleted this message.`
+  String deletedThisMessage(Object arg0) {
+    return Intl.message(
+      '$arg0 deleted this message.',
+      name: 'deletedThisMessage',
       desc: '',
       args: [arg0],
     );

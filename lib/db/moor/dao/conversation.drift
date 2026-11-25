@@ -41,7 +41,7 @@ SELECT conversation.conversation_id AS conversationId,
     lastMessageSender.full_name AS senderFullName,
     snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName,
-    participant.user_id AS participantUserId,
+    lastMessage.participant_id AS participantUserId,
     em.expire_in AS messageExpireIn,
     (
         SELECT COUNT(1)
@@ -95,7 +95,7 @@ SELECT conversation.conversation_id AS conversationId,
     lastMessageSender.full_name AS senderFullName,
     snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName,
-    participant.user_id AS participantUserId,
+    lastMessage.participant_id AS participantUserId,
     em.expire_in AS messageExpireIn,
     (
         SELECT COUNT(1)
@@ -171,7 +171,7 @@ SELECT conversation.conversation_id AS conversationId,
     message.user_id AS senderId,
     message.action AS actionName,
     lastMessageSender.full_name AS senderFullName,
-    participant.user_id AS participantUserId,
+    message.participant_id AS participantUserId,
     participant.full_name AS participantFullName
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
@@ -218,7 +218,7 @@ SELECT conversation.conversation_id AS conversationId,
     message.user_id AS senderId,
     message.action AS actionName,
     lastMessageSender.full_name AS senderFullName,
-    participant.user_id AS participantUserId,
+    message.participant_id AS participantUserId,
     participant.full_name AS participantFullName
 FROM conversations conversation
     INNER JOIN users owner ON owner.user_id = conversation.owner_id
@@ -252,7 +252,7 @@ SELECT conversation.conversation_id AS conversationId,
     message.user_id AS senderId,
     message.action AS actionName,
     lastMessageSender.full_name AS senderFullName,
-    participant.user_id AS participantUserId,
+    message.participant_id AS participantUserId,
     participant.full_name AS participantFullName
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id

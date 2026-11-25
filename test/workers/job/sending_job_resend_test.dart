@@ -68,7 +68,7 @@ void main() {
       sessionId: 'session',
       privateKey: ed.generateKey().privateKey,
       signalProtocol: signalProtocol,
-      deleteAttachment: (_) async {},
+      deleteAttachment: (_) {},
     ).run([
       Job(
         jobId: 'job',

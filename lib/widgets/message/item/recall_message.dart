@@ -9,6 +9,7 @@ import 'package:vector_graphics/vector_graphics_compat.dart'
 import '../../../constants/resources.dart';
 import '../../../ui/provider/recall_message_reedit_provider.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/message_optimize.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_style.dart';
@@ -19,6 +20,17 @@ class RecallMessage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCurrentUser = useIsCurrentUser();
+    final recallText = useMessageConverter(
+      converter: (state) => recalledMessageText(
+        participantUserId: state.participantUserId,
+        participantFullName: state.participantFullName,
+        senderId: state.userId,
+        senderFullName: state.userFullName,
+        isCurrentUser: (actorId) => actorId == state.userId
+            ? isCurrentUser
+            : actorId == context.accountServer.userId,
+      ),
+    );
     final messageId = useMessageConverter(
       converter: (state) => state.messageId,
     );
@@ -43,11 +55,7 @@ class RecallMessage extends HookConsumerWidget {
           child: Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: isCurrentUser
-                      ? context.l10n.youDeletedThisMessage
-                      : context.l10n.thisMessageWasDeleted,
-                ),
+                TextSpan(text: recallText),
                 if (recalledText != null)
                   TextSpan(
                     text: ' ${context.l10n.reedit}',

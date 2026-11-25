@@ -42,9 +42,7 @@ import '../../../integration_test/chat_timeline_fixture.dart';
 void main() {
   test('MessageRows links top tail to first bottom row without center', () {
     final rows = MessageRows.from(
-      top: [
-        testMessage('top', userId: 'same'),
-      ],
+      top: [testMessage('top', userId: 'same')],
       center: null,
       bottom: [
         testMessage('bottom-first', userId: 'same'),
@@ -97,59 +95,49 @@ void main() {
     },
   );
 
-  test('MessageActionPolicy enforces the group recall role hierarchy', () {
-    MessageActionPolicy policy(
-      ParticipantRole? actorRole,
-      ParticipantRole? senderRole, {
-      String? senderParticipantId = 'member',
-      String senderUserId = 'sender',
-      String conversationOwnerId = 'owner',
-    }) => MessageActionPolicy(
-      message: testMessage(
-        '1',
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        conversionCategory: ConversationCategory.group,
-        conversationOwnerId: conversationOwnerId,
-        senderParticipantId: senderParticipantId,
-        senderRole: senderRole,
-        userId: senderUserId,
-      ),
-      isTranscriptPage: false,
-      isPinnedPage: false,
-      role: actorRole,
-    );
+  test(
+    'MessageActionPolicy lets group owners and admins recall any message',
+    () {
+      MessageActionPolicy policy(
+        ParticipantRole? actorRole, {
+        String senderUserId = 'sender',
+        UserRelationship relationship = UserRelationship.friend,
+      }) => MessageActionPolicy(
+        message: testMessage(
+          '1',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          conversionCategory: ConversationCategory.group,
+          conversationOwnerId: 'owner',
+          userId: senderUserId,
+          relationship: relationship,
+        ),
+        isTranscriptPage: false,
+        isPinnedPage: false,
+        role: actorRole,
+      );
 
-    expect(
-      policy(ParticipantRole.owner, ParticipantRole.admin).canRecall,
-      true,
-    );
-    expect(policy(ParticipantRole.admin, null).canRecall, true);
-    expect(
-      policy(ParticipantRole.admin, ParticipantRole.admin).canRecall,
-      false,
-    );
-    expect(
-      policy(ParticipantRole.admin, ParticipantRole.owner).canRecall,
-      false,
-    );
-    expect(
-      policy(
-        ParticipantRole.admin,
-        null,
-        senderUserId: 'owner',
-      ).canRecall,
-      false,
-    );
-    expect(
-      policy(
-        ParticipantRole.admin,
-        null,
-        senderParticipantId: null,
-      ).canRecall,
-      false,
-    );
-    expect(policy(null, null).canRecall, false);
-  });
+      expect(policy(ParticipantRole.owner).canRecall, true);
+      expect(policy(ParticipantRole.admin).canRecall, true);
+      expect(
+        policy(ParticipantRole.admin, senderUserId: 'owner').canRecall,
+        true,
+      );
+      expect(policy(null).canRecall, false);
+      expect(
+        MessageActionPolicy(
+          message: testMessage(
+            '1',
+            createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          ),
+          isTranscriptPage: false,
+          isPinnedPage: false,
+          role: null,
+        ).canRecall,
+        true,
+      );
+      expect(policy(null, relationship: UserRelationship.me).canRecall, true);
+    },
+  );
 
   test('MessageActionPolicy keeps recall message constraints', () {
     MessageActionPolicy policy(MessageItem message) => MessageActionPolicy(
@@ -195,6 +183,17 @@ void main() {
     expect(
       policy(
         testMessage(
+          'failed',
+          createdAt: DateTime.now().subtract(const Duration(days: 1)),
+          relationship: UserRelationship.me,
+          status: MessageStatus.failed,
+        ),
+      ).canRecall,
+      true,
+    );
+    expect(
+      policy(
+        testMessage(
           'unsupported',
           createdAt: DateTime.now().subtract(const Duration(days: 1)),
           relationship: UserRelationship.me,
@@ -216,7 +215,6 @@ void main() {
           '1',
           createdAt: createdAt,
           conversionCategory: ConversationCategory.group,
-          senderParticipantId: 'member-1',
         ),
       )
       ..toggleSelection(
@@ -224,7 +222,7 @@ void main() {
           '2',
           createdAt: createdAt,
           conversionCategory: ConversationCategory.group,
-          senderParticipantId: 'member-2',
+          userId: 'owner',
         ),
       );
 
@@ -242,10 +240,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ValueListenableBuilder<MessageItem>(
           valueListenable: message,
-          builder: (context, value, child) => MessageContext.fromMessageItem(
-            message: value,
-            child: child!,
-          ),
+          builder: (context, value, child) =>
+              MessageContext.fromMessageItem(message: value, child: child!),
           child: const _MessageIdText(),
         ),
       ),
@@ -351,10 +347,8 @@ void main() {
                       controller: scrollController,
                       children: List<Widget>.generate(
                         40,
-                        (index) => SizedBox(
-                          height: 40,
-                          child: Text(index.toString()),
-                        ),
+                        (index) =>
+                            SizedBox(height: 40, child: Text(index.toString())),
                       ),
                     ),
                   ),
@@ -372,9 +366,8 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
       expect(
-        TickerMode.valuesOf(
-          tester.element(find.byType(MessageContext)),
-        ).enabled,
+        TickerMode.valuesOf(tester.element(find.byType(MessageContext)))
+            .enabled,
         isFalse,
       );
       expect(
@@ -394,9 +387,8 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
       expect(
-        TickerMode.valuesOf(
-          tester.element(find.byType(MessageContext)),
-        ).enabled,
+        TickerMode.valuesOf(tester.element(find.byType(MessageContext)))
+            .enabled,
         isTrue,
       );
       await tester.pump(const Duration(milliseconds: 500));
@@ -438,9 +430,7 @@ void main() {
 
   testWidgets(
     'showBubble false wrapper does not blink without a bubble surface',
-    (
-      tester,
-    ) async {
+    (tester) async {
       final notifier = BlinkNotifier(tester)..blinkByMessageId('1');
 
       await tester.pumpWidget(
@@ -643,11 +633,7 @@ void main() {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CustomText('hello world'),
-                    SizedBox(
-                      key: outsideTextKey,
-                      width: 48,
-                      height: 24,
-                    ),
+                    SizedBox(key: outsideTextKey, width: 48, height: 24),
                   ],
                 ),
               ),
@@ -690,10 +676,7 @@ void main() {
           child: const MessageQuickReplyDetector(
             child: MessageBubble(
               child: MessageSelectionArea(
-                child: SizedBox(
-                  width: 240,
-                  child: CustomText('first line\nx'),
-                ),
+                child: SizedBox(width: 240, child: CustomText('first line\nx')),
               ),
             ),
           ),
@@ -1026,9 +1009,7 @@ void main() {
 
   testWidgets(
     'prewarmed mention provider renders display name on first frame',
-    (
-      tester,
-    ) async {
+    (tester) async {
       final container = ProviderContainer(
         overrides: [
           databaseProvider.overrideWith((ref) => DatabaseOpener()),
@@ -1184,9 +1165,8 @@ class _MessageIdText extends HookWidget {
   const _MessageIdText();
 
   @override
-  Widget build(BuildContext context) => Text(
-    useMessageConverter(converter: (message) => message.messageId),
-  );
+  Widget build(BuildContext context) =>
+      Text(useMessageConverter(converter: (message) => message.messageId));
 }
 
 class _MountCounter extends StatefulWidget {
@@ -1225,9 +1205,7 @@ class _MentionTextHarness extends HookConsumerWidget {
 
     return CustomText(
       content,
-      textMatchers: [
-        MentionTextMatcher(context, mentionMap),
-      ],
+      textMatchers: [MentionTextMatcher(context, mentionMap)],
     );
   }
 }
@@ -1257,8 +1235,6 @@ MessageItem testMessage(
   DateTime? createdAt,
   ConversationCategory? conversionCategory,
   String? conversationOwnerId,
-  String? senderParticipantId,
-  ParticipantRole? senderRole,
   String? quoteId,
   String? quoteContent,
   bool? mentionRead,
@@ -1273,8 +1249,6 @@ MessageItem testMessage(
   relationship: relationship,
   conversionCategory: conversionCategory,
   conversationOwnerId: conversationOwnerId,
-  senderParticipantId: senderParticipantId,
-  senderRole: senderRole,
   userIdentityNumber: '0',
   isVerified: false,
   sharedUserIsVerified: false,

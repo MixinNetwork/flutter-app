@@ -109,6 +109,7 @@
 "deleteGroup" : "Eliminar grupo",
 "deleteMyAccount" : "Borrar mi cuenta",
 "deleteTheCircle" : "¿Quieres eliminar el círculo {arg0}?",
+"deletedThisMessage" : "{arg0} eliminó este mensaje.",
 "deposit" : "Depósito",
 "developer" : "Desarrollador",
 "disableDisappearingMessage" : "{arg0} ha desactivado los mensajes que desaparecen",

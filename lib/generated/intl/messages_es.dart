@@ -53,100 +53,102 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(arg0) => "¿Quieres eliminar el círculo ${arg0}?";
 
-  static String m15(arg0) =>
+  static String m15(arg0) => "${arg0} eliminó este mensaje.";
+
+  static String m16(arg0) =>
       "${arg0} ha desactivado los mensajes que desaparecen";
 
-  static String m16(arg0) => "El tiempo máximo es ${arg0}.";
+  static String m17(arg0) => "El tiempo máximo es ${arg0}.";
 
-  static String m17(arg0) =>
+  static String m18(arg0) =>
       "ERROR 20124: Tarifa de transacción insuficiente. Asegúrate de que tu cartera tenga ${arg0} como tarifa";
 
-  static String m18(arg0, arg1) =>
+  static String m19(arg0, arg1) =>
       "ERROR 30102: formato de dirección no válido. Introduce la dirección ${arg0} ${arg1} correcta.";
 
-  static String m19(arg0) =>
+  static String m20(arg0) =>
       "ERROR 10006: Actualiza Mixin(${arg0}) para seguir usando el servicio.";
 
-  static String m20(count, arg0) =>
+  static String m21(count, arg0) =>
       "${Intl.plural(count, one: 'ERROR 20119: PIN incorrecto. Todavía tienes ${arg0} oportunidad. Espera 24 horas para volver a intentarlo más tarde.', other: 'ERROR 20119: PIN incorrecto. Todavía tienes ${arg0} oportunidades. Espera 24 horas para volver a intentarlo más tarde.')}";
 
-  static String m21(arg0) => "El servidor está en mantenimiento: ${arg0}";
-
-  static String m22(arg0) => "ERROR: ${arg0}";
+  static String m22(arg0) => "El servidor está en mantenimiento: ${arg0}";
 
   static String m23(arg0) => "ERROR: ${arg0}";
 
-  static String m24(arg0) => "Mensaje ${arg0}";
+  static String m24(arg0) => "ERROR: ${arg0}";
 
-  static String m25(arg0) => "Quitar ${arg0}";
+  static String m25(arg0) => "Mensaje ${arg0}";
 
-  static String m26(count, arg0) =>
+  static String m26(arg0) => "Quitar ${arg0}";
+
+  static String m27(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Hora', other: '${arg0} Horas')}";
 
-  static String m27(arg0) => "Se ha unido en ${arg0}";
-
-  static String m29(arg0) =>
-      "Te enviaremos un código de 4 dígitos a tu número de teléfono ${arg0}. Introduce el código en la siguiente pantalla.";
+  static String m28(arg0) => "Se ha unido en ${arg0}";
 
   static String m30(arg0) =>
+      "Te enviaremos un código de 4 dígitos a tu número de teléfono ${arg0}. Introduce el código en la siguiente pantalla.";
+
+  static String m31(arg0) =>
       "Introduce el código de 4 dígitos que te enviamos a ${arg0}";
 
-  static String m32(arg0) => "Mi ID de Mixin: ${arg0}";
+  static String m33(arg0) => "Mi ID de Mixin: ${arg0}";
 
-  static String m33(arg0, arg1) =>
+  static String m34(arg0, arg1) =>
       "Mixin Messenger ${arg0} ya está disponible, tienes ${arg1}. ¿Te gustaría descargarlo ahora?";
 
-  static String m34(arg0) => "${arg0} ahora es administrador";
+  static String m35(arg0) => "${arg0} ahora es administrador";
 
-  static String m35(arg0) => "Abrir enlace: ${arg0}";
+  static String m36(arg0) => "Abrir enlace: ${arg0}";
 
-  static String m36(arg0) => "${arg0} PARTICIPANTES";
+  static String m37(arg0) => "${arg0} PARTICIPANTES";
 
-  static String m37(count, arg0, arg1) =>
+  static String m38(count, arg0, arg1) =>
       "${Intl.plural(count, one: '${arg0}/${arg1} confirmación', other: '${arg0}/${arg1} confirmaciones')}";
 
-  static String m38(count, arg0) =>
+  static String m39(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} Mensaje fijado', other: '${arg0} Mensajes fijados')}";
 
-  static String m39(arg0) => "Reenviar código en ${arg0} s";
+  static String m40(arg0) => "Reenviar código en ${arg0} s";
 
-  static String m40(count, arg0) =>
+  static String m41(count, arg0) =>
       "${Intl.plural(count, one: '${arg0} mensaje relacionado', other: '${arg0} mensajes relacionados')}";
 
-  static String m41(arg0, arg1) =>
+  static String m42(arg0, arg1) =>
       "${arg0} ha establecido el tiempo de desaparición del mensaje a ${arg1}";
 
-  static String m42(arg0) =>
+  static String m43(arg0) =>
       "Si continúas, tu perfil y los detalles de tu cuenta se eliminarán el ${arg0}. le nuestro documento para **aprender más**.";
 
-  static String m43(arg0, arg1) =>
+  static String m44(arg0, arg1) =>
       "¿Estás seguro de que quieres enviar un ${arg0} desde ${arg1}?";
 
-  static String m44(arg0) => "¿Estás seguro de que quieres enviar el ${arg0}?";
+  static String m45(arg0) => "¿Estás seguro de que quieres enviar el ${arg0}?";
 
-  static String m45(arg0) => "No se puede abrir el archivo: ${arg0}";
-
-  static String m46(count) =>
-      "${Intl.plural(count, one: 'día', other: 'días')}";
+  static String m46(arg0) => "No se puede abrir el archivo: ${arg0}";
 
   static String m47(count) =>
-      "${Intl.plural(count, one: 'hora', other: 'horas')}";
+      "${Intl.plural(count, one: 'día', other: 'días')}";
 
   static String m48(count) =>
-      "${Intl.plural(count, one: 'minuto', other: 'minutos')}";
+      "${Intl.plural(count, one: 'hora', other: 'horas')}";
 
   static String m49(count) =>
-      "${Intl.plural(count, one: 'segundo', other: 'segundos')}";
+      "${Intl.plural(count, one: 'minuto', other: 'minutos')}";
 
   static String m50(count) =>
+      "${Intl.plural(count, one: 'segundo', other: 'segundos')}";
+
+  static String m51(count) =>
       "${Intl.plural(count, one: 'semana', other: 'semanas')}";
 
-  static String m51(arg0) =>
+  static String m52(arg0) =>
       "¡La versión actual (${arg0}) ya no está disponible!\nHaz clic en Actualizar a continuación para actualizar a la última versión de Google Play.";
 
-  static String m52(arg0) => "valor ahora ${arg0}";
+  static String m53(arg0) => "valor ahora ${arg0}";
 
-  static String m53(arg0) => "valor entonces ${arg0}";
+  static String m54(arg0) => "valor entonces ${arg0}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -336,10 +338,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteGroup": MessageLookupByLibrary.simpleMessage("Eliminar grupo"),
     "deleteMyAccount": MessageLookupByLibrary.simpleMessage("Borrar mi cuenta"),
     "deleteTheCircle": m14,
+    "deletedThisMessage": m15,
     "deposit": MessageLookupByLibrary.simpleMessage("Depósito"),
     "developer": MessageLookupByLibrary.simpleMessage("Desarrollador"),
-    "disableDisappearingMessage": m15,
-    "disappearingCustomTimeMaxWarning": m16,
+    "disableDisappearingMessage": m16,
+    "disappearingCustomTimeMaxWarning": m17,
     "disappearingMessage": MessageLookupByLibrary.simpleMessage(
       "Mensajes que desaparecen",
     ),
@@ -420,8 +423,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorInsufficientBalance": MessageLookupByLibrary.simpleMessage(
       "ERROR 20117: Saldo insuficiente",
     ),
-    "errorInsufficientTransactionFeeWithAmount": m17,
-    "errorInvalidAddress": m18,
+    "errorInsufficientTransactionFeeWithAmount": m18,
+    "errorInvalidAddress": m19,
     "errorInvalidAddressPlain": MessageLookupByLibrary.simpleMessage(
       "ERROR 30102: formato de dirección no válido.",
     ),
@@ -446,7 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorNumberReachedLimit": MessageLookupByLibrary.simpleMessage(
       "ERROR 20132: El número ha llegado al límite.",
     ),
-    "errorOldVersion": m19,
+    "errorOldVersion": m20,
     "errorOpenLocation": MessageLookupByLibrary.simpleMessage(
       "No puedo encontrar una aplicación de mapas",
     ),
@@ -471,11 +474,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorPinIncorrect": MessageLookupByLibrary.simpleMessage(
       "ERROR 20119: PIN incorrecto",
     ),
-    "errorPinIncorrectWithTimes": m20,
+    "errorPinIncorrectWithTimes": m21,
     "errorRecaptchaIsInvalid": MessageLookupByLibrary.simpleMessage(
       "ERROR 10004: Recaptcha no es válido",
     ),
-    "errorServer5xxCode": m21,
+    "errorServer5xxCode": m22,
     "errorTooManyRequest": MessageLookupByLibrary.simpleMessage(
       "ERROR 429: Límite de tasa excedido",
     ),
@@ -494,8 +497,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorUnableToOpenMedia": MessageLookupByLibrary.simpleMessage(
       "No puedo encontrar una aplicación capaz de abrir este medio.",
     ),
-    "errorUnknownWithCode": m22,
-    "errorUnknownWithMessage": m23,
+    "errorUnknownWithCode": m23,
+    "errorUnknownWithMessage": m24,
     "errorUploadAttachmentFailed": MessageLookupByLibrary.simpleMessage(
       "No se ha podido cargar el archivo adjunto del mensaje",
     ),
@@ -542,14 +545,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "groupName": MessageLookupByLibrary.simpleMessage("Nombre del grupo"),
     "groupParticipants": MessageLookupByLibrary.simpleMessage("Participantes"),
-    "groupPopMenuMessage": m24,
-    "groupPopMenuRemove": m25,
+    "groupPopMenuMessage": m25,
+    "groupPopMenuRemove": m26,
     "groups": MessageLookupByLibrary.simpleMessage("Grupos"),
     "groupsInCommon": MessageLookupByLibrary.simpleMessage("Grupos en común"),
     "help": MessageLookupByLibrary.simpleMessage("Ayuda"),
     "helpCenter": MessageLookupByLibrary.simpleMessage("Centro de ayuda"),
     "hideMixin": MessageLookupByLibrary.simpleMessage("Ocultar Mixin"),
-    "hour": m26,
+    "hour": m27,
     "howAreYou": MessageLookupByLibrary.simpleMessage("Hola, ¿cómo estás?"),
     "iAmGood": MessageLookupByLibrary.simpleMessage("Estoy bien."),
     "ignoreThisVersion": MessageLookupByLibrary.simpleMessage(
@@ -571,9 +574,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "joinGroupWithPlus": MessageLookupByLibrary.simpleMessage(
       "+ Unirse al grupo",
     ),
-    "joinedIn": m27,
-    "landingInvitationDialogContent": m29,
-    "landingValidationTitle": m30,
+    "joinedIn": m28,
+    "landingInvitationDialogContent": m30,
+    "landingValidationTitle": m31,
     "learnMore": MessageLookupByLibrary.simpleMessage(
       "Obtener más información",
     ),
@@ -632,7 +635,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Transacción multigrado",
     ),
     "mute": MessageLookupByLibrary.simpleMessage("Silenciar"),
-    "myMixinId": m32,
+    "myMixinId": m33,
     "myStickers": MessageLookupByLibrary.simpleMessage("Mis pegatinas"),
     "na": MessageLookupByLibrary.simpleMessage("N/D"),
     "name": MessageLookupByLibrary.simpleMessage("Nombre"),
@@ -643,7 +646,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "newVersionAvailable": MessageLookupByLibrary.simpleMessage(
       "Nueva versión disponible",
     ),
-    "newVersionDescription": m33,
+    "newVersionDescription": m34,
     "next": MessageLookupByLibrary.simpleMessage("Próximo"),
     "nextConversation": MessageLookupByLibrary.simpleMessage(
       "Próxima conversación",
@@ -664,7 +667,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Las notificaciones no están permitidas, ve a Configuración de notificaciones para activarlas.",
     ),
     "notifications": MessageLookupByLibrary.simpleMessage("Notificaciones"),
-    "nowAnAddmin": m34,
+    "nowAnAddmin": m35,
     "objects": MessageLookupByLibrary.simpleMessage("Objetos"),
     "oneByOneForward": MessageLookupByLibrary.simpleMessage(
       "Adelante uno por uno",
@@ -674,21 +677,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "openHomePage": MessageLookupByLibrary.simpleMessage(
       "Abrir página de inicio",
     ),
-    "openLink": m35,
+    "openLink": m36,
     "openLogDirectory": MessageLookupByLibrary.simpleMessage(
       "abrir directorio de registro",
     ),
     "originalImage": MessageLookupByLibrary.simpleMessage("Original"),
     "owner": MessageLookupByLibrary.simpleMessage("Propietario"),
-    "participantsCount": m36,
-    "pendingConfirmation": m37,
+    "participantsCount": m37,
+    "pendingConfirmation": m38,
     "phoneNumber": MessageLookupByLibrary.simpleMessage("Número de teléfono"),
     "photos": MessageLookupByLibrary.simpleMessage("Fotos"),
     "pickAConversation": MessageLookupByLibrary.simpleMessage(
       "Selecciona una conversación y comienza a enviar un mensaje",
     ),
     "pinTitle": MessageLookupByLibrary.simpleMessage("Fijar"),
-    "pinnedMessageTitle": m38,
+    "pinnedMessageTitle": m39,
     "post": MessageLookupByLibrary.simpleMessage("Publicar"),
     "preferences": MessageLookupByLibrary.simpleMessage("Preferencias"),
     "previousConversation": MessageLookupByLibrary.simpleMessage(
@@ -725,7 +728,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "¿Enviar el registro de conversación a los desarrolladores?",
     ),
     "resendCode": MessageLookupByLibrary.simpleMessage("Reenviar codigo"),
-    "resendCodeIn": m39,
+    "resendCodeIn": m40,
     "reset": MessageLookupByLibrary.simpleMessage("Reiniciar"),
     "resetLink": MessageLookupByLibrary.simpleMessage("Restablecer enlace"),
     "restoreChat": MessageLookupByLibrary.simpleMessage("Restaurar chat"),
@@ -762,7 +765,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "searchPlaceholderNumber": MessageLookupByLibrary.simpleMessage(
       "Buscar Mixin ID o número de teléfono:",
     ),
-    "searchRelatedMessage": m40,
+    "searchRelatedMessage": m41,
     "searchUnread": MessageLookupByLibrary.simpleMessage("Buscar no leído"),
     "secretUrl": MessageLookupByLibrary.simpleMessage(
       "https://mixin.one/pages/1000007",
@@ -784,14 +787,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enviar sin sonido",
     ),
     "set": MessageLookupByLibrary.simpleMessage("Establecer"),
-    "setDisappearingMessageTimeTo": m41,
+    "setDisappearingMessageTimeTo": m42,
     "settingAuthSearchHint": MessageLookupByLibrary.simpleMessage(
       "ID de Mixin, nombre",
     ),
     "settingBackupTips": MessageLookupByLibrary.simpleMessage(
       "Haz una copia de seguridad de tu historial de chat en iCloud. si pierdes tu iPhone o cambias a uno nuevo, puedes restaurar tu historial de chat cuando reinstales Mixin Messenger. Los mensajes de los que realizas una copia de seguridad no están protegidos por el cifrado de extremo a extremo de Mixin Messenger mientras estás en iCloud.",
     ),
-    "settingDeleteAccountPinContent": m42,
+    "settingDeleteAccountPinContent": m43,
     "settingDeleteAccountUrl": MessageLookupByLibrary.simpleMessage(
       "https://support.mixin.one/en/article/how-to-delete-my-account-19fkagl",
     ),
@@ -802,8 +805,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareContact": MessageLookupByLibrary.simpleMessage("Compartir contacto"),
     "shareError": MessageLookupByLibrary.simpleMessage("Compartir error."),
     "shareLink": MessageLookupByLibrary.simpleMessage("Compartir enlace"),
-    "shareMessageDescription": m43,
-    "shareMessageDescriptionEmpty": m44,
+    "shareMessageDescription": m44,
+    "shareMessageDescriptionEmpty": m45,
     "sharedMedia": MessageLookupByLibrary.simpleMessage("Medios compartidos"),
     "show": MessageLookupByLibrary.simpleMessage("Espectáculo"),
     "showAvatar": MessageLookupByLibrary.simpleMessage("Mostrar avatar"),
@@ -876,13 +879,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "transfer": MessageLookupByLibrary.simpleMessage("Transferir"),
     "travelAndPlaces": MessageLookupByLibrary.simpleMessage("Viajes y lugares"),
     "typeMessage": MessageLookupByLibrary.simpleMessage("Escribe el mensaje"),
-    "unableToOpenFile": m45,
+    "unableToOpenFile": m46,
     "unblock": MessageLookupByLibrary.simpleMessage("Desbloquear"),
-    "unitDay": m46,
-    "unitHour": m47,
-    "unitMinute": m48,
-    "unitSecond": m49,
-    "unitWeek": m50,
+    "unitDay": m47,
+    "unitHour": m48,
+    "unitMinute": m49,
+    "unitSecond": m50,
+    "unitWeek": m51,
     "unmute": MessageLookupByLibrary.simpleMessage("Desactivar silencio"),
     "unpin": MessageLookupByLibrary.simpleMessage("Desanclar"),
     "unpinAllMessages": MessageLookupByLibrary.simpleMessage(
@@ -895,14 +898,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Mensajes no leídos",
     ),
     "updateMixin": MessageLookupByLibrary.simpleMessage("Actualizar Mixin"),
-    "updateMixinDescription": m51,
+    "updateMixinDescription": m52,
     "upgrade": MessageLookupByLibrary.simpleMessage("Mejora"),
     "upgrading": MessageLookupByLibrary.simpleMessage("Actualizando"),
     "userNotFound": MessageLookupByLibrary.simpleMessage(
       "Usuario no encontrado",
     ),
-    "valueNow": m52,
-    "valueThen": m53,
+    "valueNow": m53,
+    "valueThen": m54,
     "verifyPin": MessageLookupByLibrary.simpleMessage("Verificar PIN"),
     "video": MessageLookupByLibrary.simpleMessage("Video"),
     "videos": MessageLookupByLibrary.simpleMessage("Vídeos"),

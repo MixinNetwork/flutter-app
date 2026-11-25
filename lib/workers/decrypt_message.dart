@@ -582,6 +582,7 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
+    await refreshUsers(<String>[data.senderId]);
     final recallMessage = RecallMessage.fromJson(
       _jsonDecode(data.data) as Map<String, dynamic>,
     );
@@ -597,7 +598,12 @@ class DecryptMessage extends Injector {
     }
 
     await Future.wait([
-      database.recallMessage(data.conversationId, recallMessage.messageId),
+      database.recallMessage(
+        data.conversationId,
+        recallMessage.messageId,
+        actorUserId: data.senderId,
+        currentUserId: accountId,
+      ),
       database.messageHistoryDao.insert(
         MessagesHistoryData(messageId: data.messageId),
       ),

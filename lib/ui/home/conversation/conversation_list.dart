@@ -454,6 +454,14 @@ class _MessageContent extends HookConsumerWidget {
           senderFullName: conversation.senderFullName,
           expireIn: int.tryParse(conversation.content ?? '0'),
         );
+      } else if (conversation.contentType.isRecall) {
+        return recalledMessageText(
+          participantUserId: conversation.participantUserId,
+          participantFullName: conversation.participantFullName,
+          senderId: conversation.senderId,
+          senderFullName: conversation.senderFullName,
+          isCurrentUser: (actorId) => actorId == context.accountServer.userId,
+        );
       } else if (conversation.contentType.isPin) {
         final pinMessageMinimal = PinMessageMinimal.fromJsonString(
           conversation.content ?? '',

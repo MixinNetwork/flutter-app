@@ -70,35 +70,17 @@ extension MessageItemExtension on MessageItem {
         (type.isTranscript && mediaStatus == MediaStatus.done);
   }
 
-  bool get _canRecallBase =>
-      [
-        MessageStatus.sent,
-        MessageStatus.delivered,
-        MessageStatus.read,
-      ].contains(status) &&
+  /// Whether the current user with participant [role] can recall this
+  /// message: their own messages, any message outside a group, and any group
+  /// message for group owners and admins.
+  bool canRecallByRole(ParticipantRole? role) =>
+      status != MessageStatus.sending &&
       type.canRecall &&
-      DateTime.now().isBefore(createdAt.add(const Duration(days: 30)));
-
-  bool get canRecall => _canRecallBase && relationship == UserRelationship.me;
-
-  /// Whether the current user can recall this message given their participant
-  /// [role] in the conversation. Everyone can recall their own messages; in a
-  /// 1:1 conversation either party's messages can be recalled; group owners
-  /// can recall any message, while admins can recall regular members' messages.
-  bool canRecallByRole(ParticipantRole? role) {
-    if (canRecall) return true;
-    if (conversionCategory == ConversationCategory.contact) {
-      return _canRecallBase;
-    }
-    final canModerate =
-        conversionCategory == ConversationCategory.group &&
-        (role == ParticipantRole.owner ||
-            (role == ParticipantRole.admin &&
-                userId != conversationOwnerId &&
-                senderParticipantId != null &&
-                senderRole == null));
-    return _canRecallBase && canModerate;
-  }
+      DateTime.now().isBefore(createdAt.add(const Duration(days: 30))) &&
+      (relationship == UserRelationship.me ||
+          conversionCategory != ConversationCategory.group ||
+          role == ParticipantRole.owner ||
+          role == ParticipantRole.admin);
 }
 
 extension QuoteMessageItemExtension on QuoteMessageItem {
@@ -136,6 +118,8 @@ extension QuoteMessageItemExtension on QuoteMessageItem {
     'shared_user_avatar_url': sharedUserAvatarUrl,
     'shared_user_is_verified': sharedUserIsVerified,
     'shared_user_app_id': sharedUserAppId,
+    'participant_user_id': participantUserId,
+    'participant_full_name': participantFullName,
   });
 }
 
@@ -180,6 +164,8 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) {
     sharedUserAvatarUrl: map['shared_user_avatar_url'] as String?,
     sharedUserIsVerified: map['shared_user_is_verified'] as bool?,
     sharedUserAppId: map['shared_user_app_id'] as String?,
+    participantUserId: map['participant_user_id'] as String?,
+    participantFullName: map['participant_full_name'] as String?,
   );
 }
 

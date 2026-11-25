@@ -90,7 +90,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   final String sessionId;
   final ed.PrivateKey privateKey;
   late SignalProtocol signalProtocol;
-  final Future<void> Function(Message message) deleteAttachment;
+  final void Function(Message message) deleteAttachment;
 
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
 
@@ -150,14 +150,12 @@ class SendingJob extends JobQueue<Job, List<Job>> {
   }
 
   Future<void> _runRecallJob(Job job) async {
-    final recallMessage = RecallMessage.fromJson(
-      jsonDecode(job.blazeMessage!) as Map<String, dynamic>,
-    );
+    // 7.1.1 and earlier saved runCount 1 once the server accepted the recall.
     if (job.runCount > 0) {
-      await _finishRecallJob(job, recallMessage);
+      await _recallLegacyJobMessage(job);
+      await database.jobDao.deleteJobById(job.jobId);
       return;
     }
-
     final list = await utf8EncodeWithIsolate(job.blazeMessage!);
     final data = await base64EncodeWithIsolate(list);
 
@@ -175,9 +173,7 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     try {
       final result = await sender.deliver(blazeMessage);
       if (result.success && result.errorCode == null) {
-        await database.jobDao.insert(job.copyWith(runCount: 1));
-        await _finishRecallJob(job, recallMessage);
-        return;
+        await _recallLegacyJobMessage(job);
       }
       if (result.success || result.errorCode == badData) {
         await database.jobDao.deleteJobById(job.jobId);
@@ -187,18 +183,25 @@ class SendingJob extends JobQueue<Job, List<Job>> {
     }
   }
 
-  Future<void> _finishRecallJob(Job job, RecallMessage recallMessage) async {
+  /// 7.1.1 and earlier recalled the message locally only after the server
+  /// accepted the recall, so their saved jobs still need the local recall.
+  Future<void> _recallLegacyJobMessage(Job job) async {
+    final messageId = RecallMessage.fromJson(
+      jsonDecode(job.blazeMessage!) as Map<String, dynamic>,
+    ).messageId;
     final message = await database.messageDao.findMessageByMessageId(
-      recallMessage.messageId,
+      messageId,
     );
-    if (message?.category.isAttachment == true) {
-      await deleteAttachment(message!);
+    if (message == null || message.category == MessageCategory.messageRecall) {
+      return;
     }
+    if (message.category.isAttachment) deleteAttachment(message);
     await database.recallMessage(
       job.conversationId!,
-      recallMessage.messageId,
+      messageId,
+      actorUserId: userId,
+      currentUserId: userId,
     );
-    await database.jobDao.deleteJobById(job.jobId);
   }
 
   Future<void> _runSendJob(Job job) async {

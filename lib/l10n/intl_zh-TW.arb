@@ -133,6 +133,7 @@
 "deleteGroup" : "刪除群組",
 "deleteMyAccount" : "刪除賬號",
 "deleteTheCircle" : "確定刪除{arg0}圈子嗎？",
+"deletedThisMessage" : "{arg0}撤回了一條訊息",
 "deposit" : "充值",
 "depositHash" : "充值雜湊",
 "developer" : "開發者",
