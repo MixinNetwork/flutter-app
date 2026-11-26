@@ -3,17 +3,21 @@ library;
 
 import 'dart:async';
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart'
+    show ApplyInterceptor, QueryExecutor, QueryInterceptor, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:flutter_app/core/conversation/conversation_list_store.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/enum/encrypt_category.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/provider/account_server_provider.dart';
 import 'package:flutter_app/ui/provider/conversation_provider.dart';
 import 'package:flutter_app/ui/provider/database_provider.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
+import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -104,12 +108,68 @@ void main() {
     ]);
     await _dispose(tester, mixinDatabase);
   });
+
+  testWidgets('a confirmed start link uses the app of the time of the send', (
+    tester,
+  ) async {
+    final mixinDatabase = MixinDatabase(NativeDatabase.memory());
+    await tester.runAsync(
+      () => _insert(mixinDatabase, ConversationCategory.contact, bot, '[]'),
+    );
+    final accountServer = _FakeAccountServer(_FakeDatabase(mixinDatabase));
+    final context = await _pumpApp(tester, accountServer);
+    final send = find.text(Localization.current.send);
+
+    unawaited(
+      openUri(
+        context,
+        'mixin://conversations/$_conversationId?start=hi',
+        confirmSend: true,
+      ),
+    );
+    await _pumpUntil(tester, () => send.evaluate().isNotEmpty);
+    await tester.pumpAndSettle();
+    expect(accountServer.sent, isEmpty);
+
+    // The app changes while the dialog is open.
+    await tester.runAsync(
+      () => mixinDatabase
+          .update(mixinDatabase.apps)
+          .write(const AppsCompanion(capabilities: Value(encrypted))),
+    );
+    await tester.tap(send);
+    await _pumpUntil(tester, () => accountServer.sent.isNotEmpty);
+
+    expect(accountServer.sent, [('hi', EncryptCategory.encrypted)]);
+    await _dispose(tester, mixinDatabase);
+  });
+
+  testWidgets('a start link sends after the tapped message is gone', (
+    tester,
+  ) async {
+    final mixinDatabase = MixinDatabase(
+      NativeDatabase.memory().interceptWith(_SlowReads()),
+    );
+    await tester.runAsync(
+      () => _insert(mixinDatabase, ConversationCategory.contact, '1234', null),
+    );
+    final accountServer = _FakeAccountServer(_FakeDatabase(mixinDatabase));
+    // The link is in another chat, which closes when this one opens.
+    final context = await _pumpApp(tester, accountServer, inAnotherChat: true);
+
+    await _openStartLink(tester, context, accountServer, 1);
+
+    expect(context.mounted, isFalse);
+    expect(accountServer.sent, [('hi', EncryptCategory.signal)]);
+    await _dispose(tester, mixinDatabase);
+  });
 }
 
 Future<BuildContext> _pumpApp(
   WidgetTester tester,
-  _FakeAccountServer accountServer,
-) async {
+  _FakeAccountServer accountServer, {
+  bool inAnotherChat = false,
+}) async {
   late BuildContext context;
   await tester.pumpWidget(
     ProviderScope(
@@ -121,16 +181,27 @@ Future<BuildContext> _pumpApp(
           (ref) => _ReadyAccountServer(accountServer),
         ),
       ],
-      child: MaterialApp(
-        home: Consumer(
-          builder: (c, ref, _) {
-            ref
-              ..watch(databaseProvider)
-              ..watch(accountServerProvider)
-              ..watch(conversationProvider);
-            context = c;
-            return const SizedBox();
-          },
+      child: BrightnessData(
+        value: 0,
+        brightnessThemeData: lightBrightnessThemeData,
+        child: MaterialApp(
+          localizationsDelegates: const [Localization.delegate],
+          supportedLocales: Localization.delegate.supportedLocales,
+          home: Consumer(
+            builder: (_, ref, _) {
+              ref
+                ..watch(databaseProvider)
+                ..watch(accountServerProvider);
+              final chat = ref.watch(conversationProvider);
+              if (inAnotherChat && chat != null) return const SizedBox();
+              return Builder(
+                builder: (c) {
+                  context = c;
+                  return const SizedBox();
+                },
+              );
+            },
+          ),
         ),
       ),
     ),
@@ -148,11 +219,29 @@ Future<void> _openStartLink(
   unawaited(
     openUri(context, 'mixin://conversations/$_conversationId?start=hi'),
   );
-  for (var i = 0; i < 100 && accountServer.sent.length < sends; i++) {
+  await _pumpUntil(tester, () => accountServer.sent.length >= sends);
+}
+
+/// The database answers in real time.
+Future<void> _pumpUntil(WidgetTester tester, bool Function() done) async {
+  for (var i = 0; i < 100 && !done(); i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
+/// A read takes more than a frame, as with the database isolate of the app.
+class _SlowReads extends QueryInterceptor {
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor executor,
+    String statement,
+    List<Object?> args,
+  ) async {
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    return super.runSelect(executor, statement, args);
   }
 }
 
