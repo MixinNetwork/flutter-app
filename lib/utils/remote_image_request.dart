@@ -11,6 +11,20 @@ const _kRedirectStatusCodes = {301, 302, 303, 307, 308};
 
 final _hostName = RegExp(r'^[a-z0-9_-]+(\.[a-z0-9_-]+)*$');
 final _numericLabel = RegExp(r'^([0-9]+|0x[0-9a-f]*)$');
+// Letters of other scripts. IDNA keeps each of them outside ASCII, unlike,
+// for example, full-width letters, which become the names or addresses that
+// are not allowed.
+// shortcut: names with other characters are rejected, also real ones; use an
+// IDNA library if users need more scripts.
+final _otherScriptLetters = RegExp(
+  '['
+  r'\u00C0-\u00D6\u00D8-\u00DE\u00E0-\u00F6\u00F8-\u00FF' // Latin-1
+  r'\u0400-\u045F' // Cyrillic
+  r'\u3041-\u3096\u30A1-\u30FA' // Hiragana and Katakana
+  r'\u4E00-\u9FFF' // CJK ideographs
+  r'\uAC00-\uD7A3' // Hangul
+  ']',
+);
 
 typedef HostLookup = Future<List<InternetAddress>> Function(String host);
 
@@ -33,15 +47,19 @@ Future<http.StreamedResponse> sendImageRequest(
   // Unit tests cannot load the native client.
   @visibleForTesting http.Client? client,
 }) async {
+  final appProxy = proxyConfig == null
+      ? null
+      : _normalizeHost(proxyConfig.host);
   var target = uri;
+  String? referer;
   for (var redirects = 0; redirects <= _kMaxRedirects; redirects++) {
-    if (!isAllowed(target) || target.host == proxyConfig?.host.toLowerCase()) {
+    if (!isAllowed(target) || _normalizeHost(target.host) == appProxy) {
       throw StateError('NetworkImage address is not allowed');
     }
     final response = await (client ?? await _imageClient(proxyConfig)).send(
       http.Request('GET', target)
         ..followRedirects = false
-        ..headers.addAll(headers),
+        ..headers.addAll({...headers, HttpHeaders.refererHeader: ?referer}),
     );
     final location = response.headers[HttpHeaders.locationHeader];
     if (location == null ||
@@ -49,7 +67,12 @@ Future<http.StreamedResponse> sendImageRequest(
       return response;
     }
     await response.stream.listen((_) {}).cancel();
-    target = target.resolve(location);
+    final next = target.resolve(location);
+    // As the native client does when it follows redirects itself.
+    referer = target.isScheme('https') && next.isScheme('http')
+        ? null
+        : target.replace(userInfo: '').removeFragment().toString();
+    target = next;
   }
   throw StateError('NetworkImage has too many redirects');
 }
@@ -57,8 +80,7 @@ Future<http.StreamedResponse> sendImageRequest(
 /// Whether [uri] is an http(s) URL that does not name a local address.
 bool isPublicImageUri(Uri uri) {
   if (!uri.isScheme('http') && !uri.isScheme('https')) return false;
-  var host = uri.host.toLowerCase();
-  if (host.endsWith('.')) host = host.substring(0, host.length - 1);
+  final host = _normalizeHost(uri.host);
 
   final address = InternetAddress.tryParse(host);
   if (address != null) {
@@ -70,12 +92,19 @@ bool isPublicImageUri(Uri uri) {
     return _isPublicAddress(address);
   }
 
-  // Rejects escaped and non-ASCII hosts, which the native client maps to
-  // other names, such as full-width digits to an IP address.
-  if (!_hostName.hasMatch(host)) return false;
+  // The native client decodes escapes and applies IDNA, which can turn a host
+  // into another name or into an IP address. "_" stands for the letters that
+  // cannot, so the checks below stay in ASCII.
+  final String asciiHost;
+  try {
+    asciiHost = Uri.decodeComponent(host).replaceAll(_otherScriptLetters, '_');
+  } on FormatException {
+    return false;
+  }
+  if (!_hostName.hasMatch(asciiHost)) return false;
   // The resolver lets proxy hosts through, so a URL must not name one.
   if (_environmentProxyHosts().contains(host)) return false;
-  final lastLabel = host.split('.').last;
+  final lastLabel = asciiHost.split('.').last;
   // The native client reads a name that ends in a number, such as "127.1", as
   // an IPv4 address and connects without a DNS lookup.
   // ".local" names are mDNS devices, which also have public IPv6 addresses.
@@ -101,7 +130,7 @@ Future<List<String>> resolveImageHost(
   final isProxy =
       host == 'localhost' ||
       host == proxyHost?.toLowerCase() ||
-      _environmentProxyHosts().contains(host);
+      _environmentProxyHosts().contains(_normalizeHost(host));
   return [
     for (final address in addresses)
       if (isProxy || _isPublicAddress(address)) address.address,
@@ -113,8 +142,15 @@ Set<String> _environmentProxyHosts() => {
     if (const {'http_proxy', 'https_proxy', 'all_proxy'}.contains(
       key.toLowerCase(),
     ))
-      ?Uri.tryParse(value.contains('://') ? value : 'http://$value')?.host,
+      if (Uri.tryParse(value.contains('://') ? value : 'http://$value')
+          case final proxy?)
+        _normalizeHost(proxy.host),
 };
+
+String _normalizeHost(String host) {
+  final lower = host.toLowerCase();
+  return lower.endsWith('.') ? lower.substring(0, lower.length - 1) : lower;
+}
 
 bool _isPublicAddress(InternetAddress address) {
   final bytes = address.rawAddress;
@@ -135,6 +171,11 @@ bool _isPublicAddress(InternetAddress address) {
     return _isPublicIPv4(bytes.sublist(12));
   }
   if (startsWith(const [0x20, 0x02])) return _isPublicIPv4(bytes.sublist(2, 6));
+  // Documentation, 2001:db8::/32, and benchmarking, 2001:2::/48.
+  if (startsWith(const [0x20, 0x01, 0x0d, 0xb8]) ||
+      startsWith(const [0x20, 0x01, 0, 0x02, 0, 0])) {
+    return false;
+  }
   // Only global unicast, 2000::/3.
   return bytes[0] & 0xe0 == 0x20;
 }
@@ -150,7 +191,10 @@ bool _isPublicIPv4(Uint8List bytes) {
       (a == 169 && b == 254) ||
       (a == 172 && b & 0xf0 == 16) ||
       (a == 192 && b == 168) ||
-      (a == 192 && b == 0 && c == 0) ||
+      // Protocol assignments and the documentation ranges.
+      (a == 192 && b == 0 && (c == 0 || c == 2)) ||
+      (a == 198 && b == 51 && c == 100) ||
+      (a == 203 && b == 0 && c == 113) ||
       a >= 224);
 }
 
