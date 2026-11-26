@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/fts_database.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Sticker;
 import 'package:flutter_app/ui/provider/multi_auth_provider.dart';
 import 'package:flutter_app/ui/provider/setting_provider.dart';
 import 'package:flutter_app/utils/file.dart';
@@ -34,11 +34,12 @@ void main() {
   late _TestAccountServer server;
   late _AuthNotifier auth;
   late _RevokedSessionAdapter adapter;
+  late Database database;
 
   setUp(() async {
     final directory = await Directory.systemTemp.createTemp('logout-test-');
     mixinDocumentsDirectory = directory;
-    final database = Database(
+    database = Database(
       MixinDatabase(NativeDatabase.memory()),
       FtsDatabase(NativeDatabase.memory()),
     );
@@ -108,6 +109,56 @@ void main() {
     expect(auth.signOutCount, 1);
   });
 
+  test('concurrent sticker refreshes share one request', () async {
+    final gate = Completer<void>();
+    adapter.stickerAlbumsGate = gate.future;
+
+    final refreshes = [
+      for (var i = 0; i < 5; i++) server.refreshSticker(force: i.isEven),
+    ];
+    await adapter.stickerAlbumsRequested.future;
+    // Let the other calls reach the adapter if they send their own request.
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    expect(adapter.stickerAlbumsRequests, 1);
+
+    gate.complete();
+    await Future.wait(refreshes);
+    expect(adapter.stickerAlbumsRequests, 1);
+
+    await server.refreshSticker();
+    expect(adapter.stickerAlbumsRequests, 1);
+    await server.refreshSticker(force: true);
+    expect(adapter.stickerAlbumsRequests, 2);
+  });
+
+  test('the first favorite sticker fetches only its album', () async {
+    final sticker = Sticker.fromJson(const {
+      'sticker_id': 'added',
+      'album_id': 'personal',
+      'name': '',
+      'asset_url': '',
+      'asset_type': 'image',
+      'asset_width': 1,
+      'asset_height': 1,
+      'created_at': '2026-01-01T00:00:00Z',
+    });
+
+    await server.saveFavoriteSticker(sticker);
+
+    final db = database.mixinDatabase;
+    expect(adapter.albumRequests, 1);
+    expect(adapter.stickerAlbumsRequests, 0);
+    expect(
+      (await database.stickerAlbumDao.personalAlbum().getSingle()).albumId,
+      'personal',
+    );
+    expect((await db.select(db.stickers).get()).single.stickerId, 'added');
+    expect(
+      (await db.select(db.stickerRelationships).get()).single.albumId,
+      'personal',
+    );
+  });
+
   test('server clock skew does not clear login', () async {
     adapter.serverTime = DateTime.now().add(const Duration(minutes: 10));
     await expectLater(
@@ -174,6 +225,10 @@ class _TestAccountServer extends AccountServer {
 class _RevokedSessionAdapter implements HttpClientAdapter {
   int logoutRequests = 0;
   int meRequests = 0;
+  int stickerAlbumsRequests = 0;
+  Future<void>? stickerAlbumsGate;
+  final stickerAlbumsRequested = Completer<void>();
+  int albumRequests = 0;
   int errorCode = authentication;
   DateTime? serverTime;
 
@@ -185,6 +240,33 @@ class _RevokedSessionAdapter implements HttpClientAdapter {
   ) async {
     if (options.path == '/logout') logoutRequests++;
     if (options.path == '/me') meRequests++;
+    if (options.path == '/albums/personal') {
+      albumRequests++;
+      return ResponseBody.fromString(
+        '{"data":{"album_id":"personal","name":"","icon_url":"",'
+        '"created_at":"2026-01-01T00:00:00Z",'
+        '"update_at":"2026-01-01T00:00:00Z","user_id":"user",'
+        '"category":"PERSONAL","description":"","is_verified":false}}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
+    if (options.path == '/stickers/albums') {
+      stickerAlbumsRequests++;
+      if (!stickerAlbumsRequested.isCompleted) {
+        stickerAlbumsRequested.complete();
+      }
+      await stickerAlbumsGate;
+      return ResponseBody.fromString(
+        '{"data":[]}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
     // Bound the broken implementation's recursive requests without allowing
     // cleanup to complete, so the test reports the actual logout timeout.
     if (logoutRequests > 3) return Completer<ResponseBody>().future;

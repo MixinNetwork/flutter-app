@@ -12,7 +12,6 @@ import 'package:super_context_menu/super_context_menu.dart';
 
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../constants/icon_fonts.dart';
-import '../../db/dao/sticker_dao.dart';
 import '../../db/mixin_database.dart' hide Message;
 import '../../ui/home/chat/message_jump.dart';
 import '../../ui/provider/conversation_provider.dart';
@@ -391,25 +390,7 @@ Future<void> _onAddSticker(BuildContext context, MessageItem message) async {
       StickerRequest(stickerId: message.stickerId),
     );
 
-    final database = context.database;
-
-    final personalAlbum = await database.stickerAlbumDao
-        .personalAlbum()
-        .getSingleOrNull();
-    if (personalAlbum == null) {
-      unawaited(accountServer.refreshSticker(force: true));
-    } else {
-      final data = mixinResponse.data;
-      await database.mixinDatabase.transaction(() async {
-        await database.stickerDao.insert(data.asStickersCompanion);
-        await database.stickerRelationshipDao.insert(
-          StickerRelationship(
-            albumId: personalAlbum.albumId,
-            stickerId: data.stickerId,
-          ),
-        );
-      });
-    }
+    await accountServer.saveFavoriteSticker(mixinResponse.data);
     showToastSuccessful();
   } catch (_) {
     showToastFailed(ToastError(context.l10n.addStickerFailed));
