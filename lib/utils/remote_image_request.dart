@@ -47,11 +47,14 @@ Future<http.StreamedResponse> sendImageRequest(
   // Unit tests cannot load the native client.
   @visibleForTesting http.Client? client,
 }) async {
-  final proxyHosts = _proxyHosts(proxyConfig?.host);
+  // Only the resolver lets proxy hosts through, so only with it must a URL not
+  // name one.
+  final proxyHosts = _usesResolver(proxyConfig)
+      ? _proxyHosts(proxyConfig?.host)
+      : const <String>{};
   var target = uri;
   String? referer;
   for (var redirects = 0; redirects <= _kMaxRedirects; redirects++) {
-    // The resolver lets proxy hosts through, so a URL must not name one.
     if (!isAllowed(target) ||
         _mayName(_normalizeHost(target.host), proxyHosts)) {
       throw StateError('NetworkImage address is not allowed');
@@ -68,12 +71,18 @@ Future<http.StreamedResponse> sendImageRequest(
     }
     await response.stream.listen((_) {}).cancel();
     // For the native client, "http:next.png" from an http URL is relative.
-    final next = target.resolve(
+    var next = target.resolve(
       location.replaceFirst(
         RegExp('^${target.scheme}:', caseSensitive: false),
         '',
       ),
     );
+    // As for the native client, the credentials of the URL stay on its origin.
+    if (next.scheme == target.scheme &&
+        next.host == target.host &&
+        next.port == target.port) {
+      next = next.replace(userInfo: target.userInfo);
+    }
     // As the native client does when it follows redirects itself.
     referer = target.isScheme('https') && next.isScheme('http')
         ? null
@@ -192,14 +201,36 @@ bool _isPublicAddress(InternetAddress address) {
     return _isPublicIPv4(bytes.sublist(12));
   }
   if (startsWith(const [0x20, 0x02])) return _isPublicIPv4(bytes.sublist(2, 6));
-  // Documentation, 2001:db8::/32 and 3fff::/20, and benchmarking, 2001:2::/48.
+  // IETF protocol assignments, 2001::/23.
+  if (startsWith(const [0x20, 0x01]) && bytes[2] & 0xfe == 0) {
+    return _isReachableAssignment(bytes);
+  }
+  // Documentation, 2001:db8::/32 and 3fff::/20.
   if (startsWith(const [0x20, 0x01, 0x0d, 0xb8]) ||
-      (startsWith(const [0x3f, 0xff]) && bytes[2] & 0xf0 == 0) ||
-      startsWith(const [0x20, 0x01, 0, 0x02, 0, 0])) {
+      (startsWith(const [0x3f, 0xff]) && bytes[2] & 0xf0 == 0)) {
     return false;
   }
   // Only global unicast, 2000::/3.
   return bytes[0] & 0xe0 == 0x20;
+}
+
+// The parts of 2001::/23 that are globally reachable in
+// https://www.iana.org/assignments/iana-ipv6-special-registry
+bool _isReachableAssignment(Uint8List bytes) {
+  if (bytes[2] != 0) return false;
+  return switch (bytes[3]) {
+    // 2001:1::1 to 2001:1::3, anycast addresses.
+    0x01 =>
+      bytes.sublist(4, 15).every((byte) => byte == 0) &&
+          bytes[15] >= 1 &&
+          bytes[15] <= 3,
+    // 2001:3::/32, AMT.
+    0x03 => true,
+    // 2001:4:112::/48, AS112.
+    0x04 => bytes[4] == 0x01 && bytes[5] == 0x12,
+    // 2001:20::/28, ORCHIDv2, and 2001:30::/28, drone identifiers.
+    final group => group & 0xe0 == 0x20,
+  };
 }
 
 // 198.18.0.0/15 stays allowed: fake-IP proxies such as Clash and Surge answer
@@ -238,6 +269,9 @@ Future<rhttp.RhttpCompatibleClient> _imageClient(
   return client;
 }
 
+bool _usesResolver(ProxyConfig? proxyConfig) =>
+    proxyConfig?.type != ProxyType.http;
+
 @visibleForTesting
 rhttp.ClientSettings imageClientSettings(ProxyConfig? proxyConfig) =>
     rhttp.ClientSettings(
@@ -248,7 +282,7 @@ rhttp.ClientSettings imageClientSettings(ProxyConfig? proxyConfig) =>
           : null,
       // An HTTP proxy gets host names. A SOCKS5 proxy gets addresses, so the
       // app resolves them, as it does with no proxy.
-      dnsSettings: proxyConfig?.type == ProxyType.http
+      dnsSettings: !_usesResolver(proxyConfig)
           ? null
           : rhttp.DnsSettings.dynamic(
               resolver: (host) async {

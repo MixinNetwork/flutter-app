@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_app/utils/proxy.dart';
@@ -65,7 +66,18 @@ void main() {
       'http://198.51.101.1/a.png',
       'http://203.0.114.1/a.png',
       'http://[2001:db9::1]/a.png',
-      'http://[2001:2:1::1]/a.png',
+      // Globally reachable parts of 2001::/23, and the block after it.
+      'http://[2001:1::1]/a.png',
+      'http://[2001:1::2]/a.png',
+      'http://[2001:1::3]/a.png',
+      'http://[2001:3::1]/a.png',
+      'http://[2001:3:ffff::1]/a.png',
+      'http://[2001:4:112::1]/a.png',
+      'http://[2001:20::1]/a.png',
+      'http://[2001:2f:ffff::1]/a.png',
+      'http://[2001:30::1]/a.png',
+      'http://[2001:3f:ffff::1]/a.png',
+      'http://[2001:200::1]/a.png',
       'http://[3fff:1000::1]/a.png',
       // Names in other scripts.
       'https://bücher.example/a.png',
@@ -121,6 +133,18 @@ void main() {
       'http://203.0.113.1/a.png',
       'http://[2001:db8::1]/a.png',
       'http://[2001:2::1]/a.png',
+      // The rest of the IETF protocol assignments, 2001::/23.
+      'http://[2001::1]/a.png',
+      'http://[2001:1::]/a.png',
+      'http://[2001:1::4]/a.png',
+      'http://[2001:1:0:1::1]/a.png',
+      'http://[2001:4:111::1]/a.png',
+      'http://[2001:4:113::1]/a.png',
+      'http://[2001:10::1]/a.png',
+      'http://[2001:40::1]/a.png',
+      'http://[2001:100::1]/a.png',
+      'http://[2001:1ff:ffff::1]/a.png',
+      'http://[2001:103::1]/a.png',
       'http://[3fff::1]/a.png',
       'http://[3fff:fff:ffff::1]/a.png',
       'http://255.255.255.255/a.png',
@@ -211,10 +235,6 @@ void main() {
 
       imageEnvironment = {'HTTPS_PROXY': 'http://env.proxy:7890'};
       expect(await isSent('http://env.proxy/a', proxy: appProxy(type)), isTrue);
-      expect(
-        await isSent('http://app.proxy/a', proxy: appProxy(type)),
-        isFalse,
-      );
       Future<List<InternetAddress>> private(String _) async => [
         InternetAddress('192.168.1.2'),
       ];
@@ -236,6 +256,36 @@ void main() {
       );
     });
   }
+
+  // Only a client with the resolver lets a proxy host through. With an HTTP
+  // proxy, the proxy gets the names.
+  test('a URL may name an HTTP app proxy', () async {
+    expect(
+      await isSent('http://app.proxy/a', proxy: appProxy(ProxyType.http)),
+      isTrue,
+    );
+    expect(
+      await isSent(
+        'http://例え.example/a',
+        proxy: ProxyConfig(
+          type: ProxyType.http,
+          host: 'xn--bcher-kva.example',
+          port: 1080,
+          id: 'proxy',
+        ),
+      ),
+      isTrue,
+    );
+    // The URL rules still apply.
+    expect(
+      await isSent('http://127.0.0.1/a', proxy: appProxy(ProxyType.http)),
+      isFalse,
+    );
+    expect(
+      await isSent('http://nas.local/a', proxy: appProxy(ProxyType.http)),
+      isFalse,
+    );
+  });
 
   test('the resolver lets an environment proxy through', () async {
     imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan.:7890'};
@@ -266,7 +316,7 @@ void main() {
         sendImageRequest(
           Uri.parse(url),
           proxyConfig: ProxyConfig(
-            type: ProxyType.http,
+            type: ProxyType.socks5,
             host: proxyHost,
             port: 1080,
             id: 'proxy',
@@ -427,6 +477,79 @@ void main() {
     });
   }
 
+  // The native client sends the credentials of the URL as a header, and keeps
+  // it on redirects that stay on the same origin.
+  for (final (name, location) in <(String, String Function(_Server))>[
+    ('an absolute', (server) => server.url('/b.png')),
+    ('a relative', (_) => '/b.png'),
+    // The native client ignores these.
+    (
+      'a "user info"',
+      (server) => 'http://other:secret@127.0.0.1:${server.port}/b.png',
+    ),
+  ]) {
+    test('$name redirect on the same origin keeps the credentials', () async {
+      late final _Server server;
+      server = await _Server.bind(
+        redirect: (path) => path == '/a.png' ? location(server) : null,
+      );
+
+      final response = await sendImageRequest(
+        Uri.parse('http://user:pw@127.0.0.1:${server.port}/a.png'),
+        isAllowed: (_) => true,
+        client: client(),
+      );
+      await response.stream.drain<void>();
+
+      expect(server.paths, ['/a.png', '/b.png']);
+      expect(server.authorizations, [_basicUserPw, _basicUserPw]);
+      expect(server.referers.last, server.url('/a.png'));
+    });
+  }
+
+  test('credentials do not go to another origin, nor come back', () async {
+    late final _Server first;
+    final other = await _Server.bind(
+      redirect: (_) => first.url('/c.png'),
+    );
+    first = await _Server.bind(
+      redirect: (path) => path == '/a.png' ? other.url('/b.png') : null,
+    );
+
+    final response = await sendImageRequest(
+      Uri.parse('http://user:pw@127.0.0.1:${first.port}/a.png'),
+      isAllowed: (_) => true,
+      client: client(),
+    );
+    await response.stream.drain<void>();
+
+    expect(first.paths, ['/a.png', '/c.png']);
+    expect(first.authorizations, [_basicUserPw, null]);
+    expect(other.authorizations, [null]);
+  });
+
+  // Another scheme or host is another origin, also with the same port.
+  for (final next in [
+    'https://images.example:8443/b',
+    'http://other.example:8443/b',
+    'http://images.example:8444/b',
+  ]) {
+    test('credentials do not follow a redirect to $next', () async {
+      final sent = <Uri>[];
+      await sendImageRequest(
+        Uri.parse('http://user:pw@images.example:8443/a'),
+        client: MockClient((request) async {
+          sent.add(request.url);
+          return sent.length == 1
+              ? http.Response('', 302, headers: {'location': next})
+              : http.Response('ok', 200);
+        }),
+      );
+
+      expect(sent.last, Uri.parse(next));
+    });
+  }
+
   test('a redirect loop ends', () async {
     final server = await _Server.bind(redirectTo: '/again');
 
@@ -448,6 +571,8 @@ void main() {
   });
 }
 
+final _basicUserPw = 'Basic ${base64Encode(utf8.encode('user:pw'))}';
+
 final throwsBlocked = throwsA(
   isA<StateError>().having(
     (error) => error.message,
@@ -459,17 +584,27 @@ final throwsBlocked = throwsA(
 class _Server {
   _Server(this._server);
 
-  static Future<_Server> bind({String? redirectTo, bool once = false}) async {
+  static Future<_Server> bind({
+    String? redirectTo,
+    bool once = false,
+    String? Function(String path)? redirect,
+  }) async {
     final server = _Server(
       await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
     );
     final subscription = server._server.listen((request) async {
       server.paths.add(request.uri.path);
       server.referers.add(request.headers.value(HttpHeaders.refererHeader));
-      if (redirectTo != null && (!once || server.paths.length == 1)) {
+      server.authorizations.add(
+        request.headers.value(HttpHeaders.authorizationHeader),
+      );
+      final next = redirect != null
+          ? redirect(request.uri.path)
+          : (!once || server.paths.length == 1 ? redirectTo : null);
+      if (next != null) {
         request.response
           ..statusCode = HttpStatus.found
-          ..headers.set(HttpHeaders.locationHeader, redirectTo);
+          ..headers.set(HttpHeaders.locationHeader, next);
       } else {
         request.response.add([1, 2, 3]);
       }
@@ -485,6 +620,7 @@ class _Server {
   final HttpServer _server;
   final paths = <String>[];
   final referers = <String?>[];
+  final authorizations = <String?>[];
 
   int get port => _server.port;
 
