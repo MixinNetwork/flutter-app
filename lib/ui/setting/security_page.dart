@@ -75,7 +75,7 @@ class _Passcode extends HookConsumerWidget {
                     value: hasPasscode,
                     onChanged: (value) {
                       if (!value) {
-                        SecurityKeyValue.instance.passcode = null;
+                        SecurityKeyValue.instance.setPasscode(null);
                         return;
                       }
                       showMixinDialog(
@@ -215,9 +215,11 @@ class _InputPasscode extends HookConsumerWidget {
         return;
       }
 
-      SecurityKeyValue.instance.passcode = passcode.value;
-      Navigator.maybePop(context);
-    });
+      SecurityKeyValue.instance.setPasscode(passcode.value).then((_) {
+        if (context.mounted) Navigator.maybePop(context);
+      });
+      // Saving takes a while, so a rebuild must not save and pop again.
+    }, [passcode.value, confirmPasscode.value]);
 
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 80),
