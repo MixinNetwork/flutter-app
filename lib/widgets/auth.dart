@@ -73,8 +73,16 @@ class _AuthGuard extends HookConsumerWidget {
 
     useEffect(() {
       appLocked.value = lock.value;
-      return () => appLocked.value = false;
+      return null;
     }, [lock.value]);
+
+    // A cleanup of the effect above would run after the next effect, and so
+    // would mark the app as unlocked on each lock.
+    useEffect(
+      () =>
+          () => appLocked.value = false,
+      const [],
+    );
 
     useEffect(() {
       final listen = EventBus.instance.on.whereType<LockEvent>().listen((
