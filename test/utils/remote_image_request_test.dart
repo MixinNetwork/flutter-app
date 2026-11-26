@@ -140,6 +140,37 @@ void main() {
     expect(isPublicImageUri(Uri.parse('http://proxy.lan./a')), isFalse);
   });
 
+  // The two spellings of a name in another script cannot be compared without
+  // IDNA, which the native client applies.
+  for (final (proxy, url) in [
+    ('xn--bcher-kva.lan', 'http://bücher.lan/a'),
+    ('XN--BCHER-KVA.lan', 'http://bücher.lan/a'),
+    ('bücher.lan', 'http://BÜCHER.lan/a'),
+    ('bücher.lan', 'http://xn--bcher-kva.lan/a'),
+  ]) {
+    test('the image URL $url may name the environment proxy $proxy', () {
+      final environment = imageEnvironment;
+      imageEnvironment = {'HTTP_PROXY': 'http://$proxy:7890'};
+      addTearDown(() => imageEnvironment = environment);
+
+      expect(isPublicImageUri(Uri.parse(url)), isFalse);
+      expect(isPublicImageUri(Uri.parse('http://images.example/a')), isTrue);
+    });
+  }
+
+  test('names in other scripts load next to a proxy with an ASCII name', () {
+    final environment = imageEnvironment;
+    imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan:7890'};
+    addTearDown(() => imageEnvironment = environment);
+
+    for (final url in [
+      'http://bücher.example/a',
+      'http://xn--bcher-kva.example/a',
+    ]) {
+      expect(isPublicImageUri(Uri.parse(url)), isTrue, reason: url);
+    }
+  });
+
   test('the resolver lets an environment proxy through', () async {
     final environment = imageEnvironment;
     imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan.:7890'};
@@ -162,6 +193,9 @@ void main() {
     ('http://proxy.lan:8080/a.png', 'Proxy.lan'),
     ('http://proxy.lan.:8080/a.png', 'proxy.lan'),
     ('http://proxy.lan:8080/a.png', 'proxy.lan.'),
+    ('http://bücher.lan:8080/a.png', 'bücher.lan'),
+    ('http://bücher.lan:8080/a.png', 'xn--bcher-kva.lan'),
+    ('http://xn--bcher-kva.lan:8080/a.png', 'bücher.lan'),
   ]) {
     test('the image URL $url cannot name the app proxy $proxyHost', () async {
       await expectLater(

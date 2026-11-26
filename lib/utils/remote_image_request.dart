@@ -53,7 +53,8 @@ Future<http.StreamedResponse> sendImageRequest(
   var target = uri;
   String? referer;
   for (var redirects = 0; redirects <= _kMaxRedirects; redirects++) {
-    if (!isAllowed(target) || _normalizeHost(target.host) == appProxy) {
+    if (!isAllowed(target) ||
+        _mayName(_normalizeHost(target.host), {?appProxy})) {
       throw StateError('NetworkImage address is not allowed');
     }
     final response = await (client ?? await _imageClient(proxyConfig)).send(
@@ -103,7 +104,7 @@ bool isPublicImageUri(Uri uri) {
   }
   if (!_hostName.hasMatch(asciiHost)) return false;
   // The resolver lets proxy hosts through, so a URL must not name one.
-  if (_environmentProxyHosts().contains(host)) return false;
+  if (_mayName(host, _environmentProxyHosts())) return false;
   final lastLabel = asciiHost.split('.').last;
   // The native client reads a name that ends in a number, such as "127.1", as
   // an IPv4 address and connects without a DNS lookup.
@@ -146,6 +147,18 @@ Set<String> _environmentProxyHosts() => {
           case final proxy?)
         _normalizeHost(proxy.host),
 };
+
+/// Whether [host] may be one of [proxies]. A name in another script has a
+/// Unicode and an "xn--" spelling, which need IDNA to compare, so two such
+/// names count as equal.
+bool _mayName(String host, Set<String> proxies) =>
+    proxies.contains(host) || (_isIdn(host) && proxies.any(_isIdn));
+
+// Uri.host has the other scripts percent-encoded.
+bool _isIdn(String host) =>
+    host.contains('%') ||
+    host.codeUnits.any((unit) => unit > 0x7f) ||
+    host.split('.').any((label) => label.startsWith('xn--'));
 
 String _normalizeHost(String host) {
   final lower = host.toLowerCase();
