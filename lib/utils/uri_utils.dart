@@ -5,8 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/constants.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/mixin_database.dart' hide User;
+import '../enum/encrypt_category.dart';
 import '../ui/home/conversation/conversation_focus.dart';
-import '../ui/provider/conversation_provider.dart';
 import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/dialog.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
@@ -104,10 +104,14 @@ Future<bool> openUri(
             conversation: conversation,
           );
 
-          // The same category as a message typed in this chat.
-          final encryptCategory = context.providerContainer
-              .read(conversationProvider)!
-              .encryptCategory;
+          // From the app stored now: an open chat keeps the app it was opened
+          // with. A bot whose app is not stored yet gets plain text.
+          final encryptCategory = conversation.isGroupConversation
+              ? EncryptCategory.signal
+              : await context.database.conversationDao.getEncryptCategory(
+                  conversation.ownerId!,
+                  conversation.isBotConversation,
+                );
 
           if (confirmSend) {
             if (!context.mounted) return false;

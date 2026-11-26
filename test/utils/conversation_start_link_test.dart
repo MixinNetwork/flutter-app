@@ -25,70 +25,146 @@ const _owner = '00000000-0000-4000-8000-000000000002';
 const _conversationId = '00000000-0000-4000-8000-000000000003';
 
 void main() {
-  for (final (name, identityNumber, capabilities, expected) in [
-    ('a contact', '1234', null, EncryptCategory.signal),
-    ('a plain bot', '7000100001', '[]', EncryptCategory.plain),
+  const bot = '7000100001';
+  const encrypted = '["ENCRYPTED"]';
+  for (final (name, category, identityNumber, capabilities, expected) in [
+    (
+      'a contact',
+      ConversationCategory.contact,
+      '1234',
+      null,
+      EncryptCategory.signal,
+    ),
+    (
+      'a plain bot',
+      ConversationCategory.contact,
+      bot,
+      '[]',
+      EncryptCategory.plain,
+    ),
     (
       'an encrypted bot',
-      '7000100001',
-      '["ENCRYPTED"]',
+      ConversationCategory.contact,
+      bot,
+      encrypted,
       EncryptCategory.encrypted,
+    ),
+    (
+      'a bot whose app is not stored yet',
+      ConversationCategory.contact,
+      bot,
+      null,
+      EncryptCategory.plain,
+    ),
+    (
+      'a group that an encrypted bot owns',
+      ConversationCategory.group,
+      bot,
+      encrypted,
+      EncryptCategory.signal,
     ),
   ]) {
     testWidgets('a start link to $name keeps its encryption', (tester) async {
       final mixinDatabase = MixinDatabase(NativeDatabase.memory());
       await tester.runAsync(
-        () => _insert(mixinDatabase, identityNumber, capabilities),
+        () => _insert(mixinDatabase, category, identityNumber, capabilities),
       );
       final accountServer = _FakeAccountServer(_FakeDatabase(mixinDatabase));
+      final context = await _pumpApp(tester, accountServer);
 
-      late BuildContext context;
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            databaseProvider.overrideWith(
-              (ref) => _ReadyDatabase(accountServer.database),
-            ),
-            accountServerProvider.overrideWith(
-              (ref) => _ReadyAccountServer(accountServer),
-            ),
-          ],
-          child: MaterialApp(
-            home: Consumer(
-              builder: (c, ref, _) {
-                ref
-                  ..watch(databaseProvider)
-                  ..watch(accountServerProvider)
-                  ..watch(conversationProvider);
-                context = c;
-                return const SizedBox();
-              },
-            ),
-          ),
-        ),
-      );
-
-      unawaited(
-        openUri(context, 'mixin://conversations/$_conversationId?start=hi'),
-      );
-      for (var i = 0; i < 20 && accountServer.sent.isEmpty; i++) {
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 50)),
-        );
-        await tester.pump();
-      }
+      await _openStartLink(tester, context, accountServer, 1);
 
       expect(accountServer.sent, [('hi', expected)]);
 
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(minutes: 11));
-      await tester.runAsync(mixinDatabase.close);
+      await _dispose(tester, mixinDatabase);
     });
   }
+
+  testWidgets('a start link to the open chat uses the app of now', (
+    tester,
+  ) async {
+    final mixinDatabase = MixinDatabase(NativeDatabase.memory());
+    await tester.runAsync(
+      () => _insert(mixinDatabase, ConversationCategory.contact, bot, '[]'),
+    );
+    final accountServer = _FakeAccountServer(_FakeDatabase(mixinDatabase));
+    final context = await _pumpApp(tester, accountServer);
+    await _openStartLink(tester, context, accountServer, 1);
+
+    await tester.runAsync(
+      () => mixinDatabase
+          .update(mixinDatabase.apps)
+          .write(const AppsCompanion(capabilities: Value(encrypted))),
+    );
+    await _openStartLink(tester, context, accountServer, 2);
+
+    expect(accountServer.sent, [
+      ('hi', EncryptCategory.plain),
+      ('hi', EncryptCategory.encrypted),
+    ]);
+    await _dispose(tester, mixinDatabase);
+  });
+}
+
+Future<BuildContext> _pumpApp(
+  WidgetTester tester,
+  _FakeAccountServer accountServer,
+) async {
+  late BuildContext context;
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        databaseProvider.overrideWith(
+          (ref) => _ReadyDatabase(accountServer.database),
+        ),
+        accountServerProvider.overrideWith(
+          (ref) => _ReadyAccountServer(accountServer),
+        ),
+      ],
+      child: MaterialApp(
+        home: Consumer(
+          builder: (c, ref, _) {
+            ref
+              ..watch(databaseProvider)
+              ..watch(accountServerProvider)
+              ..watch(conversationProvider);
+            context = c;
+            return const SizedBox();
+          },
+        ),
+      ),
+    ),
+  );
+
+  return context;
+}
+
+Future<void> _openStartLink(
+  WidgetTester tester,
+  BuildContext context,
+  _FakeAccountServer accountServer,
+  int sends,
+) async {
+  unawaited(
+    openUri(context, 'mixin://conversations/$_conversationId?start=hi'),
+  );
+  for (var i = 0; i < 100 && accountServer.sent.length < sends; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+  }
+}
+
+Future<void> _dispose(WidgetTester tester, MixinDatabase database) async {
+  await tester.pumpWidget(const SizedBox());
+  await tester.pump(const Duration(minutes: 11));
+  await tester.runAsync(database.close);
 }
 
 Future<void> _insert(
   MixinDatabase database,
+  ConversationCategory category,
   String identityNumber,
   String? capabilities,
 ) => database.batch((batch) {
@@ -108,7 +184,7 @@ Future<void> _insert(
       Conversation(
         conversationId: _conversationId,
         ownerId: _owner,
-        category: ConversationCategory.contact,
+        category: category,
         createdAt: DateTime(2026),
         status: ConversationStatus.success,
       ),
