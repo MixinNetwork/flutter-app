@@ -88,10 +88,11 @@ Future<bool> openUri(
     final startText = uri.startTextOfConversation;
     if (conversationId != null && conversationId.trim().isNotEmpty) {
       if (startText?.trim().isNotEmpty == true) {
-        // A tapped link's context goes away when the other chat opens.
-        final accountServer = context.accountServer;
-        final database = context.database;
         try {
+          // Read before the first await: a tapped link's context goes away
+          // when the other chat opens.
+          final accountServer = context.accountServer;
+          final database = context.database;
           final conversation = await database.conversationDao
               .conversationItem(conversationId)
               .getSingleOrNull();

@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     show ConversationCategory, ConversationStatus, UserRelationship;
+import 'package:overlay_support/overlay_support.dart';
 
 const _me = '00000000-0000-4000-8000-000000000001';
 const _owner = '00000000-0000-4000-8000-000000000002';
@@ -162,6 +163,49 @@ void main() {
     expect(context.mounted, isFalse);
     expect(accountServer.sent, [('hi', EncryptCategory.signal)]);
     await _dispose(tester, mixinDatabase);
+  });
+
+  testWidgets('a start link before the account is ready fails with a toast', (
+    tester,
+  ) async {
+    late BuildContext context;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          accountServerProvider.overrideWith((ref) => AccountServerOpener()),
+        ],
+        child: OverlaySupport.global(
+          child: BrightnessData(
+            value: 0,
+            brightnessThemeData: lightBrightnessThemeData,
+            child: MaterialApp(
+              localizationsDelegates: const [Localization.delegate],
+              supportedLocales: Localization.delegate.supportedLocales,
+              home: Builder(
+                builder: (c) {
+                  context = c;
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final opened = openUri(
+      context,
+      'mixin://conversations/$_conversationId?start=hi',
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(await opened, isFalse);
+    expect(find.textContaining('not ready'), findsOneWidget);
+    // Ends the timers of the toast: its duration, then its fade out.
+    for (var second = 0; second < 5; second++) {
+      await tester.pump(const Duration(seconds: 1));
+    }
+    await tester.pumpAndSettle();
   });
 }
 
