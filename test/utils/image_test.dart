@@ -17,6 +17,8 @@ Matcher _throwsStateError(String message) => throwsA(
 
 void main() {
   setUpAll(() {
+    // A proxy of the machine that runs the tests must not change them.
+    imageEnvironment = {};
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     // The test binding replaces HttpClient; these tests use a local server.
     HttpOverrides.global = null;
