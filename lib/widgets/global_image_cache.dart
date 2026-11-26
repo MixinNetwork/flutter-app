@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../utils/image.dart';
 import '../utils/proxy.dart';
+import '../utils/remote_image_request.dart';
 
 const _kGlobalImageCacheKey = 'cacheimage';
 const _kGlobalImageCacheMaxSizeBytes = 1024 * 1024 * 1024;
@@ -37,8 +38,8 @@ class GlobalImageCache {
   @visibleForTesting
   factory GlobalImageCache.forTesting({
     required Directory directory,
-    required ImageCacheFetcher fetcher,
     required int maxSizeBytes,
+    ImageCacheFetcher fetcher = _fetchRemoteImage,
   }) => GlobalImageCache._(() async => directory, fetcher, maxSizeBytes);
 
   static final instance = GlobalImageCache._(
@@ -461,9 +462,7 @@ Future<http.StreamedResponse> _fetchRemoteImage(
   Uri uri,
   ProxyConfig? proxyConfig,
   Map<String, String> headers,
-) async => (await createRHttpClient(proxyConfig: proxyConfig)).send(
-  http.Request('GET', uri)..headers.addAll(headers),
-);
+) => sendImageRequest(uri, proxyConfig: proxyConfig, headers: headers);
 
 Future<Uint8List> _readResponse(
   http.StreamedResponse response, {
