@@ -41,8 +41,7 @@ cp macos/Runner/Release.entitlements "$ENTITLEMENTS"
 
 # build <entry point> <version> <build number> <app>
 build() {
-	flutter build macos -t "$1" --build-name "$2" --build-number "$3" \
-		--dart-define="APP_VERSION=$2" --dart-define="APP_BUILD_NUMBER=$3"
+	flutter build macos -t "$1" --build-name "$2" --build-number "$3"
 	mkdir -p "$(dirname "$4")"
 	ditto build/macos/Build/Products/Release/Mixin.app "$4"
 	dist/macos_sparkle.sh "$4"

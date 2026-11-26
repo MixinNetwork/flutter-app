@@ -7,46 +7,25 @@ import 'package:path/path.dart' as p;
 import '../logger.dart';
 import 'windows_device_id.dart';
 
-// auto added by .github/workflows/manual-build.yml
-const _kAppVersion = String.fromEnvironment(
-  'APP_VERSION',
-  defaultValue: '7.0.1',
-);
-const _kAppBuildNumber = String.fromEnvironment(
-  'APP_BUILD_NUMBER',
-  defaultValue: '0',
-);
-
-final _packageInfo = PackageInfo(
-  appName: 'mixin',
-  packageName: 'mixin_desktop',
-  version: _kAppVersion,
-  buildNumber: _kAppBuildNumber,
-);
-
 /// Returns the package info of the current app.
-/// NOTE: Only available on main isolate.
+/// Throws if platform package info cannot be read or has an empty version,
+/// so callers never send a bogus or outdated version in the User-Agent.
 Future<PackageInfo> getPackageInfo() async {
-  if (Platform.isWindows) {
-    return _packageInfo;
+  final info = await PackageInfo.fromPlatform();
+  if (info.version.trim().isEmpty) {
+    throw StateError('PackageInfo.fromPlatform returned an empty version.');
   }
-  try {
-    return await PackageInfo.fromPlatform();
-  } catch (error, stack) {
-    e('get package info failed. $error $stack');
-  }
-  // fallback if we can not get packageInfo dynamic.
-  return _packageInfo;
+  return info;
 }
 
-Future<String?> generateUserAgent({
+Future<String> generateUserAgent({
   Future<ProcessResult> Function(String, List<String>) runProcess = Process.run,
 }) async {
   try {
     return await _generateUserAgent(await getPackageInfo(), runProcess);
   } catch (error, stack) {
     e('generate user agent failed. $error $stack');
-    return null;
+    rethrow;
   }
 }
 

@@ -75,6 +75,7 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   await Rhttp.init();
   BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
+  ui.DartPluginRegistrant.ensureInitialized();
   final isolateChannel = IsolateChannel<IsolateEvent>.connectSend(
     params.sendPort,
   );

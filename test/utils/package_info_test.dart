@@ -156,9 +156,16 @@ void main() {
   }
 
   test('includes the model of this host, from a worker isolate', () async {
-    final (userAgent, model) = await Isolate.run(
-      () async => (await generateUserAgent(), await readHardwareModel()),
-    );
+    final (userAgent, model) = await Isolate.run(() async {
+      PackageInfo.setMockInitialValues(
+        appName: 'Mixin',
+        packageName: 'mixin',
+        version: '1.2.3',
+        buildNumber: '42',
+        buildSignature: '',
+      );
+      return (await generateUserAgent(), await readHardwareModel());
+    });
     // Shown in the CI log of each platform.
     // ignore: avoid_print
     print('User-Agent on this host: $userAgent');
