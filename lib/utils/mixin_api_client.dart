@@ -16,8 +16,18 @@ const tenSecond = Duration(seconds: 10);
 
 const kRequestTimeStampKey = 'requestTimeStamp';
 
-Future<String?> _userAgent = generateUserAgent();
+Future<String>? _userAgentFuture;
 Future<String?> _deviceId = getDeviceId();
+
+Future<String> _getUserAgent() {
+  final future = _userAgentFuture ??= generateUserAgent();
+  return future.catchError((Object error, StackTrace stackTrace) {
+    if (identical(_userAgentFuture, future)) {
+      _userAgentFuture = null;
+    }
+    Error.throwWithStackTrace(error, stackTrace);
+  });
+}
 
 class ApiUpgradeRequiredException implements Exception {
   const ApiUpgradeRequiredException();
@@ -119,7 +129,7 @@ Client createClient({
       ),
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          options.headers['User-Agent'] = await _userAgent;
+          options.headers['User-Agent'] = await _getUserAgent();
           options.headers['Mixin-Device-Id'] = await _deviceId;
           options.headers['Accept-Language'] =
               PlatformDispatcher.instance.locale.languageCode;

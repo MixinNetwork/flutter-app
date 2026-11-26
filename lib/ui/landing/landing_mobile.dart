@@ -39,9 +39,46 @@ class LoginWithMobileWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = useMemoized(() => Localizations.localeOf(context));
-    final userAgent = useMemoizedFuture(generateUserAgent, null).data;
-    final deviceId = useMemoizedFuture(getDeviceId, null).data;
+    final retryKey = useState(0);
+    final userAgentSnapshot = useMemoizedFuture(
+      generateUserAgent,
+      null,
+      keys: [retryKey.value],
+    );
+    final deviceIdSnapshot = useMemoizedFuture(
+      getDeviceId,
+      null,
+      keys: [retryKey.value],
+    );
 
+    if (userAgentSnapshot.hasError || deviceIdSnapshot.hasError) {
+      return Column(
+        children: [
+          const Spacer(),
+          Text(
+            context.l10n.unknowError,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: context.theme.red,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 16),
+          MixinButton(
+            onTap: () => retryKey.value++,
+            child: Text(context.l10n.retry),
+          ),
+          const Spacer(),
+          const SizedBox(height: 30),
+          const LandingModeSwitchButton(),
+          const SizedBox(height: 40),
+        ],
+      );
+    }
+
+    final userAgent = userAgentSnapshot.data;
+    final deviceId = deviceIdSnapshot.data;
     if (userAgent == null || deviceId == null) {
       return const Center(child: CircularProgressIndicator());
     }
