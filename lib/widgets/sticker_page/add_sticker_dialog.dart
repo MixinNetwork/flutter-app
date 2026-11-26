@@ -8,8 +8,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 
-import '../../db/dao/sticker_dao.dart';
-import '../../db/mixin_database.dart';
 import '../../utils/extension/extension.dart';
 import '../app_bar.dart';
 import '../buttons.dart';
@@ -78,7 +76,6 @@ class _AddStickerDialog extends StatelessWidget {
               child: Text(context.l10n.save),
               onTap: () async {
                 final accountServer = context.accountServer;
-                final database = context.database;
 
                 try {
                   showToastLoading();
@@ -91,28 +88,7 @@ class _AddStickerDialog extends StatelessWidget {
                       .addSticker(
                         StickerRequest(dataBase64: bytes.base64RawUrlEncode()),
                       );
-                  final sticker = response.data;
-
-                  final personalAlbum = await database.stickerAlbumDao
-                      .personalAlbum()
-                      .getSingleOrNull();
-                  if (personalAlbum == null) {
-                    unawaited(
-                      context.accountServer.refreshSticker(force: true),
-                    );
-                  } else {
-                    await database.mixinDatabase.transaction(() async {
-                      await database.stickerDao.insert(
-                        sticker.asStickersCompanion,
-                      );
-                      await database.stickerRelationshipDao.insert(
-                        StickerRelationship(
-                          albumId: personalAlbum.albumId,
-                          stickerId: sticker.stickerId,
-                        ),
-                      );
-                    });
-                  }
+                  await accountServer.saveFavoriteSticker(response.data);
                   showToastSuccessful();
                   Navigator.pop(context);
                 } catch (error, stacktrace) {

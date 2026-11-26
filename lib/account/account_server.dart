@@ -926,14 +926,22 @@ class AccountServer {
     }
   }
 
+  Future<void>? _refreshStickerInFlight;
+
+  /// Refreshes the sticker albums at most once a day, or now with [force].
+  /// Concurrent calls share the refresh that is already running.
   Future<void> refreshSticker({bool force = false}) async {
-    final refreshStickerLastTime =
-        AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
-    if (!force && now - refreshStickerLastTime < hours24) {
+    if (!force &&
+        now - AccountKeyValue.instance.refreshStickerLastTime < hours24) {
       return;
     }
+    return _refreshStickerInFlight ??= _refreshSticker(now).whenComplete(
+      () => _refreshStickerInFlight = null,
+    );
+  }
 
+  Future<void> _refreshSticker(int now) async {
     final res = await client.accountApi.getStickerAlbums();
     final albums = res.data..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
@@ -1038,6 +1046,37 @@ class AccountServer {
     if (ccList.length >= 500) {
       await handleCircle(circle, offset: offset ?? 0 + 500);
     }
+  }
+
+  /// Saves a sticker just added to favorites. Without a local personal album,
+  /// fetches only the sticker's album, as the iOS client does.
+  Future<void> saveFavoriteSticker(Sticker sticker) async {
+    var albumId =
+        (await database.stickerAlbumDao.personalAlbum().getSingleOrNull())
+            ?.albumId;
+    if (albumId == null) {
+      albumId = sticker.albumId;
+      if (albumId == null || albumId.isEmpty) {
+        return unawaited(refreshSticker(force: true));
+      }
+      try {
+        final album = (await client.accountApi.getStickerAlbum(albumId)).data;
+        await database.stickerAlbumDao.insert(album.asStickerAlbumsCompanion);
+      } catch (e, s) {
+        w('Fetch sticker album error: $e, stack: $s');
+        return unawaited(refreshSticker(force: true));
+      }
+    }
+    final personalAlbumId = albumId;
+    await database.mixinDatabase.transaction(() async {
+      await database.stickerDao.insert(sticker.asStickersCompanion);
+      await database.stickerRelationshipDao.insert(
+        db.StickerRelationship(
+          albumId: personalAlbumId,
+          stickerId: sticker.stickerId,
+        ),
+      );
+    });
   }
 
   Future<void> updateStickerAlbums(String albumId) async {

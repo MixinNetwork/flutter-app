@@ -836,8 +836,6 @@ class _StickerButton extends HookConsumerWidget {
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
           portalBuilder: (context, progress, _, child) {
-            context.accountServer.refreshSticker();
-
             final renderBox =
                 key.currentContext?.findRenderObject() as RenderBox?;
             final offset = renderBox?.localToGlobal(Offset.zero);
@@ -859,15 +857,22 @@ class _StickerButton extends HookConsumerWidget {
           },
           portal: Padding(
             padding: const EdgeInsets.all(8),
-            child: Builder(
-              builder: (context) => StickerPage(
-                tabController: DefaultTabController.of(context),
-                tabLength: tabLength,
-                presetStickerGroups: presetStickerGroups,
-                stickerAlbums: stickerAlbums,
-                readModel: stickerReadModel,
-                onStickerSent: context.completeOutgoingChatSend,
-              ),
+            child: HookBuilder(
+              builder: (context) {
+                // The portal mounts each time the sticker panel opens.
+                useEffect(() {
+                  unawaited(context.accountServer.refreshSticker());
+                  return null;
+                }, const []);
+                return StickerPage(
+                  tabController: DefaultTabController.of(context),
+                  tabLength: tabLength,
+                  presetStickerGroups: presetStickerGroups,
+                  stickerAlbums: stickerAlbums,
+                  readModel: stickerReadModel,
+                  onStickerSent: context.completeOutgoingChatSend,
+                );
+              },
             ),
           ),
           child: ActionButton(
