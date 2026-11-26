@@ -1,48 +1,75 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_app/utils/image.dart';
+import 'package:flutter_app/utils/remote_image_request.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/io_client.dart';
 import 'package:image/image.dart' as img;
 
+Matcher _throwsStateError(String message) => throwsA(
+  isA<StateError>().having(
+    (error) => error.message,
+    'message',
+    contains(message),
+  ),
+);
+
 void main() {
-  test('downloadImageFile rejects oversized streaming responses', () async {
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    addTearDown(server.close);
-    final subscription = server.listen((request) async {
-      request.response.add([1, 2]);
-      request.response.add([3, 4]);
-      await request.response.close();
-    });
-    addTearDown(subscription.cancel);
-
-    await expectLater(
-      downloadImageFile(
-        'http://${server.address.host}:${server.port}',
-        maxBytes: 3,
-      ),
-      throwsStateError,
+  setUpAll(() {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    // The test binding replaces HttpClient; these tests use a local server.
+    HttpOverrides.global = null;
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (_) async => Directory.systemTemp.path,
     );
   });
 
-  test('downloadImageBytes rejects oversized streaming responses', () async {
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    addTearDown(server.close);
-    final subscription = server.listen((request) async {
-      request.response.add([1, 2]);
-      request.response.add([3, 4]);
-      await request.response.close();
-    });
-    addTearDown(subscription.cancel);
+  for (final (name, download) in [
+    ('downloadImageFile', downloadImageFile),
+    ('downloadImageBytes', downloadImageBytes),
+  ]) {
+    test('$name does not request a local address', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(server.close);
+      var requests = 0;
+      final subscription = server.listen((request) async {
+        requests++;
+        await request.response.close();
+      });
+      addTearDown(subscription.cancel);
 
-    await expectLater(
-      downloadImageBytes(
-        'http://${server.address.host}:${server.port}',
-        maxBytes: 3,
-      ),
-      throwsStateError,
-    );
-  });
+      await expectLater(
+        download('http://${server.address.host}:${server.port}'),
+        _throwsStateError('address is not allowed'),
+      );
+      expect(requests, 0);
+    });
+
+    test('$name rejects oversized streaming responses', () async {
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(server.close);
+      final subscription = server.listen((request) async {
+        request.response.add([1, 2]);
+        request.response.add([3, 4]);
+        await request.response.close();
+      });
+      addTearDown(subscription.cancel);
+      final client = IOClient();
+      addTearDown(client.close);
+
+      await expectLater(
+        download(
+          'http://${server.address.host}:${server.port}',
+          maxBytes: 3,
+          send: (uri, {proxyConfig}) =>
+              sendImageRequest(uri, isAllowed: (_) => true, client: client),
+        ),
+        _throwsStateError('too large'),
+      );
+    });
+  }
 
   test('compressImage normalizes short animated GIF frame durations', () {
     final encoded = _gifWithFrameDurations(10, 50);
