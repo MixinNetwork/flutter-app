@@ -17,6 +17,39 @@ void main() {
     return client;
   }
 
+  // A proxy of the machine that runs the tests must not change them.
+  final environment = imageEnvironment;
+  setUp(() => imageEnvironment = {});
+  tearDown(() => imageEnvironment = environment);
+
+  /// Whether the request for [url] goes out.
+  Future<bool> isSent(String url, {ProxyConfig? proxy}) async {
+    var sent = false;
+    await sendImageRequest(
+      Uri.parse(url),
+      proxyConfig: proxy,
+      client: MockClient((_) async {
+        sent = true;
+        return http.Response('ok', 200);
+      }),
+    ).then<void>(
+      (_) {},
+      // Anything but the address check fails the test.
+      onError: (Object error) => expect(
+        error,
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          contains('address is not allowed'),
+        ),
+      ),
+    );
+    return sent;
+  }
+
+  ProxyConfig appProxy(ProxyType type) =>
+      ProxyConfig(type: type, host: 'app.proxy', port: 1080, id: 'proxy');
+
   test('only public http and https addresses are allowed', () {
     for (final url in [
       'https://mixin-images.zeromesh.net/a.png',
@@ -33,6 +66,7 @@ void main() {
       'http://203.0.114.1/a.png',
       'http://[2001:db9::1]/a.png',
       'http://[2001:2:1::1]/a.png',
+      'http://[3fff:1000::1]/a.png',
       // Names in other scripts.
       'https://bücher.example/a.png',
       'https://BÜCHER.example/a.png',
@@ -87,6 +121,8 @@ void main() {
       'http://203.0.113.1/a.png',
       'http://[2001:db8::1]/a.png',
       'http://[2001:2::1]/a.png',
+      'http://[3fff::1]/a.png',
+      'http://[3fff:fff:ffff::1]/a.png',
       'http://255.255.255.255/a.png',
       'http://[::1]/a.png',
       'http://[::]/a.png',
@@ -126,18 +162,16 @@ void main() {
     );
   });
 
-  test('an image URL cannot name an environment proxy', () {
-    final environment = imageEnvironment;
+  test('an image URL cannot name an environment proxy', () async {
     imageEnvironment = {'HTTPS_PROXY': 'http://Proxy.lan:7890'};
-    addTearDown(() => imageEnvironment = environment);
 
-    expect(isPublicImageUri(Uri.parse('http://proxy.lan:8080/a')), isFalse);
-    expect(isPublicImageUri(Uri.parse('http://proxy.lan./a')), isFalse);
-    expect(isPublicImageUri(Uri.parse('http://other.lan/a')), isTrue);
+    expect(await isSent('http://proxy.lan:8080/a'), isFalse);
+    expect(await isSent('http://proxy.lan./a'), isFalse);
+    expect(await isSent('http://other.lan/a'), isTrue);
 
     imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan.:7890'};
-    expect(isPublicImageUri(Uri.parse('http://proxy.lan/a')), isFalse);
-    expect(isPublicImageUri(Uri.parse('http://proxy.lan./a')), isFalse);
+    expect(await isSent('http://proxy.lan/a'), isFalse);
+    expect(await isSent('http://proxy.lan./a'), isFalse);
   });
 
   // The two spellings of a name in another script cannot be compared without
@@ -148,33 +182,63 @@ void main() {
     ('bücher.lan', 'http://BÜCHER.lan/a'),
     ('bücher.lan', 'http://xn--bcher-kva.lan/a'),
   ]) {
-    test('the image URL $url may name the environment proxy $proxy', () {
-      final environment = imageEnvironment;
+    test('the image URL $url may name the environment proxy $proxy', () async {
       imageEnvironment = {'HTTP_PROXY': 'http://$proxy:7890'};
-      addTearDown(() => imageEnvironment = environment);
 
-      expect(isPublicImageUri(Uri.parse(url)), isFalse);
-      expect(isPublicImageUri(Uri.parse('http://images.example/a')), isTrue);
+      expect(await isSent(url), isFalse);
+      expect(await isSent('http://images.example/a'), isTrue);
     });
   }
 
-  test('names in other scripts load next to a proxy with an ASCII name', () {
-    final environment = imageEnvironment;
-    imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan:7890'};
-    addTearDown(() => imageEnvironment = environment);
+  test(
+    'names in other scripts load next to a proxy with an ASCII name',
+    () async {
+      imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan:7890'};
 
-    for (final url in [
-      'http://bücher.example/a',
-      'http://xn--bcher-kva.example/a',
-    ]) {
-      expect(isPublicImageUri(Uri.parse(url)), isTrue, reason: url);
-    }
-  });
+      expect(await isSent('http://bücher.example/a'), isTrue);
+      expect(await isSent('http://xn--bcher-kva.example/a'), isTrue);
+    },
+  );
+
+  // The native client does not use the environment next to an app proxy.
+  for (final type in ProxyType.values) {
+    test('a ${type.name} app proxy replaces the environment proxies', () async {
+      imageEnvironment = {'HTTPS_PROXY': 'http://xn--bcher-kva.lan:7890'};
+      expect(
+        await isSent('http://例え.example/a', proxy: appProxy(type)),
+        isTrue,
+      );
+
+      imageEnvironment = {'HTTPS_PROXY': 'http://env.proxy:7890'};
+      expect(await isSent('http://env.proxy/a', proxy: appProxy(type)), isTrue);
+      expect(
+        await isSent('http://app.proxy/a', proxy: appProxy(type)),
+        isFalse,
+      );
+      Future<List<InternetAddress>> private(String _) async => [
+        InternetAddress('192.168.1.2'),
+      ];
+      expect(
+        await resolveImageHost(
+          'env.proxy',
+          proxyHost: 'app.proxy',
+          lookup: private,
+        ),
+        isEmpty,
+      );
+      expect(
+        await resolveImageHost(
+          'app.proxy',
+          proxyHost: 'App.Proxy.',
+          lookup: private,
+        ),
+        ['192.168.1.2'],
+      );
+    });
+  }
 
   test('the resolver lets an environment proxy through', () async {
-    final environment = imageEnvironment;
     imageEnvironment = {'HTTP_PROXY': 'http://proxy.lan.:7890'};
-    addTearDown(() => imageEnvironment = environment);
 
     // The native client asks for the name as the environment spells it.
     for (final host in ['proxy.lan.', 'proxy.lan']) {
@@ -343,6 +407,26 @@ void main() {
     expect(referers, [null, 'https://images.example/a', null]);
   });
 
+  // The native client reads these as relative to the previous URL.
+  for (final (location, path) in [
+    ('http:next.png', '/gallery/next.png'),
+    ('HTTP:next.png', '/gallery/next.png'),
+    ('http:/root.png', '/root.png'),
+  ]) {
+    test('the redirect to $location stays on the server', () async {
+      final server = await _Server.bind(redirectTo: location, once: true);
+
+      final response = await sendImageRequest(
+        Uri.parse(server.url('/gallery/a.png')),
+        isAllowed: (uri) => uri.host == '127.0.0.1' && uri.port == server.port,
+        client: client(),
+      );
+      await response.stream.drain<void>();
+
+      expect(server.paths, ['/gallery/a.png', path]);
+    });
+  }
+
   test('a redirect loop ends', () async {
     final server = await _Server.bind(redirectTo: '/again');
 
@@ -375,14 +459,14 @@ final throwsBlocked = throwsA(
 class _Server {
   _Server(this._server);
 
-  static Future<_Server> bind({String? redirectTo}) async {
+  static Future<_Server> bind({String? redirectTo, bool once = false}) async {
     final server = _Server(
       await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
     );
     final subscription = server._server.listen((request) async {
       server.paths.add(request.uri.path);
       server.referers.add(request.headers.value(HttpHeaders.refererHeader));
-      if (redirectTo != null) {
+      if (redirectTo != null && (!once || server.paths.length == 1)) {
         request.response
           ..statusCode = HttpStatus.found
           ..headers.set(HttpHeaders.locationHeader, redirectTo);

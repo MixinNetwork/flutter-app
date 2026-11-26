@@ -47,14 +47,13 @@ Future<http.StreamedResponse> sendImageRequest(
   // Unit tests cannot load the native client.
   @visibleForTesting http.Client? client,
 }) async {
-  final appProxy = proxyConfig == null
-      ? null
-      : _normalizeHost(proxyConfig.host);
+  final proxyHosts = _proxyHosts(proxyConfig?.host);
   var target = uri;
   String? referer;
   for (var redirects = 0; redirects <= _kMaxRedirects; redirects++) {
+    // The resolver lets proxy hosts through, so a URL must not name one.
     if (!isAllowed(target) ||
-        _mayName(_normalizeHost(target.host), {?appProxy})) {
+        _mayName(_normalizeHost(target.host), proxyHosts)) {
       throw StateError('NetworkImage address is not allowed');
     }
     final response = await (client ?? await _imageClient(proxyConfig)).send(
@@ -68,7 +67,13 @@ Future<http.StreamedResponse> sendImageRequest(
       return response;
     }
     await response.stream.listen((_) {}).cancel();
-    final next = target.resolve(location);
+    // For the native client, "http:next.png" from an http URL is relative.
+    final next = target.resolve(
+      location.replaceFirst(
+        RegExp('^${target.scheme}:', caseSensitive: false),
+        '',
+      ),
+    );
     // As the native client does when it follows redirects itself.
     referer = target.isScheme('https') && next.isScheme('http')
         ? null
@@ -103,8 +108,6 @@ bool isPublicImageUri(Uri uri) {
     return false;
   }
   if (!_hostName.hasMatch(asciiHost)) return false;
-  // The resolver lets proxy hosts through, so a URL must not name one.
-  if (_mayName(host, _environmentProxyHosts())) return false;
   final lastLabel = asciiHost.split('.').last;
   // The native client reads a name that ends in a number, such as "127.1", as
   // an IPv4 address and connects without a DNS lookup.
@@ -130,13 +133,18 @@ Future<List<String>> resolveImageHost(
   // Proxies are resolved here too. An image URL cannot name them.
   final isProxy =
       host == 'localhost' ||
-      host == proxyHost?.toLowerCase() ||
-      _environmentProxyHosts().contains(_normalizeHost(host));
+      _proxyHosts(proxyHost).contains(_normalizeHost(host));
   return [
     for (final address in addresses)
       if (isProxy || _isPublicAddress(address)) address.address,
   ];
 }
+
+/// The proxies that the client connects to. An app proxy replaces the ones of
+/// the environment.
+Set<String> _proxyHosts(String? appProxyHost) => appProxyHost != null
+    ? {_normalizeHost(appProxyHost)}
+    : _environmentProxyHosts();
 
 Set<String> _environmentProxyHosts() => {
   for (final MapEntry(:key, :value) in imageEnvironment.entries)
@@ -184,8 +192,9 @@ bool _isPublicAddress(InternetAddress address) {
     return _isPublicIPv4(bytes.sublist(12));
   }
   if (startsWith(const [0x20, 0x02])) return _isPublicIPv4(bytes.sublist(2, 6));
-  // Documentation, 2001:db8::/32, and benchmarking, 2001:2::/48.
+  // Documentation, 2001:db8::/32 and 3fff::/20, and benchmarking, 2001:2::/48.
   if (startsWith(const [0x20, 0x01, 0x0d, 0xb8]) ||
+      (startsWith(const [0x3f, 0xff]) && bytes[2] & 0xf0 == 0) ||
       startsWith(const [0x20, 0x01, 0, 0x02, 0, 0])) {
     return false;
   }
