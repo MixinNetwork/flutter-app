@@ -529,26 +529,49 @@ void main() {
   });
 
   // Another scheme or host is another origin, also with the same port.
-  for (final next in [
-    'https://images.example:8443/b',
-    'http://other.example:8443/b',
-    'http://images.example:8444/b',
+  for (final (location, expected) in [
+    ('https://images.example:8443/b', 'https://images.example:8443/b'),
+    ('http://other.example:8443/b', 'http://other.example:8443/b'),
+    ('http://images.example:8444/b', 'http://images.example:8444/b'),
+    ('http://other:secret@other.example:8443/b', 'http://other.example:8443/b'),
   ]) {
-    test('credentials do not follow a redirect to $next', () async {
+    test('credentials do not follow a redirect to $location', () async {
       final sent = <Uri>[];
       await sendImageRequest(
         Uri.parse('http://user:pw@images.example:8443/a'),
         client: MockClient((request) async {
           sent.add(request.url);
           return sent.length == 1
-              ? http.Response('', 302, headers: {'location': next})
+              ? http.Response('', 302, headers: {'location': location})
               : http.Response('ok', 200);
         }),
       );
 
-      expect(sent.last, Uri.parse(next));
+      expect(sent.last, Uri.parse(expected));
     });
   }
+
+  test(
+    'same-origin IPv6 redirect with another spelling keeps credentials',
+    () async {
+      final sent = <Uri>[];
+      await sendImageRequest(
+        Uri.parse('https://user:pw@[2606:4700:0:0:0:0:0:1]/a'),
+        client: MockClient((request) async {
+          sent.add(request.url);
+          return sent.length == 1
+              ? http.Response(
+                  '',
+                  302,
+                  headers: {'location': 'https://[2606:4700::1]/b'},
+                )
+              : http.Response('ok', 200);
+        }),
+      );
+
+      expect(sent.last, Uri.parse('https://user:pw@[2606:4700::1]/b'));
+    },
+  );
 
   test('a redirect loop ends', () async {
     final server = await _Server.bind(redirectTo: '/again');

@@ -77,12 +77,11 @@ Future<http.StreamedResponse> sendImageRequest(
         '',
       ),
     );
-    // As for the native client, the credentials of the URL stay on its origin.
-    if (next.scheme == target.scheme &&
-        next.host == target.host &&
-        next.port == target.port) {
-      next = next.replace(userInfo: target.userInfo);
-    }
+    // As for the native client, the credentials of the URL stay on its origin,
+    // and credentials from a Location header are never sent.
+    next = next.replace(
+      userInfo: _sameOrigin(target, next) ? target.userInfo : '',
+    );
     // As the native client does when it follows redirects itself.
     referer = target.isScheme('https') && next.isScheme('http')
         ? null
@@ -176,6 +175,16 @@ bool _isIdn(String host) =>
     host.contains('%') ||
     host.codeUnits.any((unit) => unit > 0x7f) ||
     host.split('.').any((label) => label.startsWith('xn--'));
+
+bool _sameOrigin(Uri a, Uri b) {
+  if (a.scheme != b.scheme || a.port != b.port) return false;
+  if (a.host == b.host) return true;
+  final aAddress = InternetAddress.tryParse(a.host);
+  final bAddress = InternetAddress.tryParse(b.host);
+  return aAddress != null &&
+      bAddress != null &&
+      listEquals(aAddress.rawAddress, bAddress.rawAddress);
+}
 
 String _normalizeHost(String host) {
   final lower = host.toLowerCase();
