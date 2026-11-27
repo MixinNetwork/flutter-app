@@ -88,6 +88,21 @@ void main() {
     expect(find.byType(EditableText), findsOneWidget);
     expect(error.hitTestable(), findsNothing);
 
+    // A check started before an unlock and relock must not unlock the new lock.
+    await tester.enterText(find.byType(EditableText), '739142');
+    await tester.pump();
+    EventBus.instance.fire(LockEvent.unlock);
+    await tester.runAsync(pumpEventQueue);
+    await tester.pump();
+    expect(appLocked.value, isFalse);
+    await lockAgain();
+    expect(appLocked.value, isTrue);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(seconds: 3)),
+    );
+    await tester.pumpAndSettle();
+    expect(appLocked.value, isTrue);
+
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(() async {
       await security.delete();

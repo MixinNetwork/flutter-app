@@ -146,4 +146,88 @@ void main() {
     await expectLater(security.setPasscode('123'), throwsArgumentError);
     expect(security.hasPasscode, isFalse);
   });
+
+  test(
+    'clearing the passcode while a write is in flight keeps it off',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      final clearing = security.setPasscode(null);
+      await Future.wait([setting, clearing]);
+
+      expect(security.hasPasscode, isFalse);
+      expect(await security.verifyPasscode(_code), isFalse);
+    },
+  );
+
+  test(
+    'deleting the account while a write is in flight does not throw',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      await security.delete();
+      await setting;
+
+      expect(security.hasPasscode, isFalse);
+    },
+  );
+
+  test(
+    'a queued clear from a deleted account does not clear the next account',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      final clearing = security.setPasscode(null);
+      final deleting = security.delete();
+      final initNext = security.init('2000');
+      await Future.wait([deleting, initNext]);
+      await security.setPasscode('654321');
+      await Future.wait([setting, clearing]);
+
+      expect(security.box.path, contains('2000'));
+      expect(security.hasPasscode, isTrue);
+      expect(await security.verifyPasscode('654321'), isTrue);
+    },
+  );
+
+  test(
+    'a queued init from a deleted account does not reopen its box',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      final queuedInit = security.init(_identityNumber);
+      await security.delete();
+      await Future.wait([setting, queuedInit]);
+      await security.init('2000');
+
+      expect(security.box.path, contains('2000'));
+      expect(security.hasPasscode, isFalse);
+    },
+  );
+
+  test('setting a passcode while init is in flight waits for init', () async {
+    final initializing = security.init(_identityNumber);
+    final setting = security.setPasscode(_code);
+    await Future.wait([initializing, setting]);
+
+    expect(security.hasPasscode, isTrue);
+    expect(await security.verifyPasscode(_code), isTrue);
+  });
+
+  test(
+    'passcode changes queued while init is in flight keep call order',
+    () async {
+      final initializing = security.init(_identityNumber);
+      final setting = security.setPasscode(_code);
+      final clearing = security.setPasscode(null);
+      await Future.wait([initializing, setting, clearing]);
+
+      expect(security.hasPasscode, isFalse);
+      expect(await security.verifyPasscode(_code), isFalse);
+    },
+  );
 }
