@@ -71,6 +71,12 @@ class _AuthGuard extends HookConsumerWidget {
     final hasError = useState(false);
     final lock = useState(SecurityKeyValue.instance.hasPasscode);
 
+    // A check that ends after the unlock must not mark the next lock screen.
+    useEffect(() {
+      hasError.value = false;
+      return null;
+    }, [lock.value]);
+
     useEffect(() {
       appLocked.value = lock.value;
       return null;
@@ -223,11 +229,14 @@ class _AuthGuard extends HookConsumerWidget {
                               ),
                             ),
                             autoFocus: true,
-                            onCompleted: (value) {
+                            onCompleted: (value) async {
                               // Clearing inside the callback would leave the
                               // field thinking it is still complete.
                               scheduleMicrotask(pinController.clear);
-                              if (SecurityKeyValue.instance.passcode == value) {
+                              final matches = await SecurityKeyValue.instance
+                                  .verifyPasscode(value);
+                              if (!context.mounted) return;
+                              if (matches) {
                                 lock.value = false;
                               } else {
                                 hasError.value = true;
