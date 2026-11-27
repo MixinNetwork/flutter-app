@@ -183,8 +183,9 @@ void main() {
       final clearing = security.setPasscode(null);
       final deleting = security.delete();
       final initNext = security.init('2000');
-      final setNext = security.setPasscode('654321');
-      await Future.wait([setting, clearing, deleting, initNext, setNext]);
+      await Future.wait([deleting, initNext]);
+      await security.setPasscode('654321');
+      await Future.wait([setting, clearing]);
 
       expect(security.box.path, contains('2000'));
       expect(security.hasPasscode, isTrue);

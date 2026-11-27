@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:hive/hive.dart';
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
@@ -28,63 +29,42 @@ class SecurityKeyValue extends HiveKeyValue {
   // OWASP password storage guidance for PBKDF2-HMAC-SHA256.
   static const _iterations = 600000;
 
-  final _writeLock = Lock();
-  var _generation = 0;
+  final _lifecycleLock = Lock();
+  _SecuritySession? _session;
 
   @override
-  Future<void> init(String identityNumber) {
-    final generation = _generation;
-    return _writeLock.synchronized(() async {
-      if (generation != _generation) return;
-      await super.init(identityNumber);
-      final currentBox = box;
-      final plain = currentBox.get(_plainPasscode);
-      if (plain is String) await _setPasscode(plain, generation);
-      if (generation != _generation || !currentBox.isOpen) return;
-      // Hive appends to its file, so a deleted value stays until it compacts.
-      // Every start does this, also after a run that stopped before it did.
-      await currentBox.compact();
-    });
-  }
+  Future<void> init(String identityNumber) =>
+      _lifecycleLock.synchronized(() async {
+        await super.init(identityNumber);
+        final session = _session ??= _SecuritySession(box);
+        final plain = session.box.get(_plainPasscode);
+        if (plain is String) await session.setPasscode(plain);
+        // Hive appends to its file, so a deleted value stays until it compacts.
+        // Every start does this, also after a run that stopped before it did.
+        await session.compact();
+      });
 
   @override
-  Future<void> delete() {
-    _generation++;
-    return _writeLock.synchronized(() => super.delete());
-  }
+  Future<void> delete() => _lifecycleLock.synchronized(() async {
+    final session = _session;
+    _session = null;
+    await session?.close();
+    await super.delete();
+  });
 
   Future<void> setPasscode(String? value) async {
     if (value != null && value.length != 6) {
       throw ArgumentError('Passcode must be 6 digits');
     }
-    final generation = _generation;
-    return _writeLock.synchronized(() => _setPasscode(value, generation));
-  }
-
-  Future<void> _setPasscode(String? value, int generation) async {
-    if (generation != _generation || !box.isOpen) return;
-    final currentBox = box;
-    if (value == null) {
-      await currentBox.deleteAll([_passcodeVerifier, _plainPasscode]);
-      if (generation != _generation || !currentBox.isOpen) return;
-      lockDuration = null;
-      biometric = false;
-    } else {
-      final salt = Uint8List.fromList(generateRandomKey(16));
-      final hash = await pbkdf2Sha256(value, salt, _iterations);
-      if (generation != _generation || !currentBox.isOpen) return;
-      await currentBox.put(
-        _passcodeVerifier,
-        '${base64Encode(salt)}:${base64Encode(hash)}',
-      );
-      if (generation != _generation || !currentBox.isOpen) return;
-      await currentBox.delete(_plainPasscode);
-    }
+    final session = _session;
+    if (session == null) return;
+    await session.setPasscode(value);
   }
 
   Future<bool> verifyPasscode(String value) async {
-    if (!box.isOpen) return false;
-    final verifier = box.get(_passcodeVerifier) as String?;
+    final session = _session;
+    if (session == null || !session.box.isOpen) return false;
+    final verifier = session.box.get(_passcodeVerifier) as String?;
     if (verifier == null) return false;
     final [salt, hash] = verifier.split(':');
     return listEquals(
@@ -106,9 +86,13 @@ class SecurityKeyValue extends HiveKeyValue {
 
   // Also true while a plain passcode waits for its replacement.
   // Signing out closes the box while the lock screen guard is mounted.
-  bool get hasPasscode =>
-      box.isOpen &&
-      (box.containsKey(_passcodeVerifier) || box.containsKey(_plainPasscode));
+  bool get hasPasscode {
+    final session = _session;
+    return session != null &&
+        session.box.isOpen &&
+        (session.box.containsKey(_passcodeVerifier) ||
+            session.box.containsKey(_plainPasscode));
+  }
 
   // must be return non-null value
   Duration? get lockDuration {
@@ -153,4 +137,52 @@ class SecurityKeyValue extends HiveKeyValue {
       return Stream.value(false);
     }
   }
+}
+
+class _SecuritySession {
+  _SecuritySession(this.box);
+
+  final Box<dynamic> box;
+  final _writeLock = Lock();
+  var _closed = false;
+
+  bool get _isActive => !_closed && box.isOpen;
+
+  Future<void> close() {
+    _closed = true;
+    return _writeLock.synchronized(() {});
+  }
+
+  Future<void> setPasscode(String? value) => _writeLock.synchronized(() async {
+    if (!_isActive) return;
+    if (value == null) {
+      await box.deleteAll([
+        SecurityKeyValue._passcodeVerifier,
+        SecurityKeyValue._plainPasscode,
+      ]);
+      if (!_isActive) return;
+      await box.put(SecurityKeyValue._lockDuration, null);
+      if (!_isActive) return;
+      await box.put(SecurityKeyValue._biometric, false);
+    } else {
+      final salt = Uint8List.fromList(generateRandomKey(16));
+      final hash = await pbkdf2Sha256(
+        value,
+        salt,
+        SecurityKeyValue._iterations,
+      );
+      if (!_isActive) return;
+      await box.put(
+        SecurityKeyValue._passcodeVerifier,
+        '${base64Encode(salt)}:${base64Encode(hash)}',
+      );
+      if (!_isActive) return;
+      await box.delete(SecurityKeyValue._plainPasscode);
+    }
+  });
+
+  Future<void> compact() => _writeLock.synchronized(() async {
+    if (!_isActive) return;
+    await box.compact();
+  });
 }
