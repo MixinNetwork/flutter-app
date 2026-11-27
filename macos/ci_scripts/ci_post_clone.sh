@@ -21,11 +21,17 @@ flutter --version
 flutter precache --macos
 flutter pub get
 
+set -- --config-only --release
 if [ -n "${MIXIN_GIPHY_KEY:-}" ]; then
-  flutter build macos --config-only --release --dart-define="MIXIN_GIPHY_KEY=$MIXIN_GIPHY_KEY"
-else
-  flutter build macos --config-only --release
+  set -- "$@" --dart-define="MIXIN_GIPHY_KEY=$MIXIN_GIPHY_KEY"
 fi
+if [ -n "${MIXIN_RECAPTCHA_KEY:-}" ]; then
+  set -- "$@" --dart-define="MIXIN_RECAPTCHA_KEY=$MIXIN_RECAPTCHA_KEY"
+fi
+if [ -n "${MIXIN_HCAPTCHA_KEY:-}" ]; then
+  set -- "$@" --dart-define="MIXIN_HCAPTCHA_KEY=$MIXIN_HCAPTCHA_KEY"
+fi
+flutter build macos "$@"
 
 cd macos
 pod install --repo-update

@@ -21,11 +21,17 @@ flutter --version
 flutter precache --ios
 flutter pub get
 
+set -- --config-only --release --no-codesign
 if [ -n "${MIXIN_GIPHY_KEY:-}" ]; then
-  flutter build ios --config-only --release --dart-define="MIXIN_GIPHY_KEY=$MIXIN_GIPHY_KEY"
-else
-  flutter build ios --config-only --release
+  set -- "$@" --dart-define="MIXIN_GIPHY_KEY=$MIXIN_GIPHY_KEY"
 fi
+if [ -n "${MIXIN_RECAPTCHA_KEY:-}" ]; then
+  set -- "$@" --dart-define="MIXIN_RECAPTCHA_KEY=$MIXIN_RECAPTCHA_KEY"
+fi
+if [ -n "${MIXIN_HCAPTCHA_KEY:-}" ]; then
+  set -- "$@" --dart-define="MIXIN_HCAPTCHA_KEY=$MIXIN_HCAPTCHA_KEY"
+fi
+flutter build ios "$@"
 
 cd ios
 pod install --repo-update

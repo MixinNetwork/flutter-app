@@ -125,9 +125,16 @@ jobs:
 
       - name: Build APP
         run: |
-          flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN
+          set -- --dart-define="SENTRY_DSN=$SENTRY_DSN"
+          if [ -n "${MIXIN_GIPHY_KEY:-}" ]; then set -- "$@" --dart-define="MIXIN_GIPHY_KEY=$MIXIN_GIPHY_KEY"; fi
+          if [ -n "${MIXIN_RECAPTCHA_KEY:-}" ]; then set -- "$@" --dart-define="MIXIN_RECAPTCHA_KEY=$MIXIN_RECAPTCHA_KEY"; fi
+          if [ -n "${MIXIN_HCAPTCHA_KEY:-}" ]; then set -- "$@" --dart-define="MIXIN_HCAPTCHA_KEY=$MIXIN_HCAPTCHA_KEY"; fi
+          flutter build linux "$@"
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          MIXIN_GIPHY_KEY: ${{ secrets.MIXIN_GIPHY_KEY }}
+          MIXIN_RECAPTCHA_KEY: ${{ secrets.MIXIN_RECAPTCHA_KEY }}
+          MIXIN_HCAPTCHA_KEY: ${{ secrets.MIXIN_HCAPTCHA_KEY }}
 
       - name: Compress Flutter build
         run: tar -C build/linux/${{ matrix.flutter_arch }}/release/bundle -cvf mixin_desktop_linux_${{ matrix.arch }}_portable.tar.gz .
@@ -335,10 +342,18 @@ jobs:
       - uses: ilammy/setup-nasm@72793074d3c8cdda771dba85f6deafe00623038b # v1
       - name: Build APP
         id: build-app
+        env:
+          MIXIN_GIPHY_KEY: ${{ secrets.MIXIN_GIPHY_KEY }}
+          MIXIN_RECAPTCHA_KEY: ${{ secrets.MIXIN_RECAPTCHA_KEY }}
+          MIXIN_HCAPTCHA_KEY: ${{ secrets.MIXIN_HCAPTCHA_KEY }}
         run: |
           $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
-          flutter build windows
+          $dart_defines = @()
+          if ($env:MIXIN_GIPHY_KEY) { $dart_defines += "--dart-define=MIXIN_GIPHY_KEY=$($env:MIXIN_GIPHY_KEY)" }
+          if ($env:MIXIN_RECAPTCHA_KEY) { $dart_defines += "--dart-define=MIXIN_RECAPTCHA_KEY=$($env:MIXIN_RECAPTCHA_KEY)" }
+          if ($env:MIXIN_HCAPTCHA_KEY) { $dart_defines += "--dart-define=MIXIN_HCAPTCHA_KEY=$($env:MIXIN_HCAPTCHA_KEY)" }
+          flutter build windows @dart_defines
           echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
 
       - name: Build Installer
@@ -421,10 +436,18 @@ jobs:
 
       - name: Build APP
         id: build-app
+        env:
+          MIXIN_GIPHY_KEY: ${{ secrets.MIXIN_GIPHY_KEY }}
+          MIXIN_RECAPTCHA_KEY: ${{ secrets.MIXIN_RECAPTCHA_KEY }}
+          MIXIN_HCAPTCHA_KEY: ${{ secrets.MIXIN_HCAPTCHA_KEY }}
         run: |
           version_str=$(sed -n 's/^version: //p' pubspec.yaml)
           version=${version_str%+*}
-          flutter build macos --release
+          set -- --release
+          if [ -n "${MIXIN_GIPHY_KEY:-}" ]; then set -- "$@" --dart-define="MIXIN_GIPHY_KEY=$MIXIN_GIPHY_KEY"; fi
+          if [ -n "${MIXIN_RECAPTCHA_KEY:-}" ]; then set -- "$@" --dart-define="MIXIN_RECAPTCHA_KEY=$MIXIN_RECAPTCHA_KEY"; fi
+          if [ -n "${MIXIN_HCAPTCHA_KEY:-}" ]; then set -- "$@" --dart-define="MIXIN_HCAPTCHA_KEY=$MIXIN_HCAPTCHA_KEY"; fi
+          flutter build macos "$@"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Import signing certificates
