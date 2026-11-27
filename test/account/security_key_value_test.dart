@@ -217,4 +217,17 @@ void main() {
     expect(security.hasPasscode, isTrue);
     expect(await security.verifyPasscode(_code), isTrue);
   });
+
+  test(
+    'passcode changes queued while init is in flight keep call order',
+    () async {
+      final initializing = security.init(_identityNumber);
+      final setting = security.setPasscode(_code);
+      final clearing = security.setPasscode(null);
+      await Future.wait([initializing, setting, clearing]);
+
+      expect(security.hasPasscode, isFalse);
+      expect(await security.verifyPasscode(_code), isFalse);
+    },
+  );
 }
