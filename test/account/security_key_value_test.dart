@@ -173,4 +173,38 @@ void main() {
       expect(security.hasPasscode, isFalse);
     },
   );
+
+  test(
+    'a queued clear from a deleted account does not clear the next account',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      final clearing = security.setPasscode(null);
+      final deleting = security.delete();
+      final initNext = security.init('2000');
+      final setNext = security.setPasscode('654321');
+      await Future.wait([setting, clearing, deleting, initNext, setNext]);
+
+      expect(security.box.path, contains('2000'));
+      expect(security.hasPasscode, isTrue);
+      expect(await security.verifyPasscode('654321'), isTrue);
+    },
+  );
+
+  test(
+    'a queued init from a deleted account does not reopen its box',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      final queuedInit = security.init(_identityNumber);
+      await security.delete();
+      await Future.wait([setting, queuedInit]);
+      await security.init('2000');
+
+      expect(security.box.path, contains('2000'));
+      expect(security.hasPasscode, isFalse);
+    },
+  );
 }

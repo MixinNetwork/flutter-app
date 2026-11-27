@@ -29,43 +29,55 @@ class SecurityKeyValue extends HiveKeyValue {
   static const _iterations = 600000;
 
   final _writeLock = Lock();
+  var _generation = 0;
 
   @override
-  Future<void> init(String identityNumber) => _writeLock.synchronized(() async {
-    await super.init(identityNumber);
-    final currentBox = box;
-    final plain = currentBox.get(_plainPasscode);
-    if (plain is String) await _setPasscode(plain);
-    if (!currentBox.isOpen || !identical(currentBox, box)) return;
-    // Hive appends to its file, so a deleted value stays until it compacts.
-    // Every start does this, also after a run that stopped before it did.
-    await currentBox.compact();
-  });
+  Future<void> init(String identityNumber) {
+    final generation = _generation;
+    return _writeLock.synchronized(() async {
+      if (generation != _generation) return;
+      await super.init(identityNumber);
+      final currentBox = box;
+      final plain = currentBox.get(_plainPasscode);
+      if (plain is String) await _setPasscode(plain, generation);
+      if (generation != _generation || !currentBox.isOpen) return;
+      // Hive appends to its file, so a deleted value stays until it compacts.
+      // Every start does this, also after a run that stopped before it did.
+      await currentBox.compact();
+    });
+  }
+
+  @override
+  Future<void> delete() {
+    _generation++;
+    return _writeLock.synchronized(() => super.delete());
+  }
 
   Future<void> setPasscode(String? value) async {
     if (value != null && value.length != 6) {
       throw ArgumentError('Passcode must be 6 digits');
     }
-    return _writeLock.synchronized(() => _setPasscode(value));
+    final generation = _generation;
+    return _writeLock.synchronized(() => _setPasscode(value, generation));
   }
 
-  Future<void> _setPasscode(String? value) async {
+  Future<void> _setPasscode(String? value, int generation) async {
+    if (generation != _generation || !box.isOpen) return;
     final currentBox = box;
-    if (!currentBox.isOpen) return;
     if (value == null) {
       await currentBox.deleteAll([_passcodeVerifier, _plainPasscode]);
-      if (!currentBox.isOpen || !identical(currentBox, box)) return;
+      if (generation != _generation || !currentBox.isOpen) return;
       lockDuration = null;
       biometric = false;
     } else {
       final salt = Uint8List.fromList(generateRandomKey(16));
       final hash = await pbkdf2Sha256(value, salt, _iterations);
-      if (!currentBox.isOpen || !identical(currentBox, box)) return;
+      if (generation != _generation || !currentBox.isOpen) return;
       await currentBox.put(
         _passcodeVerifier,
         '${base64Encode(salt)}:${base64Encode(hash)}',
       );
-      if (!currentBox.isOpen || !identical(currentBox, box)) return;
+      if (generation != _generation || !currentBox.isOpen) return;
       await currentBox.delete(_plainPasscode);
     }
   }
