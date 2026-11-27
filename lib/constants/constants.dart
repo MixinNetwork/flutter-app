@@ -72,7 +72,7 @@ const mixinDisappearingMessageHelpUrl =
 
 const giphyApiKey = String.fromEnvironment('MIXIN_GIPHY_KEY');
 
-const kRecaptchaKey = '';
-const hCaptchaKey = '';
+const kRecaptchaKey = String.fromEnvironment('MIXIN_RECAPTCHA_KEY');
+const hCaptchaKey = String.fromEnvironment('MIXIN_HCAPTCHA_KEY');
 
 const kDbFileName = 'mixin';
