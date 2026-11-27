@@ -208,4 +208,13 @@ void main() {
       expect(security.hasPasscode, isFalse);
     },
   );
+
+  test('setting a passcode while init is in flight waits for init', () async {
+    final initializing = security.init(_identityNumber);
+    final setting = security.setPasscode(_code);
+    await Future.wait([initializing, setting]);
+
+    expect(security.hasPasscode, isTrue);
+    expect(await security.verifyPasscode(_code), isTrue);
+  });
 }

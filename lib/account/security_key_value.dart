@@ -56,7 +56,7 @@ class SecurityKeyValue extends HiveKeyValue {
     if (value != null && value.length != 6) {
       throw ArgumentError('Passcode must be 6 digits');
     }
-    final session = _session;
+    final session = await _lifecycleLock.synchronized(() => _session);
     if (session == null) return;
     await session.setPasscode(value);
   }
