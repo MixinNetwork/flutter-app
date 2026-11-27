@@ -48,12 +48,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generator ENV
-        run: |
-          tee .env &>/dev/null << EOF
-          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-          EOF
-
       - name: Verify formatting
         run: dart format --set-exit-if-changed .
 
