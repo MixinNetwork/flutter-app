@@ -89,7 +89,11 @@ Future<bool> openUri(
     if (conversationId != null && conversationId.trim().isNotEmpty) {
       if (startText?.trim().isNotEmpty == true) {
         try {
-          final conversation = await context.database.conversationDao
+          // Read before the first await: a tapped link's context goes away
+          // when the other chat opens.
+          final accountServer = context.accountServer;
+          final database = context.database;
+          final conversation = await database.conversationDao
               .conversationItem(conversationId)
               .getSingleOrNull();
 
@@ -114,9 +118,19 @@ Future<bool> openUri(
             if (event != DialogEvent.positive) return false;
           }
 
-          await context.accountServer.sendTextMessage(
+          // From the app stored at the send: an open chat keeps the app it was
+          // opened with, and a dialog can stay open. A bot whose app is not
+          // stored yet gets plain text.
+          final encryptCategory = conversation.isGroupConversation
+              ? EncryptCategory.signal
+              : await database.conversationDao.getEncryptCategory(
+                  conversation.ownerId!,
+                  conversation.isBotConversation,
+                );
+
+          await accountServer.sendTextMessage(
             startText ?? '',
-            EncryptCategory.plain,
+            encryptCategory,
             conversationId: conversationId,
           );
 
