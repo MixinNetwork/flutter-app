@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart';
 
 import 'file.dart';
 import 'load_balancer_utils.dart';
 import 'proxy.dart';
+import 'remote_image_request.dart';
 
 const _kMaxDimension = 1920;
 const _kQuality = 85;
@@ -96,13 +98,19 @@ Future<(Uint8List, ImageType, int, int)?> compressFileWithIsolate(File file) =>
       return compressImage(data);
     }, file.path);
 
+typedef ImageSender = Future<http.StreamedResponse> Function(
+  Uri uri, {
+  ProxyConfig? proxyConfig,
+});
+
 Future<File?> downloadImageFile(
   String url, {
   ProxyConfig? proxyConfig,
   int maxBytes = maxDownloadedImageBytes,
+  @visibleForTesting ImageSender send = sendImageRequest,
 }) async {
   final resolved = Uri.base.resolve(url);
-  final response = await _sendImageRequest(resolved, proxyConfig);
+  final response = await send(resolved, proxyConfig: proxyConfig);
   if (response.statusCode != HttpStatus.ok) return null;
 
   final file = File(await generateTempFilePath(TempFileType.networkImage));
@@ -134,9 +142,10 @@ Future<Uint8List> downloadImageBytes(
   String url, {
   ProxyConfig? proxyConfig,
   int maxBytes = maxDownloadedImageBytes,
+  @visibleForTesting ImageSender send = sendImageRequest,
 }) async {
   final resolved = Uri.base.resolve(url);
-  final response = await _sendImageRequest(resolved, proxyConfig);
+  final response = await send(resolved, proxyConfig: proxyConfig);
   if (response.statusCode != HttpStatus.ok) {
     throw HttpException(
       'NetworkImage HTTP ${response.statusCode}',
@@ -155,14 +164,6 @@ Future<Uint8List> downloadImageBytes(
     throw StateError('NetworkImage is an empty file: $resolved');
   }
   return builder.takeBytes();
-}
-
-Future<http.StreamedResponse> _sendImageRequest(
-  Uri resolved,
-  ProxyConfig? proxyConfig,
-) async {
-  final client = await createRHttpClient(proxyConfig: proxyConfig);
-  return client.send(http.Request('GET', resolved));
 }
 
 Future<int> _readImageStream(
