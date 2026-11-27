@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:mixin_logger/mixin_logger.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../utils/crypto/pbkdf2.dart';
 import '../utils/crypto_util.dart';
@@ -27,36 +28,50 @@ class SecurityKeyValue extends HiveKeyValue {
   // OWASP password storage guidance for PBKDF2-HMAC-SHA256.
   static const _iterations = 600000;
 
+  final _writeLock = Lock();
+
   @override
-  Future<void> init(String identityNumber) async {
+  Future<void> init(String identityNumber) => _writeLock.synchronized(() async {
     await super.init(identityNumber);
-    final plain = box.get(_plainPasscode);
-    if (plain is String) await setPasscode(plain);
+    final currentBox = box;
+    final plain = currentBox.get(_plainPasscode);
+    if (plain is String) await _setPasscode(plain);
+    if (!currentBox.isOpen || !identical(currentBox, box)) return;
     // Hive appends to its file, so a deleted value stays until it compacts.
     // Every start does this, also after a run that stopped before it did.
-    await box.compact();
-  }
+    await currentBox.compact();
+  });
 
   Future<void> setPasscode(String? value) async {
+    if (value != null && value.length != 6) {
+      throw ArgumentError('Passcode must be 6 digits');
+    }
+    return _writeLock.synchronized(() => _setPasscode(value));
+  }
+
+  Future<void> _setPasscode(String? value) async {
+    final currentBox = box;
+    if (!currentBox.isOpen) return;
     if (value == null) {
-      await box.deleteAll([_passcodeVerifier, _plainPasscode]);
+      await currentBox.deleteAll([_passcodeVerifier, _plainPasscode]);
+      if (!currentBox.isOpen || !identical(currentBox, box)) return;
       lockDuration = null;
       biometric = false;
     } else {
-      if (value.length != 6) {
-        throw ArgumentError('Passcode must be 6 digits');
-      }
       final salt = Uint8List.fromList(generateRandomKey(16));
       final hash = await pbkdf2Sha256(value, salt, _iterations);
-      await box.put(
+      if (!currentBox.isOpen || !identical(currentBox, box)) return;
+      await currentBox.put(
         _passcodeVerifier,
         '${base64Encode(salt)}:${base64Encode(hash)}',
       );
-      await box.delete(_plainPasscode);
+      if (!currentBox.isOpen || !identical(currentBox, box)) return;
+      await currentBox.delete(_plainPasscode);
     }
   }
 
   Future<bool> verifyPasscode(String value) async {
+    if (!box.isOpen) return false;
     final verifier = box.get(_passcodeVerifier) as String?;
     if (verifier == null) return false;
     final [salt, hash] = verifier.split(':');

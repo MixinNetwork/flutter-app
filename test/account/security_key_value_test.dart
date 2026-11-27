@@ -146,4 +146,31 @@ void main() {
     await expectLater(security.setPasscode('123'), throwsArgumentError);
     expect(security.hasPasscode, isFalse);
   });
+
+  test(
+    'clearing the passcode while a write is in flight keeps it off',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      final clearing = security.setPasscode(null);
+      await Future.wait([setting, clearing]);
+
+      expect(security.hasPasscode, isFalse);
+      expect(await security.verifyPasscode(_code), isFalse);
+    },
+  );
+
+  test(
+    'deleting the account while a write is in flight does not throw',
+    () async {
+      await security.init(_identityNumber);
+
+      final setting = security.setPasscode(_code);
+      await security.delete();
+      await setting;
+
+      expect(security.hasPasscode, isFalse);
+    },
+  );
 }

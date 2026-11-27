@@ -70,9 +70,11 @@ class _AuthGuard extends HookConsumerWidget {
 
     final hasError = useState(false);
     final lock = useState(SecurityKeyValue.instance.hasPasscode);
+    final attempt = useRef(0);
 
-    // A check that ends after the unlock must not mark the next lock screen.
+    // A check that ends after an unlock or relock must not affect the new state.
     useEffect(() {
+      attempt.value++;
       hasError.value = false;
       return null;
     }, [lock.value]);
@@ -230,12 +232,17 @@ class _AuthGuard extends HookConsumerWidget {
                             ),
                             autoFocus: true,
                             onCompleted: (value) async {
+                              final currentAttempt = ++attempt.value;
                               // Clearing inside the callback would leave the
                               // field thinking it is still complete.
                               scheduleMicrotask(pinController.clear);
                               final matches = await SecurityKeyValue.instance
                                   .verifyPasscode(value);
-                              if (!context.mounted) return;
+                              if (!context.mounted ||
+                                  !lock.value ||
+                                  attempt.value != currentAttempt) {
+                                return;
+                              }
                               if (matches) {
                                 lock.value = false;
                               } else {
