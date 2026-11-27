@@ -75,6 +75,7 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
   mixinDocumentsDirectory = Directory(params.mixinDocumentDirectory);
   await Rhttp.init();
   BackgroundIsolateBinaryMessenger.ensureInitialized(params.rootIsolateToken);
+  ui.DartPluginRegistrant.ensureInitialized();
   final isolateChannel = IsolateChannel<IsolateEvent>.connectSend(
     params.sendPort,
   );
@@ -87,6 +88,13 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
     eventSink: isolateChannel.sink,
     sendPort: params.sendPort,
   );
+  try {
+    await runner.init(params);
+  } catch (error, stacktrace) {
+    e('message worker isolate init failed: $error, stacktrace: $stacktrace');
+    await runner.dispose();
+    Isolate.exit();
+  }
   isolateChannel.stream.listen((event) {
     assert(event is MainIsolateEvent, 'event is not MainIsolateEvent');
     if (event is! MainIsolateEvent) {
@@ -98,7 +106,6 @@ Future<void> startMessageProcessIsolate(IsolateInitParams params) async {
       e('error: $error, stacktrace: $stacktrace');
     }
   });
-  await runner.init(params);
   runner._start();
   isolateChannel.sink.add(WorkerIsolateEventType.onIsolateReady.toEvent());
 }
@@ -161,6 +168,7 @@ class _MessageProcessRunner {
   late Sender _sender;
   late SignalProtocol signalProtocol;
   late final _upgradeGate = ApiUpgradeGate(onRequired: _onUpgradeRequired);
+  var _databaseReady = false;
   var _blazeReady = false;
   var _jobsReady = false;
 
@@ -183,6 +191,7 @@ class _MessageProcessRunner {
       await connectToDatabase(identityNumber, readCount: 4),
       await FtsDatabase.connect(identityNumber),
     );
+    _databaseReady = true;
 
     client = createClient(
       userId: userId,
@@ -434,16 +443,21 @@ class _MessageProcessRunner {
       case MainIsolateEventType.addSyncInscriptionMessageJob:
         _syncInscriptionMessageJob.add(event.argument as Job);
       case MainIsolateEventType.exit:
-        dispose();
-        Isolate.exit();
+        unawaited(dispose().whenComplete(Isolate.exit));
     }
   }
 
-  void dispose() {
+  Future<void> dispose() async {
     _stopJobs();
-    blaze.dispose();
-    database.dispose();
-    jobSubscribers.forEach((subscription) => subscription.cancel());
+    if (_blazeReady) {
+      blaze.dispose();
+    }
+    if (_databaseReady) {
+      await database.dispose();
+    }
+    for (final subscription in jobSubscribers) {
+      await subscription.cancel();
+    }
     _deviceTransfer?.dispose();
   }
 }

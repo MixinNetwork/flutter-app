@@ -19,11 +19,19 @@ import 'package:flutter_app/utils/hive_key_values.dart';
 import 'package:flutter_app/utils/mixin_api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rhttp/src/rust/api/client.dart' as rust;
 import 'package:rhttp/src/rust/frb_generated.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  PackageInfo.setMockInitialValues(
+    appName: 'Mixin',
+    packageName: 'mixin_desktop',
+    version: '7.1.1',
+    buildNumber: '632',
+    buildSignature: '',
+  );
   RustLib.initMock(api: _UnusedRustApi());
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(

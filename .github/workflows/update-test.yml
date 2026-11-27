@@ -104,14 +104,14 @@ jobs:
 
       - name: Build 6.3.7+602 (the update)
         run: |
-          flutter build windows --build-name 6.3.7 --build-number 602 --dart-define=APP_VERSION=6.3.7 --dart-define=APP_BUILD_NUMBER=602
+          flutter build windows --build-name 6.3.7 --build-number 602
           & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" windows_inno_setup.iss
           New-Item -ItemType Directory served\v6.3.7 | Out-Null
           Move-Item build\mixin_desktop_windows_setup_amd64.exe served\v6.3.7\
 
       - name: Build 6.3.6+601 (installs the first update it finds)
         run: |
-          flutter build windows -t integration_test/app_update_e2e.dart --build-name 6.3.6 --build-number 601 --dart-define=APP_VERSION=6.3.6 --dart-define=APP_BUILD_NUMBER=601
+          flutter build windows -t integration_test/app_update_e2e.dart --build-name 6.3.6 --build-number 601
           & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" windows_inno_setup.iss
           Move-Item build\mixin_desktop_windows_setup_amd64.exe old_setup.exe
 

@@ -125,9 +125,7 @@ jobs:
 
       - name: Build APP
         run: |
-          version_str=$(sed -n 's/^version: //p' pubspec.yaml)
-          flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN \
-            --dart-define="APP_VERSION=${version_str%+*}" --dart-define="APP_BUILD_NUMBER=${version_str#*+}"
+          flutter build linux --dart-define SENTRY_DSN=$SENTRY_DSN
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
@@ -340,8 +338,7 @@ jobs:
         run: |
           $version_str=$(gc .\pubspec.yaml | select-string '(?<=^version: ).*' -AllMatches | Select-Object -Expand Matches | %{$_.Value})
           $version=$version_str.Split("+")[0]
-          $build_number=$version_str.Split("+")[1]
-          flutter build windows --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
+          flutter build windows
           echo "MSIX_PACKAGE_VERSION=$version.0" >> $Env:GITHUB_OUTPUT
 
       - name: Build Installer
@@ -427,8 +424,7 @@ jobs:
         run: |
           version_str=$(sed -n 's/^version: //p' pubspec.yaml)
           version=${version_str%+*}
-          build_number=${version_str#*+}
-          flutter build macos --release --dart-define="APP_VERSION=$version" --dart-define="APP_BUILD_NUMBER=$build_number"
+          flutter build macos --release
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Import signing certificates
